@@ -1,0 +1,165 @@
+{
+  "version": "0.2.0",
+  "skills": [
+    {
+      "id": "product-management-governance",
+      "name": "Product Management Governance",
+      "category": "management",
+      "description": "用于在平台层定义输入源规则、需求池规则、版本库规则与项目接入标准。",
+      "ownerRole": "产品管理 Agent",
+      "promptPath": "prompts/product-management/product_management_agent_prompt.md",
+      "stageIds": ["core-definition-baseline", "memory-context-trace"],
+      "outputs": ["治理规则", "当前基线", "接入标准", "规则变更建议"]
+    },
+    {
+      "id": "requirement-pool-operations",
+      "name": "Requirement Pool Operations",
+      "category": "management",
+      "description": "用于识别需求、标准化入池、分类优先级与来源追溯。",
+      "ownerRole": "虚拟需求产品经理",
+      "promptPath": "prompts/product-management/virtual_requirements_pm_prompt.md",
+      "stageIds": ["core-definition-baseline", "schema-contract-upgrade", "tasks"],
+      "outputs": ["需求入池卡", "需求分类", "优先级建议", "来源追溯"]
+    },
+    {
+      "id": "version-repository-operations",
+      "name": "Version Repository Operations",
+      "category": "management",
+      "description": "用于维护版本库、区分候选版本和当前基线、跟踪升级差距。",
+      "ownerRole": "虚拟版本产品经理",
+      "promptPath": "prompts/product-management/virtual_version_pm_prompt.md",
+      "stageIds": ["core-definition-baseline", "review-metrics-telemetry", "regression-acceptance"],
+      "outputs": ["版本记录", "升级差距清单", "变更记录", "版本决策建议"]
+    },
+    {
+      "id": "workflow-governance",
+      "name": "Workflow Governance",
+      "category": "management",
+      "description": "用于维护 stage contract、handoff 规则、角色边界与流程检查项。",
+      "ownerRole": "虚拟流程产品经理",
+      "promptPath": "prompts/product-management/virtual_workflow_pm_prompt.md",
+      "stageIds": ["orchestrator-kernel", "capability-slots", "operations-surface"],
+      "outputs": ["流程定义", "handoff 模板", "检查清单", "例外处理规则"]
+    },
+    {
+      "id": "review-governance",
+      "name": "Review Governance",
+      "category": "management",
+      "description": "用于汇总评审、产出 gate 决策、返工建议与风险说明。",
+      "ownerRole": "虚拟评审产品经理",
+      "promptPath": "prompts/product-management/virtual_review_pm_prompt.md",
+      "stageIds": ["review", "review-metrics-telemetry"],
+      "outputs": ["Gate 决策", "阻塞项", "返工目标", "风险说明"]
+    },
+    {
+      "id": "delivery-coordination",
+      "name": "Delivery Coordination",
+      "category": "management",
+      "description": "用于把产品结论转成研发可执行任务包、验收条件与依赖信息。",
+      "ownerRole": "虚拟研发协同产品经理",
+      "promptPath": "prompts/product-management/virtual_delivery_pm_prompt.md",
+      "stageIds": ["tasks", "operations-surface"],
+      "outputs": ["任务包", "验收条件", "依赖说明", "影响范围"]
+    },
+    {
+      "id": "retrospective-governance",
+      "name": "Retrospective Governance",
+      "category": "management",
+      "description": "用于总结本轮结果并把复盘结论回流到规则、需求池、版本候选。",
+      "ownerRole": "虚拟复盘产品经理",
+      "promptPath": "prompts/product-management/virtual_retrospective_pm_prompt.md",
+      "stageIds": ["iteration", "regression-acceptance"],
+      "outputs": ["复盘报告", "规则更新候选", "需求回流建议", "下一轮建议"]
+    },
+    {
+      "id": "competitive-analysis",
+      "name": "Competitive Analysis",
+      "category": "research",
+      "description": "用于行业分析与竞品对标，输出成熟产品、优缺点与借鉴点。",
+      "ownerRole": "行业分析师",
+      "promptPath": "prompts/industry_analysis_prompt.md",
+      "stageIds": ["industry-analysis"],
+      "outputs": ["研究结论摘要", "对标对象", "行业最佳实践", "设计启示", "风险与建议"]
+    },
+    {
+      "id": "persona",
+      "name": "Persona",
+      "category": "product",
+      "description": "用于提炼目标用户画像、关键场景和核心诉求。",
+      "ownerRole": "产品经理",
+      "promptPath": "prompts/prd_prompt.md",
+      "stageIds": ["prd"],
+      "outputs": ["目标用户", "核心场景", "关键痛点", "成功标准"]
+    },
+    {
+      "id": "five-w-two-h",
+      "name": "5W2H",
+      "category": "product",
+      "description": "用于将产品目标拆成 What/Why/Who/When/Where/How/How much。",
+      "ownerRole": "产品经理",
+      "promptPath": "prompts/prd_prompt.md",
+      "stageIds": ["prd"],
+      "outputs": ["产品目标", "MVP 范围", "非功能需求", "验收标准"]
+    },
+    {
+      "id": "system-boundary",
+      "name": "System Boundary",
+      "category": "architecture",
+      "description": "用于定义 AI OS 分层架构、边界与外部能力协作方式。",
+      "ownerRole": "系统架构师",
+      "promptPath": "prompts/architecture_prompt.md",
+      "stageIds": ["architecture"],
+      "outputs": ["分层架构", "Mermaid 图", "模块职责", "边界说明"]
+    },
+    {
+      "id": "task-breakdown",
+      "name": "Task Breakdown",
+      "category": "planning",
+      "description": "用于把 PRD 和架构拆解为可执行任务、交付物与依赖。",
+      "ownerRole": "工程经理",
+      "promptPath": "prompts/task_prompt.md",
+      "stageIds": ["tasks"],
+      "outputs": ["任务名称", "交付物", "验收标准", "依赖关系"]
+    },
+    {
+      "id": "mvp-delivery",
+      "name": "MVP Delivery",
+      "category": "delivery",
+      "description": "用于输出最小可运行实现、运行方式与验证清单。",
+      "ownerRole": "工程团队",
+      "promptPath": "workflows/execution.md",
+      "stageIds": ["development"],
+      "outputs": ["实现范围", "运行入口", "验证步骤", "回退边界"]
+    },
+    {
+      "id": "committee-gate",
+      "name": "Committee Gate",
+      "category": "review",
+      "description": "用于根据当前运行实例产物生成评审结论与 gate。",
+      "ownerRole": "评审委员会",
+      "promptPath": "workflows/execution.md",
+      "stageIds": ["review"],
+      "outputs": ["总体结论", "Issues", "建议", "Gate 决策"]
+    },
+    {
+      "id": "demo-script",
+      "name": "Demo Script",
+      "category": "multimodal",
+      "description": "用于组织演示脚本、视觉说明和多模态交付内容。",
+      "ownerRole": "多模态设计师",
+      "promptPath": "workflows/execution.md",
+      "stageIds": ["multimodal"],
+      "outputs": ["演示路径", "视觉说明", "交互重点", "交付清单"]
+    },
+    {
+      "id": "iteration-plan",
+      "name": "Iteration Plan",
+      "category": "iteration",
+      "description": "用于总结当前结果并规划下一轮优化。",
+      "ownerRole": "产品与工程联合负责人",
+      "promptPath": "workflows/execution.md",
+      "stageIds": ["iteration"],
+      "outputs": ["阶段结论", "风险清单", "下一步建议", "优先级"]
+    }
+  ]
+}

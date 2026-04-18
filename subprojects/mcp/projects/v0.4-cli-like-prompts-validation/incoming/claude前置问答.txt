@@ -1,0 +1,48 @@
+一个是操作系统 一个是业务项目，可以有很多业务项目，但是都是在我的操作系统下面运行。操作系统名称就叫PMAIOS。
+1.本项目的隔离边界
+  - 独立子项目
+  - 独立 Python 环境
+  - 独立配置
+  - 独立日志目录
+  - 不改 PMAIOS 主干代码
+2.BI 测试环境鉴权方案
+暂无 到期了提示我 我去找开发要新的
+3. BI 接口与 tool 的完整映射关系
+反推吧，最后我可以改
+4. 需要恢复到什么粒度
+优先验证 CLI-like 价值只   - list_apps
+    - list_team
+    - list_media
+    - 广告小时报表
+    - 广告日报
+    - ROI
+    - 留存
+  5. CLI-like 的目标命令格式
+cli apps list
+cli media list
+cli teams list
+
+cli ads report day
+cli ads report hour
+cli ads report retention
+cli ads report roi
+
+ 最好能自动生成 CLI 参数
+参考E:\AI\ai-os\subprojects\mcp\docs\projects\v0.3-cli-like-prompts-validation\incoming\CLI 参数设计  工具协议设计参考
+
+6. MCP 协议接入目标
+自动化测试系统：http://10.236.15.16:8000/
+
+7. “效果验证”怎么判定成功
+已提供测试集1.0：E:\AI\ai-os\subprojects\mcp\docs\projects\v0.3-cli-like-prompts-validation\incoming\测试集1.0.csv
+可以衍生
+同一模型、无prompt、同一 temperature
+每条 case 跑1次
+结果记录到markdown report
+
+8. 代码包的定位
+参考
+
+ 9. SQL 配置的来源和可信度
+这是测试环境当前线上配置导出
+只包含“广告相关”这批，我们也只验证广告

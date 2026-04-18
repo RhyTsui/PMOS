@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-os
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-os
+  template:
+    metadata:
+      labels:
+        app: ai-os
+    spec:
+      containers:
+        - name: ai-os
+          image: ai-os:latest
+          ports:
+            - containerPort: 4300

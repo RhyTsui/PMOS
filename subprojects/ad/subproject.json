@@ -1,0 +1,11 @@
+{
+  "id": "ad",
+  "name": "广告自动化项目",
+  "description": "广告自动化、归因分析、用户行为追踪与数据链路可观测业务子项目",
+  "status": "active",
+  "createdAt": "2026-04-17T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/ad",
+  "memoryPath": "subprojects/ad/docs/memory/project-memory.md",
+  "overrides": {}
+}

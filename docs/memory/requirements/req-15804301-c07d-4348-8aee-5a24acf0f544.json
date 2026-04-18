@@ -1,0 +1,26 @@
+{
+  "id": "req-15804301-c07d-4348-8aee-5a24acf0f544",
+  "subprojectId": null,
+  "title": "[feature] 用在线服务",
+  "description": "用在线服务",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P1",
+  "source": {
+    "kind": "chat",
+    "sessionId": "chat-f005bf09-a1b0-4822-949d-a54e1957546d",
+    "messageId": "msg-dd4c9890-ab3c-474b-82b0-65f6b0508fb6",
+    "runId": null
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [],
+    "linkedRunIds": [],
+    "artifactPaths": []
+  },
+  "createdAt": "2026-04-18T10:56:57.611Z",
+  "updatedAt": "2026-04-18T10:56:57.611Z",
+  "metadata": {
+    "ingestedFrom": "chat"
+  }
+}

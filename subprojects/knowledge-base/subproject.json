@@ -1,0 +1,11 @@
+{
+  "id": "knowledge-base",
+  "name": "知识库项目",
+  "description": "PMAIOS 内的知识库管理业务子项目",
+  "status": "active",
+  "createdAt": "2026-04-14T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/knowledge-base",
+  "memoryPath": "subprojects/knowledge-base/docs/memory/project-memory.md",
+  "overrides": {}
+}

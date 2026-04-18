@@ -1,0 +1,12 @@
+{
+  "servers": [
+    {
+      "name": "local-docs",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["./dist/backend/mcp-server.js"],
+      "enabled": false,
+      "tools": ["read_artifact", "list_artifacts"]
+    }
+  ]
+}

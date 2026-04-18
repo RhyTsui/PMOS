@@ -1,0 +1,11 @@
+{
+  "id": "mcp",
+  "name": "MCP项目",
+  "description": "PMAIOS 内的 MCP 业务子项目",
+  "status": "active",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/mcp",
+  "memoryPath": "subprojects/mcp/docs/memory/project-memory.md",
+  "overrides": {}
+}

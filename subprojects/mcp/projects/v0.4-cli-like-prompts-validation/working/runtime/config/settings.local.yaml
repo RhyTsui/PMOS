@@ -1,0 +1,8 @@
+base_url: "http://10.236.14.27:8003"
+bi_base_url: "https://pre-aitd.dobest.cn"
+bi_token: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVfdGltZSI6MTc3NTY5OTI2NjU1OCwidXNlcl9pZCI6MjAyNTczOSwicGhvbmUiOiI4NjE1NjE4OTQ2MjYxIiwidXNlcl9uYW1lIjoieHVxaW5nMDMiLCJyZWFsX25hbWUiOiLorrjmmbQiLCJzZXNzaW9uSWQiOiIwN2EwYTM5YjkzOWU0YjU5N2IyNjU1NTAyMGNmM2E4NSIsImFwcF9pZCI6OTAwMDEsInRoaXJkX2FjY291bnQiOiJkb2Jlc3QuY29tXFx4dXFpbmcwMyJ9.H1hdNxj8N8SeMRjlHxkwFnurBsz4rorE1uvR6eh7ICA"
+bi_app_id: "13199924"
+bi_debug_env: "PROD"
+request_timeout_seconds: 30
+log_root: "E:/AI/ai-os/subprojects/mcp/docs/projects/v0.3-cli-like-prompts-validation/working/runtime/logs"
+report_root: "E:/AI/ai-os/subprojects/mcp/docs/projects/v0.3-cli-like-prompts-validation/working/runtime/reports"

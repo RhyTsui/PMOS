@@ -1,0 +1,20 @@
+# PMAIOS v0.3.3 Agent OS - Python 依赖
+
+# Redis 客户端
+redis>=5.0.0
+
+# Anthropic Claude API
+anthropic>=0.18.0
+
+# LangGraph 工作流编排
+langgraph>=0.2.0
+langchain-core>=0.3.0
+
+# Excel 支持 (v0.3.4 需求池)
+openpyxl>=3.1.0
+
+# 异步支持
+asyncio>=3.10.0
+
+# 日志
+python-json-logger>=2.0.0

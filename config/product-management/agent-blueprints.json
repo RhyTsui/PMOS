@@ -1,0 +1,169 @@
+{
+  "version": "0.1.0",
+  "blueprints": [
+    {
+      "id": "product-management-agent",
+      "name": "产品管理 Agent",
+      "role": "product-management",
+      "level": "supervisor",
+      "scope": "platform",
+      "summary": "作为虚拟产品主管，管理规则、流程、需求池、版本库、评审和协作。",
+      "problem": "当前产品规则、流程和产出物容易散落在对话与草稿里，缺少稳定治理层。",
+      "targetUsers": ["真实产品主管", "人类产品经理", "虚拟产品经理"],
+      "goals": [
+        "沉淀平台级产品管理规则",
+        "维护需求池和版本库运行机制",
+        "约束各虚拟产品经理的输入输出和协作方式"
+      ],
+      "constraints": [
+        "必须区分输入源和当前决策",
+        "必须保留变更记录与来源追溯",
+        "必须优先复用平台模板和规则"
+      ],
+      "acceptanceCriteria": [
+        "能够明确当前基线与候选方案边界",
+        "能够管理多个虚拟产品经理并保持职责清晰",
+        "能够把对话中的规则沉淀为全局能力"
+      ],
+      "relatedPaths": [
+        "docs/architecture/PMAIOS_product_management_agent_operating_model.md",
+        "docs/memory/global-rules.md",
+        "docs/templates/human_pm_invocation_guide.md"
+      ],
+      "governanceRefs": [
+        "docs/memory/global-rules.md",
+        "docs/decisions/adr-0003-document-taxonomy.md"
+      ],
+      "promptPath": "prompts/product-management/product_management_agent_prompt.md",
+      "manages": [
+        "virtual-requirements-pm",
+        "virtual-version-pm",
+        "virtual-review-pm",
+        "virtual-workflow-pm",
+        "virtual-delivery-pm",
+        "virtual-retrospective-pm"
+      ]
+    },
+    {
+      "id": "virtual-requirements-pm",
+      "name": "虚拟需求产品经理",
+      "role": "requirements",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "负责识别需求、标准化入池、维护需求分类、优先级和来源追溯。",
+      "problem": "新增需求来源分散，需求池缺少稳定的识别、归类和检查机制。",
+      "targetUsers": ["真实产品主管", "产品管理 Agent", "项目产品经理"],
+      "goals": ["把显式需求沉淀进需求池", "保持需求状态流转和来源可追溯"],
+      "acceptanceCriteria": [
+        "需求能够按统一卡片结构入池",
+        "来源、优先级、关联版本可被追踪"
+      ],
+      "relatedPaths": [
+        "docs/templates/requirement_card_template.md",
+        "docs/sources/inbox/README.md"
+      ],
+      "governanceRefs": ["docs/templates/requirement_card_template.md"],
+      "promptPath": "prompts/product-management/virtual_requirements_pm_prompt.md"
+    },
+    {
+      "id": "virtual-version-pm",
+      "name": "虚拟版本产品经理",
+      "role": "versioning",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "负责维护版本库、升级差距、版本候选与当前生效基线的区分。",
+      "problem": "版本分析、升级规划和当前基线容易混放，导致执行口径不稳定。",
+      "goals": ["维护版本库主线", "记录版本变更与候选分析边界"],
+      "acceptanceCriteria": [
+        "版本记录与变更记录模板被统一使用",
+        "候选分析不会覆盖当前基线"
+      ],
+      "relatedPaths": [
+        "docs/templates/version_record_template.md",
+        "docs/templates/decision_change_record_template.md"
+      ],
+      "governanceRefs": ["docs/templates/version_record_template.md"],
+      "promptPath": "prompts/product-management/virtual_version_pm_prompt.md"
+    },
+    {
+      "id": "virtual-review-pm",
+      "name": "虚拟评审产品经理",
+      "role": "review",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "负责汇总评审结论，输出 gate、阻塞项、返工目标和风险说明。",
+      "problem": "评审结论经常只停留在讨论，没有被结构化沉淀成可执行 gate。",
+      "goals": ["统一 gate 口径", "把返工要求结构化"],
+      "acceptanceCriteria": [
+        "每次评审均能产出 gate 决策和阻塞项",
+        "返工建议可明确回流到需求或流程"
+      ],
+      "relatedPaths": [
+        "prompts/review_prompt.md",
+        "docs/templates/workflow_handoff_template.md"
+      ],
+      "governanceRefs": ["docs/templates/workflow_handoff_template.md"],
+      "promptPath": "prompts/product-management/virtual_review_pm_prompt.md"
+    },
+    {
+      "id": "virtual-workflow-pm",
+      "name": "虚拟流程产品经理",
+      "role": "workflow",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "负责维护 workflow、stage contract、handoff 规则和检查清单。",
+      "problem": "流程和交接缺少统一 contract，导致不同项目难以稳定复用。",
+      "goals": ["维护标准流程 contract", "检查流程执行一致性"],
+      "acceptanceCriteria": [
+        "核心 stage contract 被持续维护",
+        "handoff 都有固定结构和检查项"
+      ],
+      "relatedPaths": [
+        "workflows/roles.md",
+        "docs/templates/workflow_handoff_template.md"
+      ],
+      "governanceRefs": ["workflows/roles.md"],
+      "promptPath": "prompts/product-management/virtual_workflow_pm_prompt.md"
+    },
+    {
+      "id": "virtual-delivery-pm",
+      "name": "虚拟研发协同产品经理",
+      "role": "delivery",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "负责把产品结论转成研发可执行任务、验收条件和依赖关系。",
+      "problem": "产品结论与研发执行之间的 handoff 容易丢字段、丢依赖和丢验收条件。",
+      "goals": ["把产品结论转换为任务包", "维护研发协同的交付边界"],
+      "acceptanceCriteria": [
+        "任务包包含依赖、验收和影响范围",
+        "研发交付物可追溯回原始需求和版本目标"
+      ],
+      "relatedPaths": [
+        "prompts/task_prompt.md",
+        "docs/templates/subproject_capability_adoption_checklist.md"
+      ],
+      "governanceRefs": ["docs/templates/subproject_capability_adoption_checklist.md"],
+      "promptPath": "prompts/product-management/virtual_delivery_pm_prompt.md"
+    },
+    {
+      "id": "virtual-retrospective-pm",
+      "name": "虚拟复盘产品经理",
+      "role": "retrospective",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "负责总结本轮结果并把复盘结论回流到规则、需求池和版本候选。",
+      "problem": "复盘结果难以稳定回流到下一轮规则和版本规划。",
+      "goals": ["形成结构化复盘", "推动规则和需求回流"],
+      "acceptanceCriteria": [
+        "复盘输出能映射到规则更新候选",
+        "下一轮建议有清晰优先级和影响面"
+      ],
+      "relatedPaths": [
+        "docs/templates/decision_change_record_template.md",
+        "docs/templates/human_pm_invocation_guide.md"
+      ],
+      "governanceRefs": ["docs/templates/decision_change_record_template.md"],
+      "promptPath": "prompts/product-management/virtual_retrospective_pm_prompt.md"
+    }
+  ]
+}

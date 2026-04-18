@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  backend:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: sh -lc "pip install -e . && uvicorn ad.app:app --host 0.0.0.0 --port 8020"
+    ports:
+      - "8020:8020"
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app/frontend
+    volumes:
+      - ./:/app
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8020
+    command: sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 5180"
+    ports:
+      - "5180:5180"
+    depends_on:
+      - backend

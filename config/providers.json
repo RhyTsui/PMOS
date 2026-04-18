@@ -1,0 +1,36 @@
+{
+  "defaultProvider": "anthropic",
+  "providers": [
+    {
+      "name": "mock",
+      "type": "mock",
+      "envKey": "DEFAULT_PROVIDER",
+      "capabilities": ["text", "code", "review"]
+    },
+    {
+      "name": "anthropic",
+      "type": "anthropic",
+      "envKey": "ANTHROPIC_API_KEY",
+      "legacyEnvKeys": ["ANTHROPIC_AUTH_TOKEN"],
+      "capabilities": ["text", "code", "review"]
+    },
+    {
+      "name": "openai-compatible",
+      "type": "openai-compatible",
+      "envKey": "OPENAI_COMPATIBLE_API_KEY",
+      "capabilities": ["text", "code"]
+    },
+    {
+      "name": "ai-studio",
+      "type": "ai-studio",
+      "envKey": "GOOGLE_AI_STUDIO_API_KEY",
+      "legacyEnvKeys": ["AI_STUDIO_API_KEY"],
+      "capabilities": [
+        "text-multimodal",
+        "image-generation",
+        "video-generation",
+        "prototype-generation"
+      ]
+    }
+  ]
+}

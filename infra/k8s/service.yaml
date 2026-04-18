@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-os
+spec:
+  selector:
+    app: ai-os
+  ports:
+    - port: 80
+      targetPort: 4300

@@ -1,0 +1,32 @@
+{
+  "name": "ad-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "广告素材情报系统 - 采集与分析各大平台广告素材",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "tsx watch src/server.ts",
+    "dev:frontend": "vite",
+    "start": "tsx src/server.ts",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "vite build",
+    "build:backend": "tsc",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "express": "^4.22.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/express": "^5.0.6",
+    "@types/cors": "^2.8.19",
+    "typescript": "^5.8.3",
+    "tsx": "^4.19.3",
+    "concurrently": "^9.1.2",
+    "vite": "^6.3.5"
+  }
+}

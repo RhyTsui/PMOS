@@ -1,0 +1,11 @@
+{
+  "id": "data-service",
+  "name": "数据服务项目",
+  "description": "PMAIOS 内的数据服务业务子项目",
+  "status": "active",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/data-service",
+  "memoryPath": "subprojects/data-service/docs/memory/project-memory.md",
+  "overrides": {}
+}

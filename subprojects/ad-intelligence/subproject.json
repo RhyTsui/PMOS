@@ -1,0 +1,11 @@
+{
+  "id": "ad-intelligence",
+  "name": "广告素材情报项目",
+  "description": "广告素材采集、AI 分析、趋势分析与竞品监控业务子项目",
+  "status": "active",
+  "createdAt": "2026-04-17T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/ad-intelligence",
+  "memoryPath": "subprojects/ad-intelligence/docs/memory/project-memory.md",
+  "overrides": {}
+}

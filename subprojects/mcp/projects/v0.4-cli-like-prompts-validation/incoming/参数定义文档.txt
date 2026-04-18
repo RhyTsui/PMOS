@@ -1,0 +1,75 @@
+日报
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+217	start	startDate	查询开始日期，格式 yyyy-MM-dd，包含该日数据	true
+218	end	endDate	查询结束日期，格式 yyyy-MM-dd，包含该日数据。与 startDate 间隔不超过90天	true
+219	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true
+220	dateType	timeGranularity	统计周期，决定数据聚合的时间粒度。 可选值：日报(DAY)、周报(NATURAL_WEEK)、月报(NATURAL_MONTH) 默认日报。	true
+222	mediaId	mediaId	媒体ID筛选，可先尝试通过 list_media 接口获取实际code	false
+223	organic	organic	是否包含自然量：是(1)、否(0) 如果要筛选自然量数据，该字段需要是1 结合 筛选字段筛选.	false
+224	subGroup	groupBy	数据聚合维度：应用类型(app_package_type)、媒体(media_id)、团队(team_ids)、应用类型+团队(app_package_type...	false
+256	appPackageType	appPackageType	应用类型筛选，可先尝试通过 list_app_package_type 接口获取实际code	false
+257	teamIds	teamIds	团队ID筛选，可先尝试通过 list_team 接口获取实际code	false
+
+
+小时报表
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+44	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true
+45	start	startDate	查询开始日期，格式 yyyy-MM-dd，包含该日数据。小时报表startDate和endDate需要是同一天	true
+46	end	endDate	查询结束日期，格式 yyyy-MM-dd，包含该日数据。小时报表startDate和endDate需要是同一天	true
+47	timeType	timeType	指定小时/日报表类型，小时报表默认传小时，即timeType=HOURLY。 默认会返回这天的全部小时数据	true
+48	baseTimeType	baseTimeType	指定时间视角类型，用于区分广告小时报表按时段看数据还是按天累计看数据。支持 EVENT_TIME、REGISTER_TIME。EVENT_TIME 表示按天累计...	true
+49	subGroup	subGroup	细分类型，填 media_id 时按媒体细分，若看细分维度整天合计数据，则同时传 viewCriteria=CURRENT_SUMMARY ；若查看细分维度某小...	false
+50	viewCriteria	viewCriteria	视角，subGroup 有值时且按细分维度查询整天合计数据时，传固定值 CURRENT_SUMMARY，意思是查看整天汇总数据	false
+51	dh	dh	小时，格式 '2026-03-16 03:00'，只有当 subGroup=media_id 且查看细分维度指定小时数据 时必传，其他场景下不要传	false
+52	appPackageType	appPackageType	应用类型筛选，可先尝试通过 list_app_package_type 接口获取实际code	false
+53	mediaId	mediaId	媒体ID筛选，可先尝试通过 list_media 接口获取实际code	false
+54	teamIds	teamIds	团队ID过滤，数字类型，多个媒体用逗号分割，可先尝试通过 list_team 接口获取实际code	false
+
+
+roi报表
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+356	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true
+357	start	startDate	查询开始日期，格式 yyyy-MM-dd，包含该日数据	true
+358	end	endDate	查询结束日期，格式 yyyy-MM-dd，包含该日数据。与 startDate 间隔不超过90天	true
+359	dataType	dataType	ROI类型：区间ROI(section)、累计ROI(total)	true
+360	dateType	dateType	报表类型：日报(DAY)、周报(NATURAL_WEEK)、月报(NATURAL_MONTH)	true
+364	appPackageType	appPackageType	应用类型筛选，可先尝试通过 list_app_package_type 接口获取实际code	false
+365	teamIds	teamIds	团队ID过滤，数字类型，多个媒体用逗号分割，可先尝试通过 list_team 接口获取实际code	false
+361	mediaId	mediaId	媒体ID筛选，可先尝试通过 list_media 接口获取实际code	false
+362	organic	organic	是否包含自然量：是(1)、否(0).如果要筛选自然量数据，该字段需要是1 结合 筛选字段筛选.	false
+363	subGroup	subGroup	报表类型：应用类型(app_package_type)、媒体(media_id)、团队(team_ids)、应用类型+团队(app_package_type,t...	false
+
+
+留存报表
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+346	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true
+347	start	startDate	查询开始日期，格式 yyyy-MM-dd，包含该日数据	true
+348	end	endDate	查询结束日期，格式 yyyy-MM-dd，包含该日数据。与 startDate 间隔不超过90天	true
+349	dataType	dataType	留存类型：新增设备留存(DEVICE_RETENTION)、注册用户留存(REG_RETENTION)、首日付费账号留存(PAY_D1_RETENTION)	true
+350	dateType	dateType	报表类型：日报(DAY)、周报(NATURAL_WEEK)、月报(NATURAL_MONTH)	true
+354	appPackageType	appPackageType	应用类型筛选，可先尝试通过 list_app_package_type 接口获取实际code	false
+355	teamIds	teamIds	团队ID过滤，数字类型，多个媒体用逗号分割，可先尝试通过 list_team 接口获取实际code	false
+351	mediaId	mediaId	媒体ID筛选，可先尝试通过 list_media 接口获取实际code	false
+352	organic	organic	是否包含自然量：是(1)、否(0)，如果要筛选自然量数据，该字段需要是1 结合 筛选字段筛选.	false
+353	subGroup	subGroup	报表类型：应用类型(app_package_type)、媒体(media_id)、团队(team_ids)、应用类型+团队(app_package_type,t...	false
+
+
+媒体表
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+343	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true
+
+
+应用类型表
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+344	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true
+
+团队表
+参数列表（tool_key 由所选配置决定）
+ID	schema_property	展示名	description	is_required
+140	appId	appId	游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 appId	true

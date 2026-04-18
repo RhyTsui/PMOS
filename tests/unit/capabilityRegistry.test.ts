@@ -1,0 +1,306 @@
+import { describe, expect, it } from 'vitest';
+import path from 'node:path';
+import { mkdtempSync } from 'node:fs';
+import os from 'node:os';
+import { FileStore } from '../../src/core/fileStore';
+import { CapabilityRegistry } from '../../src/core/capabilityRegistry';
+import { ProductAgentService } from '../../src/core/productAgentService';
+
+function createStore() {
+  const root = mkdtempSync(path.join(os.tmpdir(), 'ai-os-capability-'));
+  return new FileStore(root);
+}
+
+async function createFixture() {
+  const store = createStore();
+  await store.write('docs/memory/project-memory.md', '# Project Memory\n- capability registry fixture\n');
+  await store.write(
+    'config/providers.json',
+    JSON.stringify(
+      {
+        defaultProvider: 'mock',
+        providers: [{ name: 'mock', type: 'mock', envKey: 'MOCK_KEY', capabilities: ['text', 'code', 'review', 'text-multimodal'] }],
+      },
+      null,
+      2,
+    ),
+  );
+  await store.write(
+    'mcp/mcp-servers.example.json',
+    JSON.stringify(
+      {
+        servers: [{ name: 'filesystem', transport: 'stdio', command: 'node', args: ['server.js'], enabled: true, tools: ['read'] }],
+      },
+      null,
+      2,
+    ),
+  );
+  await store.write('skills/registry.json', await new FileStore('E:/AI/ai-os').read('skills/registry.json'));
+
+  return {
+    store,
+    capabilityRegistry: new CapabilityRegistry(store),
+    productAgentService: new ProductAgentService(store),
+  };
+}
+
+describe('CapabilityRegistry', () => {
+  it('blocks publish until tests, review, and dataset evaluation all pass', async () => {
+    const { capabilityRegistry } = await createFixture();
+    const capability = await capabilityRegistry.registerCapability({
+      id: 'release-assistant',
+      name: 'Release Assistant',
+      description: 'Publish checklist capability.',
+      implementationType: 'workflow',
+      implementationRef: 'pmaios-main',
+    });
+
+    await expect(
+      capabilityRegistry.publishCapabilityVersion(capability.id, {
+        version: '0.1.0',
+      }),
+    ).rejects.toThrow(/failed publish gate/i);
+
+    const dataset = await capabilityRegistry.createEvaluationDataset(capability.id, {
+      version: '0.1.0',
+      name: 'Release assistant dataset',
+      description: 'checks workflow wrapper contract',
+      cases: [
+        {
+          id: 'workflow-shape',
+          input: { mode: 'init-only' },
+          expected: { requiredKeys: ['type', 'run', 'payload'] },
+          rubric: ['must expose workflow run wrapper'],
+        },
+      ],
+    });
+    const { capability: afterEval, run } = await capabilityRegistry.runEvaluationDataset(capability.id, {
+      datasetId: dataset.id,
+      version: '0.1.0',
+      evaluator: 'unit-test',
+    });
+
+    const gate = afterEval.versions[0]?.gate;
+    expect(run.passed).toBe(true);
+    expect(gate?.evaluationPassed).toBe(true);
+    expect(gate?.publishable).toBe(false);
+
+    const published = await capabilityRegistry.publishCapabilityVersion(capability.id, {
+      version: '0.1.0',
+      testsPassed: true,
+      reviewPassed: true,
+      reviewSummary: 'review approved',
+      releaseNotes: 'initial rollout',
+    });
+
+    expect(published.lifecycleStatus).toBe('published');
+    expect(published.activeVersion).toBe('0.1.0');
+    expect(published.versions[0]?.status).toBe('published');
+    expect(published.versions[0]?.gate.publishable).toBe(true);
+  });
+
+  it('invokes a published product-agent capability and persists invocation history', async () => {
+    const { capabilityRegistry, productAgentService } = await createFixture();
+    const agent = await productAgentService.createAgent({
+      name: 'Launch Agent',
+      summary: 'Helps define launch guardrails.',
+      problem: 'Need a reusable launch planning capability.',
+      goals: ['Capture launch goals'],
+      source: 'api',
+    });
+
+    const capability = await capabilityRegistry.registerCapability({
+      id: 'launch-agent',
+      name: 'Launch Agent Capability',
+      description: 'Wraps a product agent as a published capability.',
+      implementationType: 'product-agent',
+      implementationRef: agent.id,
+      testsPassed: true,
+      reviewPassed: true,
+    });
+
+    await capabilityRegistry.recordEvaluation(capability.id, {
+      version: '0.1.0',
+      evaluator: 'unit-test',
+      passed: true,
+      score: 0.95,
+      summary: 'agent output acceptable',
+    });
+    await capabilityRegistry.publishCapabilityVersion(capability.id, {
+      version: '0.1.0',
+      testsPassed: true,
+      reviewPassed: true,
+    });
+
+    const invocation = await capabilityRegistry.invokeCapability(capability.id, {
+      payload: { brief: 'prepare launch plan' },
+    });
+    const history = await capabilityRegistry.listInvocations(capability.id);
+
+    expect(invocation.status).toBe('completed');
+    expect((invocation.output as { type: string }).type).toBe('product-agent');
+    expect(history).toHaveLength(2);
+    expect(history[0]?.status).toBe('accepted');
+    expect(history[1]?.status).toBe('completed');
+  });
+
+  it('evaluates real execution output instead of only capability metadata', async () => {
+    const { capabilityRegistry, productAgentService } = await createFixture();
+    const agent = await productAgentService.createAgent({
+      name: 'QA Agent',
+      summary: 'Produces product-agent execution output.',
+      problem: 'Need evaluation to inspect actual execution wrapper.',
+      source: 'api',
+    });
+
+    const capability = await capabilityRegistry.registerCapability({
+      id: 'qa-agent-cap',
+      name: 'QA Agent Capability',
+      description: 'Used to verify evaluation runner executes the capability.',
+      implementationType: 'product-agent',
+      implementationRef: agent.id,
+    });
+
+    const dataset = await capabilityRegistry.createEvaluationDataset(capability.id, {
+      version: '0.1.0',
+      name: 'QA dataset',
+      description: 'inspects real output wrapper',
+      cases: [
+        {
+          id: 'type-field',
+          input: { brief: 'run actual agent wrapper' },
+          expected: { fieldEquals: { type: 'product-agent' } },
+          rubric: ['must execute capability and inspect returned wrapper'],
+        },
+        {
+          id: 'required-keys',
+          input: { brief: 'run actual agent wrapper' },
+          expected: { requiredKeys: ['type', 'agent', 'payload'] },
+          rubric: ['must expose runtime wrapper keys'],
+        },
+      ],
+    });
+
+    const result = await capabilityRegistry.runEvaluationDataset(capability.id, {
+      datasetId: dataset.id,
+      version: '0.1.0',
+      evaluator: 'unit-test',
+    });
+
+    expect(result.run.passed).toBe(true);
+    expect(result.run.caseResults[0]?.output).toMatchObject({ type: 'product-agent' });
+    expect(result.run.caseResults[1]?.output).toMatchObject({
+      type: 'product-agent',
+      agent: expect.any(Object),
+      payload: expect.any(Object),
+    });
+  });
+
+  it('keeps manual evaluation compatibility when no dataset runner result exists', async () => {
+    const { capabilityRegistry } = await createFixture();
+    const capability = await capabilityRegistry.registerCapability({
+      id: 'manual-eval-cap',
+      name: 'Manual Eval Capability',
+      description: 'Backwards-compatible manual eval path.',
+      implementationType: 'workflow',
+      implementationRef: 'pmaios-main',
+      testsPassed: true,
+      reviewPassed: true,
+    });
+
+    const { capability: updated } = await capabilityRegistry.recordEvaluation(capability.id, {
+      version: '0.1.0',
+      evaluator: 'legacy-client',
+      passed: true,
+      score: 0.9,
+      summary: 'legacy path still works',
+    });
+
+    expect(updated.versions[0]?.gate.evaluationPassed).toBe(true);
+
+    const published = await capabilityRegistry.publishCapabilityVersion(capability.id, {
+      version: '0.1.0',
+      testsPassed: true,
+      reviewPassed: true,
+    });
+
+    expect(published.activeVersion).toBe('0.1.0');
+    expect(published.versions[0]?.status).toBe('published');
+  });
+
+  it('can publish and invoke a workflow capability', async () => {
+    const { capabilityRegistry } = await createFixture();
+    const capability = await capabilityRegistry.registerCapability({
+      id: 'platform-workflow',
+      name: 'Platform Workflow',
+      description: 'Initializes the platform workflow runtime.',
+      implementationType: 'workflow',
+      implementationRef: 'pmaios-main',
+      testsPassed: true,
+      reviewPassed: true,
+    });
+
+    await capabilityRegistry.recordEvaluation(capability.id, {
+      version: '0.1.0',
+      evaluator: 'unit-test',
+      passed: true,
+      score: 0.88,
+      summary: 'workflow contract passes',
+    });
+    await capabilityRegistry.publishCapabilityVersion(capability.id, {
+      version: '0.1.0',
+      testsPassed: true,
+      reviewPassed: true,
+    });
+
+    const invocation = await capabilityRegistry.invokeCapability(capability.id, {
+      payload: { mode: 'init-only' },
+    });
+
+    expect(invocation.status).toBe('completed');
+    expect((invocation.output as { type: string }).type).toBe('workflow');
+    expect((invocation.output as { run: { id: string } }).run.id).toContain('run-');
+  });
+
+  it('supports richer evaluation assertions for workflow outputs', async () => {
+    const { capabilityRegistry } = await createFixture();
+    const capability = await capabilityRegistry.registerCapability({
+      id: 'workflow-assertions',
+      name: 'Workflow Assertions',
+      description: 'Verifies richer evaluation DSL against real workflow output.',
+      implementationType: 'workflow',
+      implementationRef: 'pmaios-main',
+    });
+
+    const dataset = await capabilityRegistry.createEvaluationDataset(capability.id, {
+      version: '0.1.0',
+      name: 'Workflow DSL dataset',
+      description: 'checks nested workflow output',
+      cases: [
+        {
+          id: 'workflow-dsl',
+          input: { mode: 'init-only' },
+          expected: {
+            fieldEquals: { type: 'workflow' },
+            exists: ['run.id', 'run.status', 'payload.mode'],
+            stringIncludes: { 'run.id': 'run-' },
+            fieldIncludes: { 'run.status': 'running' },
+          },
+          rubric: ['must validate nested workflow wrapper fields'],
+        },
+      ],
+    });
+
+    const result = await capabilityRegistry.runEvaluationDataset(capability.id, {
+      datasetId: dataset.id,
+      version: '0.1.0',
+      evaluator: 'unit-test',
+    });
+
+    expect(result.run.passed).toBe(true);
+    expect(result.run.caseResults[0]?.summary).toContain('fieldEquals matched');
+    expect(result.run.caseResults[0]?.summary).toContain('exists matched');
+    expect(result.run.caseResults[0]?.summary).toContain('stringIncludes matched');
+    expect(result.run.caseResults[0]?.summary).toContain('fieldIncludes matched');
+  });
+});

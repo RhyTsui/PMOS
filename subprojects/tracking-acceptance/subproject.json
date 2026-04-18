@@ -1,0 +1,11 @@
+{
+  "id": "tracking-acceptance",
+  "name": "AI 埋点验收项目",
+  "description": "广告与数据业务的埋点验收自动化业务子项目",
+  "status": "active",
+  "createdAt": "2026-04-17T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/tracking-acceptance",
+  "memoryPath": "subprojects/tracking-acceptance/docs/memory/project-memory.md",
+  "overrides": {}
+}

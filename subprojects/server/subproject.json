@@ -1,0 +1,11 @@
+{
+  "id": "server",
+  "name": "开服系统",
+  "description": "游戏服务器开服自动化系统",
+  "status": "active",
+  "createdAt": "2026-04-15T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/server",
+  "memoryPath": "subprojects/server/docs/memory/project-memory.md",
+  "overrides": {}
+}

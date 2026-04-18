@@ -1,0 +1,11 @@
+services:
+  ai-os:
+    build:
+      context: .
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-docker.m.daocloud.io/library/node:22-alpine}
+    ports:
+      - '4312:4312'
+    environment:
+      PORT: 4312
+      AI_OS_ROOT: /app

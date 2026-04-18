@@ -1,0 +1,354 @@
+defaults:
+  granularity: day
+  include_organic: true
+  roi_type: cumulative
+  retention_type: device
+  view_mode: cumulative
+  base_time_type: event_time
+
+parameters:
+  app_id:
+    layer: scope
+    type: string
+    cli_flag: --app-id
+    description: 游戏应用ID，数字类型字符串，请先调用 list_apps 获取正确的 app_id。
+    display_name: appId
+    format_hint: 数字类型字符串，例如 10100002
+    purpose: 锁定要查询的具体游戏应用。
+    query_method: 直接传 BI appId；若只有应用名称，先用 app_ref 或 list_apps 做映射。
+    examples: ["10100002"]
+  app_ref:
+    layer: scope
+    type: string
+    cli_flag: --app-ref
+    description: 应用名称、别名或业务侧简称，运行时会尝试解析到真实 app_id。
+    display_name: appRef
+    format_hint: 中文应用名或常用别名
+    purpose: 当用户没有明确 app_id 时，用自然语言名称辅助定位应用。
+    query_method: 先做名称匹配，再映射为 app_id。
+    examples: ["指间山海"]
+  time_range:
+    layer: time_range
+    type: daterange
+    cli_flag: --time-range
+    required_for:
+      - get_ad_hour_report
+      - get_ad_day_report
+      - get_ad_roi_report
+      - get_ad_retention_report
+    description: 查询时间范围，格式 YYYY-MM-DD:YYYY-MM-DD，开始和结束日期都包含在内。
+    display_name: start/end
+    format_hint: YYYY-MM-DD:YYYY-MM-DD
+    purpose: 定义报表统计窗口。
+    query_method: 运行时会拆分为 start 与 end 两个 BI 入参。
+    table_switching: 小时报表要求 start 与 end 为同一天；日报/ROI/留存报表最大跨度不超过 90 天。
+    examples: ["2026-04-01:2026-04-07"]
+  granularity:
+    layer: time_range
+    type: enum
+    cli_flag: --granularity
+    default: day
+    choices: [hour, day, week, month]
+    description: 统计粒度；会按报表类型映射为 dateType 或 timeType。
+    display_name: timeGranularity
+    format_hint: hour/day/week/month
+    purpose: 控制按小时、日报、自然周、自然月聚合。
+    query_method: 日报/ROI/留存报表映射为 DAY/NATURAL_WEEK/NATURAL_MONTH；小时报表映射为 HOURLY 或 DAY。
+    enum_descriptions:
+      hour: 小时报表，映射为 HOURLY。
+      day: 日报，映射为 DAY。
+      week: 自然周报，映射为 NATURAL_WEEK。
+      month: 自然月报，映射为 NATURAL_MONTH。
+    examples: ["day", "week", "month"]
+  media:
+    layer: filters
+    type: string_list
+    cli_flag: --media
+    description: 媒体别名或媒体ID列表，多个值用逗号分隔。
+    display_name: mediaId
+    format_hint: 逗号分隔字符串，如 10001,10002
+    purpose: 按媒体筛选数据。
+    query_method: 可先调用 list_media 获取实际 media_id，再作为筛选条件传入。
+    examples: ["10001", "巨量引擎,腾讯广告"]
+  team:
+    layer: filters
+    type: string_list
+    cli_flag: --team
+    description: 团队别名或团队ID列表，多个值用逗号分隔。
+    display_name: teamIds
+    format_hint: 逗号分隔字符串，如 221,222
+    purpose: 按投放团队筛选数据。
+    query_method: 可先调用 list_team 获取实际 team_ids，再作为筛选条件传入。
+    examples: ["221", "创新部,市场部"]
+  app_type:
+    layer: filters
+    type: string_list
+    cli_flag: --app-type
+    description: 应用类型筛选，多个值用逗号分隔。
+    display_name: appPackageType
+    format_hint: 逗号分隔字符串
+    purpose: 按应用包类型拆分或筛选数据。
+    query_method: 可先调用 list_app_package_type 类接口获取实际 code；当前 demo 直接透传。
+    examples: ["iOS应用", "安卓应用"]
+  include_organic:
+    layer: metrics_options
+    type: boolean
+    cli_flag: --include-organic
+    default: true
+    description: 是否包含自然量。true 表示包含，false 表示只看非自然量。
+    display_name: organic
+    format_hint: true/false
+    purpose: 控制是否统计自然量数据。
+    query_method: 运行时映射为 BI 的 organic=1/0 语义。
+    table_switching: 若需要筛选自然量数据，该字段需要开启，并结合媒体/团队等筛选维度使用。
+    examples: ["true", "false"]
+  include_paid:
+    layer: metrics_options
+    type: boolean
+    cli_flag: --include-paid
+    description: 是否包含付费投放量；用于与自然量视角组合判断。
+    display_name: includePaid
+    format_hint: true/false
+    purpose: 控制是否仅看自然量或同时保留投放量。
+    query_method: 当前主要影响统一归一化后的过滤逻辑。
+    examples: ["true", "false"]
+  roi_type:
+    layer: metrics_options
+    type: enum
+    cli_flag: --roi-type
+    default: cumulative
+    choices: [cumulative, interval]
+    required_for:
+      - get_ad_roi_report
+    description: ROI 口径类型。
+    display_name: dataType
+    format_hint: cumulative/interval
+    purpose: 选择累计 ROI 或区间 ROI。
+    query_method: cumulative 映射 total，interval 映射 section。
+    enum_descriptions:
+      cumulative: 累计 ROI，映射 BI total。
+      interval: 区间 ROI，映射 BI section。
+    examples: ["cumulative", "interval"]
+  retention_type:
+    layer: metrics_options
+    type: enum
+    cli_flag: --retention-type
+    default: device
+    choices: [device, account, first_pay]
+    required_for:
+      - get_ad_retention_report
+    description: 留存口径类型。
+    display_name: dataType
+    format_hint: device/account/first_pay
+    purpose: 选择设备留存、注册用户留存或首日付费账号留存。
+    query_method: device/account/first_pay 分别映射 DEVICE_RETENTION、REG_RETENTION、PAY_D1_RETENTION。
+    enum_descriptions:
+      device: 新增设备留存。
+      account: 注册用户留存。
+      first_pay: 首日付费账号留存。
+    examples: ["device", "account", "first_pay"]
+  view_mode:
+    layer: metrics_options
+    type: enum
+    cli_flag: --view-mode
+    default: cumulative
+    choices: [cumulative, per-period]
+    description: 时间序列展示视角。
+    display_name: viewCriteria
+    format_hint: cumulative/per-period
+    purpose: 控制展示累计结果还是单周期结果。
+    query_method: 在小时报表细分场景下会映射为 CURRENT_SUMMARY 等 BI 视角参数。
+    table_switching: 当 subGroup 有值且需要查看整天汇总数据时，应使用累计视角。
+    enum_descriptions:
+      cumulative: 查看累计或整天汇总结果。
+      per-period: 查看单周期切片结果。
+    examples: ["cumulative", "per-period"]
+  base_time_type:
+    layer: metrics_options
+    type: enum
+    cli_flag: --base-time-type
+    default: event_time
+    choices: [event_time, register_time]
+    required_for:
+      - get_ad_hour_report
+    description: 小时报表时间视角，用于区分按时段看数据还是按天累计看数据。
+    display_name: baseTimeType
+    format_hint: event_time/register_time
+    purpose: 选择事件时间口径或注册时间口径。
+    query_method: 映射 BI 的 EVENT_TIME / REGISTER_TIME。
+    enum_descriptions:
+      event_time: 事件时间口径，按天累计看数据。
+      register_time: 注册时间口径。
+    examples: ["event_time", "register_time"]
+  group_by:
+    layer: metrics_options
+    type: string_list
+    cli_flag: --group-by
+    choices: [date, media, team, app_type]
+    description: 数据聚合维度，支持单维或双维拆分。
+    display_name: subGroup
+    format_hint: 逗号分隔字符串，如 media 或 app_type,team
+    purpose: 控制报表按媒体、团队、应用类型等维度拆分。
+    query_method: 运行时会把标准化维度映射到 BI 的 subGroup 字段。
+    table_switching: 部分 BI 报表最多支持两个 subgroup 组合；小时报表按 media 细分时可结合 view_mode 与 hour_slot 切换整天汇总/指定小时。
+    enum_descriptions:
+      date: 按日期维度。
+      media: 按媒体维度，对应 media_id。
+      team: 按团队维度，对应 team_ids。
+      app_type: 按应用类型维度，对应 app_package_type。
+    examples: ["media", "app_type,team"]
+  hour_slot:
+    layer: metrics_options
+    type: string
+    cli_flag: --hour-slot
+    description: 小时报表指定小时槽位，仅在按小时细分时使用。
+    display_name: dh
+    format_hint: YYYY-MM-DD HH:00
+    purpose: 查询某一天某小时的数据切片。
+    query_method: 映射 BI 的 dh 参数。
+    table_switching: 只有当 group_by/media 细分场景需要查看指定小时数据时才传；查看整天汇总时不要传。
+    examples: ["2026-03-16 03:00"]
+
+operations:
+  - id: list_apps
+    native_tool_name: list_apps
+    cli_command: [apps, list]
+    description: 列出广告 BI 可用应用清单，返回 appId 与应用名称映射，供后续报表查询引用。
+    service_kind: dimension
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: dimension_service_unresolved
+    parameter_keys: []
+
+  - id: list_media
+    native_tool_name: list_media
+    cli_command: [media, list]
+    description: 列出广告 BI 可用媒体清单，返回 media_id 与媒体名称映射，供报表筛选引用。
+    service_kind: dimension
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: dimension_service_unresolved
+    parameter_keys: []
+
+  - id: list_team
+    native_tool_name: list_team
+    cli_command: [teams, list]
+    description: 列出广告投放团队清单，返回 team_ids 与团队名称映射，供报表筛选引用。
+    service_kind: lookup
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: mcp_http
+      path: /api/mcp/v1/teams/list
+      method: GET
+    parameter_keys: []
+
+  - id: get_ad_day_report
+    native_tool_name: get_ad_day_report
+    cli_command: [ads, report, day]
+    description: 查询广告日/周/月报表；必填 app_id 与 time_range，可选 granularity、media、team、app_type、group_by、include_organic。
+    service_kind: report
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: bi_post
+      path: /api/aiad-setting/v2/report/auto/5
+      method: POST
+      route_key: page-5_DAY_5
+      serializer: day_report
+    parameter_keys:
+      - app_id
+      - app_ref
+      - time_range
+      - granularity
+      - media
+      - team
+      - app_type
+      - include_organic
+      - include_paid
+      - group_by
+      - view_mode
+
+  - id: get_ad_hour_report
+    native_tool_name: get_ad_hour_report
+    cli_command: [ads, report, hour]
+    description: 查询广告小时报表；必填 app_id、time_range、base_time_type，支持 media/team/app_type/group_by/hour_slot 组合切换整天汇总或指定小时视角。
+    service_kind: report
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: bi_post
+      path: /api/aiad-setting/v2/report/auto/15
+      method: POST
+      route_key: page-15_15
+      serializer: hour_report
+    parameter_keys:
+      - app_id
+      - app_ref
+      - time_range
+      - granularity
+      - media
+      - team
+      - app_type
+      - include_organic
+      - include_paid
+      - base_time_type
+      - group_by
+      - hour_slot
+      - view_mode
+
+  - id: get_ad_retention_report
+    native_tool_name: get_ad_retention_report
+    cli_command: [ads, report, retention]
+    description: 查询广告留存报表；必填 app_id、time_range、retention_type，可选 granularity、media、team、app_type、group_by。
+    service_kind: report
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: bi_post
+      path: /api/aiad-setting/v2/report/auto/10
+      method: POST
+      route_key: page-10_10
+      serializer: retention_report
+    parameter_keys:
+      - app_id
+      - app_ref
+      - time_range
+      - granularity
+      - media
+      - team
+      - app_type
+      - include_organic
+      - include_paid
+      - retention_type
+      - group_by
+      - view_mode
+
+  - id: get_ad_roi_report
+    native_tool_name: get_ad_roi_report
+    cli_command: [ads, report, roi]
+    description: 查询广告 ROI 报表；必填 app_id、time_range、roi_type，可选 granularity、media、team、app_type、group_by。
+    service_kind: report
+    exposed_transport:
+      kind: mcp_tool
+    upstream_transport:
+      kind: bi_post
+      path: /api/aiad-setting/v2/report/auto/9
+      method: POST
+      route_key: page-9_DAY_9
+      serializer: roi_report
+    parameter_keys:
+      - app_id
+      - app_ref
+      - time_range
+      - granularity
+      - media
+      - team
+      - app_type
+      - include_organic
+      - include_paid
+      - roi_type
+      - group_by
+      - view_mode

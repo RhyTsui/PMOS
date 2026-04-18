@@ -1,0 +1,49 @@
+{
+  "type": "ui-structure",
+  "title": "UI 结构草图",
+  "summary": "基于请求“为 PMAIOS 生成一个后台管理页面 UI 结构”生成的后台页面 UI 结构，共 5 个模块，当前由 ai-studio 路由记录。",
+  "format": "structured-json",
+  "blocks": [
+    {
+      "id": "page",
+      "label": "管理后台页面",
+      "type": "page",
+      "description": "承载导航、筛选、表格与详情抽屉。",
+      "children": [
+        "filters",
+        "table",
+        "drawer"
+      ]
+    },
+    {
+      "id": "filters",
+      "label": "顶部筛选区",
+      "type": "section",
+      "description": "包含时间范围、业务线、负责人筛选。",
+      "children": [
+        "actions"
+      ]
+    },
+    {
+      "id": "actions",
+      "label": "快捷操作区",
+      "type": "toolbar",
+      "description": "提供查询、导出、创建任务按钮。",
+      "children": []
+    },
+    {
+      "id": "table",
+      "label": "数据列表区",
+      "type": "table",
+      "description": "展示核心指标、状态、更新时间。",
+      "children": []
+    },
+    {
+      "id": "drawer",
+      "label": "右侧详情抽屉",
+      "type": "panel",
+      "description": "查看记录详情、日志和处理建议。",
+      "children": []
+    }
+  ]
+}

@@ -1,0 +1,436 @@
+/**
+ * ProductAgent + LangGraph 集成
+ *
+ * 将产品 Agent 作为 LangGraph 工作流的智能节点
+ * 支持：需求自动生成、多 Agent 协作、状态持久化
+ */
+
+import type { LangGraphState, ArtifactRecord } from '../langgraph/index.js';
+import type { ProductAgent } from '../shared/schemas.js';
+import { ProductAgentService } from '../core/productAgentService.js';
+import { FileStore } from '../core/fileStore.js';
+import { MemoryService } from '../core/memoryService.js';
+
+export type ProductAgentNodeResult = {
+  agentId: string;
+  output: string;
+  artifacts: ArtifactRecord[];
+  nextStage?: string;
+};
+
+/**
+ * ProductAgent LangGraph 节点
+ */
+export class ProductAgentNode {
+  private agentService: ProductAgentService;
+
+  constructor(
+    private readonly store: FileStore,
+    private readonly memoryService: MemoryService,
+  ) {
+    this.agentService = new ProductAgentService(store, memoryService);
+  }
+
+  /**
+   * 执行产品 Agent 节点
+   *
+   * 根据当前工作流状态，调用相应的 ProductAgent 执行任务
+   */
+  async execute(
+    state: LangGraphState,
+    agentBrief: string,
+    options?: {
+      agentName?: string;
+      subprojectId?: string | null;
+      chatSessionId?: string | null;
+    }
+  ): Promise<ProductAgentNodeResult> {
+    const now = new Date().toISOString();
+
+    // 1. 生成或加载 ProductAgent
+    const agent = await this.agentService.generateAgent({
+      brief: agentBrief,
+      name: options?.agentName,
+      subprojectId: options?.subprojectId ?? state.context.subprojectId as string | null,
+      chatSessionId: options?.chatSessionId,
+      generatedByRunId: state.runId,
+      source: 'workspace',
+    });
+
+    // 2. 基于 Agent 生成输出
+    const output = await this.generateAgentOutput(agent, state);
+
+    // 3. 创建产物
+    const artifacts = await this.createArtifacts(agent, output, state);
+
+    // 4. 保存 Agent 到存储
+    await this.memoryService.saveProductAgent(agent);
+
+    // 5. 决定下一个阶段
+    const nextStage = this.determineNextStage(agent, state);
+
+    return {
+      agentId: agent.id,
+      output,
+      artifacts,
+      nextStage,
+    };
+  }
+
+  /**
+   * 生成 Agent 输出
+   */
+  private async generateAgentOutput(
+    agent: ProductAgent,
+    state: LangGraphState,
+  ): Promise<string> {
+    // 构建结构化输出
+    const output = {
+      name: agent.name,
+      summary: agent.summary,
+      problem: agent.problem,
+      targetUsers: agent.targetUsers,
+      goals: agent.goals,
+      nonGoals: agent.nonGoals,
+      constraints: agent.constraints,
+      acceptanceCriteria: agent.acceptanceCriteria,
+      relatedPaths: agent.relatedPaths,
+      generatedAt: new Date().toISOString(),
+      runId: state.runId,
+    };
+
+    return JSON.stringify(output, null, 2);
+  }
+
+  /**
+   * 创建产物文件
+   */
+  private async createArtifacts(
+    agent: ProductAgent,
+    output: string,
+    state: LangGraphState,
+  ): Promise<ArtifactRecord[]> {
+    const artifacts: ArtifactRecord[] = [];
+
+    // 创建 JSON 产物
+    const jsonPath = `docs/agents/${agent.id}.json`;
+    await this.store.write(jsonPath, output);
+    artifacts.push({
+      id: `${agent.id}-json`,
+      stageId: 'product-agent',
+      path: jsonPath,
+      type: 'json',
+      content: output,
+    });
+
+    // 创建 Markdown 摘要
+    const mdContent = this.buildMarkdownSummary(agent);
+    const mdPath = `docs/agents/${agent.id}.md`;
+    await this.store.write(mdPath, mdContent);
+    artifacts.push({
+      id: `${agent.id}-md`,
+      stageId: 'product-agent',
+      path: mdPath,
+      type: 'markdown',
+      content: mdContent,
+    });
+
+    return artifacts;
+  }
+
+  /**
+   * 构建 Markdown 摘要
+   */
+  private buildMarkdownSummary(agent: ProductAgent): string {
+    const sections: string[] = [];
+
+    sections.push(`# ${agent.name}`);
+    sections.push('');
+    sections.push(`**摘要**: ${agent.summary}`);
+    sections.push('');
+
+    if (agent.problem) {
+      sections.push('## 待解决问题');
+      sections.push(agent.problem);
+      sections.push('');
+    }
+
+    if (agent.targetUsers && agent.targetUsers.length > 0) {
+      sections.push('## 目标用户');
+      for (const user of agent.targetUsers) {
+        sections.push(`- ${user}`);
+      }
+      sections.push('');
+    }
+
+    if (agent.goals && agent.goals.length > 0) {
+      sections.push('## 目标');
+      for (const goal of agent.goals) {
+        sections.push(`- ${goal}`);
+      }
+      sections.push('');
+    }
+
+    if (agent.nonGoals && agent.nonGoals.length > 0) {
+      sections.push('## 非目标');
+      for (const nonGoal of agent.nonGoals) {
+        sections.push(`- ${nonGoal}`);
+      }
+      sections.push('');
+    }
+
+    if (agent.constraints && agent.constraints.length > 0) {
+      sections.push('## 约束条件');
+      for (const constraint of agent.constraints) {
+        sections.push(`- ${constraint}`);
+      }
+      sections.push('');
+    }
+
+    if (agent.acceptanceCriteria && agent.acceptanceCriteria.length > 0) {
+      sections.push('## 验收标准');
+      for (const criteria of agent.acceptanceCriteria) {
+        sections.push(`- ${criteria}`);
+      }
+      sections.push('');
+    }
+
+    sections.push('---');
+    sections.push(`*Generated by PMAIOS ProductAgent at ${agent.updatedAt}*`);
+
+    return sections.join('\n');
+  }
+
+  /**
+   * 决定下一个阶段
+   */
+  private determineNextStage(
+    agent: ProductAgent,
+    state: LangGraphState,
+  ): string | undefined {
+    // 根据 Agent 的输出决定下一步
+    // 如果有明确的设计需求，进入设计阶段
+    if (agent.goals?.some(g => g.includes('设计') || g.includes('design'))) {
+      return 'design';
+    }
+
+    // 默认进入需求评审阶段
+    return 'review';
+  }
+
+  /**
+   * 多 Agent 协作模式
+   *
+   * 同时调用多个 ProductAgent，然后合并结果
+   */
+  async executeMultiAgent(
+    state: LangGraphState,
+    agents: Array<{
+      brief: string;
+      name?: string;
+      role: string;
+    }>,
+  ): Promise<ProductAgentNodeResult> {
+    const results = await Promise.all(
+      agents.map(agent => this.execute(state, agent.brief, { agentName: agent.name })),
+    );
+
+    // 合并输出
+    const mergedOutput = {
+      collaboration: true,
+      agents: agents.map(a => a.name || a.role),
+      results: results.map(r => ({
+        agentId: r.agentId,
+        output: JSON.parse(r.output),
+      })),
+      mergedAt: new Date().toISOString(),
+    };
+
+    // 创建合并产物
+    const mergePath = `docs/agents/collab-${state.runId}.json`;
+    await this.store.write(mergePath, JSON.stringify(mergedOutput, null, 2));
+
+    return {
+      agentId: 'multi-agent',
+      output: JSON.stringify(mergedOutput, null, 2),
+      artifacts: [{
+        id: 'merged',
+        stageId: 'product-agent',
+        path: mergePath,
+        type: 'json',
+        content: JSON.stringify(mergedOutput, null, 2),
+      }],
+    };
+  }
+}
+
+/**
+ * ProductAgent LangGraph 工作流工厂
+ *
+ * 创建预定义的产品开发工作流
+ */
+export class ProductAgentWorkflowFactory {
+  constructor(
+    private readonly store: FileStore,
+    private readonly memoryService: MemoryService,
+  ) {}
+
+  /**
+   * 创建需求生成工作流
+   */
+  createRequirementWorkflow(input: {
+    brief: string;
+    projectName: string;
+    subprojectId?: string | null;
+  }) {
+    return {
+      workflowId: 'requirement-generation',
+      stages: [
+        {
+          id: 'agent-generation',
+          label: '产品 Agent 生成',
+          ownerRole: 'system',
+          description: '基于用户 brief 生成产品 Agent 定义',
+          acceptanceCriteria: ['ProductAgent JSON 已生成'],
+          requiredOutputs: [
+            { path: 'docs/agents/agent-*.json', kind: 'json' },
+            { path: 'docs/agents/agent-*.md', kind: 'markdown' },
+          ],
+          priority: 'high',
+          capability: 'text',
+          dependsOn: [],
+          gate: { reviewRequired: false },
+        },
+        {
+          id: 'requirement-refinement',
+          label: '需求细化',
+          ownerRole: 'product-manager',
+          description: '基于 ProductAgent 细化需求文档',
+          acceptanceCriteria: ['需求文档完成'],
+          requiredOutputs: [
+            { path: 'docs/requirements/*.md', kind: 'markdown' },
+          ],
+          priority: 'high',
+          capability: 'text',
+          dependsOn: ['agent-generation'],
+          gate: { reviewRequired: true },
+        },
+        {
+          id: 'review',
+          label: '评审',
+          ownerRole: 'review-committee',
+          description: '评审需求和产品定义',
+          acceptanceCriteria: ['评审通过'],
+          requiredOutputs: [
+            { path: 'docs/reviews/*.json', kind: 'json' },
+          ],
+          priority: 'high',
+          capability: 'review',
+          dependsOn: ['requirement-refinement'],
+          gate: { reviewRequired: false },
+        },
+      ],
+      subprojectId: input.subprojectId,
+    };
+  }
+
+  /**
+   * 创建完整产品开发工作流（需求→设计→开发）
+   */
+  createFullProductWorkflow(input: {
+    brief: string;
+    projectName: string;
+    subprojectId?: string | null;
+  }) {
+    return {
+      workflowId: 'full-product-development',
+      stages: [
+        {
+          id: 'product-agent',
+          label: '产品 Agent 生成',
+          ownerRole: 'system',
+          description: '生成产品定义 Agent',
+          acceptanceCriteria: ['ProductAgent 已生成'],
+          requiredOutputs: [
+            { path: 'docs/agents/agent-*.json', kind: 'json' },
+          ],
+          priority: 'high',
+          capability: 'text',
+          dependsOn: [],
+          gate: { reviewRequired: false },
+        },
+        {
+          id: 'requirement',
+          label: '需求分析',
+          ownerRole: 'product-manager',
+          description: '基于 ProductAgent 细化需求',
+          acceptanceCriteria: ['需求文档完成'],
+          requiredOutputs: [
+            { path: 'docs/requirements/*.md', kind: 'markdown' },
+          ],
+          priority: 'high',
+          capability: 'text',
+          dependsOn: ['product-agent'],
+          gate: { reviewRequired: true },
+        },
+        {
+          id: 'design',
+          label: '产品设计',
+          ownerRole: 'designer',
+          description: '产品界面和交互设计',
+          acceptanceCriteria: ['设计稿完成'],
+          requiredOutputs: [
+            { path: 'docs/design/*.md', kind: 'markdown' },
+          ],
+          priority: 'high',
+          capability: 'text-multimodal',
+          dependsOn: ['requirement'],
+          gate: { reviewRequired: true },
+        },
+        {
+          id: 'frontend',
+          label: '前端开发',
+          ownerRole: 'frontend-developer',
+          description: '实现前端界面',
+          acceptanceCriteria: ['前端代码完成'],
+          requiredOutputs: [
+            { path: 'src/frontend/*.tsx', kind: 'code' },
+          ],
+          priority: 'high',
+          capability: 'code',
+          dependsOn: ['design'],
+          gate: { reviewRequired: false },
+        },
+        {
+          id: 'backend',
+          label: '后端开发',
+          ownerRole: 'backend-developer',
+          description: '实现后端服务',
+          acceptanceCriteria: ['后端代码完成'],
+          requiredOutputs: [
+            { path: 'src/backend/*.ts', kind: 'code' },
+          ],
+          priority: 'high',
+          capability: 'code',
+          dependsOn: ['design'],
+          gate: { reviewRequired: false },
+        },
+        {
+          id: 'integration',
+          label: '集成测试',
+          ownerRole: 'qa-engineer',
+          description: '前后端集成测试',
+          acceptanceCriteria: ['测试通过'],
+          requiredOutputs: [
+            { path: 'tests/integration/*.test.ts', kind: 'code' },
+          ],
+          priority: 'high',
+          capability: 'code',
+          dependsOn: ['frontend', 'backend'],
+          gate: { reviewRequired: true },
+        },
+      ],
+      subprojectId: input.subprojectId,
+    };
+  }
+}

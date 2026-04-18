@@ -1,0 +1,119 @@
+import { promises as fs } from 'node:fs';
+import { z } from 'zod';
+import { FileStore } from './fileStore.js';
+import {
+  SubprojectSchema,
+  type Subproject,
+} from '../shared/schemas.js';
+import {
+  createPlatformProjectContext,
+  getProjectMemoryPath,
+  getProjectRoot,
+  getSubprojectManifestPath,
+  type ProjectContext,
+} from './projectPaths.js';
+
+const SubprojectIdSchema = z.string().min(1).regex(/^[a-z0-9._-]+$/u, 'subproject id 只能包含小写字母、数字、点、下划线和中划线');
+
+export class SubprojectRegistry {
+  constructor(private readonly store: FileStore) {}
+
+  async listSubprojects(): Promise<Subproject[]> {
+    const subprojectsDir = this.store.resolve('subprojects');
+
+    try {
+      const entries = await fs.readdir(subprojectsDir, { withFileTypes: true });
+      const subprojects = await Promise.all(
+        entries
+          .filter((entry) => entry.isDirectory())
+          .map(async (entry) => {
+            try {
+              return await this.loadSubproject(entry.name);
+            } catch {
+              return null;
+            }
+          }),
+      );
+
+      return subprojects
+        .filter((subproject): subproject is Subproject => subproject !== null)
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    } catch {
+      return [];
+    }
+  }
+
+  async loadSubproject(subprojectId: string): Promise<Subproject> {
+    const manifest = await this.store.readJson<unknown>(getSubprojectManifestPath(subprojectId));
+    return SubprojectSchema.parse(manifest);
+  }
+
+  async createSubproject(input: {
+    id: string;
+    name?: string;
+    description?: string;
+    defaultWorkflow?: string;
+    overrides?: {
+      provider?: string;
+      providerConfigPath?: string;
+      workflow?: string;
+      mcpConfigPath?: string;
+      skillConfigPath?: string;
+    };
+  }): Promise<Subproject> {
+    const id = SubprojectIdSchema.parse(input.id.trim());
+    const manifestPath = getSubprojectManifestPath(id);
+    if (await this.store.exists(manifestPath)) {
+      throw new Error(`subproject ${id} 已存在。`);
+    }
+
+    const now = new Date().toISOString();
+    const rootPath = getProjectRoot(id);
+    const memoryPath = getProjectMemoryPath(id);
+    const subproject: Subproject = {
+      id,
+      name: input.name?.trim() || id,
+      description: input.description?.trim() || `${id} 业务子项目`,
+      status: 'active',
+      createdAt: now,
+      defaultWorkflow: input.defaultWorkflow ?? 'ai-os-v2-main',
+      rootPath,
+      memoryPath,
+      overrides: {
+        provider: input.overrides?.provider?.trim() || undefined,
+        providerConfigPath: input.overrides?.providerConfigPath?.trim() || undefined,
+        workflow: input.overrides?.workflow?.trim() || undefined,
+        mcpConfigPath: input.overrides?.mcpConfigPath?.trim() || undefined,
+        skillConfigPath: input.overrides?.skillConfigPath?.trim() || undefined,
+      },
+    };
+
+    await this.store.writeJson(manifestPath, subproject);
+    await this.store.write(
+      memoryPath,
+      ['# Project Memory', `- projectId: ${subproject.id}`, `- projectName: ${subproject.name}`, `- description: ${subproject.description}`].join(
+        '\n',
+      ),
+    );
+
+    return subproject;
+  }
+
+  async resolveProjectContext(subprojectId?: string | null): Promise<ProjectContext> {
+    if (!subprojectId) {
+      return createPlatformProjectContext();
+    }
+
+    const subproject = await this.loadSubproject(subprojectId);
+    return {
+      subprojectId: subproject.id,
+      projectName: subproject.name,
+      projectDescription: subproject.description,
+      projectRoot: subproject.rootPath,
+      projectMemoryPath: subproject.memoryPath,
+      selectedProvider: subproject.overrides.provider ?? null,
+      providerConfigPath: subproject.overrides.providerConfigPath ?? null,
+      mcpConfigPath: subproject.overrides.mcpConfigPath ?? null,
+    };
+  }
+}

@@ -1,0 +1,144 @@
+我给你一套在业界可落地的设计方式（适用于 CLI / MCP / Agent 工具统一）。
+
+✅ 一、参数分层设计（核心思想）
+
+把参数拆成 4 层：
+
+1. 资源范围（Scope）
+2. 时间范围（Time Range）
+3. 维度筛选（Filters）
+4. 统计口径（Metrics / Options）
+✅ 二、CLI 参数结构设计（推荐标准）
+1）基础结构
+cli ads report roi \
+  --app-id 10100042 \
+  --time-range 2026-04-01:2026-04-08 \
+  --granularity day \
+  --media facebook,tiktok \
+  --team growth \
+  --app-type game \
+  --include-organic true \
+  --roi-type interval \
+  --retention-type device \
+  --view-mode cumulative
+✅ 三、参数分类说明
+1）时间类（必填）
+--time-range 2026-04-01:2026-04-08
+--granularity day | hour | week | month
+
+👉 说明：
+
+time-range：查询范围（必填）
+granularity：统计粒度（必填 or 有默认）
+2）筛选维度（Filters，可选 / 多选）
+--app-id
+--media facebook,tiktok
+--team growth,ua
+--app-type game,utility
+
+规则：
+
+多选：用 ,
+单选：直接值
+可为空：表示不过滤
+3）是否包含类开关（Boolean flags）
+--include-organic true|false
+--include-paid true|false
+
+👉 建议用显式 boolean，而不是隐式开关
+
+4）统计口径（核心差异点）
+ROI 类型
+--roi-type cumulative | interval
+
+解释：
+
+cumulative = 累积 ROI
+interval = 区间 ROI
+留存口径
+--retention-type device | account | first-pay
+时间视图模式
+--view-mode cumulative | per-period
+5）细分展示（Group By / Breakdown）
+--group-by date,media,team,app-type
+
+👉 类似 SQL GROUP BY
+
+✅ 四、默认值设计（非常关键）
+
+建议：
+
+参数	默认值
+granularity	day
+include-organic	true
+roi-type	cumulative
+retention-type	device
+view-mode	cumulative
+
+👉 默认值要稳定，否则 CLI 会不可预测
+
+✅ 五、必填 / 非必填规则
+参数	类型	是否必填
+time-range	range	✅ 必填
+app-id	string	⚠️ 必填（如果是单应用模式）
+granularity	enum	可默认
+filters	list	❌ 可选
+roi-type	enum	可默认
+✅ 六、推荐参数 schema（结构化定义）
+
+可以抽象成 JSON Schema / MCP tool schema：
+
+{
+  "time_range": {
+    "type": "string",
+    "required": true,
+    "format": "YYYY-MM-DD:YYYY-MM-DD"
+  },
+  "granularity": {
+    "type": "string",
+    "enum": ["hour", "day", "week", "month"],
+    "default": "day"
+  },
+  "media": {
+    "type": "array",
+    "items": "string"
+  },
+  "team": {
+    "type": "array",
+    "items": "string"
+  },
+  "app_type": {
+    "type": "array",
+    "items": "string"
+  },
+  "include_organic": {
+    "type": "boolean",
+    "default": true
+  },
+  "roi_type": {
+    "type": "string",
+    "enum": ["cumulative", "interval"],
+    "default": "cumulative"
+  },
+  "retention_type": {
+    "type": "string",
+    "enum": ["device", "account", "first_pay"],
+    "default": "device"
+  },
+  "group_by": {
+    "type": "array",
+    "items": {
+      "enum": ["date", "media", "team", "app_type"]
+    }
+  }
+}
+✅ 七、CLI vs API vs MCP 的统一映射
+
+你这类系统建议统一成：
+
+层	表达方式
+CLI	--media facebook,tiktok
+API	media: ["facebook","tiktok"]
+MCP Tool	schema object
+
+👉 本质：同一份 schema，多种序列化
