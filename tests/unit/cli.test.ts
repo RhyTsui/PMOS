@@ -19,8 +19,9 @@ function createStore() {
 describe('CLI-aligned runtime flow', () => {
   async function createRuntimeFixture() {
     const store = createStore();
+    const repoStore = new FileStore(path.resolve(process.cwd()));
     await store.write('docs/memory/project-memory.md', '# Project Memory\n- 本地文件驱动\n');
-    await store.write('skills/registry.json', await new FileStore('E:/AI/ai-os').read('skills/registry.json'));
+    await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
     await store.write(
       'config/providers.json',
       JSON.stringify(

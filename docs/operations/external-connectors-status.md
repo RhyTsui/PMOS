@@ -20,7 +20,7 @@ Secrets are stored only in local `.env`. Do not write raw tokens into tracked do
 | Figma | configured locally | API token loaded from `.env`; file inspection endpoint available when file key is provided | Needs a Figma file key for concrete inspection |
 | Web page fetch | implemented | Fetches a URL and writes source markdown into `docs/sources/inbox/` | Network access depends on local runtime permissions |
 | DingTalk AI meeting notes | implemented as manual import | Paste/export transcript into console; system writes inbox source and runs documentation normalization | Automatic extraction from logged-in DingTalk desktop is not reliable without an official export/API/source path |
-| GitHub push / CI artifact | blocked | Local branch is `main`; code can be committed locally | No `remote.origin.url`; GitHub App search found no accessible `ai-os`/`pmaios` repository |
+| GitHub push / CI artifact | in progress | Remote `origin` is `https://github.com/RhyTsui/pmaios.git`; local `main` has been merged with the remote initial commit and pushed without force-push | First Actions run failed because tests used a Windows absolute fixture path; local cross-platform fix is ready for push and rerun |
 
 ## Implemented API
 
@@ -41,7 +41,6 @@ The frontend now exposes an `External Connectors` panel:
 
 ## Next Required Inputs
 
-- GitHub repository URL or GitHub App installation access to the target repository.
 - Notion database IDs for PRD / meeting notes / general product decisions.
 - Figma file key for the active design source.
 - DingTalk meeting transcript export or copied AI meeting note content.

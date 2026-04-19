@@ -16,9 +16,10 @@ function createStore() {
 }
 
 async function seedFixture(store: FileStore) {
+  const repoStore = new FileStore(path.resolve(process.cwd()));
   await store.write('docs/memory/project-memory.md', '# Project Memory\n');
-  await store.write('skills/registry.json', await new FileStore('E:/AI/ai-os').read('skills/registry.json'));
-  await store.write('config/providers.json', await new FileStore('E:/AI/ai-os').read('config/providers.json'));
+  await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
+  await store.write('config/providers.json', await repoStore.read('config/providers.json'));
 }
 
 async function seedRuntimeFixture(store: FileStore) {
@@ -165,7 +166,8 @@ describe('WorkflowEngine', () => {
 
   it('loads structured skills from registry through compatibility mapping', async () => {
     const store = createStore();
-    await store.write('skills/registry.json', await new FileStore('E:/AI/ai-os').read('skills/registry.json'));
+    const repoStore = new FileStore(path.resolve(process.cwd()));
+    await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
 
     const registry = new SkillRegistry(store);
     const skills = await registry.listSkillsForStage('prd');

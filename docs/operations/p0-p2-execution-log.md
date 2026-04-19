@@ -104,7 +104,8 @@ Implemented for this correction:
 - Web fetch writes source markdown into `docs/sources/inbox/`.
 - DingTalk meeting note import writes source markdown into `docs/sources/inbox/` and triggers documentation normalization.
 - Figma file inspection endpoint is available when a file key is provided.
-- GitHub push/CI verification is blocked because the local repo has no remote and the GitHub App found no accessible matching repository.
+- GitHub remote was configured as `https://github.com/RhyTsui/pmaios.git`; local `main` was merged with the remote initial commit and pushed without force-push.
+- First GitHub Actions run `24619899349` failed because tests used Windows absolute fixture paths; fixtures now read from `process.cwd()` and are ready for rerun.
 
 Verification:
 
@@ -118,6 +119,12 @@ Verification:
   - skillTotal: `16`
   - productSkills: `12`
   - designSkills: `2`
+
+Follow-up verification after CI portability fix:
+
+- `npm run lint`
+- `npm run test` (`20` files, `72` tests)
+- `npm run build`
   - documentationSkills: `3`
 - `npm run test -- externalConnectorService documentationNormalizationService`
 
@@ -338,7 +345,7 @@ Local environment check result:
 
 ### Next P2 candidates
 
-- CI artifact download verification after push
+- GitHub Actions CI rerun and artifact download verification after pushing the portability fix
 - broader external knowledge/internal system data connectors beyond current local repository and Chroma scope
 
 ## Update Protocol

@@ -204,7 +204,10 @@ Legend:
 - DONE - Full test suite.
 - DONE - Production build.
 - DONE - Production API smoke.
-- TODO - <span style="color: gray">CI artifact download verification after branch push.</span>
+- DONE - GitHub remote configured for `https://github.com/RhyTsui/pmaios`.
+- DONE - Local `main` pushed to GitHub without force-push.
+- IN PROGRESS - GitHub Actions CI rerun after cross-platform test-fixture fix.
+- TODO - <span style="color: gray">CI artifact download verification after GitHub Actions build succeeds.</span>
 - TODO - <span style="color: gray">Broader external knowledge/internal system connectors.</span>
 - TODO - <span style="color: gray">Real model-backed specialist execution.</span>
 - TODO - <span style="color: gray">Living physical-world profile automation.</span>
@@ -221,8 +224,8 @@ Legend:
 | `P1` | Rich requirement source attribution | Completed | Implemented for document normalization, extracted documents, and Product Chief product outputs; schema supports broader source kinds. |
 | `P1` | Evaluation history drill-down | Completed | API and frontend expose requirement/version-entry/capability/version linked evaluation history. |
 | `P2` | Standard production smoke | Completed for API smoke | Port `4178` smoke verified core v0.4 endpoints; browser UI smoke remains optional/manual. |
-| `P2` | CI artifact download verification | Blocked until push/remote CI | Requires GitHub Actions run after branch push. |
-| `P2` | GitHub push / CI artifact verification | Blocked | Local repo has no `remote.origin.url`; GitHub App search found no accessible `ai-os`/`pmaios` repository. |
+| `P2` | CI artifact download verification | In progress | GitHub Actions run `24619899349` failed in `npm run test` because tests used `E:/AI/ai-os`; fixtures now read from `process.cwd()` and are ready for rerun. |
+| `P2` | GitHub push / CI artifact verification | In progress | Remote `origin` is `https://github.com/RhyTsui/pmaios.git`; local `main` was merged with the remote initial commit and pushed without force-push. |
 | `P2` | External/internal data connectors | In progress | Notion/Figma credentials are local; web fetch and DingTalk manual import are implemented; Notion DB IDs and Figma file key are still needed. |
 
 ## Verification Evidence
@@ -306,6 +309,24 @@ Latest verification after External Connectors surface:
   - dingtalkConfigured: `true`
   - skillTotal: `16`
 
+Latest verification after GitHub push and CI portability fix:
+
+- Remote `origin`: `https://github.com/RhyTsui/pmaios.git`
+- Pushed merge commit: `4a24a939e34d1966bdc01daf0a3476cb4a7fdbc6`
+- First GitHub Actions run: `24619899349`
+  - result: failed
+  - failing step: `npm run test`
+  - cause: test fixtures read `E:/AI/ai-os/skills/registry.json` and `E:/AI/ai-os/config/product-management/agent-blueprints.json`, which do not exist on Linux runners.
+- Local fix completed:
+  - replaced hardcoded fixture reads with `path.resolve(process.cwd())`
+  - updated package version to `0.4.0`
+- Local verification after fix:
+  - `npm run lint` passed
+  - `npm run test` passed:
+    - `20` test files passed
+    - `72` tests passed
+  - `npm run build` passed
+
 ## New Requirement Changes Since Last Snapshot
 
 - Version numbering must be assigned by actual accepted development state, not planning labels.
@@ -321,7 +342,7 @@ Latest verification after External Connectors surface:
 ## Next Execution Order
 
 1. Use the Project PM Outputs panel to generate current-project product materials for the demo project.
-2. Verify CI artifact download after branch push.
+2. Push CI portability fix and verify GitHub Actions artifact download after build succeeds.
 3. Decide whether browser UI smoke is required before marking `v0.4` accepted.
 4. Keep external/internal data connectors in future-version planning unless credentials and target systems are provided.
 5. Keep this snapshot updated daily.

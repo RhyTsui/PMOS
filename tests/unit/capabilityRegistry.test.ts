@@ -18,6 +18,7 @@ function createStore() {
 
 async function createFixture() {
   const store = createStore();
+  const repoStore = new FileStore(path.resolve(process.cwd()));
   await store.write('docs/memory/project-memory.md', '# Project Memory\n- capability registry fixture\n');
   await store.write(
     'config/providers.json',
@@ -40,7 +41,7 @@ async function createFixture() {
       2,
     ),
   );
-  await store.write('skills/registry.json', await new FileStore('E:/AI/ai-os').read('skills/registry.json'));
+  await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
 
   return {
     store,

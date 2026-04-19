@@ -19,6 +19,7 @@ function createStore() {
 
 async function createFixture() {
   const store = createStore();
+  const repoStore = new FileStore(path.resolve(process.cwd()));
   await store.write('docs/memory/project-memory.md', '# Project Memory\n- requirement/version fixture\n');
   await store.write(
     'config/providers.json',
@@ -35,7 +36,7 @@ async function createFixture() {
     'mcp/mcp-servers.example.json',
     JSON.stringify({ servers: [{ name: 'filesystem', transport: 'stdio', command: 'node', args: ['server.js'], enabled: true, tools: ['read'] }] }, null, 2),
   );
-  await store.write('skills/registry.json', await new FileStore('E:/AI/ai-os').read('skills/registry.json'));
+  await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
 
   const memoryService = new MemoryService(store);
   return {

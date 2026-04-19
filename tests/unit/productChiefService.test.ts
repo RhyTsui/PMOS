@@ -13,7 +13,7 @@ function createStore() {
 
 async function createFixture() {
   const store = createStore();
-  const repoStore = new FileStore('E:/AI/ai-os');
+  const repoStore = new FileStore(path.resolve(process.cwd()));
   await store.write('docs/memory/project-memory.md', '# Project Memory\n');
   await store.write('workflows/main.md', '# Workflow\n');
   await store.write('workflows/execution.md', '# Execution\n');
