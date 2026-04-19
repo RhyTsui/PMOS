@@ -105,7 +105,9 @@ Implemented for this correction:
 - DingTalk meeting note import writes source markdown into `docs/sources/inbox/` and triggers documentation normalization.
 - Figma file inspection endpoint is available when a file key is provided.
 - GitHub remote was configured as `https://github.com/RhyTsui/pmaios.git`; local `main` was merged with the remote initial commit and pushed without force-push.
-- First GitHub Actions run `24619899349` failed because tests used Windows absolute fixture paths; fixtures now read from `process.cwd()` and are ready for rerun.
+- First GitHub Actions run `24619899349` failed because tests used Windows absolute fixture paths; fixtures now read from `process.cwd()`.
+- GitHub Actions rerun `24620263772` succeeded on commit `9e5cc4badebb6060f41b827f3ac36f7269ba3458`.
+- CI artifact `pmaios-dist` was published with artifact id `6515418927` and digest `sha256:71efa237f588ed4e17f99555550009f914b6cc5acfdf7feca76edcafd797b44c`; direct anonymous REST download requires authentication and returned `401`.
 
 Verification:
 
@@ -125,6 +127,8 @@ Follow-up verification after CI portability fix:
 - `npm run lint`
 - `npm run test` (`20` files, `72` tests)
 - `npm run build`
+- GitHub Actions `ci` run `24620263772`: success
+- Artifact publication: `pmaios-dist`, id `6515418927`
   - documentationSkills: `3`
 - `npm run test -- externalConnectorService documentationNormalizationService`
 
@@ -345,7 +349,7 @@ Local environment check result:
 
 ### Next P2 candidates
 
-- GitHub Actions CI rerun and artifact download verification after pushing the portability fix
+- authenticated browser/API artifact download if a local copy is needed
 - broader external knowledge/internal system data connectors beyond current local repository and Chroma scope
 
 ## Update Protocol
