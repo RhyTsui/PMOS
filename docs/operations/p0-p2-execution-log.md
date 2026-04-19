@@ -106,8 +106,8 @@ Implemented for this correction:
 - Figma file inspection endpoint is available when a file key is provided.
 - GitHub remote was configured as `https://github.com/RhyTsui/pmaios.git`; local `main` was merged with the remote initial commit and pushed without force-push.
 - First GitHub Actions run `24619899349` failed because tests used Windows absolute fixture paths; fixtures now read from `process.cwd()`.
-- GitHub Actions rerun `24620263772` succeeded on commit `9e5cc4badebb6060f41b827f3ac36f7269ba3458`.
-- CI artifact `pmaios-dist` was published with artifact id `6515418927` and digest `sha256:71efa237f588ed4e17f99555550009f914b6cc5acfdf7feca76edcafd797b44c`; direct anonymous REST download requires authentication and returned `401`.
+- GitHub Actions rerun `24621458060` succeeded on commit `ba35577ccbc533d0aa8555ce81a9c887762d1fb9`.
+- CI artifact `pmaios-dist` was published with artifact id `6515788105` and digest `sha256:ccc33b3e4ce274f52afc855a60d4eb21dae318fafaac3ba96e3cf728d3e19938`; direct anonymous REST download requires authentication and returned `401`.
 
 Verification:
 
@@ -127,8 +127,8 @@ Follow-up verification after CI portability fix:
 - `npm run lint`
 - `npm run test` (`20` files, `72` tests)
 - `npm run build`
-- GitHub Actions `ci` run `24620263772`: success
-- Artifact publication: `pmaios-dist`, id `6515418927`
+- GitHub Actions `ci` run `24621458060`: success
+- Artifact publication: `pmaios-dist`, id `6515788105`
   - documentationSkills: `3`
 - `npm run test -- externalConnectorService documentationNormalizationService`
 

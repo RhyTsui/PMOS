@@ -224,8 +224,8 @@ Legend:
 | `P1` | Rich requirement source attribution | Completed | Implemented for document normalization, extracted documents, and Product Chief product outputs; schema supports broader source kinds. |
 | `P1` | Evaluation history drill-down | Completed | API and frontend expose requirement/version-entry/capability/version linked evaluation history. |
 | `P2` | Standard production smoke | Completed for API smoke | Port `4178` smoke verified core v0.4 endpoints; browser UI smoke remains optional/manual. |
-| `P2` | CI artifact download verification | Completed for artifact publication | GitHub Actions run `24620263772` succeeded; artifact `pmaios-dist` id `6515418927`, digest `sha256:71efa237f588ed4e17f99555550009f914b6cc5acfdf7feca76edcafd797b44c`. Direct anonymous REST download returns `401`, so local download requires an authenticated GitHub browser/API session. |
-| `P2` | GitHub push / CI artifact verification | Completed | Remote `origin` is `https://github.com/RhyTsui/pmaios.git`; local `main` was merged with the remote initial commit and pushed without force-push; latest pushed commit is `9e5cc4badebb6060f41b827f3ac36f7269ba3458`. |
+| `P2` | CI artifact download verification | Completed for artifact publication | GitHub Actions run `24621458060` succeeded; artifact `pmaios-dist` id `6515788105`, digest `sha256:ccc33b3e4ce274f52afc855a60d4eb21dae318fafaac3ba96e3cf728d3e19938`. Direct anonymous REST download returns `401`, so local download requires an authenticated GitHub browser/API session. |
+| `P2` | GitHub push / CI artifact verification | Completed | Remote `origin` is `https://github.com/RhyTsui/pmaios.git`; local `main` was merged with the remote initial commit and pushed without force-push; latest pushed verification commit is `ba35577ccbc533d0aa8555ce81a9c887762d1fb9`. |
 | `P2` | External/internal data connectors | In progress | Notion/Figma credentials are local; web fetch and DingTalk manual import are implemented; Notion DB IDs and Figma file key are still needed. |
 
 ## Verification Evidence
@@ -327,16 +327,16 @@ Latest verification after GitHub push and CI portability fix:
     - `72` tests passed
   - `npm run build` passed
 - GitHub Actions rerun:
-  - run: `24620263772`
-  - commit: `9e5cc4badebb6060f41b827f3ac36f7269ba3458`
+  - run: `24621458060`
+  - commit: `ba35577ccbc533d0aa8555ce81a9c887762d1fb9`
   - result: success
   - `verify` job: success
   - `build` job: success
   - artifact: `pmaios-dist`
-  - artifact id: `6515418927`
+  - artifact id: `6515788105`
   - artifact size: `189587` bytes
-  - artifact digest: `sha256:71efa237f588ed4e17f99555550009f914b6cc5acfdf7feca76edcafd797b44c`
-  - artifact expires: `2026-07-18T03:43:28Z`
+  - artifact digest: `sha256:ccc33b3e4ce274f52afc855a60d4eb21dae318fafaac3ba96e3cf728d3e19938`
+  - artifact expires: `2026-07-18T05:02:35Z`
   - direct anonymous REST download check returned `401`, so artifact download requires an authenticated GitHub session.
 
 ## New Requirement Changes Since Last Snapshot
