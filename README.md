@@ -1,23 +1,27 @@
-# PMAIOS v0.2
+# PMAIOS v0.4
 
-PMAIOS is a file-driven local AI operating system for software delivery. It keeps workflow definitions, project memory, requirements, capabilities, review outputs, and subproject state inside the repository, then exposes them through a local backend, frontend, and CLI.
+PMAIOS is a file-driven local AI operating system for product management and software delivery. It keeps workflow definitions, project memory, requirements, capabilities, review outputs, product-agent skills, and subproject state inside the repository, then exposes them through a local backend, frontend, and CLI.
+
+The current v0.4 focus is a Product Management AI OS / product-agent runtime: daily project PM outputs, product skills, design/documentation skills, external source intake, and governed Product Chief review.
 
 ## What Is In This Repo
 
-- `src/backend`: Express API for workflow runs, chats, capabilities, requirements, versions, observability, providers, and MCP metadata.
-- `src/frontend`: React console for inspecting runs, artifacts, chat context, review gates, and portfolio state.
+- `src/backend`: Express API for workflow runs, chats, capabilities, requirements, versions, observability, providers, product skills, connectors, and MCP metadata.
+- `src/frontend`: React console for inspecting runs, artifacts, chat context, review gates, project PM outputs, skills, and connector status.
 - `src/cli`: local CLI entrypoint for repository-native operations.
-- `src/core`: workflow runtime, persistence, provider routing, review logic, memory, and product-agent services.
+- `src/core`: workflow runtime, persistence, provider routing, review logic, memory, product-agent services, external connectors, and Product Chief orchestration.
 - `workflows`, `prompts`, `docs`, `skills`, `config`: repository source-of-truth artifacts.
 - `subprojects`: business project overlays with isolated memory and workflow outputs.
 
 ## Current Delivery Status
 
+- Project PM outputs are generated through governed Product Chief workflows with specialist tasks and deterministic multi-agent review artifacts.
+- Product, design, and documentation skills are surfaced through the backend and frontend for daily product work.
+- External intake supports Notion/Figma status checks, web page fetch into the source inbox, and DingTalk meeting-note paste/import with normalization.
 - TypeScript frontend and backend build successfully.
-- Vitest suite passes: `15` files, `57` tests.
+- Vitest suite passes: `20` files, `72` tests.
 - Backend can serve the built frontend from the same port in production mode.
-- Chroma now falls back to in-memory collections when the remote server is unavailable.
-- Review gates now block runs that skip an open-source-first / build-vs-buy assessment.
+- Chroma falls back to in-memory collections when the remote server is unavailable.
 
 ## Local Development
 
@@ -105,6 +109,9 @@ Common keys:
 - `NOTION_DATABASE_ID`
 - `NOTION_PRD_DATABASE_ID`
 - `NOTION_MEETING_NOTES_DATABASE_ID`
+- `FIGMA_API_KEY`
+- `WEB_FETCH_USER_AGENT`
+- `DINGTALK_MEETING_IMPORT_MODE`
 
 ## Verification
 
@@ -133,6 +140,9 @@ curl http://localhost:4312/api/health
 ## Operations Docs
 
 - `docs/operations/local-runbook.md`: local startup and smoke-check steps
+- `docs/operations/current-version-progress.md`: active v0.4 progress, acceptance status, and remaining work
+- `docs/operations/pmaios-version-plan.md`: accepted version timeline and roadmap
+- `docs/operations/external-connectors-status.md`: connector configuration and operational status
 - `docs/operations/release-summary.md`: current delivery and verification summary
 - `docs/operations/module-roadmap.md`: module ownership, priorities, and recommended completion order
 - `docs/operations/ai-product-office-roadmap.md`: target operating model for the Virtual Product Chief and specialist product agents
@@ -141,5 +151,5 @@ curl http://localhost:4312/api/health
 
 - `src/server/index.ts` is an older API surface kept in the repo, but the active runtime entrypoint used by `npm start`, `npm run dev:backend`, and the production build is `src/backend/server.ts`.
 - Chroma remote mode is optional. If `http://localhost:8000` is unavailable, the project continues with in-memory vector collections for local testing.
-- The frontend review inspector now surfaces review gate status, blocking stage, and issue details for the selected run.
-- `docs/templates/` now includes AI-first product output templates for intelligence briefs, roadmap/version docs, manuals, demos, learning guidance, ecosystem scans, and UI schema specs.
+- The frontend review inspector surfaces review gate status, blocking stage, and issue details for the selected run.
+- `docs/templates/` includes AI-first product output templates for intelligence briefs, roadmap/version docs, manuals, demos, learning guidance, ecosystem scans, and UI schema specs.
