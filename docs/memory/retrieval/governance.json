@@ -1,0 +1,16 @@
+{
+  "subprojectId": null,
+  "mode": "prefer-remote",
+  "remoteUrl": "http://localhost:8000",
+  "collectionName": "platform",
+  "topK": 5,
+  "indexingEnabled": true,
+  "qualityGate": {
+    "minChunkCount": 10,
+    "minScore": 0.35,
+    "requireTruthSources": true
+  },
+  "lastIndexedAt": null,
+  "lastIndexedChunkCount": 0,
+  "updatedAt": "2026-04-19T01:05:50.557Z"
+}

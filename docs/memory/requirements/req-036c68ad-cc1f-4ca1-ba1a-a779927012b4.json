@@ -1,0 +1,35 @@
+{
+  "id": "req-036c68ad-cc1f-4ca1-ba1a-a779927012b4",
+  "subprojectId": null,
+  "title": "Normalize historical document: README.md",
+  "description": "Normalize historical source into the governed PMAIOS taxonomy.\n\nSource: docs/sources/inbox/README.md\nSuggested target: docs/sources/historical/README.md\nDocument type: historical-source",
+  "category": "architecture",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "manual",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-3df7cf03-86b2-49d3-a136-09985183f006"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/README.md",
+      "docs/product-office/document-normalization/docnorm-3372fdba-685a-487e-8897-8c479ebe3f88-docs-sources-inbox-readme.md"
+    ]
+  },
+  "createdAt": "2026-04-19T00:44:44.032Z",
+  "updatedAt": "2026-04-19T00:44:44.034Z",
+  "metadata": {
+    "source": "documentation-normalization",
+    "sourcePath": "docs/sources/inbox/README.md",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/sources/historical/README.md",
+    "documentType": "historical-source"
+  }
+}

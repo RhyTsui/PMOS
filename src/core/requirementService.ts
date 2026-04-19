@@ -56,6 +56,76 @@ export class RequirementService {
     return requirement;
   }
 
+  async updateRequirement(
+    requirementId: string,
+    input: {
+      subprojectId?: string | null;
+      title?: string;
+      description?: string;
+      category?: Requirement['category'];
+      status?: Requirement['status'];
+      priority?: Requirement['priority'];
+      relatedRequirementIds?: string[];
+      linkedVersionIds?: string[];
+      linkedRunIds?: string[];
+      artifactPaths?: string[];
+      metadataPatch?: Record<string, unknown>;
+    },
+  ) {
+    const requirement = await this.memoryService.loadRequirement(requirementId, input.subprojectId);
+    const updatedAt = new Date().toISOString();
+    const next: Requirement = {
+      ...requirement,
+      title: typeof input.title === 'string' ? input.title.trim() : requirement.title,
+      description: typeof input.description === 'string' ? input.description.trim() : requirement.description,
+      category: input.category ?? requirement.category,
+      status: input.status ?? requirement.status,
+      priority: input.priority ?? requirement.priority,
+      updatedAt,
+      trace: {
+        relatedRequirementIds: [
+          ...new Set([...(input.relatedRequirementIds ?? requirement.trace.relatedRequirementIds)]),
+        ],
+        linkedVersionIds: [
+          ...new Set([...(input.linkedVersionIds ?? requirement.trace.linkedVersionIds)]),
+        ],
+        linkedRunIds: [
+          ...new Set([...(input.linkedRunIds ?? requirement.trace.linkedRunIds)]),
+        ],
+        artifactPaths: [
+          ...new Set([...(input.artifactPaths ?? requirement.trace.artifactPaths)]),
+        ],
+      },
+      metadata: {
+        ...requirement.metadata,
+        ...(input.metadataPatch ?? {}),
+      },
+    };
+
+    await this.memoryService.saveRequirement(next);
+    return next;
+  }
+
+  async batchUpdateRequirements(input: {
+    requirementIds: string[];
+    subprojectId?: string | null;
+    status?: Requirement['status'];
+    priority?: Requirement['priority'];
+    metadataPatch?: Record<string, unknown>;
+  }) {
+    const uniqueIds = [...new Set(input.requirementIds.filter(Boolean))];
+    return Promise.all(
+      uniqueIds.map((requirementId) =>
+        this.updateRequirement(requirementId, {
+          subprojectId: input.subprojectId,
+          status: input.status,
+          priority: input.priority,
+          metadataPatch: input.metadataPatch,
+        }),
+      ),
+    );
+  }
+
   async ingestFromChat(input: {
     sessionId: string;
     messageId?: string | null;

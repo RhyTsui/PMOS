@@ -1,0 +1,263 @@
+import { randomUUID } from 'node:crypto';
+import path from 'node:path';
+import { FileStore } from './fileStore.js';
+import { NotionService } from './notionService.js';
+import { getInputInboxPath } from './projectPaths.js';
+
+type FetchResponseLike = {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  text: () => Promise<string>;
+  json: () => Promise<unknown>;
+};
+
+type FetchLike = (input: string, init?: Record<string, unknown>) => Promise<FetchResponseLike>;
+
+export type ExternalConnectorStatus = {
+  notion: {
+    configured: boolean;
+    connected: boolean | null;
+    missing: string[];
+  };
+  figma: {
+    configured: boolean;
+    connected: boolean | null;
+    missing: string[];
+  };
+  webFetch: {
+    configured: boolean;
+    outputRoot: string;
+  };
+  dingtalk: {
+    configured: boolean;
+    importMode: 'manual-export-or-paste';
+    inboxPath: string;
+    localCandidateRoots: string[];
+  };
+};
+
+export type WebFetchArtifact = {
+  id: string;
+  url: string;
+  title: string;
+  sourcePath: string;
+  fetchedAt: string;
+  charCount: number;
+};
+
+export type FigmaInspection = {
+  fileKey: string;
+  name: string;
+  role: string | null;
+  lastModified: string | null;
+  thumbnailUrl: string | null;
+  nodeCount: number;
+};
+
+export type DingTalkMeetingImport = {
+  id: string;
+  sourcePath: string;
+  title: string;
+  importedAt: string;
+  charCount: number;
+};
+
+export class ExternalConnectorService {
+  constructor(
+    private readonly store: FileStore,
+    private readonly notionService = new NotionService(store),
+    private readonly fetchImpl: FetchLike = fetch as unknown as FetchLike,
+  ) {}
+
+  async getStatus(subprojectId?: string | null, options?: { checkRemote?: boolean }): Promise<ExternalConnectorStatus> {
+    const notionConfigured = Boolean(process.env.NOTION_API_KEY);
+    const figmaConfigured = Boolean(process.env.FIGMA_API_KEY);
+    const notionConnected = options?.checkRemote && notionConfigured ? await this.safeNotionConnection() : null;
+
+    return {
+      notion: {
+        configured: notionConfigured,
+        connected: notionConnected,
+        missing: [
+          ...(!process.env.NOTION_API_KEY ? ['NOTION_API_KEY'] : []),
+          ...(!process.env.NOTION_DATABASE_ID ? ['NOTION_DATABASE_ID'] : []),
+        ],
+      },
+      figma: {
+        configured: figmaConfigured,
+        connected: null,
+        missing: figmaConfigured ? [] : ['FIGMA_API_KEY'],
+      },
+      webFetch: {
+        configured: true,
+        outputRoot: getInputInboxPath(subprojectId),
+      },
+      dingtalk: {
+        configured: true,
+        importMode: 'manual-export-or-paste',
+        inboxPath: getInputInboxPath(subprojectId),
+        localCandidateRoots: this.getDingTalkCandidateRoots(),
+      },
+    };
+  }
+
+  async fetchWebPage(input: { url: string; subprojectId?: string | null }): Promise<WebFetchArtifact> {
+    const url = this.normalizeUrl(input.url);
+    const response = await this.fetchImpl(url, {
+      headers: {
+        'User-Agent': process.env.WEB_FETCH_USER_AGENT || 'PMAIOS/0.4 external-connector',
+        Accept: 'text/html,text/plain,application/xhtml+xml',
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`web fetch failed: ${response.status} ${response.statusText}`);
+    }
+
+    const raw = await response.text();
+    const title = this.extractTitle(raw) || new URL(url).hostname;
+    const content = this.htmlToText(raw);
+    const id = `web-fetch-${randomUUID()}`;
+    const sourcePath = `${getInputInboxPath(input.subprojectId)}/${id}.md`;
+    const fetchedAt = new Date().toISOString();
+
+    await this.store.write(
+      sourcePath,
+      [
+        `# ${title}`,
+        '',
+        `- source: web-fetch`,
+        `- url: ${url}`,
+        `- fetchedAt: ${fetchedAt}`,
+        '',
+        '## Content',
+        '',
+        content,
+        '',
+      ].join('\n'),
+    );
+
+    return {
+      id,
+      url,
+      title,
+      sourcePath,
+      fetchedAt,
+      charCount: content.length,
+    };
+  }
+
+  async inspectFigmaFile(input: { fileKey: string }): Promise<FigmaInspection> {
+    const fileKey = input.fileKey.trim();
+    if (!fileKey) {
+      throw new Error('fileKey is required');
+    }
+    if (!process.env.FIGMA_API_KEY) {
+      throw new Error('FIGMA_API_KEY is required');
+    }
+
+    const response = await this.fetchImpl(`https://api.figma.com/v1/files/${encodeURIComponent(fileKey)}?depth=1`, {
+      headers: {
+        'X-Figma-Token': process.env.FIGMA_API_KEY,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`figma inspect failed: ${response.status} ${response.statusText}`);
+    }
+
+    const payload = await response.json();
+    const data = payload && typeof payload === 'object' ? payload as Record<string, unknown> : {};
+    const document = data.document && typeof data.document === 'object' ? data.document as Record<string, unknown> : {};
+    const children = Array.isArray(document.children) ? document.children : [];
+    return {
+      fileKey,
+      name: typeof data.name === 'string' ? data.name : 'Untitled Figma File',
+      role: typeof data.role === 'string' ? data.role : null,
+      lastModified: typeof data.lastModified === 'string' ? data.lastModified : null,
+      thumbnailUrl: typeof data.thumbnailUrl === 'string' ? data.thumbnailUrl : null,
+      nodeCount: children.length,
+    };
+  }
+
+  async importDingTalkMeetingNote(input: {
+    title?: string | null;
+    content: string;
+    subprojectId?: string | null;
+  }): Promise<DingTalkMeetingImport> {
+    const content = input.content.trim();
+    if (!content) {
+      throw new Error('content is required');
+    }
+
+    const id = `dingtalk-meeting-${randomUUID()}`;
+    const title = input.title?.trim() || `DingTalk meeting note ${new Date().toISOString().slice(0, 10)}`;
+    const importedAt = new Date().toISOString();
+    const sourcePath = `${getInputInboxPath(input.subprojectId)}/${id}.md`;
+    await this.store.write(
+      sourcePath,
+      [
+        `# ${title}`,
+        '',
+        `- source: dingtalk-meeting-note`,
+        `- importedAt: ${importedAt}`,
+        '',
+        '## Transcript / Minutes',
+        '',
+        content,
+        '',
+      ].join('\n'),
+    );
+
+    return {
+      id,
+      sourcePath,
+      title,
+      importedAt,
+      charCount: content.length,
+    };
+  }
+
+  private async safeNotionConnection() {
+    try {
+      return await this.notionService.isConnected();
+    } catch {
+      return false;
+    }
+  }
+
+  private normalizeUrl(value: string) {
+    const url = new URL(value.trim());
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('url must start with http or https');
+    }
+    return url.toString();
+  }
+
+  private extractTitle(raw: string) {
+    return raw.match(/<title[^>]*>(.*?)<\/title>/isu)?.[1]?.replace(/\s+/gu, ' ').trim() ?? null;
+  }
+
+  private htmlToText(raw: string) {
+    return raw
+      .replace(/<script[\s\S]*?<\/script>/giu, ' ')
+      .replace(/<style[\s\S]*?<\/style>/giu, ' ')
+      .replace(/<[^>]+>/gu, ' ')
+      .replace(/&nbsp;/giu, ' ')
+      .replace(/&amp;/giu, '&')
+      .replace(/&lt;/giu, '<')
+      .replace(/&gt;/giu, '>')
+      .replace(/\s+/gu, ' ')
+      .trim()
+      .slice(0, 50000);
+  }
+
+  private getDingTalkCandidateRoots() {
+    const home = process.env.USERPROFILE || process.env.HOME || '';
+    return [
+      path.join(home, 'Documents', 'DingTalk'),
+      path.join(home, 'Documents', '钉钉'),
+      path.join(home, 'Downloads'),
+      getInputInboxPath(null),
+    ].filter(Boolean);
+  }
+}

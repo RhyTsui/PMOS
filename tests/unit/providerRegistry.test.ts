@@ -42,10 +42,13 @@ describe('ProviderRegistry', () => {
     const store = new FileStore(path.resolve(process.cwd()));
     const registry = new ProviderRegistry(store);
     const providers = await registry.listProviders();
+    const openaiCompatible = providers.find((provider) => provider.name === 'openai-compatible');
 
     expect(providers.length).toBeGreaterThan(0);
     expect(providers[0]).toHaveProperty('name');
     expect(providers.some((provider) => provider.name === 'mock')).toBe(true);
+    expect(openaiCompatible?.model).toBe('qwen-plus-latest');
+    expect(openaiCompatible?.priority).toBeGreaterThan(0);
   });
 
   it('marks ai-studio ready when canonical env key is present', async () => {
@@ -99,7 +102,7 @@ describe('ProviderRegistry', () => {
       JSON.stringify(
         {
           defaultProvider: 'alt-mock',
-          providers: [{ name: 'alt-mock', type: 'mock', envKey: 'ALT_MOCK_KEY', capabilities: ['text'] }],
+          providers: [{ name: 'alt-mock', type: 'mock', envKey: 'ALT_MOCK_KEY', capabilities: ['text'], priority: 5 }],
         },
         null,
         2,
@@ -117,6 +120,35 @@ describe('ProviderRegistry', () => {
 
     expect(providers).toHaveLength(1);
     expect(providers[0]?.name).toBe('alt-mock');
+    expect(providers[0]?.priority).toBe(5);
     expect(defaultProvider?.name).toBe('alt-mock');
+  });
+
+  it('updates default provider and provider priority in config', async () => {
+    const root = mkdtempSync(path.join(os.tmpdir(), 'ai-os-provider-write-'));
+    const store = new FileStore(root);
+    await store.write(
+      'config/providers.json',
+      JSON.stringify(
+        {
+          defaultProvider: 'openai-compatible',
+          providers: [
+            { name: 'openai-compatible', type: 'openai-compatible', envKey: 'OPENAI_COMPATIBLE_API_KEY', capabilities: ['text'], priority: 100 },
+            { name: 'ai-studio', type: 'ai-studio', envKey: 'GOOGLE_AI_STUDIO_API_KEY', capabilities: ['text'], priority: 90 },
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const registry = new ProviderRegistry(store);
+    await registry.setDefaultProvider('ai-studio');
+    const updatedProvider = await registry.updateProvider('openai-compatible', { priority: 110 });
+    const config = await registry.loadConfig();
+
+    expect(config.defaultProvider).toBe('ai-studio');
+    expect(updatedProvider.priority).toBe(110);
+    expect(config.providers.find((provider) => provider.name === 'openai-compatible')?.priority).toBe(110);
   });
 });

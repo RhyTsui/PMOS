@@ -144,6 +144,15 @@ export const ProductAgentRoleSchema = z.enum([
   'workflow',
   'delivery',
   'retrospective',
+  'industry-research',
+  'user-research',
+  'competitive-analysis',
+  'stakeholder-analysis',
+  'roi-analysis',
+  'strategy',
+  'roadmap-planning',
+  'documentation',
+  'experience-design',
 ]);
 export const ProductAgentLevelSchema = z.enum(['supervisor', 'manager', 'specialist']);
 export const ProductAgentScopeSchema = z.enum(['platform', 'shared', 'subproject']);
@@ -155,7 +164,7 @@ export const CapabilityInvocationStatusSchema = z.enum(['accepted', 'completed',
 export const EvaluationRunStatusSchema = z.enum(['pending', 'running', 'completed', 'failed']);
 export const RequirementCategorySchema = z.enum(['feature', 'bug', 'architecture']);
 export const RequirementStatusSchema = z.enum(['draft', 'active', 'done', 'archived']);
-export const VersionEntityTypeSchema = z.enum(['capability', 'requirement', 'workflow', 'chat']);
+export const VersionEntityTypeSchema = z.enum(['capability', 'requirement', 'workflow', 'chat', 'product-output', 'document-normalization']);
 export const ObservabilitySourceKindSchema = z.enum(['execution', 'workflow']);
 export const ExecutionEventKindSchema = z.enum([
   'run_created',
@@ -412,10 +421,18 @@ export const RequirementSchema = z.object({
   status: RequirementStatusSchema,
   priority: TaskPrioritySchema,
   source: z.object({
-    kind: z.enum(['chat', 'manual']),
+    kind: z.enum(['chat', 'manual', 'document', 'product-output', 'capability', 'workflow', 'version', 'document-normalization']),
     sessionId: z.string().nullable(),
     messageId: z.string().nullable(),
     runId: z.string().nullable(),
+    sourceRef: z
+      .object({
+        entityType: z.string().nullable().default(null),
+        entityId: z.string().nullable().default(null),
+        path: z.string().nullable().default(null),
+        label: z.string().nullable().default(null),
+      })
+      .optional(),
   }),
   trace: z.object({
     relatedRequirementIds: z.array(z.string()),
@@ -426,6 +443,13 @@ export const RequirementSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   metadata: z.record(z.unknown()),
+});
+
+export const VersionApprovalSchema = z.object({
+  approved: z.boolean(),
+  approver: z.string().nullable(),
+  approvedAt: z.string().nullable(),
+  summary: z.string().nullable(),
 });
 
 export const VersionEntrySchema = z.object({
@@ -441,6 +465,10 @@ export const VersionEntrySchema = z.object({
   runId: z.string().nullable(),
   artifactPaths: z.array(z.string()),
   triggeredBy: z.enum(['user', 'agent', 'system', 'webhook']),
+  releaseNotes: z.string().nullable().default(null),
+  diffSummary: z.string().nullable().default(null),
+  rollbackOfVersionEntryId: z.string().nullable().default(null),
+  approval: VersionApprovalSchema.nullable().default(null),
   createdAt: z.string(),
   metadata: z.record(z.unknown()),
 });
@@ -511,6 +539,7 @@ export const WorkflowEventSchema = z.object({
     'stage_started',
     'stage_completed',
     'stage_blocked',
+    'stage_resumed',
     'artifact_written',
     'review_recorded',
     'provider_invoked',
@@ -594,6 +623,9 @@ export const ProviderDefinitionSchema = z.object({
   envKey: z.string(),
   legacyEnvKeys: z.array(z.string()).default([]),
   capabilities: z.array(ProviderCapabilitySchema),
+  model: z.string().optional(),
+  baseUrl: z.string().optional(),
+  priority: z.number().int().default(0),
 });
 
 export const ProviderConfigSchema = z.object({
@@ -608,6 +640,33 @@ export const ProviderSummarySchema = z.object({
   runtimeReady: z.boolean(),
   deprecatedEnvInUse: z.boolean(),
   capabilities: z.array(ProviderCapabilitySchema),
+  model: z.string().nullable().default(null),
+  priority: z.number().int().default(0),
+});
+
+export const ProviderRoutingEntrySchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  configured: z.boolean(),
+  runtimeReady: z.boolean(),
+  deprecatedEnvInUse: z.boolean(),
+  activeEnvKey: z.string().nullable(),
+  capabilities: z.array(ProviderCapabilitySchema),
+  model: z.string().nullable().default(null),
+  baseUrl: z.string().nullable().default(null),
+  priority: z.number().int().default(0),
+  routedCapability: ProviderCapabilitySchema,
+  order: z.number().int().nonnegative(),
+  score: z.number().int(),
+  coolingDown: z.boolean().default(false),
+  cooldownUntil: z.string().nullable().default(null),
+});
+
+export const ProviderRoutingSnapshotSchema = z.object({
+  capability: ProviderCapabilitySchema,
+  preferredProvider: z.string().nullable().default(null),
+  defaultProvider: z.string(),
+  providers: z.array(ProviderRoutingEntrySchema),
 });
 
 export const ProviderExecutionAssetSchema = z.object({
@@ -649,6 +708,7 @@ export const MultimodalArtifactSchema = z.object({
 export const MultimodalExecutionResultSchema = z.object({
   providerName: z.string(),
   providerType: z.string(),
+  model: z.string(),
   requestedCapability: ProviderCapabilitySchema,
   artifactPath: z.string(),
   artifact: MultimodalArtifactSchema,
@@ -679,6 +739,7 @@ export type EvaluationCaseResult = z.infer<typeof EvaluationCaseResultSchema>;
 export type EvaluationRun = z.infer<typeof EvaluationRunSchema>;
 export type CapabilityInvocation = z.infer<typeof CapabilityInvocationSchema>;
 export type Requirement = z.infer<typeof RequirementSchema>;
+export type VersionApproval = z.infer<typeof VersionApprovalSchema>;
 export type VersionEntry = z.infer<typeof VersionEntrySchema>;
 export type ObservabilitySourceKind = z.infer<typeof ObservabilitySourceKindSchema>;
 export type ObservabilityTimelineEntry = z.infer<typeof ObservabilityTimelineEntrySchema>;
@@ -703,6 +764,8 @@ export type ProviderCapability = z.infer<typeof ProviderCapabilitySchema>;
 export type ProviderDefinition = z.infer<typeof ProviderDefinitionSchema>;
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 export type ProviderSummary = z.infer<typeof ProviderSummarySchema>;
+export type ProviderRoutingEntry = z.infer<typeof ProviderRoutingEntrySchema>;
+export type ProviderRoutingSnapshot = z.infer<typeof ProviderRoutingSnapshotSchema>;
 export type ProviderExecutionAsset = z.infer<typeof ProviderExecutionAssetSchema>;
 export type ProviderExecutionResult = z.infer<typeof ProviderExecutionResultSchema>;
 export type MultimodalArtifactBlock = z.infer<typeof MultimodalArtifactBlockSchema>;
@@ -833,3 +896,224 @@ export const ImpactAnalysisResultSchema = z.object({
   requiresFullRerun: z.boolean(),
 });
 export type ImpactAnalysisResult = z.infer<typeof ImpactAnalysisResultSchema>;
+
+export const RetrievalModeSchema = z.enum(['local-only', 'prefer-remote', 'remote-required']);
+export const RetrievalGovernanceSchema = z.object({
+  subprojectId: z.string().nullable(),
+  mode: RetrievalModeSchema,
+  remoteUrl: z.string().nullable(),
+  collectionName: z.string(),
+  topK: z.number().int().positive(),
+  indexingEnabled: z.boolean(),
+  qualityGate: z.object({
+    minChunkCount: z.number().int().nonnegative(),
+    minScore: z.number().min(0).max(1),
+    requireTruthSources: z.boolean(),
+  }),
+  lastIndexedAt: z.string().nullable(),
+  lastIndexedChunkCount: z.number().int().nonnegative(),
+  updatedAt: z.string(),
+});
+export type RetrievalGovernance = z.infer<typeof RetrievalGovernanceSchema>;
+
+export const HermesPolicyCheckSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  status: z.enum(['pass', 'warn', 'fail']),
+  detail: z.string(),
+  evidencePaths: z.array(z.string()).default([]),
+});
+
+export const HermesPolicyEnhancementSchema = z.object({
+  id: z.string(),
+  stageId: z.string().nullable(),
+  priority: TaskPrioritySchema,
+  summary: z.string(),
+  rationale: z.string(),
+});
+
+export const HermesPolicyReportSchema = z.object({
+  id: z.string(),
+  runId: z.string(),
+  subprojectId: z.string().nullable(),
+  generatedAt: z.string(),
+  mode: z.literal('enhance-only'),
+  status: z.enum(['pass', 'warn', 'fail']),
+  checks: z.array(HermesPolicyCheckSchema),
+  enhancements: z.array(HermesPolicyEnhancementSchema),
+  guardrails: z.object({
+    canRoute: z.literal(false),
+    canPlan: z.literal(false),
+    canModifyDag: z.literal(false),
+    canBlockWorkflow: z.literal(false),
+  }),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type HermesPolicyCheck = z.infer<typeof HermesPolicyCheckSchema>;
+export type HermesPolicyEnhancement = z.infer<typeof HermesPolicyEnhancementSchema>;
+export type HermesPolicyReport = z.infer<typeof HermesPolicyReportSchema>;
+
+export const ProductChiefQuestionSchema = z.object({
+  id: z.string(),
+  topic: z.string(),
+  question: z.string(),
+  reason: z.string(),
+  requiredFor: z.array(z.string()).default([]),
+});
+
+export const ProductChiefSpecialistEngagementSchema = z.object({
+  agentId: z.string(),
+  name: z.string(),
+  role: ProductAgentRoleSchema,
+  level: ProductAgentLevelSchema,
+  reason: z.string(),
+});
+
+export const ProductChiefReportSchema = z.object({
+  id: z.string(),
+  subprojectId: z.string().nullable(),
+  brief: z.string(),
+  generatedAt: z.string(),
+  status: z.enum(['draft', 'ready-for-review']),
+  missingQuestions: z.array(ProductChiefQuestionSchema),
+  engagedSpecialists: z.array(ProductChiefSpecialistEngagementSchema),
+  learningGuidance: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    recommendation: z.string(),
+    whyNow: z.string(),
+    templatePath: z.string().nullable(),
+  })),
+  requiredGovernedOutputs: z.array(z.object({
+    type: z.string(),
+    title: z.string(),
+    templatePath: z.string().nullable(),
+    priority: TaskPrioritySchema,
+    reason: z.string(),
+  })),
+  nextActions: z.array(z.string()).default([]),
+  evidencePaths: z.array(z.string()).default([]),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type ProductChiefQuestion = z.infer<typeof ProductChiefQuestionSchema>;
+export type ProductChiefSpecialistEngagement = z.infer<typeof ProductChiefSpecialistEngagementSchema>;
+export type ProductChiefReport = z.infer<typeof ProductChiefReportSchema>;
+
+export const ProductChiefMultiAgentReviewStatusSchema = z.enum(['pass', 'needs-human-decision', 'blocked']);
+
+export const ProductChiefMultiAgentReviewTurnSchema = z.object({
+  agentId: z.string(),
+  agentName: z.string(),
+  role: ProductAgentRoleSchema,
+  position: z.enum(['support', 'concern', 'blocker']),
+  summary: z.string(),
+  evidenceTaskId: z.string().nullable(),
+  artifactPath: z.string().nullable(),
+});
+
+export const ProductChiefMultiAgentReviewConflictSchema = z.object({
+  topic: z.string(),
+  positions: z.array(z.string()),
+  resolution: z.string(),
+  status: z.enum(['resolved', 'needs-human-decision']),
+});
+
+export const ProductChiefMultiAgentReviewStopConditionSchema = z.object({
+  condition: z.string(),
+  satisfied: z.boolean(),
+  detail: z.string(),
+});
+
+export const ProductChiefMultiAgentReviewSchema = z.object({
+  id: z.string(),
+  reportId: z.string(),
+  outputId: z.string(),
+  subprojectId: z.string().nullable(),
+  mode: z.literal('deterministic-multi-agent-review'),
+  status: ProductChiefMultiAgentReviewStatusSchema,
+  startedAt: z.string(),
+  completedAt: z.string(),
+  participantTaskIds: z.array(z.string()).default([]),
+  artifactPath: z.string(),
+  consensus: z.string(),
+  turns: z.array(ProductChiefMultiAgentReviewTurnSchema),
+  conflicts: z.array(ProductChiefMultiAgentReviewConflictSchema),
+  stopConditions: z.array(ProductChiefMultiAgentReviewStopConditionSchema),
+  requirementIds: z.array(z.string()).default([]),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type ProductChiefMultiAgentReviewStatus = z.infer<typeof ProductChiefMultiAgentReviewStatusSchema>;
+export type ProductChiefMultiAgentReviewTurn = z.infer<typeof ProductChiefMultiAgentReviewTurnSchema>;
+export type ProductChiefMultiAgentReviewConflict = z.infer<typeof ProductChiefMultiAgentReviewConflictSchema>;
+export type ProductChiefMultiAgentReviewStopCondition = z.infer<typeof ProductChiefMultiAgentReviewStopConditionSchema>;
+export type ProductChiefMultiAgentReview = z.infer<typeof ProductChiefMultiAgentReviewSchema>;
+
+export const ProductChiefOutputSchema = z.object({
+  id: z.string(),
+  reportId: z.string(),
+  subprojectId: z.string().nullable(),
+  type: z.string(),
+  title: z.string(),
+  status: z.enum(['generated', 'ready-for-review']),
+  artifactPath: z.string(),
+  generatedAt: z.string(),
+  specialistAgentIds: z.array(z.string()).default([]),
+  specialistTaskIds: z.array(z.string()).default([]),
+  specialistTaskArtifactPaths: z.array(z.string()).default([]),
+  multiAgentReviewId: z.string().nullable().default(null),
+  multiAgentReviewStatus: ProductChiefMultiAgentReviewStatusSchema.nullable().default(null),
+  multiAgentReviewArtifactPath: z.string().nullable().default(null),
+  requirementIds: z.array(z.string()).default([]),
+  versionEntryId: z.string().nullable().default(null),
+  templatePath: z.string().nullable(),
+  summary: z.string(),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type ProductChiefOutput = z.infer<typeof ProductChiefOutputSchema>;
+
+export const ProductChiefSpecialistTaskSchema = z.object({
+  id: z.string(),
+  reportId: z.string(),
+  outputId: z.string(),
+  subprojectId: z.string().nullable(),
+  agentId: z.string(),
+  agentName: z.string(),
+  role: ProductAgentRoleSchema,
+  status: z.enum(['completed']),
+  assignedAt: z.string(),
+  completedAt: z.string(),
+  artifactPath: z.string(),
+  outputType: z.string(),
+  outputTitle: z.string(),
+  summary: z.string(),
+  requirementIds: z.array(z.string()).default([]),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type ProductChiefSpecialistTask = z.infer<typeof ProductChiefSpecialistTaskSchema>;
+
+export const DocumentNormalizationSourceSchema = z.object({
+  sourcePath: z.string(),
+  artifactPath: z.string(),
+  requirementId: z.string(),
+  versionEntryId: z.string(),
+  extractedRequirementIds: z.array(z.string()).default([]),
+  documentType: z.string(),
+  suggestedTarget: z.string(),
+  extractedSignals: z.array(z.string()).default([]),
+});
+
+export const DocumentNormalizationRunSchema = z.object({
+  id: z.string(),
+  subprojectId: z.string().nullable(),
+  status: z.enum(['completed', 'empty']),
+  sourceRoot: z.string(),
+  startedAt: z.string(),
+  completedAt: z.string(),
+  normalizedSources: z.array(DocumentNormalizationSourceSchema),
+  requirementIds: z.array(z.string()).default([]),
+  versionEntryIds: z.array(z.string()).default([]),
+  summary: z.string(),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type DocumentNormalizationSource = z.infer<typeof DocumentNormalizationSourceSchema>;
+export type DocumentNormalizationRun = z.infer<typeof DocumentNormalizationRunSchema>;

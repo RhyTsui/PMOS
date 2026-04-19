@@ -116,4 +116,35 @@ export class SubprojectRegistry {
       mcpConfigPath: subproject.overrides.mcpConfigPath ?? null,
     };
   }
+
+  async updateOverrides(
+    subprojectId: string,
+    overrides: {
+      provider?: string | null;
+      providerConfigPath?: string | null;
+      workflow?: string | null;
+      mcpConfigPath?: string | null;
+      skillConfigPath?: string | null;
+    },
+  ): Promise<Subproject> {
+    const subproject = await this.loadSubproject(subprojectId);
+    const nextSubproject: Subproject = {
+      ...subproject,
+      overrides: {
+        provider: overrides.provider !== undefined ? overrides.provider?.trim() || undefined : subproject.overrides.provider,
+        providerConfigPath:
+          overrides.providerConfigPath !== undefined
+            ? overrides.providerConfigPath?.trim() || undefined
+            : subproject.overrides.providerConfigPath,
+        workflow: overrides.workflow !== undefined ? overrides.workflow?.trim() || undefined : subproject.overrides.workflow,
+        mcpConfigPath:
+          overrides.mcpConfigPath !== undefined ? overrides.mcpConfigPath?.trim() || undefined : subproject.overrides.mcpConfigPath,
+        skillConfigPath:
+          overrides.skillConfigPath !== undefined ? overrides.skillConfigPath?.trim() || undefined : subproject.overrides.skillConfigPath,
+      },
+    };
+
+    await this.store.writeJson(getSubprojectManifestPath(subprojectId), nextSubproject);
+    return nextSubproject;
+  }
 }

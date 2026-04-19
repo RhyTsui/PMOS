@@ -1,4 +1,11 @@
 services:
+  chroma:
+    image: ${CHROMA_IMAGE:-docker.m.daocloud.io/chromadb/chroma:latest}
+    ports:
+      - '8000:8000'
+    volumes:
+      - chroma_data:/chroma/chroma
+
   ai-os:
     build:
       context: .
@@ -9,3 +16,9 @@ services:
     environment:
       PORT: 4312
       AI_OS_ROOT: /app
+      CHROMA_URL: http://chroma:8000
+    depends_on:
+      - chroma
+
+volumes:
+  chroma_data:

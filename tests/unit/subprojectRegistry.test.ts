@@ -48,4 +48,21 @@ describe('SubprojectRegistry', () => {
     expect(platform.subprojectId).toBeNull();
     expect(platform.projectRoot).toBe('');
   });
+
+  it('updates subproject provider overrides', async () => {
+    const store = createStore();
+    const registry = new SubprojectRegistry(store);
+
+    await registry.createSubproject({ id: 'crm', name: 'CRM' });
+    const updated = await registry.updateOverrides('crm', {
+      provider: 'ai-studio',
+      providerConfigPath: 'config/providers-crm.json',
+    });
+    const project = await registry.resolveProjectContext('crm');
+
+    expect(updated.overrides.provider).toBe('ai-studio');
+    expect(updated.overrides.providerConfigPath).toBe('config/providers-crm.json');
+    expect(project.selectedProvider).toBe('ai-studio');
+    expect(project.providerConfigPath).toBe('config/providers-crm.json');
+  });
 });

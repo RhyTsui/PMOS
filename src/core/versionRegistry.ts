@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { MemoryService } from './memoryService.js';
-import type { VersionEntry } from '../shared/schemas.js';
+import type { VersionApproval, VersionEntry } from '../shared/schemas.js';
 
 export class VersionRegistry {
   constructor(private readonly memoryService: MemoryService) {}
@@ -21,6 +21,10 @@ export class VersionRegistry {
     runId?: string | null;
     artifactPaths?: string[];
     triggeredBy?: VersionEntry['triggeredBy'];
+    releaseNotes?: string | null;
+    diffSummary?: string | null;
+    rollbackOfVersionEntryId?: string | null;
+    approval?: VersionApproval | null;
     metadata?: Record<string, unknown>;
   }) {
     const entry: VersionEntry = {
@@ -36,6 +40,10 @@ export class VersionRegistry {
       runId: input.runId ?? null,
       artifactPaths: input.artifactPaths ?? [],
       triggeredBy: input.triggeredBy ?? 'system',
+      releaseNotes: input.releaseNotes ?? null,
+      diffSummary: input.diffSummary ?? null,
+      rollbackOfVersionEntryId: input.rollbackOfVersionEntryId ?? null,
+      approval: input.approval ?? null,
       createdAt: new Date().toISOString(),
       metadata: input.metadata ?? {},
     };

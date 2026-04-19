@@ -249,12 +249,25 @@ export class WorkflowEngine {
 
   async hydrateArtifacts(run: WorkflowRun): Promise<Array<Artifact & { content: string }>> {
     const artifacts = await this.listArtifacts(run);
-    return Promise.all(
-      artifacts.map(async (artifact) => ({
-        ...artifact,
-        content: await this.store.read(artifact.path),
-      })),
+    const hydrated = await Promise.all(
+      artifacts.map(async (artifact) => {
+        try {
+          return {
+            ...artifact,
+            content: await this.store.read(artifact.path),
+          };
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+            console.warn(`Skipping missing artifact for run ${run.id}: ${artifact.path}`);
+            return null;
+          }
+
+          throw error;
+        }
+      }),
     );
+
+    return hydrated.filter((artifact): artifact is Artifact & { content: string } => artifact !== null);
   }
 
   async loadEvents(runId: string, subprojectId?: string | null): Promise<WorkflowEvent[]> {

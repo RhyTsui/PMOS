@@ -46,6 +46,7 @@ type NotionSdkPage = {
 };
 
 type NotionDatabaseQuery = (args: Record<string, unknown>) => Promise<{ results: unknown[] }>;
+type NotionUsersMe = (args?: Record<string, unknown>) => Promise<unknown>;
 
 export class NotionService {
   private client: Client;
@@ -79,6 +80,12 @@ export class NotionService {
         await this.client.databases.retrieve({
           database_id: this.config.databaseId,
         });
+      } else {
+        const me = (this.client.users as unknown as { me?: NotionUsersMe }).me;
+        if (!me) {
+          throw new Error('Current Notion client does not expose users.me');
+        }
+        await me({});
       }
       return true;
     } catch {

@@ -10,6 +10,7 @@ import { ReviewCommittee } from './reviewCommittee.js';
 import { SubprojectRegistry } from './subprojectRegistry.js';
 import { EvaluationRunner } from './evaluationRunner.js';
 import { VersionRegistry } from './versionRegistry.js';
+import { getCapabilityEvaluationPath, getEvaluationRunPath } from './projectPaths.js';
 import type {
   CapabilityDefinition,
   CapabilityEvaluation,
@@ -17,7 +18,35 @@ import type {
   CapabilityGateSnapshot,
   CapabilityInvocation,
   CapabilityVersion,
+  EvaluationDataset,
+  EvaluationRun,
+  VersionEntry,
 } from '../shared/schemas.js';
+
+export type EvaluationHistoryItem = {
+  run: EvaluationRun;
+  dataset: EvaluationDataset | null;
+  capability: CapabilityDefinition | null;
+  requirementIds: string[];
+  versionEntryIds: string[];
+  artifactPaths: string[];
+};
+
+export type EvaluationHistory = {
+  filters: {
+    capabilityId: string | null;
+    version: string | null;
+    requirementId: string | null;
+    versionEntryId: string | null;
+  };
+  summary: {
+    runCount: number;
+    capabilityCount: number;
+    requirementCount: number;
+    versionEntryCount: number;
+  };
+  items: EvaluationHistoryItem[];
+};
 
 export class CapabilityRegistry {
   constructor(
@@ -52,6 +81,50 @@ export class CapabilityRegistry {
 
   async listEvaluationRuns(subprojectId?: string | null) {
     return this.evaluationRunner.listRuns(subprojectId);
+  }
+
+  async getEvaluationHistory(input?: {
+    subprojectId?: string | null;
+    capabilityId?: string | null;
+    version?: string | null;
+    requirementId?: string | null;
+    versionEntryId?: string | null;
+  }): Promise<EvaluationHistory> {
+    const subprojectId = input?.subprojectId ?? null;
+    const [runs, datasets, capabilities, requirements, versionEntries] = await Promise.all([
+      this.evaluationRunner.listRuns(subprojectId),
+      this.evaluationRunner.listDatasets(subprojectId),
+      this.memoryService.listCapabilities(subprojectId),
+      this.memoryService.listRequirements(subprojectId),
+      this.memoryService.listVersionEntries(subprojectId),
+    ]);
+    const datasetById = new Map(datasets.map((dataset) => [dataset.id, dataset]));
+    const capabilityById = new Map(capabilities.map((capability) => [capability.id, capability]));
+    const requirementIds = new Set(requirements.map((requirement) => requirement.id));
+    const versionEntryById = new Map(versionEntries.map((entry) => [entry.id, entry]));
+
+    const items = runs
+      .map((run) => this.buildEvaluationHistoryItem(run, datasetById.get(run.datasetId) ?? null, capabilityById.get(run.capabilityId) ?? null, versionEntries))
+      .filter((item) => this.matchesEvaluationHistoryFilters(item, input))
+      .slice(0, 50);
+    const linkedRequirementIds = new Set(items.flatMap((item) => item.requirementIds).filter((id) => requirementIds.has(id)));
+    const linkedVersionEntryIds = new Set(items.flatMap((item) => item.versionEntryIds).filter((id) => versionEntryById.has(id)));
+
+    return {
+      filters: {
+        capabilityId: input?.capabilityId?.trim() || null,
+        version: input?.version?.trim() || null,
+        requirementId: input?.requirementId?.trim() || null,
+        versionEntryId: input?.versionEntryId?.trim() || null,
+      },
+      summary: {
+        runCount: items.length,
+        capabilityCount: new Set(items.map((item) => item.run.capabilityId)).size,
+        requirementCount: linkedRequirementIds.size,
+        versionEntryCount: linkedVersionEntryIds.size,
+      },
+      items,
+    };
   }
 
   async listInvocations(capabilityId: string, subprojectId?: string | null) {
@@ -150,6 +223,7 @@ export class CapabilityRegistry {
       summary: string;
       dimensions?: CapabilityEvaluationDimension[];
       metadata?: Record<string, unknown>;
+      requirementIds?: string[];
       subprojectId?: string | null;
     },
   ) {
@@ -170,6 +244,24 @@ export class CapabilityRegistry {
     };
 
     await this.memoryService.saveCapabilityEvaluation(evaluation);
+    await this.versionRegistry.createEntry({
+      subprojectId: capability.subprojectId,
+      entityType: 'capability',
+      entityId: capability.id,
+      changeType: 'evaluate',
+      summary: `Recorded manual evaluation for ${capability.name}@${input.version}: ${evaluation.summary}`,
+      previousVersion: input.version,
+      newVersion: input.version,
+      requirementIds: input.requirementIds,
+      artifactPaths: [getCapabilityEvaluationPath(evaluation.id, capability.subprojectId)],
+      triggeredBy: 'system',
+      diffSummary: `score ${evaluation.score}; passed ${evaluation.passed}`,
+      metadata: {
+        evaluationId: evaluation.id,
+        evaluator: evaluation.evaluator,
+        evaluationMode: 'manual',
+      },
+    });
     const refreshed = await this.refreshCapabilityVersionGate(capability, input.version, {
       evaluationPassed: input.passed,
     });
@@ -217,6 +309,7 @@ export class CapabilityRegistry {
       version: string;
       evaluator: string;
       subprojectId?: string | null;
+      requirementIds?: string[];
       metadata?: Record<string, unknown>;
     },
   ) {
@@ -232,7 +325,33 @@ export class CapabilityRegistry {
       dataset,
       evaluator: input.evaluator,
       executor: (payload) => this.executeCapability(capability, payload),
-      metadata: input.metadata,
+      metadata: {
+        ...(input.metadata ?? {}),
+        requirementIds: this.cleanList(input.requirementIds),
+      },
+    });
+    await this.versionRegistry.createEntry({
+      subprojectId: capability.subprojectId,
+      entityType: 'capability',
+      entityId: capability.id,
+      changeType: 'evaluate',
+      summary: `Ran dataset evaluation for ${capability.name}@${input.version}: ${result.run.summary ?? result.run.status}`,
+      previousVersion: input.version,
+      newVersion: input.version,
+      requirementIds: input.requirementIds,
+      artifactPaths: [
+        getEvaluationRunPath(result.run.id, capability.subprojectId),
+        getCapabilityEvaluationPath(result.evaluation.id, capability.subprojectId),
+      ],
+      triggeredBy: 'system',
+      diffSummary: `score ${result.run.aggregatedScore ?? 0}; passed ${result.run.passed ?? false}; dataset ${dataset.id}`,
+      metadata: {
+        evaluationRunId: result.run.id,
+        evaluationId: result.evaluation.id,
+        datasetId: dataset.id,
+        evaluator: input.evaluator,
+        evaluationMode: 'dataset',
+      },
     });
     const refreshed = await this.refreshCapabilityVersionGate(capability, input.version, {
       evaluationPassed: result.run.passed ?? false,
@@ -259,9 +378,13 @@ export class CapabilityRegistry {
     },
   ) {
     const capability = await this.loadCapability(capabilityId, input.subprojectId);
+    void input.testsPassed;
+    void input.reviewPassed;
+    const evidenceGate = await this.resolvePublishGateFromEvidence(capability, input.version, input.runId ?? null);
     const refreshed = await this.refreshCapabilityVersionGate(capability, input.version, {
-      testsPassed: input.testsPassed,
-      reviewPassed: input.reviewPassed,
+      testsPassed: evidenceGate.testsPassed,
+      reviewPassed: evidenceGate.reviewPassed,
+      evaluationPassed: evidenceGate.evaluationPassed,
       releaseNotes: input.releaseNotes,
       reviewSummary: input.reviewSummary,
     });
@@ -315,13 +438,27 @@ export class CapabilityRegistry {
       requirementIds: input.requirementIds,
       runId: input.runId,
       triggeredBy: 'system',
+      releaseNotes: input.releaseNotes ?? null,
+      diffSummary: capability.activeVersion ? `publish ${capability.activeVersion} -> ${input.version}` : `publish ${input.version}`,
+      approval: {
+        approved: true,
+        approver: 'review-gate',
+        approvedAt: now,
+        summary: input.reviewSummary ?? null,
+      },
     });
     return updated;
   }
 
   async rollbackCapabilityVersion(
     capabilityId: string,
-    input: { version: string; subprojectId?: string | null; requirementIds?: string[]; runId?: string | null },
+    input: {
+      version: string;
+      subprojectId?: string | null;
+      requirementIds?: string[];
+      runId?: string | null;
+      summary?: string | null;
+    },
   ) {
     const capability = await this.loadCapability(capabilityId, input.subprojectId);
     const target = capability.versions.find((version) => version.version === input.version);
@@ -360,17 +497,28 @@ export class CapabilityRegistry {
     };
 
     await this.memoryService.saveCapability(updated);
+    const previousEntry = (await this.versionRegistry.listEntries(updated.subprojectId))
+      .filter((entry) => entry.entityType === 'capability' && entry.entityId === updated.id && entry.changeType === 'publish')
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0] ?? null;
     await this.versionRegistry.createEntry({
       subprojectId: updated.subprojectId,
       entityType: 'capability',
       entityId: updated.id,
       changeType: 'rollback',
-      summary: `Rolled back capability ${updated.name} to ${input.version}`,
+      summary: input.summary?.trim() || `Rolled back capability ${updated.name} to ${input.version}`,
       previousVersion: capability.activeVersion,
       newVersion: input.version,
       requirementIds: input.requirementIds,
       runId: input.runId,
       triggeredBy: 'system',
+      diffSummary: capability.activeVersion ? `rollback ${capability.activeVersion} -> ${input.version}` : `rollback -> ${input.version}`,
+      rollbackOfVersionEntryId: previousEntry?.id ?? null,
+      approval: {
+        approved: true,
+        approver: 'rollback-operator',
+        approvedAt: now,
+        summary: input.summary?.trim() || null,
+      },
     });
     return updated;
   }
@@ -498,6 +646,29 @@ export class CapabilityRegistry {
     return updated;
   }
 
+  private async resolvePublishGateFromEvidence(capability: CapabilityDefinition, version: string, runId: string | null) {
+    const latestEvaluation = await this.findLatestEvaluation(capability.id, version, capability.subprojectId);
+    const reviewPassed = runId ? await this.resolveReviewPassedFromRun(runId, capability.subprojectId) : false;
+    return {
+      testsPassed: latestEvaluation?.passed ?? false,
+      reviewPassed,
+      evaluationPassed: latestEvaluation?.passed ?? false,
+    };
+  }
+
+  private async resolveReviewPassedFromRun(runId: string, subprojectId?: string | null) {
+    const run = await this.orchestratorRuntime.loadRun(runId, subprojectId);
+    const artifacts = await this.workflowEngine.hydrateArtifacts(run);
+    const openSourceEvidence = this.reviewCommittee.inspectOpenSourceEvidence(artifacts);
+    const review = this.reviewCommittee.buildReportForRun({
+      runId,
+      artifactCount: artifacts.length,
+      openSourceEvaluationPresent: openSourceEvidence.present,
+      openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+    });
+    return !review.gate.blocked;
+  }
+
   private async findLatestEvaluation(capabilityId: string, version: string, subprojectId?: string | null) {
     const latestRun = await this.evaluationRunner.findLatestRun(capabilityId, version, subprojectId);
     if (latestRun) {
@@ -513,6 +684,70 @@ export class CapabilityRegistry {
     return evaluations
       .filter((evaluation) => evaluation.capabilityId === capabilityId && evaluation.version === version)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
+  }
+
+  private buildEvaluationHistoryItem(
+    run: EvaluationRun,
+    dataset: EvaluationDataset | null,
+    capability: CapabilityDefinition | null,
+    versionEntries: VersionEntry[],
+  ): EvaluationHistoryItem {
+    const runRequirementIds = this.extractStringArray(run.metadata.requirementIds);
+    const datasetRequirementIds = dataset ? this.extractStringArray(dataset.metadata.requirementIds) : [];
+    const capabilityVersionEntries = versionEntries.filter((entry) => {
+      if (entry.entityType !== 'capability' || entry.entityId !== run.capabilityId) {
+        return false;
+      }
+      if (entry.metadata.evaluationRunId === run.id || entry.metadata.datasetId === run.datasetId) {
+        return true;
+      }
+      return entry.previousVersion === run.version || entry.newVersion === run.version;
+    });
+    const requirementIds = [
+      ...runRequirementIds,
+      ...datasetRequirementIds,
+      ...capabilityVersionEntries.flatMap((entry) => entry.requirementIds),
+    ];
+    return {
+      run,
+      dataset,
+      capability,
+      requirementIds: [...new Set(requirementIds)],
+      versionEntryIds: capabilityVersionEntries.map((entry) => entry.id),
+      artifactPaths: [...new Set(capabilityVersionEntries.flatMap((entry) => entry.artifactPaths))],
+    };
+  }
+
+  private matchesEvaluationHistoryFilters(
+    item: EvaluationHistoryItem,
+    input?: {
+      capabilityId?: string | null;
+      version?: string | null;
+      requirementId?: string | null;
+      versionEntryId?: string | null;
+    },
+  ) {
+    const capabilityId = input?.capabilityId?.trim();
+    const version = input?.version?.trim();
+    const requirementId = input?.requirementId?.trim();
+    const versionEntryId = input?.versionEntryId?.trim();
+    if (capabilityId && item.run.capabilityId !== capabilityId) {
+      return false;
+    }
+    if (version && item.run.version !== version) {
+      return false;
+    }
+    if (requirementId && !item.requirementIds.includes(requirementId)) {
+      return false;
+    }
+    if (versionEntryId && !item.versionEntryIds.includes(versionEntryId)) {
+      return false;
+    }
+    return true;
+  }
+
+  private extractStringArray(value: unknown) {
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0) : [];
   }
 
   private buildGateSnapshot(
@@ -584,9 +819,31 @@ export class CapabilityRegistry {
     });
 
     if (payload.mode === 'run-until-blocked') {
-      const updated = await this.orchestratorRuntime.runUntilBlocked(run.id, {
-        reviewReport: this.reviewCommittee.buildReportForRun({ runId: run.id, artifactCount: 6 }),
-      });
+      let updated = run;
+      while (updated.status === 'running' && updated.currentStageId && updated.currentStageId !== 'review-metrics-telemetry') {
+        updated = await this.orchestratorRuntime.advanceRun(updated.id);
+      }
+
+      if (updated.status === 'running' && updated.currentStageId === 'review-metrics-telemetry') {
+        const events = await this.orchestratorRuntime.loadEvents(updated.id, capability.subprojectId);
+        const artifactCount = events.filter((event) => event.kind === 'artifact_written').length;
+        const artifacts = await this.workflowEngine.hydrateArtifacts(updated);
+        const openSourceEvidence = this.reviewCommittee.inspectOpenSourceEvidence(artifacts);
+
+        updated = await this.orchestratorRuntime.advanceRun(updated.id, {
+          reviewReport: this.reviewCommittee.buildReportForRun({
+            runId: updated.id,
+            artifactCount,
+            openSourceEvaluationPresent: openSourceEvidence.present,
+            openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+          }),
+        });
+      }
+
+      if (updated.status === 'running' && updated.currentStageId) {
+        updated = await this.orchestratorRuntime.runUntilBlocked(updated.id);
+      }
+
       return {
         type: 'workflow',
         run: updated,

@@ -54,8 +54,8 @@ export function getGlobalRulesPath() {
   return 'docs/memory/global-rules.md';
 }
 
-export function getInputInboxPath() {
-  return 'docs/sources/inbox';
+export function getInputInboxPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/sources/inbox');
 }
 
 export function getProductAgentBlueprintRegistryPath() {
@@ -168,6 +168,94 @@ export function getVersionEntryDirectoryPath(subprojectId?: string | null) {
 
 export function getVersionEntryPath(versionId: string, subprojectId?: string | null) {
   return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/versions/${versionId}.json`);
+}
+
+export function getDagGraphPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/dag/graph.json');
+}
+
+export function getDagRunDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/dag/runs');
+}
+
+export function getDagRunPath(runId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/dag/runs/${runId}.json`);
+}
+
+export function getDagChangeEventDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/dag/change-events');
+}
+
+export function getDagChangeEventPath(eventId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/dag/change-events/${eventId}.json`);
+}
+
+export function getRetrievalGovernancePath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/retrieval/governance.json');
+}
+
+export function getHermesPolicyReportDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/hermes/reports');
+}
+
+export function getHermesPolicyReportPath(runId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/hermes/reports/${runId}.json`);
+}
+
+export function getProductChiefReportDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/product-chief/reports');
+}
+
+export function getProductChiefReportPath(reportId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/product-chief/reports/${reportId}.json`);
+}
+
+export function getProductChiefOutputDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/product-chief/outputs');
+}
+
+export function getProductChiefOutputPath(outputId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/product-chief/outputs/${outputId}.json`);
+}
+
+export function getProductChiefOutputArtifactPath(outputId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/outputs/${outputId}.md`);
+}
+
+export function getProductChiefSpecialistTaskDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/product-chief/specialist-tasks');
+}
+
+export function getProductChiefSpecialistTaskPath(taskId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/product-chief/specialist-tasks/${taskId}.json`);
+}
+
+export function getProductChiefSpecialistTaskArtifactPath(taskId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/specialist-tasks/${taskId}.md`);
+}
+
+export function getProductChiefMultiAgentReviewDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/product-chief/multi-agent-reviews');
+}
+
+export function getProductChiefMultiAgentReviewPath(reviewId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/product-chief/multi-agent-reviews/${reviewId}.json`);
+}
+
+export function getProductChiefMultiAgentReviewArtifactPath(reviewId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/multi-agent-reviews/${reviewId}.md`);
+}
+
+export function getDocumentNormalizationRunDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/document-normalization/runs');
+}
+
+export function getDocumentNormalizationRunPath(runId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/document-normalization/runs/${runId}.json`);
+}
+
+export function getDocumentNormalizationArtifactPath(runId: string, sourceSlug: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/document-normalization/${runId}-${sourceSlug}.md`);
 }
 
 export function createPlatformProjectContext(): ProjectContext {

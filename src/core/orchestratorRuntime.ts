@@ -460,6 +460,177 @@ export class OrchestratorRuntime {
     return run;
   }
 
+  async resumeRun(
+    runId: string,
+    options?: {
+      targetStageId?: string | null;
+      reason?: string | null;
+    },
+  ) {
+    const run = await this.memoryService.loadRunSnapshot(runId);
+    const resumedAt = new Date().toISOString();
+    const targetStageId = options?.targetStageId ?? run.rework?.targetStageId ?? run.currentStageId;
+
+    if (!targetStageId) {
+      return run;
+    }
+
+    const targetIndex = run.stages.findIndex((stage) => stage.id === targetStageId);
+    if (targetIndex === -1) {
+      throw new Error(`stage ${targetStageId} not found for run ${runId}`);
+    }
+
+    const targetStage = run.stages[targetIndex];
+    run.stages[targetIndex] = {
+      ...targetStage,
+      status: 'active',
+      blockedReason: null,
+      startedAt: targetStage.startedAt ?? resumedAt,
+      attemptCount: targetStage.attemptCount + 1,
+      metadata: {
+        ...targetStage.metadata,
+        manualResumeAt: resumedAt,
+        manualResumeReason: options?.reason ?? null,
+      },
+    };
+    this.syncTaskForStage(run, targetStageId, {
+      status: 'active',
+      blockedReason: null,
+      metadata: {
+        manualResumeAt: resumedAt,
+        manualResumeReason: options?.reason ?? null,
+      },
+    });
+
+    run.currentStageId = targetStageId;
+    run.status = 'running';
+    run.activeCapability = run.stages[targetIndex].capability;
+    run.executionSummary = `${run.stages[targetIndex].label} 已人工恢复推进。`;
+    run.updatedAt = resumedAt;
+    if (run.rework?.targetStageId === targetStageId) {
+      run.rework = null;
+    }
+
+    await this.memoryService.appendEvent(
+      runId,
+      {
+        id: `${runId}-${targetStageId}-resumed`,
+        runId,
+        stageId: targetStageId,
+        kind: 'stage_resumed',
+        status: 'ok',
+        timestamp: resumedAt,
+        detail: `${run.stages[targetIndex].label} 已人工恢复推进。`,
+        artifactPath: null,
+        metadata: {
+          reason: options?.reason ?? null,
+        },
+      },
+      run.subprojectId,
+    );
+
+    await this.memoryService.saveRunSnapshot(runId, run);
+    return run;
+  }
+
+  async applyManualGateDecision(
+    runId: string,
+    input: {
+      decision: 'approve' | 'rework';
+      summary: string;
+      targetStageId?: string | null;
+    },
+  ) {
+    const run = await this.memoryService.loadRunSnapshot(runId);
+    const now = new Date().toISOString();
+
+    if (input.decision === 'approve') {
+      await this.memoryService.appendEvent(
+        runId,
+        {
+          id: `${runId}-manual-gate-${now.replace(/[-:.TZ]/gu, '').slice(0, 14)}`,
+          runId,
+          stageId: run.currentStageId ?? 'manual-gate',
+          kind: 'review_recorded',
+          status: 'ok',
+          timestamp: now,
+          detail: `人工 gate 决策：approve。${input.summary}`,
+          artifactPath: null,
+          metadata: {
+            source: 'manual-gate',
+          },
+        },
+        run.subprojectId,
+      );
+      return this.resumeRun(runId, {
+        targetStageId: input.targetStageId ?? run.currentStageId,
+        reason: input.summary,
+      });
+    }
+
+    const activeStageId = input.targetStageId ?? run.currentStageId ?? run.stages[0]?.id ?? null;
+    if (!activeStageId) {
+      return run;
+    }
+
+    const targetIndex = run.stages.findIndex((stage) => stage.id === activeStageId);
+    if (targetIndex === -1) {
+      throw new Error(`stage ${activeStageId} not found for run ${runId}`);
+    }
+
+    const targetStage = run.stages[targetIndex];
+    run.stages[targetIndex] = {
+      ...targetStage,
+      status: 'blocked',
+      blockedReason: input.summary,
+      metadata: {
+        ...targetStage.metadata,
+        manualGateBlockedAt: now,
+      },
+    };
+    this.syncTaskForStage(run, activeStageId, {
+      status: 'blocked',
+      blockedReason: input.summary,
+      metadata: {
+        manualGateBlockedAt: now,
+      },
+    });
+
+    run.currentStageId = activeStageId;
+    run.status = 'needs-rework';
+    run.reworkCount += 1;
+    run.activeCapability = run.stages[targetIndex].capability;
+    run.rework = {
+      sourceStageId: run.currentStageId ?? activeStageId,
+      targetStageId: activeStageId,
+      reason: input.summary,
+      triggeredAt: now,
+    };
+    run.executionSummary = `人工 gate 要求返工：${run.stages[targetIndex].label}`;
+    run.updatedAt = now;
+
+    await this.memoryService.appendEvent(
+      runId,
+      {
+        id: `${runId}-${activeStageId}-manual-rework`,
+        runId,
+        stageId: activeStageId,
+        kind: 'stage_blocked',
+        status: 'warning',
+        timestamp: now,
+        detail: `人工 gate 决策：rework。${input.summary}`,
+        artifactPath: null,
+        metadata: {
+          source: 'manual-gate',
+        },
+      },
+      run.subprojectId,
+    );
+
+    await this.memoryService.saveRunSnapshot(runId, run);
+    return run;
+  }
+
   private createStageRun(stage: WorkflowStageDefinition, isFirstStage: boolean, now: string): WorkflowStageRun {
     return {
       id: stage.id,
@@ -615,6 +786,10 @@ export class OrchestratorRuntime {
   private findNextRunnableStage(run: WorkflowRun, activeIndex: number, now: string) {
     for (let index = activeIndex + 1; index < run.stages.length; index += 1) {
       const candidate = run.stages[index];
+      if (candidate.status === 'completed' && typeof run.metadata.activeDagRunId === 'string') {
+        continue;
+      }
+
       const dependenciesReady = candidate.dependsOn.every((dependencyId) =>
         run.stages.some((stage) => stage.id === dependencyId && stage.status === 'completed'),
       );

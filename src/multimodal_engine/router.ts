@@ -37,6 +37,7 @@ export class MultimodalRouter {
     return {
       providerName: provider.name,
       providerType: provider.type,
+      model: provider.model ?? 'default-model',
       requestedCapability: request.capability,
       artifactPath: relativePath,
       artifact,

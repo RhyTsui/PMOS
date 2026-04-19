@@ -14,9 +14,10 @@ PMAIOS is a file-driven local AI operating system for software delivery. It keep
 ## Current Delivery Status
 
 - TypeScript frontend and backend build successfully.
-- Vitest suite passes: `15` files, `56` tests.
+- Vitest suite passes: `15` files, `57` tests.
 - Backend can serve the built frontend from the same port in production mode.
 - Chroma now falls back to in-memory collections when the remote server is unavailable.
+- Review gates now block runs that skip an open-source-first / build-vs-buy assessment.
 
 ## Local Development
 
@@ -38,6 +39,8 @@ Run the dev stack:
 ```bash
 npm run dev
 ```
+
+This starts only the active PMAIOS frontend and backend runtime. The legacy API entrypoint remains available via `npm run dev:api` and `npm run start:legacy-api` when you explicitly need it.
 
 Default dev URLs:
 
@@ -127,7 +130,16 @@ curl http://localhost:4312/api/health
 - `infra/`: infrastructure manifests
 - `tests/`: unit and integration tests
 
+## Operations Docs
+
+- `docs/operations/local-runbook.md`: local startup and smoke-check steps
+- `docs/operations/release-summary.md`: current delivery and verification summary
+- `docs/operations/module-roadmap.md`: module ownership, priorities, and recommended completion order
+- `docs/operations/ai-product-office-roadmap.md`: target operating model for the Virtual Product Chief and specialist product agents
+
 ## Notes
 
 - `src/server/index.ts` is an older API surface kept in the repo, but the active runtime entrypoint used by `npm start`, `npm run dev:backend`, and the production build is `src/backend/server.ts`.
 - Chroma remote mode is optional. If `http://localhost:8000` is unavailable, the project continues with in-memory vector collections for local testing.
+- The frontend review inspector now surfaces review gate status, blocking stage, and issue details for the selected run.
+- `docs/templates/` now includes AI-first product output templates for intelligence briefs, roadmap/version docs, manuals, demos, learning guidance, ecosystem scans, and UI schema specs.

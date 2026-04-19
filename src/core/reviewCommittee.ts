@@ -1,89 +1,165 @@
 import type { CommitteeReport } from '../shared/schemas.js';
 
+type ReviewArtifact = {
+  path: string;
+  content: string;
+};
+
+type ReviewCommitteeInput = {
+  runId: string;
+  artifactCount: number;
+  openSourceEvaluationPresent?: boolean;
+  openSourceEvidencePaths?: string[];
+};
+
+type CommitteeIssue = CommitteeReport['roles'][number]['issues'][number];
+
 export class ReviewCommittee {
-  buildReportForRun(input: { runId: string; artifactCount: number }): CommitteeReport {
-    const hasEnoughArtifacts = input.artifactCount >= 5;
-    const gateDecision = hasEnoughArtifacts ? 'pass' : 'conditional';
-    const gateBlocked = !hasEnoughArtifacts;
+  inspectOpenSourceEvidence(artifacts: ReviewArtifact[]) {
+    const evidencePatterns = [
+      /open source first/iu,
+      /open-source-first/iu,
+      /build[- ]vs[- ]buy/iu,
+      /buy before build/iu,
+      /existing solution/iu,
+      /mature open source/iu,
+      /现成方案/u,
+      /开源优先/u,
+      /优先评估开源/u,
+    ];
+
+    const evidencePaths = artifacts
+      .filter((artifact) => evidencePatterns.some((pattern) => pattern.test(artifact.content)))
+      .map((artifact) => artifact.path);
 
     return {
-      overallConclusion: hasEnoughArtifacts
-        ? '当前运行实例已经形成跨阶段产物，允许继续进入下一轮升级验收。'
-        : '当前运行实例产物仍不足，评审要求先补足前序阶段产物并返工后再继续推进。',
-      nextStage: hasEnoughArtifacts,
-      reworkRequired: !hasEnoughArtifacts,
-      gate: {
-        decision: gateDecision,
-        blocked: gateBlocked,
-        issueCount: hasEnoughArtifacts ? 1 : 2,
-        blockingStageId: gateBlocked ? 'operations-surface' : null,
+      present: evidencePaths.length > 0,
+      evidencePaths,
+    };
+  }
+
+  buildReportForRun(input: ReviewCommitteeInput): CommitteeReport {
+    const hasEnoughArtifacts = input.artifactCount >= 5;
+    const hasOpenSourceEvaluation = input.openSourceEvaluationPresent ?? true;
+    const openSourceEvidencePaths = input.openSourceEvidencePaths ?? [];
+    const gateBlocked = !hasEnoughArtifacts || !hasOpenSourceEvaluation;
+    const blockingStageId = !hasEnoughArtifacts
+      ? 'operations-surface'
+      : !hasOpenSourceEvaluation
+        ? 'core-definition-baseline'
+        : null;
+
+    const architectureIssues: CommitteeIssue[] = [
+      {
+        title: 'Architecture artifacts captured for review',
+        description: `runId=${input.runId} produced ${input.artifactCount} reviewable artifacts.`,
+        impact: 'The review has enough implementation context to assess scope, interfaces, and release readiness.',
+        recommendation: 'Keep the design, runtime, and release artifacts linked to the same run for traceability.',
+        expectedAnswer: 'The artifact set remains attached to the same workflow run and can be audited later.',
+        decision: 'Pass' as const,
       },
-      roles: [
-        {
-          role: '架构评审',
-          summary: hasEnoughArtifacts
-            ? '通过：阶段产物已覆盖主要链路，结构化运行状态可继续复用。'
-            : '需返工：runtime 已形成骨架，但仍需补足更多阶段产物后再进入下一阶段。',
-          issues: [
-            {
-              title: '运行实例与文档真源已接通',
-              description: `runId=${input.runId} 已使用真实 run state 与事件日志。`,
-              impact: '为后续 task loop、CLI 与多阶段扩展提供了稳定基础。',
-              recommendation: hasEnoughArtifacts ? '继续扩展每阶段的真实产物模板与 review gate。' : '先补齐前序阶段产物，再重新触发评审。',
-              expectedAnswer: '每个阶段至少生成一个真实产物并被 run state 索引。',
-              decision: 'Pass',
-            },
-          ],
-        },
-        {
-          role: '产品评审',
-          summary: hasEnoughArtifacts
-            ? '通过：当前阶段闭环已经能展示从初始化到阶段产物沉淀的最小链路。'
-            : '需返工：已具备最小闭环，但必须补充更多阶段可视化结果。',
-          issues: hasEnoughArtifacts
-            ? []
-            : [
-                {
-                  title: '产物数量仍偏少',
-                  description: '当前运行实例的阶段产物尚未覆盖足够多的工作流阶段。',
-                  impact: '用户在 dashboard 上看到的阶段闭环仍不完整。',
-                  recommendation: '先补足 API / CLI / Frontend 操作面与前序内核阶段产物，再重新进入评审。',
-                  expectedAnswer: '至少完成前 6 个阶段并生成对应文件。',
-                  decision: 'Conditional',
-                },
-              ],
-        },
-        {
-          role: '技术评审',
-          summary: '通过：后端 API 已切换到 run-based query/command 模型。',
-          issues: [],
-        },
-        {
-          role: '数据评审',
-          summary: hasEnoughArtifacts
-            ? '条件通过：已有 run/event/metrics 基线，可继续补充更多粒度指标。'
-            : '需返工：已有 run/event/metrics 基线，但当前阶段数据仍不足以支撑完整验收。',
-          issues: [
-            {
-              title: 'Telemetry 仍以运行基线为主',
-              description: '当前已记录 run 初始化、阶段开始/完成、产物写入与 review 事件。',
-              impact: hasEnoughArtifacts ? '足以支撑 MVP，但对失败原因与耗时的分析仍有限。' : '在返工前可以定位基础状态，但对失败原因与耗时的分析仍有限。',
-              recommendation: '下一轮补充失败原因、耗时和 provider 维度。',
-              expectedAnswer: '为关键阶段增加更细粒度的 telemetry schema。',
-              decision: 'Conditional',
-            },
-          ],
-        },
-        {
-          role: '风险评审',
-          summary: '通过：仍然保持本地文件驱动与环境变量注入边界。',
-          issues: [],
-        },
-      ],
-      summary: hasEnoughArtifacts
-        ? '评审通过：主链路产物已覆盖主要阶段，可继续进入升级验收。'
-        : '评审有条件通过：需要回到操作面阶段补足产物，再继续推进。',
-      recommendedReworkStageId: gateBlocked ? 'operations-surface' : null,
+    ];
+
+    if (!hasOpenSourceEvaluation) {
+      architectureIssues.push({
+        title: 'Missing open-source-first evaluation',
+        description:
+          'The current run does not record a build-vs-buy decision or a recommendation of mature open-source tooling.',
+        impact: 'The team could hand-roll code prematurely and create avoidable maintenance and delivery risk.',
+        recommendation:
+          'Add an explicit open-source-first assessment that compares existing tools, integration boundaries, and reasons to self-build.',
+        expectedAnswer:
+          'The artifacts should name the preferred external toolchain or explain why license, cost, security, performance, or integration constraints force custom code.',
+        decision: 'Conditional' as const,
+      });
+    } else if (openSourceEvidencePaths.length > 0) {
+      architectureIssues.push({
+        title: 'Open-source-first evaluation recorded',
+        description: `Evidence found in ${openSourceEvidencePaths.join(', ')}.`,
+        impact: 'Build-vs-buy reasoning is visible during review and can be reused in future iterations.',
+        recommendation: 'Keep the recommendation current when architecture or deployment constraints change.',
+        expectedAnswer: 'The preferred toolchain and the fallback self-build boundary remain explicit in the artifacts.',
+        decision: 'Pass' as const,
+      });
+    }
+
+    const operationsIssues: CommitteeIssue[] = hasEnoughArtifacts
+      ? []
+      : [
+          {
+            title: 'Operations surface artifacts are incomplete',
+            description:
+              'The run does not yet expose enough artifacts for API, CLI, frontend, and runtime verification.',
+            impact: 'The review cannot validate the operator surface or decide whether the release is ready to ship.',
+            recommendation:
+              'Finish the missing runtime and operator-facing outputs before resubmitting the review.',
+            expectedAnswer: 'At least five reviewable artifacts should exist before the review gate is evaluated again.',
+            decision: 'Conditional' as const,
+          },
+        ];
+
+    const telemetryIssues: CommitteeIssue[] = [
+      {
+        title: 'Telemetry trail remains available',
+        description: 'Run, review, and stage telemetry can be correlated back to the workflow execution.',
+        impact: 'The release can be audited and reworked without losing the review context.',
+        recommendation: 'Keep review decisions attached to metrics, events, and generated artifacts.',
+        expectedAnswer: 'The workflow run should retain a durable review summary and linked event history.',
+        decision: 'Pass' as const,
+      },
+    ];
+
+    const roles = [
+      {
+        role: 'Architecture Review',
+        summary: hasOpenSourceEvaluation
+          ? 'Architecture review has both implementation context and build-vs-buy evidence.'
+          : 'Architecture review is blocked until an open-source-first evaluation is documented.',
+        issues: architectureIssues,
+      },
+      {
+        role: 'Operations Review',
+        summary: hasEnoughArtifacts
+          ? 'Operator-facing surfaces expose enough artifacts for release review.'
+          : 'Operator-facing surfaces are incomplete and need more artifacts before release review can pass.',
+        issues: operationsIssues,
+      },
+      {
+        role: 'Workflow Runtime',
+        summary: 'Workflow orchestration remains traceable through a run-based review flow.',
+        issues: [],
+      },
+      {
+        role: 'Telemetry Review',
+        summary: 'Telemetry and review traces remain linked to the workflow run for audit and rework.',
+        issues: telemetryIssues,
+      },
+      {
+        role: 'Capability Review',
+        summary: 'Capability and release governance can reuse this report as a single review checkpoint.',
+        issues: [],
+      },
+    ];
+
+    const issueCount = roles.reduce((count, role) => count + role.issues.length, 0);
+
+    return {
+      overallConclusion: gateBlocked
+        ? '评审未通过，需要补齐门禁证据后再进入后续阶段。'
+        : '评审通过，可以进入后续阶段。',
+      nextStage: !gateBlocked,
+      reworkRequired: gateBlocked,
+      gate: {
+        decision: gateBlocked ? 'conditional' : 'pass',
+        blocked: gateBlocked,
+        issueCount,
+        blockingStageId,
+      },
+      roles,
+      summary: gateBlocked
+        ? '评审未通过：请先补齐产物覆盖和开源优先评估。'
+        : '评审通过：产物覆盖和开源优先评估均已具备。',
+      recommendedReworkStageId: blockingStageId,
     };
   }
 }

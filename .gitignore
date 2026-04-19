@@ -9,6 +9,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.codex*.log
 .DS_Store
 .vite/
 .claude/
@@ -27,4 +28,5 @@ docs/memory/run-log.json
 **/*.pyc
 **/*.egg-info/
 ~$*.docx
+docs/sources/inbox/*.xlsx
 subprojects/knowledge-base/WeKnora/

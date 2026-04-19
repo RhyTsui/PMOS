@@ -327,4 +327,46 @@ describe('WorkflowEngine', () => {
     expect(reviewStage?.status).toBe('completed');
     expect(targetStage?.status).toBe('blocked');
   });
+
+  it('supports manual gate decisions and blocked run resume', async () => {
+    const store = createStore();
+    await seedRuntimeFixture(store);
+
+    const memoryService = new MemoryService(store);
+    const engine = new WorkflowEngine(store, memoryService);
+    const runtime = new OrchestratorRuntime(store, memoryService);
+    const definition = await engine.loadDefinition();
+    const subprojectRegistry = new SubprojectRegistry(store);
+    const project = await subprojectRegistry.resolveProjectContext();
+
+    const run = await runtime.initRun({
+      definition,
+      project,
+      providerCount: 1,
+      mcpServerCount: 1,
+    });
+
+    const completed = await runtime.runUntilBlocked(run.id);
+    expect(completed.status).toBe('completed');
+
+    const reworked = await runtime.applyManualGateDecision(completed.id, {
+      decision: 'rework',
+      summary: 'Need operator rework on operations surface',
+      targetStageId: 'operations-surface',
+    });
+    expect(reworked.status).toBe('needs-rework');
+    expect(reworked.rework?.targetStageId).toBe('operations-surface');
+
+    const resumed = await runtime.resumeRun(reworked.id, {
+      targetStageId: 'operations-surface',
+      reason: 'Operator fixed provider config offline',
+    });
+    const resumedStage = resumed.stages.find((stage) => stage.id === 'operations-surface');
+    const events = await engine.loadEvents(resumed.id);
+
+    expect(resumed.status).toBe('running');
+    expect(resumed.currentStageId).toBe('operations-surface');
+    expect(resumedStage?.status).toBe('active');
+    expect(events.some((event) => event.kind === 'stage_resumed')).toBe(true);
+  });
 });

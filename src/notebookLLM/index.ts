@@ -15,7 +15,9 @@ import type { Collection } from 'chromadb';
 import { ChromaService, LocalEmbeddingService } from '../chroma/index.js';
 import { FileStore } from '../core/fileStore.js';
 import { MemoryService } from '../core/memoryService.js';
+import { RetrievalGovernanceService } from '../core/retrievalGovernanceService.js';
 import type { ResolvedProvider } from '../core/providerRegistry.js';
+import type { RetrievalGovernance } from '../shared/schemas.js';
 
 export type NotebookDocument = {
   id: string;
@@ -67,6 +69,8 @@ export type NotebookConfig = {
 export class NotebookLLMService {
   private chromaService: ChromaService;
   private embeddingService: LocalEmbeddingService;
+  private retrievalSettings: RetrievalGovernance | null = null;
+  private readonly retrievalGovernanceService: RetrievalGovernanceService;
   private collections: Map<string, Collection> = new Map();
 
   constructor(
@@ -76,13 +80,20 @@ export class NotebookLLMService {
   ) {
     this.chromaService = new ChromaService(store, memoryService);
     this.embeddingService = new LocalEmbeddingService();
+    this.retrievalGovernanceService = new RetrievalGovernanceService(store, memoryService);
   }
 
   /**
    * 初始化服务
    */
   async initialize(): Promise<void> {
+    const settings = await this.getRetrievalSettings();
+    this.chromaService = new ChromaService(this.store, this.memoryService, {
+      path: settings.remoteUrl ?? undefined,
+      localOnly: settings.mode === 'local-only',
+    });
     await this.chromaService.initialize();
+    this.enforceRemotePolicy(settings);
     await this.embeddingService.initialize();
   }
 
@@ -183,13 +194,16 @@ export class NotebookLLMService {
       generateAnswer?: boolean;
     },
   ): Promise<NotebookQueryResult> {
-    const topK = options?.topK ?? 5;
+    const settings = await this.getRetrievalSettings();
+    this.enforceRemotePolicy(settings);
+    const topK = options?.topK ?? settings.topK;
 
     // 从向量库检索相关片段
-    const results = await this.chromaService.search(`notebook-${notebookId}`, {
+    const rawResults = await this.chromaService.search(`notebook-${notebookId}`, {
       query: question,
       topK,
     });
+    const results = this.filterByGovernance(rawResults, settings);
 
     const sources = results.map((result, index) => ({
       documentId: result.metadata.documentId as string || `doc-${index}`,
@@ -279,15 +293,18 @@ ${question}
    * 生成笔记摘要
    */
   async generateSummary(notebookId: string): Promise<string> {
+    const settings = await this.getRetrievalSettings();
+    this.enforceRemotePolicy(settings);
     const collection = await this.chromaService.getOrCreateCollection(`notebook-${notebookId}`);
     const count = await collection.count();
 
     // 获取所有文档的摘要
     const sampleQuery = '总结这个笔记本的主要内容';
-    const results = await this.chromaService.search(`notebook-${notebookId}`, {
+    const rawResults = await this.chromaService.search(`notebook-${notebookId}`, {
       query: sampleQuery,
-      topK: 3,
+      topK: Math.min(settings.topK, 3),
     });
+    const results = this.filterByGovernance(rawResults, settings);
 
     const context = results.map(r => r.content).join('\n\n');
 
@@ -304,11 +321,14 @@ ${context}
    * 生成大纲
    */
   async generateOutline(notebookId: string): Promise<string> {
+    const settings = await this.getRetrievalSettings();
+    this.enforceRemotePolicy(settings);
     // 获取所有文档标题
-    const results = await this.chromaService.search(`notebook-${notebookId}`, {
+    const rawResults = await this.chromaService.search(`notebook-${notebookId}`, {
       query: '文档标题 主题',
-      topK: 20,
+      topK: Math.max(settings.topK, 20),
     });
+    const results = this.filterByGovernance(rawResults, settings);
 
     const titles = [...new Set(results.map(r => r.metadata.documentTitle as string).filter(Boolean))];
 
@@ -391,6 +411,23 @@ ${context}
   async deleteNotebook(notebookId: string): Promise<void> {
     await this.chromaService.clearCollection(`notebook-${notebookId}`);
     await this.store.delete(`notebooks/${notebookId}.json`);
+  }
+
+  private async getRetrievalSettings() {
+    if (!this.retrievalSettings) {
+      this.retrievalSettings = await this.retrievalGovernanceService.load(null);
+    }
+    return this.retrievalSettings;
+  }
+
+  private enforceRemotePolicy(settings: RetrievalGovernance) {
+    if (settings.mode === 'remote-required' && !this.chromaService.isRemoteAvailable()) {
+      throw new Error(`remote retrieval is required but unavailable: ${settings.remoteUrl ?? 'default Chroma URL'}`);
+    }
+  }
+
+  private filterByGovernance<T extends { score: number }>(results: T[], settings: RetrievalGovernance) {
+    return results.filter((result) => result.score >= settings.qualityGate.minScore);
   }
 }
 

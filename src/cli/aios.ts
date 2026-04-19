@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'dotenv/config';
 import path from 'node:path';
 import { FileStore } from '../core/fileStore.js';
 import { WorkflowEngine } from '../core/workflowEngine.js';
@@ -9,6 +10,7 @@ import { McpRegistry } from '../core/mcpRegistry.js';
 import { ReviewCommittee } from '../core/reviewCommittee.js';
 import { SubprojectRegistry } from '../core/subprojectRegistry.js';
 import { ProductAgentService } from '../core/productAgentService.js';
+import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
 const store = new FileStore(rootDir);
@@ -20,6 +22,7 @@ const mcpRegistry = new McpRegistry(store);
 const reviewCommittee = new ReviewCommittee();
 const subprojectRegistry = new SubprojectRegistry(store);
 const productAgentService = new ProductAgentService(store);
+const documentationNormalizationService = new DocumentationNormalizationService(store, memoryService);
 
 function normalizeSubprojectId(value?: string) {
   return value?.trim() ? value.trim() : null;
@@ -61,9 +64,17 @@ async function ensureCurrentRun(subprojectId?: string | null) {
 }
 
 async function buildReviewForRun(runId: string, subprojectId?: string | null) {
+  const run = await orchestratorRuntime.loadRun(runId, subprojectId);
   const events = await orchestratorRuntime.loadEvents(runId, subprojectId);
   const artifactCount = events.filter((event) => event.kind === 'artifact_written').length;
-  return reviewCommittee.buildReportForRun({ runId, artifactCount });
+  const artifacts = await workflowEngine.hydrateArtifacts(run);
+  const openSourceEvidence = reviewCommittee.inspectOpenSourceEvidence(artifacts);
+  return reviewCommittee.buildReportForRun({
+    runId,
+    artifactCount,
+    openSourceEvaluationPresent: openSourceEvidence.present,
+    openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+  });
 }
 
 function printUsage() {
@@ -78,6 +89,8 @@ function printUsage() {
     '  npm run cli -- run init [--subproject <id>]',
     '  npm run cli -- run advance [runId] [--subproject <id>]',
     '  npm run cli -- run until-blocked [runId] [--subproject <id>]',
+    '  npm run cli -- run resume [runId] [stageId] [--subproject <id>]',
+    '  npm run cli -- run gate [runId] <approve|rework> <summary> [targetStageId] [--subproject <id>]',
     '  npm run cli -- run status [runId] [--subproject <id>]',
     '  npm run cli -- run events [runId] [--subproject <id>]',
     '  npm run cli -- run artifacts [runId] [--subproject <id>]',
@@ -90,6 +103,8 @@ function printUsage() {
     '  npm run cli -- product-agent create <name> <summary> <problem> [--subproject <id>]',
     '  npm run cli -- product-agent generate <brief> [name] [--subproject <id>]',
     '  npm run cli -- product-agent show <id> [--subproject <id>]',
+    '  npm run cli -- documentation normalize [sourceRoot] [--subproject <id>]',
+    '  npm run cli -- documentation runs [--subproject <id>]',
     '  npm run cli -- review show [runId] [--subproject <id>]',
     '  npm run cli -- memory show [runId] [--subproject <id>]',
   ].join('\n'));
@@ -126,6 +141,38 @@ async function runUntilBlocked(runId?: string, subprojectId?: string | null) {
   }
 
   console.log(JSON.stringify(run, null, 2));
+}
+
+async function runResume(runId?: string, targetStageId?: string, subprojectId?: string | null) {
+  const targetRun = runId ? await orchestratorRuntime.loadRun(runId, subprojectId) : await ensureCurrentRun(subprojectId);
+  const resumed = await orchestratorRuntime.resumeRun(targetRun.id, {
+    targetStageId: normalizeSubprojectId(targetStageId),
+    reason: 'cli manual resume',
+  });
+  console.log(JSON.stringify(resumed, null, 2));
+}
+
+async function runGate(
+  runId?: string,
+  decision?: string,
+  summary?: string,
+  targetStageId?: string,
+  subprojectId?: string | null,
+) {
+  if (!decision || !['approve', 'rework'].includes(decision)) {
+    throw new Error('run gate 需要 decision=approve|rework。');
+  }
+  if (!summary) {
+    throw new Error('run gate 需要 summary。');
+  }
+
+  const targetRun = runId ? await orchestratorRuntime.loadRun(runId, subprojectId) : await ensureCurrentRun(subprojectId);
+  const updated = await orchestratorRuntime.applyManualGateDecision(targetRun.id, {
+    decision: decision as 'approve' | 'rework',
+    summary,
+    targetStageId: normalizeSubprojectId(targetStageId),
+  });
+  console.log(JSON.stringify(updated, null, 2));
 }
 
 async function runStatus(runId?: string, subprojectId?: string | null) {
@@ -247,6 +294,9 @@ async function providerCheck(name?: string, subprojectId?: string | null) {
         deprecatedEnvInUse: provider.deprecatedEnvInUse,
         activeEnvKey: provider.activeEnvKey,
         capabilities: provider.capabilities,
+        model: provider.model ?? null,
+        baseUrl: provider.baseUrl ?? null,
+        priority: provider.priority,
       },
       null,
       2,
@@ -301,6 +351,18 @@ async function productAgentShow(agentId?: string, subprojectId?: string | null) 
   }
 
   console.log(JSON.stringify(await productAgentService.loadAgent(agentId, subprojectId), null, 2));
+}
+
+async function documentationNormalize(sourceRoot?: string, subprojectId?: string | null) {
+  const run = await documentationNormalizationService.normalize({
+    subprojectId,
+    sourceRoot: sourceRoot?.trim() || null,
+  });
+  console.log(JSON.stringify(run, null, 2));
+}
+
+async function documentationRuns(subprojectId?: string | null) {
+  console.log(JSON.stringify(await documentationNormalizationService.listRuns(subprojectId), null, 2));
 }
 
 async function subprojectList() {
@@ -392,6 +454,16 @@ async function main() {
     return;
   }
 
+  if (scope === 'run' && action === 'resume') {
+    await runResume(target, extraName, subprojectId);
+    return;
+  }
+
+  if (scope === 'run' && action === 'gate') {
+    await runGate(target, extraName, extraDescription, positional[5], subprojectId);
+    return;
+  }
+
   if (scope === 'run' && action === 'status') {
     await runStatus(target, subprojectId);
     return;
@@ -449,6 +521,16 @@ async function main() {
 
   if (scope === 'product-agent' && action === 'show') {
     await productAgentShow(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'normalize') {
+    await documentationNormalize(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'runs') {
+    await documentationRuns(subprojectId);
     return;
   }
 

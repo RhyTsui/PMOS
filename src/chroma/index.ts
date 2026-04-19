@@ -6,6 +6,7 @@ export type ChromaConfig = {
   path?: string;
   tenant?: string;
   database?: string;
+  localOnly?: boolean;
 };
 
 export type DocumentChunk = {
@@ -167,8 +168,16 @@ export class ChromaService {
   }
 
   async initialize(): Promise<void> {
+    if (this.config.localOnly) {
+      this.client = null;
+      return;
+    }
+
+    const remoteUrl = new URL(this.config.path || 'http://localhost:8000');
     this.client = new ChromaClient({
-      path: this.config.path || 'http://localhost:8000',
+      ssl: remoteUrl.protocol === 'https:',
+      host: remoteUrl.hostname,
+      port: Number(remoteUrl.port || (remoteUrl.protocol === 'https:' ? 443 : 80)),
       tenant: this.config.tenant || 'default_tenant',
       database: this.config.database || 'default_database',
     });
@@ -180,6 +189,10 @@ export class ChromaService {
       console.warn('[ChromaDB] unavailable, continuing without remote storage', error);
       this.client = null;
     }
+  }
+
+  isRemoteAvailable(): boolean {
+    return this.client !== null;
   }
 
   async getOrCreateCollection(name: string): Promise<VectorCollection> {
@@ -207,21 +220,45 @@ export class ChromaService {
 
   async addDocuments(collectionName: string, documents: DocumentChunk[]): Promise<void> {
     const collection = await this.getOrCreateCollection(collectionName);
-    await collection.add({
+    const payload = {
       ids: documents.map((document) => document.id),
       documents: documents.map((document) => document.content),
       metadatas: documents.map((document) => document.metadata),
-    });
+    };
+    try {
+      await collection.add(payload);
+    } catch (error) {
+      if (!this.shouldFallbackToLocalCollection(error)) {
+        throw error;
+      }
+      console.warn(`[ChromaDB] remote collection ${collectionName} cannot embed locally, falling back to in-memory collection`);
+      const localCollection = this.useLocalCollection(collectionName);
+      await localCollection.add(payload);
+    }
   }
 
   async search(collectionName: string, query: SearchQuery): Promise<SearchResult[]> {
     const collection = await this.getOrCreateCollection(collectionName);
-    const results = await collection.query({
-      queryTexts: [query.query],
-      nResults: query.topK || 5,
-      where: query.filter,
-      include: ['documents', 'metadatas', 'distances'],
-    });
+    let results: QueryResponse;
+    try {
+      results = await collection.query({
+        queryTexts: [query.query],
+        nResults: query.topK || 5,
+        where: query.filter,
+        include: ['documents', 'metadatas', 'distances'],
+      });
+    } catch (error) {
+      if (!this.shouldFallbackToLocalCollection(error)) {
+        throw error;
+      }
+      console.warn(`[ChromaDB] remote collection ${collectionName} cannot query without embeddings, falling back to in-memory collection`);
+      const localCollection = this.useLocalCollection(collectionName);
+      results = await localCollection.query({
+        queryTexts: [query.query],
+        nResults: query.topK || 5,
+        where: query.filter,
+      });
+    }
 
     if (!results.documents || !results.documents[0]) {
       return [];
@@ -242,8 +279,19 @@ export class ChromaService {
       }));
   }
 
-  async indexProjectDocuments(subprojectId?: string | null): Promise<number> {
-    const collectionName = subprojectId ? `project-${subprojectId}` : 'platform';
+  private useLocalCollection(name: string) {
+    const collection = new MemoryCollection();
+    this.collections.set(name, collection);
+    return collection;
+  }
+
+  private shouldFallbackToLocalCollection(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return /No embedding function found|DefaultEmbeddingFunction|embedding function/iu.test(message);
+  }
+
+  async indexProjectDocuments(subprojectId?: string | null, targetCollectionName?: string): Promise<number> {
+    const collectionName = targetCollectionName ?? (subprojectId ? `project-${subprojectId}` : 'platform');
     await this.getOrCreateCollection(collectionName);
 
     const contextDocs = await this.memoryService.loadContextDocuments(subprojectId);

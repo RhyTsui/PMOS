@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\" \"npm:dev:api\"",
+    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:full": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\" \"npm:dev:api\"",
     "dev:backend": "tsx watch src/backend/server.ts",
     "dev:frontend": "vite",
     "dev:api": "tsx watch src/server/index.ts",

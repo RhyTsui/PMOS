@@ -1,35 +1,76 @@
 # Human PM Invocation Guide
 
-## 目标
+## Goal
 
-帮助人类产品经理稳定调用各个虚拟产品经理。
+Use this guide when the human product owner wants the AI Product Office to take over the digital work and only ask for missing physical-world information.
 
-## 先判断要找谁
+## Default Operating Assumption
 
-- 需求识别 / 入池：虚拟需求产品经理
-- 版本规划 / 升级差距：虚拟版本产品经理
-- 评审 / 阻塞 / 返工：虚拟评审产品经理
-- 流程设计 / handoff / 检查：虚拟流程产品经理
-- 研发任务包 / 验收条件：虚拟研发协同产品经理
-- 复盘 / 回流：虚拟复盘产品经理
+The AI should do the work by default:
 
-## 标准调用格式
+- structure the request
+- identify missing real-world constraints
+- choose the right specialist product agents
+- generate governed outputs
+- connect outputs to requirements, versions, reviews, and runs
+- recommend learning methods, frameworks, and cognitive upgrades when they would improve future decisions
+- scan for adjacent open-source systems, public product patterns, and reusable operating models before inventing from scratch
+- convert suitable business requests into schema-driven UI or reusable component guidance
 
-### 1. 背景
-- 项目：
-- 当前阶段：
-- 想解决的问题：
+The human should mainly provide:
 
-### 2. 输入源
-- 输入文档：
-- 是否只是草稿：
-- 是否已有当前决策：
+- physical-world facts
+- organizational constraints
+- meeting outcomes
+- final approval on major business decisions
 
-### 3. 期待输出
-- 需要什么产物：
-- 输出是否要进入需求池 / 版本库 / 决策候选：
+## When The AI Should Ask Questions
 
-### 4. 约束
-- 时间要求：
-- 风险边界：
-- 是否需要产品主管确认：
+The AI should ask when one of these is unclear:
+
+- decision authority
+- real team capacity
+- external dependencies
+- timeline expectations
+- organizational sensitivity
+- missing real-world facts that cannot be inferred safely
+
+## Preferred Question Types
+
+- role boundary
+- available resources
+- blocked resources
+- timing or milestone expectation
+- whether a change can actually be pushed through the organization
+- whether offline validation is possible
+- whether the human needs a decision framework, study plan, or external benchmark before making the call
+
+## Expected Output Pattern
+
+For a significant product request, the AI should return:
+
+1. current understanding
+2. missing physical-world questions
+3. specialist agents to engage
+4. governed outputs to generate or update
+5. learning or cognition suggestions if needed
+6. reusable external patterns or open-source options if relevant
+7. schema-driven UI or business-block implications if relevant
+8. next-step recommendation
+
+## Example Output Types
+
+- daily intelligence report
+- weekly product brief
+- quarterly OKR draft
+- special research report
+- requirement evaluation feedback
+- roadmap
+- version planning document
+- user manual
+- demo script
+- competitive intelligence report
+- solution analysis sync note
+- learning and cognition upgrade memo
+- ecosystem and open-source landscape scan
+- UI schema spec

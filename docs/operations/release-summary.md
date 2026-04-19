@@ -4,6 +4,12 @@
 
 This delivery closes the PMAIOS local runtime loop across frontend, backend, CLI, workflow runtime, memory persistence, capabilities, and release-facing documentation.
 
+## Related Docs
+
+- `docs/operations/local-runbook.md`
+- `docs/operations/module-roadmap.md`
+- `docs/operations/ai-product-office-roadmap.md`
+
 ## What Changed
 
 - Fixed repository-wide TypeScript breaks and restored `lint` to green.
@@ -13,6 +19,8 @@ This delivery closes the PMAIOS local runtime loop across frontend, backend, CLI
 - Enabled the backend to serve the built frontend in production mode from the same port.
 - Aligned `Dockerfile`, `docker-compose.yml`, `.env.example`, `README.md`, and the local runbook with the real runtime entrypoints.
 - Corrected `npm start` to use the built backend production entrypoint.
+- Added an executable open-source-first review gate that blocks runs missing build-vs-buy evidence.
+- Wired the frontend run inspector to display review gate decisions, blocking stage, and issue details.
 
 ## Verification
 
@@ -27,7 +35,7 @@ npm run build
 Observed results:
 
 - `15` test files passed
-- `56` tests passed
+- `57` tests passed
 - frontend production assets emitted under `dist/`
 - backend build emitted under `dist/backend/`
 - smoke check passed for:

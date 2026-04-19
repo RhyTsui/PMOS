@@ -221,6 +221,32 @@ export class ChatService {
       });
     }
 
+    await this.memoryService.appendExecutionEvent(run.id, {
+      id: `${run.id}-provider-resolution`,
+      runId: run.id,
+      sessionId,
+      subprojectId: effectiveSubprojectId,
+      kind: providerResult.resolution.status === 'success' ? 'provider_succeeded' : 'provider_failed',
+      status: providerResult.resolution.status === 'success' ? 'ok' : 'warning',
+      timestamp: new Date().toISOString(),
+      detail:
+        providerResult.resolution.status === 'success'
+          ? `Assistant reply resolved by ${providerResult.resolution.providerName} / ${providerResult.resolution.model}.`
+          : `Assistant reply used fallback after ${providerResult.resolution.providerName} / ${providerResult.resolution.model} failed.`,
+      messageId: triggerMessage.id,
+      artifactPath: null,
+      workflowRunId: latestWorkflowRunId,
+      metadata: {
+        source: 'provider',
+        finalResolution: true,
+        providerName: providerResult.resolution.providerName,
+        providerType: providerResult.resolution.providerType,
+        model: providerResult.resolution.model,
+        usedFallbackReply: providerResult.resolution.usedFallbackReply,
+        error: providerResult.resolution.error,
+      },
+    });
+
     const assistantMessage: ChatMessage = {
       id: `msg-${randomUUID()}`,
       sessionId,
@@ -392,7 +418,18 @@ export class ChatService {
     messages: ChatMessage[];
     triggerMessage: ChatMessage;
     subprojectId: string | null;
-  }): Promise<{ content: string; events: Array<Pick<ExecutionEvent, 'kind' | 'status' | 'detail' | 'artifactPath'>> }> {
+  }): Promise<{
+    content: string;
+    events: Array<Pick<ExecutionEvent, 'kind' | 'status' | 'detail' | 'artifactPath'>>;
+    resolution: {
+      providerName: string;
+      providerType: string;
+      model: string;
+      status: 'success' | 'error';
+      usedFallbackReply: boolean;
+      error: string | null;
+    };
+  }> {
     const project = await this.subprojectRegistry.resolveProjectContext(input.subprojectId);
     if (this.shouldUseMultimodal(input.triggerMessage.content)) {
       const result = await this.multimodalRouter.execute(
@@ -424,6 +461,14 @@ export class ChatService {
             artifactPath: result.artifactPath,
           },
         ],
+        resolution: {
+          providerName: result.providerName,
+          providerType: result.providerType,
+          model: result.model,
+          status: 'success',
+          usedFallbackReply: false,
+          error: null,
+        },
       };
     }
 
@@ -446,12 +491,28 @@ export class ChatService {
       return {
         content: execution.result.outputText,
         events: execution.events.map((event) => ({ ...event, artifactPath: null })),
+        resolution: {
+          providerName: execution.result.providerName,
+          providerType: execution.result.providerType,
+          model: execution.result.model,
+          status: 'success',
+          usedFallbackReply: false,
+          error: null,
+        },
       };
     }
 
     return {
       content: this.buildFallbackReply(project, input.triggerMessage.content, execution.result.error ?? 'provider returned empty response'),
       events: execution.events.map((event) => ({ ...event, artifactPath: null })),
+      resolution: {
+        providerName: execution.result.providerName,
+        providerType: execution.result.providerType,
+        model: execution.result.model,
+        status: 'error',
+        usedFallbackReply: true,
+        error: execution.result.error ?? 'provider returned empty response',
+      },
     };
   }
 

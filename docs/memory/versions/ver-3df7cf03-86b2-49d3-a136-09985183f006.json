@@ -1,0 +1,35 @@
+{
+  "id": "ver-3df7cf03-86b2-49d3-a136-09985183f006",
+  "subprojectId": null,
+  "entityType": "document-normalization",
+  "entityId": "docnorm-3372fdba-685a-487e-8897-8c479ebe3f88",
+  "changeType": "normalize",
+  "summary": "Normalized historical document source docs/sources/inbox/README.md.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-036c68ad-cc1f-4ca1-ba1a-a779927012b4"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/README.md",
+    "docs/product-office/document-normalization/docnorm-3372fdba-685a-487e-8897-8c479ebe3f88-docs-sources-inbox-readme.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Created governed normalization artifact docs/product-office/document-normalization/docnorm-3372fdba-685a-487e-8897-8c479ebe3f88-docs-sources-inbox-readme.md.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Normalization artifact is ready for human review before moving source material."
+  },
+  "createdAt": "2026-04-19T00:44:44.033Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/README.md",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/sources/historical/README.md",
+    "documentType": "historical-source"
+  }
+}

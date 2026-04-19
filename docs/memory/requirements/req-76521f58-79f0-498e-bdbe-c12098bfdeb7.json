@@ -1,0 +1,35 @@
+{
+  "id": "req-76521f58-79f0-498e-bdbe-c12098bfdeb7",
+  "subprojectId": null,
+  "title": "Normalize historical document: 周报-产品组-徐韵-0417.xlsx",
+  "description": "Normalize historical source into the governed PMAIOS taxonomy.\n\nSource: docs/sources/inbox/周报-产品组-徐韵-0417.xlsx\nSuggested target: docs/context/weekly/周报-产品组-徐韵-0417.xlsx\nDocument type: product-intelligence",
+  "category": "architecture",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "manual",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-86609d2d-315f-4afd-9bd7-13c88b96b9dc"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/周报-产品组-徐韵-0417.xlsx",
+      "docs/product-office/document-normalization/docnorm-3372fdba-685a-487e-8897-8c479ebe3f88-docs-sources-inbox-0417.md"
+    ]
+  },
+  "createdAt": "2026-04-19T00:44:44.035Z",
+  "updatedAt": "2026-04-19T00:44:44.037Z",
+  "metadata": {
+    "source": "documentation-normalization",
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0417.xlsx",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/context/weekly/周报-产品组-徐韵-0417.xlsx",
+    "documentType": "product-intelligence"
+  }
+}

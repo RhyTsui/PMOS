@@ -25,15 +25,15 @@ export class AnthropicProviderAdapter implements ModelProvider {
 
   async execute(request: ModelProviderRequest): Promise<ProviderExecutionResult> {
     if (!this.provider.apiKey) {
-      return this.buildErrorResult(request, `未检测到 ${this.provider.envKey}。`);
+      return this.buildErrorResult(request, `Missing ${this.provider.envKey}.`);
     }
 
     if (!['text', 'code', 'review'].includes(request.capability)) {
-      return this.buildErrorResult(request, `Anthropic runtime 暂未执行 ${request.capability}。`);
+      return this.buildErrorResult(request, `Anthropic runtime does not implement ${request.capability}.`);
     }
 
-    const baseUrl = (process.env.ANTHROPIC_BASE_URL?.trim() || 'https://api.anthropic.com').replace(/\/$/, '');
-    const model = 'claude-sonnet-4-6';
+    const baseUrl = this.getBaseUrl();
+    const model = this.getModel();
 
     try {
       const response = await fetch(`${baseUrl}/v1/messages`, {
@@ -53,11 +53,8 @@ export class AnthropicProviderAdapter implements ModelProvider {
 
       const payload = (await response.json().catch(() => null)) as AnthropicMessagesResponse | null;
       if (!response.ok) {
-        return this.buildErrorResult(
-          request,
-          payload?.error?.message ?? `Anthropic 请求失败 (${response.status})`,
-          payload?.model ?? model,
-        );
+        const errorMessage = payload?.error?.message?.trim() || `Anthropic request failed (${response.status}).`;
+        return this.buildErrorResult(request, `${errorMessage} [status=${response.status}]`, payload?.model ?? model);
       }
 
       const outputText = payload?.content
@@ -85,18 +82,30 @@ export class AnthropicProviderAdapter implements ModelProvider {
             ]
           : [],
         warning: null,
-        error: outputText ? null : 'Anthropic 返回成功，但没有可提取文本。',
+        error: outputText ? null : 'Anthropic returned successfully but no text could be extracted.',
       };
     } catch (error) {
       return this.buildErrorResult(
         request,
-        error instanceof Error ? error.message : 'Anthropic 调用发生未知错误。',
+        error instanceof Error ? error.message : 'Unknown Anthropic provider error.',
         model,
       );
     }
   }
 
-  private buildErrorResult(request: ModelProviderRequest, error: string, model = 'claude-sonnet-4-6'): ProviderExecutionResult {
+  private getBaseUrl() {
+    return (this.provider.baseUrl?.trim() || process.env.ANTHROPIC_BASE_URL?.trim() || 'https://api.anthropic.com').replace(/\/$/, '');
+  }
+
+  private getModel() {
+    return this.provider.model?.trim() || 'claude-sonnet-4-6';
+  }
+
+  private buildErrorResult(
+    request: ModelProviderRequest,
+    error: string,
+    model = this.getModel(),
+  ): ProviderExecutionResult {
     return {
       providerName: this.provider.name,
       providerType: this.provider.type,
@@ -107,7 +116,7 @@ export class AnthropicProviderAdapter implements ModelProvider {
       outputText: null,
       assets: [],
       warning: this.provider.deprecatedEnvInUse
-        ? `当前使用旧环境变量 ${this.provider.legacyEnvKeys[0] ?? 'unknown'}，请迁移到 ${this.provider.envKey}。`
+        ? `Legacy env key detected for ${this.provider.name}; migrate to ${this.provider.envKey}.`
         : null,
       error,
     };

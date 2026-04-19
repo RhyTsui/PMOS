@@ -1,31 +1,41 @@
 # Execution Rules
 
 ## Principles
-- 文件真源优先于内嵌常量与临时状态
-- 内核闭环优先于单点演示能力
-- 显式契约优先于隐式约定
-- 人类可读与机器可消费并存
-- 平台能力与子项目作用域严格分离
 
-## v0.6 release-system scope
-- 本轮先完成 PMAIOS 闭环发布系统，不把 MCP/业务子项目混入顶层基线定义
-- 现阶段继续采用本地 file-based persistence，逐步增强 requirement、version、trace、gate 与 observability
-- LangGraph / Hermes / Dify / n8n / Meta Layer 仍只保留迁移位与接入边界
+- PMAIOS executes as a file-driven, repository-native workflow system.
+- Every stage must produce traceable outputs, not just conversational summaries.
+- Workflow runs must remain observable, reviewable, and resumable.
+- The active `v0.6` baseline is a closed-loop release system, not a loose demo workflow.
 
-## Execution guards
-- 高风险外部写入动作仍需显式审批
-- Provider 密钥只能来自环境变量
-- Workflow 状态必须持久化到文件或 API 可见数据
-- Review gate 必须可阻塞、可返工、可恢复推进
-- Telemetry 只记录本地 workflow 事件与指标，不扩展为外部追踪系统
+## v0.6 Scope
 
-## Gate / rework rules
-- 任一阶段若存在依赖未满足，不得激活下一阶段
-- Review 中任何 `Reject` 都会阻止继续推进
-- `Conditional` 必须对应问题跟踪、缓解说明与返工摘要
-- `needs-rework` 状态恢复后必须保留原有 trace 与 gate 历史
+- The active baseline covers: `Execution + Requirement + Version + Observability + Governance`.
+- File-based persistence remains the default storage model for local operation.
+- LangGraph, Hermes, Dify, n8n, and Meta Layer are not assumed to be the active control plane unless explicitly integrated into the current runtime.
 
-## Trace / telemetry scope
-- 记录阶段开始、阶段完成、阶段阻塞、返工恢复、产物写入、评审记录、provider 调用事件
-- 记录阶段数、完成数、阻塞数、返工数、产物数、评审问题数等指标
-- 首版以本地统一 schema 为准，允许后续增加耗时、失败原因、依赖命中与 capability 维度
+## Execution Guards
+
+- Stage outputs must be written to repository files.
+- Provider failures must be surfaced as explicit blocked states or warnings, not hidden in free-form logs.
+- Review gates must be able to stop progression and trigger rework.
+- Telemetry must preserve stage events, provider events, artifacts, and review decisions.
+
+## Gate And Rework Rules
+
+- A stage cannot be considered complete if required outputs are missing.
+- `Reject` blocks downstream progress.
+- `Conditional` requires explicit follow-up or bounded rework.
+- `needs-rework` must preserve trace, gate rationale, and recovery target stage.
+
+## Trace And Telemetry Scope
+
+- Runs must preserve workflow state, event logs, artifact paths, and provider execution signals.
+- Review, metrics, and observability are first-class runtime outputs.
+- Capability, requirement, and version links should be visible through traceable records rather than implicit assumptions.
+
+## Open-source-first Rule
+
+- Before implementation, first evaluate mature open-source tools, open-source components, or managed services that already solve the problem.
+- Do not default to handwritten bespoke code for common infrastructure, workflow plumbing, integrations, dashboards, or operator tooling.
+- Custom implementation is allowed only when existing options clearly fail on license, cost, maintainability, integration boundary, performance, or security requirements.
+- If a ready-made solution is rejected, the reason and build-vs-buy comparison must be recorded as part of the delivery decision.

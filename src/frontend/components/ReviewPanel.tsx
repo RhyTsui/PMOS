@@ -1,39 +1,72 @@
 import type { CommitteeReport } from '../../shared/schemas';
 
 type Props = {
-  report: CommitteeReport;
+  report: CommitteeReport | null;
 };
 
+function toIssueTone(decision: 'Pass' | 'Conditional' | 'Reject') {
+  switch (decision) {
+    case 'Reject':
+      return 'error';
+    case 'Conditional':
+      return 'warning';
+    default:
+      return 'ok';
+  }
+}
+
 export function ReviewPanel({ report }: Props) {
+  if (!report) {
+    return (
+      <section className="inspector-panel">
+        <h3>Review Gate</h3>
+        <div className="inspector-empty">No review report is available for the selected run yet.</div>
+      </section>
+    );
+  }
+
   return (
-    <div className="review-panel">
-      <div className="review-summary">
-        <strong>{report.overallConclusion}</strong>
-        <span>进入下一阶段：{report.nextStage ? '是' : '否'}</span>
-        <span>是否返工：{report.reworkRequired ? '需要' : '不需要'}</span>
+    <section className="inspector-panel">
+      <h3>Review Gate</h3>
+      <article className={`trace-event trace-event--${report.gate.blocked ? 'warning' : 'ok'}`}>
+        <div className="trace-event__kind">{report.gate.decision}</div>
+        <div className="trace-event__detail">{report.overallConclusion}</div>
+        <div className="trace-event__meta">
+          next stage: {report.nextStage ? 'allowed' : 'blocked'} / rework: {report.reworkRequired ? 'required' : 'not required'}
+        </div>
+        <div className="trace-event__meta">
+          blocking stage: {report.gate.blockingStageId ?? '-'} / issue count: {report.gate.issueCount}
+        </div>
+        {report.summary ? <div className="trace-event__artifact">{report.summary}</div> : null}
+      </article>
+
+      <div className="trace-list">
+        {report.roles.map((role) => (
+          <article key={role.role} className="trace-event">
+            <div className="trace-event__kind">{role.role}</div>
+            <div className="trace-event__detail">{role.summary}</div>
+            {role.issues.length === 0 ? (
+              <div className="trace-event__meta">No issues recorded for this review role.</div>
+            ) : (
+              <div className="review-issues">
+                {role.issues.map((issue) => (
+                  <div
+                    key={`${role.role}-${issue.title}`}
+                    className={`trace-event trace-event--${toIssueTone(issue.decision)}`}
+                  >
+                    <div className="trace-event__kind">{issue.decision}</div>
+                    <div className="trace-event__detail">{issue.title}</div>
+                    <div className="trace-event__meta">{issue.description}</div>
+                    <div className="trace-event__artifact">impact: {issue.impact}</div>
+                    <div className="trace-event__artifact">recommendation: {issue.recommendation}</div>
+                    <div className="trace-event__artifact">expected answer: {issue.expectedAnswer}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </article>
+        ))}
       </div>
-      {report.roles.map((role) => (
-        <article key={role.role} className="review-role">
-          <h3>{role.role}</h3>
-          <p>{role.summary}</p>
-          {role.issues.length > 0 ? (
-            <ul>
-              {role.issues.map((issue) => (
-                <li key={`${role.role}-${issue.title}`}>
-                  <strong>{issue.title}</strong>
-                  <p>{issue.description}</p>
-                  <p>影响：{issue.impact}</p>
-                  <p>建议：{issue.recommendation}</p>
-                  <p>标准答案：{issue.expectedAnswer}</p>
-                  <p>结论：{issue.decision}</p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>暂无问题。</p>
-          )}
-        </article>
-      ))}
-    </div>
+    </section>
   );
 }

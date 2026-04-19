@@ -28,6 +28,11 @@ export class ProviderRegistry {
     return ProviderConfigSchema.parse(json);
   }
 
+  async saveConfig(config: ProviderConfig, subprojectId?: string | null) {
+    const overridePath = await this.resolveProviderConfigPath(subprojectId);
+    await this.store.writeJson(overridePath ?? 'config/providers.json', ProviderConfigSchema.parse(config));
+  }
+
   async listResolvedProviders(subprojectId?: string | null): Promise<ResolvedProvider[]> {
     const config = await this.loadConfig(subprojectId);
     return config.providers.map((provider) => this.resolveProvider(provider));
@@ -42,6 +47,8 @@ export class ProviderRegistry {
       runtimeReady: provider.runtimeReady,
       deprecatedEnvInUse: provider.deprecatedEnvInUse,
       capabilities: provider.capabilities,
+      model: provider.model ?? null,
+      priority: provider.priority,
     }));
   }
 
@@ -54,6 +61,51 @@ export class ProviderRegistry {
   async resolveProviderByName(name: string, subprojectId?: string | null) {
     const providers = await this.listResolvedProviders(subprojectId);
     return providers.find((provider) => provider.name === name) ?? null;
+  }
+
+  async setDefaultProvider(name: string, subprojectId?: string | null) {
+    const config = await this.loadConfig(subprojectId);
+    if (!config.providers.some((provider) => provider.name === name)) {
+      throw new Error(`provider ${name} not found`);
+    }
+
+    const nextConfig: ProviderConfig = {
+      ...config,
+      defaultProvider: name,
+    };
+    await this.saveConfig(nextConfig, subprojectId);
+    return nextConfig;
+  }
+
+  async updateProvider(
+    name: string,
+    updates: {
+      priority?: number;
+      model?: string | null;
+      baseUrl?: string | null;
+    },
+    subprojectId?: string | null,
+  ) {
+    const config = await this.loadConfig(subprojectId);
+    const index = config.providers.findIndex((provider) => provider.name === name);
+    if (index < 0) {
+      throw new Error(`provider ${name} not found`);
+    }
+
+    const provider = config.providers[index]!;
+    const nextProvider = {
+      ...provider,
+      ...(updates.priority !== undefined ? { priority: Math.trunc(updates.priority) } : {}),
+      ...(updates.model !== undefined ? { model: updates.model?.trim() || undefined } : {}),
+      ...(updates.baseUrl !== undefined ? { baseUrl: updates.baseUrl?.trim() || undefined } : {}),
+    };
+
+    const nextConfig: ProviderConfig = {
+      ...config,
+      providers: config.providers.map((item, itemIndex) => (itemIndex === index ? nextProvider : item)),
+    };
+    await this.saveConfig(nextConfig, subprojectId);
+    return this.resolveProvider(nextProvider);
   }
 
   async listProvidersForCapability(capability: ProviderCapability, subprojectId?: string | null) {

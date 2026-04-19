@@ -1,24 +1,30 @@
 {
-  "defaultProvider": "anthropic",
+  "defaultProvider": "openai-compatible",
   "providers": [
     {
       "name": "mock",
       "type": "mock",
       "envKey": "DEFAULT_PROVIDER",
-      "capabilities": ["text", "code", "review"]
+      "capabilities": ["text", "code", "review"],
+      "priority": 0
     },
     {
       "name": "anthropic",
       "type": "anthropic",
       "envKey": "ANTHROPIC_API_KEY",
       "legacyEnvKeys": ["ANTHROPIC_AUTH_TOKEN"],
-      "capabilities": ["text", "code", "review"]
+      "capabilities": ["text", "code", "review"],
+      "model": "claude-sonnet-4-6",
+      "priority": 70
     },
     {
       "name": "openai-compatible",
       "type": "openai-compatible",
       "envKey": "OPENAI_COMPATIBLE_API_KEY",
-      "capabilities": ["text", "code"]
+      "capabilities": ["text", "code", "review"],
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "qwen-plus-latest",
+      "priority": 100
     },
     {
       "name": "ai-studio",
@@ -26,11 +32,17 @@
       "envKey": "GOOGLE_AI_STUDIO_API_KEY",
       "legacyEnvKeys": ["AI_STUDIO_API_KEY"],
       "capabilities": [
+        "text",
+        "code",
+        "review",
         "text-multimodal",
         "image-generation",
         "video-generation",
         "prototype-generation"
-      ]
+      ],
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+      "model": "gemini-2.5-flash",
+      "priority": 90
     }
   ]
 }

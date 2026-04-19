@@ -111,10 +111,18 @@ describe('CLI-aligned runtime flow', () => {
 
     const events = await orchestratorRuntime.loadEvents(current.id);
     const artifactCount = events.filter((event) => event.kind === 'artifact_written').length;
-    const review = reviewCommittee.buildReportForRun({ runId: current.id, artifactCount });
+    const artifacts = await workflowEngine.hydrateArtifacts(current);
+    const openSourceEvidence = reviewCommittee.inspectOpenSourceEvidence(artifacts);
+    const review = reviewCommittee.buildReportForRun({
+      runId: current.id,
+      artifactCount,
+      openSourceEvaluationPresent: openSourceEvidence.present,
+      openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+    });
 
     expect(current.currentStageId).toBe('review-metrics-telemetry');
     expect(artifactCount).toBeGreaterThanOrEqual(5);
+    expect(openSourceEvidence.present).toBe(true);
     expect(review.gate.decision).toBe('pass');
   });
 
