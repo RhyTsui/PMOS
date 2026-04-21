@@ -1,5 +1,6 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import express from 'express';
+import { promises as fsp } from 'node:fs';
 import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,6 +25,7 @@ import { ProductChiefService } from '../core/productChiefService.js';
 import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
 import { SkillRegistry } from '../core/skillRegistry.js';
 import { ExternalConnectorService } from '../core/externalConnectorService.js';
+import { McpContextSyncService, type ToolIdentity } from '../core/mcpContextSyncService.js';
 import { LlmRouter } from '../llm_router/index.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
@@ -48,14 +50,641 @@ const productChiefService = new ProductChiefService(store, memoryService, produc
 const documentationNormalizationService = new DocumentationNormalizationService(store, memoryService);
 const skillRegistry = new SkillRegistry(store);
 const externalConnectorService = new ExternalConnectorService(store);
+const mcpContextSync = new McpContextSyncService(rootDir);
 const llmRouter = new LlmRouter(store);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+function renderDirectEntryHtml(
+  projectEntries: ProjectEntrySummary[] = [],
+  checklistSummary: ExecutionChecklistSummary = { versions: [], userBackchecks: [] },
+  dailyDigests: DailyDigestEntry[] = [],
+) {
+  const fullyCoveredProjects = projectEntries.filter((entry) => entry.missingAssets.length === 0).length;
+  const versionSection =
+    checklistSummary.versions.length === 0
+      ? '<p class="empty">当前还没有可展示的分母进度。</p>'
+      : `<div class="summary-grid">${checklistSummary.versions
+          .map(
+            (version) => `<article class="summary-card">
+              <strong>${version.label}</strong>
+              <span>总项数：${version.totalTrackedItems}</span>
+              <span>已解：${version.solved}</span>
+              <span>部分完成：${version.partial}</span>
+              <span>carry-over：${version.carryOver}</span>
+            </article>`,
+          )
+          .join('')}</div>`;
+  const backcheckSection =
+    checklistSummary.userBackchecks.length === 0
+      ? '<p class="empty">当前还没有用户需求回查样板。</p>'
+      : `<div class="summary-grid">${checklistSummary.userBackchecks
+          .map(
+            (backcheck) => `<article class="summary-card">
+              <strong>${backcheck.label}</strong>
+              <span>状态：${backcheck.status}</span>
+              <span>${backcheck.detail}</span>
+            </article>`,
+          )
+          .join('')}</div>`;
+  const digestSection =
+    dailyDigests.length === 0
+      ? '<p class="empty">当前还没有每日蒸馏文件。</p>'
+      : `<div class="summary-grid">${dailyDigests
+          .map(
+            (digest) => `<article class="summary-card">
+              <strong>${digest.label}</strong>
+              <span>${digest.path}</span>
+              <span><a href="${digest.url}" target="_blank" rel="noreferrer">打开蒸馏文档</a></span>
+            </article>`,
+          )
+          .join('')}</div>`;
+  const projectSection =
+    projectEntries.length === 0
+      ? '<p class="empty">当前还没有发现标准项目入口资产。</p>'
+      : `<div class="project-grid">${projectEntries
+          .map(
+            (entry) => `<article class="project-card">
+              <strong>${entry.subprojectId}</strong>
+              <span class="meta">已发现 ${entry.assetCount}/${entry.expectedAssetCount} 个入口资产，${entry.linkedSourceCount} 个依据入口</span>
+              <div class="link-list">
+                ${entry.assets
+                  .map(
+                    (asset) =>
+                      `<a href="${asset.url}" target="_blank" rel="noreferrer">${asset.name}</a>`,
+                  )
+                  .join('')}
+              </div>
+              ${
+                entry.linkedSources.length === 0
+                  ? ''
+                  : `<div class="link-list link-list--secondary">
+                ${entry.linkedSources
+                  .map(
+                    (source) =>
+                      `<a href="${source.url}" target="_blank" rel="noreferrer">${source.kind} / ${source.name}</a>`,
+                  )
+                  .join('')}
+              </div>`
+              }
+              ${
+                entry.missingAssets.length === 0
+                  ? ''
+                  : `<div class="meta">缺失：${entry.missingAssets.join(' / ')}</div>`
+              }
+            </article>`,
+          )
+          .join('')}</div>`;
+  return `<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PMAIOS</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f2e8;
+        --panel: #fffdf8;
+        --text: #1f1a14;
+        --muted: #6f675d;
+        --line: #d9cfbf;
+        --accent: #b65c2d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 32px;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(182, 92, 45, 0.14), transparent 28%),
+          linear-gradient(180deg, #f8f4ea 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        display: grid;
+        gap: 18px;
+      }
+      .hero,
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 12px 36px rgba(31, 26, 20, 0.08);
+      }
+      h1, h2, p { margin: 0; }
+      .hero {
+        display: grid;
+        gap: 10px;
+      }
+      .eyebrow {
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .hero p,
+      .panel p {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+      a.card {
+        display: grid;
+        gap: 6px;
+        padding: 18px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: #fffaf2;
+        color: inherit;
+        text-decoration: none;
+      }
+      a.card:hover {
+        border-color: var(--accent);
+        transform: translateY(-1px);
+      }
+      .meta {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .project-grid {
+        display: grid;
+        gap: 14px;
+      }
+      .project-card {
+        display: grid;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fffaf2;
+      }
+      .summary-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+      .summary-card {
+        display: grid;
+        gap: 6px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fffaf2;
+      }
+      .summary-card strong {
+        font-size: 15px;
+      }
+      .summary-card span {
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 13px;
+      }
+      .link-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .link-list--secondary {
+        margin-top: 4px;
+      }
+      .link-list a {
+        color: var(--accent);
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f1e8da;
+        font-size: 13px;
+      }
+      .empty {
+        color: var(--muted);
+      }
+      code {
+        padding: 2px 6px;
+        border-radius: 6px;
+        background: #f1e8da;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">PMAIOS Direct Entry</div>
+        <h1>PMAIOS 本机统一入口</h1>
+        <p>根路径优先提供稳定的人读入口，避免首页直接落到可能白屏的 SPA。工作台、图板和版本文档都从这里进入。</p>
+      </section>
+      <section class="grid">
+        <a class="card" href="/workspace">
+          <strong>Workspace 工作台</strong>
+          <p>React 控制台，查看共享上下文、版本分母、每日蒸馏和运行状态。</p>
+          <span class="meta">路径：<code>/workspace</code></span>
+        </a>
+        <a class="card" href="/pmaios/boards/index.svg">
+          <strong>SVG 图板入口</strong>
+          <p>直接查看 PMAIOS 主图板、版本图板、模式架构和演示图板。</p>
+          <span class="meta">路径：<code>/pmaios/boards/index.svg</code></span>
+        </a>
+        <a class="card" href="/pmaios/docs/operations/current-version-progress.md">
+          <strong>当前版本快照</strong>
+          <p>查看 v0.4 / v0.5 分母进度、用户回查和当前版本状态。</p>
+          <span class="meta">路径：<code>/pmaios/docs/operations/current-version-progress.md</code></span>
+        </a>
+        <a class="card" href="/api/health">
+          <strong>健康检查</strong>
+          <p>快速确认后端服务是否在线。</p>
+          <span class="meta">路径：<code>/api/health</code></span>
+        </a>
+      </section>
+      <section class="panel">
+        <h2>版本分母进度</h2>
+        <p>这里直接展示 v0.4 / v0.5 的总盘子，而不是只看刚完成了什么。</p>
+        ${versionSection}
+      </section>
+      <section class="panel">
+        <h2>用户需求回查</h2>
+        <p>产品侧动作是否真的回到原始用户场景，这里给第一层结论。</p>
+        ${backcheckSection}
+      </section>
+      <section class="panel">
+        <h2>每日蒸馏</h2>
+        <p>这里展示最近的对话蒸馏结果，方便从首页直接回到方法论沉淀。</p>
+        ${digestSection}
+      </section>
+      <section class="panel">
+        <h2>已发现的项目入口</h2>
+        <p>这些入口来自当前仓库里已经存在的 project-board、roadmap-board、decision-board 和 change-log 资产。当前已补齐标准入口的项目：${fullyCoveredProjects}/${projectEntries.length || 0}。</p>
+        ${projectSection}
+      </section>
+    </main>
+  </body>
+</html>`;
+}
+
+const PUBLIC_ASSET_EXTENSIONS = new Set([
+  '.svg',
+  '.md',
+  '.pdf',
+  '.docx',
+  '.txt',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.html',
+]);
+
+const PUBLIC_ASSET_PREFIXES = [
+  'boards/',
+  'docs/operations/',
+  'docs/research/',
+  'docs/templates/',
+  'subprojects/',
+];
+
+function normalizePublicAssetPath(relativePath: string) {
+  const normalized = relativePath.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!normalized || normalized.includes('..')) {
+    return null;
+  }
+  if (!PUBLIC_ASSET_PREFIXES.some((prefix) => normalized.startsWith(prefix))) {
+    return null;
+  }
+  const extension = path.extname(normalized).toLowerCase();
+  if (!PUBLIC_ASSET_EXTENSIONS.has(extension)) {
+    return null;
+  }
+  return normalized;
+}
+
+function sendPublicAsset(res: express.Response, relativePath: string) {
+  const normalized = normalizePublicAssetPath(relativePath);
+  if (!normalized) {
+    res.status(404).json({ error: 'asset_not_found' });
+    return;
+  }
+
+  const absolutePath = path.join(rootDir, normalized);
+  if (!absolutePath.startsWith(rootDir) || !fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
+    res.status(404).json({ error: 'asset_not_found' });
+    return;
+  }
+
+  res.sendFile(absolutePath);
+}
+
+function readWildcardPath(params: Record<string, unknown>) {
+  const value = params[''];
+  if (Array.isArray(value)) {
+    return value.join('/');
+  }
+  return typeof value === 'string' ? value : '';
+}
+
 function normalizeSubprojectId(value: unknown) {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
+type ChecklistVersionSummary = {
+  id: string;
+  label: string;
+  totalTrackedItems: number;
+  solved: number;
+  partial: number;
+  carryOver: number;
+  missingPlacement: number;
+};
+
+type ChecklistBackcheckSummary = {
+  id: string;
+  label: string;
+  status: 'solved' | 'partial' | 'unsolved';
+  detail: string;
+};
+
+type ExecutionChecklistSummary = {
+  versions: ChecklistVersionSummary[];
+  userBackchecks: ChecklistBackcheckSummary[];
+};
+
+type ProjectEntryAsset = {
+  name: 'project-board.svg' | 'roadmap-board.svg' | 'decision-board.svg' | 'change-log.md';
+  path: string;
+  url: string;
+};
+
+type ProjectLinkedSourceKind = 'repo-entry' | 'governance' | 'ai-facing';
+
+type ProjectLinkedSource = {
+  name: string;
+  kind: ProjectLinkedSourceKind;
+  path: string;
+  url: string;
+};
+
+type DailyDigestEntry = {
+  id: string;
+  label: string;
+  path: string;
+  url: string;
+};
+
+type ProjectEntrySummary = {
+  subprojectId: string;
+  expectedAssetCount: number;
+  assetCount: number;
+  assets: ProjectEntryAsset[];
+  missingAssets: ProjectEntryAsset['name'][];
+  linkedSourceCount: number;
+  linkedSources: ProjectLinkedSource[];
+};
+
+async function loadExecutionChecklistSummary(): Promise<ExecutionChecklistSummary> {
+  const checklistPath = path.join(rootDir, 'docs', 'operations', 'v0.4-v0.5-execution-checklist.md');
+  try {
+    const content = await fsp.readFile(checklistPath, 'utf8');
+    const lines = content.split(/\r?\n/);
+    const versions: ChecklistVersionSummary[] = [];
+    const versionSections = [
+      { id: 'v0.4', label: 'v0.4', start: '## v0.4 收口清单', end: '## v0.5 主清单' },
+      { id: 'v0.5', label: 'v0.5', start: '## v0.5 主清单', end: '## 当前推荐执行顺序' },
+    ];
+
+    for (const section of versionSections) {
+      const startIndex = lines.findIndex((line) => line.trim() === section.start);
+      if (startIndex < 0) {
+        continue;
+      }
+      const endIndex = lines.findIndex((line, index) => index > startIndex && line.trim() === section.end);
+      const sectionLines = lines.slice(startIndex + 1, endIndex > startIndex ? endIndex : undefined);
+      const totalTrackedItems = sectionLines.filter((line) => /^\s*-\s\[[x~ ]\]\s/.test(line)).length;
+      const solved = sectionLines.filter((line) => /^\s*-\s\[x\]\s/.test(line)).length;
+      const partial = sectionLines.filter((line) => /^\s*-\s\[~\]\s/.test(line)).length;
+      const carryOver = sectionLines.filter((line) => /^\s*-\s\[[x~ ]\]\s.*carry-over/i.test(line)).length;
+
+      versions.push({
+        id: section.id,
+        label: section.label,
+        totalTrackedItems,
+        solved,
+        partial,
+        carryOver,
+        missingPlacement: 0,
+      });
+    }
+
+    const userBackchecks: ChecklistBackcheckSummary[] = [];
+    const backcheckStart = lines.findIndex((line) => line.trim() === '## 用户需求回查');
+    if (backcheckStart >= 0) {
+      let index = backcheckStart + 1;
+      while (index < lines.length) {
+        const header = lines[index].trim();
+        if (!header.startsWith('### ')) {
+          index += 1;
+          continue;
+        }
+
+        const idBase = header.replace(/^###\s+/, '').trim().toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-');
+        let label = '';
+        let status: ChecklistBackcheckSummary['status'] = 'unsolved';
+        let detail = '';
+        index += 1;
+
+        while (index < lines.length && !lines[index].trim().startsWith('### ') && !lines[index].trim().startsWith('## ')) {
+          const current = lines[index].trim();
+          const requirementMatch = current.match(/^-\s需求：(.+)$/);
+          const statusMatch = current.match(/^-\s当前状态：`(solved|partial|unsolved)`$/);
+          const detailMatch = current.match(/^-\s说明：(.+)$/);
+          if (requirementMatch) {
+            label = requirementMatch[1].trim();
+          } else if (statusMatch) {
+            status = statusMatch[1] as ChecklistBackcheckSummary['status'];
+          } else if (detailMatch) {
+            detail = detailMatch[1].trim();
+          }
+          index += 1;
+        }
+
+        if (label) {
+          userBackchecks.push({
+            id: idBase || `backcheck-${userBackchecks.length + 1}`,
+            label,
+            status,
+            detail,
+          });
+        }
+      }
+    }
+
+    return { versions, userBackchecks };
+  } catch {
+    return { versions: [], userBackchecks: [] };
+  }
+}
+
+async function loadProjectEntrySummaries(): Promise<ProjectEntrySummary[]> {
+  const subprojectsRoot = path.join(rootDir, 'subprojects');
+  const assetNames: ProjectEntryAsset['name'][] = [
+    'project-board.svg',
+    'roadmap-board.svg',
+    'decision-board.svg',
+    'change-log.md',
+  ];
+  const linkedSourcePatterns: Array<{ relativePath: string; kind: ProjectLinkedSourceKind; name: string }> = [
+    { relativePath: 'README.md', kind: 'repo-entry', name: 'README' },
+    { relativePath: 'CLAUDE.md', kind: 'governance', name: 'CLAUDE' },
+    { relativePath: 'subproject.json', kind: 'governance', name: 'subproject.json' },
+    { relativePath: 'ARCHITECTURE.md', kind: 'ai-facing', name: 'ARCHITECTURE' },
+    { relativePath: 'docs/README.md', kind: 'ai-facing', name: 'docs/README' },
+    { relativePath: 'docs/ARCHITECTURE.md', kind: 'ai-facing', name: 'docs/ARCHITECTURE' },
+    { relativePath: 'docs/TASKS.md', kind: 'ai-facing', name: 'docs/TASKS' },
+    { relativePath: 'docs/PRD.md', kind: 'ai-facing', name: 'docs/PRD' },
+    { relativePath: 'docs/memory/project-memory.md', kind: 'ai-facing', name: 'project-memory' },
+  ];
+
+  try {
+    const entries = await fsp.readdir(subprojectsRoot, { withFileTypes: true });
+    const summaries: ProjectEntrySummary[] = [];
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      const subprojectId = entry.name;
+      const assets: ProjectEntryAsset[] = [];
+      const linkedSources: ProjectLinkedSource[] = [];
+      for (const assetName of assetNames) {
+        const relativePath = path.posix.join('subprojects', subprojectId, assetName);
+        const absolutePath = path.join(rootDir, relativePath);
+        if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
+          continue;
+        }
+        assets.push({
+          name: assetName,
+          path: relativePath,
+          url: `/pmaios/${relativePath.replace(/\\/g, '/')}`,
+        });
+      }
+
+      for (const source of linkedSourcePatterns) {
+        const relativePath = path.posix.join('subprojects', subprojectId, source.relativePath);
+        const absolutePath = path.join(rootDir, relativePath);
+        if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
+          continue;
+        }
+        linkedSources.push({
+          name: source.name,
+          kind: source.kind,
+          path: relativePath,
+          url: `/pmaios/${relativePath.replace(/\\/g, '/')}`,
+        });
+      }
+
+      const docsRoot = path.join(subprojectsRoot, subprojectId, 'docs');
+      if (fs.existsSync(docsRoot) && fs.statSync(docsRoot).isDirectory()) {
+        const docFiles = await collectProjectDocFiles(path.join('subprojects', subprojectId, 'docs'));
+        const discoveredDocSources: Array<{ includes: string[]; kind: ProjectLinkedSourceKind }> = [
+          { includes: ['执行工作流'], kind: 'governance' },
+          { includes: ['任务单'], kind: 'governance' },
+        ];
+        for (const descriptor of discoveredDocSources) {
+          const matches = docFiles.filter((file) => descriptor.includes.some((token) => file.includes(token)));
+          for (const match of matches.slice(0, 2)) {
+            if (linkedSources.some((source) => source.path === match)) {
+              continue;
+            }
+            linkedSources.push({
+              name: path.basename(match, path.extname(match)),
+              kind: descriptor.kind,
+              path: match,
+              url: `/pmaios/${match.replace(/\\/g, '/')}`,
+            });
+          }
+        }
+      }
+
+      const missingAssets = assetNames.filter((assetName) => !assets.some((asset) => asset.name === assetName));
+
+      if (assets.length || linkedSources.length) {
+        summaries.push({
+          subprojectId,
+          expectedAssetCount: assetNames.length,
+          assetCount: assets.length,
+          assets,
+          missingAssets,
+          linkedSourceCount: linkedSources.length,
+          linkedSources,
+        });
+      }
+    }
+
+    return summaries.sort((left, right) => left.subprojectId.localeCompare(right.subprojectId));
+  } catch {
+    return [];
+  }
+}
+
+async function collectProjectDocFiles(relativeRoot: string): Promise<string[]> {
+  const absoluteRoot = path.join(rootDir, relativeRoot);
+  const collected: string[] = [];
+
+  async function walk(currentRelative: string) {
+    const currentAbsolute = path.join(rootDir, currentRelative);
+    const entries = await fsp.readdir(currentAbsolute, { withFileTypes: true });
+    for (const entry of entries) {
+      const childRelative = path.posix.join(currentRelative, entry.name);
+      if (entry.isDirectory()) {
+        await walk(childRelative);
+        continue;
+      }
+      if (entry.isFile() && entry.name.toLowerCase().endsWith('.md')) {
+        collected.push(childRelative);
+      }
+    }
+  }
+
+  if (!fs.existsSync(absoluteRoot) || !fs.statSync(absoluteRoot).isDirectory()) {
+    return [];
+  }
+
+  await walk(relativeRoot);
+  return collected;
+}
+
+async function loadDailyDigestEntries(): Promise<DailyDigestEntry[]> {
+  const digestsRoot = path.join(rootDir, 'docs', 'operations', 'daily-digests');
+  try {
+    if (!fs.existsSync(digestsRoot) || !fs.statSync(digestsRoot).isDirectory()) {
+      return [];
+    }
+    const entries = await fsp.readdir(digestsRoot, { withFileTypes: true });
+    const files = entries
+      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.md'))
+      .map((entry) => entry.name)
+      .sort((left, right) => right.localeCompare(left))
+      .slice(0, 5);
+    return files.map((file) => {
+      const relativePath = path.posix.join('docs', 'operations', 'daily-digests', file);
+      return {
+        id: file.replace(/\.md$/i, ''),
+        label: file.replace(/\.md$/i, ''),
+        path: relativePath,
+        url: `/pmaios/${relativePath}`,
+      };
+    });
+  } catch {
+    return [];
+  }
 }
 
 async function ensureCurrentRun(subprojectId?: string | null) {
@@ -92,6 +721,38 @@ async function buildReviewForRun(runId: string, subprojectId?: string | null) {
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'ai-os-backend' });
+});
+
+app.get('/api/human-reading/manifest', (_req, res) => {
+  res.json({
+    basePath: '/pmaios',
+    entries: {
+      rootEntry: '/',
+      workspace: '/workspace',
+      boardsIndex: '/pmaios/boards/index.svg',
+      currentVersionProgress: '/pmaios/docs/operations/current-version-progress.md',
+      versionPlan: '/pmaios/docs/operations/pmaios-version-plan.md',
+      v05Checklist: '/pmaios/docs/operations/pmaios-v0.5-checklist.md',
+      v05ImplementationIndex: '/pmaios/docs/operations/v0.5-implementation-index.md',
+      executionChecklist: '/pmaios/docs/operations/v0.4-v0.5-execution-checklist.md',
+      userRequirementBackcheckSample: '/pmaios/docs/operations/user-requirement-backcheck-2026-04-21.md',
+      transitionSnapshot: '/pmaios/docs/operations/v0.4-v0.5-transition-2026-04-21.md',
+      dailyDigests: '/api/ops/daily-digests',
+      projectEntries: '/api/human-reading/project-entries',
+    },
+  });
+});
+
+app.get('/api/human-reading/project-entries', async (_req, res) => {
+  res.json({ items: await loadProjectEntrySummaries() });
+});
+
+app.get('/api/ops/execution-checklist-summary', async (_req, res) => {
+  res.json(await loadExecutionChecklistSummary());
+});
+
+app.get('/api/ops/daily-digests', async (_req, res) => {
+  res.json({ items: await loadDailyDigestEntries() });
 });
 
 app.get('/api/subprojects', async (_req, res) => {
@@ -219,6 +880,7 @@ app.get('/api/product-agent-blueprints', async (_req, res) => {
 
 app.get('/api/skills', async (req, res) => {
   const items = await skillRegistry.listSkills(normalizeSubprojectId(req.query.subprojectId));
+  const readiness = await skillRegistry.describeReadiness(normalizeSubprojectId(req.query.subprojectId));
   const byMainline = {
     product: items.filter((skill) => ['product', 'management', 'planning', 'research', 'iteration'].includes(skill.category)),
     design: items.filter(
@@ -240,15 +902,32 @@ app.get('/api/skills', async (req, res) => {
       product: byMainline.product.length,
       design: byMainline.design.length,
       documentation: byMainline.documentation.length,
+      autoTriggerable: readiness.autoTriggerable,
+      integrated: readiness.integrated,
     },
+    readiness,
     byMainline,
     designTooling: {
       packageName: 'claude-design-system',
       command: 'design-system.cmd',
-      status: 'installed',
+      status:
+        items.find((skill) => skill.id === 'claude-design-system')?.deployment.status ??
+        (readiness.byStatus.installed ? 'installed' : 'manual'),
       statusPath: 'docs/operations/claude-design-tooling-status.md',
       localGuidePath: 'DESIGN-SYSTEM.md',
     },
+  });
+});
+
+app.get('/api/skills/find', async (req, res) => {
+  res.json({
+    items: await skillRegistry.findSkills({
+      query: typeof req.query.query === 'string' ? req.query.query : '',
+      stageId: typeof req.query.stageId === 'string' ? req.query.stageId : null,
+      outputType: typeof req.query.outputType === 'string' ? req.query.outputType : null,
+      limit: typeof req.query.limit === 'string' ? Number.parseInt(req.query.limit, 10) : null,
+      subprojectId: normalizeSubprojectId(req.query.subprojectId),
+    }),
   });
 });
 
@@ -274,12 +953,20 @@ app.post('/api/connectors/web-fetch', async (req, res) => {
 });
 
 app.post('/api/connectors/figma/files/inspect', async (req, res) => {
-  if (typeof req.body?.fileKey !== 'string' || !req.body.fileKey.trim()) {
+  if ((typeof req.body?.fileKey !== 'string' || !req.body.fileKey.trim()) && !process.env.FIGMA_FILE_KEY?.trim()) {
     res.status(400).json({ error: 'fileKey is required' });
     return;
   }
 
   res.json(await externalConnectorService.inspectFigmaFile({ fileKey: req.body.fileKey }));
+});
+
+app.get('/api/connectors/figma/team/projects', async (req, res) => {
+  res.json({
+    items: await externalConnectorService.listFigmaTeamProjects({
+      teamId: typeof req.query.teamId === 'string' ? req.query.teamId : null,
+    }),
+  });
 });
 
 app.post('/api/connectors/dingtalk/meeting-notes', async (req, res) => {
@@ -1114,6 +1801,8 @@ app.get('/api/providers/:name', async (req, res) => {
     model: provider.model ?? null,
     baseUrl: provider.baseUrl ?? null,
     priority: provider.priority,
+    authMode: provider.authMode,
+    scope: provider.scope,
   });
 });
 
@@ -1121,11 +1810,155 @@ app.get('/api/mcp', async (req, res) => {
   res.json(await mcpRegistry.listServers(normalizeSubprojectId(req.query.subprojectId)));
 });
 
+app.get('/api/mcp-context/state', async (req, res) => {
+  const etag = typeof req.headers['if-none-match'] === 'string' ? req.headers['if-none-match'] : null;
+  const { state, changed, newEtag } = await mcpContextSync.getStateIfChanged(etag);
+  if (!changed && etag) {
+    res.status(304).end();
+    return;
+  }
+  res.setHeader('ETag', newEtag);
+  res.json({ ...state, eventLog: state.eventLog.slice(-20) });
+});
+
+app.get('/api/mcp-context/tasks', async (req, res) => {
+  const status = typeof req.query.status === 'string' && ['pending', 'in_progress', 'completed', 'blocked'].includes(req.query.status)
+    ? req.query.status
+    : null;
+  const state = await mcpContextSync.getState();
+  const tasks = status ? state.tasks.filter((t) => t.status === status) : state.tasks;
+  res.json({ tasks, total: state.tasks.length });
+});
+
+app.get('/api/mcp-context/events', async (req, res) => {
+  const count = typeof req.query.count === 'string' ? parseInt(req.query.count, 10) : 20;
+  res.json({ items: await mcpContextSync.getRecentEvents(count) });
+});
+
+app.get('/api/mcp-context/checkpoints', async (req, res) => {
+  res.json({ items: await mcpContextSync.getCheckpoints() });
+});
+
+app.get('/api/mcp-context/mode', async (req, res) => {
+  const state = await mcpContextSync.getState();
+  res.json({
+    currentMode: state.currentMode,
+    currentTaskId: state.currentTaskId,
+    lastUpdated: state.lastUpdated,
+    lastUpdatedBy: state.lastUpdatedBy,
+  });
+});
+
+app.get('/api/mcp-context/mode-history', async (req, res) => {
+  res.json({ items: await mcpContextSync.getModeHistory() });
+});
+
+app.post('/api/mcp-context/tasks', async (req, res) => {
+  if (typeof req.body?.label !== 'string' || !req.body.label.trim()) {
+    res.status(400).json({ error: 'label is required' });
+    return;
+  }
+  const toolIdentity: ToolIdentity = ['claude', 'codex', 'other'].includes(String(req.body?.toolIdentity ?? ''))
+    ? req.body.toolIdentity
+    : 'other';
+  const state = await mcpContextSync.updateState({
+    toolIdentity,
+    newTask: { label: req.body.label.trim(), status: 'in_progress', notes: null },
+    newEvent: { toolIdentity, kind: 'task_started', taskId: null, content: req.body.label.trim() },
+  });
+  res.status(201).json({ currentTaskId: state.currentTaskId, lastUpdated: state.lastUpdated });
+});
+
+app.patch('/api/mcp-context/tasks/:taskId', async (req, res) => {
+  const toolIdentity: ToolIdentity = ['claude', 'codex', 'other'].includes(String(req.body?.toolIdentity ?? ''))
+    ? req.body.toolIdentity
+    : 'other';
+  const state = await mcpContextSync.updateState({
+    toolIdentity,
+    taskId: req.params.taskId,
+    taskUpdates: {
+      ...(req.body?.status ? { status: req.body.status } : {}),
+      ...(req.body?.notes !== undefined ? { notes: req.body.notes } : {}),
+    },
+    newEvent: { toolIdentity, kind: 'task_completed', taskId: req.params.taskId, content: '状态更新' },
+  });
+  res.json(state.tasks.find((t) => t.id === req.params.taskId) ?? { error: 'not_found' });
+});
+
+app.post('/api/mcp-context/checkpoints', async (req, res) => {
+  if (typeof req.body?.label !== 'string' || !req.body.label.trim()) {
+    res.status(400).json({ error: 'label is required' });
+    return;
+  }
+  const toolIdentity: ToolIdentity = ['claude', 'codex', 'other'].includes(String(req.body?.toolIdentity ?? ''))
+    ? req.body.toolIdentity
+    : 'other';
+  const state = await mcpContextSync.getState();
+  await mcpContextSync.updateState({
+    toolIdentity,
+    newCheckpoint: { label: req.body.label.trim(), taskId: state.currentTaskId, contextSnapshot: 'api checkpoint' },
+    newEvent: { toolIdentity, kind: 'checkpoint', taskId: state.currentTaskId, content: req.body.label.trim() },
+  });
+  const checkpoints = await mcpContextSync.getCheckpoints();
+  res.status(201).json(checkpoints[0]);
+});
+
+app.post('/api/mcp-context/mode', async (req, res) => {
+  const mode = typeof req.body?.mode === 'string' && ['default', 'plan', 'deep', 'do'].includes(req.body.mode)
+    ? req.body.mode
+    : null;
+  if (!mode) {
+    res.status(400).json({ error: 'mode must be one of default|plan|deep|do' });
+    return;
+  }
+  const toolIdentity: ToolIdentity = ['claude', 'codex', 'other'].includes(String(req.body?.toolIdentity ?? ''))
+    ? req.body.toolIdentity
+    : 'other';
+  const label = typeof req.body?.label === 'string' && req.body.label.trim()
+    ? req.body.label.trim()
+    : `switch to ${mode}`;
+  const state = await mcpContextSync.updateState({
+    toolIdentity,
+    mode,
+    modeLabel: label,
+    newEvent: {
+      toolIdentity,
+      kind: 'mode_changed',
+      taskId: null,
+      content: label,
+    },
+  });
+  res.status(201).json({
+    currentMode: state.currentMode,
+    lastUpdated: state.lastUpdated,
+    lastUpdatedBy: state.lastUpdatedBy,
+  });
+});
+
+app.post('/api/mcp-context/session', async (req, res) => {
+  const toolIdentity: ToolIdentity = ['claude', 'codex', 'other'].includes(String(req.body?.toolIdentity ?? ''))
+    ? req.body.toolIdentity
+    : 'other';
+  res.json(await mcpContextSync.createSession({ toolIdentity, projectPath: rootDir }));
+});
+
 const staticDir = path.join(rootDir, 'dist');
 const staticIndexPath = path.join(staticDir, 'index.html');
 
 if (fs.existsSync(staticIndexPath)) {
   app.use(express.static(staticDir, { index: false }));
+  app.get('/', async (_req, res) => {
+    const projectEntries = await loadProjectEntrySummaries();
+    const checklistSummary = await loadExecutionChecklistSummary();
+    const dailyDigests = await loadDailyDigestEntries();
+    res.type('html').send(renderDirectEntryHtml(projectEntries, checklistSummary, dailyDigests));
+  });
+  app.get('/workspace', (_req, res) => {
+    res.sendFile(staticIndexPath);
+  });
+  app.get('/workspace/*', (_req, res) => {
+    res.sendFile(staticIndexPath);
+  });
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) {
       next();

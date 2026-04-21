@@ -1,0 +1,12 @@
+E:\AI\ai-os\src\core\hermesPolicyService.ts:100
+    const stageWithDag = run.stages.find((stage) => typeof stage.metadata.dagRunId === 'string') ?? null;
+                                                                          ^
+
+TypeError: Cannot read properties of undefined (reading 'dagRunId')
+    at <anonymous> (E:\AI\ai-os\src\core\hermesPolicyService.ts:100:75)
+    at Array.find (<anonymous>)
+    at HermesPolicyService.evaluateDagAwareness (E:\AI\ai-os\src\core\hermesPolicyService.ts:100:37)
+    at HermesPolicyService.evaluateRun (E:\AI\ai-os\src\core\hermesPolicyService.ts:26:12)
+    at async <anonymous> (E:\AI\ai-os\src\backend\server.ts:1004:12)
+
+Node.js v24.14.1

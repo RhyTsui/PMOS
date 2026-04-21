@@ -1,0 +1,158 @@
+﻿核心事件名称,字段名称,描述,是否必需,备注
+106 - 支付流程 PayFlow,type,"GSSdk.analytics.track()，type = ""9""",必填,HYL:游戏侧在支付流程中，按支付漏斗需求通过SDK上报
+,event,"= ""106""，HYL:游戏侧在支付流程中，按支付漏斗需求通过SDK上报",必填,
+,extra,,,
+,step_version,步骤版本号，游戏自定义的步骤列表版本号,,打包参数设置，年月日8位，如：20250121
+,step_id,步骤ID，>>点击查看：步骤列表<<,必填,前端上报：201、302、401、502、601
+,step_name,步骤名称，>>点击查看：步骤名称<<,必填,
+,result,步骤结果，0：成功，其他：失败(错误码),必填,默认成功
+,result_msg,结果信息，错误原因返回,,直接转发接口返回错误信息
+,channel_order_id,充值商户订单号，即平台侧or渠道侧订单号，对应支付成功【发货通知：channelOrderId】,,不发送，未获取
+,order_id,中台充值订单ID，即SDK充值订单号，对应支付成功【发货通知：orderId】,,不发送，未获取
+,game_order_id,游戏内订单号，按游戏内逻辑生成的支付订单号,必填,仅：502、601步骤上报（之前未生成）
+,product_ID,支付内容产品标识,必填,= Pay.product_id
+,product_name,支付内容产品名称,必填,= Pay.goods_link  => Goods.name / Vip.name
+,pay_channel,充值渠道，对应支付成功【发货通知：payWay】,,不发送，未获取
+,recharge_channel,支付方式，对应支付成功【发货通知：rechargeType】,,不发送，未获取
+,currency,支付货币类型，如：CNY、USD、HKD、JPY等（ISO-4217标准）,必填,= Pay.money_type
+,currency_unit,支付货币单位：0=legalUnit=元单位，1=cent=分单位,必填,"= ""1"""
+,amount,支付货币金额，法币单位×100，如：100 = 1.00元，299 = 2.99元,必填,int，= Pay.money_amount
+,,,,
+,,,,
+221 - 支付流程 PayFlow,event_id,"核心事件ID = ""221""，HYL:游戏侧在支付流程中，按支付漏斗需求上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""支付流程""",,该字段已精简不上报，仅作标记
+,step_version,步骤版本号，游戏自定义的步骤列表版本号,,打包参数设置，年月日8位，如：20250121
+,step_id,步骤ID，>>点击查看：步骤列表<<,必填,后端上报：402、501、1302/2702、1402/2802、1501/2901
+,step_name,步骤名称，>>点击查看：步骤名称<<,必填,
+,result,步骤结果，0：成功，其他：失败(错误码),必填,默认成功
+,result_msg,结果信息，错误原因返回,,直接转发接口返回错误信息
+,channel_order_id,充值商户订单号，即平台侧or渠道侧订单号，对应支付成功【发货通知：channelOrderId】,必填,402、501步骤不发送（未获取）
+,order_id,中台充值订单ID，即SDK充值订单号，对应支付成功【发货通知：orderId】,必填,402、501步骤不发送（未获取）
+,game_order_id,游戏内订单号，按游戏内逻辑生成的支付订单号,必填,402步骤不发送（未生成）
+,product_ID,支付内容产品标识,必填,= Pay.product_id，1302/2702可以使用【发货通知：productId】
+,product_name,支付内容产品名称,必填,= Pay.goods_link  => Goods.name / Vip.name，1302/2702可以使用【发货通知：productName】
+,pay_channel,充值渠道，对应支付成功【发货通知：payWay】,必填,402、501步骤不发送（未获取）
+,recharge_channel,支付方式，对应支付成功【发货通知：rechargeType】,必填,402、501步骤不发送（未获取）
+,currency,支付货币类型，如：CNY、USD、HKD、JPY等（ISO-4217标准）,必填,= Pay.money_type，1302/2702可以使用【发货通知：currency】
+,currency_unit,支付货币单位：0=legalUnit=元单位，1=cent=分单位,必填,"= ""1"""
+,amount,支付货币金额，法币单位×100，如：100 = 1.00元，299 = 2.99元,必填,int，= Pay.money_amount，1302/2702可以使用【发货通知：orderAmount】
+,,,,
+,,,,
+107 - 前置事件 PreEvent,type,"GSSdk.analytics.track()，type = ""1""",必填,HYL:游戏侧启动登录加载流程中，按自定义step通过SDK进行上报
+,extra,,,
+,stepId,步骤ID，>>点击查看：步骤列表<<,必填,
+,stepName,步骤名称，>>点击查看：步骤名称<<,必填,
+,,,,
+,,,,
+108 - 新手引导 TutorialStep,type,"GSSdk.analytics.track()，type = ""2""",必填,HYL:游戏侧新手引导流程中，按自定义step通过SDK将进行上报
+,extra,,,
+,stepId,步骤ID，游戏内引导步骤编号,必填,= TutorialStep.id
+,stepName,步骤名称，游戏内引导步骤名称,必填,= TutorialStep.name
+,,,,
+,,,,
+110 - 激励视频 AdVideo,type,"GSSdk.analytics.track()，type = ""9""",必填,HYL:参照【支付流程】，在激励视频业务中的流程通过SDK上报
+,event,"= ""110""，HYL:参照【支付流程】，在激励视频业务中的流程通过SDK上报",必填,
+,extra,,,
+,step_version,步骤版本号，游戏自定义的步骤列表版本号,,打包参数设置，年月日8位，如：20250121
+,step_id,步骤ID，>>点击查看：步骤列表<<,必填,前端上报：10201、10302、20102
+,step_name,步骤名称，>>点击查看：步骤名称<<,必填,
+,result,步骤结果，0：成功，其他：失败(错误码),必填,默认成功
+,result_msg,结果信息，错误原因返回,,直接转发接口返回错误信息
+,ad_sid,游戏侧激励视频流水号，参照支付订单号生成,必填,20102步骤发送（之前未生成）
+,reward_target,激励视频对应奖励目标，参照支付商品标识，>>点击查看：奖励目标<<,必填,
+,,,,
+,,,,
+223 - 激励视频 AdVideo,event_id,"核心事件ID = ""223""，HYL:参照【支付流程】，在激励视频业务中的流程上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""激励视频""",,该字段已精简不上报，仅作标记
+,step_version,步骤版本号，游戏自定义的步骤列表版本号,,打包参数设置，年月日8位，如：20250121
+,step_id,步骤ID，>>点击查看：步骤列表<<,必填,后端上报：10501、20302
+,step_name,步骤名称，>>点击查看：步骤名称<<,必填,
+,result,步骤结果，0：成功，其他：失败(错误码),必填,默认成功
+,result_msg,结果信息，错误原因返回,,直接转发接口返回错误信息
+,ad_sid,游戏侧激励视频流水号，参照支付订单号生成,必填,
+,reward_target,激励视频对应奖励目标，参照支付商品标识，>>点击查看：奖励目标<<,必填,
+,,,,
+,,,,
+215 - 账号验签 GameLoginSign,event_id,"核心事件ID = ""215""，HYL:游戏侧调用SDK登录获得参数，服务端验签结果上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""账号验签""",,该字段已精简不上报，仅作标记
+,result,步骤结果，0：成功，其他：失败(错误码),必填,默认成功
+,result_msg,结果信息，错误原因返回,,直接转发接口返回错误信息
+,,,,
+,,,,
+201 - 账号登录 GameLogin,event_id,"核心事件ID = ""201""，HYL:游戏侧通过SDK登录参数验签，完成游戏内账号登录上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""账号登录""",,该字段已精简不上报，仅作标记
+,,,,
+,,,,
+203 - 角色登录 RoleLogin,event_id,"核心事件ID = ""203""，HYL:游戏侧账号登录成功后，完成账号下角色登录上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""角色登录""",,该字段已精简不上报，仅作标记
+,,,,
+,,,,
+204 - 角色登出 RoleLogout,event_id,"核心事件ID = ""204""，HYL:游戏侧角色登出(登出标准自定义)时上报",必填,用户跨0点在线，需前一日23:59:59发一次【204】，后一日00:00:01发一次【203】
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""角色登出""",,该字段已精简不上报，仅作标记
+,duration,在线时长(秒s)，玩家下线Logout时，统计的本次登录在线时长,,int，角色Logout与玩家真实下线为异步事件，按照真实下线时间计算（跨0点前后分别计算）
+,,,,
+,,,,
+205 - 角色充值 Pay,event_id,"核心事件ID = ""205""，HYL:游戏侧完成角色支付发货流程时上报",必填,与【221:支付流程-PayFlow】事件step_id=1402/2502同时上报（另有【208:资源产销-Prop】同时上报）
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""角色充值""",,该字段已精简不上报，仅作标记
+,channel_order_id,充值商户订单号，即平台侧or渠道侧订单号，对应支付成功【发货通知：channelOrderId】,必填,
+,order_id,中台充值订单ID，即SDK充值订单号，对应支付成功【发货通知：orderId】,必填,
+,game_order_id,游戏内订单号，按游戏内逻辑生成的支付订单号,,自定义参数，上报备用
+,product_ID,支付内容产品标识,必填,= Pay.product_id
+,product_name,支付内容产品名称,必填,= Pay.goods_link  => Goods.name / Vip.name
+,pay_channel,充值渠道，对应支付成功【发货通知：payWay】,必填,
+,recharge_channel,支付方式，对应支付成功【发货通知：rechargeType】,必填,
+,currency,支付货币类型，如：CNY、USD、HKD、JPY等（ISO-4217标准）,必填,= Pay.money_type
+,currency_unit,支付货币单位：0=legalUnit=元单位，1=cent=分单位,必填,"= ""1"""
+,amount,支付货币金额，法币单位×100，如：100 = 1.00元，299 = 2.99元,必填,int，= Pay.money_amount
+,,,,
+,,,,
+206 - 角色升级 LevelUp,event_id,"核心事件ID = ""206""，HYL:游戏侧角色升级时上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""角色升级""",,该字段已精简不上报，仅作标记
+,pre_lev,升级前角色等级,,
+,,,,
+,,,,
+207 - 在线人数 CCU,event_id,"核心事件ID = ""207""，HYL:游戏各区服，按整0/5分固定5min间隔上报",必填,该事件仅包含区服信息，不包含客户端透传参数和公共参数中用户信息
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""在线人数""",,该字段已精简不上报，仅作标记
+,user_count,在线人数,必填,int，固定间隔5min上报，该间隔内最高人数
+,,,,
+,,,,
+208 - 资源产销 Prop,event_id,"核心事件ID = ""208""，HYL:游戏侧角色任意游戏资产变更时上报",必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""资源产销""",,该字段已精简不上报，仅作标记
+,item_consumetype,"资源产销类型：""1"" = 产出，""2"" = 消耗",必填,
+,scene,资源产销来源场景，>>点击查看：场景枚举<<,必填,
+,scene_extension,资源产销来源扩展参数，商品ID、随机礼盒ID等,,2025.07 SPT 0.7.9 更新，详见scene枚举备注
+,item_type,物品类型(财务类型)，>>点击查看：物品类型<<,必填,
+,item_id,物品ID，>>点击查看：物品ID<<,必填,
+,item_name,物品名称，字典表对应物品ID,必填,
+,item_num,物品数量，物品产销变更数量,必填,
+,left_num,物品库存数量，物品产销变更后数量,必填,
+,gift_content,"礼包类物品的内容，json格式；{item_id:item_num,item_id:item_num}",,当前项目资产变更全部逐项上报
+,action_id,资源产销行为流水ID，可以关联game_uuid参数,,单一游戏行为触发多项变更时，以第一条game_uuid为关联ID
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,

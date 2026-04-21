@@ -6,6 +6,7 @@ import { AiStudioProviderAdapter } from './providers/aiStudioProviderAdapter.js'
 import { AnthropicProviderAdapter } from './providers/anthropicProviderAdapter.js';
 import { MockProvider } from './providers/mockProvider.js';
 import { OpenAICompatibleProviderAdapter } from './providers/openAICompatibleProviderAdapter.js';
+import { syncActiveModelToSettings } from './claudeSettingsSync.js';
 
 type LlmRouterScope = {
   subprojectId?: string | null;
@@ -20,6 +21,7 @@ type RoutedCandidate = {
 
 export class LlmRouter {
   private static readonly providerCooldowns = new Map<string, number>();
+  private static readonly quotaResetTimes = new Map<string, number>();
 
   constructor(
     private readonly store: FileStore,
@@ -28,6 +30,7 @@ export class LlmRouter {
 
   static resetCooldowns() {
     this.providerCooldowns.clear();
+    this.quotaResetTimes.clear();
   }
 
   async execute(request: ModelProviderRequest, scope: LlmRouterScope = {}): Promise<ProviderExecutionBundle> {
@@ -83,12 +86,16 @@ export class LlmRouter {
       const result = await runtime.execute(request);
       if (result.status === 'success' && (result.outputText || result.assets.length > 0)) {
         this.clearCooldown(provider.name);
-        const withFallbackWarning = index > 0
+        const fellBack = index > 0;
+        const withFallbackWarning = fellBack
           ? {
               ...result,
               warning: [result.warning, `LLM Router automatically fell back to ${provider.name}.`].filter(Boolean).join(' '),
             }
           : result;
+        if (fellBack) {
+          syncActiveModelToSettings(provider).catch(() => {});
+        }
         events.push({
           kind: 'provider_succeeded',
           status: 'ok',
@@ -104,7 +111,7 @@ export class LlmRouter {
 
       const detail = result.error ?? `Provider ${provider.name} failed for ${request.capability}.`;
       if (this.isQuotaOrRateLimitError(detail)) {
-        this.markCooldown(provider.name);
+        this.markCooldown(provider.name, detail);
       }
       events.push({
         kind: 'provider_failed',
@@ -146,6 +153,8 @@ export class LlmRouter {
           model: candidate.provider.model ?? null,
           baseUrl: candidate.provider.baseUrl ?? null,
           priority: candidate.provider.priority,
+          authMode: candidate.provider.authMode,
+          scope: candidate.provider.scope,
           routedCapability: candidate.capability,
           order: index,
           score: this.getProviderScore(candidate.provider, scope.preferredProvider ?? null, config.defaultProvider),
@@ -159,10 +168,19 @@ export class LlmRouter {
   private async resolveCandidates(capability: ProviderCapability, scope: LlmRouterScope) {
     const subprojectId = scope.subprojectId ?? null;
     const config = await this.registry.loadConfig(subprojectId);
-    const providers = await this.registry.listResolvedProviders(subprojectId);
+    const providers = (await this.registry.listResolvedProviders(subprojectId))
+      .filter((provider) => this.isRuntimeCandidate(provider));
     const groups = this.getCapabilityGroups(capability, scope.allowCrossCapabilityFallback ?? false);
     const seen = new Set<string>();
     const candidates: RoutedCandidate[] = [];
+
+    // 如果有额度过期的提供商，清除它的 cooldown
+    for (const [name, resetTime] of LlmRouter.quotaResetTimes) {
+      if (resetTime <= Date.now()) {
+        LlmRouter.providerCooldowns.delete(name);
+        LlmRouter.quotaResetTimes.delete(name);
+      }
+    }
 
     for (const groupCapability of groups) {
       const groupProviders = providers.filter((provider) => provider.capabilities.includes(groupCapability));
@@ -216,9 +234,6 @@ export class LlmRouter {
     }
     if (preferredProvider && provider.name === preferredProvider) {
       score += 100;
-    }
-    if (provider.name === defaultProvider) {
-      score += 20;
     }
     if (provider.runtimeReady) {
       score += 10;
@@ -274,6 +289,10 @@ export class LlmRouter {
     return /(429|quota|rate[\s-]?limit|too many requests|resource[\s-]?exhausted|exhausted|额度|限流)/iu.test(detail);
   }
 
+  private isRuntimeCandidate(provider: ResolvedProvider) {
+    return provider.authMode !== 'browser' && provider.scope !== 'codex-only';
+  }
+
   private getActiveCooldownUntil(providerName: string) {
     const cooldownUntil = LlmRouter.providerCooldowns.get(providerName) ?? null;
     if (!cooldownUntil) {
@@ -288,12 +307,53 @@ export class LlmRouter {
     return cooldownUntil;
   }
 
-  private markCooldown(providerName: string) {
+  private markCooldown(providerName: string, errorDetail?: string) {
     LlmRouter.providerCooldowns.set(providerName, Date.now() + this.getCooldownMs());
+    // 尝试从错误信息中提取额度重置时间
+    if (errorDetail) {
+      const resetMatch = errorDetail.match(/(?:reset|重置|到期|过期|until|next|恢复)[\s:]*(\d{4}[-/]\d{2}[-/]\d{2}|\d{2}:\d{2}|明天|今日|tomorrow|today)/i);
+      if (resetMatch) {
+        const resetTime = this.parseResetTime(resetMatch[1]);
+        if (resetTime) {
+          LlmRouter.quotaResetTimes.set(providerName, resetTime);
+        }
+      }
+      // 另一种常见格式：429 错误中直接包含时间戳
+      const timestampMatch = errorDetail.match(/(\d{10,13})/);
+      if (timestampMatch) {
+        const ts = parseInt(timestampMatch[1]);
+        if (ts > 1e9 && ts < 1e13) {
+          LlmRouter.quotaResetTimes.set(providerName, ts);
+        }
+      }
+    }
+  }
+
+  private parseResetTime(timeStr: string): number | null {
+    // 常见格式解析
+    const now = Date.now();
+    if (/tomorrow|明天/i.test(timeStr)) return now + 24 * 60 * 60 * 1000;
+    if (/today|今日/i.test(timeStr)) return now + 1 * 60 * 60 * 1000;
+    // 日期格式
+    const dateMatch = timeStr.match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
+    if (dateMatch) {
+      const d = new Date(+dateMatch[1], +dateMatch[2] - 1, +dateMatch[3]);
+      if (!isNaN(d.getTime())) return d.getTime();
+    }
+    // 时间格式（今天内）
+    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+      const reset = new Date();
+      reset.setHours(+timeMatch[1], +timeMatch[2], 0, 0);
+      if (reset.getTime() < now) reset.setDate(reset.getDate() + 1);
+      return reset.getTime();
+    }
+    return null;
   }
 
   private clearCooldown(providerName: string) {
     LlmRouter.providerCooldowns.delete(providerName);
+    LlmRouter.quotaResetTimes.delete(providerName);
   }
 
   private getCooldownMs() {

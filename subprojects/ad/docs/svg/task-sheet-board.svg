@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1020" width="1500" height="1020">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .cardTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+  </style>
+
+  <rect width="1500" height="1020" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">Back to SVG index</text></a>
+  <text x="72" y="94" class="title">Ad PM Task Sheet Board</text>
+  <text x="72" y="122" class="sub">SVG rewrite of the active PM task sheet: deliver execution inputs for the end-of-month demo, not another broad Ad OS plan.</text>
+
+  <rect x="72" y="156" width="1356" height="166" class="card"/>
+  <text x="100" y="194" class="cardTitle">Task Goal</text>
+  <text x="100" y="236" class="body">Consolidate the existing PRD, blueprint, and demo replan into a small executable month-end demo package, then produce a clean MVP input list.</text>
+  <text x="100" y="276" class="meta">Owner: ad project PM agent. Reviewer: virtual product chief agent.</text>
+
+  <rect x="72" y="356" width="648" height="520" class="card"/>
+  <text x="100" y="394" class="cardTitle">Required Deliverables</text>
+  <text x="100" y="438" class="body">1. Demo task breakdown</text>
+  <text x="100" y="472" class="body">Answer product, frontend, backend mock API, and data/content tasks, with P0/P1 split.</text>
+  <text x="100" y="522" class="body">2. Unified workbench and core scenario flow</text>
+  <text x="100" y="556" class="body">Cover the entry structure, diagnosis flow, conversational analysis flow, state transitions, and key result-card structure.</text>
+  <text x="100" y="606" class="body">3. Demo acceptance checklist</text>
+  <text x="100" y="640" class="body">State what to verify before demo, what must be visible during demo, how readiness is judged, and how leftovers are recorded.</text>
+  <text x="100" y="690" class="body">4. Post-demo MVP input list</text>
+  <text x="100" y="724" class="body">Clarify which capabilities move into MVP, which stay deferred, and which questions require chief judgment.</text>
+
+  <rect x="780" y="356" width="648" height="520" class="card"/>
+  <text x="808" y="394" class="cardTitle">Submission and Review Rules</text>
+  <text x="808" y="438" class="body">Every output must include:</text>
+  <text x="808" y="472" class="body">core conclusion, source basis, current scope, uncertainties, and chief-decision questions.</text>
+  <text x="808" y="522" class="body">Sync discipline:</text>
+  <text x="808" y="556" class="body">sync the plan when receiving the task, sync after each first draft, and at 30-minute stalls.</text>
+  <text x="808" y="606" class="body">Review outcomes are limited to:</text>
+  <text x="808" y="640" class="body">accepted, accepted-with-constraints, needs-more-clarity, blocked-by-scope, rejected.</text>
+  <text x="808" y="690" class="body">Common reasons for rejection:</text>
+  <text x="808" y="724" class="body">scope expansion, mixing long-term capabilities into the demo, vague direction without task breakdown, or missing sync.</text>
+</svg>

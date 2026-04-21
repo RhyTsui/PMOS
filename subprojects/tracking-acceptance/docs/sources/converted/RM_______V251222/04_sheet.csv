@@ -1,0 +1,291 @@
+﻿自定义事件名称,字段名称,描述,是否必需,备注
+20001 - 新手引导 Tutorial,event_id,自定义事件ID：20001，HYL:新手引导环节开始&完成，TutorialStep.id,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""新手引导""",,
+,tutorial_id,引导编号,必填,int，= TutorialStep.id
+,tutorial_state,引导状态，>>点击查看：枚举列表<<,必填,int
+,,,,
+20002 - 玩家成长 PlayerGrow,event_id,自定义事件ID：20002，HYL:玩家成长日志，包括：玩家/商店/种植物等成长,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""玩家成长""",,
+,grow_type,成长类型，>>点击查看：枚举列表<<,必填,int
+,grow_target,成长目标ID,,int，Store.id/Plant.id
+,grow_pre,成长前数值,必填,int
+,grow_post,成长后数值,必填,int
+,,,,
+20003 - 成长解锁 GrowUnlock,event_id,自定义事件ID：20003，HYL:玩家成长解锁内容，包括：功能/场景/种植物/花艺配方等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""成长解锁""",,
+,unlock_type,解锁类型，>>点击查看：枚举列表<<,必填,int
+,unlock_target,成长目标ID,必填,int，GameFunc.id/Plant.id/Formula.id/SocialRes.id
+,,,,
+20004 - 游戏货币 GameCurrency,event_id,自定义事件ID：20004，HYL:游戏货币变更日志，参照【资源产销-Prop】,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""游戏货币""",,
+,currency_id,游戏货币ID,必填,int
+,act_type,变更类型，>>点击查看：枚举列表<<,必填,int
+,act_amount,变更数额,必填,int
+,scene,变更场景，>>点击查看：功能场景<<,,string
+,scene_extension,货币变更来源扩展参数，商品ID、随机礼盒ID等,,int
+,,,,
+20005 - 资源存量 Inventory,event_id,自定义事件ID：20005，HYL:角色下线后异步上报(与Logout同时),必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""资源存量""",,
+,inventory,资源库存,必填,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,物品ID,必填,key，string，广义物品：Item.id/Furniture.id/PlayerAvatar.id/Plant.id/Formula.id
+,item_cnt,物品数量,必填,value，int
+,,,,
+20006 - 鲜花种植 Plant,event_id,自定义事件ID：20006，HYL:鲜花种植相关操作日志，培育/种植/浇水/收获等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""鲜花种植""",,
+,plant_id,种植物ID,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,operation_cnt,操作数量，批量操作时计数,必填,int，默认1
+,gain_item,收获物,,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,收获物ID,,key，string
+,item_cnt,收获物数量,,value，int
+,,,,
+20007 - 花艺制作 FloralMake,event_id,自定义事件ID：20007，HYL:花艺制作相关操作日志，制作&收获等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""花艺制作""",,
+,formula_type,配方类型，>>点击查看：枚举列表<<,,int
+,formula_id,配方ID,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,output_id,产物ID,必填,int，= Item.id
+,output_cnt,产物数量,必填,int
+,,,,
+20008 - 花艺售卖 FloralSell,event_id,自定义事件ID：20008，HYL:花艺售卖相关操作日志，上架/结算/下架等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""花艺售卖""",,
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,floral_id,花艺品ID,必填,int，= Item.id
+,floral_cnt,花艺品数量,必填,int
+,,,,
+20009 - 经营订单 OperateOrder,event_id,自定义事件ID：20009，HYL:经营订单相关操作日志，触发/交付/超时等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""经营订单""",,
+,order_type,订单类型，>>点击查看：枚举列表<<,必填,int
+,customer_id,顾客ID,,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,order_item,订单物品,必填,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,订单物品ID,,key，string
+,item_cnt,订单物品数量,,value，int
+,,,,
+20010 - 场景事件 SceneEvent,event_id,自定义事件ID：20010，HYL:场景事件相关操作日志，触发/完成等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""场景事件""",,
+,event_type,事件类型，>>点击查看：枚举列表<<,,int
+,game_event_id,事件ID,必填,int
+,customer_id,顾客ID,,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,gain_item,收获物,,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,收获物ID,,key，string
+,item_cnt,收获物数量,,value，int
+,,,,
+20011 - 剧情播放 GameStory  由客户端SDK发送 自定义事件,type,"SDK上报事件类型，自定义事件type固定为""0""",必填,
+,event,自定义事件ID：20011，HYL:剧情播放相关操作日志，跳过/自动/回看等,必填,
+,extra,自定义事件扩展参数集,,
+,event_name,"= ""剧情播放""",必填,
+,story_coin,剩余剧情币,,int，主线剧情发送
+,today_story_coin,今日获得剧情币,,int，主线剧情发送
+,story_type,剧情类型，>>点击查看：枚举列表<<,必填,int
+,story_id,剧情ID,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,,,,
+20012 - 任务成就 Task,event_id,自定义事件ID：20012，HYL:任务成就相关操作日志，触发/领取/完成/交付等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""任务成就""",,
+,task_type,任务类型，>>点击查看：枚举列表<<,,int
+,task_id,任务ID,必填,int
+,task_state,任务状态，>>点击查看：枚举列表<<,必填,int
+,,,,
+20013 - 分档奖励 RankeReward,event_id,自定义事件ID：20013，HYL:分档奖励相关操作日志，达成/领取等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""分档奖励""",,
+,rank_type,分档类型，>>点击查看：枚举列表<<,必填,int
+,rank_id,分档奖励ID,必填,int，= RankReward.id
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,,,,
+20014 - 玩家换装 PlayerAvatar,event_id,自定义事件ID：20014，HYL:玩家换装相关操作日志，穿上/脱下/染色等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""玩家换装""",,
+,avatar_type,装扮类型，>>点击查看：枚举列表<<,,int
+,avatar_id,装扮ID,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,color_index,涂色色卡,,int
+,,,,
+20015 - 场景布置 SceneLayout,event_id,自定义事件ID：20015，HYL:场景布置相关操作日志，布置/移动/收回等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""场景布置""",,
+,layout_type,布置物类型，>>点击查看：枚举列表<<,,int
+,layout_id,布置物ID,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,,,,
+20016 - 社交系统 Social,event_id,自定义事件ID：20016，HYL:社交好友相关操作日志，加好友/互助等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""社交系统""",,
+,friend_cnt,好友人数,必填,int
+,buddy_cnt,闺蜜人数,必填,int
+,friend_coin,友情币数量,,int，拜访/采摘/兑换发送
+,today_friend_coin,今日获得友情币,,int，拜访/采摘/兑换发送
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,operation_cnt,操作数量，批量操作时计数,必填,int，默认1
+,pluck_item,采摘物品,,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,采摘物ID,,key，string
+,item_cnt,采摘物数量,,value，int
+,,,,
+20017 - 交易系统 Trade,event_id,自定义事件ID：20017，HYL:交易系统相关操作日志，寄售/购买等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""交易系统""",,
+,trade_type,交易类型，>>点击查看：枚举列表<<,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,trade_id,交易品ID,必填,int
+,trade_cnt,交易品数量,必填,int
+,trade_price,交易品均价,必填,int
+,trade_times,今日剩余交易次数,,int，上架/购买次数发送
+,,,,
+20018 - 玩家排行 GameRanking,event_id,自定义事件ID：20018，HYL:玩家排行相关行为日志，排名变动/奖励领取等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""玩家排行""",,
+,rank_key,排行标识，>>点击查看：排行标识<<,必填,string，=GameRanking.sort_key
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,cur_rank,当前排名,必填,int
+,pre_rank,变更前排名,,
+,gain_item,收获物,,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,收获物ID,,key，string
+,item_cnt,收获物数量,,value，int
+,,,,
+20019 - 公会系统 Guild,event_id,自定义事件ID：20019，HYL:交易系统相关操作日志，寄售/购买等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""公会系统""",,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+20020 - 公会竞赛 GuildLeague,event_id,自定义事件ID：20020，HYL:玩家排行相关行为日志，排名变动/奖励领取等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""公会竞赛""",,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+20021 - 内嵌游戏 MiniGame,event_id,自定义事件ID：20021，HYL:内嵌游戏相关操作日志，挑战/评分/结算等,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""内嵌游戏""",,
+,game_mode,游戏模式，>>点击查看：游戏模式<<,必填,
+,game_level,游戏难度，默认1,必填,int
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,
+,game_extension,操作拓展参数：道具ID、游戏积分等，默认0,必填,int
+,result_rank,结算评级，游戏结算评级，0=失败，1/2/3/…=评级分档,必填,int
+,,,,
+20022 - 入口检测 LaunchFrom  由客户端SDK发送 自定义事件,type,"SDK上报事件类型，自定义事件type固定为""0""",必填,
+,event,自定义事件ID：20022，HYL:根据平台要求，针对特定入口激励类功能的行为日志,必填,
+,extra,自定义事件扩展参数集,,
+,launch_scene,入口场景标识，>>点击查看：入口场景<<,必填,int
+,launch_extension,入口场景拓展参数，预留,,
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,int
+,,,,
+20023 - 平台特性 PlatformFeature  由客户端SDK发送 自定义事件,type,"SDK上报事件类型，自定义事件type固定为""0""",必填,
+,event,自定义事件ID：20023，HYL:平台特性相关操作日志，触发/发起/完成/反馈等,必填,
+,extra,自定义事件扩展参数集,,
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,
+,scene,特性场景，>>点击查看：特性场景<<,必填,
+,feature_state,特性操作状态，>>点击查看：特性状态<<,必填,
+,feature_extension,特性操作扩展参数：订阅消息ID、游戏圈跳转ID、赠送道具ID、炫耀排行榜ID等，默认0,必填,stringarray
+,,,,
+20024 - 商品购买 GoodsPurchase,event_id,自定义事件ID：20024，HYL:通用商店机制中，商品购买日志,必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""商品购买""",,
+,goods_id,商品标识，>>点击查看：枚举列表<<,必填,int，= Goods.id
+,store_id,商店标识，>>点击查看：枚举列表<<,必填,int，= Store.id
+,purchase_amount,购买数量，默认=1,必填,int
+,price_item,购买价格货币物品编号(单价),必填,int
+,price_cnt,购买价格货币物品数量(单价),必填,int
+,,,,
+20025 - 扭蛋抽奖 Gacha,event_id,自定义事件ID：20025，HYL:内嵌游戏相关操作日志，挑战/评分/结算等,,
+,start_time,数据发生时间(13位时间戳),,
+,event_name,"= ""扭蛋抽奖""",,
+,gacha_id,扭蛋标识，>>点击查看：枚举列表<<,必填,
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,
+,draw_times,保底型扭蛋保底累计次数,,
+,draw_loops,循环保底型扭蛋循环轮次,,
+,buff_link,扭蛋关联Buff,,
+,gain_item,收获物,,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,收获物ID,,key，string
+,item_cnt,收获物数量,,value，int
+,,,,
+20026 - 活动展示 OpActHUD  由客户端SDK发送 自定义事件,type,"SDK上报事件类型，自定义事件type固定为""0""",必填,
+,event,自定义事件ID：20026，HYL:活动类HUD界面操作日志，弹出/打开/完成/关闭等,必填,
+,extra,自定义事件扩展参数集,,
+,act_key,活动标识，>>点击查看：活动标识<<,必填,
+,act_extension,活动扩展参数,,礼包特权类，= Pay.id
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,
+,,,,
+20027 - 运营活动 OpAct,event_id,自定义事件ID：20027，HYL:运营活动相关操作日志，启用/完成/交付等(参考任务),必填,
+,start_time,数据发生时间(13位时间戳),必填,
+,event_name,"= ""运营活动""",,
+,act_key,活动标识，>>点击查看：活动标识<<,必填,
+,act_goal,活动目标，>>点击查看：活动目标<<,必填,
+,operation_type,操作类型，>>点击查看：枚举列表<<,必填,
+,gain_item,收获物,必填,"map，= {""$item_id"":$item_cnt,""$item_id"":$item_cnt,...}"
+,item_id,收获物ID,必填,key，string
+,item_cnt,收获物数量,必填,value，int
+,,,,
+20028 -,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+20029 -,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+20030 -,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,

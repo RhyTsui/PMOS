@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1160" width="1440" height="1160">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
+    .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
+    .sub { fill: #6e6e80; font-size: 13px; }
+    .card { fill: #ffffff; stroke: #e5e5e5; stroke-width: 1.5; rx: 10; }
+    .cardTitle { fill: #0d0d0d; font-size: 17px; font-weight: 600; }
+    .body { fill: #374151; font-size: 13px; }
+    .meta { fill: #6e6e80; font-size: 12px; }
+    .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
+  </style>
+  <rect width="1440" height="1160" fill="#ffffff"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS 规则图板</text>
+  <text x="72" y="116" class="sub">当前平台关于产品工作、评审、可见性和 AI 产品经理交付方式的运行规则。</text>
+
+  <rect x="72" y="152" width="412" height="180" class="card"/>
+  <rect x="72" y="152" width="5" height="180" fill="#10a37f"/>
+  <text x="100" y="192" class="cardTitle">1. 单一原始输入入口</text>
+  <text x="100" y="217" class="meta">truth source</text>
+  <text x="100" y="252" class="body">所有人工原始材料都先进入 `docs/sources/inbox/`。没有进入治理文档体系前，都只能算推断，不能直接当事实。</text>
+
+  <rect x="514" y="152" width="412" height="180" class="card"/>
+  <rect x="514" y="152" width="5" height="180" fill="#10a37f"/>
+  <text x="542" y="192" class="cardTitle">2. 工作流主链不可跳过</text>
+  <text x="542" y="217" class="meta">must not be skipped</text>
+  <text x="542" y="252" class="body">输入 -&gt; 研究/访谈 -&gt; 头脑风暴 -&gt; 认知整合 -&gt; 关键点提炼 -&gt; 决策 -&gt; 输出 -&gt; 主动同步。不能从原始输入直接跳到最终 PRD。</text>
+
+  <rect x="956" y="152" width="412" height="180" class="card"/>
+  <rect x="956" y="152" width="5" height="180" fill="#10a37f"/>
+  <text x="984" y="192" class="cardTitle">3. 不确定性必须显式化</text>
+  <text x="984" y="217" class="meta">early-stage output discipline</text>
+  <text x="984" y="252" class="body">所有早期产物都要区分 fact / judgment / candidate / unknown。研究和架构没收口前，不能制造假确定性。</text>
+
+  <rect x="72" y="370" width="412" height="180" class="card"/>
+  <text x="100" y="410" class="cardTitle">4. 工作必须可见</text>
+  <text x="100" y="435" class="meta">submission rule</text>
+  <text x="100" y="470" class="body">没有文档、没有同步的工作，不算已提交。同步格式保持：target / done / current / blocker / needed decision。</text>
+
+  <rect x="514" y="370" width="412" height="180" class="card"/>
+  <text x="542" y="410" class="cardTitle">5. 固定提问阶段</text>
+  <text x="542" y="435" class="meta">must happen before convergence</text>
+  <text x="542" y="470" class="body">给 chief 的问题必须分组、书面化，并回写到治理文档里。确认、边界、优先级、非目标和决策请求是标准分类。</text>
+
+  <rect x="956" y="370" width="412" height="180" class="card"/>
+  <text x="984" y="410" class="cardTitle">6. AI PM 默认输出规则</text>
+  <text x="984" y="435" class="meta">delivery rule</text>
+  <text x="984" y="470" class="body">所有 AI 产品经理在面向 chief 的规划、研究、工作流、确认和状态类输出上，都默认先交 SVG。长篇 Markdown 退到附录层。</text>
+
+  <rect x="72" y="588" width="412" height="180" class="card"/>
+  <text x="100" y="628" class="cardTitle">7. SVG 优先，Markdown 第二层</text>
+  <text x="100" y="653" class="meta">artifact priority</text>
+  <text x="100" y="688" class="body">project board、research map、planning board、decision board 和 workflow board 应成为评审第一入口。Markdown 是细节支撑，不是主入口。</text>
+
+  <rect x="514" y="588" width="412" height="180" class="card"/>
+  <text x="542" y="628" class="cardTitle">8. 文档仍是真源</text>
+  <text x="542" y="653" class="meta">terminal is summary only</text>
+  <text x="542" y="688" class="body">权威结果仍要落在 `docs/operations`、`docs/memory`、`docs/templates`、`subprojects/*/docs`，以及平台/子项目 SVG 图板中。</text>
+
+  <rect x="956" y="588" width="412" height="180" class="card"/>
+  <text x="984" y="628" class="cardTitle">9. 例外处理规则</text>
+  <text x="984" y="653" class="meta">delivery layer exception</text>
+  <text x="984" y="688" class="body">如果开发、老板或外部交付硬性要求 Word、PRD 或 Markdown，就保留这些格式。但 SVG 图板仍应作为可视总览和评审入口。</text>
+
+  <rect x="72" y="806" width="412" height="180" class="card"/>
+  <text x="100" y="846" class="cardTitle">10. 子项目入口规则</text>
+  <text x="100" y="871" class="meta">navigation contract</text>
+  <text x="100" y="906" class="body">每个活跃子项目在条件允许时都应在根目录暴露 `project-board.svg`。平台总入口保持为 `boards/index.svg`。</text>
+
+  <rect x="514" y="806" width="412" height="180" class="card"/>
+  <text x="542" y="846" class="cardTitle">11. Hermes 候选技能规则</text>
+  <text x="542" y="871" class="meta">current runtime reality</text>
+  <text x="542" y="906" class="body">Hermes 目前仍是增强型能力，不是强制工作流控制器。它可以建议 `follow-builders`、`fireworks-tech-graph` 这类候选技能。</text>
+
+  <rect x="956" y="806" width="412" height="180" class="card"/>
+  <text x="984" y="846" class="cardTitle">12. 版本文档纪律</text>
+  <text x="984" y="871" class="meta">human + AI output split</text>
+  <text x="984" y="906" class="body">版本文档仍可能需要简洁交付稿和详细 Markdown，但 PM 向评审应优先从治理过的 SVG 图板进入。</text>
+
+  <rect x="72" y="1024" width="1296" height="92" class="card"/>
+  <text x="100" y="1062" class="cardTitle">关联真源</text>
+  <a href="../docs/operations/product-workflow-total-design.md"><text x="100" y="1092" class="linkText">product-workflow-total-design.md</text></a>
+  <a href="../docs/operations/svg-first-artifact-policy.md"><text x="430" y="1092" class="linkText">svg-first-artifact-policy.md</text></a>
+  <a href="../docs/operations/startup-whoami.md"><text x="700" y="1092" class="linkText">startup-whoami.md</text></a>
+  <a href="pmaios-pm-delivery.svg"><text x="950" y="1092" class="linkText">pmaios-pm-delivery.svg</text></a>
+</svg>

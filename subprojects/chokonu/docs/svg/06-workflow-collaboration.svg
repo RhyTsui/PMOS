@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="980" viewBox="0 0 1400 980" fill="none">
+  <defs>
+    <linearGradient id="bg6" x1="80" y1="40" x2="1320" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EEF4FF"/>
+    </linearGradient>
+    <filter id="s6" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#BECBE3" flood-opacity="0.25"/>
+    </filter>
+    <marker id="arr6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#6F84A8"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .t { font-size: 34px; font-weight: 700; fill: #1F2A44; }
+      .st { font-size: 16px; font-weight: 500; fill: #60708F; }
+      .h { font-size: 22px; font-weight: 700; fill: #21314B; }
+      .b { font-size: 14px; font-weight: 500; fill: #5C6D8A; }
+      .c { font-size: 18px; font-weight: 700; fill: #21314B; }
+    </style>
+  </defs>
+  <rect width="1400" height="980" fill="url(#bg6)"/>
+  <text x="88" y="68" class="t">06 执行工作流与角色协同</text>
+  <text x="88" y="98" class="st">把执行工作流、PM任务单、同步格式和文档分层放在一张图里，后续就按这套协作。</text>
+
+  <rect x="88" y="140" width="1224" height="194" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s6)"/>
+  <text x="122" y="184" class="h">三条并行工作链</text>
+
+  <rect x="122" y="220" width="340" height="74" rx="20" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="148" y="250" class="c">规划链</text>
+  <text x="148" y="274" class="b">背景 -> 最佳实践 -> 首版目标 -> 架构 -> 动作链 -> skill</text>
+
+  <rect x="530" y="220" width="340" height="74" rx="20" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="556" y="250" class="c">执行链</text>
+  <text x="556" y="274" class="b">任务单 -> 同步 -> 评审 -> 决策 -> 回写</text>
+
+  <rect x="938" y="220" width="340" height="74" rx="20" fill="#FFF8F0" stroke="#F1DEC7"/>
+  <text x="964" y="250" class="c">交付链</text>
+  <text x="964" y="274" class="b">详细版 -> 人读版 -> 开发评审版 -> 版本评审</text>
+
+  <rect x="88" y="376" width="586" height="270" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s6)"/>
+  <text x="122" y="420" class="h">角色分工</text>
+  <text x="122" y="458" class="b">Chief：首版边界判断、关键架构收口、模板与评审口径、最终拍板。</text>
+  <text x="122" y="490" class="b">项目 PM：同步信息、整理首稿、维护需求清单、准备版本评审、整理人读版材料。</text>
+  <text x="122" y="522" class="b">测试 / 测开 / 工程：规则可实现性、自动化执行链路、评估器、报告与 Trace 落地。</text>
+  <text x="122" y="566" class="b">关键原则：所有新增页面、模块、需求、版本项，都必须能回挂到主链某一环。</text>
+
+  <rect x="726" y="376" width="586" height="270" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s6)"/>
+  <text x="760" y="420" class="h">固定同步格式</text>
+  <text x="760" y="458" class="b">1. 本轮目标</text>
+  <text x="760" y="486" class="b">2. 已完成</text>
+  <text x="760" y="514" class="b">3. 当前在写</text>
+  <text x="760" y="542" class="b">4. 卡点</text>
+  <text x="760" y="570" class="b">5. 需要主决策</text>
+  <text x="760" y="612" class="b">未按这 5 行同步，视为未正式提交。</text>
+
+  <rect x="88" y="688" width="1224" height="204" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s6)"/>
+  <text x="122" y="732" class="h">文档分层规则</text>
+  <text x="122" y="770" class="b">过程文档：给内部团队使用，可以详细，承接研究、推理、对比、风险暴露和中间过程沉淀。</text>
+  <text x="122" y="802" class="b">交付文档：给开发、老板、下游使用，必须精简，只保留目标、范围、核心结论、行动项、风险、待拍板项。</text>
+  <text x="122" y="834" class="b">固定禁项：不再往 tracking-acceptance 写活跃文档；不再让首版停在概念层；不再让需求句混入大段背景；不再出现无 skill 支撑的空动作。</text>
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1120" width="1560" height="1120">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .chip { fill: #ecfeff; stroke: #bae6fd; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f172a; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1120" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">模式架构</text>
+  <text x="72" y="118" class="sub">不是强行用一套默认行为覆盖所有场景，而是按明确模式切换执行协议。</text>
+
+  <rect x="72" y="156" width="1416" height="30" class="chip"/>
+  <text x="100" y="175" class="chipText">核心思想：保留默认保守模式，同时允许显式进入 `{plan}`、`{deep}`、`{do}` 等不同执行路线。</text>
+
+  <rect x="72" y="224" width="300" height="220" class="card"/>
+  <text x="100" y="268" class="section">default</text>
+  <text x="100" y="296" class="meta">保守 / 评估 / 治理优先</text>
+  <text x="100" y="338" class="body">适合高不确定、高风险、需要更多评估和更稳同步的场景。</text>
+  <text x="100" y="372" class="body">确认更多，推进更稳。</text>
+
+  <rect x="404" y="224" width="300" height="220" class="card"/>
+  <text x="432" y="268" class="section">plan</text>
+  <text x="432" y="296" class="meta">先完善再实施</text>
+  <text x="432" y="338" class="body">适合 idea 仍需强化的场景：先识别意图，做拆解、做最佳实践扫描和影响评估，再决定是否实施。</text>
+
+  <rect x="736" y="224" width="300" height="220" class="card"/>
+  <text x="764" y="268" class="section">deep</text>
+  <text x="764" y="296" class="meta">旁路深研，不打断主线</text>
+  <text x="764" y="338" class="body">适合大课题和长期议题。主流程继续推进，旁边单开深研文档和比较线。</text>
+
+  <rect x="1068" y="224" width="420" height="220" class="card"/>
+  <text x="1096" y="268" class="section">do</text>
+  <text x="1096" y="296" class="meta">快速实施路线</text>
+  <text x="1096" y="338" class="body">适合目标已经明确、今天要冲结果的场景。连续执行、短同步、阶段汇报不停工，新想法默认旁路。</text>
+  <text x="1096" y="372" class="body">建议指令：`{do} finish today's plan`</text>
+
+  <rect x="72" y="488" width="1416" height="252" class="card"/>
+  <text x="104" y="532" class="section">模式切换后应影响什么</text>
+  <text x="104" y="560" class="meta">这不是只换一句话，而是切换执行协议</text>
+
+  <rect x="104" y="602" width="300" height="96" class="card"/>
+  <text x="132" y="640" class="section">汇报节奏</text>
+  <text x="132" y="672" class="body">长汇报还是短状态流，是否允许中间总结后继续冲。</text>
+
+  <rect x="432" y="602" width="300" height="96" class="card"/>
+  <text x="460" y="640" class="section">停顿条件</text>
+  <text x="460" y="672" class="body">什么时候必须停，什么时候默认继续做。</text>
+
+  <rect x="760" y="602" width="300" height="96" class="card"/>
+  <text x="788" y="640" class="section">新需求插入策略</text>
+  <text x="788" y="672" class="body">直接吸收、先完善，还是先旁路挂起。</text>
+
+  <rect x="1088" y="602" width="368" height="96" class="card"/>
+  <text x="1116" y="640" class="section">权限处理策略</text>
+  <text x="1116" y="672" class="body">逐次确认，还是尽量批量处理并保持非阻塞推进。</text>
+
+  <rect x="72" y="780" width="1416" height="164" class="card"/>
+  <text x="104" y="824" class="section">为什么这是架构层而不是提示词小修</text>
+  <text x="104" y="856" class="body">因为它改变的是：启动与切换、汇报器、执行器、阻塞判断、权限门、需求插入策略和产物预期，而不是只改变一句 prompt 的语气。</text>
+  <text x="104" y="892" class="body">正确路径不是把默认模式改坏，而是在需要时显式切换到更适合的协议。</text>
+
+  <rect x="72" y="980" width="1416" height="82" class="card"/>
+  <a href="../docs/architecture/mode-architecture.md"><text x="100" y="1016" class="linkText">配套文档：mode architecture -&gt;</text></a>
+  <a href="../docs/operations/do-mode-execution-protocol.md"><text x="470" y="1016" class="linkText">执行协议：{do} mode protocol -&gt;</text></a>
+  <a href="../docs/templates/mode_switch_template.md"><text x="850" y="1016" class="linkText">配套模板：mode switch template -&gt;</text></a>
+  <a href="../docs/research/human-machine-collaboration-research.md"><text x="1180" y="1016" class="linkText">深研文档 -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="100" y="1046" class="linkText">回到：v0.5 清单板 -&gt;</text></a>
+  <a href="index.svg"><text x="360" y="1046" class="linkText">回到：图板目录 -&gt;</text></a>
+  <text x="620" y="1046" class="meta">当前 `{do}` 样板任务：task-60d32fc4-4bea-466a-adc7-443a4869dc72</text>
+</svg>

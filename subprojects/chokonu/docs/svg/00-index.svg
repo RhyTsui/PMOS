@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1240" viewBox="0 0 1400 1240" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1320" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EFF4FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#BCCAE3" flood-opacity="0.28"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #1F2A44; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #60708F; }
+      .cardTitle { font-size: 22px; font-weight: 700; fill: #20304A; }
+      .cardBody { font-size: 14px; font-weight: 500; fill: #5E6E8C; }
+      .tag { font-size: 12px; font-weight: 700; fill: #4B6EA8; }
+      .foot { font-size: 13px; font-weight: 600; fill: #6A7B98; }
+    </style>
+  </defs>
+  <rect width="1400" height="1240" fill="url(#bg)"/>
+  <text x="88" y="68" class="title">ChoKoNu 文档 SVG 目录</text>
+  <text x="88" y="98" class="subtitle">当前 ChoKoNu 文档的可视化入口。前 01-07 偏当前真源，08-11 专门吸收 legacy 研究、专项测试草案和执行方法稿。</text>
+
+  <a href="./01-overview.svg">
+    <rect x="88" y="146" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="122" y="192" class="cardTitle">01 项目背景与定位</text>
+    <text x="122" y="223" class="cardBody">说明 ChoKoNu 为什么存在、要解决什么问题，以及首版边界是什么。</text>
+    <text x="122" y="250" class="cardBody">来源：项目背景、一期开源 AI 方案说明、项目记忆。</text>
+    <text x="122" y="274" class="tag">起始阅读</text>
+  </a>
+
+  <a href="./02-problems.svg">
+    <rect x="724" y="146" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="758" y="192" class="cardTitle">02 问题地图与优先级</text>
+    <text x="758" y="223" class="cardBody">把当前业务问题收敛成少量主线，明确优先级和暂不处理范围。</text>
+    <text x="758" y="250" class="cardBody">来源：问题清单总表、优先级与边界分析。</text>
+    <text x="758" y="274" class="tag">问题地图</text>
+  </a>
+
+  <a href="./03-planning.svg">
+    <rect x="88" y="332" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="122" y="378" class="cardTitle">03 首版规划主链</text>
+    <text x="122" y="409" class="cardBody">把首版规划压缩成稳定主链：标准、样本、评测集、执行、评估、Trace、报告、回归。</text>
+    <text x="122" y="436" class="cardBody">来源：首版总规划、首版需求清单人读版。</text>
+    <text x="122" y="460" class="tag">规划</text>
+  </a>
+
+  <a href="./04-product-architecture.svg">
+    <rect x="724" y="332" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="758" y="378" class="cardTitle">04 产品架构与工作台</text>
+    <text x="758" y="409" class="cardBody">展示 Studio 外壳、工作台拆分以及核心对象关系。</text>
+    <text x="758" y="436" class="cardBody">来源：产品草图、导航方案、工作台关系图、整体架构图。</text>
+    <text x="758" y="460" class="tag">产品结构</text>
+  </a>
+
+  <a href="./05-requirements-delivery.svg">
+    <rect x="88" y="518" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="122" y="564" class="cardTitle">05 需求与交付结构</text>
+    <text x="122" y="595" class="cardBody">整理必须范围、交付分层，以及当前版本评审输入包。</text>
+    <text x="122" y="622" class="cardBody">来源：一期范围、需求池、需求清单、人读版、评审输入稿。</text>
+    <text x="122" y="646" class="tag">交付结构</text>
+  </a>
+
+  <a href="./06-workflow-collaboration.svg">
+    <rect x="724" y="518" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="758" y="564" class="cardTitle">06 工作流与协同</text>
+    <text x="758" y="595" class="cardBody">汇总执行工作流、PM 任务分工、同步规则和文档分层。</text>
+    <text x="758" y="622" class="cardBody">来源：执行工作流、产品经理任务单、文档验收状态清单。</text>
+    <text x="758" y="646" class="tag">协同</text>
+  </a>
+
+  <a href="./07-review-readiness.svg">
+    <rect x="88" y="704" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="122" y="750" class="cardTitle">07 版本评审准备板</text>
+    <text x="122" y="781" class="cardBody">汇总评审所需的目标、范围、风险、真源状态和待决策项。</text>
+    <text x="122" y="808" class="cardBody">来源：版本评审输入稿、验收状态清单、首版总规划。</text>
+    <text x="122" y="832" class="tag">评审入口</text>
+  </a>
+
+  <a href="./08-legacy-research-map.svg">
+    <rect x="724" y="704" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="758" y="750" class="cardTitle">08 Legacy 研究总览</text>
+    <text x="758" y="781" class="cardBody">把旧研究、竞品、最佳实践、主链方法稿和专项草案整理成一张研究地图。</text>
+    <text x="758" y="808" class="cardBody">来源：legacy/research 与 legacy/requirements 下的核心研究文档。</text>
+    <text x="758" y="832" class="tag">研究入口</text>
+  </a>
+
+  <a href="./09-specialized-test-methods.svg">
+    <rect x="88" y="890" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="122" y="936" class="cardTitle">09 六类专项测试方法</text>
+    <text x="122" y="967" class="cardBody">把 MCP、Chat、Skill、Agent、知识检索、Workflow 的测试目标、方法和指标压成一张图。</text>
+    <text x="122" y="994" class="cardBody">来源：AI 应用分类测试框架与六份专项测试方法草案。</text>
+    <text x="122" y="1018" class="tag">专项方法</text>
+  </a>
+
+  <a href="./10-execution-asset-chain.svg">
+    <rect x="724" y="890" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="758" y="936" class="cardTitle">10 资产到报告执行主链</text>
+    <text x="758" y="967" class="cardBody">把 case、suite、evaluator、run、Trace、report、regression 的落地关系展开。</text>
+    <text x="758" y="994" class="cardBody">来源：评测集设计草案、评估器草案、自动化测试与评测报告主链路草案。</text>
+    <text x="758" y="1018" class="tag">执行设计</text>
+  </a>
+
+  <a href="./11-legacy-absorption-roadmap.svg">
+    <rect x="88" y="1076" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="122" y="1122" class="cardTitle">11 Legacy 吸收路线图</text>
+    <text x="122" y="1153" class="cardBody">明确哪些 legacy 文档已经变成现有真源，哪些应继续吸收，哪些保留为背景附录。</text>
+    <text x="122" y="1180" class="cardBody">来源：legacy 研究包与当前 active docs 的对照判断。</text>
+    <text x="122" y="1204" class="tag">吸收关系</text>
+  </a>
+
+  <a href="./12-first-batch-scope.svg">
+    <rect x="724" y="1076" width="588" height="146" rx="26" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#shadow)"/>
+    <text x="758" y="1122" class="cardTitle">12 首批方案范围</text>
+    <text x="758" y="1153" class="cardBody">明确首版先做哪些专项测试对象、哪些能力必进、哪些延后。</text>
+    <text x="758" y="1180" class="cardBody">来源：legacy 六类专项方法、首版约束、当前总规划。</text>
+    <text x="758" y="1204" class="tag">方案入口</text>
+  </a>
+</svg>

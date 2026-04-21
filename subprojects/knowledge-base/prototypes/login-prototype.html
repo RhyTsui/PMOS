@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小荀 · 知识资产平台 - 登录</title>
+  <style>
+    :root {
+      --bg: #eef3f8;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-2: rgba(247, 250, 253, 0.98);
+      --text: #1b2431;
+      --muted: #68788d;
+      --line: rgba(27, 36, 49, 0.08);
+      --navy: #1f3f67;
+      --teal: #0f766e;
+      --blue: #2c74d8;
+      --shadow: 0 18px 42px rgba(45, 67, 98, 0.11);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at left top, rgba(44,116,216,0.12), transparent 24%),
+        radial-gradient(circle at right 18%, rgba(15,118,110,0.12), transparent 20%),
+        linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .shell {
+      width: min(1180px, 100%);
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.56);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 700px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 44px;
+      line-height: 1.05;
+      font-weight: 600;
+    }
+
+    .hero-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+      max-width: 560px;
+    }
+
+    .capsule-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .capsule {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 11px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .mini-card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+      color: var(--navy);
+    }
+
+    .mini-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .hero-footer {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero-footer .info {
+      padding: 14px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(31,63,103,0.96), rgba(34,95,164,0.92));
+      color: #eef4ff;
+    }
+
+    .hero-footer .info strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .hero-footer .info span {
+      display: block;
+      font-size: 12px;
+      line-height: 1.8;
+      color: rgba(238,244,255,0.82);
+    }
+
+    .panel {
+      padding: 22px;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+      min-height: 700px;
+    }
+
+    .brand {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .brand-meta {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      margin: 4px 0 0;
+      font-size: 28px;
+      line-height: 1.1;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .section-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .login-block {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .login-block h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .login-block p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .scan-area {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .qr {
+      width: 120px;
+      height: 120px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(31,63,103,0.06) 10%, transparent 10%, transparent 20%, rgba(31,63,103,0.06) 20%, rgba(31,63,103,0.06) 30%, transparent 30%, transparent 40%, rgba(31,63,103,0.06) 40%, rgba(31,63,103,0.06) 50%, transparent 50%, transparent 60%, rgba(31,63,103,0.06) 60%, rgba(31,63,103,0.06) 70%, transparent 70%, transparent 80%, rgba(31,63,103,0.06) 80%),
+        linear-gradient(rgba(31,63,103,0.06) 10%, transparent 10%, transparent 20%, rgba(31,63,103,0.06) 20%, rgba(31,63,103,0.06) 30%, transparent 30%, transparent 40%, rgba(31,63,103,0.06) 40%, rgba(31,63,103,0.06) 50%, transparent 50%, transparent 60%, rgba(31,63,103,0.06) 60%, rgba(31,63,103,0.06) 70%, transparent 70%, transparent 80%, rgba(31,63,103,0.06) 80%);
+      background-size: 24px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .qr::before,
+    .qr::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border: 4px solid var(--navy);
+      border-radius: 6px;
+    }
+
+    .qr::before {
+      top: 12px;
+      left: 12px;
+    }
+
+    .qr::after {
+      bottom: 12px;
+      right: 12px;
+    }
+
+    .btn-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .btn.secondary {
+      background: var(--panel-2);
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .field label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 700;
+    }
+
+    .fake-input {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: #7a8799;
+      font-size: 13px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .tips {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tip {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+
+    .tip strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .tip span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 980px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+      .hero,
+      .panel {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .hero,
+      .panel { padding: 16px; }
+      h1 { font-size: 32px; }
+      .section-title { font-size: 24px; }
+      .grid { grid-template-columns: 1fr; }
+      .scan-area { grid-template-columns: 1fr; }
+      .qr { margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">小荀 · 知识资产平台 / 登录</p>
+        <h1>用一个入口，进入你的知识工作空间。</h1>
+        <p class="hero-copy">
+          先用假对接方式把登录流程和平台基调定下来。当前版本不接真实认证，
+          但页面表达会按“小闪账号为主”的使用方式来设计：扫码可进、手机号可进、登录后直接进入平台。
+        </p>
+        <div class="capsule-row">
+          <span class="capsule">小闪扫码登录</span>
+          <span class="capsule">手机号登录</span>
+          <span class="capsule">企业/部门/项目/个人知识库</span>
+          <span class="capsule">响应式</span>
+        </div>
+
+        <div class="grid">
+          <div class="mini-card">
+            <strong>个人知识</strong>
+            <span>会议纪要、笔记、外部订阅、收藏资料，形成长期上下文。</span>
+          </div>
+          <div class="mini-card">
+            <strong>业务知识</strong>
+            <span>广告业务、数据分析、项目资料、企业规则和口径支持业务问答。</span>
+          </div>
+          <div class="mini-card">
+            <strong>多种输入</strong>
+            <span>文字、语音、图片、文件、视频、链接、会议 URL 都能进入系统。</span>
+          </div>
+          <div class="mini-card">
+            <strong>随处可用</strong>
+            <span>登录后可在 Chat、Agent、工作流和 MCP 场景里直接调用知识。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-footer">
+        <div class="info">
+          <strong>当前原型说明</strong>
+          <span>
+            这是“假对接小闪”版本。现在点击登录按钮，会直接跳转到平台总览页，
+            用来先确认入口体验和整体风格，不阻塞前端继续往下走。
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="brand">
+        <div class="brand-name">小荀 · 知识资产平台</div>
+        <div class="brand-meta">login prototype</div>
+      </div>
+
+      <h2 class="section-title">登录进入平台</h2>
+      <p class="section-desc">
+        优先按小闪账号使用习惯来设计。正式接入前，先用假登录把页面体验跑通。
+      </p>
+
+      <div class="login-block">
+        <h3>小闪扫码登录</h3>
+        <p>推荐入口。当前是演示版，点击按钮后直接进入平台首页。</p>
+        <div class="scan-area">
+          <div class="qr" aria-hidden="true"></div>
+          <div class="btn-row">
+            <a class="btn primary" href="./platform-overview-prototype.html">模拟扫码进入平台</a>
+            <a class="btn secondary" href="./platform-overview-prototype.html">用当前小闪账号进入</a>
+            <div class="hint">正式版本可替换为真实小闪扫码能力和账号态回填。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-block">
+        <h3>手机号登录</h3>
+        <p>备用入口。当前仍然是演示版，点击按钮可直接进入平台。</p>
+        <div class="field">
+          <label>手机号</label>
+          <div class="fake-input">请输入手机号</div>
+        </div>
+        <div class="field">
+          <label>验证码</label>
+          <div class="fake-input">请输入短信验证码</div>
+        </div>
+        <div class="btn-row">
+          <a class="btn primary" href="./platform-overview-prototype.html">模拟手机号登录</a>
+        </div>
+      </div>
+
+      <div class="login-block">
+        <h3>登录后会发生什么</h3>
+        <div class="tips">
+          <div class="tip">
+            <strong>自动带出账号权限</strong>
+            <span>后续正式版可按小闪账号权限，自动展示你能看的企业、部门、项目和个人知识库。</span>
+          </div>
+          <div class="tip">
+            <strong>直接进入主工作区</strong>
+            <span>登录后进入平台总览，再进入主对话框、知识资产、接入中心和权限管理等页面。</span>
+          </div>
+          <div class="tip">
+            <strong>不阻塞原型评审</strong>
+            <span>先用假登录把前端体验做出来，等权限和认证接口确定后再替换成真实接入。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

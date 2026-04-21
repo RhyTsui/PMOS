@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1120" width="1560" height="1120">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .chip { fill: #ecfeff; stroke: #bae6fd; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f172a; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1120" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">AI 产研协同闭环</text>
+  <text x="72" y="118" class="sub">把产品 AI、aicoding、AI 测试和版本治理收成一个标准闭环，而不是产品、开发、测试各自零散使用 AI。</text>
+
+  <rect x="72" y="156" width="1416" height="30" class="chip"/>
+  <text x="100" y="175" class="chipText">主链路：产品 AI 产物 -&gt; aicoding 重实现 -&gt; AI 测试验证 -&gt; 发布上线 -&gt; AI 测试平台全流程回归</text>
+
+  <rect x="72" y="224" width="300" height="232" class="card"/>
+  <text x="100" y="268" class="section">1. 产品 AI 层</text>
+  <text x="100" y="296" class="meta">先出验证与交付产物</text>
+  <text x="100" y="338" class="body">产品侧默认用 AI 维护：</text>
+  <text x="100" y="370" class="body">demo 验证与演示材料</text>
+  <text x="100" y="402" class="body">演示后需求文档</text>
+  <text x="100" y="434" class="body">现有系统改动说明</text>
+  <text x="100" y="466" class="body">相关 SVG 图板</text>
+  <text x="100" y="498" class="body">版本化需求文档</text>
+
+  <rect x="404" y="224" width="300" height="232" class="card"/>
+  <text x="432" y="268" class="section">2. aicoding 重实现</text>
+  <text x="432" y="296" class="meta">demo 不是生产系统</text>
+  <text x="432" y="338" class="body">开发侧不直接把 demo 当正式系统，而是基于产品产物包重新实现：</text>
+  <text x="432" y="370" class="body">架构边界</text>
+  <text x="432" y="402" class="body">前端工程</text>
+  <text x="432" y="434" class="body">后端服务</text>
+  <text x="432" y="466" class="body">全栈 demo / 可部署版本</text>
+
+  <rect x="736" y="224" width="300" height="232" class="card"/>
+  <text x="764" y="268" class="section">3. AI 测试验证</text>
+  <text x="764" y="296" class="meta">实现前后都接测试</text>
+  <text x="764" y="338" class="body">AI 测试平台和 AI 测试流程负责：</text>
+  <text x="764" y="370" class="body">需求对齐验证</text>
+  <text x="764" y="402" class="body">关键流程验证</text>
+  <text x="764" y="434" class="body">改动影响验证</text>
+  <text x="764" y="466" class="body">阶段性回归</text>
+
+  <rect x="1068" y="224" width="420" height="232" class="card"/>
+  <text x="1096" y="268" class="section">4. 发布与回归</text>
+  <text x="1096" y="296" class="meta">上线后不是结束</text>
+  <text x="1096" y="338" class="body">发布上线后，AI 测试平台负责全流程回归评测：</text>
+  <text x="1096" y="370" class="body">smoke</text>
+  <text x="1096" y="402" class="body">关键场景回放</text>
+  <text x="1096" y="434" class="body">验收链路检查</text>
+  <text x="1096" y="466" class="body">版本漂移与回归风险提示</text>
+
+  <rect x="72" y="508" width="1416" height="254" class="card"/>
+  <text x="104" y="552" class="section">需要自动化同步的关键点</text>
+  <text x="104" y="580" class="meta">否则这个闭环会重新退化成人工补丁式协作</text>
+
+  <rect x="104" y="620" width="300" height="104" class="card"/>
+  <text x="132" y="658" class="section">需求变更传播</text>
+  <text x="132" y="690" class="body">变更后自动识别影响的 demo、文档、SVG、版本项和测试资产。</text>
+
+  <rect x="432" y="620" width="300" height="104" class="card"/>
+  <text x="460" y="658" class="section">产物包契约</text>
+  <text x="460" y="690" class="body">明确产品交给开发、开发交给测试、测试回写版本的标准产物包。</text>
+
+  <rect x="760" y="620" width="300" height="104" class="card"/>
+  <text x="788" y="658" class="section">Demo / 正式实现边界</text>
+  <text x="788" y="690" class="body">防止 demo 直接滑成生产系统，确保始终存在可审计的重实现步骤。</text>
+
+  <rect x="1088" y="620" width="368" height="104" class="card"/>
+  <text x="1116" y="658" class="section">测试前移 + 版本治理</text>
+  <text x="1116" y="690" class="body">测试不只上线后回归，每轮产品/开发/测试闭环都要落进版本记录。</text>
+
+  <rect x="72" y="808" width="1416" height="92" class="card"/>
+  <text x="104" y="850" class="section">一句话收敛</text>
+  <text x="104" y="882" class="body">目标不是“每个角色都用一下 AI”，而是把产品 AI、aicoding、AI 测试和版本治理串成一条持续可追溯的协同闭环。</text>
+
+  <rect x="72" y="944" width="1416" height="82" class="card"/>
+  <a href="../docs/operations/ai-product-development-collaboration-loop.md"><text x="100" y="990" class="linkText">配套文档：AI product-development collaboration loop -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="640" y="990" class="linkText">回到：v0.5 清单板 -&gt;</text></a>
+  <a href="cognition-ladder.svg"><text x="910" y="990" class="linkText">继续看：认知阶梯 / 意图放大器 -&gt;</text></a>
+</svg>

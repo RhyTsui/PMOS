@@ -1,0 +1,351 @@
+﻿字典分类,参数字段 key,枚举值 key.value,字典文本,备用枚举
+基础事件  枚举类字段 枚举字典,item_consumetype,,物品产销类型,
+,,item_consumetype.1,产出,
+,,item_consumetype.2,消耗,
+,scene,,功能场景,
+,,scene.gm,gm,enum=1
+,,scene.login,登录,
+,,scene.creatRole,创角,enum=2
+,,scene.rename,改名,
+,,scene.roleLevelUp,升级,
+,,scene.bag,背包系统,enum=3，【208：资源产销-Prop】scene_extension = Item.id（背包道具or出售）
+,,scene.store,商店系统,enum=4，【208：资源产销-Prop】scene_extension = Goods.id
+,,scene.pay,充值,enum=5，【208：资源产销-Prop】scene_extension = Pay.id
+,,scene.vip,月卡特权,enum=6，【208：资源产销-Prop】scene_extension = Vip.id
+,,scene.ad,广告,【208：资源产销-Prop】scene_extension = Goods.id
+,,scene.mail,邮件系统,enum=7，【208：资源产销-Prop】scene_extension = Mail.id/GM
+,,scene.bulletin,通知消息,【208：资源产销-Prop】scene_extension = Bulletin.id/GM
+,,scene.storyMain,主线剧情,enum=8，【208：资源产销-Prop】scene_extension = Story.id
+,,scene.task,任务成就,enum=9，【208：资源产销-Prop】scene_extension = Task.id
+,,scene.tutorial,引导,【208：资源产销-Prop】scene_extension = Tutorial.id
+,,scene.plant,种植,enum=10，【208：资源产销-Prop】scene_extension = Plant.id
+,,scene.floralMake,花艺制作,enum=11，【208：资源产销-Prop】scene_extension = Formula.id
+,,scene.floralSell,花艺出售,enum=12，【208：资源产销-Prop】scene_extension = Item.id（花艺物品）
+,,scene.sceneOrder,顾客订单,enum=13，【208：资源产销-Prop】scene_extension = Item.id（订单物品）
+,,scene.mapOrder,居民订单,enum=14，【208：资源产销-Prop】scene_extension = Item.id（订单物品）
+,,scene.shipOrder,特供订单,enum=15，【208：资源产销-Prop】scene_extension = Item.id（订单物品）
+,,scene.grouponOrder,组团订单,enum=16，【208：资源产销-Prop】scene_extension = Item.id（订单物品）
+,,scene.sceneEvent,场景事件,enum=17，【208：资源产销-Prop】scene_extension = GameEvent.id
+,,scene.social,社交系统,社交好友基础功能
+,,scene.friendHire,好友雇佣,enum=18，【208：资源产销-Prop】scene_extension = 目标玩家uid
+,,scene.friendPluck,好友采摘,enum=19，【208：资源产销-Prop】scene_extension = 目标玩家uid
+,,scene.trade,交易系统,【208：资源产销-Prop】scene_extension = Item.id（交易物品）
+,,scene.guildBuild,公会建设,enum=20
+,,scene.guildPlant,公会种植,enum=21
+,,scene.guildShare,公会分享,enum=22，【208：资源产销-Prop】scene_extension = Item.id（分享鲜花）
+,,scene.sevenDayGift,福利-七日登录,enum=23，【208：资源产销-Prop】scene_extension = OpActGoal.id
+,,scene.dailySignin,福利-每日签到,enum=24，【208：资源产销-Prop】scene_extension = OpActGoal.id
+,,scene.growthRoad,福利-成长之路,enum=25，【208：资源产销-Prop】scene_extension = OpActGoal.id
+,,scene.welfareChest,福利-福利宝箱,enum=26
+,,scene.gacha,扭蛋,enum=28，【208：资源产销-Prop】scene_extension = Gacha.id
+,,scene.opAct,运营活动,【208：资源产销-Prop】scene_extension = OpActGoal.id
+,,scene.miniGame,内嵌游戏,【208：资源产销-Prop】scene_extension = game_mode
+,,scene.share,被动分享,
+,,scene.interactive,关系链互动,
+,,scene.gift,游戏圈礼包（平台推送礼包）,【208：资源产销-Prop】scene_extension = GiftId
+,,scene.cdk,CDK礼包,【208：资源产销-Prop】scene_extension = CDK
+,,scene.sub$subScene,推送订阅（拼接Push.sub_scene）,
+,,scene.feedSub,推荐流订阅,【208：资源产销-Prop】scene_extension = Push.sub_scene
+,,scene.followAweme,关注官抖/官微,
+,,scene.avatar,玩家换装,
+,,scene.layout,场景布置,
+,,scene.expand,场景扩建,
+,,scene.roleHead,头像,
+,,scene.gameFuncPreview,功能指南,【208：资源产销-Prop】scene_extension = GameFuncPreview.id
+,itemType,,物品类型,
+,,item_type.once,一次性物品,
+,,item_type.lasting,永久性物品,
+,,item_type.weekly,周时长物品,
+,,item_type.monthly,月时长物品,
+,,item_type.yearly,年时长物品,
+,,item_type.free,免费物品,
+,itemId,,物品ID,
+,,itemId.$id,*详见内容ID字典,
+,,,,
+自定义事件  参数名称 & 枚举名称,event_name,,事件名称,
+,tutorial_id,,引导编号,
+,,tutorial_id.$id,*详见内容ID字典,= Tutorial.id
+,tutorial_state,,引导状态,
+,,tutorial_state.1,触发,"""trigger"""
+,,tutorial_state.2,结束,"""end"""
+,,tutorial_state.3,跳过,"""skip"""
+,grow_type,,成长类型,
+,,grow_type.0,玩家等级,"""player"""
+,,grow_type.1,商店等级,"""store"""
+,,grow_type.2,种植物等级,"""plantGrade"""
+,,grow_type.3,种植物阶级,"""plantRank"""
+,,grow_type.4,,*预留
+,,grow_type.5,,*预留
+,grow_target,,成长目标,
+,,grow_target.$id,*详见内容ID字典,= Store.id/Plant.id
+,unlock_type,,解锁类型,
+,,unlock_type.1,功能,"""func"""
+,,unlock_type.2,场景,"""scene"""
+,,unlock_type.3,种植物,"""plant"""
+,,unlock_type.4,花艺配方,"""formula"""
+,,unlock_type.5,社交资源,"""socialRes"""
+,,unlock_type.6,,*预留
+,unlock_target,,成长目标,
+,,unlock_target.$id,*详见内容ID字典,= GameFunc.id/Plant.id/Formula.id/SocialRes.id
+,currency_id,,货币种类,
+,,currency_id.$id,*详见内容ID字典,= Item.id
+,act_type,,变更类型,
+,,act_type.1,增加,"""add"""
+,,act_type.2,减少,"""sub"""
+,item_id,,物品编号,
+,,item_id.$id,*详见内容ID字典,
+,plant_id,,生产物ID,
+,,plant_id.$id,*详见内容ID字典,= Plant.id
+,operation_type,,操作类型,
+,鲜花种植-20006,operation_type.601,培育-开始,
+,,operation_type.602,培育-完成,
+,,operation_type.603,培育-视频加速,
+,,operation_type.604,培育-钻石加速,
+,,operation_type.611,种植-单一,
+,,operation_type.612,浇水-单一,
+,,operation_type.613,收获-单一,
+,,operation_type.614,铲除-单一,
+,,operation_type.615,加速-单一,
+,,operation_type.621,种植-批量,
+,,operation_type.622,浇水-批量,
+,,operation_type.623,收获-批量,
+,,operation_type.624,铲除-批量,
+,,operation_type.625,加速-批量道具,
+,,operation_type.626,加速-批量视频,
+,花艺制作-20007,operation_type.701,花艺-制作,
+,,operation_type.702,,*预留
+,,operation_type.703,,*预留
+,花艺售卖-20008,operation_type.801,上架,
+,,operation_type.802,完成结算,
+,,operation_type.803,下架结算,
+,经营订单-20009,operation_type.901,触发/生成,
+,,operation_type.902,交付,P.S. 组团订单交付并不结算
+,,operation_type.903,拒绝,"仅适用于""sceneOrder"""
+,,operation_type.904,刷新,"仅适用于""shipOrder"""
+,,operation_type.905,加单,"仅适用于""grouponOrder"""
+,,operation_type.906,组团结算1.0,"仅适用于""grouponOrder"""
+,,operation_type.907,组团结算1.2,"仅适用于""grouponOrder"""
+,,operation_type.908,组团结算1.4,"仅适用于""grouponOrder"""
+,,operation_type.909,组团结算1.6,"仅适用于""grouponOrder"""
+,,operation_type.910,组团结算1.8,"仅适用于""grouponOrder"""
+,,operation_type.911,组团结算2.0,"仅适用于""grouponOrder"""
+,场景事件-20010,operation_type.1001,触发/生成,
+,,operation_type.1002,完成,
+,,operation_type.1003,,*预留
+,剧情播放-20011,operation_type.1101,剧情-首次,
+,,operation_type.1102,剧情-自动,*预留
+,,operation_type.1103,剧情-跳过,
+,,operation_type.1104,剧情-回看,
+,分档奖励-20013,operation_type.1301,达成,
+,,operation_type.1302,领取,
+,,operation_type.1303,,*预留
+,玩家换装-20014,operation_type.1401,换装-穿上,
+,,operation_type.1402,换装-脱下,
+,,operation_type.1403,换装-染色,
+,,operation_type.1404,,*预留
+,场景布置-20015,operation_type.1501,布置-放置,
+,,operation_type.1502,布置-收回,
+,,operation_type.1503,,*预留
+,社交系统-20016,operation_type.1601,好友-添加申请,
+,,operation_type.1602,好友-同意申请,
+,,operation_type.1603,好友-拒绝申请,
+,,operation_type.1604,好友-解除,
+,,operation_type.1605,好友-拉黑,
+,,operation_type.1611,闺蜜-添加申请,
+,,operation_type.1612,闺蜜-同意申请,
+,,operation_type.1613,闺蜜-拒绝申请,
+,,operation_type.1614,闺蜜-解除,
+,,operation_type.1621,好友拜访,
+,,operation_type.1622,好友回访,
+,,operation_type.1623,好友采摘,
+,,operation_type.1624,兑换采摘,
+,交易系统-20017,operation_type.1701,上架交易,
+,,operation_type.1702,下架交易,
+,,operation_type.1703,购买交易,
+,,operation_type.1704,解锁货架,
+,,operation_type.1705,购买次数,
+,玩家排行-20018,operation_type.1801,玩家排行-排名上升,
+,,operation_type.1802,玩家排行-排名下降,
+,,operation_type.1803,玩家排行-领取奖励,仅针对手动领取奖励
+,公会系统-20019,operation_type.1901,,
+,,operation_type.1902,,
+,,operation_type.1903,,
+,,operation_type.1904,,
+,,operation_type.1905,,
+,公会竞赛-20020,operation_type.2001,,
+,,operation_type.2002,,
+,,operation_type.2003,,
+,,operation_type.2004,,
+,,operation_type.2005,,
+,内嵌游戏-20021,operation_type.2101,内嵌游戏-挑战,extension=关卡、难度、拼图ID等
+,,operation_type.2102,内嵌游戏-暂停退出,
+,,operation_type.2103,内嵌游戏-结算,extension=积分(如有)
+,,operation_type.2104,内嵌游戏-辅助道具,extension=道具ID
+,,operation_type.2105,内嵌游戏-付费作弊,暂无
+,入口检测-20022,operation_type.2201,入口检测-指定入口登录,
+,,operation_type.2202,入口检测-指定入口提示展示,侧边栏界面打开、添加到桌面提示弹出
+,,operation_type.2203,入口检测-指定入口前往/添加,按钮点击：前往侧边栏、添加到桌面
+,,operation_type.2204,入口检测-指定入口奖励领取,侧边栏奖励领取
+,平台特性-20023,operation_type.2301,平台特性-用户信息,
+,,operation_type.2302,平台特性-被动转发,
+,,operation_type.2303,平台特性-主动转发,
+,,operation_type.2304,平台特性-更新订阅,
+,,operation_type.2305,平台特性-一次性订阅,
+,,operation_type.2306,平台特性-系统订阅,包含：推荐流订阅FeedSub
+,,operation_type.2307,平台特性-游戏圈转发,
+,,operation_type.2308,平台特性-游戏圈查询,
+,,operation_type.2309,平台特性-游戏圈跳转,
+,,operation_type.2310,平台特性-查看微信好友,
+,,operation_type.2311,平台特性-邀请微信好友,
+,,operation_type.2312,平台特性-点赞微信好友,
+,,operation_type.2313,平台特性-赠送道具,
+,,operation_type.2314,平台特性-炫耀排名,
+,,operation_type.2315,平台特性-加入粉丝群,
+,扭蛋抽奖-20025,operation_type.2501,,
+,,operation_type.2502,,
+,,operation_type.2503,,
+,,operation_type.2504,,
+,,operation_type.2505,,
+,活动展示-20026,operation_type.2601,活动展示-强弹打开,
+,,operation_type.2602,活动展示-完成关闭,
+,,operation_type.2603,活动展示-跳转关闭,
+,,operation_type.2604,活动展示-点击打开,
+,,operation_type.2605,活动展示-点击关闭,
+,运营活动-20027,operation_type.2701,运营活动-活动开启,
+,,operation_type.2702,运营活动-活动结束,
+,,operation_type.2703,运营活动-目标完成,
+,,operation_type.2704,运营活动-目标完成(加强),用于十连抽等，可根据目标不同定义
+,formula_type,,配方类型,
+,,formula_type.1,花艺制作,
+,,formula_type.2,预留,
+,formula_id,,配方编号,
+,,formula_id.$id,*详见内容ID字典,= Formula.id
+,output_id,,产物编号,
+,,output_id.$id,*详见内容ID字典,= Item.id
+,floral_id,,花艺品编号,
+,,floral_id.$id,*详见内容ID字典,= Item.id
+,order_type,,订单类型,
+,,order_type.101,顾客订单,“sceneOrder”
+,,order_type.201,居民普通,“mapOrderBase”
+,,order_type.202,居民普通视频,“mapOrderBaseAd”
+,,order_type.203,居民装扮,“mapOrderAvatar”
+,,order_type.204,居民装扮视频,“mapOrderAvatarAd”
+,,order_type.205,居民家具,“mapOrderAvatar”
+,,order_type.206,居民家具视频,“mapOrderAvatarAd”
+,,order_type.301,特供,“shipOrder”
+,,order_type.401,组团,“grouponOrder”
+,customer_id,,顾客编号,
+,,customer_id.$id,*详见内容ID字典,= NPC.id
+,event_type,,事件类型,
+,,event_type.1,剧情事件,“story”
+,,event_type.2,,
+,,event_type.3,,
+,game_event_id,,事件ID,
+,,event_id.$id,*详见内容ID字典,= GameEvent.id
+,story_type,,剧情类型,
+,,story_type.1,主线,"""main"""
+,,story_type.2,事件,"""event"""
+,story_id,,剧情ID,
+,,story_id.$id,*详见内容ID字典,
+,task_type,,任务类型,= Task.type
+,,task_type.1,主线任务,
+,,task_type.2,日常任务,
+,,task_type.3,,*预留
+,,task_type.4,,*预留
+,task_id,,任务ID,
+,,task_id.$id,*详见内容ID字典,= Task.id
+,task_state,,任务状态,
+,,task_state.1,触发待领取,*预留
+,,task_state.2,领取进行中,
+,,task_state.3,完成可交付,
+,,task_state.4,已交付,
+,rank_type,,分档类型,= RankReward.type
+,,rank_type.1,鲜花图鉴,
+,,rank_type.2,花瓶图鉴,
+,,rank_type.3,花艺图鉴,
+,,rank_type.11,每日任务,
+,,rank_type.12,每周任务,
+,,rank_type.13,居民订单,
+,,rank_type.,,*预留
+,,rank_type.,,*预留
+,rank_id,,任务ID,
+,,rank_id.$id,*详见内容ID字典,= RankReward.id
+,avatar_type,,装扮类型,= PlayerAvatar.type
+,,avatar_type.0,身体(肤色),“skin”
+,,avatar_type.1,发型,“hair”
+,,avatar_type.2,服饰,“suit”
+,,avatar_type.3,手持,“grasp”
+,,avatar_type.4,背饰,“back”
+,,avatar_type.5,面饰,"""face"""
+,,avatar_type.6,手饰,"""hand"""
+,,avatar_type.7,五官,"""head"""
+,,avatar_type.8,头饰,"""hat"""
+,,avatar_type.9,美瞳,"""eyes"""
+,avatar_id,,装扮ID,
+,,avatar_id.$id,*详见内容ID字典,= PlayerAvatar.id
+,color_index,,涂色色卡,
+,,color_index.$id,*详见内容ID字典,= ColorIndex.id
+,layout_type,,布置物类型,= Furniture.type
+,,layout_type.0,设施,“facility”
+,,layout_type.1,地板,“floor_paper”
+,,layout_type.2,墙纸,“wall_paper”
+,,layout_type.3,地毯,“carpet”
+,,layout_type.4,座椅家具,“chair_furniture”
+,,layout_type.5,地面家具,“floor_furniture”
+,,layout_type.6,摆件家具,“ornaments”
+,,layout_type.7,墙面家具,“wall_furniture”
+,layout_id,,布置物ID,
+,,layout_id.$id,*详见内容ID字典,= Furniture.id
+,trade_type,,交易类型,
+,,trade_type.1,自由订单,
+,,trade_type.2,密码订单,
+,trade_id,,交易品ID,
+,,trade_id.$id,*详见内容ID字典,=Item.id
+,rank_key,,,
+,,rank_key.$key,*详见内容ID字典,
+,game_mode,,游戏模式,
+,,game_mode.1,消消乐(热卖时光),"“matchGame”/""hotSale"""
+,,game_mode.2,钓鱼,“fishingGame”
+,,game_mode.3,拼图,“jigsawGame”
+,,game_mode.4,刮刮乐,“scrapeGame”
+,,game_mode.5,摇摇乐,“shakeGame”
+,,game_mode.6,点点乐,“clickGame”
+,,game_mode.7,接金币,“catchGold”
+,,game_mode.8,打地鼠,“whackAMole”
+,,game_mode.9,水果机,“fruitMachine”
+,,game_mode.10,钢管鸟,“flappyBird”
+,game_extension,,游戏扩展参数,
+,,game_extension.$score,游戏评分,int
+,,game_extension.$id,*详见内容ID字典,= Item.id
+,launch_scene,,,
+,,launch_scene.1,侧边栏（抖音）,
+,,launch_scene.2,桌面快捷方式（抖音）,
+,launch_extension,,,*预留
+,,launch_extension.1,,
+,,launch_extension.2,,
+,feature_state,,特性操作状态,
+,,feature_state.1,触发,
+,,feature_state.2,成功,
+,,feature_state.3,失败,
+,feature_extension,,特性扩展参数,
+,,feature_extension.$id,*详见内容ID字典,
+,goods_id,,,
+,,goods_id.$id,*详见内容ID字典,= Goods.id
+,store_id,,,
+,,store_id.$id,*详见内容ID字典,= Store.id
+,gacha_id,,,
+,,gacha_id.$id,*详见内容ID字典,= Gacha.id
+,buff_link,,,
+,,buff_link.$id,*详见内容ID字典,= GameBuff.id
+,act_key,,活动标识,
+,,act_key.$key,活动标识KeyName,string
+,,act_key.$id,*详见内容ID字典,
+,act_extension,,活动目标,
+,,act_goal.$key,活动目标KeyName,string
+,act_goal,,活动目标,
+,,act_goal.$key,活动目标KeyName,string
+,,act_goal.$id,*详见内容ID字典,
+,,,,
+,,,,
+,,,,
+,,,,

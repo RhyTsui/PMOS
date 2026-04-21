@@ -1,0 +1,3167 @@
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/runs/run-20260406203706/hermes-policy[39m
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:47:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/runs/run-20260406203706/hermes-policy[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:49:11[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints/bootstrap[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats/chat-94092c84-b5e7-4a2a-9833-d634359ddef1/messages[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:51:44[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats/chat-94092c84-b5e7-4a2a-9833-d634359ddef1/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:28[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:55[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m15:56:55[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:02:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:08[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:08:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:09:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:11:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:14:36[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:16:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:19:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:26:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:39:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:41:54[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:05[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m16:44:12[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:35:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:30:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:38[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:44:39[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/subprojects[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/capabilities[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-datasets[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/evaluation-history[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/providers/routing[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/workflow-metrics[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/review[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/portfolio[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agents[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-agent-blueprints[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/skills[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/connectors/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/graph[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/reports[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/multi-agent-reviews[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/product-chief/outputs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/runs[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/retrieval/governance[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dag/changes[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:24:14[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:24:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/requirements[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:24:17[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/versions[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m09:24:38[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/chats[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)

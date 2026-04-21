@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 980" width="1440" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .big { fill: #0f172a; font-size: 34px; font-weight: 700; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1440" height="980" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS 演示介绍图板</text>
+  <text x="72" y="118" class="sub">适合公司内部演示的短讲版本。用一张图说明 PMAIOS 是什么、解决什么问题、已经做到哪里、下一步往哪里走。</text>
+
+  <rect x="72" y="160" width="1296" height="134" class="card"/>
+  <text x="104" y="212" class="big">PMAIOS = 面向产品管理与项目协同的本地 AI Product Office</text>
+  <text x="104" y="248" class="body">它不是单点聊天工具，也不只是工作流引擎，而是把“需求、版本、评审、文档、子项目、知识、产品经理协作”收敛成一个可持续运行的本地产品操作系统。</text>
+
+  <rect x="72" y="330" width="404" height="206" class="card"/>
+  <text x="100" y="374" class="section">1. 公司现在的典型问题</text>
+  <text x="100" y="402" class="meta">为什么要做这个产品</text>
+  <text x="100" y="444" class="body">项目多、文档散、版本变化快、AI 对话上下文不连续。</text>
+  <text x="100" y="476" class="body">每次切换模型、切换会话、切换项目，都要重新补背景。</text>
+  <text x="100" y="508" class="body">AI 产物很多，但人真正能读、能看、能确认的入口很弱。</text>
+
+  <rect x="518" y="330" width="404" height="206" class="card"/>
+  <text x="546" y="374" class="section">2. PMAIOS 提供的核心能力</text>
+  <text x="546" y="402" class="meta">从“单轮问答”升级为“可运行产品办公室”</text>
+  <text x="546" y="444" class="body">把需求、版本、评审、能力、工作流、记忆和子项目统一治理。</text>
+  <text x="546" y="476" class="body">让 AI 能持续输出 roadmap、版本规划、周报、研究、Demo、手册等产物。</text>
+  <text x="546" y="508" class="body">让 Product Chief 和项目 PM 形成分层协同，而不是所有事情都靠人工重讲。</text>
+
+  <rect x="964" y="330" width="404" height="206" class="card"/>
+  <text x="992" y="374" class="section">3. 当前已经做到的点</text>
+  <text x="992" y="402" class="meta">v0.4 可演示价值</text>
+  <text x="992" y="444" class="body">已有本地 runtime、前后端、CLI、mcp-context、workflow ops 和 traceability。</text>
+  <text x="992" y="476" class="body">已有 Product Chief、Product Agents、Requirements、Versions、Review、DAG、Retrieval 等主线能力。</text>
+  <text x="992" y="508" class="body">已有可用于真实项目的 SVG-first 文档和子项目治理样板。</text>
+
+  <rect x="72" y="576" width="620" height="230" class="card"/>
+  <text x="100" y="620" class="section">4. 你可以怎么讲这款产品</text>
+  <text x="100" y="648" class="meta">建议的 3 句话介绍</text>
+  <text x="100" y="692" class="body">第一句：PMAIOS 是把 AI 从“对话工具”升级为“产品办公室”的系统。</text>
+  <text x="100" y="724" class="body">第二句：它把项目背景、需求、版本、评审和 AI 产物变成长期可追溯、可协作、可复用的资产。</text>
+  <text x="100" y="756" class="body">第三句：它的目标不是替代人拍板，而是让 AI 把数字世界里的产品工作默认做起来。</text>
+
+  <rect x="724" y="576" width="644" height="230" class="card"/>
+  <text x="752" y="620" class="section">5. 下一步最值得讲的升级方向</text>
+  <text x="752" y="648" class="meta">v0.5 收敛重点</text>
+  <text x="752" y="692" class="body">统一协作模式：多模型、多会话、多项目之间减少重复背景输入。</text>
+  <text x="752" y="724" class="body">统一人阅读访问面：IP + 固定端口 + 目录路径，统一访问 SVG、Markdown、DOCX 和子项目服务。</text>
+  <text x="752" y="756" class="body">统一人读/AI 读分层：AI 产物自动归档，人要看的内容用更适合阅读的方式呈现。</text>
+
+  <rect x="72" y="846" width="1296" height="84" class="card"/>
+  <a href="pmaios-architecture-roadmap.svg"><text x="100" y="894" class="linkText">继续看：架构 + 路线图 -&gt;</text></a>
+  <a href="pmaios-product-roadmap.svg"><text x="420" y="894" class="linkText">继续看：PMAIOS 产品线路图 -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="780" y="894" class="linkText">继续看：PMAIOS v0.5 图板 -&gt;</text></a>
+  <a href="../docs/operations/pmaios-version-plan.md"><text x="1080" y="894" class="linkText">继续看：版本规划文档 -&gt;</text></a>
+</svg>

@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1320" width="1680" height="1320">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #6b7280; font-size: 14px; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .card { fill: #ffffff; stroke: #dbe3f0; stroke-width: 1.5; rx: 16; }
+    .cardTitle { fill: #111827; font-size: 17px; font-weight: 700; }
+    .smallTitle { fill: #111827; font-size: 15px; font-weight: 700; }
+    .body { fill: #334155; font-size: 13px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .pill { font-size: 11px; font-weight: 700; }
+    .link { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .line { stroke: #94a3b8; stroke-width: 2; fill: none; }
+    .accentA { fill: #eff6ff; stroke: #93c5fd; }
+    .accentB { fill: #ecfeff; stroke: #67e8f9; }
+    .accentC { fill: #f5f3ff; stroke: #c4b5fd; }
+    .accentD { fill: #ecfdf5; stroke: #86efac; }
+    .accentE { fill: #fff7ed; stroke: #fdba74; }
+    .accentF { fill: #fef2f2; stroke: #fca5a5; }
+    .phaseA { fill: #dbeafe; }
+    .phaseB { fill: #dcfce7; }
+    .phaseC { fill: #fef3c7; }
+    .phaseD { fill: #fee2e2; }
+  </style>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect width="1680" height="1320" fill="#f8fafc"/>
+  <a href="../README.md"><text x="72" y="54" class="link">Back to docs</text></a>
+  <text x="72" y="96" class="title">Knowledge Asset Platform v1.1 Engineering Breakdown</text>
+  <text x="72" y="124" class="sub">Top-down view from platform goals and product modules to engineering domains, pages, APIs, and a 4-week delivery plan.</text>
+
+  <text x="72" y="176" class="section">1. Platform Goal And Boundaries</text>
+  <rect x="72" y="196" width="492" height="168" class="card accentA"/>
+  <text x="96" y="228" class="cardTitle">North Star</text>
+  <text x="96" y="258" class="body">Build a knowledge supply platform for main chat, business chat, MCP, and model calls across personal and enterprise use cases.</text>
+  <text x="96" y="300" class="meta">Success means intake, governance, consumption, and operations frameworks are in place.</text>
+
+  <rect x="594" y="196" width="492" height="168" class="card accentE"/>
+  <text x="618" y="228" class="cardTitle">Version Focus</text>
+  <text x="618" y="258" class="body">v1.1 is a platform-structure version, not a single feature iteration. Main chat first, knowledge and prompts in parallel, personal plus enterprise.</text>
+  <text x="618" y="300" class="meta">Base strategy: adapt WeKnora capabilities without inheriting its full product shell.</text>
+
+  <rect x="1116" y="196" width="492" height="168" class="card accentF"/>
+  <text x="1140" y="228" class="cardTitle">Out Of Scope</text>
+  <text x="1140" y="258" class="body">No agent orchestration platform, no recording product, no testing platform merge, no deep GraphRAG production rollout in v1.1.</text>
+  <text x="1140" y="300" class="meta">Engineering rule: keep only what is needed for the three core scenarios and demo loop.</text>
+
+  <text x="72" y="418" class="section">2. Top-Level Product Modules</text>
+  <rect x="72" y="438" width="246" height="144" class="card accentA"/>
+  <text x="96" y="470" class="cardTitle">Main Chat</text>
+  <text x="96" y="500" class="body">Unified work entry</text>
+  <text x="96" y="524" class="body">Knowledge, prompts, MCP, models</text>
+  <text x="96" y="548" class="meta">P0 page: platform chat demo</text>
+
+  <rect x="340" y="438" width="246" height="144" class="card accentB"/>
+  <text x="364" y="470" class="cardTitle">Knowledge Assets</text>
+  <text x="364" y="500" class="body">Asset list, details, meeting notes</text>
+  <text x="364" y="524" class="body">Types, tags, sources, scopes</text>
+  <text x="364" y="548" class="meta">P0 pages: list, detail, note detail</text>
+
+  <rect x="608" y="438" width="246" height="144" class="card accentC"/>
+  <text x="632" y="470" class="cardTitle">Prompt Assets</text>
+  <text x="632" y="500" class="body">Parallel core asset line</text>
+  <text x="632" y="524" class="body">Category, version, bindings</text>
+  <text x="632" y="548" class="meta">v1.1 defines entry and objects first</text>
+
+  <rect x="876" y="438" width="246" height="144" class="card accentD"/>
+  <text x="900" y="470" class="cardTitle">Intake Center</text>
+  <text x="900" y="500" class="body">Text, docs, notes, project data</text>
+  <text x="900" y="524" class="body">Jobs, parse results, storage results</text>
+  <text x="900" y="548" class="meta">P0 pages: list and create</text>
+
+  <rect x="1144" y="438" width="246" height="144" class="card accentE"/>
+  <text x="1168" y="470" class="cardTitle">Knowledge Plaza</text>
+  <text x="1168" y="500" class="body">Discovery and subscription</text>
+  <text x="1168" y="524" class="body">Recommended, hot, topics</text>
+  <text x="1168" y="548" class="meta">P1 pages: plaza home and detail</text>
+
+  <rect x="1412" y="438" width="196" height="144" class="card accentF"/>
+  <text x="1436" y="470" class="cardTitle">Permissions</text>
+  <text x="1436" y="500" class="body">View, cite, edit</text>
+  <text x="1436" y="524" class="body">Members, teams, scopes</text>
+  <text x="1436" y="548" class="meta">P1 page: permissions and refs</text>
+
+  <text x="72" y="636" class="section">3. Engineering Domains And Core Objects</text>
+  <rect x="72" y="656" width="344" height="232" class="card">
+    <text x="96" y="688" class="cardTitle">Foundation Adapter</text>
+    <text x="96" y="718" class="body">WeKnora adapter layer</text>
+    <text x="96" y="742" class="body">Parse, chunk, index, search, reference</text>
+    <text x="96" y="766" class="body">Hide raw base product details</text>
+    <text x="96" y="790" class="body">Expose intake, search, reference services</text>
+    <text x="96" y="830" class="meta">Milestone: phase 1 must prove minimal search plus reference flow.</text>
+  </rect>
+
+  <rect x="440" y="656" width="416" height="232" class="card">
+    <text x="464" y="688" class="cardTitle">Platform Domain Model</text>
+    <text x="464" y="718" class="body">asset, asset_type, source</text>
+    <text x="464" y="742" class="body">permission_policy, consumer_binding, reference</text>
+    <text x="464" y="766" class="body">Initial types: formal_knowledge, process_knowledge, meeting_note, business_rule, faq_case, subscription_content</text>
+    <text x="464" y="806" class="meta">This object set is the engineering spine for pages, intake jobs, governance, and chat consumption.</text>
+    <a href="../../src/v1.1/engineeringManifest.ts"><text x="464" y="848" class="link">Open engineering manifest</text></a>
+  </rect>
+
+  <rect x="880" y="656" width="344" height="232" class="card">
+    <text x="904" y="688" class="cardTitle">Four Core Lanes</text>
+    <text x="904" y="718" class="body">Intake: source to intake to parse to asset</text>
+    <text x="904" y="742" class="body">Asset: list to detail to summary to tags</text>
+    <text x="904" y="766" class="body">Consumption: binding to search to refs to answer</text>
+    <text x="904" y="790" class="body">Governance: permission to flags to correction to trace</text>
+    <text x="904" y="830" class="meta">API rule: define platform APIs first, not raw base APIs.</text>
+  </rect>
+
+  <rect x="1248" y="656" width="360" height="232" class="card">
+    <text x="1272" y="688" class="cardTitle">Consumers And Scenarios</text>
+    <text x="1272" y="718" class="body">Platform chat</text>
+    <text x="1272" y="742" class="body">Data analysis chat</text>
+    <text x="1272" y="766" class="body">Advertising business chat</text>
+    <text x="1272" y="790" class="body">MCP and model calls</text>
+    <text x="1272" y="830" class="meta">v1.1 must prove both personal knowledge loop and enterprise knowledge boost.</text>
+  </rect>
+
+  <text x="72" y="942" class="section">4. Pages, APIs, And Delivery Batches</text>
+
+  <rect x="72" y="962" width="500" height="286" class="card accentA"/>
+  <text x="96" y="994" class="cardTitle">Page Skeleton</text>
+  <text x="96" y="1024" class="smallTitle">P0</text>
+  <text x="96" y="1048" class="body">1. Intake list</text>
+  <text x="96" y="1070" class="body">2. Intake create</text>
+  <text x="96" y="1092" class="body">3. Asset list</text>
+  <text x="96" y="1114" class="body">4. Asset detail</text>
+  <text x="96" y="1136" class="body">5. Meeting note detail</text>
+  <text x="96" y="1158" class="body">6. Consumption config</text>
+  <text x="96" y="1180" class="body">7. Platform chat demo</text>
+  <text x="288" y="1024" class="smallTitle">P1 And P2</text>
+  <text x="288" y="1048" class="body">8. Business chat binding</text>
+  <text x="288" y="1070" class="body">9. Plaza home and detail</text>
+  <text x="288" y="1092" class="body">10. Permissions and references</text>
+  <text x="288" y="1114" class="body">11. Correction and confirmation</text>
+  <text x="288" y="1136" class="body">12. Intake detail enhancement</text>
+  <a href="../知识资产平台v1.1页面清单.md"><text x="96" y="1216" class="link">Open page list</text></a>
+
+  <rect x="596" y="962" width="500" height="286" class="card accentB"/>
+  <text x="620" y="994" class="cardTitle">Platform API Shell</text>
+  <text x="620" y="1024" class="smallTitle">Intake</text>
+  <text x="620" y="1048" class="body">POST /api/v1/intakes</text>
+  <text x="620" y="1070" class="body">GET /api/v1/intakes</text>
+  <text x="620" y="1092" class="body">GET /api/v1/intakes/:id</text>
+  <text x="620" y="1124" class="smallTitle">Assets, Governance, Consumption</text>
+  <text x="620" y="1148" class="body">GET and PATCH /api/v1/assets</text>
+  <text x="620" y="1170" class="body">PATCH /api/v1/assets/:id/permissions</text>
+  <text x="620" y="1192" class="body">POST /api/v1/knowledge/search, /chat/query, /consumer-bindings</text>
+  <text x="620" y="1216" class="body">GET /api/v1/plaza/home and /plaza/assets/:id</text>
+  <a href="../知识资产平台v1.1前后端接口清单.md"><text x="620" y="1240" class="link">Open API list</text></a>
+
+  <rect x="1120" y="962" width="488" height="286" class="card accentD"/>
+  <text x="1144" y="994" class="cardTitle">4-Week Delivery Plan</text>
+  <rect x="1144" y="1012" width="94" height="26" rx="13" class="phaseA"/><text x="1172" y="1030" text-anchor="middle" class="pill">Phase 1</text>
+  <text x="1254" y="1030" class="body">Foundation ready: WeKnora minimal setup, search and reference samples running</text>
+  <rect x="1144" y="1054" width="94" height="26" rx="13" class="phaseB"/><text x="1172" y="1072" text-anchor="middle" class="pill">Phase 2</text>
+  <text x="1254" y="1072" class="body">Platform skeleton: domain objects, permission model, intake and consumption API shells</text>
+  <rect x="1144" y="1096" width="94" height="26" rx="13" class="phaseC"/><text x="1172" y="1114" text-anchor="middle" class="pill">Phase 3</text>
+  <text x="1254" y="1114" class="body">Scenario samples: personal loop, data analysis chat, advertising chat</text>
+  <rect x="1144" y="1138" width="94" height="26" rx="13" class="phaseD"/><text x="1172" y="1156" text-anchor="middle" class="pill">Phase 4</text>
+  <text x="1254" y="1156" class="body">Demo and acceptance: page skeleton, plaza, correction flow, regression check</text>
+  <text x="1144" y="1198" class="meta">Immediate build slice: finish phase 2 engineering baseline first so later UI and API work can align to one source of truth.</text>
+  <a href="../知识资产平台v1.1开发排期.md"><text x="1144" y="1240" class="link">Open schedule</text></a>
+
+  <path d="M 195 582 L 195 618 L 244 618 L 244 656" class="line" marker-end="url(#arrow)"/>
+  <path d="M 463 582 L 463 618 L 648 618 L 648 656" class="line" marker-end="url(#arrow)"/>
+  <path d="M 999 582 L 999 618 L 1052 618 L 1052 656" class="line" marker-end="url(#arrow)"/>
+  <path d="M 1510 582 L 1510 618 L 1428 618 L 1428 656" class="line" marker-end="url(#arrow)"/>
+
+  <path d="M 648 888 L 648 924 L 322 924 L 322 962" class="line" marker-end="url(#arrow)"/>
+  <path d="M 648 888 L 648 924 L 846 924 L 846 962" class="line" marker-end="url(#arrow)"/>
+  <path d="M 1052 888 L 1052 924 L 1364 924 L 1364 962" class="line" marker-end="url(#arrow)"/>
+</svg>

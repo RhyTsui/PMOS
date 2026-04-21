@@ -172,5 +172,51 @@ State ≠ Pipeline
 一个支持“局部重算 + 状态驱动 + AI自动生成产品全链路”的 DAG 编译型产品操作系统
 如果再压缩成一句更狠的版本：
 
-🔁 这是一个“AI产品自动重构编译器”，不是工作流工具。
+🔁 这是一个”AI产品自动重构编译器”，不是工作流工具。
+
+---
+
+## v0.4 补充需求（2026-04-19）
+
+### 一、多 Agent 自动触发（产品经理多 agent 生效）
+
+**问题现状**：`productChiefService` 已实现但只暴露 REST API，无法在 subproject 场景下自动触发产出。
+
+**需求**：子项目运行时能自动触发多 agent 协作（specialist agents + review committee），自动产出设计/报告。
+
+**实现要求**：
+1. 在 `orchestratorRuntime` 的 `core-definition-baseline` 阶段自动调用 `productChiefService.analyze()`
+2. 把 `productChiefService` 的输出（reports、outputs、specialist-tasks）写入 artifact 系统
+3. 打通 Auto/Lazy/Manual 三种执行模式（Auto=全链路自动，Lazy=只标记dirty等触发，Manual=节点冻结）
+4. 产物路径：`memory/product-chief/reports/`, `memory/product-chief/outputs/`
+
+### 二、Finds Skill 部署 + 自动选择
+
+**问题现状**：`skills/registry.json` 16个 skill 都是方法论类，没有 finds/research 类 skill，全部被过滤。
+
+**需求**：部署 Claude 官方 finds 类 skill，自动根据 brief/task 内容匹配执行。
+
+**实现要求**：
+1. 新增 finds 类 skill（如 `market-research`, `competitor-analysis`, `technology-scan`, `user-insight`）
+2. 每个 finds skill 调用 `WebSearch`/`WebFetch` 工具搜集信息，写入 `memory/research/` 目录
+3. 在 `capabilityRegistry` 或 `workflowEngine` 中实现”根据 brief 关键词自动选择相关 skill”的选择器
+4. Skill 执行结果写入 artifact 的”调研”章节
+
+### 三、Claude Design 自动集成
+
+**问题现状**：`design-it` 命令已安装（`.claude/commands/`），但作为外部工具，未与 PMAIOS workflow 打通。
+
+**需求**：`design-it` 集成进 workflow 自动触发，UI/前端类需求自动产出设计草案。
+
+**实现要求**：
+1. 在 `capabilityRegistry` 中新增 `design` 类型 capability，触发时调用 `design-it` 命令
+2. 当 `productChiefService` 判定需要 `ui-schema-spec` 输出时，自动调用设计生成
+3. 设计产物写入 `docs/design/` 目录（而非 `memory/`）
+4. 通过 MCP 工具或子进程调用 `claude design-it` 并捕获结果
+
+### 四、实现优先级
+
+1. **多 agent 自动触发**（核心，DAG 节点依赖的前提）
+2. **Finds skill 部署**（调研是设计的前置依赖）
+3. **Claude Design 集成**（设计产出的最后一环）
 

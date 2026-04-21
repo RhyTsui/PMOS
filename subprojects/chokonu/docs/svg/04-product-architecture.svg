@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="980" viewBox="0 0 1400 980" fill="none">
+  <defs>
+    <linearGradient id="bg4" x1="80" y1="40" x2="1320" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9FBFF"/>
+      <stop offset="1" stop-color="#EEF4FF"/>
+    </linearGradient>
+    <filter id="s4" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#BECBE3" flood-opacity="0.25"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .t { font-size: 34px; font-weight: 700; fill: #1F2A44; }
+      .st { font-size: 16px; font-weight: 500; fill: #60708F; }
+      .h { font-size: 22px; font-weight: 700; fill: #21314B; }
+      .b { font-size: 14px; font-weight: 500; fill: #5C6D8A; }
+      .c { font-size: 18px; font-weight: 700; fill: #21314B; }
+    </style>
+  </defs>
+  <rect width="1400" height="980" fill="url(#bg4)"/>
+  <text x="88" y="68" class="t">04 产品架构与工作台</text>
+  <text x="88" y="98" class="st">这页把已有产品类 markdown 和两张正式产品 SVG 汇成一页，方便后续都按工作台理解产品。</text>
+
+  <rect x="88" y="138" width="1224" height="104" rx="28" fill="#1A73E8" filter="url(#s4)"/>
+  <text x="122" y="181" font-size="28" font-weight="700" fill="#FFFFFF">Studio 外壳 + 六个核心工作台 + 横向治理能力</text>
+  <text x="122" y="212" font-size="15" font-weight="500" fill="#DDEBFF">不是对象目录，不是传统测试后台。对象类型进入工作台，不升格为一级导航。</text>
+
+  <rect x="88" y="282" width="1224" height="256" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s4)"/>
+  <text x="122" y="326" class="h">六个核心工作台</text>
+
+  <rect x="122" y="366" width="170" height="110" rx="22" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="148" y="406" class="c">Case Studio</text>
+  <text x="148" y="432" class="b">定义 case</text>
+  <text x="148" y="454" class="b">沉淀样本资产</text>
+
+  <rect x="320" y="366" width="170" height="110" rx="22" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="346" y="406" class="c">Suite Studio</text>
+  <text x="346" y="432" class="b">组织 baseline</text>
+  <text x="346" y="454" class="b">regression / scenario</text>
+
+  <rect x="518" y="366" width="170" height="110" rx="22" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="544" y="406" class="c">Run Studio</text>
+  <text x="544" y="432" class="b">发起执行</text>
+  <text x="544" y="454" class="b">管理 run / trial</text>
+
+  <rect x="716" y="366" width="170" height="110" rx="22" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="742" y="406" class="c">Trace Studio</text>
+  <text x="742" y="432" class="b">失败下钻</text>
+  <text x="742" y="454" class="b">过程复盘</text>
+
+  <rect x="914" y="366" width="170" height="110" rx="22" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="940" y="406" class="c">Report Studio</text>
+  <text x="940" y="432" class="b">报告结论</text>
+  <text x="940" y="454" class="b">版本 compare / gate</text>
+
+  <rect x="1112" y="366" width="170" height="110" rx="22" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="1138" y="406" class="c">Eval Studio</text>
+  <text x="1138" y="432" class="b">规则 / evaluator</text>
+  <text x="1138" y="454" class="b">threshold / redline</text>
+
+  <text x="122" y="516" class="b">横向治理能力：Compare / Review / Gate / Baseline；纵向主链：Case -> Suite -> Run -> Trace -> Report。</text>
+
+  <rect x="88" y="578" width="586" height="286" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s4)"/>
+  <text x="122" y="622" class="h">对象类型怎么处理</text>
+  <text x="122" y="660" class="b">MCP / Chat / Agent / 知识检索 / Skill / Workflow 是内容维度，不是产品骨架。</text>
+  <text x="122" y="694" class="b">它们会影响：case 类型、suite 组织、evaluator 维度，以及 run / trace / report 的筛选与解释。</text>
+  <text x="122" y="728" class="b">所以不能做成六个对象专区，否则质量主链会被拆碎，页面会退化成对象目录。</text>
+  <text x="122" y="770" class="b">正确方式：导航按工作台，内容按对象筛选。</text>
+
+  <rect x="726" y="578" width="586" height="286" rx="28" fill="#FFFFFF" stroke="#D8E3F8" filter="url(#s4)"/>
+  <text x="760" y="622" class="h">竞品吸收策略</text>
+  <text x="760" y="660" class="b">1. 外壳与工作区组织，学 Coze Studio。</text>
+  <text x="760" y="688" class="b">2. 调试、评测、Trace、回流主链，学 Coze Loop。</text>
+  <text x="760" y="716" class="b">3. dataset / evaluator / experiment 联动，学 LangSmith。</text>
+  <text x="760" y="744" class="b">4. compare / gate / release 决策，学 Braintrust。</text>
+  <text x="760" y="786" class="b">但 ChoKoNu 的主语仍是：企业内部 AI 应用测试与质量治理。</text>
+
+  <text x="88" y="922" class="st">延伸阅读：/docs/product/整体产品架构图-v1.svg 与 /docs/product/工作台关系图-v1.svg</text>
+</svg>

@@ -66,7 +66,8 @@ export class OpenAICompatibleProviderAdapter implements ModelProvider {
       }
 
       const content = payload?.choices?.[0]?.message?.content ?? null;
-      const outputText = this.extractContent(content);
+      const reasoning = (payload?.choices?.[0] as Record<string, unknown>)?.reasoning as string | null;
+      const outputText = this.extractContent(content) || (typeof reasoning === 'string' && reasoning.trim() ? reasoning.trim() : null);
 
       return {
         providerName: this.provider.name,

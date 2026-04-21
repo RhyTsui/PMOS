@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1120" width="1560" height="1120">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .panel { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .panelTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="1560" height="1120" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">返回 SVG 索引</text></a>
+  <text x="72" y="94" class="title">广告项目全功能设计走查板</text>
+  <text x="72" y="122" class="sub">按业务真实使用顺序，把所有核心功能走一遍，确认每一步的输入、输出与页面承接。</text>
+
+  <rect x="72" y="156" width="1416" height="820" class="panel"/>
+  <text x="100" y="194" class="panelTitle">端到端走查</text>
+
+  <rect x="108" y="264" width="200" height="180" fill="#eff6ff" stroke="#93c5fd" rx="14"/>
+  <text x="132" y="300" class="panelTitle">1. 需求接入</text>
+  <text x="132" y="338" class="body">输入：投放需求、预期时间、账号、文档。</text>
+  <text x="132" y="372" class="body">输出：request_id 与结构化字段。</text>
+
+  <rect x="348" y="264" width="200" height="180" fill="#ecfdf5" stroke="#86efac" rx="14"/>
+  <text x="372" y="300" class="panelTitle">2. 标准联调</text>
+  <text x="372" y="338" class="body">输入：任务、入口、设备、验收口径。</text>
+  <text x="372" y="372" class="body">输出：task_id、步骤、日志。</text>
+
+  <rect x="588" y="264" width="200" height="180" fill="#ecfdf5" stroke="#86efac" rx="14"/>
+  <text x="612" y="300" class="panelTitle">3. 异常诊断</text>
+  <text x="612" y="338" class="body">输入：问题、时间、计划、异常表现。</text>
+  <text x="612" y="372" class="body">输出：证据链、结论、建议。</text>
+
+  <rect x="828" y="264" width="200" height="180" fill="#ecfdf5" stroke="#86efac" rx="14"/>
+  <text x="852" y="300" class="panelTitle">4. 对话式分析</text>
+  <text x="852" y="338" class="body">输入：对比对象、指标、时间范围。</text>
+  <text x="852" y="372" class="body">输出：分析卡片、分析表、追问。</text>
+
+  <rect x="1068" y="264" width="200" height="180" fill="#fff7ed" stroke="#fdba74" rx="14"/>
+  <text x="1092" y="300" class="panelTitle">5. 知识复用</text>
+  <text x="1092" y="338" class="body">输入：媒体、主题、规则。</text>
+  <text x="1092" y="372" class="body">输出：知识条目、相似案例。</text>
+
+  <rect x="1308" y="264" width="140" height="180" fill="#eff6ff" stroke="#93c5fd" rx="14"/>
+  <text x="1328" y="300" class="panelTitle">6. Case归档</text>
+  <text x="1328" y="338" class="body">输出 case_id</text>
+  <text x="1328" y="372" class="body">与后续动作</text>
+
+  <path d="M308 354 L348 354" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M548 354 L588 354" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M788 354 L828 354" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1028 354 L1068 354" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1268 354 L1308 354" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="108" y="520" width="1340" height="180" fill="#ffffff" stroke="#d1d5db" rx="14"/>
+  <text x="132" y="558" class="panelTitle">统一工作台页面设计</text>
+  <text x="132" y="600" class="body">左上：快捷入口与固定问题。</text>
+  <text x="132" y="634" class="body">中部：提问框、条件补全、当前场景提示。</text>
+  <text x="132" y="668" class="body">右侧：执行状态、步骤流、风险提示。</text>
+  <text x="132" y="692" class="body">下方：诊断卡片 / 分析表 / 知识条目 / case 归档结果，根据场景切换内容层。</text>
+
+  <rect x="108" y="736" width="1340" height="180" fill="#ffffff" stroke="#d1d5db" rx="14"/>
+  <text x="132" y="774" class="panelTitle">这轮走查后的设计结论</text>
+  <text x="132" y="816" class="body">1. 当前产品可以用一个统一工作台承接六个模块，不需要拆六套页面。</text>
+  <text x="132" y="850" class="body">2. 月底前真正必须可演示的是联调、诊断、分析；其余模块先做结构与 mock 数据。</text>
+  <text x="132" y="884" class="body">3. 如果后续进入实现，最省路径是继续扩现有 integration-poc 接口，增加 full-design 工作台接口而不是重起一套后端模型。</text>
+</svg>

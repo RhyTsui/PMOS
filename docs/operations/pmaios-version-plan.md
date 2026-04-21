@@ -1,18 +1,17 @@
-# PMAIOS Version Plan
+# PMAIOS 版本计划
 
 ## Purpose
 
-This is the canonical PMAIOS version plan after cleaning up earlier planning-time version labels.
+这是当前规范化后的 PMAIOS 版本计划真源。
 
-The previous `v0.2 -> v0.6` wording is now treated as historical roadmap language. Actual product versions are assigned by accepted development result.
+早期 `v0.2 -> v0.6` 的说法现在都视为历史规划语言。实际产品版本以真实开发结果、验收状态和版本快照为准。
 
-Canonical version governance:
+相关真源：
 
 - `docs/operations/version-governance.md`
-
-Current daily progress snapshot:
-
 - `docs/operations/current-version-progress.md`
+- `docs/operations/v0.5-implementation-index.md`
+- `docs/operations/requirement-promotion-and-loss-prevention.md`
 
 ## Version Timeline
 
@@ -22,194 +21,166 @@ Current daily progress snapshot:
 | `v0.2` | 2026-04-13 -> 2026-04-18 20:15, inferred | Local runtime baseline | Accepted |
 | `v0.3` | 2026-04-18 20:15 -> 2026-04-18 22:20, inferred | AI Product Office planning and foundation consolidation | Accepted |
 | `v0.4` | 2026-04-18 22:00 -> current | Active AI Product Office runtime and governed product loop | In progress / release candidate |
-
-## v0.1 Prototype Workflow Runtime
-
-### Cycle
-
-- Start: 2026-04-06, inferred from review/run artifacts.
-- End: 2026-04-12, inferred.
-
-### Accepted Scope
-
-- Early workflow and review concepts existed.
-- Initial repository memory and execution artifacts existed.
-- This version is archived as historical seed work.
-
-### Remaining
-
-- None. All actionable work is folded into later versions.
-
-## v0.2 Local Runtime Baseline
-
-### Cycle
-
-- Start: 2026-04-13, inferred.
-- End: 2026-04-18 20:15 +0800, anchored by commit `14432a4`.
-
-### Accepted Scope
-
-- Backend entrypoint exists.
-- Frontend console exists.
-- CLI entrypoint exists.
-- Local lint, tests, and production build passed.
-- Backend can serve built frontend.
-- Local Chroma fallback exists.
-- Local runbook and release docs exist.
-
-### Acceptance Evidence
-
-- Commit `14432a4`: `feat: ship PMAIOS local runtime with passing build, tests, and release docs`.
-
-### Remaining
-
-- None for `v0.2`; later smoke hardening is handled in `v0.4`.
-
-## v0.3 AI Product Office Foundation
-
-### Cycle
-
-- Start: 2026-04-18 20:15 +0800, inferred from post-runtime baseline.
-- End: 2026-04-18 22:20 +0800, inferred from roadmap/template timestamps.
-
-### Accepted Scope
-
-- AI Product Office target model documented.
-- Human/AI boundary documented.
-- Product output categories documented.
-- Manager/specialist Product Agent hierarchy defined.
-- Physical-world profile template introduced.
-- AI-first estimation model introduced.
-- External pattern/open-source scouting requirement introduced.
-- Schema-driven UI and reusable business block direction introduced.
-- Module roadmap defined with P0/P1/P2 execution order.
-
-### Remaining
-
-- None for `v0.3`; implementation moved into active `v0.4`.
+| `v0.5` | next cycle | Unified collaboration, reading surface, cognition, and AI product-delivery system | Planned |
 
 ## v0.4 Active Runtime And Governed Product Loop
 
 ### Cycle
 
-- Start: 2026-04-18 22:00 +0800.
-- Current date: 2026-04-19.
-- Status: in progress / release candidate.
+- Start: 2026-04-18 22:00 +0800
+- Current date: 2026-04-22
+- Status: in progress / release candidate
 
 ### Product Goal
 
-Turn PMAIOS from a local workflow runtime plus roadmap into an active project-PM output runtime:
+把 PMAIOS 从“本地 workflow runtime + roadmap”推进为“可实际出项目 PM 产物的运行中系统”：
 
-- can generate current-project product outputs that the PM can use directly every day
-- can ask missing product questions
-- can route work to product agents
-- can generate governed product outputs
-- can run deterministic multi-agent review on generated PM outputs
-- can trace requirements, versions, reviews, evaluations, and artifacts
-- can normalize historical documents
-- can operate local/remote retrieval governance
-- can expose product-office operations in the frontend console
+- 能生成当前项目每天可用的产品产物
+- 能提出缺失的物理世界问题
+- 能把工作分发给 Product Agents
+- 能生成受治理的 Product Chief 输出
+- 能对生成的 PM 产物做确定性的多 agent review
+- 能追踪 requirements / versions / reviews / evaluations / artifacts
+- 能规范化历史文档
+- 能运行 retrieval governance
+- 能在 frontend console 中暴露 product-office operations
 
-Priority order inside `v0.4`:
+### v0.4 当前价值
 
-1. Project PM outputs for the current product project.
-2. Product Agent / product skill / design skill / documentation-output workflow.
-3. Product Chief review and governance.
-4. Engineering hardening only when it blocks product-output use.
+- 平台级 product workflow total design
+- subproject workflow adoption checklist
+- restart-safe startup `whoami`
+- Product Chief runtime analysis
+- missing physical-world question generation
+- learning and cognitive guidance generation
+- Product Agent manager / specialist bootstrap 与 frontend surface
+- product / design / documentation-output skill registry 与可视化
+- Notion / Figma / web fetch / DingTalk meeting-note import starter surface
+- governed Product Chief output generation
+- specialist task records 与 artifacts
+- deterministic multi-agent review loop
+- documentation normalization runtime / API / CLI / requirement trace / version trace
+- capability registry lifecycle
+- Requirement Desk / Version Desk / Workflow Ops / Observability / Portfolio / DAG / Retrieval Governance / Hermes Policy
+- backend human-reading routes:
+  - `/`
+  - `/workspace`
+  - `/pmaios/boards/*`
+  - `/pmaios/docs/*`
+  - `/pmaios/subprojects/*`
+  - `/api/human-reading/manifest`
+- `mcp-context` runtime mode state:
+  - current mode
+  - mode history
+  - CLI/API read-write
+- Workspace shared context surface:
+  - current mode
+  - recent mode history
+  - in-progress tasks
+  - recent checkpoints
+  - recent events
+  - direct mode switching
+  - auto-refresh
+  - denominator summary
+  - daily digests
 
-### Completed Capability Groups
+### v0.4 In Progress
 
-- Product Chief runtime analysis.
-- Missing physical-world question generation.
-- Learning and cognitive guidance generation.
-- Product Agent manager/specialist hierarchy bootstrap and frontend surface.
-- Product skill registry API and frontend surface for product/design/documentation-output skills.
-- External connector surface for Notion, Figma, web fetch, and DingTalk meeting-note import.
-- Governed Product Chief output generation.
-- Specialist task records and artifacts.
-- Deterministic multi-agent review loop for generated project PM outputs.
-- Project PM Outputs frontend surface with review status and artifact links.
-- Documentation normalization runtime, API, CLI, artifacts, requirement trace, and version trace.
-- Capability registry lifecycle: register, dataset, evaluation run, publish, invoke, rollback.
-- Capability publish gate based on real evaluation and linked workflow review evidence.
-- Requirement Desk: create, update, batch update, chat ingestion, status, priority, trace.
-- Version Desk: release notes, diff summary, rollback linkage, approval metadata.
-- Workflow Ops: advance, run-until-blocked, resume, manual approve/rework.
-- Observability filters.
-- Portfolio panel.
-- DAG graph, change event, dirty node state, and dirty rerun.
-- Retrieval governance: mode, remote URL, indexing, topK, quality gate, governed search.
-- NotebookLLM retrieval governance integration.
-- Hermes policy mainline TypeScript service.
-- Docker Compose Chroma service with verified remote heartbeat.
-- Chroma in-memory fallback when remote embedding function is unavailable.
-- Claude design tooling status and `claude-design-system@1.0.7` installation record.
-- Rich requirement source attribution from non-chat sources:
-  - document normalization requirements use `document-normalization`
-  - extracted document requirements use `document`
-  - Product Chief output review requirements use `product-output`
-  - each source can carry `sourceRef` with entity/path/label context
-- Evaluation history drill-down by requirement, version entry, capability, and version.
-- Production API smoke for health, workflow, Product Chief, documentation normalization, retrieval governance, and evaluation history.
+- 当前版本快照持续维护
+- `knowledge-base` workflow 样板向其他活跃子项目扩展
+- `v0.4` close-out：能快收的快收，外部难点不再拖住版本
+- 把当前价值与下一版本 ambitions 明确切开
 
-### In Progress
+## v0.5 Planned Unified Next Version
 
-- Version progress reporting is active and should be maintained daily.
-- Product-output priority is now centered on current project PM work; Product Chief remains the review/governance layer.
+`v0.6` 已并入 `v0.5`。
 
-### Open P2 / External Follow-up
+下一版本不再拆成“连接器版”和“自主 multi-agent 交付版”，而是统一收敛成一套协作型产品操作系统。
 
-- CI artifact download verification after push.
-- Broader external knowledge and internal system connectors beyond the current Notion/Figma/web/DingTalk starter surface.
-- Real model-backed specialist execution; this is future enhancement, not a blocker for deterministic `v0.4` multi-agent review.
-- Living physical-world profile automation.
-- UI schema to implementation-task loop.
+### v0.5 Theme
 
-### v0.4 Acceptance Criteria
+`协作型产品操作系统：以 2 小时连续执行目标、显式优先级同步、意图识别后再选解法、稳定的人阅读层、AI 归档层、认知蒸馏、AI 产研闭环和产品级 Web UI 为核心`
 
-- `npm run lint` passes.
-- `npm run test` passes.
-- `npm run build` passes.
-- Product Chief can generate governed outputs with requirement/version trace.
-- Project PM can use generated roadmap/version/daily/weekly/demo/manual/design/evaluation outputs directly.
-- Product, design, and documentation-output skills are visible from API and frontend.
-- Notion/Figma/web/DingTalk connector readiness is visible from API and frontend.
-- Web pages and DingTalk meeting notes can enter governed inbox/document-normalization flow.
-- Generated project PM outputs include deterministic multi-agent review records and artifacts.
-- Documentation normalization creates auditable runs and requirement/version records.
-- Requirement records expose non-chat source attribution for document normalization, extracted documents, and Product Chief outputs.
-- Evaluation history can be queried by capability/version/requirement/version-entry.
-- Capability publish rejects insufficient evaluation/review evidence.
-- Requirement and Version desks expose traceability.
-- Workflow Ops can run, block, resume, approve, and rework.
-- DAG dirty rerun is connected to workflow runtime.
-- Retrieval governance can index/search with quality-gate result.
-- Hermes policy reports are available in the mainline runtime.
-- Current version progress snapshot is updated.
-- Production API smoke covers the main v0.4 endpoints.
+### v0.5 Scope
 
-## Future Version Candidates
+1. 协作模型
+- 2 小时连续执行目标
+- 优先级外显与同步
+- 思考与同步并行
+- 批量权限与阻塞分离
 
-### v0.5 Candidate
+2. 协作模式架构
+- `default / plan / deep / do`
+- 实验性的 `{do}` 路线
+- 模式影响汇报节奏、停顿条件、新需求插入和权限处理
 
-Likely theme: external data and real-world product-office integration.
+3. 意图识别与认知升降维
+- 意图识别后再选解法
+- Intent Amplifier
+- Intent Delivery Ladder
+- Cognition Mirror
+- sidecar deep research
 
-Candidate scope:
+4. 人阅读层
+- 固定 `IP + 端口 + 路径` 的统一访问面
+- 本机、公司内网、远程访问同一阅读入口
+- SVG / Markdown / DOCX / 版本文档统一可访问
+- 每个活跃项目默认具备：
+  - `project-board.svg`
+  - `roadmap-board.svg`
+  - `decision-board.svg`
+  - `change-log.md`
 
-- Notion, Figma, web research, meeting transcript, and internal document connectors.
-- External knowledge ingestion with permissions and source trace.
-- Living physical-world profile updates.
-- Daily/weekly report automation from live sources.
+5. AI 归档层与强关系
+- 人看的和 AI 看的产物分层
+- 两层之间保持双向强关系
+- 支持知识库导入与知识图谱化
+- 支持从人读层回钻到底层 AI 归档依据
 
-### v0.6 Candidate
+6. 对话蒸馏与方法论沉淀
+- 实时识别高价值概念 / 方法 / 规则 / skill 候选
+- 夜间自动整理当天对话
+- 升级为 `skill / rule / method asset / deep research`
 
-Likely theme: autonomous multi-agent product delivery.
+7. AI 产研协同闭环
+- 产品 AI demo 验证
+- 演示后需求包
+- 现有系统改动说明
+- SVG 沟通资产
+- 完整版本需求包
+- `aicoding` 全栈重实现
+- AI 测试平台验证
+- 上线后全流程回归评测
+- 需求变更自动传播到文档、demo、版本和测试资产
 
-Candidate scope:
+8. Hermes 与可复用产品技能
+- workflow selection
+- evidence collection
+- skill reuse
+- escalation
+- 高重复 PM 流程技能化
 
-- Model-backed specialist agents.
-- Realtime/model-backed multi-agent collaboration beyond the deterministic `v0.4` review loop.
-- UI schema to implementation-task generation.
-- Stronger release/CI/CD automation and artifact download verification.
+9. Office 兼容与知识导航
+- Word / Excel 兼容循环
+- Obsidian 风格的人类知识导航层
+- 但不替代 repo 真源
 
-Future versions must be accepted through requirement change control before implementation.
+10. Web UI 产品化
+- 围绕真实 chief / PM 工作流重构
+- 把共享上下文、阅读入口、任务状态、agent 输出收敛成产品面
+
+### Planning Notes
+
+- `docs/operations/v0.5-research-and-execution-backlog.md` 是研究与执行 backlog
+- `docs/operations/v0.5-implementation-index.md` 是实施入口
+- `docs/operations/v0.4-v0.5-transition-2026-04-21.md` 是过渡边界快照
+- `docs/operations/requirement-promotion-and-loss-prevention.md` 是防漏需求机制
+
+### Version Rule
+
+未来版本进入实施前，新增需求不能只停留在对话和候选草案里，必须至少进入以下之一：
+
+- `version plan` 正式范围
+- `backlog` 明确条目
+- `candidate` 列表并附原因
+- `parked / rejected` 记录并附原因

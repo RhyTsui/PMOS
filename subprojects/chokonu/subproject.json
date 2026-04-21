@@ -1,0 +1,11 @@
+{
+  "id": "chokonu",
+  "name": "ChoKoNu",
+  "description": "AI testing platform subproject for evaluation, automation, regression, reporting, and traceability.",
+  "status": "active",
+  "createdAt": "2026-04-14T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/chokonu",
+  "memoryPath": "subprojects/chokonu/docs/memory/project-memory.md",
+  "overrides": {}
+}

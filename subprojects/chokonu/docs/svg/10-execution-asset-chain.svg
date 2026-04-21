@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1100" viewBox="0 0 1480 1100" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="40" x2="1420" y2="1060" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6FAFF"/>
+      <stop offset="1" stop-color="#F9F7FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#B8C3E6" flood-opacity="0.24"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5B6FCE"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #25305B; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #65719A; }
+      .cardTitle { font-size: 20px; font-weight: 700; fill: #2E3D68; }
+      .body { font-size: 13px; font-weight: 500; fill: #5C688A; }
+      .tag { font-size: 12px; font-weight: 700; fill: #4E63C5; }
+      .foot { font-size: 13px; font-weight: 600; fill: #667397; }
+      .arrowLabel { font-size: 12px; font-weight: 700; fill: #4153A5; }
+    </style>
+  </defs>
+  <rect width="1480" height="1100" fill="url(#bg)"/>
+  <text x="76" y="70" class="title">10 资产到报告执行主链</text>
+  <text x="76" y="102" class="subtitle">把 legacy 方法稿里的对象关系展开，说明 ChoKoNu 首版到底要把哪些资产、执行对象和报告对象做实。</text>
+
+  <rect x="76" y="170" width="180" height="180" rx="24" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="106" y="212" class="cardTitle">case</text>
+  <text x="106" y="246" class="body">最小样本</text>
+  <text x="106" y="274" class="body">分 contract_case</text>
+  <text x="106" y="302" class="body">和 semantic_case</text>
+  <text x="106" y="330" class="tag">样本层</text>
+
+  <rect x="312" y="170" width="180" height="180" rx="24" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="342" y="212" class="cardTitle">suite</text>
+  <text x="342" y="246" class="body">场景集合</text>
+  <text x="342" y="274" class="body">分 baseline</text>
+  <text x="342" y="302" class="body">regression scenario</text>
+  <text x="342" y="330" class="tag">组织层</text>
+
+  <rect x="548" y="170" width="180" height="180" rx="24" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="578" y="212" class="cardTitle">run config</text>
+  <text x="578" y="246" class="body">目标模型/工具</text>
+  <text x="578" y="274" class="body">并发超时</text>
+  <text x="578" y="302" class="body">重试复核</text>
+  <text x="578" y="330" class="tag">执行参数</text>
+
+  <rect x="784" y="170" width="180" height="180" rx="24" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="814" y="212" class="cardTitle">evaluator</text>
+  <text x="814" y="246" class="body">规则 / 契约</text>
+  <text x="814" y="274" class="body">语义 / 人工复核</text>
+  <text x="814" y="302" class="body">可组合执行</text>
+  <text x="814" y="330" class="tag">评估层</text>
+
+  <rect x="1020" y="170" width="180" height="180" rx="24" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="1050" y="212" class="cardTitle">Trace</text>
+  <text x="1050" y="246" class="body">run_id / case_id</text>
+  <text x="1050" y="274" class="body">原始输出</text>
+  <text x="1050" y="302" class="body">失败阶段定位</text>
+  <text x="1050" y="330" class="tag">可追溯层</text>
+
+  <rect x="1256" y="170" width="180" height="180" rx="24" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="1286" y="212" class="cardTitle">report</text>
+  <text x="1286" y="246" class="body">概览 / 分布</text>
+  <text x="1286" y="274" class="body">重点失败</text>
+  <text x="1286" y="302" class="body">版本对比建议</text>
+  <text x="1286" y="330" class="tag">交付层</text>
+
+  <path d="M 256 260 L 312 260" stroke="#5B6FCE" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 492 260 L 548 260" stroke="#5B6FCE" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 728 260 L 784 260" stroke="#5B6FCE" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 964 260 L 1020 260" stroke="#5B6FCE" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 1200 260 L 1256 260" stroke="#5B6FCE" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="270" y="248" class="arrowLabel">组织</text>
+  <text x="508" y="248" class="arrowLabel">配置</text>
+  <text x="742" y="248" class="arrowLabel">挂评估</text>
+  <text x="982" y="248" class="arrowLabel">记录</text>
+  <text x="1218" y="248" class="arrowLabel">汇总</text>
+
+  <rect x="76" y="420" width="420" height="252" rx="26" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="108" y="462" class="cardTitle">评测集设计草案给出的落地要求</text>
+  <text x="108" y="496" class="body">1. case 不是脚本片段，而是长期样本资产。</text>
+  <text x="108" y="526" class="body">2. suite 至少分 baseline、regression、scenario 三类。</text>
+  <text x="108" y="556" class="body">3. 历史埋点验收内容应被拆成契约样本、数据一致性样本、回归事故样本。</text>
+  <text x="108" y="586" class="body">4. 组织方式按领域 -&gt; 场景 -&gt; 用例，而不是按脚本作者。</text>
+  <text x="108" y="620" class="tag">资产要求</text>
+
+  <rect x="530" y="420" width="420" height="252" rx="26" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="562" y="462" class="cardTitle">评估器草案给出的落地要求</text>
+  <text x="562" y="496" class="body">1. 不是单一大打分器，而是规则、契约、语义、人工复核四层。</text>
+  <text x="562" y="526" class="body">2. 推荐顺序：先规则/契约，再语义，最后把高风险样本送人工复核。</text>
+  <text x="562" y="556" class="body">3. decision 至少支持 pass / fail / review。</text>
+  <text x="562" y="586" class="body">4. 首版重点是先把规则类和契约类自动化做稳。</text>
+  <text x="562" y="620" class="tag">评估要求</text>
+
+  <rect x="984" y="420" width="452" height="252" rx="26" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="1016" y="462" class="cardTitle">自动化测试与报告草案给出的落地要求</text>
+  <text x="1016" y="496" class="body">1. 主链固定：选择评测集 -&gt; 发起执行 -&gt; 记录 Trace -&gt; 运行评估器 -&gt; 汇总结果 -&gt; 报告 -&gt; 回流回归集。</text>
+  <text x="1016" y="526" class="body">2. Trace 是首版必选能力，不是附属日志。</text>
+  <text x="1016" y="556" class="body">3. 报告至少要有概览、失败分布、重点失败样本、Trace 入口、版本对比和建议动作。</text>
+  <text x="1016" y="586" class="body">4. 报告是正式交付物，也是质量门禁输入和回归回流入口。</text>
+  <text x="1016" y="620" class="tag">报告要求</text>
+
+  <rect x="76" y="726" width="1360" height="280" rx="26" fill="#FFFFFF" stroke="#D6DDF5" filter="url(#shadow)"/>
+  <text x="108" y="768" class="cardTitle">对当前产品规划的直接影响</text>
+  <text x="108" y="802" class="body">1. 工作台不能只围绕页面功能分层，而应围绕对象层与动作层：样本、评测集、执行、评估、Trace、报告、回归。</text>
+  <text x="108" y="832" class="body">2. 页面设计要服务于对象沉淀和执行追溯，例如样本模板、suite 编排、run 配置模板、失败分类视图、Trace 跳转、报告导出。</text>
+  <text x="108" y="862" class="body">3. 如果这些对象没有明确数据结构和关系，ChoKoNu 会再次退回“脚本集合 + 结果截图”而不是平台。</text>
+  <text x="108" y="892" class="body">4. 所以下一轮不该先补更多泛页面，而应先把首批对象和产物结构固化进 active docs。</text>
+  <text x="108" y="926" class="tag">执行落点</text>
+
+  <text x="76" y="1062" class="foot">这一张图对应 legacy 里最具体的“系统应该怎样运转”。</text>
+</svg>

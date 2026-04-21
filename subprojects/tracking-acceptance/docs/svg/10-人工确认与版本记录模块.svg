@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6b7280; }
+      .section { font-size: 20px; font-weight: 700; fill: #111827; }
+      .nodeTitle { font-size: 18px; font-weight: 700; fill: #111827; }
+      .body { font-size: 14px; font-weight: 500; fill: #374151; }
+      .small { font-size: 12px; font-weight: 600; fill: #6b7280; }
+      .link { font-size: 14px; font-weight: 700; fill: #2563eb; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#94a3b8" flood-opacity="0.20"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="980" fill="#ffffff"/>
+  <text x="80" y="70" class="title">人工确认与版本记录模块</text>
+  <text x="80" y="102" class="subtitle">自动生成初稿和检查结果后，关键环节交给人工拍板，并形成可追踪的版本链路。</text>
+  <a href="./05-全景流程图.svg">
+    <rect x="1360" y="40" width="160" height="40" rx="20" fill="#ffffff" stroke="#d1d5db"/>
+    <text x="1390" y="66" class="link">返回全景流程</text>
+  </a>
+
+  <rect x="60" y="160" width="300" height="540" rx="24" fill="#f8fafc" stroke="#dbe3ee"/>
+  <text x="90" y="202" class="section">进入确认区的对象</text>
+  <rect x="90" y="250" width="240" height="72" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="280" class="body">标准文档基线</text>
+  <text x="118" y="302" class="small">是否允许自动更新</text>
+  <rect x="90" y="350" width="240" height="72" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="380" class="body">规则清单</text>
+  <text x="118" y="402" class="small">灰区规则 / 例外规则</text>
+  <rect x="90" y="450" width="240" height="72" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="480" class="body">自动检查结果</text>
+  <text x="118" y="502" class="small">异常与未覆盖项</text>
+  <rect x="90" y="550" width="240" height="96" rx="14" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="118" y="582" class="small">原则</text>
+  <text x="118" y="606" class="body">只有关键节点才打断自动流程</text>
+
+  <rect x="410" y="160" width="760" height="540" rx="24" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="440" y="202" class="section">确认与版本流程</text>
+
+  <rect x="450" y="250" width="220" height="120" rx="18" fill="#ffffff" stroke="#fdba74" filter="url(#shadow)"/>
+  <text x="476" y="284" class="nodeTitle">待确认汇总</text>
+  <text x="476" y="310" class="body">收集灰区项</text>
+  <text x="476" y="332" class="body">收集冲突项</text>
+  <text x="476" y="354" class="body">收集例外项</text>
+
+  <rect x="720" y="250" width="220" height="120" rx="18" fill="#ffffff" stroke="#fdba74" filter="url(#shadow)"/>
+  <text x="746" y="284" class="nodeTitle">人工审核</text>
+  <text x="746" y="310" class="body">确认文档</text>
+  <text x="746" y="332" class="body">裁决规则</text>
+  <text x="746" y="354" class="body">补充说明</text>
+
+  <rect x="990" y="250" width="140" height="120" rx="18" fill="#ffffff" stroke="#fdba74" filter="url(#shadow)"/>
+  <text x="1020" y="284" class="nodeTitle">发布</text>
+  <text x="1020" y="310" class="body">通过</text>
+  <text x="1020" y="332" class="body">驳回</text>
+  <text x="1020" y="354" class="body">补充</text>
+
+  <rect x="590" y="450" width="220" height="120" rx="18" fill="#ffffff" stroke="#fdba74" filter="url(#shadow)"/>
+  <text x="616" y="484" class="nodeTitle">版本快照</text>
+  <text x="616" y="510" class="body">记录版本号</text>
+  <text x="616" y="532" class="body">记录确认人</text>
+  <text x="616" y="554" class="body">记录差异说明</text>
+
+  <rect x="860" y="450" width="220" height="120" rx="18" fill="#ffffff" stroke="#fdba74" filter="url(#shadow)"/>
+  <text x="886" y="484" class="nodeTitle">历史回看</text>
+  <text x="886" y="510" class="body">按项目 / 版本查</text>
+  <text x="886" y="532" class="body">按结论状态查</text>
+  <text x="886" y="554" class="body">按责任人查</text>
+
+  <path d="M360 286 H450" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M670 310 H720" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M940 310 H990" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M1060 370 V430 H970" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <path d="M830 510 H860" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <rect x="1230" y="160" width="310" height="540" rx="24" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="1260" y="202" class="section">输出资产</text>
+  <rect x="1260" y="250" width="250" height="80" rx="14" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1290" y="282" class="body">确认后的正式版本</text>
+  <text x="1290" y="306" class="small">供多端查看和复用</text>
+  <rect x="1260" y="360" width="250" height="80" rx="14" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1290" y="392" class="body">版本历史链路</text>
+  <text x="1290" y="416" class="small">知道是谁改了什么</text>
+  <rect x="1260" y="470" width="250" height="80" rx="14" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1290" y="502" class="body">结论状态</text>
+  <text x="1290" y="526" class="small">通过 / 异常 / 待补充</text>
+
+  <path d="M1130 310 H1260" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <path d="M1080 510 H1260" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <path d="M810 510 C1140 510, 1170 400, 1260 400" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+
+  <rect x="60" y="760" width="1480" height="160" rx="24" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="90" y="802" class="section">设计重点</text>
+  <text x="90" y="832" class="body">1. 人工确认负责“拍板”，不是重新手工生产文档和规则。</text>
+  <text x="90" y="860" class="body">2. 每次确认都必须绑定版本、确认人、时间、差异理由。</text>
+  <text x="90" y="888" class="body">3. 发布后的正式版本才允许进入多端分发和后续复用。</text>
+</svg>

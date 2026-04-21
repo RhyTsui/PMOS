@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1020" width="1440" height="1020">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
+    .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
+    .sub { fill: #6e6e80; font-size: 13px; }
+    .card { fill: #ffffff; stroke: #e5e5e5; stroke-width: 1.5; rx: 10; }
+    .cardTitle { fill: #0d0d0d; font-size: 17px; font-weight: 600; }
+    .body { fill: #374151; font-size: 13px; }
+    .meta { fill: #6e6e80; font-size: 12px; }
+    .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
+  </style>
+  <rect width="1440" height="1020" fill="#ffffff"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS PM 交付图板</text>
+  <text x="72" y="116" class="sub">AI 产品经理默认交付契约。面向评审的输出默认先用 SVG，只有更严格的下游格式要求才覆盖这个规则。</text>
+
+  <rect x="72" y="160" width="404" height="188" class="card"/>
+  <text x="100" y="200" class="cardTitle">默认规则</text>
+  <text x="100" y="225" class="meta">AI PM 默认动作</text>
+  <text x="100" y="260" class="body">面向 chief 的规划、研究、工作流、确认和状态类输出，都应先交 SVG 图板。除非明确要求，否则不要先交长篇 Markdown。</text>
+
+  <rect x="518" y="160" width="404" height="188" class="card"/>
+  <text x="546" y="200" class="cardTitle">主图板类型</text>
+  <text x="546" y="225" class="meta">推荐命名</text>
+  <text x="546" y="260" class="body">`project-board.svg`</text>
+  <text x="546" y="292" class="body">`research-map.svg`</text>
+  <text x="546" y="324" class="body">`planning-board.svg`, `decision-board.svg`, `workflow-board.svg`</text>
+
+  <rect x="964" y="160" width="404" height="188" class="card"/>
+  <text x="992" y="200" class="cardTitle">附属层</text>
+  <text x="992" y="225" class="meta">Markdown 的定位</text>
+  <text x="992" y="260" class="body">Markdown 仍适用于来源抽取、证据说明、详细推理、PRD 正文和交付文档，但它应服务于 SVG 图板，而不是替代它。</text>
+
+  <rect x="72" y="388" width="404" height="220" class="card"/>
+  <text x="100" y="428" class="cardTitle">最小图板内容</text>
+  <text x="100" y="453" class="meta">required metadata and structure</text>
+  <text x="100" y="488" class="body">标题、版本/日期、范围、状态、主视觉结构、当前决策、待确认事项，以及到下一治理产物的链接。</text>
+  <a href="../docs/templates/svg_primary_artifact_template.md"><text x="100" y="554" class="linkText">打开 SVG 模板 -&gt;</text></a>
+
+  <rect x="518" y="388" width="404" height="220" class="card"/>
+  <text x="546" y="428" class="cardTitle">导航规则</text>
+  <text x="546" y="453" class="meta">保持评审路径短</text>
+  <text x="546" y="488" class="body">能图板互链就优先图板互链。如果需要细节说明，应从 SVG 节点跳转到治理过的 Markdown 附录，而不是把整段正文塞进图里。</text>
+
+  <rect x="964" y="388" width="404" height="220" class="card"/>
+  <text x="992" y="428" class="cardTitle">子项目入口规则</text>
+  <text x="992" y="453" class="meta">读者从哪里进入</text>
+  <text x="992" y="488" class="body">每个活跃子项目在条件允许时都应在根目录暴露 `project-board.svg`。平台级评审应从 `boards/index.svg` 开始。</text>
+
+  <rect x="72" y="648" width="404" height="220" class="card"/>
+  <text x="100" y="688" class="cardTitle">典型 SVG 优先场景</text>
+  <text x="100" y="713" class="meta">这些场景默认先出图板</text>
+  <text x="100" y="748" class="body">研究总结、架构确认、工作流设计、产品规划、决策确认、项目状态总览，以及给 chief 的问题包。</text>
+
+  <rect x="518" y="648" width="404" height="220" class="card"/>
+  <text x="546" y="688" class="cardTitle">允许的例外</text>
+  <text x="546" y="713" class="meta">downstream delivery overrides</text>
+  <text x="546" y="748" class="body">如果开发、老板或外部消费者明确要求 Word、PRD 或 Markdown，就提供这些格式；但在条件允许时仍保留 SVG 作为可视总览和评审入口。</text>
+
+  <rect x="964" y="648" width="404" height="220" class="card"/>
+  <text x="992" y="688" class="cardTitle">行为预期</text>
+  <text x="992" y="713" class="meta">落地时怎么做</text>
+  <text x="992" y="748" class="body">新的 AI PM 产出应先创建或更新 SVG 图板，只有在执行、证据补充或下游交付确实需要时，才补充详细 Markdown。</text>
+
+  <rect x="72" y="908" width="1296" height="68" class="card"/>
+  <a href="../docs/operations/svg-first-artifact-policy.md"><text x="100" y="948" class="linkText">打开 SVG-first 政策 -&gt;</text></a>
+  <a href="../docs/operations/product-workflow-total-design.md"><text x="430" y="948" class="linkText">打开总工作流设计 -&gt;</text></a>
+  <a href="pmaios-rules.svg"><text x="860" y="948" class="linkText">打开规则图板 -&gt;</text></a>
+  <a href="pmaios-workflow.svg"><text x="1088" y="948" class="linkText">打开工作流图板 -&gt;</text></a>
+</svg>

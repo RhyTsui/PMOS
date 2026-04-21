@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小荀 · 知识资产平台 - 资产列表</title>
+  <style>
+    :root {
+      --bg: #f2f5f9;
+      --panel: rgba(255,255,255,0.92);
+      --panel-soft: rgba(248,250,253,0.98);
+      --text: #1b2431;
+      --muted: #667588;
+      --line: rgba(27,36,49,0.08);
+      --navy: #1f3f67;
+      --teal: #0f766e;
+      --orange: #bc6225;
+      --blue: #2c74d8;
+      --purple: #6d58c7;
+      --gold: #ae8618;
+      --shadow: 0 16px 38px rgba(51,72,103,0.09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at left top, rgba(44,116,216,0.12), transparent 24%),
+        radial-gradient(circle at right top, rgba(15,118,110,0.12), transparent 20%),
+        linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+    }
+    .shell {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .topbar, .hero, .filters, .table, .metric {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.56);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 10px;
+    }
+    .brand small {
+      display: block;
+      color: var(--teal);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 28px;
+      color: var(--navy);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: #fff;
+      border-color: transparent;
+    }
+    .hero {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+    }
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      line-height: 1.1;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .metric {
+      padding: 14px;
+      background: var(--panel-soft);
+    }
+    .metric .k {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: 6px;
+    }
+    .metric .v {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .metric span:last-child {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 14px;
+    }
+    .filters {
+      padding: 14px;
+      height: fit-content;
+    }
+    .filters h3, .table-head h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .filters-head, .table-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+    .filters-head span, .table-head span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .field label {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-weight: 700;
+    }
+    .box, .chip {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip.active {
+      background: rgba(31,63,103,0.08);
+      border-color: rgba(31,63,103,0.14);
+      color: var(--navy);
+    }
+    .table {
+      padding: 14px;
+    }
+    .table-body {
+      display: grid;
+      gap: 10px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1.7fr 0.75fr 1fr 0.95fr 0.7fr 0.75fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+    }
+    .asset-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .asset-meta, .cell {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 11px;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+    .status.warn::before { background: var(--orange); }
+    @media (max-width: 1180px) {
+      .hero, .layout { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .metrics { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: start; }
+      .hero h2 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <small>Asset List / Prototype</small>
+        <h1>小荀 · 知识资产目录</h1>
+      </div>
+      <div class="actions">
+        <a class="btn" href="./homepage-prototype.html">首页</a>
+        <a class="btn" href="./knowledge-base-detail-prototype.html">知识库详情</a>
+        <a class="btn primary" href="./main-chat-prototype.html">进入主对话框</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h2>在一个目录里，看清“有什么知识、谁在用、该不该修”。</h2>
+        <p>这页不是简单文档列表，而是知识资产工作台。能同时承载业务知识、过程知识、个人知识和能力资产，也能继续扩成更多知识域和更复杂的治理能力。</p>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="k">Assets</div><div class="v">1,284</div><span>当前平台总资产</span></div>
+        <div class="metric"><div class="k">High Usage</div><div class="v">86</div><span>高频引用资产</span></div>
+        <div class="metric"><div class="k">Pending Fix</div><div class="v">19</div><span>待修正 / 待确认</span></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="filters">
+        <div class="filters-head">
+          <h3>筛选器</h3>
+          <span>v1.1</span>
+        </div>
+        <div class="field">
+          <label>搜索</label>
+          <div class="box">广告归因 / 会议纪要 / 周报 / Skill</div>
+        </div>
+        <div class="field">
+          <label>知识库范围</label>
+          <div class="chips">
+            <span class="chip active">全部</span>
+            <span class="chip">企业库</span>
+            <span class="chip">部门库</span>
+            <span class="chip">项目库</span>
+            <span class="chip">个人库</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>资产类型</label>
+          <div class="chips">
+            <span class="chip active">业务知识</span>
+            <span class="chip">过程知识</span>
+            <span class="chip">个人知识</span>
+            <span class="chip">能力资产</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>消费方</label>
+          <div class="chips">
+            <span class="chip active">广告业务 Chat</span>
+            <span class="chip">数据分析 Chat</span>
+            <span class="chip">Agent</span>
+            <span class="chip">工作流</span>
+            <span class="chip">MCP</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>治理状态</label>
+          <div class="chips">
+            <span class="chip active">已生效</span>
+            <span class="chip">待修正</span>
+            <span class="chip">刚更新</span>
+            <span class="chip">待确认</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="table">
+        <div class="table-head">
+          <h3>资产列表</h3>
+          <span>支持继续扩引用热度、质量状态、责任人、更新时间等维度</span>
+        </div>
+        <div class="table-body">
+          <article class="row">
+            <div>
+              <div class="asset-title">Q2 广告归因与转化成本口径说明</div>
+              <div class="asset-meta">企业知识库 / 广告业务域 / Owner：广告策略组 / 今天更新</div>
+            </div>
+            <div class="cell">业务知识</div>
+            <div class="tags">
+              <span class="tag">归因</span>
+              <span class="tag">成本</span>
+            </div>
+            <div class="cell">广告业务 Chat<br/>数据分析 Chat</div>
+            <div class="status">已生效</div>
+            <div class="cell">引用 142 次</div>
+          </article>
+
+          <article class="row">
+            <div>
+              <div class="asset-title">广州二部周会纪要：素材疲劳与账户分层测试</div>
+              <div class="asset-meta">项目知识库 / 周会纪要 / 待确认 2 项 / 今天导入</div>
+            </div>
+            <div class="cell">过程知识</div>
+            <div class="tags">
+              <span class="tag">会议纪要</span>
+              <span class="tag">素材策略</span>
+            </div>
+            <div class="cell">平台内 Chat<br/>项目分析</div>
+            <div class="status warn">待修正</div>
+            <div class="cell">引用 29 次</div>
+          </article>
+
+          <article class="row">
+            <div>
+              <div class="asset-title">个人四月研究记录：Meta 创意疲劳外部资料整合</div>
+              <div class="asset-meta">个人知识库 / 收藏资料 + 研究记录 / 自动同步</div>
+            </div>
+            <div class="cell">个人知识</div>
+            <div class="tags">
+              <span class="tag">研究</span>
+              <span class="tag">外部订阅</span>
+            </div>
+            <div class="cell">个人 Chat<br/>广告业务 Chat</div>
+            <div class="status">已生效</div>
+            <div class="cell">引用 47 次</div>
+          </article>
+
+          <article class="row">
+            <div>
+              <div class="asset-title">广告投放分析 Skill 模板</div>
+              <div class="asset-meta">能力资产库 / 可与知识库组合使用 / 负责人：xuyun</div>
+            </div>
+            <div class="cell">能力资产</div>
+            <div class="tags">
+              <span class="tag">Skill</span>
+              <span class="tag">分析模板</span>
+            </div>
+            <div class="cell">主对话框<br/>Agent / 工作流</div>
+            <div class="status">已生效</div>
+            <div class="cell">调用 18 次</div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

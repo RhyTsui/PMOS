@@ -1,12 +1,12 @@
 # ad
 
-Local Ads Flow Insight prototype.
+Local Android integration PoC workbench for the first-round `巨量 × 指间山海` path.
 
 ## Stack
 
 - Backend: FastAPI
-- Frontend: React + Vite + ECharts
-- Data: mock data only
+- Frontend: React + Vite
+- Data: mock PoC data only
 
 ## Backend
 
@@ -17,14 +17,12 @@ pip install -e .
 ad
 ```
 
-Backend runs at `http://127.0.0.1:8020`.
+Backend runs at `http://127.0.0.1:8021`.
 
 Useful endpoints:
 
 - `GET /api/v1/health`
-- `GET /api/v1/flow`
-- `GET /api/v1/nodes/click/users`
-- `GET /api/v1/users/u1/trace`
+- `GET /api/v1/integration-poc`
 
 ## Frontend
 
@@ -37,7 +35,7 @@ npm run dev
 
 Frontend runs at `http://127.0.0.1:5180`.
 
-The Vite dev server proxies `/api` requests to the backend at `http://127.0.0.1:8020`.
+The Vite dev server proxies `/api` requests to the backend at `http://127.0.0.1:8021`.
 
 ## Docker Compose
 
@@ -50,5 +48,5 @@ docker compose up
 ## Notes
 
 - The repo/package name stays `ad`.
-- The UI title is `Ads Flow Insight`.
-- Sankey nodes use canonical ids such as `click`, `filter`, `install`, `new_user`, and `old_device`.
+- The current default UI is the first-round Android integration workbench.
+- The default scope is fixed to `巨量 × 指间山海 × 安卓已安装路径 × 启动+登录`.

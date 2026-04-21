@@ -1,0 +1,66 @@
+
+> pmaios@0.4.0 dev:frontend
+> vite
+
+
+  [32m[1mVITE[22m v6.4.2[39m  [2mready in [0m[1m587[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5174[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://10.236.14.27:[1m5174[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.19.64.1:[1m5174[22m/[39m
+[2m15:50:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/mineru/resources/header.html[22m
+[2m15:51:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m15:53:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m15:54:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:03:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:06:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/torch/utils/model_dump/skeleton.html[22m
+[2m16:07:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/ray/dashboard/client/build/index.html[22m
+[2m16:07:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/ray/dashboard/client/build/speedscope-1.5.3/index.html[22m
+[2m16:08:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/gradio/templates/frontend/share.html[22m
+[2m16:08:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/gradio/templates/frontend/index.html[22m
+[2m16:08:05[22m [36m[1m[vite][22m[39m changed tsconfig file detected: E:/AI/ai-os/subprojects/knowledge-base/MinerU/.venv/Lib/site-packages/gradio/cli/commands/components/files/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m16:08:32[22m [36m[1m[vite][22m[39m changed tsconfig file detected: E:/AI/ai-os/subprojects/knowledge-base/MinerU/.venv/Lib/site-packages/gradio/cli/commands/components/files/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m16:08:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/gradio/templates/frontend/index.html[22m
+[2m16:08:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/gradio/templates/frontend/share.html[22m
+[2m16:08:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/ray/dashboard/client/build/index.html[22m
+[2m16:08:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/ray/dashboard/client/build/speedscope-1.5.3/index.html[22m
+[2m16:08:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/.venv/Lib/site-packages/torch/utils/model_dump/skeleton.html[22m
+[2m16:08:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/MinerU/mineru/resources/header.html[22m
+[2m16:09:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:14:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:14:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:14:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:15:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/ad/frontend/dist/index.html[22m
+[2m16:15:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/ad/frontend/dist/index.html[22m
+[2m16:16:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:16:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:16:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/ad/frontend/dist/index.html[22m
+[2m16:16:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/ad/frontend/dist/index.html[22m
+[2m16:16:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:17:18[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:19:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:19:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:21:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/index.html[22m
+[2m16:26:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:26:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:41:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:41:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:42:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:42:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m
+[2m16:44:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:44:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m16:44:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/styles.css[22m
+[2m16:53:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m
+[2m16:53:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m
+[2m16:59:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m
+[2m17:17:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/prototypes/platform-overview-prototype.html[22m
+[2m19:39:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/knowledge-base/WeKnora/frontend/dist/index.html[22m
+[2m20:24:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/index.html[22m
+[2m20:24:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m
+[2m20:24:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/chokonu/frontend/index.html[22m
+[2m20:24:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/chokonu/frontend/dist/index.html[22m
+[2m20:30:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/frontend/App.tsx[22m
+[2m09:30:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/index.html[22m
+[2m09:35:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m
+[2m09:35:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msubprojects/tracking-acceptance/frontend/dist/index.html[22m

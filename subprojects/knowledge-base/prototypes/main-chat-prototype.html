@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小荀 · 知识资产平台 - 主对话框</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --panel: rgba(255,255,255,0.92);
+      --panel-soft: rgba(248,250,253,0.98);
+      --text: #1b2431;
+      --muted: #67788d;
+      --line: rgba(27,36,49,0.08);
+      --navy: #1f3f67;
+      --teal: #0f766e;
+      --blue: #2c74d8;
+      --shadow: 0 18px 42px rgba(49,72,102,0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at left top, rgba(44,116,216,0.1), transparent 24%),
+        radial-gradient(circle at right top, rgba(15,118,110,0.1), transparent 20%),
+        linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+    }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 250px 1fr 340px; gap: 12px; padding: 12px; }
+    .sidebar, .main, .aside, .card, .message, .composer { background: var(--panel); border: 1px solid rgba(255,255,255,0.56); border-radius: 20px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+    .sidebar, .aside { padding: 14px; display: grid; align-content: start; gap: 12px; }
+    .brand small { display: block; color: var(--teal); font-size: 11px; text-transform: uppercase; letter-spacing: .15em; font-weight: 700; margin-bottom: 8px; }
+    .brand h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 28px; line-height: 1.05; color: var(--navy); }
+    .card { padding: 12px; background: var(--panel-soft); }
+    .card h3 { margin: 0 0 8px; font-size: 14px; }
+    .card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .session-list, .library-list, .suggest-list, .reference-list { display: grid; gap: 8px; }
+    .item { padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
+    .item.active { background: rgba(31,63,103,0.07); border-color: rgba(31,63,103,0.15); }
+    .item strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .item span { color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .main { padding: 12px; display: grid; grid-template-rows: auto 1fr auto; gap: 12px; min-height: calc(100vh - 24px); }
+    .topbar { display: flex; justify-content: space-between; align-items: start; gap: 12px; padding: 4px 4px 0; }
+    .topbar h2 { margin: 0 0 6px; font-size: 24px; }
+    .topbar p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; max-width: 720px; }
+    .capsules { display: flex; flex-wrap: wrap; gap: 6px; justify-content: end; }
+    .capsule { padding: 6px 9px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 11px; }
+    .chat { display: grid; gap: 10px; align-content: start; overflow: auto; padding-right: 4px; }
+    .message { padding: 14px; background: var(--panel-soft); }
+    .message.user { background: rgba(31,63,103,0.06); }
+    .meta { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; margin-bottom: 8px; }
+    .message p { margin: 0; font-size: 13px; line-height: 1.8; }
+    .ref-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .ref { padding: 5px 8px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 11px; color: var(--navy); }
+    .composer { padding: 12px; display: grid; gap: 10px; background: var(--panel-soft); }
+    .binding-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+    .binding { padding: 6px 9px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 11px; }
+    .input { min-height: 88px; padding: 12px; border: 1px dashed rgba(31,63,103,0.2); border-radius: 14px; background: #fff; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .toolbar { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .tool-row, .action-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn { padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-size: 12px; font-weight: 700; color: var(--text); text-decoration: none; }
+    .btn.primary { background: linear-gradient(135deg, var(--navy), var(--blue)); color: #fff; border-color: transparent; }
+    .aside h3 { margin: 0 0 8px; font-size: 15px; }
+    .aside .section { display: grid; gap: 8px; }
+    .aside .section + .section { padding-top: 10px; border-top: 1px solid var(--line); }
+    .mini { padding: 10px 12px; border-radius: 12px; background: var(--panel-soft); border: 1px solid var(--line); }
+    .mini strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .mini span { color: var(--muted); font-size: 11px; line-height: 1.7; }
+    @media (max-width: 1280px) { .app { grid-template-columns: 230px 1fr; } .aside { display: none; } }
+    @media (max-width: 960px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .main { min-height: auto; } .topbar { flex-direction: column; } .capsules { justify-content: start; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <small>Main Chat / Prototype</small>
+        <h1>主对话框</h1>
+      </div>
+
+      <div class="card">
+        <h3>最近会话</h3>
+        <div class="session-list">
+          <div class="item active">
+            <strong>广告业务策略分析</strong>
+            <span>同时引用了广告业务库、项目知识和外部研究</span>
+          </div>
+          <div class="item">
+            <strong>数据异常排查</strong>
+            <span>调用数据字典、指标说明和埋点文档</span>
+          </div>
+          <div class="item">
+            <strong>周会纪要提炼</strong>
+            <span>从会议 URL 进入，沉淀成项目知识</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>已挂载知识库</h3>
+        <div class="library-list">
+          <div class="item">
+            <strong>广告业务知识库</strong>
+            <span>规则、口径、案例、素材策略</span>
+          </div>
+          <div class="item">
+            <strong>公司公共知识库</strong>
+            <span>流程说明、FAQ、协作文档</span>
+          </div>
+          <div class="item">
+            <strong>个人补充知识</strong>
+            <span>会议纪要、收藏资料、个人研究，可按需挂载</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>建议入口</h3>
+        <div class="suggest-list">
+          <div class="item"><strong>继续上次分析</strong><span>从最近会话直接接着问</span></div>
+          <div class="item"><strong>上传会议纪要</strong><span>沉淀成项目或部门知识</span></div>
+          <div class="item"><strong>引用其他知识库</strong><span>跨库一起分析</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2>统一 AI 工作入口</h2>
+          <p>这里不是普通聊天框。你可以直接调用团队、项目、公司和外部知识，也可以调用 Skill、MCP、网络和外部服务来做分析、总结、问答和决策支持；个人知识作为补充引用源存在。</p>
+        </div>
+        <div class="capsules">
+          <span class="capsule">语音对话</span>
+          <span class="capsule">图片 / 文件 / 视频</span>
+          <span class="capsule">会议 URL</span>
+          <span class="capsule">最近会话</span>
+          <span class="capsule">使用建议</span>
+        </div>
+      </div>
+
+      <section class="chat">
+        <article class="message user">
+          <div class="meta"><span>用户</span><span>10:12</span></div>
+          <p>帮我分析一下最近广告投放效果下降的原因，优先参考广告业务知识库、上周周会纪要和外部研究，必要时补充我的个人收藏资料。</p>
+        </article>
+        <article class="message">
+          <div class="meta"><span>系统</span><span>10:12</span></div>
+          <p>已为你同时引用 3 类知识来源：广告业务知识库、项目知识中的周会纪要、外部订阅研究。先给你一个结论：当前下滑更像是“素材疲劳 + 账户分层调整影响 + 回传延迟误判”的组合问题。</p>
+          <div class="ref-row">
+            <span class="ref">广告业务知识库 / 归因口径</span>
+            <span class="ref">项目知识 / 周会纪要 / 广州二部</span>
+            <span class="ref">外部订阅 / Meta 创意疲劳研究</span>
+          </div>
+        </article>
+        <article class="message">
+          <div class="meta"><span>系统</span><span>10:13</span></div>
+          <p>我还可以继续帮你做三件事：1. 调用广告投放分析 Skill 输出结构化分析；2. 调用 MCP 获取外部补充数据；3. 把这次结论沉淀成新的项目知识，必要时再保存到个人补充知识。</p>
+          <div class="ref-row">
+            <span class="ref">Skill / 广告投放分析</span>
+            <span class="ref">MCP / 外部数据补强</span>
+            <span class="ref">知识沉淀 / 项目库</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="composer">
+        <div class="binding-bar">
+          <span class="binding">当前知识：广告业务知识库</span>
+          <span class="binding">当前知识：项目知识库</span>
+          <span class="binding">当前知识：公司公共知识库</span>
+          <span class="binding">个人补充：按需开启</span>
+          <span class="binding">外部知识：已开启</span>
+        </div>
+        <div class="input">在这里输入问题，或者直接粘贴图片、上传文件/视频、发送语音、接入会议 URL。也可以让系统帮你调用 Skill、MCP、网络和外部知识库。</div>
+        <div class="toolbar">
+          <div class="tool-row">
+            <span class="btn">语音输入</span>
+            <span class="btn">图片</span>
+            <span class="btn">文件</span>
+            <span class="btn">视频</span>
+            <span class="btn">会议 URL</span>
+            <span class="btn">引用知识库</span>
+            <span class="btn">调用 Skill</span>
+            <span class="btn">调用 MCP</span>
+          </div>
+          <div class="action-row">
+            <span class="btn">建议引导</span>
+            <span class="btn primary">发送分析请求</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="aside">
+      <div class="section">
+        <h3>引用知识</h3>
+        <div class="reference-list">
+          <div class="mini"><strong>广告归因与转化成本口径</strong><span>业务规则 / 高频引用 / 今天更新</span></div>
+          <div class="mini"><strong>广州二部周会纪要</strong><span>过程知识 / 待确认 2 项</span></div>
+          <div class="mini"><strong>Meta 创意疲劳研究订阅</strong><span>外部知识 / 自动同步</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>使用建议</h3>
+        <div class="mini"><strong>继续追问</strong><span>你可以让系统分别给出“问题判断、证据来源、行动建议”。</span></div>
+        <div class="mini"><strong>沉淀知识</strong><span>把本次分析保存为“项目复盘结论”，个人知识按需补充。</span></div>
+      </div>
+      <div class="section">
+        <h3>调用能力</h3>
+        <div class="mini"><strong>Skill</strong><span>广告分析、会议纪要整理、竞品研究、文档提炼</span></div>
+        <div class="mini"><strong>MCP</strong><span>外部服务调用、知识补强、网络访问、业务系统补数</span></div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

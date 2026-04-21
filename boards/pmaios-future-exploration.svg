@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1180" width="1560" height="1180">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .warn { fill: #fff7ed; stroke: #fdba74; stroke-width: 1.2; rx: 12; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1180" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS 未来版本演进探索</text>
+  <text x="72" y="118" class="sub">这张图不把“已实现的自进化”当作未来主叙事，而是把真正仍待深入的高杠杆方向单独拿出来。</text>
+
+  <rect x="72" y="154" width="1416" height="92" class="warn"/>
+  <text x="100" y="194" class="section">先排除一个误区</text>
+  <text x="100" y="224" class="body">未来演进不再主打“系统已经会自己进化”这类叙事。技能沉淀、文档归一化、mcp-context 恢复和基础治理链路已经存在，后续重点应转向协作连续性、人阅读效率、知识复利和产品体验。</text>
+
+  <rect x="72" y="282" width="1416" height="276" class="card"/>
+  <text x="104" y="326" class="section">一、未来版本最值得继续问的 4 个问题</text>
+  <text x="104" y="354" class="meta">适合对内讨论“为什么后面还有空间”。</text>
+
+  <rect x="104" y="396" width="300" height="120" class="card"/>
+  <text x="132" y="434" class="section">Q1 协作能否真正连续</text>
+  <text x="132" y="466" class="body">切换模型、切换会话、切换项目后，是否还能稳定接住同一条工作链和同一套规则。</text>
+
+  <rect x="432" y="396" width="300" height="120" class="card"/>
+  <text x="460" y="434" class="section">Q2 AI 与人能否看同一套事实</text>
+  <text x="460" y="466" class="body">AI 需要机器归档，人需要高效阅读，两者是否能靠强关系而不是靠重复整理连接起来。</text>
+
+  <rect x="760" y="396" width="300" height="120" class="card"/>
+  <text x="788" y="434" class="section">Q3 Web UI 能否成为真实产品</text>
+  <text x="788" y="466" class="body">它是否能承接项目阅读、治理、资产、操作和监控，而不是继续停留在后台拼盘状态。</text>
+
+  <rect x="1088" y="396" width="368" height="120" class="card"/>
+  <text x="1116" y="434" class="section">Q4 知识是否能变成长期复利</text>
+  <text x="1116" y="466" class="body">规则、项目背景、决策、图板、日志和外部信号是否能形成可复用的知识资产，而不是只存在于聊天窗口。</text>
+
+  <rect x="72" y="600" width="1416" height="332" class="card"/>
+  <text x="104" y="644" class="section">二、可探索的未来版本主题</text>
+  <text x="104" y="672" class="meta">不是正式版本承诺，而是后续最值得继续验证和收敛的方向。</text>
+
+  <rect x="104" y="714" width="260" height="176" class="card"/>
+  <text x="132" y="754" class="section">协作操作系统化</text>
+  <text x="132" y="788" class="body">把预授权、恢复、分工、同步和升级路径做得更稳定，让多人多模型协作接近“操作系统”级别。</text>
+
+  <rect x="392" y="714" width="260" height="176" class="card"/>
+  <text x="420" y="754" class="section">知识双层架构</text>
+  <text x="420" y="788" class="body">人阅读层、AI 归档层、知识图谱层和统一访问面的关系进一步产品化。</text>
+
+  <rect x="680" y="714" width="260" height="176" class="card"/>
+  <text x="708" y="754" class="section">项目实时叙事面</text>
+  <text x="708" y="788" class="body">每个项目实时拥有可讲述的 `project-board`、`roadmap-board`、`decision-board` 和更新日志联动机制。</text>
+
+  <rect x="968" y="714" width="260" height="176" class="card"/>
+  <text x="996" y="754" class="section">Office 与公司协作兼容</text>
+  <text x="996" y="788" class="body">让 PMAIOS 能更自然进入 Word、Excel、版本文档、评审和公司内常见沟通链路。</text>
+
+  <rect x="1256" y="714" width="200" height="176" class="card"/>
+  <text x="1284" y="754" class="section">研究信号引擎</text>
+  <text x="1284" y="788" class="body">把高质量外部信号采集和转入真实需求池的过程进一步标准化。</text>
+
+  <rect x="72" y="972" width="1416" height="132" class="card"/>
+  <text x="104" y="1014" class="section">三、对公司怎么讲更稳</text>
+  <text x="104" y="1046" class="body">不要把未来讲成“它会自己变强”。更稳的讲法是：PMAIOS 已经有运行底座，接下来要把协作连续性、人阅读效率、知识复利和产品体验收敛成真正适合公司内部长期使用的能力。</text>
+  <a href="pmaios-capability-overview.svg"><text x="104" y="1086" class="linkText">回到：整体能力介绍 -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="360" y="1086" class="linkText">回到：v0.5 清单板 -&gt;</text></a>
+  <a href="../docs/operations/pmaios-v0.5-checklist.md"><text x="610" y="1086" class="linkText">配套文档：v0.5 checklist -&gt;</text></a>
+</svg>

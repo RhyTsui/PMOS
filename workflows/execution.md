@@ -1,4 +1,4 @@
-# Execution Rules
+﻿# Execution Rules
 
 ## Principles
 
@@ -39,3 +39,11 @@
 - Do not default to handwritten bespoke code for common infrastructure, workflow plumbing, integrations, dashboards, or operator tooling.
 - Custom implementation is allowed only when existing options clearly fail on license, cost, maintainability, integration boundary, performance, or security requirements.
 - If a ready-made solution is rejected, the reason and build-vs-buy comparison must be recorded as part of the delivery decision.
+
+
+## Product Management Gate Rules
+
+- Product work that involves platform capability, base selection, competitor route choice, or shared ownership must follow workflows/product-management.md.
+- Product Solution, PRD, or prototype outputs must be downgraded to research conclusions if research analysis or architecture confirmation has not been completed.
+- Business confirmation, architecture confirmation, and gate review should use the templates under docs/templates/.
+

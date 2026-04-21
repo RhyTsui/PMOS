@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 980" width="1500" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .cardTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+    .go { fill: #ecfdf5; stroke: #86efac; stroke-width: 1.5; rx: 14; }
+    .hold { fill: #fff7ed; stroke: #fdba74; stroke-width: 1.5; rx: 14; }
+    .ask { fill: #eff6ff; stroke: #93c5fd; stroke-width: 1.5; rx: 14; }
+  </style>
+
+  <rect width="1500" height="980" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">Back to SVG index</text></a>
+  <text x="72" y="94" class="title">Ad MVP Input Board</text>
+  <text x="72" y="122" class="sub">Post-demo input split: what should move forward if the demo validates, what must stay deferred, and what needs chief judgment.</text>
+
+  <rect x="72" y="156" width="420" height="696" class="card"/>
+  <text x="100" y="194" class="cardTitle">Move Into MVP</text>
+  <rect x="100" y="228" width="364" height="536" class="go"/>
+  <text x="124" y="268" class="body">1. Stronger workbench interaction shell.</text>
+  <text x="124" y="308" class="body">2. More stable scenario contracts and reusable response schemas.</text>
+  <text x="124" y="348" class="body">3. Better evidence presentation and follow-up query handling.</text>
+  <text x="124" y="388" class="body">4. The first real integration target, chosen from demo feedback.</text>
+  <text x="124" y="428" class="body">5. Minimal observability and traceability for the agent flow.</text>
+
+  <rect x="540" y="156" width="420" height="696" class="card"/>
+  <text x="568" y="194" class="cardTitle">Keep Deferred</text>
+  <rect x="568" y="228" width="364" height="536" class="hold"/>
+  <text x="592" y="268" class="body">1. Real media API integration.</text>
+  <text x="592" y="308" class="body">2. Full automation and orchestration chain.</text>
+  <text x="592" y="348" class="body">3. Asset-agent end-to-end system.</text>
+  <text x="592" y="388" class="body">4. Knowledge-base governance platformization.</text>
+  <text x="592" y="428" class="body">5. Large unified Ad OS control-console work.</text>
+
+  <rect x="1008" y="156" width="420" height="696" class="card"/>
+  <text x="1036" y="194" class="cardTitle">Chief Decisions Needed</text>
+  <rect x="1036" y="228" width="364" height="536" class="ask"/>
+  <text x="1060" y="268" class="body">1. Which capability gets the first real integration budget?</text>
+  <text x="1060" y="308" class="body">2. Which scenario becomes the flagship story after demo?</text>
+  <text x="1060" y="348" class="body">3. How much platform work is justified before user proof strengthens?</text>
+  <text x="1060" y="388" class="body">4. What can remain mocked for one more cycle without hurting trust?</text>
+
+  <rect x="72" y="884" width="1356" height="56" class="card"/>
+  <text x="100" y="919" class="meta">Rule: MVP input must be a ranked capability list derived from demo evidence, not a return to broad vision-writing.</text>
+</svg>

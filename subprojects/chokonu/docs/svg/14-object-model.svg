@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1120" viewBox="0 0 1480 1120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="40" x2="1420" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4FBFF"/>
+      <stop offset="1" stop-color="#F9F6FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#B3C4E3" flood-opacity="0.22"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#596FD4"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #25345E; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6A78A0; }
+      .cardTitle { font-size: 20px; font-weight: 700; fill: #31426F; }
+      .body { font-size: 13px; font-weight: 500; fill: #5E6F91; }
+      .tag { font-size: 12px; font-weight: 700; fill: #5067D0; }
+      .foot { font-size: 13px; font-weight: 600; fill: #6A7BA1; }
+    </style>
+  </defs>
+  <rect width="1480" height="1120" fill="url(#bg)"/>
+  <text x="76" y="70" class="title">14 对象模型设计图</text>
+  <text x="76" y="102" class="subtitle">把首版需要先做实的对象关系画清楚，避免后面继续只讨论页面与按钮。</text>
+
+  <rect x="110" y="170" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="142" y="212" class="cardTitle">标准 standard</text>
+  <text x="142" y="244" class="body">规则、契约、口径、指标</text>
+  <text x="142" y="274" class="body">决定什么算 pass/fail</text>
+  <text x="142" y="304" class="tag">定义层</text>
+
+  <rect x="392" y="170" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="424" y="212" class="cardTitle">样本 case</text>
+  <text x="424" y="244" class="body">contract_case</text>
+  <text x="424" y="274" class="body">semantic_case</text>
+  <text x="424" y="304" class="tag">最小资产</text>
+
+  <rect x="674" y="170" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="706" y="212" class="cardTitle">评测集 suite</text>
+  <text x="706" y="244" class="body">baseline</text>
+  <text x="706" y="274" class="body">scenario / regression</text>
+  <text x="706" y="304" class="tag">组织资产</text>
+
+  <rect x="956" y="170" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="988" y="212" class="cardTitle">执行 run</text>
+  <text x="988" y="244" class="body">目标模型/工具</text>
+  <text x="988" y="274" class="body">环境、参数、状态</text>
+  <text x="988" y="304" class="tag">运行单元</text>
+
+  <rect x="1238" y="170" width="160" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="1266" y="212" class="cardTitle">Trace</text>
+  <text x="1266" y="244" class="body">原始链路</text>
+  <text x="1266" y="274" class="body">异常定位</text>
+  <text x="1266" y="304" class="tag">追溯</text>
+
+  <path d="M 330 258 L 392 258" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 612 258 L 674 258" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 894 258 L 956 258" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 1176 258 L 1238 258" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="216" y="418" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="248" y="460" class="cardTitle">评估器 evaluator</text>
+  <text x="248" y="492" class="body">规则 / 契约</text>
+  <text x="248" y="522" class="body">语义 / 人工复核</text>
+  <text x="248" y="552" class="tag">判定器</text>
+
+  <rect x="630" y="418" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="662" y="460" class="cardTitle">结果 result</text>
+  <text x="662" y="492" class="body">score / decision</text>
+  <text x="662" y="522" class="body">reason / failure type</text>
+  <text x="662" y="552" class="tag">判定结果</text>
+
+  <rect x="1044" y="418" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="1076" y="460" class="cardTitle">报告 report</text>
+  <text x="1076" y="492" class="body">概览、分布、重点失败</text>
+  <text x="1076" y="522" class="body">版本对比、建议动作</text>
+  <text x="1076" y="552" class="tag">交付</text>
+
+  <path d="M 1066 346 L 326 418" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 1318 346 L 740 418" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 436 506 L 630 506" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 850 506 L 1044 506" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="216" y="666" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="248" y="708" class="cardTitle">回归集 regression</text>
+  <text x="248" y="740" class="body">失败样本回流</text>
+  <text x="248" y="770" class="body">风险样本标记</text>
+  <text x="248" y="800" class="tag">资产回流</text>
+
+  <rect x="630" y="666" width="220" height="176" rx="24" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="662" y="708" class="cardTitle">版本 gate</text>
+  <text x="662" y="740" class="body">红线 / 主指标</text>
+  <text x="662" y="770" class="body">回归 / 观察项</text>
+  <text x="662" y="800" class="tag">决策层</text>
+
+  <path d="M 1154 594 L 326 666" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M 1154 594 L 740 666" stroke="#596FD4" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="76" y="896" width="1328" height="160" rx="26" fill="#FFFFFF" stroke="#D8E0F5" filter="url(#shadow)"/>
+  <text x="108" y="938" class="cardTitle">对象模型设计结论</text>
+  <text x="108" y="970" class="body">ChoKoNu 的首版产品结构应由对象模型反推：标准定义决定 case，case 组成 suite，suite 触发 run，run 产生 Trace，evaluator 判出 result，result 汇成 report，失败项再回流 regression，并最终进入 version gate。</text>
+  <text x="108" y="1002" class="foot">如果这组对象关系没有稳定下来，后面的页面、工作台和版本治理都会反复返工。</text>
+</svg>

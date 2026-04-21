@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1120" width="1560" height="1120">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 16; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .chipBlue { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 1; rx: 14; }
+    .chipGreen { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 1; rx: 14; }
+    .chipAmber { fill: #fffbeb; stroke: #fde68a; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f172a; font-size: 12px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1120" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">v0.4 -> v0.5 过渡快照</text>
+  <text x="72" y="118" class="sub">这张图用来说明：今天哪些内容已经构成当前版本价值，哪些内容正式收敛为下一版本的实施入口。</text>
+
+  <rect x="72" y="156" width="1416" height="32" class="chipBlue"/>
+  <text x="100" y="176" class="chipText">过渡原则：v0.4 不再被外部阻塞拖住；今天已形成直接价值的资产记入当前版本；更大能力统一收敛到 v0.5。</text>
+
+  <rect x="72" y="224" width="676" height="330" class="card"/>
+  <text x="104" y="266" class="section">当前 v0.4 价值</text>
+  <text x="104" y="294" class="meta">已经对当前工作直接有效</text>
+  <rect x="104" y="324" width="292" height="72" class="chipGreen"/>
+  <text x="128" y="352" class="chipText">启动恢复</text>
+  <text x="128" y="378" class="body">默认中文、startup truth 收紧、恢复速度更快</text>
+  <rect x="424" y="324" width="292" height="72" class="chipGreen"/>
+  <text x="448" y="352" class="chipText">人读入口</text>
+  <text x="448" y="378" class="body">boards/index.svg 与公司演示图板已可直接使用</text>
+  <rect x="104" y="420" width="292" height="72" class="chipGreen"/>
+  <text x="128" y="448" class="chipText">版本真源</text>
+  <text x="128" y="474" class="body">current-version-progress、version-plan、transition snapshot 已收紧</text>
+  <rect x="424" y="420" width="292" height="72" class="chipGreen"/>
+  <text x="448" y="448" class="chipText">{do} 实验模式</text>
+  <text x="448" y="474" class="body">已有协议、契约、样板任务、图板和入口</text>
+  <text x="104" y="530" class="body">这些内容虽然服务于 v0.5，但已经直接提升了当前的恢复效率、沟通效率和协作可见性，因此记入 v0.4 当前价值。</text>
+
+  <rect x="812" y="224" width="676" height="330" class="card"/>
+  <text x="844" y="266" class="section">正式 v0.5 入口</text>
+  <text x="844" y="294" class="meta">从今天开始的统一承接层</text>
+  <rect x="844" y="324" width="188" height="72" class="chipAmber"/>
+  <text x="868" y="352" class="chipText">清单层</text>
+  <text x="868" y="378" class="body">pmaios-v0.5-checklist</text>
+  <rect x="1056" y="324" width="188" height="72" class="chipAmber"/>
+  <text x="1080" y="352" class="chipText">Backlog 层</text>
+  <text x="1080" y="378" class="body">v0.5 research backlog</text>
+  <rect x="1268" y="324" width="188" height="72" class="chipAmber"/>
+  <text x="1292" y="352" class="chipText">实施层</text>
+  <text x="1292" y="378" class="body">v0.5 implementation index</text>
+  <text x="844" y="432" class="body">三层职责：</text>
+  <text x="874" y="460" class="body">1. 清单层定义收敛目标</text>
+  <text x="874" y="486" class="body">2. Backlog 层定义研究与交付方向</text>
+  <text x="874" y="512" class="body">3. 实施层承接模板、协议、图板和样板</text>
+
+  <rect x="72" y="590" width="456" height="282" class="card"/>
+  <text x="104" y="632" class="section">v0.5 资产一：人机协同</text>
+  <text x="104" y="660" class="meta">认知与深研线</text>
+  <text x="104" y="698" class="body">- cognition ladder and intent amplifier</text>
+  <text x="104" y="724" class="body">- sidecar deep research mechanism</text>
+  <text x="104" y="750" class="body">- human-machine collaboration research</text>
+  <text x="104" y="776" class="body">- human-machine collaboration research board</text>
+
+  <rect x="552" y="590" width="456" height="282" class="card"/>
+  <text x="584" y="632" class="section">v0.5 资产二：模式架构</text>
+  <text x="584" y="660" class="meta">default / plan / deep / do</text>
+  <text x="584" y="698" class="body">- mode architecture</text>
+  <text x="584" y="724" class="body">- do-mode execution protocol</text>
+  <text x="584" y="750" class="body">- do-mode task-start contract</text>
+  <text x="584" y="776" class="body">- mode switch template</text>
+  <text x="584" y="802" class="body">- 简版与详细版模式图板</text>
+
+  <rect x="1032" y="590" width="456" height="282" class="card"/>
+  <text x="1064" y="632" class="section">v0.5 资产三：AI 产研闭环</text>
+  <text x="1064" y="660" class="meta">产品 -> 开发 -> 测试 -> 回归</text>
+  <text x="1064" y="698" class="body">- AI product-development collaboration loop</text>
+  <text x="1064" y="724" class="body">- implementation / testing / version package templates</text>
+  <text x="1064" y="750" class="body">- AI product-development loop board</text>
+  <text x="1064" y="790" class="body">目标是让需求、demo、重实现、测试和回归形成标准闭环，而不是散点交接。</text>
+
+  <rect x="72" y="908" width="1416" height="122" class="card"/>
+  <text x="104" y="950" class="section">下一步 carry-over 方向</text>
+  <text x="104" y="978" class="meta">之后不再反复重讲方向，而是按这几条继续做</text>
+  <text x="104" y="1014" class="body">1. 把 v0.4 能快速收口的项继续收掉</text>
+  <text x="440" y="1014" class="body">2. 把外部阻塞项明确标成 carry-over</text>
+  <text x="844" y="1014" class="body">3. 让 implementation index 承接更多真实样板</text>
+  <text x="104" y="1040" class="body">4. 让人读层、AI 层、知识库、统一访问面从规则走向实际接入</text>
+
+  <rect x="72" y="1054" width="1416" height="42" class="card"/>
+  <a href="../docs/operations/v0.4-v0.5-transition-2026-04-21.md"><text x="100" y="1080" class="linkText">过渡文档 -&gt;</text></a>
+  <a href="../docs/operations/current-version-progress.md"><text x="320" y="1080" class="linkText">当前版本快照 -&gt;</text></a>
+  <a href="../docs/operations/v0.5-implementation-index.md"><text x="580" y="1080" class="linkText">v0.5 实施索引 -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="840" y="1080" class="linkText">v0.5 清单板 -&gt;</text></a>
+  <a href="index.svg"><text x="1050" y="1080" class="linkText">图板目录 -&gt;</text></a>
+</svg>

@@ -197,6 +197,133 @@ type ExternalConnectorStatus = {
   };
 };
 
+type CollaborationModeName = 'default' | 'plan' | 'deep' | 'do';
+
+type CollaborationModeState = {
+  currentMode: CollaborationModeName;
+  currentTaskId: string | null;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+};
+
+type CollaborationModeEntry = {
+  id: string;
+  mode: CollaborationModeName;
+  label: string;
+  toolIdentity: string;
+  timestamp: string;
+};
+
+type SharedTaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked';
+
+type SharedTask = {
+  id: string;
+  label: string;
+  status: SharedTaskStatus;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  notes: string | null;
+};
+
+type SharedCheckpoint = {
+  id: string;
+  label: string;
+  taskId: string | null;
+  contextSnapshot: string;
+  timestamp: string;
+};
+
+type SharedEventKind = 'task_started' | 'task_completed' | 'task_blocked' | 'checkpoint' | 'decision' | 'note' | 'mode_changed';
+
+type SharedEvent = {
+  id: string;
+  toolIdentity: string;
+  kind: SharedEventKind;
+  taskId: string | null;
+  content: string;
+  timestamp: string;
+};
+
+type ExecutionChecklistVersionSummary = {
+  id: string;
+  label: string;
+  totalTrackedItems: number;
+  solved: number;
+  partial: number;
+  carryOver: number;
+  missingPlacement: number;
+};
+
+type ExecutionChecklistBackcheck = {
+  id: string;
+  label: string;
+  status: 'solved' | 'partial' | 'unsolved';
+  detail: string;
+};
+
+type ExecutionChecklistSummary = {
+  versions: ExecutionChecklistVersionSummary[];
+  userBackchecks: ExecutionChecklistBackcheck[];
+};
+
+type DailyDigestEntry = {
+  id: string;
+  label: string;
+  path: string;
+  url: string;
+};
+
+type ProjectEntryAsset = {
+  name: 'project-board.svg' | 'roadmap-board.svg' | 'decision-board.svg' | 'change-log.md';
+  path: string;
+  url: string;
+};
+
+type ProjectLinkedSourceKind = 'repo-entry' | 'governance' | 'ai-facing';
+
+type ProjectLinkedSource = {
+  name: string;
+  kind: ProjectLinkedSourceKind;
+  path: string;
+  url: string;
+};
+
+type ProjectEntrySummary = {
+  subprojectId: string;
+  expectedAssetCount: number;
+  assetCount: number;
+  assets: ProjectEntryAsset[];
+  missingAssets: ProjectEntryAsset['name'][];
+  linkedSourceCount: number;
+  linkedSources: ProjectLinkedSource[];
+};
+
+type RuleExecutionItem = {
+  id: string;
+  label: string;
+  status: 'ok' | 'warning' | 'pending';
+  detail: string;
+};
+
+const SUBPROJECT_WORKFLOW_ADOPTION: Record<string, 'partial' | 'not_adopted' | 'unknown'> = {
+  'knowledge-base': 'partial',
+  ad: 'partial',
+  chokonu: 'partial',
+  'tracking-acceptance': 'partial',
+  server: 'partial',
+  'data-service': 'not_adopted',
+  'ad-intelligence': 'unknown',
+  mcp: 'unknown',
+};
+
+const RULE_EVIDENCE_PATHS = {
+  inbox: 'docs/sources/inbox/',
+  workflow: 'docs/operations/product-workflow-total-design.md',
+  adoption: 'docs/operations/subproject-product-workflow-adoption-checklist.md',
+  version: 'docs/operations/version-governance.md',
+};
+
 type WebFetchArtifact = {
   id: string;
   url: string;
@@ -259,6 +386,526 @@ async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> 
 
 async function listSubprojects() {
   return fetchJson<Subproject[]>('/api/subprojects');
+}
+
+function RuleExecutionStatusPanel({
+  selectedSubproject,
+  sessionsCount,
+  messagesCount,
+  workflowRun,
+}: {
+  selectedSubproject: Subproject | null;
+  sessionsCount: number;
+  messagesCount: number;
+  workflowRun: WorkflowRun | null;
+}) {
+  const adoptionState = selectedSubproject?.id ? SUBPROJECT_WORKFLOW_ADOPTION[selectedSubproject.id] ?? 'unknown' : 'partial';
+  const workflowAdoptionLabel =
+    adoptionState === 'partial' ? '已部分接入' : adoptionState === 'not_adopted' ? '未接入' : '待确认';
+  const workflowAdoptionStatus: RuleExecutionItem['status'] =
+    adoptionState === 'partial' ? 'ok' : adoptionState === 'not_adopted' ? 'warning' : 'pending';
+
+  const items: RuleExecutionItem[] = [
+    {
+      id: 'input',
+      label: '唯一输入源 inbox',
+      status: 'ok',
+      detail: '已固化为平台规则，原始材料需先进入 docs/sources/inbox。',
+    },
+    {
+      id: 'chain',
+      label: '产品主链执行',
+      status: workflowRun ? 'ok' : 'pending',
+      detail: workflowRun ? `当前 workflow 状态：${workflowRun.status}` : '当前 scope 暂无 workflow run 证据。',
+    },
+    {
+      id: 'sync',
+      label: '主动同步与文档优先',
+      status: sessionsCount > 0 || messagesCount > 0 ? 'ok' : 'pending',
+      detail: sessionsCount > 0 ? `当前已有 ${sessionsCount} 个会话、${messagesCount} 条消息，可作为同步入口。` : '当前还没有会话同步记录。',
+    },
+    {
+      id: 'subproject',
+      label: '子项目工作流接入',
+      status: workflowAdoptionStatus,
+      detail: `${selectedSubproject?.name ?? '平台总控'}：${workflowAdoptionLabel}`,
+    },
+  ];
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>规则执行看板</h2>
+      </div>
+      <div className="trace-list">
+        {items.map((item) => (
+          <article key={item.id} className={`trace-event trace-event--${item.status}`}>
+            <div className="trace-event__kind">{item.label}</div>
+            <div className="trace-event__detail">{item.detail}</div>
+          </article>
+        ))}
+      </div>
+      <div className="inspector-path-list">
+        <code className="inspector-path-chip">{RULE_EVIDENCE_PATHS.inbox}</code>
+        <code className="inspector-path-chip">{RULE_EVIDENCE_PATHS.workflow}</code>
+        <code className="inspector-path-chip">{RULE_EVIDENCE_PATHS.adoption}</code>
+      </div>
+    </section>
+  );
+}
+
+function ArtifactHubPanel({
+  counts,
+  latest,
+  onOpenRequirements,
+  onOpenVersions,
+  onOpenCapabilities,
+  onOpenDatasets,
+  onOpenProductOutputs,
+}: {
+  counts: {
+    requirements: number;
+    versions: number;
+    capabilities: number;
+    datasets: number;
+    productOutputs: number;
+  };
+  latest: {
+    requirement: string;
+    version: string;
+    capability: string;
+    dataset: string;
+    productOutput: string;
+  };
+  onOpenRequirements: () => void;
+  onOpenVersions: () => void;
+  onOpenCapabilities: () => void;
+  onOpenDatasets: () => void;
+  onOpenProductOutputs: () => void;
+}) {
+  const items = [
+    { id: 'requirements', label: '需求池', count: counts.requirements, latestLabel: latest.requirement, onClick: onOpenRequirements },
+    { id: 'versions', label: '版本库', count: counts.versions, latestLabel: latest.version, onClick: onOpenVersions },
+    { id: 'capabilities', label: 'Capability', count: counts.capabilities, latestLabel: latest.capability, onClick: onOpenCapabilities },
+    { id: 'datasets', label: '评测集', count: counts.datasets, latestLabel: latest.dataset, onClick: onOpenDatasets },
+    { id: 'outputs', label: 'PM产出', count: counts.productOutputs, latestLabel: latest.productOutput, onClick: onOpenProductOutputs },
+  ];
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>产出物</h2>
+      </div>
+      <div className="artifact-hub-list">
+        {items.map((item) => (
+          <button key={item.id} type="button" className="artifact-hub-card" onClick={item.onClick}>
+            <span className="artifact-hub-card__label">{item.label}</span>
+            <strong>{item.count}</strong>
+            <span className="artifact-hub-card__latest">{item.latestLabel}</span>
+            <span className="artifact-hub-card__hint">点击查看</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RecentOutputTimelinePanel({
+  outputs,
+  requirements,
+  versions,
+}: {
+  outputs: ProductChiefOutput[];
+  requirements: Requirement[];
+  versions: VersionEntry[];
+}) {
+  const items = [
+    ...outputs.map((output) => ({
+      id: `output-${output.id}`,
+      kind: 'PM产出',
+      title: output.title,
+      detail: output.summary,
+      time: output.generatedAt,
+      meta: output.type,
+      status: output.status === 'ready-for-review' ? 'warning' : 'ok',
+    })),
+    ...requirements.map((requirement) => ({
+      id: `requirement-${requirement.id}`,
+      kind: '需求',
+      title: requirement.title,
+      detail: requirement.description,
+      time: requirement.updatedAt,
+      meta: `${requirement.category} / ${requirement.priority} / ${requirement.status}`,
+      status: requirement.status === 'done' ? 'ok' : 'pending',
+    })),
+    ...versions.map((version) => ({
+      id: `version-${version.id}`,
+      kind: '版本',
+      title: version.summary,
+      detail: version.releaseNotes ?? version.diffSummary ?? `${version.entityType} / ${version.entityId}`,
+      time: version.createdAt,
+      meta: `${version.changeType} / ${version.newVersion ?? '-'}`,
+      status: version.approval?.approved === false ? 'warning' : 'ok',
+    })),
+  ]
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+    .slice(0, 8);
+
+  return (
+    <section className="inspector-panel">
+      <div className="section-header">
+        <h3>最近产出时间线</h3>
+      </div>
+      <div className="trace-list">
+        {items.length === 0 ? (
+          <div className="inspector-empty">当前还没有可展示的产出。</div>
+        ) : (
+          items.map((item) => (
+            <article key={item.id} className={`trace-event trace-event--${item.status}`}>
+              <div className="trace-event__kind">{item.kind}</div>
+              <div className="trace-event__detail">{item.title}</div>
+              <div className="trace-event__artifact">{item.detail}</div>
+              <div className="trace-event__meta">
+                {item.meta} / {new Date(item.time).toLocaleString('zh-CN')}
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ModeRuntimePanel({
+  modeState,
+  modeHistory,
+  busy,
+  onSwitchMode,
+}: {
+  modeState: CollaborationModeState | null;
+  modeHistory: CollaborationModeEntry[];
+  busy: boolean;
+  onSwitchMode: (mode: CollaborationModeName) => void;
+}) {
+  const status: RuleExecutionItem['status'] =
+    modeState?.currentMode === 'do' ? 'ok' : modeState?.currentMode === 'deep' ? 'warning' : 'pending';
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>协作模式</h2>
+      </div>
+      {!modeState ? (
+        <div className="inspector-empty">当前还没有 mcp-context mode 状态。</div>
+      ) : (
+        <>
+          <article className={`trace-event trace-event--${status}`}>
+            <div className="trace-event__kind">当前模式</div>
+            <div className="trace-event__detail">{modeState.currentMode}</div>
+            <div className="trace-event__meta">
+              task: {modeState.currentTaskId ?? '-'} / by: {modeState.lastUpdatedBy}
+            </div>
+          </article>
+          <div className="artifact-hub-list">
+            {(['default', 'plan', 'deep', 'do'] as CollaborationModeName[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                className="artifact-hub-card"
+                onClick={() => onSwitchMode(mode)}
+                disabled={busy || modeState.currentMode === mode}
+              >
+                <span className="artifact-hub-card__label">{mode}</span>
+                <strong>{modeState.currentMode === mode ? '当前' : '切换'}</strong>
+                <span className="artifact-hub-card__hint">{busy ? '处理中' : '更新共享模式'}</span>
+              </button>
+            ))}
+          </div>
+          <div className="trace-list">
+            {modeHistory.slice(0, 3).map((entry) => (
+              <article key={entry.id} className="trace-event trace-event--ok">
+                <div className="trace-event__kind">{entry.mode}</div>
+                <div className="trace-event__detail">{entry.label}</div>
+                <div className="trace-event__meta">
+                  {entry.toolIdentity} / {new Date(entry.timestamp).toLocaleString('zh-CN')}
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function SharedContextPanel({
+  tasks,
+  checkpoints,
+  events,
+}: {
+  tasks: SharedTask[];
+  checkpoints: SharedCheckpoint[];
+  events: SharedEvent[];
+}) {
+  const activeTasks = tasks.filter((task) => task.status === 'in_progress').slice(0, 4);
+  const recentCheckpoints = checkpoints.slice(0, 3);
+  const recentEvents = events.slice(0, 6);
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>共享上下文</h2>
+      </div>
+      <div className="trace-list">
+        {activeTasks.length === 0 ? (
+          <div className="inspector-empty">当前没有 in-progress 共享任务。</div>
+        ) : (
+          activeTasks.map((task) => (
+            <article key={task.id} className={`trace-event trace-event--${task.status === 'blocked' ? 'warning' : 'ok'}`}>
+              <div className="trace-event__kind">{task.status}</div>
+              <div className="trace-event__detail">{task.label}</div>
+              <div className="trace-event__meta">{task.id}</div>
+            </article>
+          ))
+        )}
+      </div>
+      <div className="trace-list">
+        {recentCheckpoints.map((checkpoint) => (
+          <article key={checkpoint.id} className="trace-event trace-event--ok">
+            <div className="trace-event__kind">checkpoint</div>
+            <div className="trace-event__detail">{checkpoint.label}</div>
+            <div className="trace-event__meta">
+              {checkpoint.taskId ?? '-'} / {new Date(checkpoint.timestamp).toLocaleString('zh-CN')}
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="trace-list">
+        {recentEvents.map((event) => (
+          <article key={event.id} className="trace-event trace-event--ok">
+            <div className="trace-event__kind">{event.kind}</div>
+            <div className="trace-event__detail">{event.content}</div>
+            <div className="trace-event__meta">
+              {event.toolIdentity} / {event.taskId ?? '-'} / {new Date(event.timestamp).toLocaleString('zh-CN')}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ExecutionChecklistPanel({ summary }: { summary: ExecutionChecklistSummary | null }) {
+  if (!summary) {
+    return (
+      <section className="sidebar-section">
+        <div className="section-header">
+          <h2>版本进度</h2>
+        </div>
+        <div className="inspector-empty">当前还没有执行清单摘要。</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>版本进度</h2>
+      </div>
+      <div className="trace-list">
+        {summary.versions.map((version) => (
+          <article key={version.id} className="trace-event trace-event--ok">
+            <div className="trace-event__kind">{version.label}</div>
+            <div className="trace-event__detail">
+              分母 {version.totalTrackedItems} / 已解 {version.solved} / 部分 {version.partial}
+            </div>
+            <div className="trace-event__meta">
+              carry-over {version.carryOver} / 未落位 {version.missingPlacement}
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="trace-list">
+        {summary.userBackchecks.map((item) => (
+          <article
+            key={item.id}
+            className={`trace-event trace-event--${item.status === 'solved' ? 'ok' : item.status === 'partial' ? 'warning' : 'pending'}`}
+          >
+            <div className="trace-event__kind">用户回查</div>
+            <div className="trace-event__detail">
+              {item.label} / {item.status}
+            </div>
+            <div className="trace-event__meta">{item.detail}</div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DailyDigestPanel({ items }: { items: DailyDigestEntry[] }) {
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>每日蒸馏</h2>
+      </div>
+      <div className="trace-list">
+        {items.length === 0 ? (
+          <div className="inspector-empty">当前还没有每日蒸馏文件。</div>
+        ) : (
+          items.map((item) => (
+            <article key={item.id} className="trace-event trace-event--ok">
+              <div className="trace-event__kind">digest</div>
+              <div className="trace-event__detail">
+                <a href={item.url} target="_blank" rel="noreferrer">
+                  {item.label}
+                </a>
+              </div>
+              <div className="trace-event__meta">{item.path}</div>
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ProjectEntryPanel({ items }: { items: ProjectEntrySummary[] }) {
+  const kindLabelMap: Record<ProjectLinkedSourceKind, string> = {
+    'repo-entry': '项目入口',
+    governance: '治理依据',
+    'ai-facing': 'AI 依据',
+  };
+  const fullyCoveredProjects = items.filter((item) => item.missingAssets.length === 0).length;
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>项目入口</h2>
+      </div>
+      <div className="trace-event trace-event--ok" style={{ marginBottom: 10 }}>
+        <div className="trace-event__kind">coverage</div>
+        <div className="trace-event__detail">
+          已补齐标准入口的项目：{fullyCoveredProjects}/{items.length}
+        </div>
+        <div className="trace-event__meta">标准集：project-board / roadmap-board / decision-board / change-log</div>
+      </div>
+      <div className="trace-list">
+        {items.length === 0 ? (
+          <div className="inspector-empty">当前还没有发现标准项目入口资产。</div>
+        ) : (
+          items.map((item) => (
+            <article key={item.subprojectId} className="trace-event trace-event--ok">
+              <div className="trace-event__kind">{item.subprojectId}</div>
+              <div className="trace-event__detail">
+                已发现 {item.assetCount}/{item.expectedAssetCount} 个入口资产，{item.linkedSourceCount} 个回钻入口
+              </div>
+              <div className="inspector-path-list">
+                {item.assets.map((asset) => (
+                  <a
+                    key={`${item.subprojectId}-${asset.name}`}
+                    href={asset.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inspector-path-chip"
+                  >
+                    {asset.name}
+                  </a>
+                ))}
+              </div>
+              {item.linkedSources.length > 0 ? (
+                <div className="inspector-path-list" style={{ marginTop: 8 }}>
+                  {item.linkedSources.map((source) => (
+                    <a
+                      key={`${item.subprojectId}-${source.path}`}
+                      href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inspector-path-chip"
+                      title={source.path}
+                    >
+                      {kindLabelMap[source.kind]} / {source.name}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+              {item.missingAssets.length > 0 ? (
+                <div className="trace-event__meta">缺失：{item.missingAssets.join(' / ')}</div>
+              ) : (
+                <div className="trace-event__meta">标准入口已补齐</div>
+              )}
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function MonitoringOverviewPanel({
+  run,
+  metrics,
+  review,
+  observability,
+}: {
+  run: WorkflowRun | null;
+  metrics: WorkflowMetrics | null;
+  review: CommitteeReport | null;
+  observability: ExecutionObservability | null;
+}) {
+  const activeStage = run?.stages.find((stage) => stage.id === run.currentStageId) ?? null;
+  const cards = [
+    {
+      id: 'run',
+      label: '运行状态',
+      value: run?.status ?? '无运行',
+      detail: activeStage?.label ?? run?.currentStageId ?? '暂无 active stage',
+    },
+    {
+      id: 'completion',
+      label: '阶段完成',
+      value: metrics ? `${metrics.completedStages}/${metrics.totalStages}` : '0/0',
+      detail: metrics ? `${Math.round(metrics.completionRate * 100)}% 完成率` : '暂无 workflow metrics',
+    },
+    {
+      id: 'review',
+      label: '评审门禁',
+      value: review?.gate.decision ?? '未评审',
+      detail: review ? `${review.gate.issueCount} 个问题 / blocked=${String(review.gate.blocked)}` : '暂无 review gate',
+    },
+    {
+      id: 'trace',
+      label: '执行追踪',
+      value: observability ? `${observability.timeline.length}` : '0',
+      detail: observability
+        ? `${observability.summary.executionEventCount} execution / ${observability.summary.workflowEventCount} workflow`
+        : '暂无 observability',
+    },
+  ];
+
+  return (
+    <section className="inspector-panel">
+      <div className="section-header">
+        <h3>运行总览</h3>
+      </div>
+      <div className="workspace-summary-grid workspace-summary-grid--compact">
+        {cards.map((card) => (
+          <article key={card.id} className="summary-card">
+            <span className="summary-card__label">{card.label}</span>
+            <strong>{card.value}</strong>
+            <span>{card.detail}</span>
+          </article>
+        ))}
+      </div>
+      {run?.executionSummary ? (
+        <article className="trace-event trace-event--ok">
+          <div className="trace-event__kind">execution summary</div>
+          <div className="trace-event__detail">{run.executionSummary}</div>
+          <div className="trace-event__meta">{run.updatedAt ? new Date(run.updatedAt).toLocaleString('zh-CN') : '-'}</div>
+        </article>
+      ) : null}
+    </section>
+  );
 }
 
 async function listPortfolio() {
@@ -548,6 +1195,49 @@ async function listVersions(subprojectId: string | null) {
   return fetchJson<{ items: VersionEntry[] }>(buildScopedUrl('/api/versions', subprojectId));
 }
 
+async function loadMcpContextMode() {
+  return fetchJson<CollaborationModeState>('/api/mcp-context/mode');
+}
+
+async function loadMcpContextModeHistory() {
+  return fetchJson<{ items: CollaborationModeEntry[] }>('/api/mcp-context/mode-history');
+}
+
+async function loadMcpContextTasks() {
+  return fetchJson<{ tasks: SharedTask[]; total: number }>('/api/mcp-context/tasks?status=in_progress');
+}
+
+async function loadMcpContextCheckpoints() {
+  return fetchJson<{ items: SharedCheckpoint[] }>('/api/mcp-context/checkpoints');
+}
+
+async function loadMcpContextEvents() {
+  return fetchJson<{ items: SharedEvent[] }>('/api/mcp-context/events?count=12');
+}
+
+async function loadExecutionChecklistSummary() {
+  return fetchJson<ExecutionChecklistSummary>('/api/ops/execution-checklist-summary');
+}
+
+async function loadDailyDigests() {
+  return fetchJson<{ items: DailyDigestEntry[] }>('/api/ops/daily-digests');
+}
+
+async function loadProjectEntries() {
+  return fetchJson<{ items: ProjectEntrySummary[] }>('/api/human-reading/project-entries');
+}
+
+async function setMcpContextMode(mode: CollaborationModeName) {
+  return fetchJson<CollaborationModeState>('/api/mcp-context/mode', {
+    method: 'POST',
+    body: JSON.stringify({
+      mode,
+      toolIdentity: 'other',
+      label: `workspace switch to ${mode}`,
+    }),
+  });
+}
+
 async function createRequirement(input: {
   subprojectId?: string | null;
   title: string;
@@ -748,7 +1438,7 @@ function ContextInspector({
     return (
       <section className="inspector-panel">
         <h3>Context</h3>
-        <div className="inspector-empty">杩樻病鏈変笂涓嬫枃蹇収銆</div>
+        <div className="inspector-empty">还没有上下文快照。</div>
       </section>
     );
   }
@@ -845,7 +1535,7 @@ function RunTracePanel({ run, events }: { run: ExecutionRun | null; events: Exec
     return (
       <section className="inspector-panel">
         <h3>Run Trace</h3>
-        <div className="inspector-empty">閫夋嫨涓€鏉″甫 run 鐨勬秷鎭悗鍙煡鐪嬫墽琛岄摼璺€</div>
+        <div className="inspector-empty">选择一条带 run 的消息后可查看执行链路。</div>
       </section>
     );
   }
@@ -922,7 +1612,7 @@ function RunTracePanel({ run, events }: { run: ExecutionRun | null; events: Exec
       ) : null}
       <div className="trace-list">
         {events.length === 0 ? (
-          <div className="inspector-empty">鏆傛棤浜嬩欢銆</div>
+          <div className="inspector-empty">暂无事件。</div>
         ) : (
           events.map((event) => (
             <article key={event.id} className={`trace-event trace-event--${event.status}`}>
@@ -947,7 +1637,7 @@ function ArtifactPreview({ artifact }: { artifact: MultimodalArtifact | null }) 
     return (
       <section className="inspector-panel">
         <h3>Artifact Preview</h3>
-        <div className="inspector-empty">閫夋嫨鍖呭惈浜х墿鐨?run 鍚庡彲鏌ョ湅缁撴瀯鍖栫粨鏋溿€</div>
+        <div className="inspector-empty">选择包含产物的 run 后可查看结构化结果。</div>
       </section>
     );
   }
@@ -990,7 +1680,7 @@ function ObservabilityPanel({ observability }: { observability: ExecutionObserva
     return (
       <section className="inspector-panel">
         <h3>Observability</h3>
-        <div className="inspector-empty">閫夋嫨涓€鏉″甫 run 鐨勬秷鎭悗鍙煡鐪?timeline 鍜屾枃浠惰拷韪€</div>
+        <div className="inspector-empty">选择一条带 run 的消息后可查看 timeline 和文件追踪。</div>
       </section>
     );
   }
@@ -1072,7 +1762,7 @@ function ObservabilityPanel({ observability }: { observability: ExecutionObserva
       </div>
       <div className="trace-list">
         {filteredTimeline.length === 0 ? (
-          <div className="inspector-empty">鏆傛棤 timeline 浜嬩欢銆</div>
+          <div className="inspector-empty">暂无 timeline 事件。</div>
         ) : (
           filteredTimeline.slice(0, 12).map((entry) => (
             <article key={`${entry.sourceKind}-${entry.id}`} className={`trace-event trace-event--${entry.status}`}>
@@ -2185,7 +2875,7 @@ function CapabilityPanel({
         </label>
       </div>
       {visibleCapabilities.length === 0 ? (
-        <div className="inspector-empty">杩樻病鏈?capability銆傚厛閫氳繃 API 娉ㄥ唽 capability锛岄潰鏉夸細鑷姩鏄剧ず銆</div>
+        <div className="inspector-empty">还没有 capability。先通过 API 注册 capability，面板会自动显示。</div>
       ) : (
         <>
           <div className="capability-list">
@@ -2250,7 +2940,7 @@ function CapabilityPanel({
               </div>
               <div className="capability-requirement-list">
                 {requirements.length === 0 ? (
-                  <div className="inspector-empty">鏆傛棤 requirement 鍙粦瀹氥€</div>
+                  <div className="inspector-empty">暂无 requirement 可绑定。</div>
                 ) : (
                   requirements.slice(0, 8).map((requirement) => (
                     <button
@@ -2329,7 +3019,7 @@ function CapabilityPanel({
               </div>
               <div className="trace-list">
                 {capabilityRuns.length === 0 ? (
-                  <div className="inspector-empty">鏆傛棤 evaluation run銆</div>
+                  <div className="inspector-empty">暂无 evaluation run。</div>
                 ) : (
                   capabilityRuns.map((run) => (
                     <button
@@ -2518,7 +3208,7 @@ function RequirementVersionPanel({
       </div>
       <div className="trace-list">
         {requirements.length === 0 ? (
-          <div className="inspector-empty">鏆傛棤 requirement銆</div>
+          <div className="inspector-empty">暂无 requirement。</div>
         ) : (
           requirements.slice(0, 5).map((requirement) => (
             <button
@@ -2622,7 +3312,7 @@ function RequirementVersionPanel({
       </div>
       <div className="trace-list">
         {relatedVersions.length === 0 ? (
-          <div className="inspector-empty">鏆傛棤 version entry銆</div>
+          <div className="inspector-empty">暂无 version entry。</div>
         ) : (
           relatedVersions.slice(0, 6).map((entry) => (
             <button
@@ -2685,7 +3375,7 @@ function RequirementVersionPanel({
           </div>
           <div className="trace-list">
             {relatedCapabilities.length === 0 ? (
-              <div className="inspector-empty">褰撳墠 requirement 鏆傛棤 capability 鍙樻洿銆</div>
+              <div className="inspector-empty">当前 requirement 暂无 capability 变更。</div>
             ) : (
               relatedCapabilities.map((capability) => (
                 <button
@@ -2707,7 +3397,7 @@ function RequirementVersionPanel({
           </div>
           <div className="trace-list">
             {relatedRuns.length === 0 ? (
-              <div className="inspector-empty">褰撳墠 requirement 杩樻病鏈夊彲鐩存帴鎵撳紑鐨?execution run銆</div>
+              <div className="inspector-empty">当前 requirement 还没有可直接打开的 execution run。</div>
             ) : (
               relatedRuns.map((run) => (
                 <button
@@ -2730,6 +3420,7 @@ function RequirementVersionPanel({
 }
 
 export default function App() {
+  const [inspectorView, setInspectorView] = useState<'outputs' | 'monitoring' | 'assets'>('outputs');
   const [subprojects, setSubprojects] = useState<Subproject[]>([]);
   const [selectedSubprojectId, setSelectedSubprojectId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -2766,6 +3457,14 @@ export default function App() {
   const [evaluationHistory, setEvaluationHistory] = useState<EvaluationHistory | null>(null);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [versionEntries, setVersionEntries] = useState<VersionEntry[]>([]);
+  const [mcpModeState, setMcpModeState] = useState<CollaborationModeState | null>(null);
+  const [mcpModeHistory, setMcpModeHistory] = useState<CollaborationModeEntry[]>([]);
+  const [mcpTasks, setMcpTasks] = useState<SharedTask[]>([]);
+  const [mcpCheckpoints, setMcpCheckpoints] = useState<SharedCheckpoint[]>([]);
+  const [mcpEvents, setMcpEvents] = useState<SharedEvent[]>([]);
+  const [executionChecklistSummary, setExecutionChecklistSummary] = useState<ExecutionChecklistSummary | null>(null);
+  const [dailyDigests, setDailyDigests] = useState<DailyDigestEntry[]>([]);
+  const [projectEntries, setProjectEntries] = useState<ProjectEntrySummary[]>([]);
   const [workflowRun, setWorkflowRun] = useState<WorkflowRun | null>(null);
   const [workflowMetrics, setWorkflowMetrics] = useState<WorkflowMetrics | null>(null);
   const [workflowReview, setWorkflowReview] = useState<CommitteeReport | null>(null);
@@ -2813,7 +3512,11 @@ export default function App() {
   const [dagBusy, setDagBusy] = useState(false);
   const [retrievalBusy, setRetrievalBusy] = useState(false);
   const [hermesBusy, setHermesBusy] = useState(false);
+  const [mcpContextBusy, setMcpContextBusy] = useState(false);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const productOutputsSectionRef = useRef<HTMLDivElement | null>(null);
+  const capabilitySectionRef = useRef<HTMLDivElement | null>(null);
+  const requirementSectionRef = useRef<HTMLDivElement | null>(null);
 
   const activeSession = useMemo(
     () => sessions.find((session) => session.id === activeSessionId) ?? null,
@@ -2842,6 +3545,14 @@ export default function App() {
     () => capabilities.find((capability) => capability.id === selectedCapabilityId) ?? capabilities[0] ?? null,
     [capabilities, selectedCapabilityId],
   );
+  const latestRequirementTitle = useMemo(() => requirements[0]?.title ?? '暂无需求', [requirements]);
+  const latestVersionSummary = useMemo(() => versionEntries[0]?.summary ?? '暂无版本', [versionEntries]);
+  const latestCapabilityName = useMemo(() => capabilities[0]?.name ?? '暂无 capability', [capabilities]);
+  const latestDatasetName = useMemo(() => evaluationDatasets[0]?.name ?? '暂无评测集', [evaluationDatasets]);
+  const latestProductOutputTitle = useMemo(() => productChiefOutputs[0]?.title ?? '暂无 PM 产出', [productChiefOutputs]);
+  const scrollToSection = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
   useEffect(() => {
     const activeVersion = selectedCapability?.versions.find((version) => version.version === selectedCapability.activeVersion) ?? selectedCapability?.versions[0] ?? null;
     setPublishDraft({
@@ -2998,6 +3709,29 @@ export default function App() {
     setVersionEntries(versionResult.items);
   }, []);
 
+  const loadMcpModeData = useCallback(async () => {
+    const [modeState, modeHistoryResult] = await Promise.all([loadMcpContextMode(), loadMcpContextModeHistory()]);
+    setMcpModeState(modeState);
+    setMcpModeHistory(modeHistoryResult.items);
+  }, []);
+
+  const loadSharedContextData = useCallback(async () => {
+    const [taskResult, checkpointResult, eventResult, checklistSummary, dailyDigestResult, projectEntryResult] = await Promise.all([
+      loadMcpContextTasks(),
+      loadMcpContextCheckpoints(),
+      loadMcpContextEvents(),
+      loadExecutionChecklistSummary(),
+      loadDailyDigests(),
+      loadProjectEntries(),
+    ]);
+    setMcpTasks(taskResult.tasks);
+    setMcpCheckpoints(checkpointResult.items);
+    setMcpEvents(eventResult.items);
+    setExecutionChecklistSummary(checklistSummary);
+    setDailyDigests(dailyDigestResult.items);
+    setProjectEntries(projectEntryResult.items);
+  }, []);
+
   const loadWorkflowSurface = useCallback(async (subprojectId: string | null) => {
     const [run, metrics, review] = await Promise.all([
       loadWorkflowRun(subprojectId),
@@ -3103,8 +3837,27 @@ export default function App() {
   const bootstrap = useCallback(async () => {
     setLoading(true);
     try {
-      const [subprojectItems, chatResult] = await Promise.all([listSubprojects(), listChats(selectedSubprojectId)]);
+      const [subprojectItems, chatResult, modeState, modeHistoryResult, taskResult, checkpointResult, eventResult, checklistSummary, dailyDigestResult, projectEntryResult] = await Promise.all([
+        listSubprojects(),
+        listChats(selectedSubprojectId),
+        loadMcpContextMode(),
+        loadMcpContextModeHistory(),
+        loadMcpContextTasks(),
+        loadMcpContextCheckpoints(),
+        loadMcpContextEvents(),
+        loadExecutionChecklistSummary(),
+        loadDailyDigests(),
+        loadProjectEntries(),
+      ]);
       setSubprojects(subprojectItems);
+      setMcpModeState(modeState);
+      setMcpModeHistory(modeHistoryResult.items);
+      setMcpTasks(taskResult.tasks);
+      setMcpCheckpoints(checkpointResult.items);
+      setMcpEvents(eventResult.items);
+      setExecutionChecklistSummary(checklistSummary);
+      setDailyDigests(dailyDigestResult.items);
+      setProjectEntries(projectEntryResult.items);
 
       if (chatResult.items.length > 0) {
         setSessions(chatResult.items);
@@ -3164,6 +3917,35 @@ export default function App() {
       }
     })();
   }, [loadTraceabilityData, selectedSubprojectId]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await loadMcpModeData();
+      } catch (cause) {
+        setError(cause instanceof Error ? `mcp-context mode load failed: ${cause.message}` : 'mcp-context mode load failed.');
+      }
+    })();
+  }, [loadMcpModeData]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await loadSharedContextData();
+      } catch (cause) {
+        setError(cause instanceof Error ? `shared context load failed: ${cause.message}` : 'shared context load failed.');
+      }
+    })();
+  }, [loadSharedContextData]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      void loadMcpModeData();
+      void loadSharedContextData();
+    }, 20000);
+
+    return () => window.clearInterval(interval);
+  }, [loadMcpModeData, loadSharedContextData]);
 
   useEffect(() => {
     void (async () => {
@@ -3331,7 +4113,7 @@ export default function App() {
       setMessages((current) => [...current, userMessage]);
       setDraft('');
       setActiveMessageId(userMessage.id);
-      setVoiceStatus('娑堟伅宸插彂閫侊紝姝ｅ湪绛夊緟鍥炲...');
+      setVoiceStatus('消息已发送，正在等待回复...');
 
       const result = await respondToChat(activeSessionId, {
         subprojectId: selectedSubprojectId,
@@ -4129,17 +4911,49 @@ export default function App() {
     }
   }, [selectedSubprojectId, workflowRun]);
 
+  const handleSwitchMode = useCallback(async (mode: CollaborationModeName) => {
+    setMcpContextBusy(true);
+    try {
+      const nextModeState = await setMcpContextMode(mode);
+      setMcpModeState(nextModeState);
+      await loadSharedContextData();
+      await loadMcpModeData();
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `mcp-context mode switch failed: ${cause.message}` : 'mcp-context mode switch failed.');
+    } finally {
+      setMcpContextBusy(false);
+    }
+  }, [loadMcpModeData, loadSharedContextData]);
+
   if (loading) {
     return <div className="app-loading">Loading chat workspace...</div>;
   }
 
   return (
-    <div className="chat-layout">
+    <div className="workspace-shell">
+      <header className="workspace-topbar">
+        <div>
+          <p className="eyebrow">PMAIOS Workspace</p>
+          <h1 className="workspace-topbar__title">Platform Chat And Operating Console</h1>
+        </div>
+        <div className="workspace-topbar__meta">
+          <span className="workspace-chip">scope: {selectedSubprojectId ?? 'platform'}</span>
+          <span className="workspace-chip">sessions: {sessions.length}</span>
+          <span className="workspace-chip">runs: {runs.length}</span>
+          <span className="workspace-chip">messages: {messages.length}</span>
+        </div>
+      </header>
+
+      <div className="chat-layout">
       <aside className="chat-sidebar">
         <div className="sidebar-section">
-          <p className="eyebrow">PMAIOS v0.2</p>
+          <p className="eyebrow">PMAIOS v0.4</p>
           <h1>Chat Workspace</h1>
-          <p className="sidebar-copy">Unified entry point for platform chat, scoped context, and run trace inspection.</p>
+          <div className="sidebar-highlight">
+            <strong>{selectedSubproject?.name ?? 'PMAIOS Platform'}</strong>
+            <span>{selectedSubproject?.description ?? 'Global operating scope for platform-level product workflow and runtime inspection.'}</span>
+          </div>
         </div>
 
         <div className="sidebar-section">
@@ -4160,6 +4974,65 @@ export default function App() {
           </select>
           <div className="context-pill">{selectedSubproject?.description ?? 'platform scope'}</div>
         </div>
+
+        <RuleExecutionStatusPanel
+          selectedSubproject={selectedSubproject}
+          sessionsCount={sessions.length}
+          messagesCount={messages.length}
+          workflowRun={workflowRun}
+        />
+
+        <ModeRuntimePanel
+          modeState={mcpModeState}
+          modeHistory={mcpModeHistory}
+          busy={mcpContextBusy}
+          onSwitchMode={handleSwitchMode}
+        />
+
+        <ExecutionChecklistPanel summary={executionChecklistSummary} />
+
+        <DailyDigestPanel items={dailyDigests} />
+
+        <ProjectEntryPanel items={projectEntries} />
+
+        <SharedContextPanel tasks={mcpTasks} checkpoints={mcpCheckpoints} events={mcpEvents} />
+
+        <ArtifactHubPanel
+          counts={{
+            requirements: requirements.length,
+            versions: versionEntries.length,
+            capabilities: capabilities.length,
+            datasets: evaluationDatasets.length,
+            productOutputs: productChiefOutputs.length,
+          }}
+          latest={{
+            requirement: latestRequirementTitle,
+            version: latestVersionSummary,
+            capability: latestCapabilityName,
+            dataset: latestDatasetName,
+            productOutput: latestProductOutputTitle,
+          }}
+          onOpenRequirements={() => {
+            setInspectorView('outputs');
+            setTimeout(() => scrollToSection(requirementSectionRef), 0);
+          }}
+          onOpenVersions={() => {
+            setInspectorView('outputs');
+            setTimeout(() => scrollToSection(requirementSectionRef), 0);
+          }}
+          onOpenCapabilities={() => {
+            setInspectorView('assets');
+            setTimeout(() => scrollToSection(capabilitySectionRef), 0);
+          }}
+          onOpenDatasets={() => {
+            setInspectorView('assets');
+            setTimeout(() => scrollToSection(capabilitySectionRef), 0);
+          }}
+          onOpenProductOutputs={() => {
+            setInspectorView('outputs');
+            setTimeout(() => scrollToSection(productOutputsSectionRef), 0);
+          }}
+        />
 
         <div className="sidebar-section sidebar-section--grow">
           <div className="section-header">
@@ -4198,24 +5071,34 @@ export default function App() {
           </div>
         </header>
 
-        <section className="chat-runtime-banner">
-          <strong>PMAIOS v0.2</strong>
-          <span>Frontend: http://localhost:{FRONTEND_PORT}</span>
-          <span>Backend: http://localhost:{BACKEND_PORT}</span>
-        </section>
-
-        <section className="chat-runtime-banner chat-runtime-banner--voice">
-          <strong>Voice Mode</strong>
-          <span>{voiceSupported ? 'Speech input available' : 'Speech input unavailable'}</span>
-          <span>{speechOutputSupported ? 'Speech output available' : 'Speech output unavailable'}</span>
-          <span>{autoSpeak ? 'Auto speak on' : 'Auto speak off'}</span>
+        <section className="workspace-summary-grid">
+          <article className="summary-card">
+            <span className="summary-card__label">Active Scope</span>
+            <strong>{selectedSubproject?.name ?? 'PMAIOS Platform'}</strong>
+            <span>{selectedSubprojectId ?? 'platform-root'}</span>
+          </article>
+          <article className="summary-card">
+            <span className="summary-card__label">Conversation State</span>
+            <strong>{activeSession?.title ?? 'No session'}</strong>
+            <span>{sending ? 'assistant is responding' : 'ready for next prompt'}</span>
+          </article>
+          <article className="summary-card">
+            <span className="summary-card__label">Workflow Signals</span>
+            <strong>{workflowRun?.status ?? 'no active workflow'}</strong>
+            <span>{workflowMetrics ? `${workflowMetrics.completedStages}/${workflowMetrics.totalStages} stages complete` : 'workflow metrics unavailable'}</span>
+          </article>
+          <article className="summary-card">
+            <span className="summary-card__label">实时产出</span>
+            <strong>{productChiefOutputs.length + requirements.length + versionEntries.length}</strong>
+            <span>{productChiefOutputs.length} PM产出 / {requirements.length} 需求 / {versionEntries.length} 版本</span>
+          </article>
         </section>
 
         {error ? <section className="chat-error">{error}</section> : null}
 
         <section className="chat-transcript">
           {messages.length === 0 ? (
-            <div className="chat-empty">杩樻病鏈夋秷鎭紝鍏堝彂涓€鍙ャ€</div>
+            <div className="chat-empty">还没有消息，先发一句。</div>
           ) : (
             messages.map((message) => (
               <button
@@ -4290,140 +5173,159 @@ export default function App() {
       </main>
 
       <aside className="chat-inspector">
-        <ContextInspector snapshot={selectedContextSnapshot} fallbackSnapshotId={selectedRun?.contextSnapshotId ?? null} />
-        <ProviderRoutingPanel
-          snapshots={providerRouting}
-          scopeLabel={providerRoutingScopeLabel}
-          busy={providerRoutingBusy}
-          onRefresh={() => void handleProviderRoutingRefresh()}
-          onSetPrimary={(providerName) => void handleSetPrimaryProvider(providerName)}
-          onAdjustPriority={(providerName, delta) => void handleAdjustProviderPriority(providerName, delta)}
-        />
-        <RunTracePanel run={selectedRun} events={runEvents} />
-        <ReviewPanel report={selectedReview} />
-        <ObservabilityPanel observability={selectedObservability} />
-        <WorkflowOpsPanel
-          run={workflowRun}
-          metrics={workflowMetrics}
-          review={workflowReview}
-          busy={workflowBusy}
-          onRefresh={() => void handleWorkflowRefresh()}
-          onAdvance={() => void handleWorkflowAdvance()}
-          onRunUntilBlocked={() => void handleWorkflowRunUntilBlocked()}
-          onResume={() => void handleWorkflowResume()}
-          onApproveGate={() => void handleWorkflowApproveGate()}
-          onSendToRework={() => void handleWorkflowSendToRework()}
-        />
-        <HermesPolicyPanel report={hermesPolicy} busy={hermesBusy} onRefresh={() => void handleHermesRefresh()} />
-        <PortfolioPanel
-          entries={portfolioEntries}
-          busy={portfolioBusy}
-          onRefresh={() => void handlePortfolioRefresh()}
-          onSelectScope={setSelectedSubprojectId}
-        />
-        <ProductAgentPanel
-          agents={productAgents}
-          blueprints={productAgentBlueprints}
-          busy={productAgentBusy}
-          onRefresh={() => void handleProductAgentRefresh()}
-          onBootstrap={() => void handleProductAgentBootstrap()}
-        />
-        <ProductSkillPanel
-          surface={productSkillSurface}
-          busy={productAgentBusy}
-          onRefresh={() => void handleProductAgentRefresh()}
-        />
-        <ExternalConnectorsPanel
-          status={externalConnectorStatus}
-          latestWebFetch={latestWebFetch}
-          latestFigmaInspection={latestFigmaInspection}
-          latestDingTalkImport={latestDingTalkImport}
-          busy={externalConnectorBusy}
-          onRefresh={() => void handleExternalConnectorRefresh()}
-          onWebFetch={(url) => void handleWebFetch(url)}
-          onInspectFigma={(fileKey) => void handleInspectFigma(fileKey)}
-          onImportDingTalk={(title, content) => void handleImportDingTalk(title, content)}
-        />
-        <ProductChiefPanel
-          reports={productChiefReports}
-          outputs={productChiefOutputs}
-          reviews={productChiefReviews}
-          busy={productChiefBusy}
-          onRefresh={() => void handleProductChiefRefresh()}
-          onAnalyze={(brief) => void handleProductChiefAnalyze(brief)}
-          onGenerateOutput={(reportId, type) => void handleProductChiefGenerateOutput(reportId, type)}
-        />
-        <DagPanel
-          graph={dagGraph}
-          runs={dagRuns}
-          changes={dagChanges}
-          busy={dagBusy}
-          activeNodeId={workflowRun?.currentStageId ?? null}
-          onRefresh={() => void handleDagRefresh()}
-          onRegisterChange={() => void handleDagRegisterChange()}
-          onRerunDirty={() => void handleDagRerunDirty()}
-        />
-        <RetrievalGovernancePanel
-          settings={retrievalGovernance}
-          searchResult={retrievalSearchResult}
-          busy={retrievalBusy}
-          onRefresh={() => void handleRetrievalRefresh()}
-          onSetMode={(mode) => void handleRetrievalSetMode(mode)}
-          onIndex={() => void handleRetrievalIndex()}
-          onSearch={(query) => void handleRetrievalSearch(query)}
-        />
-        <ArtifactPreview artifact={selectedArtifact} />
-        <CapabilityPanel
-          capabilities={capabilities}
-          datasets={evaluationDatasets}
-          evaluationRuns={evaluationRuns}
-          evaluationHistory={evaluationHistory}
-          requirements={requirements}
-          versionEntries={versionEntries}
-          filteredCapabilityIds={filteredCapabilityIds}
-          selectedCapabilityId={selectedCapabilityId}
-          selectedEvaluationRunId={selectedEvaluationRunId}
-          selectedRequirementIds={selectedRequirementIds}
-          busy={capabilityBusy}
-          registrationDraft={capabilityDraft}
-          publishDraft={publishDraft}
-          onRegistrationDraftChange={handleRegistrationDraftChange}
-          onPublishDraftChange={handlePublishDraftChange}
-          onCreateCapability={() => void handleCreateCapability()}
-          onSelectCapability={setSelectedCapabilityId}
-          onToggleRequirement={handleToggleRequirement}
-          onSelectEvaluationRun={setSelectedEvaluationRunId}
-          onRefresh={() => void loadCapabilityData(selectedSubprojectId)}
-          onCreateDataset={() => void handleCreateCapabilityDataset()}
-          onRunEvaluation={() => void handleRunCapabilityEvaluation()}
-          onPublish={() => void handlePublishCapability()}
-          onRollbackVersion={(version) => void handleRollbackCapabilityVersion(version)}
-          onInvoke={() => void handleInvokeCapability()}
-        />
-        <RequirementVersionPanel
-          requirements={requirements}
-          versions={versionEntries}
-          capabilities={capabilities}
-          runs={runs}
-          activeSessionId={activeSessionId}
-          activeMessageId={activeMessageId}
-          selectedRequirementId={selectedTraceRequirementId}
-          selectedVersionId={selectedTraceVersionId}
-          selectedBatchRequirementIds={selectedBatchRequirementIds}
-          busy={traceBusy}
-          onSelectRequirement={handleSelectTraceRequirement}
-          onSelectVersion={setSelectedTraceVersionId}
-          onToggleBatchRequirement={handleToggleBatchRequirement}
-          onUpdateRequirementStatus={(requirementId, status) => void handleUpdateRequirementStatus(requirementId, status)}
-          onBatchUpdateRequirementStatus={(status) => void handleBatchRequirementStatus(status)}
-          onSelectCapability={handleSelectTraceCapability}
-          onSelectRun={(runId) => void handleSelectTraceRun(runId)}
-          onRefresh={() => void loadTraceabilityData(selectedSubprojectId)}
-          onIngestCurrentChat={() => void handleIngestCurrentChat()}
-          onCreateManualRequirement={() => void handleCreateManualRequirement()}
-          onRollbackVersion={(entry) => void handleRollbackVersion(entry)}
-        />
+        <section className="inspector-tabs">
+          <button
+            type="button"
+            className={inspectorView === 'outputs' ? 'inspector-tab inspector-tab--active' : 'inspector-tab'}
+            onClick={() => setInspectorView('outputs')}
+          >
+            实时产出
+          </button>
+          <button
+            type="button"
+            className={inspectorView === 'monitoring' ? 'inspector-tab inspector-tab--active' : 'inspector-tab'}
+            onClick={() => setInspectorView('monitoring')}
+          >
+            执行监控
+          </button>
+          <button
+            type="button"
+            className={inspectorView === 'assets' ? 'inspector-tab inspector-tab--active' : 'inspector-tab'}
+            onClick={() => setInspectorView('assets')}
+          >
+            资产库
+          </button>
+        </section>
+
+        {inspectorView === 'outputs' ? (
+          <>
+            <RecentOutputTimelinePanel
+              outputs={productChiefOutputs}
+              requirements={requirements}
+              versions={versionEntries}
+            />
+            <div ref={productOutputsSectionRef}>
+              <ProductChiefPanel
+                reports={productChiefReports}
+                outputs={productChiefOutputs}
+                reviews={productChiefReviews}
+                busy={productChiefBusy}
+                onRefresh={() => void handleProductChiefRefresh()}
+                onAnalyze={(brief) => void handleProductChiefAnalyze(brief)}
+                onGenerateOutput={(reportId, type) => void handleProductChiefGenerateOutput(reportId, type)}
+              />
+            </div>
+            <div ref={requirementSectionRef}>
+              <RequirementVersionPanel
+                requirements={requirements}
+                versions={versionEntries}
+                capabilities={capabilities}
+                runs={runs}
+                activeSessionId={activeSessionId}
+                activeMessageId={activeMessageId}
+                selectedRequirementId={selectedTraceRequirementId}
+                selectedVersionId={selectedTraceVersionId}
+                selectedBatchRequirementIds={selectedBatchRequirementIds}
+                busy={traceBusy}
+                onSelectRequirement={handleSelectTraceRequirement}
+                onSelectVersion={setSelectedTraceVersionId}
+                onToggleBatchRequirement={handleToggleBatchRequirement}
+                onUpdateRequirementStatus={(requirementId, status) => void handleUpdateRequirementStatus(requirementId, status)}
+                onBatchUpdateRequirementStatus={(status) => void handleBatchRequirementStatus(status)}
+                onSelectCapability={handleSelectTraceCapability}
+                onSelectRun={(runId) => void handleSelectTraceRun(runId)}
+                onRefresh={() => void loadTraceabilityData(selectedSubprojectId)}
+                onIngestCurrentChat={() => void handleIngestCurrentChat()}
+                onCreateManualRequirement={() => void handleCreateManualRequirement()}
+                onRollbackVersion={(entry) => void handleRollbackVersion(entry)}
+              />
+            </div>
+          </>
+        ) : null}
+
+        {inspectorView === 'monitoring' ? (
+          <>
+            <MonitoringOverviewPanel
+              run={workflowRun}
+              metrics={workflowMetrics}
+              review={workflowReview}
+              observability={selectedObservability}
+            />
+            <ContextInspector snapshot={selectedContextSnapshot} fallbackSnapshotId={selectedRun?.contextSnapshotId ?? null} />
+            <RunTracePanel run={selectedRun} events={runEvents} />
+            <ReviewPanel report={selectedReview} />
+            <ObservabilityPanel observability={selectedObservability} />
+            <WorkflowOpsPanel
+              run={workflowRun}
+              metrics={workflowMetrics}
+              review={workflowReview}
+              busy={workflowBusy}
+              onRefresh={() => void handleWorkflowRefresh()}
+              onAdvance={() => void handleWorkflowAdvance()}
+              onRunUntilBlocked={() => void handleWorkflowRunUntilBlocked()}
+              onResume={() => void handleWorkflowResume()}
+              onApproveGate={() => void handleWorkflowApproveGate()}
+              onSendToRework={() => void handleWorkflowSendToRework()}
+            />
+            <HermesPolicyPanel report={hermesPolicy} busy={hermesBusy} onRefresh={() => void handleHermesRefresh()} />
+            <DagPanel
+              graph={dagGraph}
+              runs={dagRuns}
+              changes={dagChanges}
+              busy={dagBusy}
+              activeNodeId={workflowRun?.currentStageId ?? null}
+              onRefresh={() => void handleDagRefresh()}
+              onRegisterChange={() => void handleDagRegisterChange()}
+              onRerunDirty={() => void handleDagRerunDirty()}
+            />
+            <ArtifactPreview artifact={selectedArtifact} />
+          </>
+        ) : null}
+
+        {inspectorView === 'assets' ? (
+          <>
+            <div ref={capabilitySectionRef}>
+              <CapabilityPanel
+                capabilities={capabilities}
+                datasets={evaluationDatasets}
+                evaluationRuns={evaluationRuns}
+                evaluationHistory={evaluationHistory}
+                requirements={requirements}
+                versionEntries={versionEntries}
+                filteredCapabilityIds={filteredCapabilityIds}
+                selectedCapabilityId={selectedCapabilityId}
+                selectedEvaluationRunId={selectedEvaluationRunId}
+                selectedRequirementIds={selectedRequirementIds}
+                busy={capabilityBusy}
+                registrationDraft={capabilityDraft}
+                publishDraft={publishDraft}
+                onRegistrationDraftChange={handleRegistrationDraftChange}
+                onPublishDraftChange={handlePublishDraftChange}
+                onCreateCapability={() => void handleCreateCapability()}
+                onSelectCapability={setSelectedCapabilityId}
+                onToggleRequirement={handleToggleRequirement}
+                onSelectEvaluationRun={setSelectedEvaluationRunId}
+                onRefresh={() => void loadCapabilityData(selectedSubprojectId)}
+                onCreateDataset={() => void handleCreateCapabilityDataset()}
+                onRunEvaluation={() => void handleRunCapabilityEvaluation()}
+                onPublish={() => void handlePublishCapability()}
+                onRollbackVersion={(version) => void handleRollbackCapabilityVersion(version)}
+                onInvoke={() => void handleInvokeCapability()}
+              />
+            </div>
+            <RetrievalGovernancePanel
+              settings={retrievalGovernance}
+              searchResult={retrievalSearchResult}
+              busy={retrievalBusy}
+              onRefresh={() => void handleRetrievalRefresh()}
+              onSetMode={(mode) => void handleRetrievalSetMode(mode)}
+              onIndex={() => void handleRetrievalIndex()}
+              onSearch={(query) => void handleRetrievalSearch(query)}
+            />
+          </>
+        ) : null}
       </aside>
+      </div>
     </div>
   );
 }

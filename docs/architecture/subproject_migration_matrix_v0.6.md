@@ -14,7 +14,7 @@
 | `knowledge-base` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | 文档较多，缺测试与结构收敛 |
 | `mcp` | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | 基本接入，缺项目总说明 |
 | `server` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | 最接近标准 |
-| `tracking-acceptance` | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | 资料仓形态，需先补注册与执行入口 |
+| `chokonu` | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | 原 `tracking-acceptance` 已迁移为 ChoKoNu，仍需继续收口执行入口 |
 
 ## 2. 项目级判断
 
@@ -74,7 +74,7 @@
 
 建议优先级：`P2`
 
-### `tracking-acceptance`
+### `chokonu`
 
 - 优点：README 信息完整，已有 `docs/memory`
 - 缺口：
@@ -91,7 +91,7 @@
 
 1. `ad`
 2. `ad-intelligence`
-3. `tracking-acceptance`
+3. `chokonu`
 
 目标：
 
@@ -131,10 +131,10 @@
 
 - 为 `ad` 新增 `subproject.json`
 - 为 `ad-intelligence` 新增 `subproject.json`
-- 为 `tracking-acceptance` 新增 `subproject.json`
+- 为 `chokonu` 新增 `subproject.json`
 
 ### P1 第二批
 
 - 为 `data-service` 新增 `README.md`
 - 为 `mcp` 新增 `README.md`
-- 为 `tracking-acceptance` 补最小 `src/` 占位或明确“资料项目”定位
+- 为 `chokonu` 补最小 `src/` 占位或明确“资料项目”定位

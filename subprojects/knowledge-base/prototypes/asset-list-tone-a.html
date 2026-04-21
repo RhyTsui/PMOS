@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Asset Platform - Tone A</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --panel: rgba(255, 251, 244, 0.92);
+      --panel-strong: #fffaf0;
+      --text: #1c1b18;
+      --muted: #6f675b;
+      --line: rgba(28, 27, 24, 0.12);
+      --accent: #b14d25;
+      --accent-soft: rgba(177, 77, 37, 0.12);
+      --green: #285840;
+      --shadow: 0 24px 60px rgba(79, 56, 21, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(177, 77, 37, 0.14), transparent 28%),
+        radial-gradient(circle at right 20%, rgba(40, 88, 64, 0.13), transparent 24%),
+        linear-gradient(180deg, #f8f4ea 0%, var(--bg) 100%);
+    }
+
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 34px;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-meta {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    .button.primary {
+      background: var(--text);
+      color: #fff;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .hero-card,
+    .metric-card,
+    .filter-card,
+    .table-card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card {
+      padding: 28px 30px;
+      min-height: 250px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 52px;
+      line-height: 1;
+      font-weight: 600;
+    }
+
+    .hero-copy {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 18px;
+    }
+
+    .metric-card {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric-title {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .metric-row:last-child { border-bottom: 0; padding-bottom: 0; }
+
+    .metric-value {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 36px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+    }
+
+    .filter-card {
+      padding: 22px;
+      height: fit-content;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .filter-group {
+      margin-bottom: 18px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .input,
+    .chip-grid span {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--text);
+    }
+
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip-grid span {
+      width: auto;
+      font-size: 13px;
+    }
+
+    .chip-grid span.active {
+      background: var(--accent-soft);
+      border-color: rgba(177, 77, 37, 0.32);
+      color: var(--accent);
+    }
+
+    .table-card {
+      padding: 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .toolbar small {
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 16px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .asset-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .asset-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      margin-right: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .status::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(40, 88, 64, 0.12);
+    }
+
+    @media (max-width: 1080px) {
+      .hero, .content { grid-template-columns: 1fr; }
+      h1 { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">Knowledge Asset</div>
+        <div class="brand-meta">Tone A / Editorial Workspace</div>
+      </div>
+      <div class="actions">
+        <button class="button">知识广场</button>
+        <button class="button">消费配置</button>
+        <button class="button primary">新建接入</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-card">
+        <p class="eyebrow">Knowledge Assets</p>
+        <h1>把“资料”变成可调用、可修正、可复用的知识资产。</h1>
+        <div class="hero-copy">
+          这个方向更偏知识工作台，而不是后台管理系统。它应该同时服务个人上下文与业务 Chat，
+          让会议纪要、业务规则、案例、项目文档和订阅内容进入同一个知识供给体系。
+        </div>
+        <div class="pills">
+          <span class="pill">个人长期上下文</span>
+          <span class="pill">广告业务知识</span>
+          <span class="pill">数据分析 Chat</span>
+          <span class="pill">可引用检索</span>
+          <span class="pill">知识修正</span>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="metric-card">
+          <div class="metric-title">Platform Snapshot</div>
+          <div class="metric-row">
+            <span>已接入资产</span>
+            <span class="metric-value">1,284</span>
+          </div>
+          <div class="metric-row">
+            <span>高频引用资产</span>
+            <span class="metric-value">86</span>
+          </div>
+          <div class="metric-row">
+            <span>待修正内容</span>
+            <span class="metric-value">19</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Today's Feed</div>
+          <div class="metric-row">
+            <span>会议纪要入库</span>
+            <strong>12 份</strong>
+          </div>
+          <div class="metric-row">
+            <span>广告规则更新</span>
+            <strong>3 条</strong>
+          </div>
+          <div class="metric-row">
+            <span>Chat 侧调用</span>
+            <strong>542 次</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <aside class="filter-card">
+        <div class="section-title">
+          <h2>筛选器</h2>
+          <span class="eyebrow" style="margin:0;">v1.1</span>
+        </div>
+
+        <div class="filter-group">
+          <label>搜索</label>
+          <div class="input">广告归因 / 口径 / 会议纪要 / 项目复盘</div>
+        </div>
+        <div class="filter-group">
+          <label>资产类型</label>
+          <div class="chip-grid">
+            <span class="active">全部</span>
+            <span>会议纪要</span>
+            <span>业务规则</span>
+            <span>案例</span>
+            <span>外部订阅</span>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>业务域</label>
+          <div class="chip-grid">
+            <span class="active">广告业务</span>
+            <span>数据分析</span>
+            <span>个人知识</span>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>使用状态</label>
+          <div class="chip-grid">
+            <span class="active">高频引用</span>
+            <span>待修正</span>
+            <span>刚更新</span>
+          </div>
+        </div>
+      </aside>
+
+      <div class="table-card">
+        <div class="toolbar">
+          <div>
+            <h2>资产目录</h2>
+            <small>更像知识编辑台，不像传统文件列表。</small>
+          </div>
+          <div class="pills">
+            <span class="pill">按时效排序</span>
+            <span class="pill">按引用热度排序</span>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>资产</th>
+              <th>类型</th>
+              <th>标签</th>
+              <th>消费方</th>
+              <th>状态</th>
+              <th>更新时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="asset-title">2026 Q2 广告投放归因与口径说明</div>
+                <div class="asset-meta">
+                  <span>来源：内部文档</span>
+                  <span>Owner：广告策略组</span>
+                  <span>可引用</span>
+                </div>
+              </td>
+              <td>业务规则</td>
+              <td>
+                <span class="tag">归因口径</span>
+                <span class="tag">投放分析</span>
+              </td>
+              <td>广告业务 Chat / 数据分析 Chat</td>
+              <td><span class="status">已生效</span></td>
+              <td>今天 10:24</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="asset-title">广州二部周会纪要：账户分层与素材迭代</div>
+                <div class="asset-meta">
+                  <span>来源：会议纪要</span>
+                  <span>Owner：增长运营</span>
+                  <span>待确认 2 项</span>
+                </div>
+              </td>
+              <td>会议纪要</td>
+              <td>
+                <span class="tag">账户分层</span>
+                <span class="tag">素材策略</span>
+              </td>
+              <td>平台内 Chat</td>
+              <td><span class="status">待修正</span></td>
+              <td>今天 09:40</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="asset-title">Meta Ads 创意疲劳外部研究订阅</div>
+                <div class="asset-meta">
+                  <span>来源：外部订阅</span>
+                  <span>Owner：个人空间 / xuyun</span>
+                  <span>自动同步</span>
+                </div>
+              </td>
+              <td>订阅内容</td>
+              <td>
+                <span class="tag">外部趋势</span>
+                <span class="tag">素材效果</span>
+              </td>
+              <td>个人 Chat / 广告业务 Chat</td>
+              <td><span class="status">已生效</span></td>
+              <td>昨天 18:16</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

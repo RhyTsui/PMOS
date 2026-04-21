@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 1540" role="img" aria-labelledby="title desc">
+  <title id="title">企业知识库到 Skill Agent 爆发路线图（可解释版）</title>
+  <desc id="desc">解释为什么路线从企业知识库开始，经由重点 Chat 样板和个人知识库，形成知识正向流入，再走向 Skill 与 Agent 爆发；同时说明每一步解决什么问题、依赖什么、跳过会有什么后果。</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #10243e; }
+      .title { font-size: 31px; font-weight: 700; }
+      .subtitle { font-size: 16px; fill: #49627d; }
+      .section-title { font-size: 22px; font-weight: 700; }
+      .label { font-size: 18px; font-weight: 700; }
+      .body { font-size: 15px; fill: #35506b; }
+      .small { font-size: 14px; fill: #5a7186; }
+      .chip { font-size: 14px; font-weight: 700; }
+      .mono { font-size: 14px; font-family: "Cascadia Code", "Consolas", monospace; fill: #1e3a5f; }
+    </style>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2f6fed"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f8fc"/>
+      <stop offset="100%" stop-color="#eef4fb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#a5b6cb" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+
+  <rect width="1760" height="1540" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1712" height="1492" rx="28" fill="#ffffff" stroke="#d8e2ef"/>
+
+  <text x="64" y="82" class="title">企业知识库 → 重点 Chat 样板 → 个人知识库 → 知识正向流入 → Skill / Agent 爆发</text>
+  <text x="64" y="110" class="subtitle">可解释版重点不是只给顺序，而是解释：为什么这样排、每一步解决什么、依赖什么、跳过会带来什么问题。</text>
+
+  <rect x="56" y="148" width="1648" height="276" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="188" class="section-title">1. 总体推理</text>
+
+  <rect x="84" y="222" width="1580" height="72" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="106" y="252" class="label">核心推理</text>
+  <text x="214" y="252" class="body">先把知识资产接住，再把高频 Chat 场景打穿，再把个人知识引入，随后让交互持续沉淀知识，最后才会出现 Skill / Agent 的规模化增长。</text>
+  <text x="106" y="278" class="small">这条路线的重点不是“功能堆叠”，而是“让系统从知识消费工具演化成知识增长系统”。</text>
+
+  <rect x="84" y="316" width="1580" height="72" rx="16" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="106" y="346" class="label">反向理解</text>
+  <text x="214" y="346" class="body">如果一开始就追求 Skill / Agent 爆发，通常会得到很多壳，但没有稳定知识底盘、没有高频使用场景、也没有持续流入的知识增量。</text>
+  <text x="106" y="372" class="small">也就是“看起来很智能，但长不出来”。</text>
+
+  <rect x="56" y="456" width="1648" height="382" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="496" class="section-title">2. 主路线与顺序解释</text>
+
+  <rect x="84" y="536" width="272" height="254" rx="18" fill="#edf3ff" stroke="#c9d9ff" filter="url(#shadow)"/>
+  <text x="106" y="568" class="chip" fill="#2f6fed">Step 1</text>
+  <text x="170" y="568" class="label">企业知识库</text>
+  <text x="106" y="598" class="body">解决什么：</text>
+  <text x="106" y="622" class="body">把制度、流程、FAQ、口径、案例这些公共知识先沉下来。</text>
+  <text x="106" y="652" class="body">为什么先做：</text>
+  <text x="106" y="676" class="body">没有这个底盘，后面所有 Chat 都容易空转。</text>
+  <text x="106" y="706" class="small">跳过后果：Chat 只能靠模型泛答，可信度和组织可复用性都很弱。</text>
+
+  <rect x="404" y="536" width="272" height="254" rx="18" fill="#eefaf6" stroke="#c7eadc" filter="url(#shadow)"/>
+  <text x="426" y="568" class="chip" fill="#1f9d72">Step 2</text>
+  <text x="490" y="568" class="label">重点 Chat 样板</text>
+  <text x="426" y="598" class="body">解决什么：</text>
+  <text x="426" y="622" class="body">把知识资产变成真的使用入口，而不是放在后台等人搜。</text>
+  <text x="426" y="652" class="body">为什么排第二：</text>
+  <text x="426" y="676" class="body">样板负责验证“哪些场景值得先打穿”。</text>
+  <text x="426" y="706" class="small">跳过后果：知识库会变成静态资产池，使用率起不来。</text>
+
+  <rect x="724" y="536" width="272" height="254" rx="18" fill="#fff8eb" stroke="#f0d8a6" filter="url(#shadow)"/>
+  <text x="746" y="568" class="chip" fill="#ea7a22">Step 3</text>
+  <text x="810" y="568" class="label">个人知识库</text>
+  <text x="746" y="598" class="body">解决什么：</text>
+  <text x="746" y="622" class="body">把员工日常工作中的隐性知识带进系统。</text>
+  <text x="746" y="652" class="body">为什么这时引入：</text>
+  <text x="746" y="676" class="body">公共知识先跑通后，再把知识生产权扩到每个人。</text>
+  <text x="746" y="706" class="small">跳过后果：系统只能吃公共知识，无法进入个人工作流。</text>
+
+  <rect x="1044" y="536" width="272" height="254" rx="18" fill="#f8f1ff" stroke="#ddc9ff" filter="url(#shadow)"/>
+  <text x="1066" y="568" class="chip" fill="#7c3aed">Step 4</text>
+  <text x="1130" y="568" class="label">知识正向流入</text>
+  <text x="1066" y="598" class="body">解决什么：</text>
+  <text x="1066" y="622" class="body">让系统在使用过程中持续产出新知识，而不是只消耗旧知识。</text>
+  <text x="1066" y="652" class="body">为什么必须有：</text>
+  <text x="1066" y="676" class="body">只有形成正反馈，系统才会越用越强。</text>
+  <text x="1066" y="706" class="small">跳过后果：知识库会越用越旧，后面 Agent 能力也会枯竭。</text>
+
+  <rect x="1364" y="536" width="300" height="254" rx="18" fill="#eef7ff" stroke="#c7dff7" filter="url(#shadow)"/>
+  <text x="1386" y="568" class="chip" fill="#0f766e">Step 5</text>
+  <text x="1450" y="568" class="label">Skill / Agent 爆发</text>
+  <text x="1386" y="598" class="body">解决什么：</text>
+  <text x="1386" y="622" class="body">把稳定知识、稳定场景、稳定流入转成可规模复制的能力单元。</text>
+  <text x="1386" y="652" class="body">为什么放最后：</text>
+  <text x="1386" y="676" class="body">因为它本质上是前四步成熟后的结果，不是起点。</text>
+  <text x="1386" y="706" class="small">跳过前置步骤直接做，通常只能得到很多 demo，而不是生态。</text>
+
+  <line x1="356" y1="664" x2="404" y2="664" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="676" y1="664" x2="724" y2="664" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="996" y1="664" x2="1044" y2="664" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="1316" y1="664" x2="1364" y2="664" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+  <rect x="56" y="870" width="804" height="340" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="910" class="section-title">3. 底层机制为什么这样搭</text>
+
+  <rect x="84" y="948" width="348" height="214" rx="18" fill="#edf3ff" stroke="#c9d9ff" filter="url(#shadow)"/>
+  <text x="106" y="980" class="label">RAG</text>
+  <text x="106" y="1010" class="body">作用：</text>
+  <text x="106" y="1034" class="body">把企业知识、项目知识、个人知识接到模型上，形成 grounding。</text>
+  <text x="106" y="1064" class="body">为什么必要：</text>
+  <text x="106" y="1088" class="body">没有它，Chat 只能靠模型记忆和泛化，不适合组织级稳定使用。</text>
+  <text x="106" y="1118" class="small">解释性：它是“让回答站在知识上”的机制。</text>
+
+  <rect x="468" y="948" width="364" height="214" rx="18" fill="#eefaf6" stroke="#c7eadc" filter="url(#shadow)"/>
+  <text x="490" y="980" class="label">隐式 LLM_AUTO_WIKI</text>
+  <text x="490" y="1010" class="body">作用：</text>
+  <text x="490" y="1034" class="body">在日常工作流里隐式生成、修正、沉淀知识，而不是要求员工显式写 wiki。</text>
+  <text x="490" y="1064" class="body">为什么重要：</text>
+  <text x="490" y="1088" class="body">它决定系统能不能从“知识库”升级成“知识增长网络”。</text>
+  <text x="490" y="1118" class="small">解释性：它是“让系统自己越来越像 wiki”的机制。</text>
+
+  <rect x="900" y="870" width="804" height="340" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="928" y="910" class="section-title">4. 规划为什么可解释</text>
+
+  <rect x="928" y="948" width="736" height="72" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="950" y="978" class="label">可解释点 1</text>
+  <text x="1060" y="978" class="body">每一步都回答了“解决什么核心问题”，不是单纯列功能模块。</text>
+
+  <rect x="928" y="1040" width="736" height="72" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="950" y="1070" class="label">可解释点 2</text>
+  <text x="1060" y="1070" class="body">每一步都说明了“为什么排在这里”，让顺序有因果，不是拍脑袋。</text>
+
+  <rect x="928" y="1132" width="736" height="72" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="950" y="1162" class="label">可解释点 3</text>
+  <text x="1060" y="1162" class="body">每一步都指出“跳过会怎样”，这样能看清真正的依赖关系。</text>
+
+  <rect x="56" y="1242" width="1648" height="248" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="1282" class="section-title">5. 这张图最终表达的不是阶段，而是组织能力演化</text>
+
+  <rect x="84" y="1318" width="1580" height="120" rx="18" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="106" y="1350" class="label">一句话版本</text>
+  <text x="214" y="1350" class="body">先把企业知识接住，再用 Chat 打穿高频入口，再让个人知识进入系统，再让交互持续沉淀知识，最后 Skill / Agent 才会像生态一样长出来。</text>
+  <text x="106" y="1380" class="label">它真正反对的路线</text>
+  <text x="286" y="1380" class="body">不是“不能先做 Agent”，而是反对“在知识底盘、使用样板、知识流入都没成型时，就期待 Agent 自然爆发”。</text>
+  <text x="106" y="1410" class="small">说明：由于你给的分享页原文未成功抓取，这张图是基于你提供的关键词主线做的推理提炼，不是对原页面逐句复述。</text>
+</svg>

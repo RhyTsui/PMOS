@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="980" viewBox="0 0 1440 980" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1360" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EEF4FF"/>
+    </linearGradient>
+    <linearGradient id="shell" x1="120" y1="96" x2="1320" y2="170" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A73E8"/>
+      <stop offset="1" stop-color="#4D90FE"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#B7C7E6" flood-opacity="0.28"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#7C8FB4"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 32px; font-weight: 700; fill: #1F2A44; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #5F6F8F; }
+      .section { font-size: 20px; font-weight: 700; fill: #24324B; }
+      .body { font-size: 14px; font-weight: 500; fill: #50607C; }
+      .card-title { font-size: 18px; font-weight: 700; fill: #1F2A44; }
+      .card-body { font-size: 13px; font-weight: 500; fill: #5A6B89; }
+      .small { font-size: 12px; font-weight: 600; fill: #6A7B98; }
+      .white { fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="980" fill="url(#bg)"/>
+
+  <text x="92" y="66" class="title">连弩整体产品架构图 v1</text>
+  <text x="92" y="95" class="subtitle">AI Testing Studio：Studio 外壳 + 质量主链 + 六个核心工作台 + 横向治理能力</text>
+
+  <rect x="92" y="118" width="1256" height="78" rx="24" fill="url(#shell)" filter="url(#shadow)"/>
+  <text x="128" y="149" font-size="22" font-weight="700" fill="#FFFFFF">Studio Shell</text>
+  <text x="128" y="175" font-size="13" font-weight="500" fill="#DDEBFF">workspace / 环境切换 / 全局搜索 / 当前版本上下文 / 快速发起 run / 最近运行入口</text>
+
+  <rect x="92" y="238" width="390" height="318" rx="28" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="122" y="278" class="section">资产层</text>
+  <text x="122" y="301" class="body">定义测试资产，沉淀可复用的质量输入</text>
+
+  <rect x="122" y="328" width="330" height="58" rx="18" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="148" y="352" class="card-title">Case</text>
+  <text x="148" y="373" class="card-body">最小测试样本、期望结果、风险标签、对象类型</text>
+
+  <rect x="122" y="404" width="330" height="58" rx="18" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="148" y="428" class="card-title">Suite</text>
+  <text x="148" y="449" class="card-body">baseline / regression / scenario 评测集组织</text>
+
+  <rect x="122" y="480" width="330" height="58" rx="18" fill="#F4F8FF" stroke="#D8E4FA"/>
+  <text x="148" y="504" class="card-title">Evaluator</text>
+  <text x="148" y="525" class="card-body">规则、评估器、阈值、红线项</text>
+
+  <rect x="524" y="238" width="390" height="318" rx="28" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="554" y="278" class="section">运行层</text>
+  <text x="554" y="301" class="body">让资产真正执行，形成证据与结论</text>
+
+  <rect x="554" y="328" width="330" height="58" rx="18" fill="#F8FAFF" stroke="#D8E4FA"/>
+  <text x="580" y="352" class="card-title">Run</text>
+  <text x="580" y="373" class="card-body">一次执行实例，连接 suite、环境与 evaluator</text>
+
+  <rect x="554" y="404" width="330" height="58" rx="18" fill="#F8FAFF" stroke="#D8E4FA"/>
+  <text x="580" y="428" class="card-title">Trace</text>
+  <text x="580" y="449" class="card-body">执行证据、失败定位、问题复盘、人工 review 挂点</text>
+
+  <rect x="554" y="480" width="330" height="58" rx="18" fill="#F8FAFF" stroke="#D8E4FA"/>
+  <text x="580" y="504" class="card-title">Report</text>
+  <text x="580" y="525" class="card-body">run report、aggregate report、版本结论输出</text>
+
+  <rect x="956" y="238" width="392" height="318" rx="28" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="986" y="278" class="section">治理层</text>
+  <text x="986" y="301" class="body">将结果变成版本判断、放行与回归资产</text>
+
+  <rect x="986" y="328" width="160" height="58" rx="18" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="1012" y="352" class="card-title">Compare</text>
+  <text x="1012" y="373" class="card-body">版本对比</text>
+
+  <rect x="1168" y="328" width="150" height="58" rx="18" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="1194" y="352" class="card-title">Review</text>
+  <text x="1194" y="373" class="card-body">人工复核</text>
+
+  <rect x="986" y="404" width="160" height="58" rx="18" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="1012" y="428" class="card-title">Gate</text>
+  <text x="1012" y="449" class="card-body">放行判断</text>
+
+  <rect x="1168" y="404" width="150" height="58" rx="18" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="1194" y="428" class="card-title">Baseline</text>
+  <text x="1194" y="449" class="card-body">回归沉淀</text>
+
+  <rect x="986" y="480" width="332" height="58" rx="18" fill="#FFF8F0" stroke="#F3DEC3"/>
+  <text x="1012" y="504" class="card-title">横向治理目标</text>
+  <text x="1012" y="525" class="card-body">让 AI 版本可比、可审、可放行，而不是只展示结果</text>
+
+  <rect x="92" y="610" width="1256" height="252" rx="28" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="122" y="650" class="section">测试对象维度</text>
+  <text x="122" y="673" class="body">对象类型属于内容维度，不是一级导航。它们进入 Case / Suite / Evaluator，并在 Run / Trace / Report 中作为筛选和解释维度出现。</text>
+
+  <rect x="122" y="710" width="174" height="52" rx="16" fill="#F6F9FF" stroke="#D8E4FA"/>
+  <text x="149" y="742" class="card-title">MCP</text>
+
+  <rect x="318" y="710" width="174" height="52" rx="16" fill="#F6F9FF" stroke="#D8E4FA"/>
+  <text x="345" y="742" class="card-title">Chat</text>
+
+  <rect x="514" y="710" width="174" height="52" rx="16" fill="#F6F9FF" stroke="#D8E4FA"/>
+  <text x="541" y="742" class="card-title">Agent</text>
+
+  <rect x="710" y="710" width="174" height="52" rx="16" fill="#F6F9FF" stroke="#D8E4FA"/>
+  <text x="737" y="742" class="card-title">知识检索</text>
+
+  <rect x="906" y="710" width="174" height="52" rx="16" fill="#F6F9FF" stroke="#D8E4FA"/>
+  <text x="933" y="742" class="card-title">Skill</text>
+
+  <rect x="1102" y="710" width="174" height="52" rx="16" fill="#F6F9FF" stroke="#D8E4FA"/>
+  <text x="1129" y="742" class="card-title">Workflow</text>
+
+  <text x="122" y="808" class="small">产品骨架固定为工作台：Case / Suite / Run / Trace / Report / Eval</text>
+  <text x="122" y="831" class="small">对象类型只影响测试方法、样本组织、评估维度和结果解释，不单独升格为产品主导航</text>
+
+  <path d="M287 386H524" stroke="#7C8FB4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M720 556V590" stroke="#7C8FB4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M914 386H956" stroke="#7C8FB4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1243 610V568" stroke="#7C8FB4" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1220 710V596" stroke="#A1B2D1" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+  <path d="M220 710V568" stroke="#A1B2D1" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+</svg>

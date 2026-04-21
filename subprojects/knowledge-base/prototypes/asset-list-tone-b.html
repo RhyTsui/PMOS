@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Asset Platform - Tone B</title>
+  <style>
+    :root {
+      --bg: #0e1726;
+      --bg-soft: #132038;
+      --panel: #15243d;
+      --panel-2: #1a2c4a;
+      --line: rgba(255,255,255,0.09);
+      --text: #eef4ff;
+      --muted: #8da4c7;
+      --blue: #58a6ff;
+      --cyan: #4ad7d1;
+      --amber: #f0b35b;
+      --green: #69d395;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(88,166,255,0.18), transparent 22%),
+        radial-gradient(circle at right bottom, rgba(74,215,209,0.12), transparent 18%),
+        linear-gradient(180deg, #0d1421 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 28px 20px;
+      background: rgba(11, 19, 32, 0.75);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 28px;
+    }
+    .nav {
+      display: grid;
+      gap: 10px;
+    }
+    .nav-item {
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      background: transparent;
+    }
+    .nav-item.active {
+      background: rgba(88,166,255,0.12);
+      color: var(--text);
+      border-color: rgba(88,166,255,0.28);
+    }
+    .side-card {
+      margin-top: 26px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .side-card h4 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .side-card strong {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .main {
+      padding: 24px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 40px;
+      line-height: 1;
+    }
+    .header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.7;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--blue), #2b70d9);
+      border-color: transparent;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .stat {
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .stat .k {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+    .stat .v {
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 18px 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .panel-body {
+      padding: 18px;
+    }
+    .field {
+      margin-bottom: 14px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .field .box,
+    .seg span {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .seg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .seg span.active {
+      border-color: rgba(88,166,255,0.35);
+      color: var(--blue);
+      background: rgba(88,166,255,0.08);
+    }
+    .asset-list {
+      display: grid;
+      gap: 12px;
+    }
+    .asset {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1.7fr 0.7fr 1fr 0.9fr 0.7fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .asset:last-child { border-bottom: 0; }
+    .title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stack {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      margin: 0 6px 6px 0;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+    .status {
+      color: var(--green);
+      font-weight: 700;
+    }
+    .warning { color: var(--amber); }
+    @media (max-width: 1280px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats, .workspace { grid-template-columns: 1fr; }
+      .asset { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">KAP</div>
+      <div class="subtitle">Tone B / Operations Console</div>
+      <div class="nav">
+        <div class="nav-item">接入中心</div>
+        <div class="nav-item active">知识资产</div>
+        <div class="nav-item">知识消费</div>
+        <div class="nav-item">知识广场</div>
+        <div class="nav-item">资产治理</div>
+      </div>
+      <div class="side-card">
+        <h4>Today</h4>
+        <strong>542</strong>
+        <div>Chat 引用次数</div>
+      </div>
+      <div class="side-card">
+        <h4>Risk Queue</h4>
+        <strong>19</strong>
+        <div>待修正 / 待确认资产</div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="header">
+        <div>
+          <h1>知识资产目录控制台</h1>
+          <p>这一版更偏“平台中台”气质，信息密度更高，适合资产治理、消费绑定和企业业务侧运维场景。</p>
+        </div>
+        <div class="actions">
+          <button class="btn">导出视图</button>
+          <button class="btn">批量治理</button>
+          <button class="btn primary">新建资产</button>
+        </div>
+      </div>
+
+      <section class="stats">
+        <div class="stat"><div class="k">Assets</div><div class="v">1,284</div></div>
+        <div class="stat"><div class="k">Consumers</div><div class="v">17</div></div>
+        <div class="stat"><div class="k">High Usage</div><div class="v">86</div></div>
+        <div class="stat"><div class="k">Pending Fix</div><div class="v">19</div></div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel">
+          <div class="panel-header"><h2>筛选与域控制</h2><span style="color:var(--muted)">v1.1</span></div>
+          <div class="panel-body">
+            <div class="field">
+              <label>关键字</label>
+              <div class="box">广告归因 / 素材疲劳 / 会议纪要</div>
+            </div>
+            <div class="field">
+              <label>业务域</label>
+              <div class="seg">
+                <span class="active">广告业务</span>
+                <span>数据分析</span>
+                <span>个人知识</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>资产类型</label>
+              <div class="seg">
+                <span class="active">全部</span>
+                <span>业务规则</span>
+                <span>会议纪要</span>
+                <span>案例</span>
+                <span>订阅内容</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>消费方</label>
+              <div class="seg">
+                <span class="active">广告业务 Chat</span>
+                <span>数据分析 Chat</span>
+                <span>平台内 Chat</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>治理状态</label>
+              <div class="seg">
+                <span class="active">已生效</span>
+                <span>待修正</span>
+                <span>待确认</span>
+                <span>刚更新</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>资产总表</h2>
+            <span style="color:var(--muted)">企业场景优先 / 便于扩展批量治理</span>
+          </div>
+          <div class="asset-list">
+            <div class="asset">
+              <div>
+                <div class="title">广告归因与转化成本分析口径</div>
+                <div class="meta"><span>内部文档</span><span>广告策略组</span><span>最近更新：今天 10:24</span></div>
+              </div>
+              <div class="stack">业务规则</div>
+              <div>
+                <span class="badge">归因</span>
+                <span class="badge">成本</span>
+              </div>
+              <div class="stack">广告业务 Chat<br />数据分析 Chat</div>
+              <div class="status">已生效</div>
+            </div>
+            <div class="asset">
+              <div>
+                <div class="title">广州二部周会纪要：素材疲劳与分账户测试</div>
+                <div class="meta"><span>会议纪要</span><span>增长运营</span><span>待确认：2</span></div>
+              </div>
+              <div class="stack">会议纪要</div>
+              <div>
+                <span class="badge">素材测试</span>
+                <span class="badge">账户分层</span>
+              </div>
+              <div class="stack">平台内 Chat</div>
+              <div class="warning">待修正</div>
+            </div>
+            <div class="asset">
+              <div>
+                <div class="title">Meta Ads 创意疲劳研究订阅</div>
+                <div class="meta"><span>外部订阅</span><span>xuyun</span><span>自动同步</span></div>
+              </div>
+              <div class="stack">订阅内容</div>
+              <div>
+                <span class="badge">趋势</span>
+                <span class="badge">创意</span>
+              </div>
+              <div class="stack">个人 Chat<br />广告业务 Chat</div>
+              <div class="status">已生效</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

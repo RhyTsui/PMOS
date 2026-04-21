@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6b7280; }
+      .section { font-size: 20px; font-weight: 700; fill: #111827; }
+      .nodeTitle { font-size: 18px; font-weight: 700; fill: #111827; }
+      .body { font-size: 14px; font-weight: 500; fill: #374151; }
+      .small { font-size: 12px; font-weight: 600; fill: #6b7280; }
+      .link { font-size: 14px; font-weight: 700; fill: #2563eb; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#94a3b8" flood-opacity="0.20"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="980" fill="#ffffff"/>
+  <text x="80" y="70" class="title">文档自动优化模块</text>
+  <text x="80" y="102" class="subtitle">把会议纪要、埋点文档、差异说明整理成标准化文档基线，作为后续规则和报告的唯一上游。</text>
+  <a href="./05-全景流程图.svg">
+    <rect x="1360" y="40" width="160" height="40" rx="20" fill="#ffffff" stroke="#d1d5db"/>
+    <text x="1390" y="66" class="link">返回全景流程</text>
+  </a>
+
+  <rect x="60" y="140" width="280" height="520" rx="24" fill="#f8fafc" stroke="#dbe3ee"/>
+  <text x="90" y="182" class="section">输入</text>
+  <rect x="90" y="220" width="220" height="58" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="255" class="body">会议纪要 / 群结论</text>
+  <rect x="90" y="302" width="220" height="58" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="337" class="body">埋点事件文档 / Excel</text>
+  <rect x="90" y="384" width="220" height="58" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="419" class="body">历史版本差异</text>
+  <rect x="90" y="466" width="220" height="58" rx="14" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="118" y="501" class="body">研发联调补充信息</text>
+  <rect x="90" y="548" width="220" height="88" rx="14" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="118" y="580" class="small">输入要求</text>
+  <text x="118" y="604" class="body">至少能定位版本、事件、字段、变更点</text>
+
+  <rect x="400" y="140" width="800" height="520" rx="24" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="430" y="182" class="section">AI 处理流程</text>
+
+  <rect x="430" y="230" width="210" height="120" rx="18" fill="#ffffff" stroke="#bfdbfe" filter="url(#shadow)"/>
+  <text x="456" y="264" class="nodeTitle">输入归档</text>
+  <text x="456" y="290" class="body">识别来源</text>
+  <text x="456" y="312" class="body">绑定项目 / 版本</text>
+  <text x="456" y="334" class="body">形成单次任务上下文</text>
+
+  <rect x="695" y="230" width="210" height="120" rx="18" fill="#ffffff" stroke="#bfdbfe" filter="url(#shadow)"/>
+  <text x="721" y="264" class="nodeTitle">结构抽取</text>
+  <text x="721" y="290" class="body">事件名 / 字段名</text>
+  <text x="721" y="312" class="body">枚举 / 口径 / 说明</text>
+  <text x="721" y="334" class="body">待确认缺口</text>
+
+  <rect x="960" y="230" width="210" height="120" rx="18" fill="#ffffff" stroke="#bfdbfe" filter="url(#shadow)"/>
+  <text x="986" y="264" class="nodeTitle">标准化重写</text>
+  <text x="986" y="290" class="body">统一模板结构</text>
+  <text x="986" y="312" class="body">拆出事件卡片</text>
+  <text x="986" y="334" class="body">补齐目录字段</text>
+
+  <rect x="560" y="430" width="210" height="120" rx="18" fill="#ffffff" stroke="#bfdbfe" filter="url(#shadow)"/>
+  <text x="586" y="464" class="nodeTitle">差异对比</text>
+  <text x="586" y="490" class="body">比较新旧版本</text>
+  <text x="586" y="512" class="body">标出新增 / 删除 / 修改</text>
+  <text x="586" y="534" class="body">生成变更摘要</text>
+
+  <rect x="830" y="430" width="210" height="120" rx="18" fill="#ffffff" stroke="#bfdbfe" filter="url(#shadow)"/>
+  <text x="856" y="464" class="nodeTitle">待确认项生成</text>
+  <text x="856" y="490" class="body">缺字段</text>
+  <text x="856" y="512" class="body">冲突口径</text>
+  <text x="856" y="534" class="body">灰区说明</text>
+
+  <path d="M340 250 H430" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M640 290 H695" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M905 290 H960" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M1065 350 V410 H935" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <path d="M800 350 V410 H665" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+
+  <rect x="1260" y="140" width="280" height="520" rx="24" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="1290" y="182" class="section">输出</text>
+  <rect x="1290" y="230" width="220" height="72" rx="14" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1320" y="260" class="body">标准文档基线</text>
+  <text x="1320" y="282" class="small">事件 / 字段 / 说明统一</text>
+  <rect x="1290" y="330" width="220" height="72" rx="14" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1320" y="360" class="body">变更差异摘要</text>
+  <text x="1320" y="382" class="small">给版本评审直接看</text>
+  <rect x="1290" y="430" width="220" height="72" rx="14" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1320" y="460" class="body">待确认问题单</text>
+  <text x="1320" y="482" class="small">给人工审核补口径</text>
+  <rect x="1290" y="530" width="220" height="90" rx="14" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="1320" y="560" class="small">人工介入点</text>
+  <text x="1320" y="584" class="body">确认关键字段、冲突口径、例外说明</text>
+
+  <path d="M1170 290 H1290" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <path d="M1040 490 H1290" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <path d="M770 490 C1100 490, 1140 366, 1290 366" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+
+  <rect x="60" y="720" width="1480" height="180" rx="24" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="90" y="762" class="section">设计重点</text>
+  <text x="90" y="792" class="body">1. 文档自动优化不是“自由润色”，而是生成统一结构的标准资产。</text>
+  <text x="90" y="820" class="body">2. 所有后续模块只认这份标准文档基线，不再各自解析原始输入。</text>
+  <text x="90" y="848" class="body">3. 任何不确定内容都不默默吞掉，而是显式进入“待确认问题单”。</text>
+  <path d="M1380 620 C1380 680, 1260 680, 1260 770 H1180" stroke="#ea580c" stroke-width="2.5" fill="none" stroke-dasharray="6 4" marker-end="url(#arrow-orange)"/>
+  <rect x="1200" y="690" width="190" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="1218" y="709" class="small">人工确认后再回写版本</text>
+</svg>

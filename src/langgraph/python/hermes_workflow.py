@@ -24,7 +24,10 @@ import json
 # ========================
 # 配置
 # ========================
-os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY", "AIzaSyDS6vA3NJXPS5B2SjMGMFaunNjXHpAbsZc")
+google_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+if not google_api_key:
+    raise RuntimeError("Set GEMINI_API_KEY or GOOGLE_API_KEY before running hermes_workflow.py")
+os.environ["GOOGLE_API_KEY"] = google_api_key
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",

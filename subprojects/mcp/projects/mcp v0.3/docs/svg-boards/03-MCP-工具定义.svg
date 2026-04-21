@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="992" viewBox="0 0 1440 992" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="32" x2="1360" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EEF4FF"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="72" y1="120" x2="1368" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165DFF"/>
+      <stop offset="1" stop-color="#36CFC9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#B7C7E6" flood-opacity="0.28"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #1F2A44; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #5F6F8F; }
+      .hero-title { font-size: 24px; font-weight: 700; fill: #FFFFFF; }
+      .hero-body { font-size: 14px; font-weight: 500; fill: #DDF3FF; }
+      .card-title { font-size: 18px; font-weight: 700; fill: #1F2A44; }
+      .body { font-size: 13px; font-weight: 500; fill: #566780; }
+      .meta { font-size: 12px; font-weight: 600; fill: #6B7B95; }
+      .chip { font-size: 12px; font-weight: 700; fill: #165DFF; }
+      .link { font-size: 12px; font-weight: 700; fill: #165DFF; text-decoration: underline; }
+    </style>
+  </defs>
+  <rect width="1440" height="992" fill="url(#bg)"/>
+  <text x="72" y="56" class="title">MCP 工具定义</text>
+  <text x="72" y="86" class="subtitle">Markdown 文档板：按章节提炼核心内容，供快速评审和沟通</text>
+  <rect x="72" y="118" width="1296" height="118" rx="28" fill="url(#hero)" filter="url(#shadow)"/>
+  <text x="100" y="158" class="hero-title">03-MCP 工具定义.md</text>
+  <text x="100" y="188" class="hero-body">源文件：docs/03-MCP 工具定义.md</text>
+  <text x="100" y="212" class="hero-body">更新时间：2026-04-20 06:24</text>
+  <text x="100" y="238" class="hero-body">该文档主体以结构化章节为主，以下卡片展示各章节的提炼内容。</text>
+  <rect x="72" y="276" width="400" height="220" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="96" y="310" class="card-title">1. 使用原则</text>
+  <text x="96" y="340" class="body">• 本版工具定义按两层维护：</text>
+  <text x="96" y="362" class="body">• **事实层**：当前代码或配置里已存在、可验证的工具</text>
+  <text x="96" y="384" class="body">• **目标层**：`v3.14.16`</text>
+  <text x="96" y="406" class="body">  页面与需求需要承接的能力</text>
+  <text x="96" y="428" class="body">• 页面视图不必和工具一一对应。</text>
+  <text x="96" y="450" class="body">• 优先复用现有工具；只有在数据源、字段体系或筛选逻辑独立时，才新增工具。</text>
+  <rect x="496" y="276" width="400" height="220" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="520" y="310" class="card-title">2.1 报表工具</text>
+  <text x="520" y="340" class="body">• ```yaml</text>
+  <text x="520" y="362" class="body">• tools:</text>
+  <text x="520" y="384" class="body">• name: get_ad_hour_report</text>
+  <text x="520" y="406" class="body">• description:</text>
+  <text x="520" y="428" class="body">  获取广告小时级报表数据，优先承接实时数据页</text>
+  <text x="520" y="450" class="body">• input_schema:</text>
+  <rect x="920" y="276" width="400" height="220" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="944" y="310" class="card-title">2.2 实体查询工具</text>
+  <text x="944" y="340" class="body">• ```yaml</text>
+  <text x="944" y="362" class="body">• tools:</text>
+  <text x="944" y="384" class="body">• name: list_team</text>
+  <text x="944" y="406" class="body">• description: 获取团队、优化师等组织实体</text>
+  <text x="944" y="428" class="body">• name: list_apps</text>
+  <rect x="72" y="520" width="400" height="352" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="96" y="554" class="card-title">3. 页面级能力承接关系</text>
+  <text x="96" y="584" class="body">• 页面 · 首选工具 · 说明</text>
+  <text x="96" y="606" class="body">• 概览 · `get_ad_day_report` ·</text>
+  <text x="96" y="628" class="body">  用于 KPI 汇总卡片与月趋势</text>
+  <text x="96" y="650" class="body">• 实时数据 · `get_ad_hour_report`</text>
+  <text x="96" y="672" class="body">  · 对应小时粒度</text>
+  <text x="96" y="694" class="body">• 日周月报 · `get_ad_day_report` ·</text>
+  <text x="96" y="716" class="body">  对应日/周/月聚合查询</text>
+  <text x="96" y="738" class="body">• ROI 分析 · `get_ad_roi_report`</text>
+  <text x="96" y="760" class="body">  · 对应 ROI 专题页</text>
+  <rect x="496" y="520" width="400" height="352" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="520" y="554" class="card-title">4. 候选新增工具</text>
+  <text x="520" y="584" class="body">• 以下不是当前事实能力，而是本版可补的候选工具：</text>
+  <text x="520" y="606" class="body">• ```yaml</text>
+  <text x="520" y="628" class="body">• candidates:</text>
+  <text x="520" y="650" class="body">• name: get_ad_creative_report</text>
+  <text x="520" y="672" class="body">• description:</text>
+  <text x="520" y="694" class="body">  广告素材报表能力，承接素材页和素材层问数</text>
+  <rect x="920" y="520" width="400" height="352" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="944" y="554" class="card-title">5. 当前定义规则</text>
+  <text x="944" y="584" class="body">• 不再为“聚合分析引擎</text>
+  <text x="944" y="606" class="body">  MCP”单列工具，统一并入多维分析能力。</text>
+  <text x="944" y="628" class="body">• 概览页是组合视图，不新增独立 `overview`</text>
+  <text x="944" y="650" class="body">  工具。</text>
+  <text x="944" y="672" class="body">• 是否新增 `creative / ltv /</text>
+  <text x="944" y="694" class="body">  traffic_source`，以真实页面数据边界为准，不靠命名想象。</text>
+  <text x="944" y="716" class="body">• 工具定义必须和</text>
+  <text x="944" y="738" class="body">  `04-v3.14.16页面与MCP映射.md`</text>
+  <text x="944" y="760" class="body">  保持一致。</text>
+  <text x="944" y="782" class="body">• **路径**:</text>
+  <text x="944" y="804" class="body">  `E:\AI\ai-os\subprojects\mcp\projects\mcp</text>
+  <text x="944" y="826" class="body">  v0.3\docs\03-MCP 工具定义.md`</text>
+  <a href="../03-MCP 工具定义.md">
+    <text x="72" y="958" class="link">打开原 Markdown</text>
+  </a>
+</svg>

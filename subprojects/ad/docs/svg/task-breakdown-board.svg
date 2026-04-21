@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1520 1040" width="1520" height="1040">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .cardTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+    .p0 { fill: #ecfdf5; stroke: #86efac; stroke-width: 1.5; rx: 14; }
+    .p1 { fill: #fff7ed; stroke: #fdba74; stroke-width: 1.5; rx: 14; }
+  </style>
+
+  <rect width="1520" height="1040" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">Back to SVG index</text></a>
+  <text x="72" y="94" class="title">Ad Task Breakdown Board</text>
+  <text x="72" y="122" class="sub">P0 delivery package for the demo, plus the first deferred items that should not be smuggled into the month-end scope.</text>
+
+  <rect x="72" y="156" width="1376" height="640" class="card"/>
+  <text x="100" y="194" class="cardTitle">P0: Must Land Before 2026-04-30</text>
+
+  <rect x="100" y="238" width="300" height="230" class="p0"/>
+  <text x="124" y="272" class="cardTitle">Product</text>
+  <text x="124" y="312" class="body">Lock demo script and narrative.</text>
+  <text x="124" y="344" class="body">Define homepage IA and two core entry points.</text>
+  <text x="124" y="376" class="body">Define diagnosis and comparison result-card fields.</text>
+
+  <rect x="430" y="238" width="300" height="230" class="p0"/>
+  <text x="454" y="272" class="cardTitle">Frontend</text>
+  <text x="454" y="312" class="body">Turn the funnel page into a workbench.</text>
+  <text x="454" y="344" class="body">Add prompt input, quick actions, and module switch.</text>
+  <text x="454" y="376" class="body">Add execution-state, diagnosis-card, and comparison-card/table components.</text>
+
+  <rect x="760" y="238" width="300" height="230" class="p0"/>
+  <text x="784" y="272" class="cardTitle">Backend</text>
+  <text x="784" y="312" class="body">Add a unified demo scene interface.</text>
+  <text x="784" y="344" class="body">Add diagnosis mock API.</text>
+  <text x="784" y="376" class="body">Add comparison mock API and unified response shape.</text>
+
+  <rect x="1090" y="238" width="300" height="230" class="p0"/>
+  <text x="1114" y="272" class="cardTitle">Data and Content</text>
+  <text x="1114" y="312" class="body">Prepare fixed mock steps and evidence.</text>
+  <text x="1114" y="344" class="body">Prepare comparison tables and follow-up prompts.</text>
+  <text x="1114" y="376" class="body">Prepare homepage copy and presenter language.</text>
+
+  <rect x="100" y="502" width="1290" height="238" class="p0"/>
+  <text x="124" y="536" class="cardTitle">Delivery Completion Signals</text>
+  <text x="124" y="576" class="body">README reflects how to run and demo the workbench.</text>
+  <text x="124" y="608" class="body">Acceptance checklist exists and matches the actual UI/system path.</text>
+  <text x="124" y="640" class="body">The two fixed scenarios can be run end-to-end on mock data with stable states and structured output.</text>
+  <text x="124" y="672" class="meta">These are delivery conditions, not optional documentation extras.</text>
+
+  <rect x="72" y="832" width="1376" height="160" class="card"/>
+  <text x="100" y="870" class="cardTitle">P1: Explicitly Deferred</text>
+  <rect x="100" y="896" width="1290" height="64" class="p1"/>
+  <text x="124" y="926" class="body">Automation orchestration, real MCP abstraction, more diagnosis templates, more comparison templates, asset-agent chain, and knowledge-base foundation all stay out of the month-end demo scope.</text>
+</svg>

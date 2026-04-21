@@ -30,4 +30,4 @@ PMAIOS 内的数据服务业务子项目。
 - 补齐 `docs/requirements/`
 - 补齐 `docs/versions/`
 - 补齐 `docs/decisions/`
-- 明确与 `mcp / tracking-acceptance / ad` 的联动边界
+- 明确与 `mcp / ai-eval-platform / ad` 的联动边界

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import 'dotenv/config';
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { FileStore } from '../core/fileStore.js';
 import { WorkflowEngine } from '../core/workflowEngine.js';
@@ -10,7 +11,13 @@ import { McpRegistry } from '../core/mcpRegistry.js';
 import { ReviewCommittee } from '../core/reviewCommittee.js';
 import { SubprojectRegistry } from '../core/subprojectRegistry.js';
 import { ProductAgentService } from '../core/productAgentService.js';
+import { ProductChiefService } from '../core/productChiefService.js';
 import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
+import { McpContextSyncService, type CollaborationMode, type ToolIdentity } from '../core/mcpContextSyncService.js';
+import { SkillRegistry } from '../core/skillRegistry.js';
+import { LlmRouter } from '../llm_router/index.js';
+import { syncActiveModelToSettings } from '../llm_router/claudeSettingsSync.js';
+import type { ProviderCapability } from '../shared/schemas.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
 const store = new FileStore(rootDir);
@@ -22,7 +29,11 @@ const mcpRegistry = new McpRegistry(store);
 const reviewCommittee = new ReviewCommittee();
 const subprojectRegistry = new SubprojectRegistry(store);
 const productAgentService = new ProductAgentService(store);
+const skillRegistry = new SkillRegistry(store);
+const productChiefService = new ProductChiefService(store, memoryService, productAgentService, skillRegistry);
 const documentationNormalizationService = new DocumentationNormalizationService(store, memoryService);
+const mcpContextSync = new McpContextSyncService(rootDir);
+const llmRouter = new LlmRouter(store);
 
 function normalizeSubprojectId(value?: string) {
   return value?.trim() ? value.trim() : null;
@@ -30,6 +41,7 @@ function normalizeSubprojectId(value?: string) {
 
 function parseOptions(args: string[]) {
   let subprojectId: string | null = null;
+  let tool: string | null = null;
   const positional: string[] = [];
 
   for (let index = 0; index < args.length; index += 1) {
@@ -39,10 +51,21 @@ function parseOptions(args: string[]) {
       index += 1;
       continue;
     }
+    if (current === '--tool') {
+      tool = args[index + 1] ?? null;
+      index += 1;
+      continue;
+    }
+    if (current === '--status' || current === '--count') {
+      positional.push(current);
+      positional.push(args[index + 1] ?? '');
+      index += 1;
+      continue;
+    }
     positional.push(current);
   }
 
-  return { positional, subprojectId };
+  return { positional, subprojectId, tool };
 }
 
 async function ensureCurrentRun(subprojectId?: string | null) {
@@ -97,16 +120,36 @@ function printUsage() {
     '  npm run cli -- run metrics [runId] [--subproject <id>]',
     '  npm run cli -- provider list',
     '  npm run cli -- provider check [name]',
+    '  npm run cli -- provider use <name> [--tool claude|codex] [--subproject <id>]',
+    '  npm run cli -- provider routing [text|code|review|text-multimodal] [--subproject <id>]',
     '  npm run cli -- product-agent list [--subproject <id>]',
     '  npm run cli -- product-agent blueprints',
     '  npm run cli -- product-agent bootstrap [--subproject <id>]',
     '  npm run cli -- product-agent create <name> <summary> <problem> [--subproject <id>]',
     '  npm run cli -- product-agent generate <brief> [name] [--subproject <id>]',
     '  npm run cli -- product-agent show <id> [--subproject <id>]',
+    '  npm run cli -- skill list [--subproject <id>]',
+    '  npm run cli -- skill find <brief> [stageId] [outputType] [--subproject <id>]',
+    '  npm run cli -- product-chief analyze <brief> [--subproject <id>]',
+    '  npm run cli -- product-chief output <reportId> [type] [--subproject <id>]',
+    '  npm run cli -- product-chief reports [--subproject <id>]',
+    '  npm run cli -- product-chief outputs [--subproject <id>]',
     '  npm run cli -- documentation normalize [sourceRoot] [--subproject <id>]',
     '  npm run cli -- documentation runs [--subproject <id>]',
     '  npm run cli -- review show [runId] [--subproject <id>]',
     '  npm run cli -- memory show [runId] [--subproject <id>]',
+    '  npm run cli -- mcp-context status [--tool claude|codex]',
+    '  npm run cli -- mcp-context tasks [--status pending|in_progress|completed|blocked]',
+    '  npm run cli -- mcp-context task-start <label> [--tool claude|codex]',
+    '  npm run cli -- mcp-context task-complete <taskId> [--tool claude|codex]',
+    '  npm run cli -- mcp-context task-note <taskId> <note> [--tool claude|codex]',
+    '  npm run cli -- mcp-context events [--count <n>]',
+    '  npm run cli -- mcp-context checkpoint <label> [--tool claude|codex]',
+    '  npm run cli -- mcp-context mode',
+    '  npm run cli -- mcp-context mode-set <default|plan|deep|do> [label] [--tool claude|codex]',
+    '  npm run cli -- mcp-context mode-history',
+    '  npm run cli -- mcp-context digest-day [YYYY-MM-DD] [--tool claude|codex]',
+    '  npm run cli -- mcp-context repair [--tool claude|codex]',
   ].join('\n'));
 }
 
@@ -297,11 +340,85 @@ async function providerCheck(name?: string, subprojectId?: string | null) {
         model: provider.model ?? null,
         baseUrl: provider.baseUrl ?? null,
         priority: provider.priority,
+        authMode: provider.authMode,
+        scope: provider.scope,
       },
       null,
       2,
     ),
   );
+}
+
+async function providerUse(name?: string, subprojectId?: string | null, tool?: string | null) {
+  if (!name) {
+    throw new Error('provider use requires a provider name.');
+  }
+
+  const provider = await providerRegistry.resolveProviderByName(name, subprojectId);
+  if (!provider) {
+    throw new Error(`provider not found: ${name}`);
+  }
+
+  if (provider.scope === 'codex-only' || provider.authMode === 'browser') {
+    console.log(
+      JSON.stringify(
+        {
+          providerName: provider.name,
+          changed: false,
+          reason: 'This provider is a native Codex login provider. PMAIOS cannot route Claude/Web/runtime calls through it.',
+          nextRuntimeProvider: (await llmRouter.describeRouting('text', { subprojectId })).providers[0]?.name ?? null,
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (subprojectId) {
+    await subprojectRegistry.updateOverrides(subprojectId, { provider: provider.name });
+  } else {
+    await providerRegistry.setDefaultProvider(provider.name, null);
+  }
+
+  const toolIdentity = parseToolIdentity(tool ?? undefined);
+  if (toolIdentity === 'claude') {
+    await syncActiveModelToSettings(provider);
+  }
+
+  console.log(
+    JSON.stringify(
+      {
+        providerName: provider.name,
+        subprojectId: subprojectId ?? null,
+        toolIdentity,
+        defaultProvider: (await providerRegistry.loadConfig(subprojectId)).defaultProvider,
+        note:
+          toolIdentity === 'claude'
+            ? 'Claude settings sync was requested. Existing interactive sessions may need restart or an in-tool model switch.'
+            : 'PMAIOS runtime default was updated. Native Codex login sessions are not intercepted by this command.',
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function providerRouting(capability?: string, subprojectId?: string | null) {
+  const capabilities: ProviderCapability[] = capability
+    ? [capability as ProviderCapability]
+    : ['text', 'code', 'review', 'text-multimodal'];
+  const project = await subprojectRegistry.resolveProjectContext(subprojectId);
+  const snapshots = await Promise.all(
+    capabilities.map((item) =>
+      llmRouter.describeRouting(item, {
+        subprojectId,
+        preferredProvider: project.selectedProvider,
+        allowCrossCapabilityFallback: item === 'text-multimodal',
+      }),
+    ),
+  );
+  console.log(JSON.stringify({ subprojectId: subprojectId ?? null, items: snapshots }, null, 2));
 }
 
 async function productAgentList(subprojectId?: string | null) {
@@ -351,6 +468,70 @@ async function productAgentShow(agentId?: string, subprojectId?: string | null) 
   }
 
   console.log(JSON.stringify(await productAgentService.loadAgent(agentId, subprojectId), null, 2));
+}
+
+async function skillList(subprojectId?: string | null) {
+  const items = await skillRegistry.listSkills(subprojectId);
+  const readiness = await skillRegistry.describeReadiness(subprojectId);
+  console.log(JSON.stringify({ items, readiness }, null, 2));
+}
+
+async function skillFind(query?: string, stageId?: string, outputType?: string, subprojectId?: string | null) {
+  if (!query) {
+    throw new Error('skill find requires a brief or query.');
+  }
+
+  console.log(
+    JSON.stringify(
+      {
+        query,
+        stageId: normalizeSubprojectId(stageId),
+        outputType: normalizeSubprojectId(outputType),
+        items: await skillRegistry.findSkills({
+          query,
+          stageId: normalizeSubprojectId(stageId),
+          outputType: normalizeSubprojectId(outputType),
+          subprojectId,
+        }),
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function productChiefAnalyze(brief?: string, subprojectId?: string | null) {
+  if (!brief) {
+    throw new Error('product-chief analyze requires a brief.');
+  }
+
+  console.log(JSON.stringify(await productChiefService.analyze({ brief, subprojectId }), null, 2));
+}
+
+async function productChiefOutput(reportId?: string, type?: string, subprojectId?: string | null) {
+  if (!reportId) {
+    throw new Error('product-chief output requires a report id.');
+  }
+
+  console.log(
+    JSON.stringify(
+      await productChiefService.generateGovernedOutput({
+        reportId,
+        type,
+        subprojectId,
+      }),
+      null,
+      2,
+    ),
+  );
+}
+
+async function productChiefReports(subprojectId?: string | null) {
+  console.log(JSON.stringify(await productChiefService.listReports(subprojectId), null, 2));
+}
+
+async function productChiefOutputs(subprojectId?: string | null) {
+  console.log(JSON.stringify(await productChiefService.listOutputs(subprojectId), null, 2));
 }
 
 async function documentationNormalize(sourceRoot?: string, subprojectId?: string | null) {
@@ -409,8 +590,293 @@ async function subprojectShow(id?: string) {
   console.log(JSON.stringify(subproject, null, 2));
 }
 
+function parseToolIdentity(raw?: string): ToolIdentity {
+  if (raw === 'claude' || raw === 'codex' || raw === 'other') {
+    return raw;
+  }
+  return 'other';
+}
+
+function parseCollaborationMode(raw?: string): CollaborationMode | null {
+  if (raw === 'default' || raw === 'plan' || raw === 'deep' || raw === 'do') {
+    return raw;
+  }
+  return null;
+}
+
+async function mcpContextStatus(rawTool?: string, statusFilter?: string) {
+  const toolIdentity = parseToolIdentity(rawTool);
+  const state = toolIdentity === 'other'
+    ? await mcpContextSync.getState()
+    : await mcpContextSync.createSession({ toolIdentity, projectPath: rootDir });
+  let tasks = state.tasks;
+  if (statusFilter && ['pending', 'in_progress', 'completed', 'blocked'].includes(statusFilter)) {
+    tasks = tasks.filter((t) => t.status === statusFilter);
+  }
+  console.log(JSON.stringify({ state: { ...state, eventLog: state.eventLog.slice(-20) }, tasks, total: state.tasks.length }, null, 2));
+}
+
+async function mcpContextMode() {
+  const state = await mcpContextSync.getState();
+  console.log(
+    JSON.stringify(
+      {
+        currentMode: state.currentMode,
+        lastUpdated: state.lastUpdated,
+        lastUpdatedBy: state.lastUpdatedBy,
+        currentTaskId: state.currentTaskId,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function mcpContextModeSet(rawMode?: string, label?: string, tool?: string) {
+  const mode = parseCollaborationMode(rawMode);
+  if (!mode) {
+    throw new Error('mcp-context mode-set requires one of: default | plan | deep | do');
+  }
+  const toolIdentity = parseToolIdentity(tool);
+  const state = await mcpContextSync.updateState({
+    toolIdentity,
+    mode,
+    modeLabel: label ?? `switch to ${mode}`,
+    newEvent: {
+      toolIdentity,
+      kind: 'mode_changed',
+      taskId: null,
+      content: label?.trim() || `switch to ${mode}`,
+    },
+  });
+  console.log(
+    JSON.stringify(
+      {
+        currentMode: state.currentMode,
+        lastUpdated: state.lastUpdated,
+        lastUpdatedBy: state.lastUpdatedBy,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function mcpContextModeHistory() {
+  console.log(JSON.stringify(await mcpContextSync.getModeHistory(), null, 2));
+}
+
+async function mcpContextTasks(statusFilter?: string) {
+  const state = await mcpContextSync.getState();
+  const tasks = statusFilter && ['pending', 'in_progress', 'completed', 'blocked'].includes(statusFilter)
+    ? state.tasks.filter((t) => t.status === statusFilter)
+    : state.tasks;
+  console.log(JSON.stringify(tasks, null, 2));
+}
+
+async function mcpContextTaskStart(label?: string, tool?: string) {
+  if (!label) throw new Error('mcp-context task-start 需要 label');
+  const toolIdentity = parseToolIdentity(tool);
+  await mcpContextSync.updateState({
+    toolIdentity,
+    newTask: { label, status: 'in_progress', notes: null },
+    newEvent: { toolIdentity, kind: 'task_started', taskId: null, content: label },
+  });
+  console.log(JSON.stringify(await mcpContextSync.getState().then((s) => ({ currentTaskId: s.currentTaskId, lastUpdated: s.lastUpdated })), null, 2));
+}
+
+async function mcpContextTaskComplete(taskId?: string, tool?: string) {
+  if (!taskId) throw new Error('mcp-context task-complete 需要 taskId');
+  const toolIdentity = parseToolIdentity(tool);
+  const updated = await mcpContextSync.updateState({
+    toolIdentity,
+    taskId,
+    taskUpdates: { status: 'completed' },
+    newEvent: { toolIdentity, kind: 'task_completed', taskId, content: '任务完成' },
+  });
+  console.log(JSON.stringify(updated.tasks.find((t) => t.id === taskId) ?? { error: 'task not found' }, null, 2));
+}
+
+async function mcpContextTaskNote(taskId?: string, note?: string, tool?: string) {
+  if (!taskId || !note) throw new Error('mcp-context task-note 需要 taskId 和 note');
+  const toolIdentity = parseToolIdentity(tool);
+  await mcpContextSync.updateState({
+    toolIdentity,
+    taskId,
+    taskUpdates: { notes: note },
+    newEvent: { toolIdentity, kind: 'note', taskId, content: note },
+  });
+  console.log(JSON.stringify({ ok: true, taskId, note }, null, 2));
+}
+
+async function mcpContextEvents(count?: number) {
+  const events = await mcpContextSync.getRecentEvents(count ?? 10);
+  console.log(JSON.stringify(events, null, 2));
+}
+
+async function mcpContextCheckpoint(label?: string, tool?: string) {
+  if (!label) throw new Error('mcp-context checkpoint 需要 label');
+  const toolIdentity = parseToolIdentity(tool);
+  const state = await mcpContextSync.getState();
+  await mcpContextSync.updateState({
+    toolIdentity,
+    newCheckpoint: { label, taskId: state.currentTaskId, contextSnapshot: 'task snapshot' },
+    newEvent: { toolIdentity, kind: 'checkpoint', taskId: state.currentTaskId, content: label },
+  });
+  console.log(JSON.stringify(await mcpContextSync.getCheckpoints().then((c) => c[0]), null, 2));
+}
+
+async function mcpContextRepair(tool?: string) {
+  const toolIdentity = parseToolIdentity(tool);
+  const repaired = await mcpContextSync.repairState(toolIdentity);
+  console.log(
+    JSON.stringify(
+      {
+        currentTaskId: repaired.currentTaskId,
+        taskCount: repaired.tasks.length,
+        eventCount: repaired.eventLog.length,
+        checkpointCount: repaired.checkpoints.length,
+        lastUpdated: repaired.lastUpdated,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+function formatDigestDate(input: Date, timeZone = 'Asia/Shanghai') {
+  return new Intl.DateTimeFormat('sv-SE', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(input);
+}
+
+function matchesDigestDate(timestamp: string, digestDate: string) {
+  return formatDigestDate(new Date(timestamp)) === digestDate;
+}
+
+function classifyDigestCandidate(label: string) {
+  const normalized = label.toLowerCase();
+  if (
+    normalized.includes('rule') ||
+    normalized.includes('protocol') ||
+    normalized.includes('mode') ||
+    normalized.includes('requirement') ||
+    normalized.includes('backcheck') ||
+    normalized.includes('progress')
+  ) {
+    return 'rule-or-method';
+  }
+  if (
+    normalized.includes('template') ||
+    normalized.includes('contract') ||
+    normalized.includes('workflow') ||
+    normalized.includes('checklist')
+  ) {
+    return 'template-or-contract';
+  }
+  if (
+    normalized.includes('research') ||
+    normalized.includes('cognition') ||
+    normalized.includes('intent') ||
+    normalized.includes('digestion')
+  ) {
+    return 'research-or-cognition';
+  }
+  if (normalized.includes('skill')) {
+    return 'skill-candidate';
+  }
+  return null;
+}
+
+async function mcpContextDigestDay(rawDate?: string, tool?: string) {
+  const toolIdentity = parseToolIdentity(tool);
+  const state = await mcpContextSync.getState();
+  const digestDate = rawDate?.trim() || formatDigestDate(new Date());
+  const events = state.eventLog.filter((event) => matchesDigestDate(event.timestamp, digestDate));
+  const checkpoints = state.checkpoints.filter((checkpoint) => matchesDigestDate(checkpoint.timestamp, digestDate));
+  const tasks = state.tasks.filter(
+    (task) =>
+      matchesDigestDate(task.createdAt, digestDate) ||
+      matchesDigestDate(task.updatedAt, digestDate) ||
+      (task.completedAt ? matchesDigestDate(task.completedAt, digestDate) : false),
+  );
+
+  const candidatePool = [...checkpoints.map((item) => item.label), ...events.map((item) => item.content)];
+  const seen = new Set<string>();
+  const candidates = candidatePool
+    .map((label) => ({ label, type: classifyDigestCandidate(label) }))
+    .filter((item): item is { label: string; type: string } => Boolean(item.type))
+    .filter((item) => {
+      const dedupeKey = `${item.type}:${item.label}`;
+      if (seen.has(dedupeKey)) return false;
+      seen.add(dedupeKey);
+      return true;
+    });
+
+  const digestPath = path.join(rootDir, 'docs', 'operations', 'daily-digests', `${digestDate}.md`);
+  const markdown = [
+    `# ${digestDate} 对话蒸馏`,
+    '',
+    '- generator: `npm run cli -- mcp-context digest-day`',
+    `- date: ${digestDate}`,
+    `- current mode: ${state.currentMode}`,
+    `- current task: ${state.currentTaskId ?? '-'}`,
+    `- tool identity: ${toolIdentity}`,
+    '',
+    '## 当日任务变化',
+    ...(tasks.length
+      ? tasks.map(
+          (task) =>
+            `- ${task.label} | status=${task.status} | created=${task.createdAt} | updated=${task.updatedAt}${
+              task.completedAt ? ` | completed=${task.completedAt}` : ''
+            }`,
+        )
+      : ['- 无']),
+    '',
+    '## 当日 checkpoints',
+    ...(checkpoints.length
+      ? checkpoints.map((checkpoint) => `- ${checkpoint.label} | ${checkpoint.taskId ?? '-'} | ${checkpoint.timestamp}`)
+      : ['- 无']),
+    '',
+    '## 当日共享事件',
+    ...(events.length
+      ? events.map((event) => `- ${event.kind} | ${event.content} | ${event.taskId ?? '-'} | ${event.timestamp}`)
+      : ['- 无']),
+    '',
+    '## 可提炼候选',
+    ...(candidates.length ? candidates.map((item) => `- ${item.type}: ${item.label}`) : ['- 今日未识别到明确候选']),
+    '',
+    '## 待人工判断',
+    '- 哪些候选应升级为 rule',
+    '- 哪些候选应升级为 method asset',
+    '- 哪些候选应升级为 skill candidate',
+    '- 哪些候选应单开 deep research',
+    '',
+  ].join('\n');
+
+  await fs.mkdir(path.dirname(digestPath), { recursive: true });
+  await fs.writeFile(digestPath, markdown, 'utf8');
+  console.log(
+    JSON.stringify(
+      {
+        date: digestDate,
+        path: path.relative(rootDir, digestPath),
+        eventCount: events.length,
+        checkpointCount: checkpoints.length,
+        taskCount: tasks.length,
+        candidateCount: candidates.length,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
 async function main() {
-  const { positional, subprojectId } = parseOptions(process.argv.slice(2));
+  const { positional, subprojectId, tool } = parseOptions(process.argv.slice(2));
   const [scope, action, target, extraName, extraDescription] = positional;
 
   if (!scope || !action) {
@@ -494,6 +960,16 @@ async function main() {
     return;
   }
 
+  if (scope === 'provider' && action === 'use') {
+    await providerUse(target, subprojectId, tool);
+    return;
+  }
+
+  if (scope === 'provider' && action === 'routing') {
+    await providerRouting(target, subprojectId);
+    return;
+  }
+
   if (scope === 'product-agent' && action === 'list') {
     await productAgentList(subprojectId);
     return;
@@ -524,6 +1000,36 @@ async function main() {
     return;
   }
 
+  if (scope === 'skill' && action === 'list') {
+    await skillList(subprojectId);
+    return;
+  }
+
+  if (scope === 'skill' && action === 'find') {
+    await skillFind(target, extraName, extraDescription, subprojectId);
+    return;
+  }
+
+  if (scope === 'product-chief' && action === 'analyze') {
+    await productChiefAnalyze(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'product-chief' && action === 'output') {
+    await productChiefOutput(target, extraName, subprojectId);
+    return;
+  }
+
+  if (scope === 'product-chief' && action === 'reports') {
+    await productChiefReports(subprojectId);
+    return;
+  }
+
+  if (scope === 'product-chief' && action === 'outputs') {
+    await productChiefOutputs(subprojectId);
+    return;
+  }
+
   if (scope === 'documentation' && action === 'normalize') {
     await documentationNormalize(target, subprojectId);
     return;
@@ -541,6 +1047,68 @@ async function main() {
 
   if (scope === 'memory' && action === 'show') {
     await memoryShow(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'status') {
+    await mcpContextStatus(tool ?? target, target === '--status' ? extraName : undefined);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'tasks') {
+    await mcpContextTasks(target === '--status' ? extraName : target);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'task-start') {
+    await mcpContextTaskStart(target, tool ?? extraName);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'task-complete') {
+    await mcpContextTaskComplete(target, tool ?? extraName);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'task-note') {
+    await mcpContextTaskNote(target, extraName, positional[5]);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'events') {
+    const rawCount = target === '--count' ? extraName : target;
+    const count = rawCount ? parseInt(rawCount, 10) : undefined;
+    await mcpContextEvents(count);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'checkpoint') {
+    await mcpContextCheckpoint(target, tool ?? extraName);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'mode') {
+    await mcpContextMode();
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'mode-set') {
+    await mcpContextModeSet(target, extraName, tool ?? positional[5]);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'mode-history') {
+    await mcpContextModeHistory();
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'digest-day') {
+    await mcpContextDigestDay(target, tool ?? extraName);
+    return;
+  }
+
+  if (scope === 'mcp-context' && action === 'repair') {
+    await mcpContextRepair(tool ?? target);
     return;
   }
 

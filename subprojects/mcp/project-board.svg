@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 940" width="1360" height="940">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
+    .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
+    .sub { fill: #6e6e80; font-size: 13px; }
+    .card { fill: #ffffff; stroke: #e5e5e5; stroke-width: 1.5; rx: 10; }
+    .cardTitle { fill: #0d0d0d; font-size: 17px; font-weight: 600; }
+    .body { fill: #374151; font-size: 13px; }
+    .meta { fill: #6e6e80; font-size: 12px; }
+    .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
+  </style>
+  <rect width="1360" height="940" fill="#ffffff"/>
+  <a href="../../boards/index.svg"><text x="72" y="46" class="linkText">← Back to PMAIOS directory</text></a>
+  <text x="72" y="88" class="title">MCP Project Board</text>
+  <text x="72" y="116" class="sub">Ad report MCP and integration requirement consolidation.</text>
+
+  <rect x="72" y="160" width="392" height="196" class="card"/>
+  <rect x="72" y="160" width="5" height="196" fill="#10a37f"/>
+  <text x="100" y="198" class="cardTitle">Current Position</text>
+  <text x="100" y="223" class="meta">active / requirements grounded in PRD + screenshots + Excel</text>
+  <text x="100" y="258" class="body">Ad report MCP has been realigned to v3.14.16 source inputs, especially 7-day paid metrics, report expansions, and material filter updates.</text>
+
+  <rect x="484" y="160" width="392" height="196" class="card"/>
+  <text x="512" y="198" class="cardTitle">Current Priority</text>
+  <text x="512" y="258" class="body">Primary: 7-day paid-related metrics and material report filters. Secondary: effective-user metrics can wait and remain optional in this round.</text>
+
+  <rect x="896" y="160" width="392" height="196" class="card"/>
+  <text x="924" y="198" class="cardTitle">Next Needed Work</text>
+  <text x="924" y="258" class="body">Consolidate integration requirements from meeting notes, clarify new tool boundaries, and turn page-to-MCP mapping into cleaner implementation slices.</text>
+
+  <rect x="72" y="396" width="392" height="236" class="card"/>
+  <text x="100" y="434" class="cardTitle">Main Docs</text>
+  <a href="README.md"><text x="100" y="476" class="linkText">README.md</text></a>
+  <a href="projects/mcp v0.3/docs/prd.md"><text x="100" y="508" class="linkText">v3.14.16 PRD</text></a>
+  <a href="projects/mcp v0.3/docs/03-MCP 工具定义.md"><text x="100" y="540" class="linkText">MCP tool definition</text></a>
+  <a href="projects/mcp v0.3/docs/04-v3.14.16页面与MCP映射.md"><text x="100" y="572" class="linkText">page to MCP mapping</text></a>
+
+  <rect x="484" y="396" width="804" height="236" class="card"/>
+  <text x="512" y="434" class="cardTitle">Follow-Up Boards</text>
+  <text x="512" y="476" class="body">Recommended next SVG boards:</text>
+  <text x="512" y="508" class="body">- report-map.svg</text>
+  <text x="512" y="540" class="body">- integration-requirement-board.svg</text>
+  <text x="512" y="572" class="body">- metrics-scope-board.svg</text>
+</svg>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1140" width="1560" height="1140">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .chip { fill: #ecfeff; stroke: #bae6fd; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f172a; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1140" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">认知阶梯 / 意图放大器</text>
+  <text x="72" y="118" class="sub">不是围着用户表层句子打转，而是识别背后意图，再做升维、降维、关联和深研，让认知持续长成地图。</text>
+
+  <rect x="72" y="156" width="1416" height="30" class="chip"/>
+  <text x="100" y="175" class="chipText">主线：意图识别 -&gt; 向上升维 -&gt; 向下降维 -&gt; 向外关联 -&gt; 向深研究 -&gt; 形成认知地图</text>
+
+  <rect x="72" y="224" width="420" height="212" class="card"/>
+  <text x="100" y="268" class="section">1. 先识别背后目的</text>
+  <text x="100" y="296" class="meta">不直接跟着表层 idea 跑</text>
+  <text x="100" y="338" class="body">先判断：</text>
+  <text x="100" y="370" class="body">你真正想达到什么结果</text>
+  <text x="100" y="402" class="body">你想避免什么风险</text>
+  <text x="100" y="434" class="body">这件事服务于哪个更大目标</text>
+
+  <rect x="520" y="224" width="420" height="212" class="card"/>
+  <text x="548" y="268" class="section">2. 向上升维</text>
+  <text x="548" y="296" class="meta">从局部点抬到更高层</text>
+  <text x="548" y="338" class="body">例如：</text>
+  <text x="548" y="370" class="body">功能 -&gt; 产品能力</text>
+  <text x="548" y="402" class="body">产品能力 -&gt; 战略 / 商业模式</text>
+  <text x="548" y="434" class="body">战略 -&gt; 生态位 / 组织方法</text>
+
+  <rect x="968" y="224" width="520" height="212" class="card"/>
+  <text x="996" y="268" class="section">3. 向下降维</text>
+  <text x="996" y="296" class="meta">不是只拆到今天任务</text>
+  <text x="996" y="338" class="body">优先沿真实项目交付链去拆：</text>
+  <text x="996" y="370" class="body">研究 -&gt; 规划 -&gt; 设计 -&gt; Figma -&gt; 前端 demo -&gt; 后端架构 -&gt; 后端 demo -&gt; 全栈 demo -&gt; 可部署版本</text>
+
+  <rect x="72" y="476" width="1416" height="274" class="card"/>
+  <text x="104" y="520" class="section">4. 向外关联与向深研究</text>
+  <text x="104" y="548" class="meta">避免只在狭小会话里迭代</text>
+
+  <rect x="104" y="588" width="300" height="120" class="card"/>
+  <text x="132" y="626" class="section">向外关联</text>
+  <text x="132" y="658" class="body">看哪些项目、能力、开源方案、行业实践和现有规则与当前意图相关。</text>
+
+  <rect x="432" y="588" width="300" height="120" class="card"/>
+  <text x="460" y="626" class="section">向深研究</text>
+  <text x="460" y="658" class="body">对大课题默认考虑旁路深研文档，不打断主流程，但持续积累更深比较与依据。</text>
+
+  <rect x="760" y="588" width="300" height="120" class="card"/>
+  <text x="788" y="626" class="section">认知提炼</text>
+  <text x="788" y="658" class="body">持续提炼概念、原则、方法、框架、约束、风险、候选课题和平台规则候选。</text>
+
+  <rect x="1088" y="588" width="368" height="120" class="card"/>
+  <text x="1116" y="626" class="section">实时呈现</text>
+  <text x="1116" y="658" class="body">不是只放后台归档，重要认知点应实时形成你可读的认知增量和认知地图。</text>
+
+  <rect x="72" y="790" width="1416" height="216" class="card"/>
+  <text x="104" y="834" class="section">5. 产出结构</text>
+  <text x="104" y="862" class="meta">对重要 idea，默认至少能给出这些槽位</text>
+  <text x="104" y="904" class="body">1. detected intent</text>
+  <text x="104" y="936" class="body">2. 当前想法里正确的部分</text>
+  <text x="104" y="968" class="body">3. 不完整或有风险的部分</text>
+  <text x="520" y="904" class="body">4. upward expansion</text>
+  <text x="520" y="936" class="body">5. downward execution ladder</text>
+  <text x="520" y="968" class="body">6. lateral connections</text>
+  <text x="968" y="904" class="body">7. deep research candidate</text>
+  <text x="968" y="936" class="body">8. recommended next action</text>
+
+  <rect x="72" y="1040" width="1416" height="58" class="card"/>
+  <a href="../docs/operations/cognition-ladder-and-intent-amplifier.md"><text x="100" y="1076" class="linkText">配套文档：cognition ladder and intent amplifier -&gt;</text></a>
+  <a href="ai-product-development-loop.svg"><text x="650" y="1076" class="linkText">继续看：AI 产研协同闭环 -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="970" y="1076" class="linkText">回到：v0.5 清单板 -&gt;</text></a>
+</svg>

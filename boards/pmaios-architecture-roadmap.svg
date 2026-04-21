@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1180" width="1560" height="1180">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .chipText { fill: #0f172a; font-size: 13px; font-weight: 600; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1180" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS 架构 + 路线图</text>
+  <text x="72" y="118" class="sub">推荐作为公司演示主图。上半部分讲架构骨架，中间讲产品线路，下半部分讲开源能力和方法论来源，避免只讲时间线、不讲为什么这样设计。</text>
+
+  <rect x="72" y="160" width="1416" height="310" class="card"/>
+  <text x="104" y="204" class="section">一、当前产品架构骨架</text>
+  <text x="104" y="232" class="meta">讲法：不是单一聊天工具，而是文件真源 + 工作流编排 + 能力治理 + 人阅读输出面</text>
+
+  <rect x="104" y="276" width="220" height="140" class="card"/>
+  <text x="132" y="316" class="section">输入与真源层</text>
+  <text x="132" y="350" class="body">docs / prompts / workflows / config / inbox</text>
+  <text x="132" y="382" class="body">项目文档、规则、模板、原始输入统一沉淀。</text>
+
+  <rect x="372" y="276" width="220" height="140" class="card"/>
+  <text x="400" y="316" class="section">工作流与治理层</text>
+  <text x="400" y="350" class="body">Workflow Engine / Review / Requirement / Version / DAG</text>
+  <text x="400" y="382" class="body">把需求、版本、评审、追溯和流程门禁接起来。</text>
+
+  <rect x="640" y="276" width="220" height="140" class="card"/>
+  <text x="668" y="316" class="section">Agent 与能力层</text>
+  <text x="668" y="350" class="body">Product Chief / Product Agents / Skills / Capability Registry</text>
+  <text x="668" y="382" class="body">让 AI 不是只回答问题，而是承担产品办公室中的具体角色。</text>
+
+  <rect x="908" y="276" width="220" height="140" class="card"/>
+  <text x="936" y="316" class="section">连接与扩展层</text>
+  <text x="936" y="350" class="body">MCP / Providers / Web Fetch / Notion / Figma / DingTalk</text>
+  <text x="936" y="382" class="body">让外部工具和不同模型作为可替换能力接入，而不是写死在单一产品里。</text>
+
+  <rect x="1176" y="276" width="280" height="140" class="card"/>
+  <text x="1204" y="316" class="section">输出与阅读层</text>
+  <text x="1204" y="350" class="body">Web UI / CLI / SVG Boards / README / Doc Outputs</text>
+  <text x="1204" y="382" class="body">对 AI 形成归档层，对人形成可读、可访问、可演示的阅读面。</text>
+
+  <line x1="324" y1="346" x2="372" y2="346" stroke="#10a37f" stroke-width="2"/>
+  <line x1="592" y1="346" x2="640" y2="346" stroke="#10a37f" stroke-width="2"/>
+  <line x1="860" y1="346" x2="908" y2="346" stroke="#10a37f" stroke-width="2"/>
+  <line x1="1128" y1="346" x2="1176" y2="346" stroke="#10a37f" stroke-width="2"/>
+
+  <rect x="104" y="432" width="1352" height="24" fill="#ecfeff" rx="12"/>
+  <text x="128" y="449" class="chipText">核心表达：PMAIOS 不是“再做一个 Agent”，而是把项目背景、规则、产物、工作流、评审和人机协作沉淀成可持续运行的产品操作系统。</text>
+
+  <rect x="72" y="510" width="1416" height="274" class="card"/>
+  <text x="104" y="554" class="section">二、产品线路怎么讲更好</text>
+  <text x="104" y="582" class="meta">讲法：用“产品演进逻辑”而不是“功能堆叠”</text>
+
+  <line x1="150" y1="654" x2="1410" y2="654" stroke="#cbd5e1" stroke-width="4"/>
+  <circle cx="220" cy="654" r="14" fill="#10a37f"/>
+  <circle cx="500" cy="654" r="14" fill="#10a37f"/>
+  <circle cx="780" cy="654" r="14" fill="#10a37f"/>
+  <circle cx="1060" cy="654" r="14" fill="#10a37f"/>
+  <circle cx="1340" cy="654" r="14" fill="#f59e0b"/>
+
+  <text x="170" y="626" class="chipText">v0.1</text>
+  <text x="450" y="626" class="chipText">v0.2</text>
+  <text x="730" y="626" class="chipText">v0.3</text>
+  <text x="1010" y="626" class="chipText">v0.4</text>
+  <text x="1290" y="626" class="chipText">v0.5</text>
+
+  <rect x="120" y="698" width="200" height="56" class="card"/>
+  <text x="144" y="732" class="body">v0.1：验证 workflow runtime 原型能跑</text>
+
+  <rect x="400" y="698" width="200" height="56" class="card"/>
+  <text x="424" y="732" class="body">v0.2：补齐本地前后端与 CLI 基线</text>
+
+  <rect x="680" y="698" width="200" height="56" class="card"/>
+  <text x="704" y="732" class="body">v0.3：定义 AI Product Office operating model</text>
+
+  <rect x="960" y="698" width="200" height="56" class="card"/>
+  <text x="984" y="732" class="body">v0.4：把 Product Chief / PM outputs / traceability 真接起来</text>
+
+  <rect x="1240" y="698" width="200" height="56" class="card"/>
+  <text x="1264" y="732" class="body">v0.5：收敛协作、执行、人阅读访问面与知识导航</text>
+
+  <text x="104" y="764" class="body">建议一句话概括：PMAIOS 的产品线路，不是从“工具 A”加到“工具 B”，而是从“本地 AI workflow runtime”逐步收敛为“可持续运行的 AI Product Office”。</text>
+
+  <rect x="72" y="824" width="1416" height="276" class="card"/>
+  <text x="104" y="868" class="section">三、演示里可以明确说：用了哪些开源能力和思想</text>
+  <text x="104" y="896" class="meta">讲法：不是简单抄某个开源项目，而是把多种成熟思想收敛成适合公司当前阶段的本地产品系统</text>
+
+  <rect x="104" y="936" width="312" height="124" class="card"/>
+  <text x="132" y="972" class="section">开源能力来源</text>
+  <text x="132" y="1004" class="body">MCP：统一工具协议与外部能力接入方式。</text>
+  <text x="132" y="1034" class="body">Chroma / 检索治理：本地知识检索与可替换向量层。</text>
+  <text x="132" y="1064" class="body">WeKnora / NotebookLLM 等：知识工作台与知识消费思路参考。</text>
+
+  <rect x="456" y="936" width="312" height="124" class="card"/>
+  <text x="484" y="972" class="section">架构思想来源</text>
+  <text x="484" y="1004" class="body">Docs as Code：文档、规则、版本、决策都留在 repo 真源里。</text>
+  <text x="484" y="1034" class="body">ADR / governed workflow：重大决策、阶段门禁和 review 可追溯。</text>
+  <text x="484" y="1064" class="body">Open-source-first / buy-before-build：优先复用，不默认手搓。</text>
+
+  <rect x="808" y="936" width="312" height="124" class="card"/>
+  <text x="836" y="972" class="section">Agent 方法论来源</text>
+  <text x="836" y="1004" class="body">多 Agent 分工，但不把所有逻辑塞进单一 agent。</text>
+  <text x="836" y="1034" class="body">Hermes 作为增强层，而不是失控的总控制器。</text>
+  <text x="836" y="1064" class="body">确定性 workflow + AI 产出，而不是全靠自由发挥。</text>
+
+  <rect x="1160" y="936" width="296" height="124" class="card"/>
+  <text x="1188" y="972" class="section">为什么适合现在讲</text>
+  <text x="1188" y="1004" class="body">因为它已经不是 PPT 概念，而是有 runtime、有产物、有样板项目、有治理链路的系统。</text>
+  <text x="1188" y="1048" class="body">公司能看到的不只是想法，而是一条能持续演进的产品线。</text>
+
+  <a href="pmaios-demo-intro.svg"><text x="100" y="1144" class="linkText">前置：演示介绍图板 -&gt;</text></a>
+  <a href="pmaios-product-roadmap.svg"><text x="360" y="1144" class="linkText">补充：产品线路图 -&gt;</text></a>
+  <a href="pmaios-v0.5.svg"><text x="600" y="1144" class="linkText">补充：v0.5 图板 -&gt;</text></a>
+  <a href="../docs/operations/pmaios-version-plan.md"><text x="780" y="1144" class="linkText">文档：版本规划 -&gt;</text></a>
+</svg>

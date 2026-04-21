@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1460 980" width="1460" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .panel { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .panelTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .good { fill: #ecfdf5; stroke: #86efac; stroke-width: 1.5; rx: 14; }
+    .warn { fill: #fff7ed; stroke: #fdba74; stroke-width: 1.5; rx: 14; }
+    .bad { fill: #fef2f2; stroke: #fca5a5; stroke-width: 1.5; rx: 14; }
+    .linkText { fill: #2563eb; font-size: 14px; font-weight: 600; }
+  </style>
+
+  <rect width="1460" height="980" fill="#f8fafc"/>
+  <a href="project-board.svg"><text x="72" y="48" class="linkText">Back to ad project board</text></a>
+  <text x="72" y="94" class="title">Ad Acceptance Board</text>
+  <text x="72" y="122" class="sub">The demo is accepted only if it behaves like a clear agent workflow within five minutes and leaves a usable MVP handoff.</text>
+
+  <rect x="72" y="156" width="420" height="330" class="panel"/>
+  <text x="100" y="194" class="panelTitle">Pre-Demo Check</text>
+  <text x="100" y="236" class="body">1. Workbench opens with clear positioning and two core entry points.</text>
+  <text x="100" y="276" class="body">2. Diagnosis and comparison prompts are preloaded and reusable.</text>
+  <text x="100" y="316" class="body">3. Mock endpoints return stable, structured payloads.</text>
+  <text x="100" y="356" class="body">4. Loading, running, empty, and error states are covered.</text>
+  <text x="100" y="396" class="body">5. Presenter script matches what the UI actually shows.</text>
+  <text x="100" y="436" class="meta">If any item is missing, the demo is not ready for chief-facing review.</text>
+
+  <rect x="520" y="156" width="420" height="330" class="panel"/>
+  <text x="548" y="194" class="panelTitle">What Must Be Visible</text>
+  <text x="548" y="236" class="body">1. User question and scene classification.</text>
+  <text x="548" y="276" class="body">2. Mid-process execution states instead of instant static output.</text>
+  <text x="548" y="316" class="body">3. Structured results: evidence, conclusion, and next action.</text>
+  <text x="548" y="356" class="body">4. Comparison metrics that are easy to read aloud.</text>
+  <text x="548" y="396" class="body">5. One follow-up interaction that proves it is conversational.</text>
+  <text x="548" y="436" class="meta">This is the minimum proof that the product is an agent desk rather than a chart page.</text>
+
+  <rect x="968" y="156" width="420" height="330" class="panel"/>
+  <text x="996" y="194" class="panelTitle">Success Test</text>
+  <rect x="996" y="228" width="364" height="72" class="good"/>
+  <text x="1020" y="258" class="body">Accepted if both fixed scenarios can be demoed within 5 minutes</text>
+  <text x="1020" y="280" class="body">with stable process, readable evidence, and a clear story.</text>
+  <rect x="996" y="322" width="364" height="72" class="warn"/>
+  <text x="1020" y="352" class="body">Accepted with constraints if the story works but one branch still</text>
+  <text x="1020" y="374" class="body">needs polish on states, copy, or result formatting.</text>
+  <rect x="996" y="416" width="364" height="72" class="bad"/>
+  <text x="1020" y="446" class="body">Not accepted if the UI falls back to static charts, hides reasoning,</text>
+  <text x="1020" y="468" class="body">or depends on unstable manual explanation.</text>
+
+  <rect x="72" y="530" width="632" height="340" class="panel"/>
+  <text x="100" y="568" class="panelTitle">Common Failure Modes</text>
+  <text x="100" y="612" class="body">1. Scope creep: extra platform ideas dilute the demo story.</text>
+  <text x="100" y="652" class="body">2. Visual mismatch: the page still feels like the old funnel prototype.</text>
+  <text x="100" y="692" class="body">3. Opaque output: conclusion appears without evidence chain.</text>
+  <text x="100" y="732" class="body">4. Broken pacing: too much narration is needed to explain what the system is doing.</text>
+  <text x="100" y="772" class="body">5. No handoff: MVP inputs are still broad ideas rather than ranked tasks.</text>
+
+  <rect x="756" y="530" width="632" height="340" class="panel"/>
+  <text x="784" y="568" class="panelTitle">Post-Demo Handoff</text>
+  <text x="784" y="612" class="body">Record which part of the workbench felt strongest to the audience.</text>
+  <text x="784" y="652" class="body">List leftover issues under states, content, backend contracts, and scope.</text>
+  <text x="784" y="692" class="body">Convert MVP follow-up into ranked tasks instead of open-ended product vision.</text>
+  <text x="784" y="732" class="body">Chief decision needed: where to invest first after demo validation.</text>
+  <text x="784" y="800" class="meta">This board should be used together with demo-board.svg when reviewing readiness.</text>
+</svg>

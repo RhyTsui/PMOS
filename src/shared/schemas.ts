@@ -621,11 +621,16 @@ export const ProviderDefinitionSchema = z.object({
   name: z.string(),
   type: z.string(),
   envKey: z.string(),
+  envKeys: z.array(z.string()).default([]),
   legacyEnvKeys: z.array(z.string()).default([]),
   capabilities: z.array(ProviderCapabilitySchema),
   model: z.string().optional(),
   baseUrl: z.string().optional(),
   priority: z.number().int().default(0),
+  authMode: z.enum(['api-key', 'browser']).default('api-key'),
+  scope: z.enum(['runtime', 'codex-only']).default('runtime'),
+  keySelection: z.enum(['first', 'random']).default('first'),
+  comment: z.string().optional(),
 });
 
 export const ProviderConfigSchema = z.object({
@@ -642,6 +647,8 @@ export const ProviderSummarySchema = z.object({
   capabilities: z.array(ProviderCapabilitySchema),
   model: z.string().nullable().default(null),
   priority: z.number().int().default(0),
+  authMode: z.enum(['api-key', 'browser']).default('api-key'),
+  scope: z.enum(['runtime', 'codex-only']).default('runtime'),
 });
 
 export const ProviderRoutingEntrySchema = z.object({
@@ -655,6 +662,8 @@ export const ProviderRoutingEntrySchema = z.object({
   model: z.string().nullable().default(null),
   baseUrl: z.string().nullable().default(null),
   priority: z.number().int().default(0),
+  authMode: z.enum(['api-key', 'browser']).default('api-key'),
+  scope: z.enum(['runtime', 'codex-only']).default('runtime'),
   routedCapability: ProviderCapabilitySchema,
   order: z.number().int().nonnegative(),
   score: z.number().int(),
@@ -969,6 +978,18 @@ export const ProductChiefSpecialistEngagementSchema = z.object({
   reason: z.string(),
 });
 
+export const ProductChiefSkillRecommendationSchema = z.object({
+  skillId: z.string(),
+  name: z.string(),
+  category: z.string(),
+  ownerRole: z.string(),
+  promptPath: z.string(),
+  score: z.number(),
+  reasons: z.array(z.string()).default([]),
+  deploymentStatus: z.enum(['integrated', 'installed', 'configured', 'manual', 'unavailable']).default('manual'),
+  tool: z.string().nullable().default(null),
+});
+
 export const ProductChiefReportSchema = z.object({
   id: z.string(),
   subprojectId: z.string().nullable(),
@@ -977,6 +998,7 @@ export const ProductChiefReportSchema = z.object({
   status: z.enum(['draft', 'ready-for-review']),
   missingQuestions: z.array(ProductChiefQuestionSchema),
   engagedSpecialists: z.array(ProductChiefSpecialistEngagementSchema),
+  recommendedSkills: z.array(ProductChiefSkillRecommendationSchema).default([]),
   learningGuidance: z.array(z.object({
     id: z.string(),
     title: z.string(),
@@ -997,6 +1019,7 @@ export const ProductChiefReportSchema = z.object({
 });
 export type ProductChiefQuestion = z.infer<typeof ProductChiefQuestionSchema>;
 export type ProductChiefSpecialistEngagement = z.infer<typeof ProductChiefSpecialistEngagementSchema>;
+export type ProductChiefSkillRecommendation = z.infer<typeof ProductChiefSkillRecommendationSchema>;
 export type ProductChiefReport = z.infer<typeof ProductChiefReportSchema>;
 
 export const ProductChiefMultiAgentReviewStatusSchema = z.enum(['pass', 'needs-human-decision', 'blocked']);

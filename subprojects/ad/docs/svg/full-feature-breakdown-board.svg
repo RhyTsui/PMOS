@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1540 1080" width="1540" height="1080">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .panel { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .panelTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+    .p0 { fill: #ecfdf5; stroke: #86efac; stroke-width: 1.5; rx: 14; }
+    .p1 { fill: #eff6ff; stroke: #93c5fd; stroke-width: 1.5; rx: 14; }
+    .p2 { fill: #fff7ed; stroke: #fdba74; stroke-width: 1.5; rx: 14; }
+  </style>
+  <rect width="1540" height="1080" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">返回 SVG 索引</text></a>
+  <text x="72" y="94" class="title">广告项目全功能拆解板</text>
+  <text x="72" y="122" class="sub">把“其它功能”也收口成模块，不再停留在单个月底 Demo 页面。</text>
+
+  <rect x="72" y="156" width="1396" height="132" class="panel"/>
+  <text x="100" y="194" class="panelTitle">拆解口径</text>
+  <text x="100" y="236" class="body">当前产品正确主线不是“大而全广告平台”，而是“广告支持与投放协同自动化工作台”。</text>
+  <text x="100" y="268" class="meta">所以拆解顺序按照：先支持侧自动化，再投放侧自助，再知识沉淀与追溯。</text>
+
+  <rect x="72" y="320" width="430" height="230" class="p1"/>
+  <text x="96" y="356" class="panelTitle">1. 需求接入</text>
+  <text x="96" y="394" class="body">目标：自由文本收口成结构化任务。</text>
+  <text x="96" y="428" class="body">字段：媒体、应用、需求类型、测试项目、预期时间、账号、文档地址。</text>
+  <text x="96" y="462" class="body">结果：生成标准 request_id 和前置校验结论。</text>
+  <text x="96" y="508" class="meta">优先级：P1。是长期入口，但不是月底 Demo 主场。</text>
+
+  <rect x="554" y="320" width="430" height="230" class="p0"/>
+  <text x="578" y="356" class="panelTitle">2. 标准联调</text>
+  <text x="578" y="394" class="body">目标：浏览器后台、设备桥接、抖音入口、打开游戏、启动登录串起来。</text>
+  <text x="578" y="428" class="body">结果：生成 task_id、执行步骤、回放日志、验收状态。</text>
+  <text x="578" y="508" class="meta">优先级：P0。它是当前最像“可执行工作台”的部分。</text>
+
+  <rect x="1036" y="320" width="430" height="230" class="p0"/>
+  <text x="1060" y="356" class="panelTitle">3. 异常诊断</text>
+  <text x="1060" y="394" class="body">目标：4 到 5 步固定证据链回答异常问题。</text>
+  <text x="1060" y="428" class="body">结果：步骤、证据、结论、建议。</text>
+  <text x="1060" y="508" class="meta">优先级：P0。月底 Demo 的第一固定场景。</text>
+
+  <rect x="72" y="590" width="430" height="230" class="p0"/>
+  <text x="96" y="626" class="panelTitle">4. 对话式分析</text>
+  <text x="96" y="664" class="body">目标：自然语言转模板分析请求，输出结构化对比结果。</text>
+  <text x="96" y="698" class="body">结果：分析卡片、分析表、追问能力。</text>
+  <text x="96" y="778" class="meta">优先级：P0。月底 Demo 的第二固定场景。</text>
+
+  <rect x="554" y="590" width="430" height="230" class="p2"/>
+  <text x="578" y="626" class="panelTitle">5. 知识复用</text>
+  <text x="578" y="664" class="body">目标：把媒体规则、坑点、成功案例变成知识条目。</text>
+  <text x="578" y="698" class="body">结果：检索命中、规则提示、相似案例推荐。</text>
+  <text x="578" y="778" class="meta">优先级：P2。重要，但不应该抢掉主链路实施资源。</text>
+
+  <rect x="1036" y="590" width="430" height="230" class="p1"/>
+  <text x="1060" y="626" class="panelTitle">6. Case 归档</text>
+  <text x="1060" y="664" class="body">目标：把每次联调、诊断、分析沉淀成可追溯记录。</text>
+  <text x="1060" y="698" class="body">结果：case_id、条件、结果、后续动作。</text>
+  <text x="1060" y="778" class="meta">优先级：P1。它是后续流程治理的基础。</text>
+
+  <rect x="72" y="860" width="1396" height="152" class="panel"/>
+  <text x="100" y="898" class="panelTitle">当前判断</text>
+  <text x="100" y="940" class="body">月底之前真正要走完设计与演示的是：标准联调、异常诊断、对话式分析，并为需求接入与 Case 归档补足结构，不去抢做知识底座和大平台化。</text>
+</svg>

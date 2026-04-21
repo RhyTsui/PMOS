@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1180" role="img" aria-labelledby="title desc">
+  <title id="title">WeKnora Permission Architecture</title>
+  <desc id="desc">A top-down diagram of WeKnora's permission architecture, operating model, and secondary development implications.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #10243e; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 14px; fill: #49627d; }
+      .section-title { font-size: 20px; font-weight: 700; }
+      .label { font-size: 15px; font-weight: 600; }
+      .body { font-size: 13px; fill: #35506b; }
+      .small { font-size: 12px; fill: #5a7186; }
+      .chip { font-size: 12px; font-weight: 700; }
+    </style>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2f6fed"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#ea7a22"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#1f9d72"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f8fc"/>
+      <stop offset="100%" stop-color="#eef4fb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#a5b6cb" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="1180" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1552" height="1132" rx="28" fill="#ffffff" stroke="#d8e2ef"/>
+
+  <text x="64" y="82" class="title">WeKnora Permission Architecture</text>
+  <text x="64" y="110" class="subtitle">Source basis: organization API + tenant/auth middleware + kb share + agent share + KB access handlers</text>
+
+  <rect x="56" y="146" width="1488" height="430" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="186" class="section-title">1. How Access Is Decided</text>
+
+  <rect x="84" y="220" width="220" height="120" rx="18" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="104" y="252" class="label">Identity Entry</text>
+  <text x="104" y="278" class="body">JWT Bearer token</text>
+  <text x="104" y="300" class="body">or X-API-Key</text>
+  <text x="104" y="322" class="small">OIDC is login upstream only.</text>
+
+  <rect x="356" y="220" width="240" height="120" rx="18" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="376" y="252" class="label">Tenant Boundary</text>
+  <text x="376" y="278" class="body">Every request gets a tenant context.</text>
+  <text x="376" y="300" class="body">Cross-tenant switch exists only with</text>
+  <text x="376" y="322" class="body">explicit global capability.</text>
+
+  <rect x="648" y="220" width="256" height="120" rx="18" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="668" y="252" class="label">Organization Membership</text>
+  <text x="668" y="278" class="body">Member roles: admin &gt; editor &gt; viewer</text>
+  <text x="668" y="300" class="body">Role hierarchy is numeric and ordered.</text>
+  <text x="668" y="322" class="body">Create-org owner becomes org admin.</text>
+
+  <rect x="956" y="220" width="250" height="120" rx="18" fill="#f8f1ff" stroke="#ddc9ff"/>
+  <text x="976" y="252" class="label">Share Layer</text>
+  <text x="976" y="278" class="body">KB share: viewer/editor/admin</text>
+  <text x="976" y="300" class="body">Agent share: forced to viewer only</text>
+  <text x="976" y="322" class="small">Share does not transfer ownership.</text>
+
+  <rect x="1258" y="220" width="246" height="120" rx="18" fill="#eef7ff" stroke="#c7dff7"/>
+  <text x="1278" y="252" class="label">Effective Decision</text>
+  <text x="1278" y="278" class="body">effective = min(org role, share permission)</text>
+  <text x="1278" y="300" class="body">Then switch to source_tenant_id</text>
+  <text x="1278" y="322" class="body">for downstream reads and retrieval.</text>
+
+  <line x1="304" y1="280" x2="356" y2="280" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="596" y1="280" x2="648" y2="280" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="904" y1="280" x2="956" y2="280" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="1206" y1="280" x2="1258" y2="280" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+  <rect x="84" y="382" width="1420" height="162" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="106" y="414" class="label">Resource Resolution Paths</text>
+
+  <rect x="112" y="438" width="392" height="78" rx="14" fill="#edf7f2" stroke="#c9ead8"/>
+  <text x="132" y="466" class="chip" fill="#1f9d72">Path A</text>
+  <text x="186" y="466" class="label">Own tenant resource</text>
+  <text x="132" y="490" class="body">Knowledge base tenant matches caller tenant.</text>
+  <text x="132" y="510" class="body">Result: full owner control; delete stays owner-only.</text>
+
+  <rect x="548" y="438" width="432" height="78" rx="14" fill="#eef3ff" stroke="#c9d9ff"/>
+  <text x="568" y="466" class="chip" fill="#2f6fed">Path B</text>
+  <text x="622" y="466" class="label">Shared knowledge base</text>
+  <text x="568" y="490" class="body">User must be in target org. Effective permission is intersected.</text>
+  <text x="568" y="510" class="body">Read/write obey shared permission; source tenant is used internally.</text>
+
+  <rect x="1024" y="438" width="452" height="78" rx="14" fill="#fff5eb" stroke="#f0d8a6"/>
+  <text x="1044" y="466" class="chip" fill="#ea7a22">Path C</text>
+  <text x="1098" y="466" class="label">Shared agent projected access</text>
+  <text x="1044" y="490" class="body">Agent can expose KB visibility even without direct KB share.</text>
+  <text x="1044" y="510" class="body">Result is viewer-only and constrained by agent KB selection mode.</text>
+
+  <text x="126" y="554" class="small">Key implication: WeKnora is not a flat RBAC matrix. It is layered authorization with a hard tenant base and organization-mediated sharing bridge.</text>
+
+  <rect x="56" y="604" width="720" height="518" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="644" class="section-title">2. How It Is Operated</text>
+
+  <rect x="84" y="676" width="296" height="186" rx="18" fill="#ffffff" stroke="#dbe5f1" filter="url(#shadow)"/>
+  <text x="106" y="708" class="label">Organization Setup</text>
+  <text x="106" y="734" class="body">1. Create organization / space</text>
+  <text x="106" y="756" class="body">2. Set member_limit</text>
+  <text x="106" y="778" class="body">3. Set invite_code_validity_days</text>
+  <text x="106" y="800" class="body">4. Toggle require_approval</text>
+  <text x="106" y="822" class="body">5. Toggle searchable discovery</text>
+  <text x="106" y="844" class="small">These are governance knobs, not resource permissions.</text>
+
+  <rect x="404" y="676" width="332" height="186" rx="18" fill="#ffffff" stroke="#dbe5f1" filter="url(#shadow)"/>
+  <text x="426" y="708" class="label">Member Growth Paths</text>
+  <text x="426" y="734" class="body">Invite code join</text>
+  <text x="426" y="756" class="body">Search org - join by organization id</text>
+  <text x="426" y="778" class="body">Direct invite by org admin</text>
+  <text x="426" y="800" class="body">Approval queue when require_approval = true</text>
+  <text x="426" y="822" class="body">Role upgrade request for existing member</text>
+  <text x="426" y="844" class="small">Admin reviews join and upgrade requests.</text>
+
+  <rect x="84" y="892" width="652" height="196" rx="18" fill="#ffffff" stroke="#dbe5f1" filter="url(#shadow)"/>
+  <text x="106" y="924" class="label">Resource Distribution Model</text>
+  <text x="106" y="950" class="body">KB share prerequisites:</text>
+  <text x="286" y="950" class="body">caller tenant must own KB; caller must be org editor or admin.</text>
+  <text x="106" y="972" class="body">KB share operations:</text>
+  <text x="286" y="972" class="body">share, update permission, unlink.</text>
+  <text x="106" y="994" class="body">Agent share prerequisites:</text>
+  <text x="286" y="994" class="body">caller tenant must own agent; agent must be fully configured.</text>
+  <text x="106" y="1016" class="body">Agent share behavior:</text>
+  <text x="286" y="1016" class="body">permission always collapses to viewer for safer reuse.</text>
+  <text x="106" y="1038" class="body">Shared agent preference:</text>
+  <text x="286" y="1038" class="body">target tenant can hide a shared agent locally without revoking it.</text>
+  <text x="106" y="1060" class="small">Org admin or original sharer can govern share cleanup.</text>
+
+  <line x1="380" y1="768" x2="404" y2="768" stroke="#ea7a22" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <line x1="570" y1="862" x2="570" y2="892" stroke="#ea7a22" stroke-width="3" marker-end="url(#arrowOrange)"/>
+
+  <rect x="816" y="604" width="728" height="518" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="844" y="644" class="section-title">3. What To Preserve In Secondary Development</text>
+
+  <rect x="844" y="676" width="670" height="96" rx="18" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="866" y="708" class="label">Invariant A: Tenant is the hard isolation domain</text>
+  <text x="866" y="734" class="body">Do not replace tenant isolation with org-only checks. Organization is a collaboration overlay, not the primary ownership domain.</text>
+  <text x="866" y="756" class="small">Every cross-tenant read path must keep an explicit effective tenant switch.</text>
+
+  <rect x="844" y="790" width="670" height="96" rx="18" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="866" y="822" class="label">Invariant B: Resource access requires two gates</text>
+  <text x="866" y="848" class="body">Gate 1 = caller belongs to the organization. Gate 2 = share record grants resource access. Final permission is the lower of both.</text>
+  <text x="866" y="870" class="small">This protects org viewers from accidentally inheriting editor/admin rights.</text>
+
+  <rect x="844" y="904" width="670" height="96" rx="18" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="866" y="936" class="label">Invariant C: Shared agent is a safer projection layer</text>
+  <text x="866" y="962" class="body">Shared agent access is intentionally read-only. If you want richer reuse, add a new resource-sharing mode instead of silently upgrading agent share.</text>
+  <text x="866" y="984" class="small">Agent-carried KB visibility should stay clearly marked as indirect access.</text>
+
+  <rect x="844" y="1018" width="670" height="70" rx="18" fill="#f8f1ff" stroke="#ddc9ff"/>
+  <text x="866" y="1050" class="label">Suggested extension direction</text>
+  <text x="866" y="1074" class="body">Add policy objects above share records: dataset labels, approval policies, audit events, and workspace templates, but keep the current layered decision chain.</text>
+
+  <path d="M776 745 C810 745, 810 724, 844 724" fill="none" stroke="#1f9d72" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <path d="M776 855 C810 855, 810 838, 844 838" fill="none" stroke="#1f9d72" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <path d="M776 982 C810 982, 810 952, 844 952" fill="none" stroke="#1f9d72" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+  <rect x="1228" y="76" width="292" height="62" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1248" y="102" class="chip" fill="#2f6fed">Blue arrows</text>
+  <text x="1338" y="102" class="small">request authorization chain</text>
+  <text x="1248" y="124" class="chip" fill="#ea7a22">Orange arrows</text>
+  <text x="1352" y="124" class="small">operating workflow</text>
+
+</svg>

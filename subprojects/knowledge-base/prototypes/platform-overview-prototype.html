@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小荀 · 知识资产平台 - 平台总览</title>
+  <style>
+    :root {
+      --bg: #f2f5f9;
+      --text: #1b2431;
+      --muted: #667588;
+      --line: rgba(27, 36, 49, 0.08);
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-2: rgba(249, 251, 254, 0.98);
+      --navy: #1f3f67;
+      --teal: #0f766e;
+      --orange: #bc6225;
+      --blue: #2c74d8;
+      --purple: #6d58c7;
+      --gold: #ae8618;
+      --shadow: 0 16px 38px rgba(51, 72, 103, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at left top, rgba(43, 116, 216, 0.12), transparent 24%),
+        radial-gradient(circle at right top, rgba(15, 118, 110, 0.12), transparent 20%),
+        linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+    }
+
+    .sidebar {
+      padding: 20px 14px;
+      border-right: 1px solid var(--line);
+      background: rgba(246, 249, 252, 0.8);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      margin-bottom: 18px;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      line-height: 1.05;
+    }
+
+    .nav-group {
+      margin-bottom: 14px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-group h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    .nav-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: var(--text);
+      background: transparent;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .nav-item.active {
+      background: rgba(32, 57, 93, 0.08);
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .nav-item.disabled {
+      color: rgba(27, 36, 49, 0.42);
+      background: rgba(27, 36, 49, 0.03);
+      border: 1px dashed rgba(27, 36, 49, 0.12);
+      cursor: not-allowed;
+      user-select: none;
+    }
+
+    .nav-note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .main {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero,
+    .section,
+    .right-card,
+    .dialog-card,
+    .asset-card,
+    .service-card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.52);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+    }
+
+    .hero small {
+      display: block;
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .hero h2 {
+      margin: 0 0 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 38px;
+      line-height: 1.08;
+      font-weight: 600;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 13px;
+      max-width: 800px;
+    }
+
+    .hero-metrics {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric-box {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .metric-box .k {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: 10px;
+      margin-bottom: 6px;
+    }
+
+    .metric-box .v {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .metric-box div:last-child {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 11px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 14px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      padding: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .section-head span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .service-grid,
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .service-card,
+    .asset-card {
+      padding: 14px;
+      border-radius: 16px;
+      border-top: 4px solid var(--navy);
+    }
+
+    .service-card.orange,
+    .asset-card.orange { border-top-color: var(--orange); }
+    .service-card.teal,
+    .asset-card.teal { border-top-color: var(--teal); }
+    .service-card.purple,
+    .asset-card.purple { border-top-color: var(--purple); }
+    .asset-card.gold { border-top-color: var(--gold); }
+
+    .service-card h4,
+    .asset-card h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .service-card p,
+    .asset-card p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 12px;
+    }
+
+    .service-card ul,
+    .dialog-card ul,
+    .right-card ul,
+    .asset-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 12px;
+    }
+
+    .dialog-card,
+    .right-card {
+      padding: 16px;
+    }
+
+    .dialog-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .dialog-top strong {
+      font-size: 18px;
+    }
+
+    .input-box {
+      min-height: 82px;
+      border: 1px dashed rgba(32, 57, 93, 0.24);
+      border-radius: 14px;
+      background: var(--panel-2);
+      padding: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .suggestion-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .suggestion {
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 11px;
+    }
+
+    .right-card + .right-card {
+      margin-top: 14px;
+    }
+
+    .right-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .info-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+
+    .info-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .info-item span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 1360px) {
+      .app { grid-template-columns: 220px 1fr; }
+      .hero h2 { font-size: 34px; }
+    }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .hero, .content { grid-template-columns: 1fr; }
+      .hero h2 { font-size: 32px; }
+    }
+
+    @media (max-width: 900px) {
+      .service-grid, .asset-grid { grid-template-columns: 1fr; }
+      .main { padding: 12px; }
+      .section, .hero, .right-card, .dialog-card { padding: 14px; }
+      .hero h2 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <small>Prototype / Overview</small>
+        <h1>小荀 · 知识资产平台</h1>
+      </div>
+      <div class="nav-group">
+        <h3>平台主结构</h3>
+        <div class="nav-item active">平台总览</div>
+        <div class="nav-item">主对话框</div>
+        <div class="nav-item">知识资产</div>
+        <div class="nav-item disabled">{提示词}</div>
+        <div class="nav-item">接入中心</div>
+        <div class="nav-item">知识广场</div>
+        <div class="nav-item">权限管理</div>
+      </div>
+      <div class="nav-group">
+        <h3>当前重点</h3>
+        <div class="nav-note">这一版先把企业、部门和项目知识的接入、整理、调用和权限控制做扎实。提示词先放在知识库下面，用菜单占位，不独立做一级入口。</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div>
+          <small>One Platform / Many Knowledge Flows</small>
+          <h2>把企业、部门和项目知识整理好，让 AI 随时拿来用。</h2>
+          <p>这不是一个只放文档的库，而是一个统一的知识服务平台。它先承接企业、部门和项目知识，同时兼容个人知识补充；既能给人查，也能给 Chat、Agent、工作流和 MCP 调用。</p>
+          <div class="chips">
+            <span class="chip">企业 / 部门 / 项目知识库</span>
+            <span class="chip">提示词资产</span>
+            <span class="chip">会议纪要 / 文档 / 聊天记录</span>
+            <span class="chip">Chat / Agent / MCP / 工作流</span>
+          </div>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric-box">
+            <div class="k">Core Promise</div>
+            <div class="v">收进来</div>
+            <div>自动接入会议纪要、文档、聊天记录、订阅内容和外部知识。</div>
+          </div>
+          <div class="metric-box">
+            <div class="k">Core Promise</div>
+            <div class="v">用起来</div>
+            <div>让知识和提示词能在主对话框、业务 Chat、Agent 和 MCP 里被稳定调用。</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="content">
+        <div class="stack">
+          <section class="section">
+            <div class="section-head">
+              <h3>平台提供的服务</h3>
+              <span>用户能听懂的表达</span>
+            </div>
+            <div class="service-grid">
+              <article class="service-card">
+                <h4>知识库服务</h4>
+                <p>支持企业知识库、部门知识库、项目知识库，个人知识作为补充层，同时预留提示词资产管理。</p>
+                <ul>
+                  <li>企业、部门、项目是主知识范围</li>
+                  <li>提示词先挂在知识库下面</li>
+                </ul>
+              </article>
+              <article class="service-card orange">
+                <h4>知识接入服务</h4>
+                <p>把会议纪要、小闪文档、小闪聊天记录、外部知识库和订阅内容持续接进来。</p>
+                <ul>
+                  <li>支持文档、图片、视频、链接、脚本包</li>
+                  <li>支持会议 URL 与文本纪要接入</li>
+                </ul>
+              </article>
+              <article class="service-card teal">
+                <h4>知识使用服务</h4>
+                <p>让知识和提示词在 Chat、Agent、工作流、MCP 和知识洞察里真正被用起来。</p>
+                <ul>
+                  <li>支持跨知识库引用分析</li>
+                  <li>支持按场景补强业务问答</li>
+                </ul>
+              </article>
+              <article class="service-card purple">
+                <h4>权限服务</h4>
+                <p>以小闪账号为主做登录和权限控制，每个知识库都能独立设可见、可用和可编辑范围。</p>
+                <ul>
+                  <li>小闪扫码 / 手机号登录</li>
+                  <li>按库名与使用范围配置权限</li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <h3>主对话框能力</h3>
+              <span>统一 AI 工作入口</span>
+            </div>
+            <div class="dialog-card">
+              <div class="dialog-top">
+                <strong>主对话框</strong>
+                <span>默认系统模型 / 默认 MCP 分配</span>
+              </div>
+              <div class="input-box">在这里直接提问，或者粘贴图片、文件、视频、会议 URL。也可以引用团队知识、项目知识、公司知识，必要时再打开高级配置切换模型、MCP 和提示词。</div>
+              <ul>
+                <li>支持跨知识库分析、Skill 调用、MCP 调用和网络补充</li>
+                <li>支持最近会话、建议引导、语音输入与附件上传</li>
+                <li>高级配置默认关闭，默认走系统模型和系统 MCP</li>
+              </ul>
+              <div class="suggestion-row">
+                <span class="suggestion">分析广告投放波动原因</span>
+                <span class="suggestion">引用公司知识库 + 项目知识库</span>
+                <span class="suggestion">调用 MCP 做 BI 查询</span>
+                <span class="suggestion">挂载提示词模板</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <h3>资产类型</h3>
+              <span>先立框架，再逐步扩展</span>
+            </div>
+            <div class="asset-grid">
+              <article class="asset-card teal">
+                <h4>业务知识</h4>
+                <p>数据字典、指标说明、报表说明、埋点文档、规则说明、FAQ。</p>
+              </article>
+              <article class="asset-card orange">
+                <h4>过程知识</h4>
+                <p>会议纪要、讨论记录、项目记录、复盘、研究笔记和周报月报。</p>
+              </article>
+              <article class="asset-card purple">
+                <h4>个人补充知识</h4>
+                <p>个人收藏、研究资料、日周月报、经验总结，作为补充背景使用。</p>
+              </article>
+              <article class="asset-card gold">
+                <h4>提示词资产</h4>
+                <p>聊天提示词、分析模板、业务 Prompt、Agent Prompt，当前先放在知识库下面管理。</p>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <section class="right-card">
+            <h3>接入来源</h3>
+            <div class="info-list">
+              <div class="info-item"><strong>内部内容</strong><span>小闪文档、小闪聊天记录转发、企业知识库、项目系统、会议纪要。</span></div>
+              <div class="info-item"><strong>外部内容</strong><span>外部知识库、外部订阅、网络资料、自然语言采集任务。</span></div>
+              <div class="info-item"><strong>多种格式</strong><span>PDF、Word、Excel、图片、视频、URL、脚本包。</span></div>
+            </div>
+          </section>
+
+          <section class="right-card">
+            <h3>使用去向</h3>
+            <div class="info-list">
+              <div class="info-item"><strong>对人使用</strong><span>主对话框、业务问答、知识洞察、知识广场。</span></div>
+              <div class="info-item"><strong>对系统使用</strong><span>Agent 补强、工作流、MCP、知识分发调用。</span></div>
+              <div class="info-item"><strong>高级开关</strong><span>默认关闭，打开后才允许自定义模型、MCP 和提示词策略。</span></div>
+            </div>
+          </section>
+
+          <section class="right-card">
+            <h3>当前导航调整</h3>
+            <ul>
+              <li>`{提示词}` 已加入左侧菜单</li>
+              <li>当前是禁用占位，不可点击</li>
+              <li>样式保持和现有导航同一套平台风格</li>
+            </ul>
+            <p class="footer-note">后面如果提示词资产独立升级，再从知识库下方挪成并列一级能力。</p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

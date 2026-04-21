@@ -1,0 +1,5 @@
+群名: QCode
+正确的 chat_id: oc_76edd6e8e6c6bb6062ac0368d0aabc43
+
+App ID: cli_a96aff9d40b89bc6
+App Secret: lhiZFtqRUjPUUWK6VteMEeLijWafT0tB

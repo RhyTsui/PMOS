@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1180" width="1560" height="1180">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 16; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .chip { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 1; rx: 14; }
+    .chipText { fill: #1e3a8a; font-size: 12px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1180" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">2026-04-21 迭代资产索引</text>
+  <text x="72" y="118" class="sub">这张图用于快速查看今天这轮 `v0.4 / v0.5` 收口中新增的规则、文档、模板、图板和样板任务。</text>
+
+  <rect x="72" y="156" width="1416" height="30" class="chip"/>
+  <text x="100" y="176" class="chipText">定位：今天的资产入口，不是长期版本计划的替代物，而是同日阅读、演示、交接和切模型恢复的快速面板。</text>
+
+  <rect x="72" y="224" width="456" height="238" class="card"/>
+  <text x="104" y="266" class="section">版本收口与过渡</text>
+  <text x="104" y="294" class="meta">把今天的边界收紧成正式真源</text>
+  <text x="104" y="334" class="body">- current-version-progress</text>
+  <text x="104" y="360" class="body">- pmaios-version-plan</text>
+  <text x="104" y="386" class="body">- v0.4 -> v0.5 过渡快照</text>
+  <text x="104" y="412" class="body">- v0.4 -> v0.5 过渡图板</text>
+
+  <rect x="552" y="224" width="456" height="238" class="card"/>
+  <text x="584" y="266" class="section">v0.5 正式入口</text>
+  <text x="584" y="294" class="meta">下一版本从这里继续推进</text>
+  <text x="584" y="334" class="body">- pmaios-v0.5-checklist</text>
+  <text x="584" y="360" class="body">- v0.5 research and execution backlog</text>
+  <text x="584" y="386" class="body">- v0.5 implementation index</text>
+  <text x="584" y="412" class="body">- pmaios-v0.5.svg</text>
+
+  <rect x="1032" y="224" width="456" height="238" class="card"/>
+  <text x="1064" y="266" class="section">模式架构与 `{do}`</text>
+  <text x="1064" y="294" class="meta">今天最关键的一条协作线</text>
+  <text x="1064" y="334" class="body">- mode-architecture</text>
+  <text x="1064" y="360" class="body">- do-mode execution protocol</text>
+  <text x="1064" y="386" class="body">- do-mode task-start contract</text>
+  <text x="1064" y="412" class="body">- 模式架构简版 / 详细版图板</text>
+
+  <rect x="72" y="494" width="456" height="258" class="card"/>
+  <text x="104" y="536" class="section">人机协同与认知</text>
+  <text x="104" y="564" class="meta">从“会补几句”走向“能持续增长认知”</text>
+  <text x="104" y="604" class="body">- cognition ladder and intent amplifier</text>
+  <text x="104" y="630" class="body">- sidecar deep research mechanism</text>
+  <text x="104" y="656" class="body">- human-machine collaboration research</text>
+  <text x="104" y="682" class="body">- human-machine collaboration research board</text>
+  <text x="104" y="718" class="body">关键修正：</text>
+  <text x="134" y="744" class="body">`{do}` 假停顿从“现象级不要停”升级为“根因级修正”</text>
+
+  <rect x="552" y="494" width="456" height="258" class="card"/>
+  <text x="584" y="536" class="section">AI 产研协同闭环</text>
+  <text x="584" y="564" class="meta">产品 -> 开发 -> 测试 -> 回归</text>
+  <text x="584" y="604" class="body">- AI product-development collaboration loop</text>
+  <text x="584" y="630" class="body">- AI product-development loop template</text>
+  <text x="584" y="656" class="body">- AI product-development loop board</text>
+  <text x="584" y="694" class="body">目标：</text>
+  <text x="614" y="720" class="body">让 demo、需求、重实现、验证和回归形成标准闭环。</text>
+
+  <rect x="1032" y="494" width="456" height="258" class="card"/>
+  <text x="1064" y="536" class="section">统一人读入口</text>
+  <text x="1064" y="564" class="meta">今天这轮不是散文件，而是有清晰入口</text>
+  <text x="1064" y="604" class="body">- boards/index.svg</text>
+  <text x="1064" y="630" class="body">- 公司演示图板组</text>
+  <text x="1064" y="656" class="body">- 过渡图板</text>
+  <text x="1064" y="682" class="body">- 详细版模式架构图板</text>
+  <text x="1064" y="708" class="body">- 今日资产索引文档</text>
+
+  <rect x="72" y="784" width="1416" height="174" class="card"/>
+  <text x="104" y="826" class="section">今日最重要的结果</text>
+  <text x="104" y="854" class="meta">不是“又多了几份文档”，而是形成了恢复、阅读、切模型和继续推进的稳定入口</text>
+  <text x="104" y="894" class="body">1. 版本边界被重新收紧：v0.4 当前价值与 v0.5 正式入口被明确拆开。</text>
+  <text x="104" y="922" class="body">2. `{do}` 从口头约定升级为规则、协议、契约、样板任务和图板组成的可恢复机制。</text>
+  <text x="104" y="950" class="body">3. 人机协同、模式架构、AI 产研闭环、过渡收口都有对应的人读入口，不再只是会话结论。</text>
+
+  <rect x="72" y="992" width="1416" height="90" class="card"/>
+  <text x="104" y="1032" class="section">推荐阅读顺序</text>
+  <text x="104" y="1060" class="body">如果要看今天收了什么：current-version-progress -> v0.4 -> v0.5 过渡快照 -> 今日资产索引</text>
+  <text x="104" y="1086" class="body">如果要继续做下一步：v0.5 checklist -> v0.5 backlog -> v0.5 implementation index -> 对应图板</text>
+
+  <rect x="72" y="1106" width="1416" height="42" class="card"/>
+  <a href="../docs/operations/iteration-assets-2026-04-21.md"><text x="100" y="1132" class="linkText">资产索引文档 -&gt;</text></a>
+  <a href="../docs/operations/v0.4-v0.5-transition-2026-04-21.md"><text x="360" y="1132" class="linkText">过渡快照 -&gt;</text></a>
+  <a href="v0.4-v0.5-transition.svg"><text x="580" y="1132" class="linkText">过渡图板 -&gt;</text></a>
+  <a href="mode-architecture-detailed.svg"><text x="790" y="1132" class="linkText">详细模式架构图板 -&gt;</text></a>
+  <a href="index.svg"><text x="1090" y="1132" class="linkText">图板目录 -&gt;</text></a>
+</svg>

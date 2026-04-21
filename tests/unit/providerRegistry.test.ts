@@ -10,6 +10,7 @@ const originalGoogleKey = process.env.GOOGLE_AI_STUDIO_API_KEY;
 const originalLegacyKey = process.env.AI_STUDIO_API_KEY;
 const originalAnthropicKey = process.env.ANTHROPIC_API_KEY;
 const originalAnthropicLegacyKey = process.env.ANTHROPIC_AUTH_TOKEN;
+const originalOpenAiCompatibleKey = process.env.OPENAI_COMPATIBLE_API_KEY;
 
 afterEach(() => {
   if (originalGoogleKey === undefined) {
@@ -35,6 +36,12 @@ afterEach(() => {
   } else {
     process.env.ANTHROPIC_AUTH_TOKEN = originalAnthropicLegacyKey;
   }
+
+  if (originalOpenAiCompatibleKey === undefined) {
+    delete process.env.OPENAI_COMPATIBLE_API_KEY;
+  } else {
+    process.env.OPENAI_COMPATIBLE_API_KEY = originalOpenAiCompatibleKey;
+  }
 });
 
 describe('ProviderRegistry', () => {
@@ -42,22 +49,25 @@ describe('ProviderRegistry', () => {
     const store = new FileStore(path.resolve(process.cwd()));
     const registry = new ProviderRegistry(store);
     const providers = await registry.listProviders();
-    const openaiCompatible = providers.find((provider) => provider.name === 'openai-compatible');
+    const minimax = providers.find((provider) => provider.name === 'minimax');
+    const gpt = providers.find((provider) => provider.name === 'gpt');
 
     expect(providers.length).toBeGreaterThan(0);
     expect(providers[0]).toHaveProperty('name');
-    expect(providers.some((provider) => provider.name === 'mock')).toBe(true);
-    expect(openaiCompatible?.model).toBe('qwen-plus-latest');
-    expect(openaiCompatible?.priority).toBeGreaterThan(0);
+    expect(providers.some((provider) => provider.name === 'claude')).toBe(true);
+    expect(gpt?.scope).toBe('codex-only');
+    expect(gpt?.runtimeReady).toBe(false);
+    expect(minimax?.model).toBe('MiniMaxM2.5');
+    expect(minimax?.priority).toBeGreaterThan(0);
   });
 
-  it('marks ai-studio ready when canonical env key is present', async () => {
+  it('marks gemini ready when canonical env key is present', async () => {
     process.env.GOOGLE_AI_STUDIO_API_KEY = 'test-google-key';
     delete process.env.AI_STUDIO_API_KEY;
 
     const store = new FileStore(path.resolve(process.cwd()));
     const registry = new ProviderRegistry(store);
-    const provider = await registry.resolveProviderByName('ai-studio');
+    const provider = await registry.resolveProviderByName('gemini');
 
     expect(provider?.configured).toBe(true);
     expect(provider?.runtimeReady).toBe(true);
@@ -71,7 +81,7 @@ describe('ProviderRegistry', () => {
 
     const store = new FileStore(path.resolve(process.cwd()));
     const registry = new ProviderRegistry(store);
-    const provider = await registry.resolveProviderByName('ai-studio');
+    const provider = await registry.resolveProviderByName('gemini');
 
     expect(provider?.configured).toBe(true);
     expect(provider?.runtimeReady).toBe(true);
@@ -79,13 +89,13 @@ describe('ProviderRegistry', () => {
     expect(provider?.activeEnvKey).toBe('AI_STUDIO_API_KEY');
   });
 
-  it('falls back to anthropic legacy env key with migration warning', async () => {
+  it('falls back to claude legacy env key with migration warning', async () => {
     delete process.env.ANTHROPIC_API_KEY;
     process.env.ANTHROPIC_AUTH_TOKEN = 'legacy-anthropic-key';
 
     const store = new FileStore(path.resolve(process.cwd()));
     const registry = new ProviderRegistry(store);
-    const provider = await registry.resolveProviderByName('anthropic');
+    const provider = await registry.resolveProviderByName('claude');
 
     expect(provider?.configured).toBe(true);
     expect(provider?.runtimeReady).toBe(true);
@@ -131,10 +141,10 @@ describe('ProviderRegistry', () => {
       'config/providers.json',
       JSON.stringify(
         {
-          defaultProvider: 'openai-compatible',
+          defaultProvider: 'minimax',
           providers: [
-            { name: 'openai-compatible', type: 'openai-compatible', envKey: 'OPENAI_COMPATIBLE_API_KEY', capabilities: ['text'], priority: 100 },
-            { name: 'ai-studio', type: 'ai-studio', envKey: 'GOOGLE_AI_STUDIO_API_KEY', capabilities: ['text'], priority: 90 },
+            { name: 'minimax', type: 'openai-compatible', envKey: 'OPENAI_COMPATIBLE_API_KEY', capabilities: ['text'], priority: 100 },
+            { name: 'gemini', type: 'ai-studio', envKey: 'GOOGLE_AI_STUDIO_API_KEY', capabilities: ['text'], priority: 80 },
           ],
         },
         null,
@@ -143,12 +153,12 @@ describe('ProviderRegistry', () => {
     );
 
     const registry = new ProviderRegistry(store);
-    await registry.setDefaultProvider('ai-studio');
-    const updatedProvider = await registry.updateProvider('openai-compatible', { priority: 110 });
+    await registry.setDefaultProvider('gemini');
+    const updatedProvider = await registry.updateProvider('minimax', { priority: 110 });
     const config = await registry.loadConfig();
 
-    expect(config.defaultProvider).toBe('ai-studio');
+    expect(config.defaultProvider).toBe('gemini');
     expect(updatedProvider.priority).toBe(110);
-    expect(config.providers.find((provider) => provider.name === 'openai-compatible')?.priority).toBe(110);
+    expect(config.providers.find((provider) => provider.name === 'minimax')?.priority).toBe(110);
   });
 });

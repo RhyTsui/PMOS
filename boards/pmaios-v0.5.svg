@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1180" width="1560" height="1180">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .chip { fill: #ecfeff; stroke: #bae6fd; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f172a; font-size: 13px; font-weight: 600; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1180" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS v0.5 清单板</text>
+  <text x="72" y="118" class="sub">把下一版本从零散增强点收敛成一组可执行、可演示、可持续优化的统一能力。</text>
+
+  <rect x="72" y="156" width="1416" height="76" class="card"/>
+  <text x="104" y="200" class="body">v0.5 的核心不是再叠一批功能，而是把连续工作、人机协同、意图识别与升降维、人阅读访问面、AI 归档层、知识导航、Hermes 强化和 Web UI 产品化收敛成一个更可用的 AI Product Office。</text>
+
+  <rect x="72" y="264" width="1416" height="30" class="chip"/>
+  <text x="98" y="283" class="chipText">一句话：从“能跑的本地 AI runtime”收敛成“能连续工作、能持续协同、能形成知识复利的 AI Product Office”。</text>
+
+  <rect x="72" y="326" width="416" height="204" class="card"/>
+  <text x="100" y="370" class="section">1. 2 小时连续工作能力</text>
+  <text x="100" y="398" class="meta">减少频繁确认、等待与中断</text>
+  <text x="100" y="440" class="body">把“长任务持续推进”作为明确目标，区分真正阻塞与非阻塞工作，降低小确认带来的主线中断。</text>
+  <text x="100" y="474" class="body">把预授权、批量权限和非阻塞并行推进纳入默认执行模式。</text>
+
+  <rect x="520" y="326" width="416" height="204" class="card"/>
+  <text x="548" y="370" class="section">2. 思考与同步并行</text>
+  <text x="548" y="398" class="meta">不是只闷头做，也不是只回话</text>
+  <text x="548" y="440" class="body">长任务中持续同步当前优先级、主线、压后支线、风险和偏差；如果你不纠偏，就按当前同步过的判断继续执行。</text>
+  <text x="548" y="474" class="body">同步不再等于暂停，而是和推进并行。</text>
+
+  <rect x="968" y="326" width="520" height="204" class="card"/>
+  <text x="996" y="370" class="section">3. 意图识别与 Idea 完善后实施</text>
+  <text x="996" y="398" class="meta">不跟着表层想法直接跑</text>
+  <text x="996" y="440" class="body">用户提出的 idea 默认先当作线索，而不是直接实施指令。先识别背后目的，再做领域驱动拆解、行业最佳实践扫描、相关性与影响评估、边界与依赖澄清。</text>
+  <text x="996" y="474" class="body">输出强化后的实施提案，而不是直接按表层想法迭代。</text>
+
+  <rect x="72" y="562" width="416" height="204" class="card"/>
+  <text x="100" y="606" class="section">4. 意图升降维机制</text>
+  <text x="100" y="634" class="meta">向上拓展，向下落地</text>
+  <text x="100" y="676" class="body">把人的意图默认做向上升维、向下降维、向外关联、向深研究的结构化展开，而不是只补充一点点。</text>
+  <text x="100" y="710" class="body">向下降维优先沿真实项目流程展开，不只拆到“今天能做什么”。</text>
+
+  <rect x="520" y="562" width="416" height="204" class="card"/>
+  <text x="548" y="606" class="section">5. 人阅读访问面</text>
+  <text x="548" y="634" class="meta">固定 IP + 端口 + 路径</text>
+  <text x="548" y="676" class="body">统一访问 SVG、Markdown、DOCX、版本文档和项目目录入口，让本机、公司内网和远程阅读体验更稳定。</text>
+  <text x="548" y="710" class="body">每个项目默认具备实时可查的 `project-board.svg`、`roadmap-board.svg`、`decision-board.svg`。</text>
+
+  <rect x="968" y="562" width="520" height="204" class="card"/>
+  <text x="996" y="606" class="section">6. 人读层 / AI 归档层 / 强关系</text>
+  <text x="996" y="634" class="meta">分层，但不分裂</text>
+  <text x="996" y="676" class="body">AI 归档层沉淀任务、会话、证据和结构化记录；人阅读层只呈现该被阅读、确认、分享的内容。</text>
+  <text x="996" y="710" class="body">两层保留强关系，支持从图板追到依据，也支持知识库同时消费机器层与人读层。</text>
+
+  <rect x="72" y="798" width="416" height="204" class="card"/>
+  <text x="100" y="842" class="section">7. 认知提炼与旁路深研</text>
+  <text x="100" y="870" class="meta">不影响主流程，但持续增值</text>
+  <text x="100" y="912" class="body">对话里出现的概念、思想、方法、框架、风险和候选课题，应该被持续提炼成认知资产。</text>
+  <text x="100" y="946" class="body">大的课题默认考虑配套深度研究文档，支持你继续注入物理世界信息形成下一轮更高价值反馈。</text>
+
+  <rect x="520" y="798" width="416" height="204" class="card"/>
+  <text x="548" y="842" class="section">8. Hermes 与可复用产品技能</text>
+  <text x="548" y="870" class="meta">强化编排与复用</text>
+  <text x="548" y="912" class="body">强化 Hermes 在 workflow selection、evidence collection、skill reuse、escalation 上的作用。</text>
+  <text x="548" y="946" class="body">把高重复 PM 流程做成可复用技能，逐步形成复利。</text>
+
+  <rect x="968" y="798" width="520" height="204" class="card"/>
+  <text x="996" y="842" class="section">9. AI 产研协同闭环</text>
+  <text x="996" y="870" class="meta">产品 AI -> aicoding -> AI 测试</text>
+  <text x="996" y="912" class="body">产品侧用 AI 维护 demo、需求文档、改动说明、SVG 和版本文档；开发侧用 `aicoding` 重实现；测试侧用 AI 测试平台验证与回归。</text>
+  <text x="996" y="946" class="body">需求修改、增加、补全应自动同步到产物、版本和测试资产，而不是靠人工追补。</text>
+
+  <rect x="72" y="1040" width="1416" height="78" class="card"/>
+  <a href="../docs/operations/pmaios-v0.5-checklist.md"><text x="100" y="1086" class="linkText">配套清单文档：pmaios-v0.5-checklist.md -&gt;</text></a>
+  <a href="pmaios-capability-overview.svg"><text x="510" y="1086" class="linkText">整体能力介绍 -&gt;</text></a>
+  <a href="pmaios-future-exploration.svg"><text x="770" y="1086" class="linkText">未来版本演进探索 -&gt;</text></a>
+  <a href="../docs/operations/pmaios-version-plan.md"><text x="1090" y="1086" class="linkText">版本真源 -&gt;</text></a>
+</svg>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="980" viewBox="0 0 1440 980" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1360" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9F1"/>
+      <stop offset="1" stop-color="#F2E8D9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#9D8460" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #2A2118; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6A5A49; }
+      .section { font-size: 20px; font-weight: 700; fill: #35281D; }
+      .card-title { font-size: 22px; font-weight: 700; fill: #2B2118; }
+      .body { font-size: 14px; font-weight: 500; fill: #675949; }
+      .small { font-size: 12px; font-weight: 600; fill: #806F5C; }
+      .link { font-size: 14px; font-weight: 700; fill: #2054C8; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="980" fill="url(#bg)"/>
+
+  <text x="88" y="72" class="title">AI 埋点验收文档图板目录</text>
+  <text x="88" y="102" class="subtitle">将当前 Markdown 文档按主题收敛成可浏览的 SVG 图板。以后优先看图板，再按需回到 Markdown 原文。</text>
+
+  <rect x="88" y="136" width="1264" height="114" rx="28" fill="#FFFDF8" stroke="#E4D6C4" filter="url(#shadow)"/>
+  <text x="122" y="178" class="section">阅读顺序</text>
+  <text x="122" y="206" class="body">1. 先看背景与问题，确认项目为什么做。</text>
+  <text x="122" y="228" class="body">2. 再看一期方案与主链路，确认怎么做。</text>
+  <text x="520" y="206" class="body">3. 再看需求范围与产品骨架，确认一期做到哪。</text>
+  <text x="520" y="228" class="body">4. 最后看工作台原型，确认当前前端框架承载什么。</text>
+
+  <a href="./01-背景与问题.svg">
+    <rect x="88" y="298" width="592" height="186" rx="28" fill="#FFFFFF" stroke="#E6DACA" filter="url(#shadow)"/>
+    <text x="122" y="344" class="card-title">01 背景与问题</text>
+    <text x="122" y="374" class="body">为什么现在做、核心业务问题是什么、一期先收哪些问题。</text>
+    <text x="122" y="408" class="small">来源文档</text>
+    <text x="122" y="432" class="body">overview/项目背景与立项说明.md</text>
+    <text x="122" y="454" class="body">analysis/业务问题清单总表.md</text>
+    <text x="122" y="476" class="body">analysis/问题优先级与边界切割.md</text>
+    <text x="534" y="456" class="link">打开图板 →</text>
+  </a>
+
+  <a href="./02-一期方案与主链路.svg">
+    <rect x="760" y="298" width="592" height="186" rx="28" fill="#FFFFFF" stroke="#E6DACA" filter="url(#shadow)"/>
+    <text x="794" y="344" class="card-title">02 一期方案与主链路</text>
+    <text x="794" y="374" class="body">AI 主提效、人做确认、系统承接闭环，以及 8 步主链路。</text>
+    <text x="794" y="408" class="small">来源文档</text>
+    <text x="794" y="432" class="body">overview/一期AI方案说明.md</text>
+    <text x="794" y="454" class="body">product/PRD前言.md</text>
+    <text x="1206" y="456" class="link">打开图板 →</text>
+  </a>
+
+  <a href="./03-需求范围与产品骨架.svg">
+    <rect x="88" y="536" width="592" height="186" rx="28" fill="#FFFFFF" stroke="#E6DACA" filter="url(#shadow)"/>
+    <text x="122" y="582" class="card-title">03 需求范围与产品骨架</text>
+    <text x="122" y="612" class="body">P0 / P1 范围、一期不做、以及产品一级模块骨架。</text>
+    <text x="122" y="646" class="small">来源文档</text>
+    <text x="122" y="670" class="body">requirements/一期需求范围.md</text>
+    <text x="122" y="692" class="body">src/README.md</text>
+    <text x="534" y="694" class="link">打开图板 →</text>
+  </a>
+
+  <a href="./04-工作台原型.svg">
+    <rect x="760" y="536" width="592" height="186" rx="28" fill="#FFFFFF" stroke="#E6DACA" filter="url(#shadow)"/>
+    <text x="794" y="582" class="card-title">04 工作台原型</text>
+    <text x="794" y="612" class="body">当前前端骨架承载什么页面、每个页面对应什么业务含义。</text>
+    <text x="794" y="646" class="small">来源文档</text>
+    <text x="794" y="670" class="body">frontend/README.md</text>
+    <text x="794" y="692" class="body">frontend/src/App.jsx</text>
+    <text x="1206" y="694" class="link">打开图板 →</text>
+  </a>
+
+  <rect x="88" y="776" width="1264" height="132" rx="28" fill="#FFFDF8" stroke="#E4D6C4" filter="url(#shadow)"/>
+  <text x="122" y="822" class="section">补充说明</text>
+  <text x="122" y="850" class="body">这套图板是当前 AI 埋点验收项目的视觉化主入口。Markdown 继续保留为细节原文，但后续沟通默认优先更新 SVG。</text>
+  <text x="122" y="876" class="body">如果后面继续补材料，优先补现有图板而不是新增大量零散 md。</text>
+</svg>

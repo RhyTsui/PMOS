@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6b7280; }
+      .section { font-size: 20px; font-weight: 700; fill: #111827; }
+      .nodeTitle { font-size: 18px; font-weight: 700; fill: #111827; }
+      .body { font-size: 14px; font-weight: 500; fill: #374151; }
+      .small { font-size: 12px; font-weight: 600; fill: #6b7280; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#94a3b8" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="980" fill="#ffffff"/>
+  <text x="80" y="70" class="title">AI-native 方案拼装图</text>
+  <text x="80" y="102" class="subtitle">不是找单个现成方案，而是把最合适的能力层拼成一个新范式。</text>
+
+  <rect x="60" y="150" width="1480" height="670" rx="28" fill="#f8fafc" stroke="#dbe3ee"/>
+  <text x="90" y="194" class="section">从上到下的组合</text>
+
+  <rect x="120" y="240" width="1360" height="110" rx="20" fill="#fff7ed" stroke="#fdba74" filter="url(#shadow)"/>
+  <text x="150" y="278" class="nodeTitle">层 1：AI 需求追问与歧义消解</text>
+  <text x="150" y="306" class="body">借鉴：IdeaForge / resetDocs / EltegraAI / Requirements AI</text>
+  <text x="150" y="332" class="small">解决：从会议纪要、群聊、自然语言输入中追问并抽出需求对象与待确认问题</text>
+
+  <rect x="120" y="390" width="1360" height="110" rx="20" fill="#eff6ff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="150" y="428" class="nodeTitle">层 2：living specification 规格骨架</text>
+  <text x="150" y="456" class="body">借鉴：Snowplow / Spec Native / SENAR</text>
+  <text x="150" y="482" class="small">解决：把需求翻译成结构化埋点规格、版本化、可验证的 event / field / entity / rule 资产</text>
+
+  <rect x="120" y="540" width="1360" height="110" rx="20" fill="#f0fdf4" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="150" y="578" class="nodeTitle">层 3：数据验收与调试底座</text>
+  <text x="150" y="606" class="body">借鉴：数数科技 / 神策 / GrowingIO</text>
+  <text x="150" y="632" class="small">解决：debug、实时错误、规则执行、上报统计、追溯、回传、错误样例、数据治理</text>
+
+  <rect x="120" y="690" width="1360" height="110" rx="20" fill="#faf5ff" stroke="#c4b5fd" filter="url(#shadow)"/>
+  <text x="150" y="728" class="nodeTitle">层 4：AI 语义型项目控制面</text>
+  <text x="150" y="756" class="body">借鉴：Plane AI / control plane 思路 + 本项目对象模型</text>
+  <text x="150" y="782" class="small">解决：自动汇总状态、暴露 blocker、追踪变更影响、生成补验动作、同步不同角色视图</text>
+
+  <path d="M800 350 V390" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <path d="M800 500 V540" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <path d="M800 650 V690" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+
+  <rect x="60" y="850" width="1480" height="90" rx="22" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="90" y="888" class="section">拼装后的目标</text>
+  <text x="90" y="916" class="body">让系统从自然输入自动长出需求、规格、验收、结果和项目状态，而不是让团队再维护一套新流程。</text>
+</svg>

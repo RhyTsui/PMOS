@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6b7280; }
+      .section { font-size: 20px; font-weight: 700; fill: #111827; }
+      .nodeTitle { font-size: 18px; font-weight: 700; fill: #111827; }
+      .body { font-size: 14px; font-weight: 500; fill: #374151; }
+      .small { font-size: 12px; font-weight: 600; fill: #6b7280; }
+      .link { font-size: 14px; font-weight: 700; fill: #2563eb; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#94a3b8" flood-opacity="0.20"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="980" fill="#ffffff"/>
+
+  <text x="80" y="70" class="title">AI 埋点验收干系人协同图</text>
+  <text x="80" y="102" class="subtitle">第一步先把谁提供输入、谁确认、谁执行、谁消费结果讲清楚，后面模块实现都挂在这张协同图上。</text>
+
+  <a href="./00-目录.svg">
+    <rect x="1380" y="40" width="140" height="40" rx="20" fill="#ffffff" stroke="#d1d5db"/>
+    <text x="1415" y="66" class="link">返回目录</text>
+  </a>
+
+  <rect x="570" y="330" width="460" height="280" rx="30" fill="#eff6ff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="615" y="382" class="section">AI 埋点验收核心中台</text>
+  <text x="615" y="410" class="body">统一承接文档、规则、检查、报告、版本留痕</text>
+
+  <rect x="620" y="450" width="160" height="110" rx="18" fill="#ffffff" stroke="#bfdbfe"/>
+  <text x="646" y="484" class="nodeTitle">文档引擎</text>
+  <text x="646" y="510" class="body">标准化</text>
+  <text x="646" y="532" class="body">目录 / SVG</text>
+
+  <rect x="820" y="450" width="160" height="110" rx="18" fill="#ffffff" stroke="#bfdbfe"/>
+  <text x="846" y="484" class="nodeTitle">验收引擎</text>
+  <text x="846" y="510" class="body">规则生成</text>
+  <text x="846" y="532" class="body">自动检查</text>
+
+  <rect x="720" y="585" width="160" height="110" rx="18" fill="#ffffff" stroke="#bfdbfe"/>
+  <text x="746" y="619" class="nodeTitle">结果引擎</text>
+  <text x="746" y="645" class="body">报告输出</text>
+  <text x="746" y="667" class="body">版本记录</text>
+
+  <rect x="90" y="150" width="300" height="130" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="120" y="192" class="nodeTitle">业务 / 产品</text>
+  <text x="120" y="220" class="body">给目标、给场景、给优先级</text>
+  <text x="120" y="244" class="body">提供会议结论与验收口径</text>
+
+  <rect x="90" y="420" width="300" height="130" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="120" y="462" class="nodeTitle">埋点文档维护方</text>
+  <text x="120" y="490" class="body">提供事件、字段、版本差异</text>
+  <text x="120" y="514" class="body">确认文档基线是否正确</text>
+
+  <rect x="90" y="690" width="300" height="130" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="120" y="732" class="nodeTitle">研发 / 联调方</text>
+  <text x="120" y="760" class="body">提供本地调试信息、样例、反馈</text>
+  <text x="120" y="784" class="body">消费规则和验收结论</text>
+
+  <rect x="1210" y="150" width="300" height="130" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="1240" y="192" class="nodeTitle">数据开发平台</text>
+  <text x="1240" y="220" class="body">承接正式检查执行</text>
+  <text x="1240" y="244" class="body">沉淀查询结果与历史记录</text>
+
+  <rect x="1210" y="420" width="300" height="130" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="1240" y="462" class="nodeTitle">人工审核 / 验收人</text>
+  <text x="1240" y="490" class="body">确认灰区、异常、最终结论</text>
+  <text x="1240" y="514" class="body">决定是否通过或补充</text>
+
+  <rect x="1210" y="690" width="300" height="130" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="1240" y="732" class="nodeTitle">小闪机器人 / 多端入口</text>
+  <text x="1240" y="760" class="body">通知、快速查询、回看结果</text>
+  <text x="1240" y="784" class="body">把同一套结果分发出去</text>
+
+  <path d="M390 215 C500 215, 520 380, 620 380" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <rect x="450" y="250" width="118" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="469" y="269" class="small">目标与口径</text>
+
+  <path d="M390 485 C500 485, 520 470, 620 470" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <rect x="452" y="448" width="130" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="473" y="467" class="small">文档与版本输入</text>
+
+  <path d="M390 755 C500 755, 520 650, 720 650" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <rect x="470" y="708" width="128" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="490" y="727" class="small">本地反馈与样例</text>
+
+  <path d="M980 470 C1080 470, 1100 215, 1210 215" stroke="#7c3aed" stroke-width="2.5" fill="none" marker-end="url(#arrow-purple)"/>
+  <rect x="1030" y="304" width="138" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="1048" y="323" class="small">规则与检查任务</text>
+
+  <path d="M1030 525 C1100 525, 1130 485, 1210 485" stroke="#7c3aed" stroke-width="2.5" fill="none" marker-end="url(#arrow-purple)"/>
+  <rect x="1060" y="488" width="112" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="1080" y="507" class="small">待人工确认</text>
+
+  <path d="M880 650 C1060 650, 1070 755, 1210 755" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+  <rect x="1015" y="690" width="126" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="1035" y="709" class="small">报告与结果分发</text>
+
+  <path d="M1210 515 C1110 515, 1080 610, 880 610" stroke="#2563eb" stroke-width="2.5" fill="none" stroke-dasharray="6 4" marker-end="url(#arrow-blue)"/>
+  <rect x="1000" y="566" width="150" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="1020" y="585" class="small">审核反馈回中台</text>
+
+  <path d="M1210 245 C1110 245, 1080 385, 980 385" stroke="#2563eb" stroke-width="2.5" fill="none" stroke-dasharray="6 4" marker-end="url(#arrow-blue)"/>
+  <rect x="1020" y="284" width="138" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="1040" y="303" class="small">执行结果回流</text>
+
+  <path d="M1210 755 C1110 755, 1080 860, 300 860 C180 860, 160 815, 240 820" stroke="#059669" stroke-width="2.5" fill="none" stroke-dasharray="8 5" marker-end="url(#arrow-green)"/>
+  <rect x="680" y="884" width="210" height="28" rx="8" fill="#ffffff" opacity="0.96"/>
+  <text x="700" y="903" class="small">结果被研发和业务继续消费</text>
+
+  <rect x="520" y="760" width="560" height="108" rx="20" fill="#f8fafc" stroke="#d1d5db"/>
+  <text x="550" y="798" class="section">协同原则</text>
+  <text x="550" y="824" class="body">AI 负责整理、生成、检查、输出；人负责裁决、确认、拍板；平台负责执行、留痕、分发。</text>
+  <text x="550" y="848" class="body">后续各模块实现图都应回答：它服务哪类干系人、输入输出是什么、落在哪个出口。</text>
+
+  <g transform="translate(80, 930)">
+    <line x1="0" y1="8" x2="34" y2="8" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+    <text x="44" y="12" class="small">输入 / 反馈</text>
+    <line x1="140" y1="8" x2="174" y2="8" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrow-purple)"/>
+    <text x="184" y="12" class="small">执行分发</text>
+    <line x1="280" y1="8" x2="314" y2="8" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+    <text x="324" y="12" class="small">结果消费</text>
+  </g>
+</svg>

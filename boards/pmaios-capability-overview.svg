@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1160" width="1560" height="1160">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .chip { fill: #ecfeff; stroke: #bae6fd; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f172a; font-size: 13px; font-weight: 600; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1160" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS 整体能力介绍</text>
+  <text x="72" y="118" class="sub">适合公司演示的总图。上半部分讲当前能力骨架，下半部分讲 v0.5 的统一收敛方向。</text>
+
+  <rect x="72" y="156" width="1416" height="72" class="card"/>
+  <text x="104" y="198" class="body">一句话表达：PMAIOS 不是单点聊天工具，而是把需求、版本、评审、项目管理、知识沉淀和人机协作收敛成一个可持续运行的本地 AI Product Office。</text>
+
+  <rect x="72" y="258" width="1416" height="364" class="card"/>
+  <text x="104" y="302" class="section">一、当前已经具备的能力骨架</text>
+  <text x="104" y="330" class="meta">基于 v0.4 现实，适合讲“它已经不是概念，而是已有运行基础和治理链路”。</text>
+
+  <rect x="104" y="372" width="236" height="184" class="card"/>
+  <text x="132" y="412" class="section">输入与真源</text>
+  <text x="132" y="446" class="body">`docs`、`inbox`、规则文档、模板、项目资料统一进入 repo 真源。</text>
+  <text x="132" y="480" class="body">重启、换模型、换会话后仍可恢复上下文。</text>
+
+  <rect x="372" y="372" width="236" height="184" class="card"/>
+  <text x="400" y="412" class="section">工作流与治理</text>
+  <text x="400" y="446" class="body">Requirement、Version、Review、Workflow Ops、DAG 和 traceability 已接上主链。</text>
+  <text x="400" y="480" class="body">输出不再只是一段对话，而是可追溯资产。</text>
+
+  <rect x="640" y="372" width="236" height="184" class="card"/>
+  <text x="668" y="412" class="section">Agent 与角色</text>
+  <text x="668" y="446" class="body">Product Chief、Product Agents、技能注册与可见性已存在。</text>
+  <text x="668" y="480" class="body">AI 已开始承担产品办公室中的具体职责。</text>
+
+  <rect x="908" y="372" width="236" height="184" class="card"/>
+  <text x="936" y="412" class="section">连接与扩展</text>
+  <text x="936" y="446" class="body">MCP、Notion、Figma、Web、DingTalk、Chroma 等能力已纳入接入面。</text>
+  <text x="936" y="480" class="body">外部工具作为可治理能力，而不是孤立插件。</text>
+
+  <rect x="1176" y="372" width="280" height="184" class="card"/>
+  <text x="1204" y="412" class="section">输出与阅读</text>
+  <text x="1204" y="446" class="body">CLI、Web UI、SVG 图板、规范文档、项目板已形成初步输出面。</text>
+  <text x="1204" y="480" class="body">AI PM 输出开始具备 chief-facing 交付形式。</text>
+
+  <rect x="104" y="580" width="1352" height="24" class="chip"/>
+  <text x="128" y="597" class="chipText">当前对外可讲的重点：PMAIOS 已有 runtime、治理链、角色体系和 SVG-first 产物，不再只是“未来会做什么”。</text>
+
+  <rect x="72" y="658" width="1416" height="374" class="card"/>
+  <text x="104" y="702" class="section">二、v0.5 要把它收敛成什么</text>
+  <text x="104" y="730" class="meta">重点不是继续加点，而是提升连续工作能力、人机协同质量、人阅读效率和知识复用效率。</text>
+
+  <rect x="104" y="774" width="300" height="188" class="card"/>
+  <text x="132" y="814" class="section">连续工作与优先级同步</text>
+  <text x="132" y="848" class="body">目标是 2 小时连续执行，同时保持优先级外显、风险同步和支线可见。</text>
+  <text x="132" y="880" class="body">沟通不再等于暂停，而是和推进并行。</text>
+
+  <rect x="432" y="774" width="300" height="188" class="card"/>
+  <text x="460" y="814" class="section">意图识别与升降维</text>
+  <text x="460" y="848" class="body">先识别背后目的，再做领域驱动拆解、最佳实践扫描和相关性评估。</text>
+  <text x="460" y="880" class="body">支持向上升维、向下降维、向外关联、向深研究。</text>
+
+  <rect x="760" y="774" width="300" height="188" class="card"/>
+  <text x="788" y="814" class="section">人读层 / AI 层 / 知识图谱</text>
+  <text x="788" y="848" class="body">把人阅读层、AI 归档层和知识图谱层通过强关系打通。</text>
+  <text x="788" y="880" class="body">让 AI 能读机器层，也能返回适合人看的内容。</text>
+
+  <rect x="1088" y="774" width="368" height="188" class="card"/>
+  <text x="1116" y="814" class="section">统一访问面、Hermes 与 Web UI</text>
+  <text x="1116" y="848" class="body">固定 IP + 端口 + 路径访问图板与文档，强化 Hermes 编排，继续把 Web UI 做成真实产品面。</text>
+  <text x="1116" y="880" class="body">目标是更适合公司内部真实使用，而不是只适合演示。</text>
+
+  <rect x="72" y="1066" width="1416" height="58" class="card"/>
+  <a href="pmaios-v0.5.svg"><text x="100" y="1102" class="linkText">展开看：v0.5 清单板 -&gt;</text></a>
+  <a href="pmaios-future-exploration.svg"><text x="360" y="1102" class="linkText">展开看：未来版本演进探索 -&gt;</text></a>
+  <a href="pmaios-architecture-roadmap.svg"><text x="690" y="1102" class="linkText">补充看：架构 + 路线图 -&gt;</text></a>
+  <a href="../docs/operations/pmaios-v0.5-checklist.md"><text x="980" y="1102" class="linkText">配套文档：v0.5 checklist -&gt;</text></a>
+</svg>

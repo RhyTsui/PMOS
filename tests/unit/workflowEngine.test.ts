@@ -232,6 +232,28 @@ describe('WorkflowEngine', () => {
     expect(prdSkills.map((skill) => skill.id)).toContain('five-w-two-h');
   });
 
+  it('finds auto-trigger skills by brief, stage, output type, and deployment readiness', async () => {
+    const store = createStore();
+    const repoStore = new FileStore(path.resolve(process.cwd()));
+    await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
+
+    const registry = new SkillRegistry(store);
+    const matches = await registry.findSkills({
+      query: 'Build a schema-driven UI workflow with Claude Design and manager agent review',
+      stageId: 'operations-surface',
+      outputType: 'ui-schema-spec',
+      limit: 5,
+    });
+    const readiness = await registry.describeReadiness();
+
+    expect(matches.map((match) => match.skill.id)).toContain('schema-driven-ui-design');
+    expect(matches.map((match) => match.skill.id)).toContain('claude-design-system');
+    expect(matches.map((match) => match.skill.id)).toContain('product-chief-manager-agent');
+    expect(matches[0]?.score).toBeGreaterThan(0);
+    expect(readiness.autoTriggerable).toBeGreaterThan(0);
+    expect(readiness.integrated).toBeGreaterThan(0);
+  });
+
   it('writes multimodal markdown and manifest outputs and blocks on missing provider config', async () => {
     const store = createStore();
     await seedFixture(store);
@@ -264,7 +286,8 @@ describe('WorkflowEngine', () => {
     expect(events.some((event) => event.kind === 'provider_failed')).toBe(true);
 
     const manifest = await store.read(`docs/multimodal/${run.id}.json`);
-    expect(manifest).toContain('"providerName": "ai-studio"');
+    expect(manifest).toContain('"providerName": "gemini"');
+    expect(manifest).toContain('"providerType": "ai-studio"');
     expect(manifest).toContain('"status": "error"');
   });
 

@@ -16,11 +16,13 @@ pnpm-debug.log*
 docs/memory/chats/
 docs/memory/events/
 docs/memory/runs/
+docs/memory/mcp-context/
 docs/memory/telemetry-log.json
 docs/memory/run-log.json
 **/docs/memory/chats/
 **/docs/memory/events/
 **/docs/memory/runs/
+**/docs/memory/mcp-context/
 **/docs/memory/telemetry-log.json
 **/docs/memory/run-log.json
 **/__pycache__/

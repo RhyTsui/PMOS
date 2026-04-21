@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1540 1120" width="1540" height="1120">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .panel { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .panelTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+    .block { fill: #eff6ff; stroke: #93c5fd; stroke-width: 1.5; rx: 14; }
+  </style>
+  <rect width="1540" height="1120" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">返回 SVG 索引</text></a>
+  <text x="72" y="94" class="title">广告项目模拟数据板</text>
+  <text x="72" y="122" class="sub">配套数据文件：`docs/mock-data/full-function-design-mock-data.json`。</text>
+
+  <rect x="72" y="156" width="1396" height="120" class="panel"/>
+  <text x="100" y="194" class="panelTitle">模拟数据设计原则</text>
+  <text x="100" y="236" class="body">每个功能模块都至少有一个“可展示对象”，确保工作台可以先靠 mock 数据走完整体验，不依赖真实媒体接口。</text>
+
+  <rect x="72" y="308" width="430" height="220" class="block"/>
+  <text x="96" y="344" class="panelTitle">需求接入样例</text>
+  <text x="96" y="382" class="body">request_id: REQ-20260421-001</text>
+  <text x="96" y="416" class="body">提交人: 投放-小林</text>
+  <text x="96" y="450" class="body">类型: 监测回传对接</text>
+  <text x="96" y="484" class="body">预期时间: 2026-04-26</text>
+
+  <rect x="554" y="308" width="430" height="220" class="block"/>
+  <text x="578" y="344" class="panelTitle">标准联调样例</text>
+  <text x="578" y="382" class="body">task_id: TASK-POC-001</text>
+  <text x="578" y="416" class="body">媒体: 巨量</text>
+  <text x="578" y="450" class="body">设备: ANDROID-01</text>
+  <text x="578" y="484" class="body">验收: 打开游戏 / 启动 / 登录</text>
+
+  <rect x="1036" y="308" width="430" height="220" class="block"/>
+  <text x="1060" y="344" class="panelTitle">异常诊断样例</text>
+  <text x="1060" y="382" class="body">问题: 为什么昨天巨量激活比 BI 少 30%？</text>
+  <text x="1060" y="416" class="body">时间: 2026-04-20</text>
+  <text x="1060" y="450" class="body">计划: PLAN-7788</text>
+  <text x="1060" y="484" class="body">状态: 可诊断</text>
+
+  <rect x="72" y="568" width="430" height="220" class="block"/>
+  <text x="96" y="604" class="panelTitle">对话式分析样例</text>
+  <text x="96" y="642" class="body">问题: 对比素材 A 和素材 B 近 7 天消耗和 ROI</text>
+  <text x="96" y="676" class="body">指标: 消耗 / ROI / CTR</text>
+  <text x="96" y="710" class="body">状态: 可分析</text>
+
+  <rect x="554" y="568" width="430" height="220" class="block"/>
+  <text x="578" y="604" class="panelTitle">知识条目样例</text>
+  <text x="578" y="642" class="body">article_id: KB-GL-014</text>
+  <text x="578" y="676" class="body">标题: 巨量激活回传时间戳格式检查</text>
+  <text x="578" y="710" class="body">风险等级: 高</text>
+
+  <rect x="1036" y="568" width="430" height="220" class="block"/>
+  <text x="1060" y="604" class="panelTitle">Case 归档样例</text>
+  <text x="1060" y="642" class="body">case_id: CASE-20260421-009</text>
+  <text x="1060" y="676" class="body">场景: 激活异常诊断</text>
+  <text x="1060" y="710" class="body">结论: 时间戳格式异常</text>
+
+  <rect x="72" y="828" width="1396" height="212" class="panel"/>
+  <text x="100" y="866" class="panelTitle">可直接用于工作台展示的数据对象</text>
+  <text x="100" y="908" class="body">1. diagnosis_result：诊断卡片，包含摘要、证据、建议。</text>
+  <text x="100" y="942" class="body">2. analysis_table：分析表，包含素材 A/B 的消耗、ROI、CTR。</text>
+  <text x="100" y="976" class="body">3. walkthrough：从需求接入到 Case 归档的 6 步走查顺序。</text>
+  <text x="100" y="1010" class="meta">这份 mock 数据已经足够支撑“全功能设计走一遍”，下一步如果要接 UI，可以直接按这个数据结构扩接口。</text>
+</svg>

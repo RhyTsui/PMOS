@@ -17,7 +17,8 @@
     "build:backend": "tsc -p tsconfig.backend.json",
     "test": "vitest run",
     "lint": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.backend.json",
-    "cli": "tsx src/cli/aios.ts"
+    "cli": "tsx src/cli/aios.ts",
+    "dingtalk:ui": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dingtalk-ui-automation.ps1"
   },
   "dependencies": {
     "@langchain/core": "^1.1.39",

@@ -1,0 +1,106 @@
+{
+  "windowTitlePattern": "\u9489\u9489",
+  "steps": [
+    {
+      "action": "sleep",
+      "milliseconds": 1500
+    },
+    {
+      "action": "click-relative",
+      "x": 257,
+      "y": 107
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 1600
+    },
+    {
+      "action": "click-relative",
+      "x": 825,
+      "y": 287
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 2200
+    },
+    {
+      "action": "click-relative",
+      "x": 1328,
+      "y": 84
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 800
+    },
+    {
+      "action": "click-element",
+      "selector": {
+        "name": "\u5bfc\u51faAI\u542c\u8bb0"
+      }
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 1200
+    },
+    {
+      "action": "click-element",
+      "selector": {
+        "name": "\u7eaa\u8981"
+      }
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 500
+    },
+    {
+      "action": "click-element",
+      "selector": {
+        "containsName": "pdf"
+      }
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 500
+    },
+    {
+      "action": "click-element",
+      "selector": {
+        "containsName": "docx"
+      }
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 500
+    },
+    {
+      "action": "click-element",
+      "selector": {
+        "name": "\u5bfc\u51fa",
+        "index": -1
+      }
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 1000
+    },
+    {
+      "action": "send-keys",
+      "text": "{ENTER}"
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 1200
+    },
+    {
+      "action": "send-keys",
+      "text": "{ENTER}"
+    },
+    {
+      "action": "sleep",
+      "milliseconds": 1200
+    },
+    {
+      "action": "close-window"
+    }
+  ]
+}

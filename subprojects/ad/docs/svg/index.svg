@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 980" width="1480" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .cardTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+    .tag { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 1; rx: 12; }
+    .tagText { fill: #1d4ed8; font-size: 12px; font-weight: 700; }
+  </style>
+
+  <rect width="1480" height="980" fill="#f8fafc"/>
+  <a href="../../project-board.svg"><text x="72" y="48" class="link">Back to ad project board</text></a>
+  <text x="72" y="94" class="title">Ad SVG Document Index</text>
+  <text x="72" y="122" class="sub">SVG-first communication set for the active `ad` project. Markdown remains detailed source material only.</text>
+
+  <rect x="72" y="156" width="1336" height="108" class="card"/>
+  <text x="100" y="194" class="cardTitle">Communication Rule</text>
+  <rect x="100" y="212" width="208" height="28" class="tag"/>
+  <text x="123" y="231" class="tagText">SVG PRIMARY ARTIFACT</text>
+  <text x="336" y="231" class="body">Use these boards for chief-facing review, scope sync, and delivery discussion. Only drop to Markdown when line-level detail is required.</text>
+
+  <rect x="72" y="300" width="420" height="250" class="card"/>
+  <text x="100" y="338" class="cardTitle">Project Overview</text>
+  <a href="../../project-board.svg"><text x="100" y="380" class="link">project-board.svg</text></a>
+  <a href="../../demo-board.svg"><text x="100" y="414" class="link">demo-board.svg</text></a>
+  <a href="../../user-flow-board.svg"><text x="100" y="448" class="link">user-flow-board.svg</text></a>
+  <a href="../../acceptance-board.svg"><text x="100" y="482" class="link">acceptance-board.svg</text></a>
+  <text x="100" y="522" class="meta">These four are the fast entry set for current demo execution.</text>
+
+  <rect x="530" y="300" width="420" height="250" class="card"/>
+  <text x="558" y="338" class="cardTitle">Workflow and Roles</text>
+  <a href="workflow-board.svg"><text x="558" y="380" class="link">workflow-board.svg</text></a>
+  <a href="task-sheet-board.svg"><text x="558" y="414" class="link">task-sheet-board.svg</text></a>
+  <a href="full-feature-breakdown-board.svg"><text x="558" y="448" class="link">full-feature-breakdown-board.svg</text></a>
+  <text x="558" y="456" class="body">Shows the active execution sequence, role boundaries, submission contract, and review gate.</text>
+
+  <rect x="988" y="300" width="420" height="250" class="card"/>
+  <text x="1016" y="338" class="cardTitle">Delivery Outputs</text>
+  <a href="task-breakdown-board.svg"><text x="1016" y="380" class="link">task-breakdown-board.svg</text></a>
+  <a href="mvp-input-board.svg"><text x="1016" y="414" class="link">mvp-input-board.svg</text></a>
+  <a href="today-plan-2026-04-21.svg"><text x="1016" y="448" class="link">today-plan-2026-04-21.svg</text></a>
+  <a href="mock-data-board.svg"><text x="1016" y="482" class="link">mock-data-board.svg</text></a>
+  <a href="full-walkthrough-board.svg"><text x="1016" y="516" class="link">full-walkthrough-board.svg</text></a>
+  <text x="1016" y="548" class="body">Covers delivery package, mock data, today's execution focus, full feature breakdown, and the complete walkthrough.</text>
+
+  <rect x="72" y="592" width="1336" height="264" class="card"/>
+  <text x="100" y="630" class="cardTitle">Active Source Mapping</text>
+  <text x="100" y="672" class="body">`docs/月底Demo重规划-2026-04-20.md` -> demo-board.svg</text>
+  <text x="100" y="706" class="body">`docs/广告项目执行工作流.md` -> workflow-board.svg</text>
+  <text x="100" y="740" class="body">`docs/广告项目产品经理任务单.md` -> task-sheet-board.svg</text>
+  <text x="100" y="774" class="body">Delivery obligations from those three sources -> task-breakdown-board.svg, acceptance-board.svg, mvp-input-board.svg</text>
+  <text x="100" y="822" class="meta">Interpretation rule: this set rewrites the active governed docs, not every historical research draft in `docs/`.</text>
+</svg>

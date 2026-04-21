@@ -55,6 +55,33 @@ Emergency exception:
 
 - If a defect blocks verification or local runtime, fix it immediately and backfill the requirement/version record in the same work session.
 
+## Version Document Rules
+
+All formal version documents that need development review must follow a written template.
+
+Two artifacts are required:
+
+1. `Detailed MD`
+   - the authoritative AI-readable version document
+   - must contain source mapping, fact/judgment/candidate/unknown separation, detailed requirement list, review focus, risks, and decisions needed
+   - template:
+     - `docs/templates/version_dev_review_detailed_template.md`
+
+2. `Human DOCX`
+   - the human-readable version review document
+   - must be concise, review-oriented, and easier for product, engineering, and management to scan
+   - its source structure should follow:
+     - `docs/templates/version_human_doc_template.md`
+
+Hard rules:
+
+1. A version doc is not review-ready if it does not match the development review template.
+2. The MD file is the source of truth for AI and repository traceability.
+3. The DOCX file is the source of truth for human review circulation.
+4. The human DOCX must be derived from the detailed MD, not written as an unrelated parallel draft.
+5. If only one artifact exists, the version document is considered incomplete.
+6. The requirement list inside version documents must use concise review-friendly statements rather than narrative prose.
+
 ## Daily Progress Rule
 
 Every working day should maintain a current version progress snapshot.
@@ -74,4 +101,3 @@ The snapshot must include:
 Canonical snapshot file:
 
 - `docs/operations/current-version-progress.md`
-

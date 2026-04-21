@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 1020" width="1480" height="1020">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .lane { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .laneTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .card { rx: 14; stroke-width: 1.5; }
+    .cardTitle { fill: #0f172a; font-size: 15px; font-weight: 700; }
+    .body { fill: #334155; font-size: 13px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .linkText { fill: #2563eb; font-size: 14px; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect width="1480" height="1020" fill="#f8fafc"/>
+  <a href="project-board.svg"><text x="72" y="48" class="linkText">Back to ad project board</text></a>
+  <text x="72" y="94" class="title">Ad User Flow Board</text>
+  <text x="72" y="122" class="sub">The demo should read as one guided workbench with two stable branches rather than disconnected visual pages.</text>
+
+  <rect x="72" y="156" width="1336" height="368" class="lane"/>
+  <text x="100" y="194" class="laneTitle">Flow A: Gap Diagnosis Demo</text>
+
+  <rect x="112" y="252" width="214" height="170" fill="#dbeafe" stroke="#93c5fd" class="card"/>
+  <text x="136" y="286" class="cardTitle">A1. Enter Workbench</text>
+  <text x="136" y="316" class="body">See positioning, quick asks,</text>
+  <text x="136" y="338" class="body">and diagnosis entry.</text>
+  <text x="136" y="380" class="meta">Goal: frame this as an agent desk,</text>
+  <text x="136" y="400" class="meta">not a chart-only screen.</text>
+
+  <rect x="372" y="252" width="214" height="170" fill="#e0f2fe" stroke="#7dd3fc" class="card"/>
+  <text x="396" y="286" class="cardTitle">A2. Submit Question</text>
+  <text x="396" y="316" class="body">Use fixed example or type:</text>
+  <text x="396" y="338" class="body">activation gap vs BI.</text>
+  <text x="396" y="380" class="meta">Prompt classified as diagnosis.</text>
+
+  <rect x="632" y="252" width="214" height="170" fill="#dcfce7" stroke="#86efac" class="card"/>
+  <text x="656" y="286" class="cardTitle">A3. Show Execution</text>
+  <text x="656" y="316" class="body">Display 4-5 steps with</text>
+  <text x="656" y="338" class="body">status and evidence hints.</text>
+  <text x="656" y="380" class="meta">Must show process, not instant answer.</text>
+
+  <rect x="892" y="252" width="214" height="170" fill="#fef3c7" stroke="#fcd34d" class="card"/>
+  <text x="916" y="286" class="cardTitle">A4. Output Findings</text>
+  <text x="916" y="316" class="body">Conclusion, evidence chain,</text>
+  <text x="916" y="338" class="body">and suggested action.</text>
+  <text x="916" y="380" class="meta">Structured cards only.</text>
+
+  <rect x="1152" y="252" width="214" height="170" fill="#fee2e2" stroke="#fca5a5" class="card"/>
+  <text x="1176" y="286" class="cardTitle">A5. Presenter Wrap-Up</text>
+  <text x="1176" y="316" class="body">Explain why the answer</text>
+  <text x="1176" y="338" class="body">is actionable for the team.</text>
+  <text x="1176" y="380" class="meta">Outcome: direction confidence.</text>
+
+  <path d="M326 337 L372 337" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M586 337 L632 337" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M846 337 L892 337" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1106 337 L1152 337" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="72" y="556" width="1336" height="368" class="lane"/>
+  <text x="100" y="594" class="laneTitle">Flow B: Conversational Comparison Demo</text>
+
+  <rect x="112" y="652" width="214" height="170" fill="#ede9fe" stroke="#c4b5fd" class="card"/>
+  <text x="136" y="686" class="cardTitle">B1. Same Entry Surface</text>
+  <text x="136" y="716" class="body">Reuse the workbench,</text>
+  <text x="136" y="738" class="body">switch to analysis branch.</text>
+  <text x="136" y="780" class="meta">No separate product surface.</text>
+
+  <rect x="372" y="652" width="214" height="170" fill="#f5f3ff" stroke="#d8b4fe" class="card"/>
+  <text x="396" y="686" class="cardTitle">B2. Ask for Comparison</text>
+  <text x="396" y="716" class="body">Compare asset A and B</text>
+  <text x="396" y="738" class="body">for spend and ROI.</text>
+  <text x="396" y="780" class="meta">Prompt classified as comparison.</text>
+
+  <rect x="632" y="652" width="214" height="170" fill="#fae8ff" stroke="#e879f9" class="card"/>
+  <text x="656" y="686" class="cardTitle">B3. Fill Template</text>
+  <text x="656" y="716" class="body">System resolves date range,</text>
+  <text x="656" y="738" class="body">entities, and metrics.</text>
+  <text x="656" y="780" class="meta">Keep parameters visible.</text>
+
+  <rect x="892" y="652" width="214" height="170" fill="#fef9c3" stroke="#fde047" class="card"/>
+  <text x="916" y="686" class="cardTitle">B4. Return Comparison</text>
+  <text x="916" y="716" class="body">Cards or table with</text>
+  <text x="916" y="738" class="body">clear metric contrast.</text>
+  <text x="916" y="780" class="meta">Allow one follow-up question.</text>
+
+  <rect x="1152" y="652" width="214" height="170" fill="#fee2e2" stroke="#fca5a5" class="card"/>
+  <text x="1176" y="686" class="cardTitle">B5. Extend or Close</text>
+  <text x="1176" y="716" class="body">Presenter asks one more</text>
+  <text x="1176" y="738" class="body">metric like CTR if needed.</text>
+  <text x="1176" y="780" class="meta">Outcome: conversation feels live.</text>
+
+  <path d="M326 737 L372 737" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M586 737 L632 737" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M846 737 L892 737" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1106 737 L1152 737" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+</svg>

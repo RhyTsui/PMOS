@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小荀 · 知识资产平台 - 知识库详情</title>
+  <style>
+    :root {
+      --bg: #f2f6fa;
+      --panel: rgba(255,255,255,0.92);
+      --panel-soft: rgba(248,250,253,0.98);
+      --text: #1b2431;
+      --muted: #67788d;
+      --line: rgba(27,36,49,0.08);
+      --navy: #1f3f67;
+      --teal: #0f766e;
+      --orange: #bc6225;
+      --blue: #2c74d8;
+      --gold: #ae8618;
+      --shadow: 0 16px 38px rgba(51,72,103,0.09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at left top, rgba(44,116,216,0.1), transparent 24%),
+        radial-gradient(circle at right top, rgba(15,118,110,0.1), transparent 20%),
+        linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+    }
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .topbar, .hero, .section, .side-card, .mini-card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.56);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .topbar {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand small {
+      display: block;
+      color: var(--teal);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 28px;
+      color: var(--navy);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: #fff;
+      border-color: transparent;
+    }
+    .hero {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+    }
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.1;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .capsules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .capsule {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 11px;
+    }
+    .hero-side {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .mini-card {
+      padding: 14px;
+      background: var(--panel-soft);
+    }
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: var(--navy);
+    }
+    .mini-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+    .stack, .side {
+      display: grid;
+      gap: 14px;
+    }
+    .section, .side-card {
+      padding: 16px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+    .section-head h3, .side-card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .section-head span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .info {
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+    }
+    .info strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .info span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+    .item {
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+    }
+    .item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .item span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .footer-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    @media (max-width: 1180px) {
+      .hero, .layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .hero-side, .grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: start; }
+      .hero h2 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <small>Knowledge Base Detail / Prototype</small>
+        <h1>小荀 · 知识库详情</h1>
+      </div>
+      <div class="actions">
+        <a class="btn" href="./homepage-prototype.html">首页</a>
+        <a class="btn" href="./asset-list-page-prototype.html">资产目录</a>
+        <a class="btn primary" href="./main-chat-prototype.html">用这个库去分析</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h2>广告业务知识库</h2>
+        <p>这是一个业务知识库详情页示例。它不只展示“这个库里有什么”，还要展示“这个库给谁用、最近在发生什么、哪些内容值得修、哪些来源在持续更新”。</p>
+        <div class="capsules">
+          <span class="capsule">部门知识库</span>
+          <span class="capsule">广告业务域</span>
+          <span class="capsule">支持 Chat / Agent / MCP</span>
+          <span class="capsule">小闪账号控制权限</span>
+          <span class="capsule">今日更新 3 项</span>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="mini-card">
+          <strong>资产数</strong>
+          <span>286 项，包括业务规则、案例、会议纪要、指标说明和分析模板。</span>
+        </div>
+        <div class="mini-card">
+          <strong>活跃消费方</strong>
+          <span>广告业务 Chat、数据分析 Chat、投放分析 Agent。</span>
+        </div>
+        <div class="mini-card">
+          <strong>待修正</strong>
+          <span>7 项内容需要修正或确认，集中在会议纪要和旧口径说明。</span>
+        </div>
+        <div class="mini-card">
+          <strong>最近接入</strong>
+          <span>周会纪要、小闪文档和外部研究订阅在持续进入这个知识库。</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <div class="stack">
+        <section class="section">
+          <div class="section-head">
+            <h3>这个知识库包含什么</h3>
+            <span>按用户理解，不按底层数据结构表达</span>
+          </div>
+          <div class="grid">
+            <div class="info"><strong>业务规则</strong><span>归因口径、投放流程、规则说明、FAQ。</span></div>
+            <div class="info"><strong>数据说明</strong><span>数据字典、指标说明、报表说明、埋点文档。</span></div>
+            <div class="info"><strong>过程知识</strong><span>周会纪要、复盘记录、讨论结论、项目记录。</span></div>
+            <div class="info"><strong>能力内容</strong><span>Skill、提示词、分析模板、任务模板。</span></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h3>最近进入这个库的内容</h3>
+            <span>让用户知道“这个库在活着更新”</span>
+          </div>
+          <div class="list">
+            <div class="item">
+              <strong>广州二部周会纪要：素材疲劳与账户分层</strong>
+              <span>来源：会议纪要 / 今天导入 / 待确认 2 项</span>
+            </div>
+            <div class="item">
+              <strong>Q2 广告归因与转化成本说明</strong>
+              <span>来源：小闪文档 / 今天更新 / 高频引用</span>
+            </div>
+            <div class="item">
+              <strong>Meta Ads 创意疲劳研究订阅</strong>
+              <span>来源：外部订阅 / 自动同步 / 已进入知识补强</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h3>这个知识库怎么被使用</h3>
+            <span>体现业务价值而不是只看管理信息</span>
+          </div>
+          <div class="grid">
+            <div class="info"><strong>广告业务 Chat</strong><span>回答投放策略、口径差异、案例参考等问题。</span></div>
+            <div class="info"><strong>数据分析 Chat</strong><span>解释指标口径、报表字段和数据异常。</span></div>
+            <div class="info"><strong>主对话框</strong><span>和个人知识、公司知识一起被引用做综合分析。</span></div>
+            <div class="info"><strong>Agent / MCP</strong><span>作为自动化分析和外部能力补强的背景知识。</span></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side">
+        <section class="side-card">
+          <h3>权限和范围</h3>
+          <div class="list">
+            <div class="item">
+              <strong>登录方式</strong>
+              <span>以小闪账号为主，支持小闪扫码登录和手机号登录。</span>
+            </div>
+            <div class="item">
+              <strong>查看范围</strong>
+              <span>当前对广告业务团队开放，对公司其他团队按权限可申请查看。</span>
+            </div>
+            <div class="item">
+              <strong>可操作范围</strong>
+              <span>普通成员可看可用，维护人可改，负责人可管权限。</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-card">
+          <h3>需要关注的事</h3>
+          <div class="list">
+            <div class="item">
+              <strong>待修正内容</strong>
+              <span>近期 7 项待修正，主要来自旧报表口径和会议纪要未确认内容。</span>
+            </div>
+            <div class="item">
+              <strong>推荐补充</strong>
+              <span>建议继续接入“数据回传延迟”专题和“素材分类标准”。</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-card">
+          <h3>设计说明</h3>
+          <div class="footer-note">
+            这页后面可以继续加：知识库负责人、成员列表、接入任务状态、知识质量评分、引用趋势、知识广场入口。当前先把“范围、内容、使用、权限、动态”这几个核心块立起来。
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

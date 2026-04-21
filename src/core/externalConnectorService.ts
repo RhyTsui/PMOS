@@ -24,6 +24,8 @@ export type ExternalConnectorStatus = {
     configured: boolean;
     connected: boolean | null;
     missing: string[];
+    teamId: string | null;
+    defaultFileKey: string | null;
   };
   webFetch: {
     configured: boolean;
@@ -55,6 +57,11 @@ export type FigmaInspection = {
   nodeCount: number;
 };
 
+export type FigmaTeamProject = {
+  id: string;
+  name: string;
+};
+
 export type DingTalkMeetingImport = {
   id: string;
   sourcePath: string;
@@ -74,6 +81,11 @@ export class ExternalConnectorService {
     const notionConfigured = Boolean(process.env.NOTION_API_KEY);
     const figmaConfigured = Boolean(process.env.FIGMA_API_KEY);
     const notionConnected = options?.checkRemote && notionConfigured ? await this.safeNotionConnection() : null;
+    const figmaTeamId = process.env.FIGMA_TEAM_ID?.trim() || null;
+    const figmaDefaultFileKey = process.env.FIGMA_FILE_KEY?.trim() || null;
+    const figmaConnected = options?.checkRemote && figmaConfigured
+      ? await this.safeFigmaConnection({ teamId: figmaTeamId, fileKey: figmaDefaultFileKey })
+      : null;
 
     return {
       notion: {
@@ -86,8 +98,13 @@ export class ExternalConnectorService {
       },
       figma: {
         configured: figmaConfigured,
-        connected: null,
-        missing: figmaConfigured ? [] : ['FIGMA_API_KEY'],
+        connected: figmaConnected,
+        missing: [
+          ...(!process.env.FIGMA_API_KEY ? ['FIGMA_API_KEY'] : []),
+          ...(!figmaTeamId && !figmaDefaultFileKey ? ['FIGMA_TEAM_ID or FIGMA_FILE_KEY'] : []),
+        ],
+        teamId: figmaTeamId,
+        defaultFileKey: figmaDefaultFileKey,
       },
       webFetch: {
         configured: true,
@@ -147,8 +164,8 @@ export class ExternalConnectorService {
     };
   }
 
-  async inspectFigmaFile(input: { fileKey: string }): Promise<FigmaInspection> {
-    const fileKey = input.fileKey.trim();
+  async inspectFigmaFile(input: { fileKey?: string | null }): Promise<FigmaInspection> {
+    const fileKey = input.fileKey?.trim() || process.env.FIGMA_FILE_KEY?.trim() || '';
     if (!fileKey) {
       throw new Error('fileKey is required');
     }
@@ -177,6 +194,36 @@ export class ExternalConnectorService {
       thumbnailUrl: typeof data.thumbnailUrl === 'string' ? data.thumbnailUrl : null,
       nodeCount: children.length,
     };
+  }
+
+  async listFigmaTeamProjects(input?: { teamId?: string | null }): Promise<FigmaTeamProject[]> {
+    const teamId = input?.teamId?.trim() || process.env.FIGMA_TEAM_ID?.trim() || '';
+    if (!teamId) {
+      throw new Error('FIGMA_TEAM_ID is required');
+    }
+    if (!process.env.FIGMA_API_KEY) {
+      throw new Error('FIGMA_API_KEY is required');
+    }
+
+    const response = await this.fetchImpl(`https://api.figma.com/v1/teams/${encodeURIComponent(teamId)}/projects`, {
+      headers: {
+        'X-Figma-Token': process.env.FIGMA_API_KEY,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`figma team projects failed: ${response.status} ${response.statusText}`);
+    }
+
+    const payload = await response.json();
+    const data = payload && typeof payload === 'object' ? payload as Record<string, unknown> : {};
+    const projects = Array.isArray(data.projects) ? data.projects : [];
+    return projects
+      .filter((project): project is Record<string, unknown> => Boolean(project && typeof project === 'object'))
+      .map((project) => ({
+        id: String(project.id ?? ''),
+        name: typeof project.name === 'string' ? project.name : 'Untitled Figma Project',
+      }))
+      .filter((project) => project.id);
   }
 
   async importDingTalkMeetingNote(input: {
@@ -225,6 +272,22 @@ export class ExternalConnectorService {
     }
   }
 
+  private async safeFigmaConnection(input: { teamId: string | null; fileKey: string | null }) {
+    try {
+      if (input.teamId) {
+        await this.listFigmaTeamProjects({ teamId: input.teamId });
+        return true;
+      }
+      if (input.fileKey) {
+        await this.inspectFigmaFile({ fileKey: input.fileKey });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   private normalizeUrl(value: string) {
     const url = new URL(value.trim());
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
@@ -254,6 +317,7 @@ export class ExternalConnectorService {
   private getDingTalkCandidateRoots() {
     const home = process.env.USERPROFILE || process.env.HOME || '';
     return [
+      process.env.DINGTALK_EXPORT_ROOT?.trim() || '',
       path.join(home, 'Documents', 'DingTalk'),
       path.join(home, 'Documents', '钉钉'),
       path.join(home, 'Downloads'),

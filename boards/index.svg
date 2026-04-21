@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1180" width="1500" height="1180">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .cardTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .cardMeta { fill: #64748b; font-size: 12px; }
+    .cardBody { fill: #334155; font-size: 14px; }
+    .chip { fill: #f8fafc; stroke: #dbe2ea; stroke-width: 1; rx: 14; }
+    .chipText { fill: #475569; font-size: 12px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1500" height="1180" fill="#ffffff"/>
+  <text x="72" y="72" class="title">PMAIOS 可视图板目录</text>
+  <text x="72" y="102" class="sub">平台规则、工作流、版本路线、演示主图、机制图板、研究入口和实施索引从这里统一进入。</text>
+
+  <rect x="72" y="132" width="220" height="30" class="chip"/>
+  <text x="102" y="151" class="chipText">默认产物：面向人阅读的 SVG</text>
+  <rect x="304" y="132" width="180" height="30" class="chip"/>
+  <text x="334" y="151" class="chipText">细节层：Markdown</text>
+  <rect x="496" y="132" width="258" height="30" class="chip"/>
+  <text x="526" y="151" class="chipText">默认语言：中文，专有名词可保留英文</text>
+
+  <a href="pmaios-rules.svg">
+    <rect x="72" y="196" width="300" height="196" class="card"/>
+    <rect x="72" y="196" width="5" height="196" fill="#10a37f"/>
+    <text x="100" y="236" class="cardTitle">规则图板</text>
+    <text x="100" y="260" class="cardMeta">平台规则与默认做法</text>
+    <text x="100" y="300" class="cardBody">统一 inbox、可见性要求、SVG-first、默认中文、idea 先完善后实施等平台级规则。</text>
+    <text x="100" y="344" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-workflow.svg">
+    <rect x="402" y="196" width="300" height="196" class="card"/>
+    <rect x="402" y="196" width="5" height="196" fill="#10a37f"/>
+    <text x="430" y="236" class="cardTitle">工作流图板</text>
+    <text x="430" y="260" class="cardMeta">输入 -&gt; 研究 -&gt; 决策 -&gt; 同步</text>
+    <text x="430" y="300" class="cardBody">平台级产品工作主链路、固定提问阶段和 stage gate，明确 chief 与项目 PM 的职责边界。</text>
+    <text x="430" y="344" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-pm-delivery.svg">
+    <rect x="732" y="196" width="300" height="196" class="card"/>
+    <rect x="732" y="196" width="5" height="196" fill="#10a37f"/>
+    <text x="760" y="236" class="cardTitle">PM 交付图板</text>
+    <text x="760" y="260" class="cardMeta">AI 产品经理默认交付契约</text>
+    <text x="760" y="300" class="cardBody">明确 project board、roadmap board、decision board 等默认主产物，以及 Markdown 附录和例外处理。</text>
+    <text x="760" y="344" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-v0.5.svg">
+    <rect x="1062" y="196" width="366" height="196" class="card"/>
+    <rect x="1062" y="196" width="5" height="196" fill="#10a37f"/>
+    <text x="1090" y="236" class="cardTitle">v0.5 清单板</text>
+    <text x="1090" y="260" class="cardMeta">下一版本统一收敛方向</text>
+    <text x="1090" y="300" class="cardBody">连续工作、人机协同、意图识别与升降维、人读层与 AI 层、知识导航、Hermes、Web UI 产品化。</text>
+    <text x="1090" y="344" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-demo-intro.svg">
+    <rect x="72" y="430" width="298" height="196" class="card"/>
+    <rect x="72" y="430" width="5" height="196" fill="#f59e0b"/>
+    <text x="100" y="468" class="cardTitle">演示介绍图板</text>
+    <text x="100" y="492" class="cardMeta">公司介绍 / 对外讲解入口</text>
+    <text x="100" y="532" class="cardBody">一张图解释 PMAIOS 是什么、解决什么问题、当前做到哪里、下一步往哪里收敛。</text>
+    <text x="100" y="574" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-capability-overview.svg">
+    <rect x="392" y="430" width="298" height="196" class="card"/>
+    <rect x="392" y="430" width="5" height="196" fill="#f59e0b"/>
+    <text x="420" y="468" class="cardTitle">整体能力介绍</text>
+    <text x="420" y="492" class="cardMeta">公司演示总图</text>
+    <text x="420" y="532" class="cardBody">把当前能力骨架与 v0.5 收敛方向放在同一张图里，适合先讲现在已有，再讲下一步价值。</text>
+    <text x="420" y="574" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-architecture-roadmap.svg">
+    <rect x="712" y="430" width="298" height="196" class="card"/>
+    <rect x="712" y="430" width="5" height="196" fill="#f59e0b"/>
+    <text x="740" y="468" class="cardTitle">架构 + 路线图</text>
+    <text x="740" y="492" class="cardMeta">推荐公司演示主图</text>
+    <text x="740" y="532" class="cardBody">把架构骨架、产品路线、开源能力来源和方法论思想放在一张图里，适合向公司内部讲清主线。</text>
+    <text x="740" y="574" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="pmaios-future-exploration.svg">
+    <rect x="1032" y="430" width="396" height="196" class="card"/>
+    <rect x="1032" y="430" width="5" height="196" fill="#f59e0b"/>
+    <text x="1060" y="468" class="cardTitle">未来版本演进探究</text>
+    <text x="1060" y="492" class="cardMeta">排除“已实现自进化”的表述</text>
+    <text x="1060" y="532" class="cardBody">聚焦协作连续性、人阅读访问面、知识双层架构、Web UI 产品化等真正仍待深入的方向。</text>
+    <text x="1060" y="574" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="ai-product-development-loop.svg">
+    <rect x="72" y="664" width="298" height="196" class="card"/>
+    <text x="100" y="702" class="cardTitle">AI 产研协同闭环</text>
+    <text x="100" y="726" class="cardMeta">产品 AI - aicoding - AI 测试</text>
+    <text x="100" y="766" class="cardBody">把 demo、需求文档、重实现、验证和回归串成标准闭环，而不是零散交接。</text>
+    <text x="100" y="808" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="cognition-ladder.svg">
+    <rect x="392" y="664" width="298" height="196" class="card"/>
+    <text x="420" y="702" class="cardTitle">认知阶梯</text>
+    <text x="420" y="726" class="cardMeta">意图识别与升降维</text>
+    <text x="420" y="766" class="cardBody">把表层 idea 转成意图识别、向上升维、向下降维、向外关联和向深研究。</text>
+    <text x="420" y="808" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="mode-architecture.svg">
+    <rect x="712" y="664" width="298" height="196" class="card"/>
+    <text x="740" y="702" class="cardTitle">模式架构图板</text>
+    <text x="740" y="726" class="cardMeta">default / plan / deep / do</text>
+    <text x="740" y="766" class="cardBody">把保守探索、快速实施、旁路深研和计划打磨拆成显式模式，避免一套行为覆盖所有场景。</text>
+    <text x="740" y="808" class="linkText">打开图板 -&gt;</text>
+  </a>
+
+  <a href="../docs/research/human-machine-collaboration-research.md">
+    <rect x="1032" y="664" width="396" height="196" class="card"/>
+    <text x="1060" y="702" class="cardTitle">人机协同深研</text>
+    <text x="1060" y="726" class="cardMeta">v0.5 旁路深研样板</text>
+    <text x="1060" y="766" class="cardBody">收敛连续执行、意图识别、模式路由、认知提炼和产物分层，作为后续机制化落地的研究入口。</text>
+    <text x="1060" y="808" class="linkText">打开研究文档 -&gt;</text>
+  </a>
+
+  <a href="../subprojects/chokonu/project-board.svg">
+    <rect x="72" y="894" width="220" height="100" class="card"/>
+    <text x="100" y="934" class="cardTitle">ChoKoNu</text>
+    <text x="100" y="960" class="cardMeta">AI 测试平台</text>
+    <text x="214" y="960" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../subprojects/ad/project-board.svg">
+    <rect x="316" y="894" width="220" height="100" class="card"/>
+    <text x="344" y="934" class="cardTitle">Ad</text>
+    <text x="344" y="960" class="cardMeta">Demo 优先项目</text>
+    <text x="456" y="960" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../subprojects/mcp/project-board.svg">
+    <rect x="560" y="894" width="220" height="100" class="card"/>
+    <text x="588" y="934" class="cardTitle">MCP</text>
+    <text x="588" y="960" class="cardMeta">能力接入方向</text>
+    <text x="700" y="960" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="mode-architecture-detailed.svg">
+    <rect x="804" y="894" width="220" height="100" class="card"/>
+    <text x="832" y="934" class="cardTitle">模式架构详细版</text>
+    <text x="832" y="960" class="cardMeta">中文细化介绍</text>
+    <text x="944" y="960" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/operations/do-mode-execution-protocol.md">
+    <rect x="1048" y="894" width="188" height="100" class="card"/>
+    <text x="1076" y="934" class="cardTitle">{do} 执行协议</text>
+    <text x="1076" y="960" class="cardMeta">快速实施路线</text>
+    <text x="1178" y="960" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="human-machine-collaboration-research.svg">
+    <rect x="1260" y="894" width="168" height="100" class="card"/>
+    <text x="1288" y="934" class="cardTitle">协同研究图板</text>
+    <text x="1288" y="960" class="cardMeta">研究总览入口</text>
+    <text x="1372" y="960" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/operations/v0.5-implementation-index.md">
+    <rect x="72" y="1018" width="300" height="70" class="card"/>
+    <text x="100" y="1056" class="cardTitle">v0.5 实施索引</text>
+    <text x="100" y="1080" class="cardMeta">实施入口聚合</text>
+    <text x="266" y="1080" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/architecture/mode-architecture.md">
+    <rect x="396" y="1018" width="240" height="70" class="card"/>
+    <text x="424" y="1056" class="cardTitle">模式架构</text>
+    <text x="424" y="1080" class="cardMeta">协作模式路由层</text>
+    <text x="556" y="1080" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/operations/pmaios-v0.5-checklist.md">
+    <rect x="660" y="1018" width="220" height="70" class="card"/>
+    <text x="688" y="1056" class="cardTitle">v0.5 清单</text>
+    <text x="688" y="1080" class="cardMeta">执行真源</text>
+    <text x="810" y="1080" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/research/human-machine-collaboration-research.md">
+    <rect x="904" y="1018" width="260" height="70" class="card"/>
+    <text x="932" y="1056" class="cardTitle">协同深研文档</text>
+    <text x="932" y="1080" class="cardMeta">研究真源</text>
+    <text x="1066" y="1080" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/operations/do-mode-task-start-contract.md">
+    <rect x="1188" y="1018" width="240" height="70" class="card"/>
+    <text x="1216" y="1056" class="cardTitle">{do} task-start</text>
+    <text x="1216" y="1080" class="cardMeta">快速启动契约</text>
+    <text x="1348" y="1080" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/operations/v0.4-v0.5-transition-2026-04-21.md">
+    <rect x="72" y="1102" width="280" height="46" class="card"/>
+    <text x="100" y="1130" class="cardTitle">v0.4 -&gt; v0.5 过渡快照</text>
+    <text x="250" y="1130" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="v0.4-v0.5-transition.svg">
+    <rect x="376" y="1102" width="260" height="46" class="card"/>
+    <text x="404" y="1130" class="cardTitle">v0.4 -&gt; v0.5 过渡图板</text>
+    <text x="564" y="1130" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <a href="../docs/operations/iteration-assets-2026-04-21.md">
+    <rect x="660" y="1102" width="240" height="46" class="card"/>
+    <text x="688" y="1130" class="cardTitle">2026-04-21 资产索引</text>
+    <text x="838" y="1130" class="linkText">打开 -&gt;</text>
+  </a>
+
+  <text x="924" y="1128" class="sub">公司演示推荐阅读路径：演示介绍图板 -&gt; 整体能力介绍 -&gt; 架构 + 路线图 -&gt; 未来版本演进探究 -&gt; v0.5 清单板。</text>
+  <text x="924" y="1152" class="sub">实施工作推荐路径：v0.5 清单文档 -&gt; v0.5 实施索引 -&gt; 模式架构 / AI 产研协同闭环 / 认知阶梯 / 人机协同深研。</text>
+</svg>

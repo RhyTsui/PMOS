@@ -1,0 +1,263 @@
+{
+  "id": "pmaios-main-dag",
+  "name": "PMAIOS v0.6 主工作流 DAG",
+  "description": "Workflow-derived DAG graph for dirty-node rerun and impact analysis.",
+  "executionMode": "lazy",
+  "metadata": {
+    "workflowId": "pmaios-main",
+    "workflowVersion": "0.6.0"
+  },
+  "nodes": [
+    {
+      "id": "core-definition-baseline",
+      "label": "核心定义基线",
+      "description": "统一 PMAIOS v0.6 的闭环目标、边界、非目标与阶段验收语义。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "auto",
+      "dependencies": [],
+      "outputs": [
+        "docs/implementation/baseline/*.md",
+        "docs/tasks/*.md"
+      ],
+      "stageId": "core-definition-baseline",
+      "priority": "P0",
+      "constraints": [
+        "明确 v0.6 闭环目标",
+        "明确本轮边界",
+        "明确非目标与验收口径"
+      ],
+      "metadata": {
+        "ownerRole": "产品架构负责人",
+        "capability": "system"
+      }
+    },
+    {
+      "id": "schema-contract-upgrade",
+      "label": "Schema 与契约升级",
+      "description": "补齐 workflow/task/review/execution/requirement/version/observability 的 v0.6 typed schema。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "core-definition-baseline"
+      ],
+      "outputs": [
+        "docs/implementation/schema/*.md"
+      ],
+      "stageId": "schema-contract-upgrade",
+      "priority": "P0",
+      "constraints": [
+        "可表达优先级与依赖",
+        "可表达 gate 与返工",
+        "可表达 requirement/version/trace 关联"
+      ],
+      "metadata": {
+        "ownerRole": "核心工程师",
+        "capability": "text"
+      }
+    },
+    {
+      "id": "orchestrator-kernel",
+      "label": "Orchestrator 内核调度",
+      "description": "把阶段推进器升级为带 gate、依赖、返工、追踪与恢复推进能力的内核调度器。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "schema-contract-upgrade"
+      ],
+      "outputs": [
+        "docs/implementation/orchestrator/*.md"
+      ],
+      "stageId": "orchestrator-kernel",
+      "priority": "P0",
+      "constraints": [
+        "blocked 可追踪",
+        "needs-rework 可恢复",
+        "调度语义与事件日志一致"
+      ],
+      "metadata": {
+        "ownerRole": "Orchestrator Engineer",
+        "capability": "text"
+      }
+    },
+    {
+      "id": "capability-slots",
+      "label": "Stage Execution / Capability 插槽",
+      "description": "统一 text / review / multimodal 等能力路径，为未来 tool/provider 接入保留边界。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "orchestrator-kernel"
+      ],
+      "outputs": [
+        "docs/implementation/capability/*.md"
+      ],
+      "stageId": "capability-slots",
+      "priority": "P0",
+      "constraints": [
+        "stage runner 输入输出稳定",
+        "capability 路径清晰",
+        "provider/tool 插槽边界清晰"
+      ],
+      "metadata": {
+        "ownerRole": "Runtime Engineer",
+        "capability": "text"
+      }
+    },
+    {
+      "id": "memory-context-trace",
+      "label": "Memory / Context / Trace",
+      "description": "统一 run、chat、context snapshot、artifact refs 与 execution trace 的 file-based 持久化视图。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "capability-slots"
+      ],
+      "outputs": [
+        "docs/memory/trace/*.md"
+      ],
+      "stageId": "memory-context-trace",
+      "priority": "P1",
+      "constraints": [
+        "输入/上下文/事件/产物可串联",
+        "平台与子项目边界清晰",
+        "trace 查询可读"
+      ],
+      "metadata": {
+        "ownerRole": "State Engineer",
+        "capability": "text"
+      }
+    },
+    {
+      "id": "operations-surface",
+      "label": "API / CLI / Frontend 操作面",
+      "description": "形成 Workflow Viewer + Run Console 的统一操作面，并暴露 requirement/version/observability 入口。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "memory-context-trace"
+      ],
+      "outputs": [
+        "docs/multimodal/*.md",
+        "docs/multimodal/*.json"
+      ],
+      "stageId": "operations-surface",
+      "priority": "P1",
+      "constraints": [
+        "CLI/API/Frontend 共享同一运行模型",
+        "操作面可观测",
+        "需求/版本/trace 路径可挂接"
+      ],
+      "metadata": {
+        "ownerRole": "体验集成工程师",
+        "capability": "multimodal"
+      }
+    },
+    {
+      "id": "review-metrics-telemetry",
+      "label": "Review / Metrics / Telemetry",
+      "description": "让 gate、metrics、review、execution observability 形成可阻塞、可返工、可恢复推进的统一闭环。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "operations-surface"
+      ],
+      "outputs": [
+        "docs/review/*.json"
+      ],
+      "stageId": "review-metrics-telemetry",
+      "priority": "P2",
+      "constraints": [
+        "为什么通过/阻塞/返工可解释",
+        "metrics 可反映阶段状态",
+        "review 与 observability 可驱动闭环"
+      ],
+      "metadata": {
+        "ownerRole": "评审委员会",
+        "capability": "review"
+      }
+    },
+    {
+      "id": "regression-acceptance",
+      "label": "测试回归与升级验收",
+      "description": "总结 build/lint/test 与闭环主链路验收结果，形成本轮升级收口结论。",
+      "version": "v1",
+      "state": "clean",
+      "executionMode": "lazy",
+      "dependencies": [
+        "review-metrics-telemetry"
+      ],
+      "outputs": [
+        "docs/iteration/*.md"
+      ],
+      "stageId": "regression-acceptance",
+      "priority": "P2",
+      "constraints": [
+        "主链路可回归验证",
+        "核心风险有结论",
+        "输出下一步闭环收口建议"
+      ],
+      "metadata": {
+        "ownerRole": "质量负责人",
+        "capability": "text"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "core-definition-baseline->schema-contract-upgrade",
+      "sourceId": "core-definition-baseline",
+      "targetId": "schema-contract-upgrade",
+      "dependencyType": "strong",
+      "description": "Workflow dependency core-definition-baseline -> schema-contract-upgrade"
+    },
+    {
+      "id": "schema-contract-upgrade->orchestrator-kernel",
+      "sourceId": "schema-contract-upgrade",
+      "targetId": "orchestrator-kernel",
+      "dependencyType": "strong",
+      "description": "Workflow dependency schema-contract-upgrade -> orchestrator-kernel"
+    },
+    {
+      "id": "orchestrator-kernel->capability-slots",
+      "sourceId": "orchestrator-kernel",
+      "targetId": "capability-slots",
+      "dependencyType": "strong",
+      "description": "Workflow dependency orchestrator-kernel -> capability-slots"
+    },
+    {
+      "id": "capability-slots->memory-context-trace",
+      "sourceId": "capability-slots",
+      "targetId": "memory-context-trace",
+      "dependencyType": "strong",
+      "description": "Workflow dependency capability-slots -> memory-context-trace"
+    },
+    {
+      "id": "memory-context-trace->operations-surface",
+      "sourceId": "memory-context-trace",
+      "targetId": "operations-surface",
+      "dependencyType": "strong",
+      "description": "Workflow dependency memory-context-trace -> operations-surface"
+    },
+    {
+      "id": "operations-surface->review-metrics-telemetry",
+      "sourceId": "operations-surface",
+      "targetId": "review-metrics-telemetry",
+      "dependencyType": "strong",
+      "description": "Workflow dependency operations-surface -> review-metrics-telemetry"
+    },
+    {
+      "id": "review-metrics-telemetry->regression-acceptance",
+      "sourceId": "review-metrics-telemetry",
+      "targetId": "regression-acceptance",
+      "dependencyType": "strong",
+      "description": "Workflow dependency review-metrics-telemetry -> regression-acceptance"
+    }
+  ]
+}

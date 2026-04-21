@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小荀 · 知识资产平台原型</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      background: linear-gradient(180deg, #eef3f8 0%, #dde5ef 100%);
+      color: #172235;
+    }
+    .shell {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 42px;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    p {
+      margin: 0 0 28px;
+      color: #5d6b7e;
+      line-height: 1.8;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .card {
+      background: rgba(255,255,255,0.84);
+      border: 1px solid rgba(23,34,53,0.08);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 18px 40px rgba(33, 58, 94, 0.12);
+    }
+    .card small {
+      display: block;
+      margin-bottom: 8px;
+      color: #0b7b72;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+    .card p {
+      font-size: 14px;
+      min-height: 110px;
+      margin-bottom: 16px;
+    }
+    .card a {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #fff;
+      background: #1d3b65;
+      font-weight: 700;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>小荀 · 知识资产平台原型</h1>
+    <p>同一页内容，三种定调方向。先选气质，再进入真实前端实现。</p>
+    <div class="grid">
+      <div class="card">
+        <small>Page</small>
+        <h2>Main Chat</h2>
+        <p>主对话框正式业务页原型。体现多知识库引用、Skill/MCP 调用、语音与多模态输入、最近会话和使用建议。</p>
+        <a href="./main-chat-prototype.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Page</small>
+        <h2>Asset List</h2>
+        <p>知识资产列表正式业务页原型。按平台真实使用场景组织，兼顾信息密度、筛选和扩展性。</p>
+        <a href="./asset-list-page-prototype.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Page</small>
+        <h2>Knowledge Base Detail</h2>
+        <p>知识库详情页原型。展示一个知识库的范围、内容、权限、接入来源、消费方和最近动态。</p>
+        <a href="./knowledge-base-detail-prototype.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Home</small>
+        <h2>Portal Homepage</h2>
+        <p>平台门户首页原型。更精致，但不做强营销，不打扰使用，适合作为正式入口首页。</p>
+        <a href="./homepage-prototype.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Entry</small>
+        <h2>Login</h2>
+        <p>假对接小闪登录页原型。保留小闪扫码/手机号登录入口，但当前点击即可直接进入平台。</p>
+        <a href="./login-prototype.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Prototype</small>
+        <h2>Platform Overview</h2>
+        <p>信息量更完整的一页式原型。把平台服务、主对话框能力、知识资产类型、接入接出和权限放在一起看。</p>
+        <a href="./platform-overview-prototype.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Tone A</small>
+        <h2>Editorial Workspace</h2>
+        <p>偏知识工作台，兼顾平台感和内容感。更适合你们现在这条“知识资产平台”主线。</p>
+        <a href="./asset-list-tone-a.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Tone B</small>
+        <h2>Operations Console</h2>
+        <p>偏中台控制台，适合企业治理、消费绑定、批量管理和运维感更强的路线。</p>
+        <a href="./asset-list-tone-b.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Tone C</small>
+        <h2>Knowledge Atlas</h2>
+        <p>偏探索和发现，适合后续做知识广场、洞察、订阅和个人长期上下文。</p>
+        <a href="./asset-list-tone-c.html">打开原型</a>
+      </div>
+      <div class="card">
+        <small>Architecture</small>
+        <h2>Service Overview</h2>
+        <p>不是页面视觉稿，而是整体服务架构视图。把接入源、平台层、WeKnora 底座、消费方和后续 Agent 汇总关系画清。</p>
+        <a href="./system-architecture-overview.html">打开原型</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

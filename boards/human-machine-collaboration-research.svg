@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1120" width="1560" height="1120">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 14; }
+    .section { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .body { fill: #334155; font-size: 14px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+    .chip { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 1; rx: 14; }
+    .chipText { fill: #1e3a8a; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1560" height="1120" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">人机协同深度研究</text>
+  <text x="72" y="118" class="sub">这不是单次聊天优化，而是 PMAIOS 如何形成稳定协作协议、认知增量和持续执行能力的研究总览。</text>
+
+  <rect x="72" y="156" width="1416" height="30" class="chip"/>
+  <text x="100" y="175" class="chipText">目标：把“会补几句”升级成“能识别意图、能升降维、能同步推进、能沉淀认知、能支撑 2 小时连续工作”的协同系统。</text>
+
+  <rect x="72" y="224" width="448" height="230" class="card"/>
+  <text x="104" y="266" class="section">当前问题</text>
+  <text x="104" y="294" class="meta">为什么会频繁卡住</text>
+  <text x="104" y="336" class="body">阶段性汇报被误当成停工点，小确认变成主线阻塞，单线深入后丢掉其他高优先线程，解释覆盖推进，模式切换不稳定。</text>
+
+  <rect x="556" y="224" width="448" height="230" class="card"/>
+  <text x="588" y="266" class="section">目标状态</text>
+  <text x="588" y="294" class="meta">理想的人机协同回路</text>
+  <text x="588" y="336" class="body">用户提方向或意图，AI 识别目的，判断更优路径，按模式选择保守推进、快速实施或旁路深研，并持续同步状态与风险。</text>
+
+  <rect x="1040" y="224" width="448" height="230" class="card"/>
+  <text x="1072" y="266" class="section">核心增量</text>
+  <text x="1072" y="294" class="meta">和普通问答的区别</text>
+  <text x="1072" y="336" class="body">不是只回答当前一句，而是持续把想法提炼成概念、原则、方法、框架、开放问题和可产品化能力，并沉淀成认知地图。</text>
+
+  <rect x="72" y="494" width="300" height="214" class="card"/>
+  <text x="100" y="536" class="section">Intent Recognition</text>
+  <text x="100" y="564" class="meta">先识别背后目的</text>
+  <text x="100" y="606" class="body">不只响应表层措辞，先判断用户真正想要的结果、风险和全局目标。</text>
+
+  <rect x="400" y="494" width="300" height="214" class="card"/>
+  <text x="428" y="536" class="section">Intent Amplifier</text>
+  <text x="428" y="564" class="meta">向上、向下、向外、向深</text>
+  <text x="428" y="606" class="body">围绕意图做升维、降维、关联、深研和替代方案扩展，而不是只补一句。</text>
+
+  <rect x="728" y="494" width="300" height="214" class="card"/>
+  <text x="756" y="536" class="section">Delivery Ladder</text>
+  <text x="756" y="564" class="meta">按真实项目链降维</text>
+  <text x="756" y="606" class="body">不是只拆到“今天做什么”，而是按研究、规划、设计、demo、架构、实现、部署和下游交付展开。</text>
+
+  <rect x="1056" y="494" width="432" height="214" class="card"/>
+  <text x="1084" y="536" class="section">Cognition Mirror</text>
+  <text x="1084" y="564" class="meta">认知提炼线程</text>
+  <text x="1084" y="606" class="body">持续识别概念、原则、方法、框架、问题定义、判断标准、优先级偏好和候选课题，让认知每天都在增长。</text>
+
+  <rect x="72" y="748" width="696" height="192" class="card"/>
+  <text x="104" y="790" class="section">和 v0.5 的关系</text>
+  <text x="104" y="818" class="meta">不是旁支，而是主干能力</text>
+  <text x="104" y="860" class="body">直接支撑 2 小时连续工作、思考与同步并行、意图识别后再选解法、协作模式架构、认知提炼线程和 AI 产研协同闭环。</text>
+
+  <rect x="804" y="748" width="684" height="192" class="card"/>
+  <text x="836" y="790" class="section">行业参考方向</text>
+  <text x="836" y="818" class="meta">不是盲目自创</text>
+  <text x="836" y="860" class="body">KCS、Docs as Code、ADR、统一目录入口、open-source-first 和 buy-before-build 都应作为判断基准，而不是只跟着局部想法走。</text>
+
+  <rect x="72" y="976" width="1416" height="76" class="card"/>
+  <a href="../docs/research/human-machine-collaboration-research.md"><text x="100" y="1018" class="linkText">深研文档 -&gt;</text></a>
+  <a href="../docs/operations/cognition-ladder-and-intent-amplifier.md"><text x="360" y="1018" class="linkText">认知阶梯机制 -&gt;</text></a>
+  <a href="../docs/architecture/mode-architecture.md"><text x="700" y="1018" class="linkText">模式架构 -&gt;</text></a>
+  <a href="../docs/operations/do-mode-task-start-contract.md"><text x="940" y="1018" class="linkText">{do} task-start -&gt;</text></a>
+  <a href="mode-architecture.svg"><text x="1210" y="1018" class="linkText">模式图板 -&gt;</text></a>
+  <text x="100" y="1046" class="meta">当前实验样板：task-60d32fc4-4bea-466a-adc7-443a4869dc72</text>
+</svg>

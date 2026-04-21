@@ -1,48 +1,72 @@
 {
-  "defaultProvider": "openai-compatible",
+  "defaultProvider": "claude",
   "providers": [
     {
-      "name": "mock",
-      "type": "mock",
-      "envKey": "DEFAULT_PROVIDER",
+      "name": "gpt",
+      "type": "codex-login",
+      "envKey": "CODEX_LOGIN",
       "capabilities": ["text", "code", "review"],
-      "priority": 0
+      "model": "gpt-4o",
+      "priority": 100,
+      "authMode": "browser",
+      "scope": "codex-only",
+      "comment": "GPT account login mode is only available inside Codex itself. PMAIOS runtime skips this provider."
     },
     {
-      "name": "anthropic",
+      "name": "claude",
       "type": "anthropic",
       "envKey": "ANTHROPIC_API_KEY",
       "legacyEnvKeys": ["ANTHROPIC_AUTH_TOKEN"],
       "capabilities": ["text", "code", "review"],
       "model": "claude-sonnet-4-6",
-      "priority": 70
+      "baseUrl": "https://aicoding.dobest.com/v1",
+      "priority": 90,
+      "comment": "Claude proxy internal routing mode. First runtime provider for PMAIOS, Claude CLI, and Web defaults."
     },
     {
-      "name": "openai-compatible",
+      "name": "gemini",
+      "type": "ai-studio",
+      "envKey": "GOOGLE_AI_STUDIO_API_KEY",
+      "legacyEnvKeys": ["GEMINI_API_KEY", "AI_STUDIO_API_KEY"],
+      "capabilities": ["text", "code", "review", "text-multimodal", "image-generation", "video-generation", "prototype-generation"],
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+      "model": "gemini-3-flash-preview",
+      "priority": 80,
+      "comment": "Gemini direct API mode. Runtime fallback after Claude quota or proxy failure."
+    },
+    {
+      "name": "minimax",
       "type": "openai-compatible",
       "envKey": "OPENAI_COMPATIBLE_API_KEY",
       "capabilities": ["text", "code", "review"],
-      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-      "model": "qwen-plus-latest",
-      "priority": 100
+      "baseUrl": "https://aicoding.dobest.com/v1",
+      "model": "glm-5",
+      "priority": 70,
+      "comment": "MiniMax proxy internal routing mode."
     },
     {
-      "name": "ai-studio",
-      "type": "ai-studio",
-      "envKey": "GOOGLE_AI_STUDIO_API_KEY",
-      "legacyEnvKeys": ["AI_STUDIO_API_KEY"],
-      "capabilities": [
-        "text",
-        "code",
-        "review",
-        "text-multimodal",
-        "image-generation",
-        "video-generation",
-        "prototype-generation"
-      ],
-      "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-      "model": "gemini-2.5-flash",
-      "priority": 90
+      "name": "qwen-company",
+      "type": "openai-compatible",
+      "envKey": "QWEN_API_KEY",
+      "envKeys": ["QWEN_API_KEY_2"],
+      "legacyEnvKeys": ["Qwen_API_KEY"],
+      "capabilities": ["text", "code", "review"],
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "Qwen-plus",
+      "priority": 60,
+      "keySelection": "random",
+      "comment": "Qwen company direct API mode. Configure QWEN_API_KEY and optionally QWEN_API_KEY_2."
+    },
+    {
+      "name": "qwen-self-paid",
+      "type": "openai-compatible",
+      "envKey": "QWEN_SELF_PAID_API_KEY",
+      "legacyEnvKeys": ["QWEN_FALLBACK_API_KEY"],
+      "capabilities": ["text", "code", "review"],
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "qwen3.6-flash-2026-04-16",
+      "priority": 50,
+      "comment": "Self-paid Qwen direct API fallback. Use only after company Qwen is unavailable."
     }
   ]
 }

@@ -18,6 +18,7 @@ import {
 import { RequirementService } from './requirementService.js';
 import { VersionRegistry } from './versionRegistry.js';
 import { HermesPolicyService } from './hermesPolicyService.js';
+import { SkillRegistry } from './skillRegistry.js';
 import type {
   HermesPolicyReport,
   ProductChiefMultiAgentReview,
@@ -46,6 +47,7 @@ export class ProductChiefService {
     private readonly store: FileStore,
     private readonly memoryService = new MemoryService(store),
     private readonly productAgentService = new ProductAgentService(store),
+    private readonly skillRegistry = new SkillRegistry(store),
   ) {}
 
   async analyze(input: ProductChiefInput): Promise<ProductChiefReport> {
@@ -56,6 +58,7 @@ export class ProductChiefService {
 
     const agents = await this.ensureAgentHierarchy(input.subprojectId);
     const engagedSpecialists = this.selectSpecialists(agents, brief);
+    const recommendedSkills = await this.findRecommendedSkills(brief, input.subprojectId);
     const evidencePaths = await this.resolveEvidencePaths(input.subprojectId, input.contextPaths);
     const now = new Date().toISOString();
     const report: ProductChiefReport = {
@@ -66,6 +69,7 @@ export class ProductChiefService {
       status: 'ready-for-review',
       missingQuestions: this.buildMissingQuestions(brief, evidencePaths),
       engagedSpecialists,
+      recommendedSkills,
       learningGuidance: this.buildLearningGuidance(brief),
       requiredGovernedOutputs: this.buildRequiredOutputs(brief),
       nextActions: [
@@ -78,6 +82,7 @@ export class ProductChiefService {
       metadata: {
         agentCount: agents.length,
         engagedSpecialistCount: engagedSpecialists.length,
+        recommendedSkillCount: recommendedSkills.length,
       },
     };
 
@@ -263,6 +268,7 @@ export class ProductChiefService {
         priority: outputSpec.priority,
         reason: outputSpec.reason,
         outputRecordPath,
+        recommendedSkillIds: report.recommendedSkills.map((skill) => skill.skillId),
       },
     };
 
@@ -498,6 +504,25 @@ export class ProductChiefService {
     const truthSources = await this.memoryService.loadTruthSourceDocuments(subprojectId);
     const contextDocs = await this.memoryService.loadContextDocuments(subprojectId);
     return [...new Set([...(contextPaths ?? []), ...truthSources.map((document) => document.path), ...contextDocs.map((document) => document.path)])];
+  }
+
+  private async findRecommendedSkills(brief: string, subprojectId?: string | null): Promise<ProductChiefReport['recommendedSkills']> {
+    const matches = await this.skillRegistry.findSkills({
+      query: brief,
+      subprojectId,
+      limit: 8,
+    });
+    return matches.map((match) => ({
+      skillId: match.skill.id,
+      name: match.skill.name,
+      category: match.skill.category,
+      ownerRole: match.skill.ownerRole,
+      promptPath: match.skill.promptPath,
+      score: match.score,
+      reasons: match.reasons,
+      deploymentStatus: match.skill.deployment.status,
+      tool: match.skill.tool,
+    }));
   }
 
   private selectSpecialists(agents: ProductAgent[], brief: string): ProductChiefReport['engagedSpecialists'] {
@@ -754,6 +779,15 @@ export class ProductChiefService {
       '## Learning Guidance',
       '',
       ...report.learningGuidance.map((guidance) => `- ${guidance.title}: ${guidance.recommendation}`),
+      '',
+      '## Recommended Skills',
+      '',
+      ...(report.recommendedSkills.length > 0
+        ? report.recommendedSkills.map(
+            (skill) =>
+              `- ${skill.name} (${skill.skillId}): ${skill.deploymentStatus}; ${skill.reasons.join(', ') || 'matched by Product Chief brief'}`,
+          )
+        : ['- No skill recommendation matched this brief.']),
       '',
     ];
 

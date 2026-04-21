@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1370" viewBox="0 0 1440 1370" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="32" x2="1360" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#EEF4FF"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="72" y1="120" x2="1368" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165DFF"/>
+      <stop offset="1" stop-color="#36CFC9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#B7C7E6" flood-opacity="0.28"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #1F2A44; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #5F6F8F; }
+      .hero-title { font-size: 24px; font-weight: 700; fill: #FFFFFF; }
+      .hero-body { font-size: 14px; font-weight: 500; fill: #DDF3FF; }
+      .card-title { font-size: 18px; font-weight: 700; fill: #1F2A44; }
+      .body { font-size: 13px; font-weight: 500; fill: #566780; }
+      .meta { font-size: 12px; font-weight: 600; fill: #6B7B95; }
+      .chip { font-size: 12px; font-weight: 700; fill: #165DFF; }
+      .link { font-size: 12px; font-weight: 700; fill: #165DFF; text-decoration: underline; }
+    </style>
+  </defs>
+  <rect width="1440" height="1370" fill="url(#bg)"/>
+  <text x="72" y="56" class="title">广告聚合 MCP v3.14.16 产品需求文档</text>
+  <text x="72" y="86" class="subtitle">Markdown 文档板：按章节提炼核心内容，供快速评审和沟通</text>
+  <rect x="72" y="118" width="1296" height="118" rx="28" fill="url(#hero)" filter="url(#shadow)"/>
+  <text x="100" y="158" class="hero-title">prd.md</text>
+  <text x="100" y="188" class="hero-body">源文件：docs/prd.md</text>
+  <text x="100" y="212" class="hero-body">更新时间：2026-04-20 07:18</text>
+  <text x="100" y="238" class="hero-body">该文档主体以结构化章节为主，以下卡片展示各章节的提炼内容。</text>
+  <rect x="72" y="276" width="400" height="286" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="96" y="310" class="card-title">基本信息</text>
+  <text x="96" y="340" class="body">• **项目名称**: 广告聚合 MCP</text>
+  <text x="96" y="362" class="body">• **版本**: v3.14.16</text>
+  <text x="96" y="384" class="body">• **项目路径**:</text>
+  <text x="96" y="406" class="body">  `subprojects/mcp/projects/mcp</text>
+  <text x="96" y="428" class="body">  v0.3/`</text>
+  <text x="96" y="450" class="body">• **汇报人**: 徐韵</text>
+  <text x="96" y="472" class="body">• **创建日期**: 2026-04-14</text>
+  <rect x="496" y="276" width="400" height="286" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="520" y="310" class="card-title">本轮输入来源</text>
+  <text x="520" y="340" class="body">• 本次版本更新基于 `inbox`</text>
+  <text x="520" y="362" class="body">  中的四类输入统一整理，不再沿用旧版 PRD 的拆分口径：</text>
+  <text x="520" y="384" class="body">• 输入类型 · 文件/来源 · 用途</text>
+  <text x="520" y="406" class="body">• 分析文档 · `需求分析文档v1.0-广告业务.md`</text>
+  <text x="520" y="428" class="body">  · 早期需求分析与方案背景</text>
+  <text x="520" y="450" class="body">• 分析文档 · `需求分析文档v1.1-广告业务.md`</text>
+  <text x="520" y="472" class="body">  · 当前分析口径与修订后的业务边界</text>
+  <text x="520" y="494" class="body">• 需求文档 · `需求Q2-广州二部.xlsx` ·</text>
+  <text x="520" y="516" class="body">  广州二部新增需求清单</text>
+  <rect x="920" y="276" width="400" height="286" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="944" y="310" class="card-title">输入优先级</text>
+  <text x="944" y="340" class="body">• `04-16 内部会议.</text>
+  <text x="944" y="362" class="body">  广告数据需求与系统化解决方案.docx`</text>
+  <text x="944" y="384" class="body">• `需求分析文档v1.1-广告业务.md`</text>
+  <text x="944" y="406" class="body">• `需求Q2-广州二部.xlsx`</text>
+  <text x="944" y="428" class="body">• `需求分析文档v1.0-广告业务.md`</text>
+  <text x="944" y="450" class="body">• 历史 `v0.3` PRD</text>
+  <rect x="72" y="586" width="400" height="220" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="96" y="620" class="card-title">版本目标</text>
+  <text x="96" y="650" class="body">• **一句话目标**: 在 `v3.14.16`</text>
+  <text x="96" y="672" class="body">  中完成广告聚合 MCP</text>
+  <text x="96" y="694" class="body">  的统一需求收敛，将有效需求全部纳入版本，并按“直接支持、待开发评估工期、需补原型”三种状态推进。</text>
+  <rect x="496" y="586" width="400" height="220" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="520" y="620" class="card-title">本版执行口径</text>
+  <text x="520" y="650" class="body">• **本版支持**:</text>
+  <text x="520" y="672" class="body">  需求有效，边界足够清晰，可直接进入开发排期。</text>
+  <text x="520" y="694" class="body">• **待开发评估工期**:</text>
+  <text x="520" y="716" class="body">  需求有效并确认要做，但实现成本、依赖或工期待开发评估后补充。</text>
+  <text x="520" y="738" class="body">• **需补原型**:</text>
+  <text x="520" y="760" class="body">  需求有效并确认要做，但交互、页面或流程需要先出原型收敛。</text>
+  <rect x="920" y="586" width="400" height="220" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="944" y="620" class="card-title">本版不采用的口径</text>
+  <text x="944" y="650" class="body">• 不使用“待定”“后续讨论”“先放着”这类模糊状态。</text>
+  <text x="944" y="672" class="body">• 不因为需要开发评估或原型而将需求移出</text>
+  <text x="944" y="694" class="body">  `v3.14.16`。</text>
+  <rect x="72" y="830" width="400" height="198" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="96" y="864" class="card-title">范围内</text>
+  <text x="96" y="894" class="body">• 广告报表类 MCP 能力</text>
+  <text x="96" y="916" class="body">• 标签/维度类 MCP 能力</text>
+  <text x="96" y="938" class="body">• 多维分析与问数解释能力</text>
+  <text x="96" y="960" class="body">• 广告数据推送与下游消费能力</text>
+  <text x="96" y="982" class="body">• 广州二部新增分析/会议确认有效的需求</text>
+  <rect x="496" y="830" width="400" height="198" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="520" y="864" class="card-title">范围外</text>
+  <text x="520" y="894" class="body">• 未在 `inbox` 中出现、且会议纪要未确认的新需求</text>
+  <text x="520" y="916" class="body">• 脱离广告业务主场景的泛化平台化诉求</text>
+  <text x="520" y="938" class="body">• 未形成业务价值闭环的探索型事项</text>
+  <rect x="920" y="830" width="400" height="198" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="944" y="864" class="card-title">Excel 原始增量确认</text>
+  <text x="944" y="894" class="body">• 已补读</text>
+  <text x="944" y="916" class="body">  `docs/sources/inbox/需求Q2-广州二部.xlsx`，当前与本版最相关的新增项如下。</text>
+  <rect x="72" y="1052" width="400" height="198" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="96" y="1086" class="card-title">1. 广告与素材报表</text>
+  <text x="96" y="1116" class="body">• 新增数据指标：</text>
+  <text x="96" y="1138" class="body">• `7日人均付费次数`</text>
+  <text x="96" y="1160" class="body">• `7日付费次数`</text>
+  <text x="96" y="1182" class="body">• `7日付费成本`</text>
+  <text x="96" y="1204" class="body">• `ltv3/ltv1`</text>
+  <rect x="496" y="1052" width="400" height="198" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="520" y="1086" class="card-title">2. 监测活动报表</text>
+  <text x="520" y="1116" class="body">• 新增数据指标：</text>
+  <text x="520" y="1138" class="body">• `7日人均付费次数`</text>
+  <text x="520" y="1160" class="body">• `7日付费次数`</text>
+  <text x="520" y="1182" class="body">• `7日付费成本`</text>
+  <text x="520" y="1204" class="body">• `ltv3/ltv1`</text>
+  <rect x="920" y="1052" width="400" height="198" rx="24" fill="#FFFFFF" stroke="#D7E3F7" filter="url(#shadow)"/>
+  <text x="944" y="1086" class="card-title">3. ROI 分析、广告与素材报表</text>
+  <text x="944" y="1116" class="body">• 新增筛选/展示要求：</text>
+  <text x="944" y="1138" class="body">• `支持拆分腾讯版位数据`</text>
+  <text x="944" y="1160" class="body">• `支持按照渠道分天汇总`</text>
+  <text x="944" y="1182" class="body">• `按周汇总时不按自然周突破所选时间范围`</text>
+  <a href="../prd.md">
+    <text x="72" y="1336" class="link">打开原 Markdown</text>
+  </a>
+</svg>

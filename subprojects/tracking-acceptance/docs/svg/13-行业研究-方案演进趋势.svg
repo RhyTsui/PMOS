@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6b7280; }
+      .section { font-size: 20px; font-weight: 700; fill: #111827; }
+      .nodeTitle { font-size: 18px; font-weight: 700; fill: #111827; }
+      .body { font-size: 14px; font-weight: 500; fill: #374151; }
+      .small { font-size: 12px; font-weight: 600; fill: #6b7280; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#94a3b8" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="980" fill="#ffffff"/>
+  <text x="80" y="70" class="title">行业研究：方案演进趋势与产品推导</text>
+  <text x="80" y="102" class="subtitle">行业已经从“埋点表管理”演进到“tracking plan / schema / validation / observability / versioning”一体化。</text>
+
+  <rect x="60" y="150" width="1480" height="650" rx="28" fill="#f8fafc" stroke="#dbe3ee"/>
+  <text x="90" y="194" class="section">方案演进</text>
+
+  <rect x="110" y="270" width="250" height="360" rx="22" fill="#ffffff" stroke="#d1d5db" filter="url(#shadow)"/>
+  <text x="136" y="308" class="nodeTitle">阶段 1</text>
+  <text x="136" y="336" class="body">Excel 埋点表时代</text>
+  <text x="136" y="376" class="small">特征</text>
+  <text x="136" y="402" class="body">人工维护</text>
+  <text x="136" y="426" class="body">字段导向</text>
+  <text x="136" y="450" class="body">版本混乱</text>
+  <text x="136" y="490" class="small">问题</text>
+  <text x="136" y="516" class="body">人能看，机器不能直接消费</text>
+  <text x="136" y="540" class="body">验收、报表、代码脱节</text>
+
+  <rect x="410" y="270" width="250" height="360" rx="22" fill="#eff6ff" stroke="#bfdbfe" filter="url(#shadow)"/>
+  <text x="436" y="308" class="nodeTitle">阶段 2</text>
+  <text x="436" y="336" class="body">Tracking Plan / Schema</text>
+  <text x="436" y="376" class="small">特征</text>
+  <text x="436" y="402" class="body">结构化规格</text>
+  <text x="436" y="426" class="body">人机双读</text>
+  <text x="436" y="450" class="body">ownership 明确</text>
+  <text x="436" y="490" class="small">提升</text>
+  <text x="436" y="516" class="body">让文档能驱动实现与验证</text>
+  <text x="436" y="540" class="body">开始支持安全演进</text>
+
+  <rect x="710" y="270" width="250" height="360" rx="22" fill="#f0fdf4" stroke="#bbf7d0" filter="url(#shadow)"/>
+  <text x="736" y="308" class="nodeTitle">阶段 3</text>
+  <text x="736" y="336" class="body">Validation + Versioning</text>
+  <text x="736" y="376" class="small">特征</text>
+  <text x="736" y="402" class="body">schema 校验</text>
+  <text x="736" y="426" class="body">failed events 收集</text>
+  <text x="736" y="450" class="body">版本兼容管理</text>
+  <text x="736" y="490" class="small">提升</text>
+  <text x="736" y="516" class="body">从“发现问题”走向“防止问题进入”</text>
+  <text x="736" y="540" class="body">让变更可追踪、可回滚</text>
+
+  <rect x="1010" y="270" width="250" height="360" rx="22" fill="#faf5ff" stroke="#ddd6fe" filter="url(#shadow)"/>
+  <text x="1036" y="308" class="nodeTitle">阶段 4</text>
+  <text x="1036" y="336" class="body">Observability + Control Plane</text>
+  <text x="1036" y="376" class="small">特征</text>
+  <text x="1036" y="402" class="body">健康信号</text>
+  <text x="1036" y="426" class="body">血缘与影响分析</text>
+  <text x="1036" y="450" class="body">统一治理控制面</text>
+  <text x="1036" y="490" class="small">提升</text>
+  <text x="1036" y="516" class="body">不仅知道错了，还知道影响谁</text>
+  <text x="1036" y="540" class="body">面向组织级协同</text>
+
+  <rect x="1310" y="270" width="180" height="360" rx="22" fill="#fff7ed" stroke="#fed7aa" filter="url(#shadow)"/>
+  <text x="1336" y="308" class="nodeTitle">阶段 5</text>
+  <text x="1336" y="336" class="body">AI 驱动</text>
+  <text x="1336" y="376" class="small">特征</text>
+  <text x="1336" y="402" class="body">需求反推规格</text>
+  <text x="1336" y="426" class="body">规则与报告自动生成</text>
+  <text x="1336" y="450" class="body">多端挂载</text>
+  <text x="1336" y="490" class="small">关键前提</text>
+  <text x="1336" y="516" class="body">前四阶段底座已成立</text>
+
+  <path d="M360 450 H410" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <path d="M660 450 H710" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <path d="M960 450 H1010" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <path d="M1260 450 H1310" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+
+  <rect x="60" y="840" width="1480" height="100" rx="24" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="90" y="882" class="section">对本项目的推导</text>
+  <text x="90" y="912" class="body">第一阶段不应停留在“字段校验工具”，而应至少搭出阶段 2 + 3 的底座，并让 AI 开始承接阶段 5 的文档、规则、报告生成能力。</text>
+</svg>

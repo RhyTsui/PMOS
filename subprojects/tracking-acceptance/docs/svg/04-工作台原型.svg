@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1120" viewBox="0 0 1440 1120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="40" x2="1380" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8F2"/>
+      <stop offset="1" stop-color="#EFE3D2"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#90745A" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #2B2118; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6B5B49; }
+      .section { font-size: 20px; font-weight: 700; fill: #382B20; }
+      .card-title { font-size: 18px; font-weight: 700; fill: #2B2118; }
+      .body { font-size: 14px; font-weight: 500; fill: #695949; }
+      .small { font-size: 12px; font-weight: 600; fill: #806E5D; }
+      .link { font-size: 14px; font-weight: 700; fill: #2054C8; }
+    </style>
+  </defs>
+  <rect width="1440" height="1120" fill="url(#bg)"/>
+
+  <text x="88" y="72" class="title">04 工作台原型</text>
+  <text x="88" y="102" class="subtitle">当前前端原型不是最终产品，而是把一期信息架构先可视化，让讨论不再只停留在 Markdown 和口头方案。</text>
+
+  <a href="./00-目录.svg">
+    <rect x="1210" y="46" width="142" height="38" rx="19" fill="#FFFFFF" stroke="#D8C8B4"/>
+    <text x="1248" y="71" class="link">← 返回目录</text>
+  </a>
+
+  <rect x="88" y="144" width="240" height="736" rx="30" fill="#FFFDF8" stroke="#E3D5C3" filter="url(#shadow)"/>
+  <text x="118" y="188" class="section">左侧导航</text>
+  <text x="118" y="224" class="card-title">项目身份</text>
+  <text x="118" y="248" class="body">AI 埋点验收 / Phase 1</text>
+  <text x="118" y="290" class="card-title">页面入口</text>
+  <text x="118" y="318" class="body">• 总览</text>
+  <text x="118" y="342" class="body">• 文档基线</text>
+  <text x="118" y="366" class="body">• 规则中心</text>
+  <text x="118" y="390" class="body">• 验收执行</text>
+  <text x="118" y="414" class="body">• 协作与沉淀</text>
+  <text x="118" y="458" class="small">作用</text>
+  <text x="118" y="482" class="body">把“需求、规则、验收、沉淀”四类讨论放到同一个工作台，而不是散在多个文档里。</text>
+
+  <rect x="368" y="144" width="984" height="170" rx="30" fill="#FFFFFF" stroke="#E5D8C8" filter="url(#shadow)"/>
+  <text x="402" y="188" class="section">首页头部</text>
+  <text x="402" y="220" class="body">一句话北极星：先把“输入 → 文档 → 规则 → 校验 → 确认 → 沉淀”做成稳定主链路。</text>
+  <text x="402" y="248" class="body">头部指标卡直接展示：P0 业务问题数、AI 主链路步骤数、待确认规则数、当前周目标。</text>
+  <text x="402" y="276" class="small">作用</text>
+  <text x="402" y="298" class="body">让业务、产品、研发打开第一页就看到当前阶段最重要的判断，不需要先翻长文档。</text>
+
+  <rect x="368" y="346" width="472" height="252" rx="28" fill="#FFFFFF" stroke="#E5D8C8" filter="url(#shadow)"/>
+  <text x="398" y="388" class="section">总览页</text>
+  <text x="398" y="420" class="body">• 展示为什么现在做</text>
+  <text x="398" y="444" class="body">• 展示三条问题主轴</text>
+  <text x="398" y="468" class="body">• 展示一期优先级和 8 步主链路</text>
+  <text x="398" y="504" class="small">意义</text>
+  <text x="398" y="528" class="body">把项目背景、问题和方案主线压成一页，不再靠多份 md 来回对照。</text>
+
+  <rect x="880" y="346" width="472" height="252" rx="28" fill="#FFFFFF" stroke="#E5D8C8" filter="url(#shadow)"/>
+  <text x="910" y="388" class="section">文档基线页</text>
+  <text x="910" y="420" class="body">• 标准事件 / 自定义事件</text>
+  <text x="910" y="444" class="body">• 字段定义、必填项、版本差异</text>
+  <text x="910" y="468" class="body">• 当前基线状态与输入来源</text>
+  <text x="910" y="504" class="small">意义</text>
+  <text x="910" y="528" class="body">把当前最散乱、最依赖口头补充的部分先变成结构化页签。</text>
+
+  <rect x="368" y="630" width="472" height="252" rx="28" fill="#FFFFFF" stroke="#E5D8C8" filter="url(#shadow)"/>
+  <text x="398" y="672" class="section">规则中心页</text>
+  <text x="398" y="704" class="body">• 显示 AI 生成规则草稿</text>
+  <text x="398" y="728" class="body">• 标出冲突和待确认规则</text>
+  <text x="398" y="752" class="body">• 明确规则责任方</text>
+  <text x="398" y="788" class="small">意义</text>
+  <text x="398" y="812" class="body">把“规则靠人记忆和临时解释”变成可确认、可流转的资产。</text>
+
+  <rect x="880" y="630" width="472" height="252" rx="28" fill="#FFFFFF" stroke="#E5D8C8" filter="url(#shadow)"/>
+  <text x="910" y="672" class="section">验收与协作页</text>
+  <text x="910" y="704" class="body">• 验收执行：ID/DID + 时间窗口</text>
+  <text x="910" y="728" class="body">• 异常清单：层级、严重度、责任建议</text>
+  <text x="910" y="752" class="body">• 协作沉淀：角色化报告与知识链接</text>
+  <text x="910" y="788" class="small">意义</text>
+  <text x="910" y="812" class="body">把验收结果从“看日志 + 群里解释”改成工作台里的结构化输出。</text>
+
+  <rect x="88" y="920" width="1264" height="128" rx="30" fill="#FFFDF8" stroke="#E3D5C3" filter="url(#shadow)"/>
+  <text x="122" y="962" class="section">来源文档</text>
+  <a href="../../frontend/README.md"><text x="122" y="992" class="link">frontend/README.md</text></a>
+  <a href="../../frontend/src/App.jsx"><text x="402" y="992" class="link">frontend/src/App.jsx</text></a>
+  <a href="../requirements/一期需求范围.md"><text x="722" y="992" class="link">requirements/一期需求范围.md</text></a>
+  <text x="122" y="1020" class="body">这张图解释当前前端原型“每个页面为什么存在”，防止前端骨架和业务方案脱节。</text>
+</svg>

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="860" viewBox="0 0 1440 860" fill="none">
+  <defs>
+    <linearGradient id="bg2" x1="64" y1="48" x2="1376" y2="812" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FAFCFF"/>
+      <stop offset="1" stop-color="#F2F6FF"/>
+    </linearGradient>
+    <filter id="shadow2" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#BAC7E0" flood-opacity="0.28"/>
+    </filter>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#7185A8"/>
+    </marker>
+    <marker id="arrowSoft" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#97A8C7"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 30px; font-weight: 700; fill: #1F2A44; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #60708F; }
+      .node-title { font-size: 20px; font-weight: 700; fill: #20304A; }
+      .node-body { font-size: 13px; font-weight: 500; fill: #596A88; }
+      .hint { font-size: 13px; font-weight: 600; fill: #6B7D9A; }
+      .group { font-size: 18px; font-weight: 700; fill: #23324C; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="860" fill="url(#bg2)"/>
+
+  <text x="88" y="64" class="title">连弩工作台关系图 v1</text>
+  <text x="88" y="92" class="subtitle">主链：定义 -> 编排 -> 执行 -> 定位 -> 判断；Eval Studio 横向提供判定语言，Trace / Report 反向沉淀资产</text>
+
+  <rect x="88" y="136" width="1264" height="450" rx="30" fill="#FFFFFF" stroke="#D7E2F5" filter="url(#shadow2)"/>
+  <text x="116" y="176" class="group">主工作链</text>
+
+  <rect x="116" y="266" width="180" height="120" rx="24" fill="#F4F8FF" stroke="#D9E4FA"/>
+  <text x="143" y="306" class="node-title">Case Studio</text>
+  <text x="143" y="333" class="node-body">定义 case、对象类型、期望结果、</text>
+  <text x="143" y="352" class="node-body">风险标签与测试输入</text>
+
+  <rect x="346" y="266" width="180" height="120" rx="24" fill="#F4F8FF" stroke="#D9E4FA"/>
+  <text x="373" y="306" class="node-title">Suite Studio</text>
+  <text x="373" y="333" class="node-body">组织 baseline / regression /</text>
+  <text x="373" y="352" class="node-body">scenario suites</text>
+
+  <rect x="576" y="266" width="180" height="120" rx="24" fill="#F4F8FF" stroke="#D9E4FA"/>
+  <text x="603" y="306" class="node-title">Run Studio</text>
+  <text x="603" y="333" class="node-body">发起 run、配置环境、</text>
+  <text x="603" y="352" class="node-body">重跑、多 trial 管理</text>
+
+  <rect x="806" y="266" width="180" height="120" rx="24" fill="#F4F8FF" stroke="#D9E4FA"/>
+  <text x="833" y="306" class="node-title">Trace Studio</text>
+  <text x="833" y="333" class="node-body">失败下钻、过程复盘、</text>
+  <text x="833" y="352" class="node-body">review 挂点、定位问题</text>
+
+  <rect x="1036" y="266" width="180" height="120" rx="24" fill="#FFF8F0" stroke="#F1DDC1"/>
+  <text x="1063" y="306" class="node-title">Report Studio</text>
+  <text x="1063" y="333" class="node-body">报告、版本 compare、</text>
+  <text x="1063" y="352" class="node-body">质量判断与放行建议</text>
+
+  <path d="M296 326H346" stroke="#7185A8" stroke-width="3" marker-end="url(#arrow2)"/>
+  <path d="M526 326H576" stroke="#7185A8" stroke-width="3" marker-end="url(#arrow2)"/>
+  <path d="M756 326H806" stroke="#7185A8" stroke-width="3" marker-end="url(#arrow2)"/>
+  <path d="M986 326H1036" stroke="#7185A8" stroke-width="3" marker-end="url(#arrow2)"/>
+
+  <rect x="486" y="446" width="468" height="96" rx="24" fill="#FFFFFF" stroke="#D7E2F5"/>
+  <text x="514" y="482" class="group">Eval Studio</text>
+  <text x="514" y="507" class="node-body">横向提供 evaluator、rules、thresholds、redlines，影响 Case / Suite / Run / Trace / Report 全链路</text>
+
+  <path d="M566 446L246 386" stroke="#97A8C7" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrowSoft)"/>
+  <path d="M608 446L436 386" stroke="#97A8C7" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrowSoft)"/>
+  <path d="M720 446V386" stroke="#97A8C7" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrowSoft)"/>
+  <path d="M830 446L896 386" stroke="#97A8C7" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrowSoft)"/>
+  <path d="M900 446L1126 386" stroke="#97A8C7" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#arrowSoft)"/>
+
+  <path d="M896 386C896 470 420 478 206 620" stroke="#8FA4C7" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#arrowSoft)"/>
+  <text x="420" y="566" class="hint">问题回流：Trace -> 新 Case / 风险标签 / reviewer 规则</text>
+
+  <path d="M1126 386C1126 470 1026 520 716 620" stroke="#8FA4C7" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#arrowSoft)"/>
+  <text x="952" y="566" class="hint">回归沉淀：Report -> regression suite / baseline / gate 规则</text>
+
+  <rect x="88" y="634" width="1264" height="148" rx="28" fill="#FFFFFF" stroke="#D7E2F5" filter="url(#shadow2)"/>
+  <text x="116" y="674" class="group">关系约束</text>
+  <text x="116" y="706" class="hint">1. 一级导航固定为 6 个工作台，不按 MCP / Chat / Agent / 知识检索 / Skill / Workflow 分区</text>
+  <text x="116" y="732" class="hint">2. Compare 归属 Report Studio，Rule / Evaluator 归属 Eval Studio，不再拆独立一级中心</text>
+  <text x="116" y="758" class="hint">3. Trace 必须可回流 Case，Report 必须可回流 Suite，这决定平台是否具备持续回归价值</text>
+</svg>

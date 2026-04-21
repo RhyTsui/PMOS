@@ -49,6 +49,8 @@ export class ProviderRegistry {
       capabilities: provider.capabilities,
       model: provider.model ?? null,
       priority: provider.priority,
+      authMode: provider.authMode,
+      scope: provider.scope,
     }));
   }
 
@@ -125,7 +127,30 @@ export class ProviderRegistry {
       };
     }
 
-    const primaryValue = process.env[provider.envKey]?.trim() ?? '';
+    if (provider.authMode === 'browser') {
+      return {
+        ...provider,
+        configured: provider.scope === 'codex-only',
+        runtimeReady: false,
+        deprecatedEnvInUse: false,
+        activeEnvKey: null,
+        apiKey: null,
+      };
+    }
+
+    const envKeys = [...new Set([provider.envKey, ...provider.envKeys].map((envKey) => envKey.trim()).filter(Boolean))];
+    const configuredKeys = envKeys
+      .map((envKey) => ({
+        envKey,
+        value: process.env[envKey]?.trim() ?? '',
+      }))
+      .filter((entry) => Boolean(entry.value));
+    const selected = configuredKeys.length > 0
+      ? provider.keySelection === 'random'
+        ? configuredKeys[Math.floor(Math.random() * configuredKeys.length)]
+        : configuredKeys[0]
+      : null;
+    const primaryValue = selected?.value ?? '';
     const legacyEnvKey = provider.legacyEnvKeys.find((envKey) => Boolean(process.env[envKey]?.trim())) ?? null;
     const legacyValue = legacyEnvKey ? process.env[legacyEnvKey]?.trim() ?? '' : '';
     const apiKey = primaryValue || legacyValue || null;
@@ -135,7 +160,7 @@ export class ProviderRegistry {
       configured: Boolean(apiKey),
       runtimeReady: Boolean(apiKey),
       deprecatedEnvInUse: !primaryValue && Boolean(legacyEnvKey),
-      activeEnvKey: primaryValue ? provider.envKey : legacyEnvKey,
+      activeEnvKey: selected?.envKey ?? legacyEnvKey,
       apiKey,
     };
   }

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Asset Platform - Tone C</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --text: #152033;
+      --muted: #65748b;
+      --line: rgba(21, 32, 51, 0.1);
+      --white: rgba(255,255,255,0.88);
+      --teal: #0f766e;
+      --ink: #1d3b65;
+      --gold: #b98918;
+      --shadow: 0 24px 55px rgba(54, 78, 113, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at left top, rgba(15,118,110,0.12), transparent 26%),
+        radial-gradient(circle at right 18%, rgba(29,59,101,0.12), transparent 24%),
+        linear-gradient(180deg, #fbfcfe 0%, var(--bg) 100%);
+    }
+    .shell {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .title-block small {
+      display: block;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .title-block h1 {
+      margin: 0;
+      font-size: 46px;
+      line-height: 1.02;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--white);
+      padding: 11px 16px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      color: var(--text);
+      font-weight: 700;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--ink), #315d95);
+      color: #fff;
+      border-color: transparent;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .hero-main {
+      padding: 28px;
+      min-height: 270px;
+    }
+    .hero-main p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 760px;
+    }
+    .orbit {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .node {
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 600;
+    }
+    .hero-side {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+    .cluster {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255,255,255,0.56);
+    }
+    .cluster h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+    .cluster strong {
+      display: block;
+      font-size: 30px;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 18px;
+    }
+    .gallery {
+      padding: 20px;
+    }
+    .gallery-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .gallery-head h2,
+    .sidebar h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .asset {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255,255,255,0.78);
+    }
+    .asset-type {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(15,118,110,0.08);
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .asset h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+    .asset p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      min-height: 72px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+    }
+    .asset-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .sidebar {
+      padding: 20px;
+    }
+    .sidebar-block {
+      border-bottom: 1px solid var(--line);
+      padding: 0 0 16px;
+      margin: 0 0 16px;
+    }
+    .sidebar-block:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    .sidebar-block h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+    .list-item {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+    }
+    .list-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .list-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 1160px) {
+      .hero, .layout, .grid { grid-template-columns: 1fr; }
+      .title-block h1 { font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="header">
+      <div class="title-block">
+        <small>Tone C / Knowledge Atlas</small>
+        <h1>让知识资产“被发现、被连接、被调用”。</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn">知识地图</button>
+        <button class="btn">广场订阅</button>
+        <button class="btn primary">新建知识域</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="card hero-main">
+        <p style="margin:0;color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;">Discovery First</p>
+        <h1 style="font-size:50px;margin-top:10px;">一个偏探索与发现的知识资产首页。</h1>
+        <p>
+          这个方向更像“知识地图”而不是“中台表格”。它适合以后做知识广场、专题聚合、个人长期上下文、热点主题和洞察扩展。
+          如果你希望产品一眼看上去不是后台，而像新一代 AI 知识工作台，这个调性更合适。
+        </p>
+        <div class="orbit">
+          <span class="node">会议纪要</span>
+          <span class="node">广告规则</span>
+          <span class="node">项目方案</span>
+          <span class="node">外部订阅</span>
+          <span class="node">Chat 引用</span>
+          <span class="node">修正记录</span>
+          <span class="node">高频主题</span>
+        </div>
+      </div>
+      <div class="card hero-side">
+        <div class="cluster">
+          <h3>活跃知识域</h3>
+          <strong>12</strong>
+          <div>广告业务、数据分析、个人上下文三大域最活跃。</div>
+        </div>
+        <div class="cluster">
+          <h3>今日热点</h3>
+          <strong>素材疲劳</strong>
+          <div>过去 24 小时被 3 个 Chat 和 2 个团队反复引用。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="card gallery">
+        <div class="gallery-head">
+          <div>
+            <h2>精选资产</h2>
+            <div class="sub">把资产做成卡片集合，弱化传统表格感。</div>
+          </div>
+          <div class="sub">按热点 / 业务域 / 资产类型切换</div>
+        </div>
+
+        <div class="grid">
+          <article class="asset">
+            <div class="asset-type">业务规则</div>
+            <h3>Q2 广告归因与转化成本口径</h3>
+            <p>广告业务 Chat 与数据分析 Chat 的核心 grounding 资产，近期被频繁用于归因争议和预算分配讨论。</p>
+            <div class="chips">
+              <span class="chip">广告业务</span>
+              <span class="chip">归因</span>
+              <span class="chip">高频引用</span>
+            </div>
+            <div class="asset-foot"><span>今天更新</span><span>引用 142 次</span></div>
+          </article>
+
+          <article class="asset">
+            <div class="asset-type">会议纪要</div>
+            <h3>广州二部周会：素材迭代策略</h3>
+            <p>从过程知识进入知识资产平台的典型样例，包含 2 个待确认问题和 3 个可沉淀的策略结论。</p>
+            <div class="chips">
+              <span class="chip">会议纪要</span>
+              <span class="chip">待修正</span>
+              <span class="chip">策略讨论</span>
+            </div>
+            <div class="asset-foot"><span>今天导入</span><span>待确认 2 项</span></div>
+          </article>
+
+          <article class="asset">
+            <div class="asset-type">订阅内容</div>
+            <h3>Meta Ads 创意疲劳研究订阅</h3>
+            <p>外部研究经过筛选和沉淀后进入个人与团队知识流，用于补充内部案例视角。</p>
+            <div class="chips">
+              <span class="chip">外部趋势</span>
+              <span class="chip">创意分析</span>
+            </div>
+            <div class="asset-foot"><span>自动同步</span><span>个人 Chat 可用</span></div>
+          </article>
+
+          <article class="asset">
+            <div class="asset-type">项目方案</div>
+            <h3>知识资产平台 v1.1 规划包</h3>
+            <p>当前平台自身的规划和版本框架，可作为产品、研发和 Demo 联动的内部知识域样例。</p>
+            <div class="chips">
+              <span class="chip">平台规划</span>
+              <span class="chip">版本设计</span>
+            </div>
+            <div class="asset-foot"><span>内部资产</span><span>多人协作</span></div>
+          </article>
+        </div>
+      </div>
+
+      <aside class="card sidebar">
+        <div class="sidebar-block">
+          <h2>侧栏洞察</h2>
+        </div>
+        <div class="sidebar-block">
+          <h3>热门主题</h3>
+          <div class="list">
+            <div class="list-item"><strong>素材疲劳</strong><span>过去 7 天增长 34%</span></div>
+            <div class="list-item"><strong>归因口径</strong><span>高频出现在广告与分析 Chat</span></div>
+            <div class="list-item"><strong>会议决策沉淀</strong><span>过程知识转正式知识的核心入口</span></div>
+          </div>
+        </div>
+        <div class="sidebar-block">
+          <h3>推荐动作</h3>
+          <div class="list">
+            <div class="list-item"><strong>补齐“数据回传延迟”知识</strong><span>广告业务 Chat 多次检索无结果</span></div>
+            <div class="list-item"><strong>修正周会纪要中的 2 条口径</strong><span>过程知识存在未确认结论</span></div>
+          </div>
+        </div>
+        <div class="sidebar-block">
+          <h3>适用场景</h3>
+          <div class="list">
+            <div class="list-item"><strong>知识广场</strong><span>更容易做发现与订阅</span></div>
+            <div class="list-item"><strong>个人知识库</strong><span>更像长期上下文空间</span></div>
+            <div class="list-item"><strong>洞察扩展</strong><span>适合后续做热点和缺口分析</span></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+</body>
+</html>

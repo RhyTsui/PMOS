@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 980" width="1500" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
+    .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
+    .sub { fill: #6e6e80; font-size: 13px; }
+    .box { fill: #ffffff; stroke: #e5e5e5; stroke-width: 1.5; rx: 10; }
+    .step { fill: #0d0d0d; font-size: 16px; font-weight: 600; }
+    .body { fill: #374151; font-size: 13px; }
+    .meta { fill: #6e6e80; font-size: 12px; }
+    .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
+  </style>
+  <defs>
+    <marker id="arrow-oai" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10a37f"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="980" fill="#ffffff"/>
+  <a href="index.svg"><text x="72" y="46" class="linkText">&lt;- 返回目录</text></a>
+  <text x="72" y="88" class="title">PMAIOS 工作流图板</text>
+  <text x="72" y="116" class="sub">面向 chief 的主链路。所有 AI 产品经理和子项目都应继承这条操作路径。</text>
+
+  <rect x="72" y="180" width="150" height="92" class="box"/>
+  <text x="102" y="218" class="step">1. 输入</text>
+  <text x="102" y="242" class="body">进入 inbox</text>
+
+  <rect x="280" y="180" width="170" height="92" class="box"/>
+  <text x="310" y="218" class="step">2. 研究</text>
+  <text x="310" y="242" class="body">访谈 / 对比 / 扫描</text>
+
+  <rect x="508" y="180" width="180" height="92" class="box"/>
+  <text x="538" y="218" class="step">3. 头脑风暴</text>
+  <text x="538" y="242" class="body">生成候选方向</text>
+
+  <rect x="746" y="180" width="206" height="92" class="box"/>
+  <text x="776" y="218" class="step">4. 认知整合</text>
+  <text x="776" y="242" class="body">形成一致地图</text>
+
+  <rect x="1010" y="180" width="198" height="92" class="box"/>
+  <text x="1040" y="218" class="step">5. 关键点提炼</text>
+  <text x="1040" y="242" class="body">抽出决策与风险</text>
+
+  <rect x="1266" y="180" width="162" height="92" class="box"/>
+  <text x="1296" y="218" class="step">6. 决策</text>
+  <text x="1296" y="242" class="body">chief 评审</text>
+
+  <line x1="222" y1="226" x2="280" y2="226" stroke="#10a37f" stroke-width="1.8" marker-end="url(#arrow-oai)"/>
+  <line x1="450" y1="226" x2="508" y2="226" stroke="#10a37f" stroke-width="1.8" marker-end="url(#arrow-oai)"/>
+  <line x1="688" y1="226" x2="746" y2="226" stroke="#10a37f" stroke-width="1.8" marker-end="url(#arrow-oai)"/>
+  <line x1="952" y1="226" x2="1010" y2="226" stroke="#10a37f" stroke-width="1.8" marker-end="url(#arrow-oai)"/>
+  <line x1="1208" y1="226" x2="1266" y2="226" stroke="#10a37f" stroke-width="1.8" marker-end="url(#arrow-oai)"/>
+
+  <rect x="280" y="356" width="360" height="156" class="box"/>
+  <text x="308" y="394" class="step">5.5 固定提问阶段</text>
+  <text x="308" y="418" class="meta">重大收敛前强制发生</text>
+  <text x="308" y="454" class="body">目标、边界、优先级、架构、非目标和决策请求类问题，都必须书面化、分组，并回写到治理产物。</text>
+
+  <rect x="700" y="356" width="340" height="156" class="box"/>
+  <text x="728" y="394" class="step">7. 输出</text>
+  <text x="728" y="418" class="meta">AI PM 默认输出</text>
+  <text x="728" y="454" class="body">优先用 `project-board.svg`、`research-map.svg`、`planning-board.svg`、`decision-board.svg`、`workflow-board.svg` 作为面向 chief 的第一产物。</text>
+
+  <rect x="1100" y="356" width="328" height="156" class="box"/>
+  <text x="1128" y="394" class="step">8. 主动同步</text>
+  <text x="1128" y="418" class="meta">提交等于可见</text>
+  <text x="1128" y="454" class="body">Target / done / current / blocker / needed decision。没有同步的工作不算已提交。</text>
+
+  <rect x="72" y="578" width="432" height="230" class="box"/>
+  <text x="100" y="616" class="step">角色分工</text>
+  <text x="100" y="652" class="body">Chief：顶层支持、边界判断、最终收敛。</text>
+  <text x="100" y="684" class="body">虚拟 chief：工作流治理、任务整形、评审和 gate 执行。</text>
+  <text x="100" y="716" class="body">项目 PM：研究、初稿、提问、同步，以及子项目治理产物输出。</text>
+  <text x="100" y="760" class="body">AI PM 输出默认从 SVG 图板进入评审，除非有明确下游格式覆盖这个默认值。</text>
+
+  <rect x="544" y="578" width="432" height="230" class="box"/>
+  <text x="572" y="616" class="step">Stage Gates</text>
+  <text x="572" y="652" class="body">问题定义 -&gt; 研究分析 -&gt; 架构确认 -&gt; 产品方案 -&gt; PRD/原型 -&gt; 交付规划。</text>
+  <text x="572" y="700" class="body">研究和架构还未收口时，任何项目都不应该直接跳到 PRD 或最终实施方案。</text>
+  <text x="572" y="748" class="body">如果 gate 未完成，输出只能停留在候选方向、风险、缺失信息或研究建议。</text>
+
+  <rect x="1016" y="578" width="412" height="230" class="box"/>
+  <text x="1044" y="616" class="step">关联真源</text>
+  <a href="../docs/operations/product-workflow-total-design.md"><text x="1044" y="660" class="linkText">打开总工作流设计 -&gt;</text></a>
+  <a href="../docs/operations/svg-first-artifact-policy.md"><text x="1044" y="692" class="linkText">打开 SVG-first 政策 -&gt;</text></a>
+  <a href="../docs/templates/svg_primary_artifact_template.md"><text x="1044" y="724" class="linkText">打开 SVG 产物模板 -&gt;</text></a>
+  <a href="pmaios-pm-delivery.svg"><text x="1044" y="756" class="linkText">打开 PM 交付图板 -&gt;</text></a>
+
+  <rect x="72" y="854" width="1356" height="74" class="box"/>
+  <text x="100" y="896" class="body">默认阅读路径：先图板，后附录。如果存在 Markdown 附件，它应该服务于 SVG 图板，而不是替代图板成为第一评审入口。</text>
+</svg>

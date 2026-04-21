@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>广告聚合 MCP v3.14.16 高保真原型</title>
+  <style>
+    :root {
+      --nav-bg: #182649;
+      --nav-accent: #2e7bf6;
+      --page-bg: #f3f6fb;
+      --card-bg: #ffffff;
+      --line: #e6ebf2;
+      --text: #1b2537;
+      --muted: #7c8aa5;
+      --soft-blue: #e8f1ff;
+      --blue: #2f7cf6;
+      --green: #36b37e;
+      --warning-bg: #fff7dd;
+      --warning-text: #8a6400;
+      --shadow: 0 10px 28px rgba(19, 38, 73, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 176px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      height: 60px;
+      background: var(--nav-bg);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(150deg, #39a0ff 0%, #2e7bf6 40%, #fed36e 100%);
+      transform: skew(-12deg);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,.18);
+    }
+
+    .side-menu {
+      padding: 8px 10px 20px;
+      overflow: auto;
+    }
+
+    .side-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 38px;
+      padding: 0 12px;
+      margin: 2px 0;
+      border-radius: 8px;
+      color: #31415e;
+      cursor: pointer;
+    }
+
+    .side-item.active {
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .dot-icon {
+      width: 16px;
+      height: 16px;
+      border: 1.6px solid currentColor;
+      border-radius: 3px;
+      position: relative;
+      opacity: .8;
+    }
+
+    .dot-icon::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 6px;
+      height: 6px;
+      background: currentColor;
+      border-radius: 2px;
+      opacity: .75;
+    }
+
+    .main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 60px;
+      background: var(--nav-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px 0 10px;
+      color: #fff;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 14px;
+    }
+
+    .top-tab {
+      padding: 18px 14px 14px;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      opacity: .92;
+    }
+
+    .top-tab.active {
+      border-bottom-color: #3f89ff;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .switch-pill, .project-pill {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .switch-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.12);
+    }
+
+    .project-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9fe4ae, #4ea56b);
+    }
+
+    .content {
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .page {
+      display: none;
+      gap: 14px;
+      flex-direction: column;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tiny-square {
+      width: 11px;
+      height: 11px;
+      background: #4b8ef7;
+      border-radius: 2px;
+      box-shadow: 4px 4px 0 #dfeafc;
+    }
+
+    .subnote {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero-panel {
+      padding: 18px;
+    }
+
+    .hero-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .kpi-card {
+      min-height: 112px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #fff, #fcfdff);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kpi-card .label {
+      font-size: 14px;
+      color: #3e4a61;
+    }
+
+    .kpi-card .big {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
+    .progress {
+      margin-top: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #edf3fc;
+      overflow: hidden;
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #2d7df7, #5aa4ff);
+      border-radius: inherit;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 14px;
+      min-height: 110px;
+    }
+
+    .stat-card.selected {
+      outline: 2px solid #b7d4ff;
+      background: #fbfdff;
+    }
+
+    .stat-card .name {
+      color: #394762;
+      font-size: 13px;
+      min-height: 36px;
+    }
+
+    .stat-card .value {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 6px 0 12px;
+    }
+
+    .delta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .delta .up { color: #4dc59f; font-weight: 600; }
+
+    .chart-box {
+      height: 260px;
+      margin: 0 16px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(47,124,246,.04), rgba(47,124,246,.01)),
+        repeating-linear-gradient(
+          to bottom,
+          #fff 0,
+          #fff 48px,
+          #eef3fb 49px,
+          #eef3fb 50px
+        );
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-line {
+      position: absolute;
+      left: 26px;
+      right: 26px;
+      bottom: 34px;
+      height: 2px;
+      background: linear-gradient(90deg, #2f7cf6, #2f7cf6);
+    }
+
+    .chart-note {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #8aa1c6;
+      font-size: 13px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 12px;
+      padding: 16px 18px;
+      align-items: center;
+    }
+
+    .filter-label {
+      color: var(--muted);
+      font-size: 14px;
+      min-width: 64px;
+    }
+
+    .pill, .select, .search {
+      height: 36px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #33425d;
+      gap: 10px;
+    }
+
+    .pill.active {
+      background: #edf5ff;
+      color: var(--blue);
+      border-color: #d6e6ff;
+      font-weight: 600;
+    }
+
+    .search {
+      min-width: 240px;
+      color: #99a7c0;
+      justify-content: space-between;
+    }
+
+    .select.selected {
+      background: #edf5ff;
+      color: var(--blue);
+      border-color: #d6e6ff;
+      font-weight: 600;
+    }
+
+    .filter-note {
+      width: 100%;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: -2px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #3a4965;
+      padding: 0 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .btn.ghost {
+      background: #f8fbff;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .tabs button {
+      border: 0;
+      background: #fff;
+      min-width: 100px;
+      height: 40px;
+      cursor: pointer;
+      color: #44506b;
+    }
+
+    .tabs button.active {
+      background: #2f7cf6;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      padding: 0 0 4px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1180px;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid #eef2f8;
+      padding: 12px 10px;
+      text-align: left;
+      white-space: nowrap;
+      background: #fff;
+    }
+
+    th {
+      color: #4b5874;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #fff;
+    }
+
+    td strong { font-weight: 700; }
+
+    .summary-row td {
+      font-weight: 700;
+      background: #fcfdff;
+    }
+
+    .heat {
+      background: linear-gradient(180deg, rgba(63,116,255,.22), rgba(63,116,255,.10));
+      border-radius: 4px;
+    }
+
+    .placeholder {
+      height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9fb0cb;
+      font-size: 16px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(109,163,255,.08), transparent 110px),
+        #fff;
+    }
+
+    .warning {
+      margin: 12px 16px 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      font-size: 14px;
+      border: 1px solid #f2e1a3;
+    }
+
+    .metric-chip {
+      color: #44506b;
+      font-size: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      height: 36px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 28, 47, .34);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 20;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(1120px, 100%);
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 30px 60px rgba(14, 30, 64, .24);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      height: 56px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      min-height: 470px;
+    }
+
+    .col-picker {
+      padding: 18px;
+      border-right: 1px solid var(--line);
+    }
+
+    .picker-search {
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: #9ba9c2;
+      margin-bottom: 14px;
+    }
+
+    .picker-group {
+      margin-bottom: 18px;
+    }
+
+    .picker-title {
+      font-weight: 700;
+      color: #37507d;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 16px;
+      color: #4b5874;
+      font-size: 14px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .check input {
+      width: 14px;
+      height: 14px;
+    }
+
+    .selected-panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .selected-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      height: 36px;
+      border-bottom: 1px solid #eef2f7;
+      color: #47546d;
+    }
+
+    .drag {
+      color: #9aabc4;
+      font-size: 18px;
+    }
+
+    .modal-foot {
+      height: 64px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 18px;
+      background: #fff;
+    }
+
+    @media (max-width: 1200px) {
+      .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark"></span><span>智投</span></div>
+      <div class="side-menu">
+        <div class="side-item active" data-page="overview"><span class="dot-icon"></span>项目概况</div>
+        <div class="side-item" data-page="realtime"><span class="dot-icon"></span>实时数据</div>
+        <div class="side-item" data-page="day-report"><span class="dot-icon"></span>日周月报</div>
+        <div class="side-item"><span class="dot-icon"></span>流量来源</div>
+        <div class="side-item" data-page="creative"><span class="dot-icon"></span>广告素材</div>
+        <div class="side-item" data-page="roi"><span class="dot-icon"></span>ROI分析</div>
+        <div class="side-item" data-page="ltv"><span class="dot-icon"></span>LTV分析</div>
+        <div class="side-item" data-page="retention"><span class="dot-icon"></span>留存分析</div>
+        <div class="side-item" data-page="activity-report"><span class="dot-icon"></span>活动报表</div>
+        <div class="side-item" data-page="package-report"><span class="dot-icon"></span>包体报表</div>
+        <div class="side-item" data-page="live-report"><span class="dot-icon"></span>直播报表</div>
+        <div class="side-item" data-page="keyword-report"><span class="dot-icon"></span>关键词报表</div>
+        <div class="side-item" data-page="backflow-report"><span class="dot-icon"></span>回流数据</div>
+        <div class="side-item" data-page="backflow-ltv"><span class="dot-icon"></span>回流LTV</div>
+        <div class="side-item" data-page="backflow-roi"><span class="dot-icon"></span>回流ROI</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="top-tabs">
+          <div class="top-tab active">概览</div>
+          <div class="top-tab">分析</div>
+          <div class="top-tab">素材</div>
+          <div class="top-tab">推广</div>
+        </div>
+        <div class="top-right">
+          <div class="switch-pill"><span class="switch-dot"></span>预购归因: 已关闭</div>
+          <div class="project-pill"><span class="project-avatar"></span>指间山海-国内</div>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="page active" id="overview">
+          <div class="panel hero-panel">
+            <div class="hero-title">项目概况</div>
+            <div class="hero-desc">可查看广告流量数据、项目整体趋势，还可追踪本月广告目标达成情况。</div>
+            <div class="kpi-grid">
+              <div class="kpi-card"><div class="label">本月消耗目标2万</div><div><div class="big">0%</div><div class="progress"><span style="width:0%"></span></div></div></div>
+              <div class="kpi-card"><div class="label">本月激活目标1万</div><div><div class="big">28.11%</div><div class="progress"><span style="width:28%"></span></div></div></div>
+              <div class="kpi-card"><div class="label">本月付费成本目标3元</div><div><div class="big">0%</div><div class="progress"><span style="width:0%"></span></div></div></div>
+              <div class="kpi-card"><div class="label">本月首日ROI目标4%</div><div><div class="big">0%</div><div class="progress"><span style="width:0%"></span></div></div></div>
+              <div class="kpi-card"><div class="label">本月月ROI目标5%</div><div><div class="big">0%</div><div class="progress"><span style="width:0%"></span></div></div></div>
+              <div class="kpi-card"><div class="label">本月广告流水目标6万</div><div><div class="big">72.56%</div><div class="progress"><span style="width:72%"></span></div></div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>本月广告趋势</div>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-card selected"><div class="name">本月折后消耗</div><div class="value">0.0</div><div class="delta">环比前一周期 0.0</div></div>
+              <div class="stat-card"><div class="name">本月激活</div><div class="value">2,811</div><div class="delta">环比前一周期 14,793 <span class="up">↓80.99%</span></div></div>
+              <div class="stat-card"><div class="name">首日注册率均值</div><div class="value">79.26%</div><div class="delta">环比前一周期 80.30% <span class="up">↓1.29%</span></div></div>
+              <div class="stat-card"><div class="name">首日付费率均值</div><div class="value">9.92%</div><div class="delta">环比前一周期 13.55% <span class="up">↓26.83%</span></div></div>
+              <div class="stat-card"><div class="name">首日有效率均值</div><div class="value">0.00%</div><div class="delta">环比前一周期 75.80% <span class="up">↓100%</span></div></div>
+              <div class="stat-card"><div class="name">次留率均值</div><div class="value">33.39%</div><div class="delta">环比前一周期 75.80% <span class="up">↓55.94%</span></div></div>
+              <div class="stat-card"><div class="name">首日ROI均值</div><div class="value">0.00%</div><div class="delta">环比前一周期 0.00%</div></div>
+            </div>
+            <div class="chart-box">
+              <div class="chart-line"></div>
+              <div class="chart-note">日消耗趋势</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据明细</div>
+              <div class="toolbar">
+                <button class="metric-chip open-columns">指标 13/35</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>折后消耗</th>
+                    <th>激活数</th>
+                    <th>激活成本</th>
+                    <th>注册数</th>
+                    <th>注册成本</th>
+                    <th>有效数</th>
+                    <th>有效率</th>
+                    <th>有效成本</th>
+                    <th>首日付费账号数</th>
+                    <th>首日付费金额</th>
+                    <th>首日付费成本</th>
+                    <th>首日ROI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>0.00</td><td>1,604</td><td>0.00</td><td>1,444</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>181</td><td>4,728.00</td><td>0.00</td><td>0.00%</td></tr>
+                  <tr><td>2026-04-20</td><td>0.00</td><td>56</td><td>0.00</td><td>48</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>2</td><td>110.00</td><td>0.00</td><td>0.00%</td></tr>
+                  <tr><td>2026-04-19</td><td>0.00</td><td>423</td><td>0.00</td><td>383</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>44</td><td>772.00</td><td>0.00</td><td>0.00%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="realtime">
+          <div class="panel hero-panel">
+            <div class="hero-title">实时数据</div>
+            <div class="hero-desc">仅广告数据，消耗每20分钟更新一次，其他数据实时更新。成本口径已排除未消耗媒体。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">2026-04-20</div>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-card"><div class="name">折后消耗</div><div class="value">0.00</div><div class="delta">23:00 截止</div></div>
+              <div class="stat-card"><div class="name">激活设备成本</div><div class="value">0.00</div><div class="delta">环比 2026-04-19</div></div>
+              <div class="stat-card"><div class="name">注册账号成本</div><div class="value">0.00</div><div class="delta">环比 2026-04-19</div></div>
+              <div class="stat-card"><div class="name">首日付费成本</div><div class="value">0.00 元</div><div class="delta">环比 2026-04-19</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>小时数据</div>
+              <div class="toolbar">
+                <button class="btn">指标口径：按时段统计</button>
+                <button class="btn primary">明细媒体</button>
+                <button class="metric-chip open-columns">指标 12/24</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>时段</th>
+                    <th>折后消耗</th>
+                    <th>激活数</th>
+                    <th>激活成本</th>
+                    <th>注册数</th>
+                    <th>注册成本</th>
+                    <th>有效数</th>
+                    <th>有效率</th>
+                    <th>有效成本</th>
+                    <th>首日付费账号数</th>
+                    <th>首日付费金额</th>
+                    <th>首日付费成本</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>0.00</td><td>0</td><td>0.00</td><td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>0</td><td>0.00</td><td>0.00</td></tr>
+                  <tr><td>03:00-04:00</td><td>0.00</td><td>0</td><td>0.00</td><td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>0</td><td>0.00</td><td>0.00</td></tr>
+                  <tr><td>02:00-03:00</td><td>0.00</td><td>0</td><td>0.00</td><td>0</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>0</td><td>0.00</td><td>0.00</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="day-report">
+          <div class="panel hero-panel">
+            <div class="hero-title">日周月报</div>
+            <div class="hero-desc">仅广告数据，市场和运营数据将在流量来源分析。每20分钟更新一次。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="tabs">
+                <button>汇总</button>
+                <button class="active">日报</button>
+                <button>周报</button>
+                <button>月报</button>
+              </div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+              <div class="select">日期对比</div>
+              <div class="pill">包含自然量</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据明细</div>
+              <div class="toolbar">
+                <div class="subnote">支持汇总、日、周、月四种周期视图</div>
+                <button class="btn">应用类型</button>
+                <button class="btn">媒体</button>
+                <button class="btn">团队</button>
+                <button class="btn">应用类型+团队</button>
+                <button class="btn">应用类型+媒体</button>
+                <button class="metric-chip open-columns">指标 22/75</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>折后消耗</th>
+                    <th>激活数</th>
+                    <th>激活成本</th>
+                    <th>注册数</th>
+                    <th>注册成本</th>
+                    <th>有效数</th>
+                    <th>有效率</th>
+                    <th>有效成本</th>
+                    <th>首日付费账号数</th>
+                    <th>首日付费金额</th>
+                    <th>首日付费成本</th>
+                    <th>首日ROI</th>
+                    <th>2日ROI</th>
+                    <th>3日ROI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>0.00</td><td>1,604</td><td>0.00</td><td>1,444</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>181</td><td>4,728.00</td><td>0.00</td><td>0.00%</td><td>0.00%</td><td>0.00%</td></tr>
+                  <tr><td>2026-04-20</td><td>0.00</td><td>56</td><td>0.00</td><td>48</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>2</td><td>110.00</td><td>0.00</td><td>0.00%</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-19</td><td>0.00</td><td>423</td><td>0.00</td><td>383</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>44</td><td>772.00</td><td>0.00</td><td>0.00%</td><td>0.00%</td><td>-</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="creative">
+          <div class="panel hero-panel">
+            <div class="hero-title">广告素材</div>
+            <div class="hero-desc">可查看国内三大媒体的广告明细、素材明细数据，数据每20分钟更新。</div>
+          </div>
+
+          <div class="panel">
+            <div class="filters">
+              <div class="tabs">
+                <button>账户</button>
+                <button>广告组</button>
+                <button>广告</button>
+                <button class="active">素材</button>
+              </div>
+              <div class="pill active">不限</div>
+              <div class="pill">巨量广告</div>
+              <div class="pill">腾讯广告</div>
+              <div class="pill">快手广告</div>
+              <div class="pill active">不限</div>
+              <div class="pill">安卓应用</div>
+              <div class="pill">iOS应用</div>
+              <div class="pill">鸿蒙应用</div>
+            </div>
+            <div class="filters" style="padding-top:0">
+              <div class="filter-label">广告</div>
+              <div class="pill active">不限</div>
+              <div class="select selected">活动 2</div>
+              <div class="select selected">账户 3</div>
+              <div class="search">广告组 / 广告 / 搜索ID/名称 <span>🔍</span></div>
+              <div class="select selected">分包 2</div>
+              <div class="select">应用类型</div>
+              <div class="select">优化目标</div>
+              <div class="select">营销场景</div>
+              <div class="select">投放模式</div>
+              <div class="select">状态</div>
+              <div class="filter-label">素材</div>
+              <div class="pill active">不限</div>
+              <div class="select">多级标签</div>
+              <div class="select">素材来源</div>
+              <div class="select">素材组</div>
+              <div class="select">旧智投筛选项</div>
+              <div class="select">制作方</div>
+              <div class="select">优化师</div>
+              <div class="select">上下架</div>
+              <div class="select">上传时间</div>
+              <div class="select">素材修改时间</div>
+              <div class="search">搜索ID/名称 <span>🔍</span></div>
+              <div class="filter-note">账户支持多选，广告组、广告、活动、分包交互与 ROI 报表一致；优化师匹配不上按未知处理，且未知默认不展示。</div>
+            </div>
+          </div>
+
+          <div class="warning">快手媒体按广告信息筛选素材时，不支持查看消耗、点击等媒体指标</div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>素材报表</div>
+              <div class="toolbar">
+                <button class="metric-chip open-columns">指标 25/101</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>素材名</th>
+                    <th>素材</th>
+                    <th>素材来源</th>
+                    <th>多级标签</th>
+                    <th>自定义标签</th>
+                    <th>横竖版</th>
+                    <th>上传人</th>
+                    <th>达人</th>
+                    <th>创意人</th>
+                    <th>制作人</th>
+                    <th>折后消耗</th>
+                    <th>点击数</th>
+                    <th>点击率</th>
+                    <th>点击成本</th>
+                    <th>激活设备数</th>
+                    <th>激活率</th>
+                    <th>激活成本</th>
+                    <th>注册数</th>
+                    <th>注册率</th>
+                    <th>注册成本</th>
+                    <th>有效数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>44</td><td>0.00%</td><td>0.00</td><td>38</td><td>86.36%</td><td>0.00</td><td>0</td></tr>
+                  <tr><td>素材ID：7567195566566522890</td><td>🖼</td><td>自制上传</td><td>剧情向/强转化</td><td>素材池A</td><td>竖版</td><td>运营A</td><td>达人_阿青</td><td>创意组-李想</td><td>制作组-小周</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>1</td><td>0.00%</td><td>0.00</td><td>1</td><td>100.00%</td><td>0.00</td><td>0</td></tr>
+                  <tr><td>素材ID：7555718807680892938</td><td>🖼</td><td>达人共创</td><td>口播向/拉活跃</td><td>素材池B</td><td>横版</td><td>市场B</td><td>达人_安妮</td><td>创意组-王璇</td><td>制作组-陈默</td><td>0.00</td><td>0</td><td>0.00%</td><td>0.00</td><td>13</td><td>0.00%</td><td>0.00</td><td>10</td><td>76.92%</td><td>0.00</td><td>0</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="roi">
+          <div class="panel hero-panel">
+            <div class="hero-title">ROI分析</div>
+            <div class="hero-desc">可查看广告流量数据，数据每20分钟更新。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="select">包体</div>
+              <div class="search">广告组 / 搜索ID/名称 <span>🔍</span></div>
+              <div class="pill">包含自然量</div>
+              <div class="select">汇总</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+              <div class="select">日期对比</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据趋势</div>
+            </div>
+            <div class="placeholder">暂无数据</div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据报表</div>
+              <div class="toolbar">
+                <div class="tabs">
+                  <button>汇总</button>
+                  <button class="active">累计ROI</button>
+                  <button>区间ROI</button>
+                </div>
+                <button class="btn primary">选择细分</button>
+                <button class="metric-chip open-columns">指标 79/126</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>折后消耗</th>
+                    <th>激活设备数</th>
+                    <th>注册数</th>
+                    <th>累计付费金额</th>
+                    <th>累计ROI</th>
+                    <th>7日付费次数</th>
+                    <th>LTV3/LTV1</th>
+                    <th>LTV7/LTV1</th>
+                    <th>LTV7/LTV3</th>
+                    <th>首日ROI</th>
+                    <th>2日ROI</th>
+                    <th>3日ROI</th>
+                    <th>4日ROI</th>
+                    <th>5日ROI</th>
+                    <th>6日ROI</th>
+                    <th>7日ROI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>0.00</td><td>1,604</td><td>1,444</td><td>9,942.00</td><td>0.00%</td><td>286</td><td>1.31</td><td>1.86</td><td>1.42</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>-</td></tr>
+                  <tr><td>2026-04-20</td><td>0.00</td><td>56</td><td>48</td><td>110.00</td><td>0.00%</td><td>5</td><td>1.12</td><td>-</td><td>-</td><td>0.00%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-19</td><td>0.00</td><td>423</td><td>383</td><td>784.00</td><td>0.00%</td><td>37</td><td>1.28</td><td>1.74</td><td>-</td><td>0.00%</td><td>0.00%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="ltv">
+          <div class="panel hero-panel">
+            <div class="hero-title">LTV分析</div>
+            <div class="hero-desc">可查看广告、市场、运营推广带来的用户生命周期付费数据，按账号LTV统计。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">包体</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="search">广告组 / 搜索ID/名称 <span>🔍</span></div>
+              <div class="select">汇总</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+              <div class="select">日期对比</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据趋势</div>
+            </div>
+            <div class="placeholder">暂无数据</div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据明细</div>
+              <div class="toolbar">
+                <button class="btn primary">选择细分</button>
+                <button class="metric-chip open-columns">指标 75/75</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>注册账号数</th>
+                    <th>LTV1</th>
+                    <th>LTV2</th>
+                    <th>LTV3</th>
+                    <th>LTV4</th>
+                    <th>LTV5</th>
+                    <th>LTV6</th>
+                    <th>LTV7</th>
+                    <th>LTV8</th>
+                    <th>LTV9</th>
+                    <th>LTV10</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>1,904</td><td>10.41</td><td>16.93</td><td>22.07</td><td>39.62</td><td>508.00</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-20</td><td>67</td><td class="heat">1.73</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-19</td><td>511</td><td class="heat">3.27</td><td class="heat">3.35</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-18</td><td>463</td><td class="heat">5.10</td><td class="heat">10.72</td><td class="heat">10.85</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="retention">
+          <div class="panel hero-panel">
+            <div class="hero-title">留存分析</div>
+            <div class="hero-desc">可查看广告、市场、运营推广带来的用户生命周期留存数据，按登录+登出事件统计。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">包体</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="search">广告组 / 搜索ID/名称 <span>🔍</span></div>
+              <div class="pill">包含自然量</div>
+              <div class="select">汇总</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+              <div class="select">日期对比</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="tiny-square"></span>数据报表</div>
+              <div class="toolbar">
+                <div class="tabs">
+                  <button class="active">新增设备留存</button>
+                  <button>注册用户留存</button>
+                  <button>首日付费账号留存</button>
+                </div>
+                <button class="btn primary">选择细分</button>
+                <button class="metric-chip open-columns">指标 43/85</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>激活数</th>
+                    <th>次留率</th>
+                    <th>3日留存率</th>
+                    <th>4日留存率</th>
+                    <th>5日留存率</th>
+                    <th>6日留存率</th>
+                    <th>7日留存率</th>
+                    <th>8日留存率</th>
+                    <th>9日留存率</th>
+                    <th>10日留存率</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="summary-row"><td>总计/平均</td><td>1,607</td><td>46.58%</td><td>38.99%</td><td>33.01%</td><td>50.00%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-19</td><td>424</td><td class="heat">11.79%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-18</td><td>414</td><td class="heat">43.24%</td><td class="heat">7.25%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                  <tr><td>2026-04-17</td><td>401</td><td class="heat">47.13%</td><td class="heat">39.65%</td><td class="heat">4.24%</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="activity-report">
+          <div class="panel hero-panel">
+            <div class="hero-title">活动报表</div>
+            <div class="hero-desc">支持活动维度投放分析，当前版本已纳入优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="search">广告组 / 搜索ID/名称 <span>🔍</span></div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">活动报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+
+        <div class="page" id="package-report">
+          <div class="panel hero-panel">
+            <div class="hero-title">包体报表</div>
+            <div class="hero-desc">支持包体维度分析，当前版本已纳入优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="select">包体</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">包体报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+
+        <div class="page" id="live-report">
+          <div class="panel hero-panel">
+            <div class="hero-title">直播报表</div>
+            <div class="hero-desc">支持直播场景投放分析，当前版本已纳入优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">直播报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+
+        <div class="page" id="keyword-report">
+          <div class="panel hero-panel">
+            <div class="hero-title">关键词报表</div>
+            <div class="hero-desc">支持关键词维度分析，当前版本已纳入优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">优化师</div>
+              <div class="select">账户</div>
+              <div class="search">广告组 / 广告 / 关键词搜索 <span>🔍</span></div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">关键词报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+
+        <div class="page" id="backflow-report">
+          <div class="panel hero-panel">
+            <div class="hero-title">回流数据</div>
+            <div class="hero-desc">支持回流数据分析，当前版本不提供优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="select">包体</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">回流数据报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+
+        <div class="page" id="backflow-ltv">
+          <div class="panel hero-panel">
+            <div class="hero-title">回流LTV</div>
+            <div class="hero-desc">支持回流 LTV 分析，当前版本不提供优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="select">包体</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">回流LTV报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+
+        <div class="page" id="backflow-roi">
+          <div class="panel hero-panel">
+            <div class="hero-title">回流ROI</div>
+            <div class="hero-desc">支持回流 ROI 分析，当前版本不提供优化师筛选。</div>
+          </div>
+          <div class="panel">
+            <div class="filters">
+              <div class="filter-label">其他筛选</div>
+              <div class="pill active">不限</div>
+              <div class="select">媒体</div>
+              <div class="select">应用类型</div>
+              <div class="select">团队</div>
+              <div class="select">活动</div>
+              <div class="select">账户</div>
+              <div class="select">包体</div>
+              <div class="select">按日</div>
+              <div class="select">2026-04-07 ～ 2026-04-20</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="tiny-square"></span>数据报表</div></div>
+            <div class="placeholder">回流ROI报表默认返回第一页 10 条内容</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="columnModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>自定义列</div>
+        <button class="btn" id="closeModal">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="col-picker">
+          <div class="picker-search">搜索指标名称</div>
+
+          <div class="picker-group">
+            <div class="picker-title">素材信息</div>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox">素材MD5</label>
+              <label class="check"><input type="checkbox">创意</label>
+              <label class="check"><input type="checkbox" checked>素材来源</label>
+              <label class="check"><input type="checkbox" checked>横竖版</label>
+              <label class="check"><input type="checkbox">尺寸</label>
+              <label class="check"><input type="checkbox">时长</label>
+              <label class="check"><input type="checkbox" checked>上传人</label>
+              <label class="check"><input type="checkbox">素材上传时间</label>
+              <label class="check"><input type="checkbox" checked>达人</label>
+              <label class="check"><input type="checkbox">素材修改日期</label>
+              <label class="check"><input type="checkbox">上下架状态</label>
+              <label class="check"><input type="checkbox">首次投放时间</label>
+            </div>
+          </div>
+
+          <div class="picker-group">
+            <div class="picker-title">素材标签</div>
+            <div class="checkbox-grid">
+              <label class="check"><input type="checkbox">素材类型</label>
+              <label class="check"><input type="checkbox">素材组</label>
+              <label class="check"><input type="checkbox" checked>多级标签</label>
+              <label class="check"><input type="checkbox">核心内容</label>
+              <label class="check"><input type="checkbox">设计风格</label>
+              <label class="check"><input type="checkbox">迭代策略</label>
+              <label class="check"><input type="checkbox" checked>创意人</label>
+              <label class="check"><input type="checkbox" checked>制作人</label>
+              <label class="check"><input type="checkbox">制作方</label>
+              <label class="check"><input type="checkbox">语言</label>
+              <label class="check"><input type="checkbox" checked>自定义标签</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="selected-panel">
+          <div class="picker-title">已选25个</div>
+          <div class="selected-item"><span><span class="drag">☰</span> 素材来源</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 多级标签</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 自定义标签</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 横竖版</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 上传人</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 达人</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 创意人</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 制作人</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 折后消耗</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 点击数</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 点击率</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 点击成本</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 激活设备数</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 激活率</span><span>×</span></div>
+          <div class="selected-item"><span><span class="drag">☰</span> 激活成本</span><span>×</span></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost">重置自定义列</button>
+        <button class="btn">保存已选</button>
+        <button class="btn primary" id="confirmModal">确认</button>
+        <button class="btn" id="cancelModal">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pages = document.querySelectorAll('.page');
+    const sideItems = document.querySelectorAll('.side-item[data-page]');
+
+    sideItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        sideItems.forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+        pages.forEach(p => p.classList.toggle('active', p.id === page));
+      });
+    });
+
+    const modal = document.getElementById('columnModal');
+    document.querySelectorAll('.open-columns').forEach(btn => {
+      btn.addEventListener('click', () => modal.classList.add('open'));
+    });
+    document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('open'));
+    document.getElementById('confirmModal').addEventListener('click', () => modal.classList.remove('open'));
+    document.getElementById('cancelModal').addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

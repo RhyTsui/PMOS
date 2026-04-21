@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1520 1040" width="1520" height="1040">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .cardTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+    .p0 { fill: #ecfdf5; stroke: #86efac; stroke-width: 1.5; rx: 14; }
+    .warn { fill: #fff7ed; stroke: #fdba74; stroke-width: 1.5; rx: 14; }
+    .hold { fill: #fef2f2; stroke: #fca5a5; stroke-width: 1.5; rx: 14; }
+  </style>
+
+  <rect width="1520" height="1040" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">返回 SVG 索引</text></a>
+  <text x="72" y="94" class="title">广告项目今日计划 2026-04-21</text>
+  <text x="72" y="122" class="sub">从硬截止日期 `2026-04-30` 倒推。今天处在第一阶段，目标是完成范围收口与 Demo 骨架定义。</text>
+
+  <rect x="72" y="156" width="1376" height="148" class="card"/>
+  <text x="100" y="194" class="cardTitle">业务时间锚点</text>
+  <text x="100" y="236" class="body">硬截止时间：`2026-04-30` 月底 Demo。</text>
+  <text x="100" y="268" class="body">当前治理文档已经把工作拆成四段：`04-20 到 04-22`、`04-23 到 04-26`、`04-27 到 04-28`、`04-29 到 04-30`。</text>
+  <text x="100" y="292" class="meta">会议纪要沉淀里还有一条业务预期：部分广告对接诉求的预期响应时间是 `5天`，这进一步说明今天必须先消灭范围歧义。</text>
+
+  <rect x="72" y="336" width="1376" height="212" class="card"/>
+  <text x="100" y="374" class="cardTitle">倒排计划</text>
+  <rect x="100" y="404" width="300" height="104" class="warn"/>
+  <text x="124" y="438" class="cardTitle">04-29 到 04-30</text>
+  <text x="124" y="470" class="body">完整走查 Demo，修稳定性问题，输出最终验收单、遗留问题和 MVP 输入。</text>
+  <rect x="430" y="404" width="300" height="104" class="warn"/>
+  <text x="454" y="438" class="cardTitle">04-27 到 04-28</text>
+  <text x="454" y="470" class="body">打通完整演示链路，补齐空状态、加载状态、异常状态。</text>
+  <rect x="760" y="404" width="300" height="104" class="warn"/>
+  <text x="784" y="438" class="cardTitle">04-23 到 04-26</text>
+  <text x="784" y="470" class="body">完成后端 Mock API 和前端工作台首版，分别跑通两个固定场景。</text>
+  <rect x="1090" y="404" width="300" height="104" class="p0"/>
+  <text x="1114" y="438" class="cardTitle">04-20 到 04-22</text>
+  <text x="1114" y="470" class="body">锁范围、锁两个 Demo 场景、锁接口骨架、锁页面骨架。</text>
+
+  <rect x="72" y="580" width="920" height="376" class="card"/>
+  <text x="100" y="618" class="cardTitle">今天必须完成</text>
+  <rect x="100" y="646" width="864" height="268" class="p0"/>
+  <text x="124" y="682" class="body">1. 用一句话锁死 Demo 范围：只做 `工作台 + 诊断 Demo + 对比分析 Demo`。</text>
+  <text x="124" y="722" class="body">2. 锁死两个固定演示问题，以及每个场景的结果结构。</text>
+  <text x="124" y="762" class="body">3. 锁死工作台信息架构：入口区、提问区、执行状态区、结果卡区。</text>
+  <text x="124" y="802" class="body">4. 锁死后端接口骨架：统一 scene 接口，加诊断 / 对比两个 mock payload 结构。</text>
+  <text x="124" y="842" class="body">5. 产出前端、后端、内容三侧交接清单，确保 `2026-04-23` 可以不再反复讨论范围，直接开做。</text>
+  <text x="124" y="882" class="meta">如果这五项今天没收口，后面几天会被反复解释和返工吃掉。</text>
+
+  <rect x="1032" y="580" width="416" height="376" class="card"/>
+  <text x="1060" y="618" class="cardTitle">今天不要做</text>
+  <rect x="1060" y="646" width="360" height="118" class="hold"/>
+  <text x="1084" y="680" class="body">真实媒体 API、全自动化链路、素材 Agent 故事、大而全 Ad OS 平台叙事。</text>
+  <rect x="1060" y="790" width="360" height="124" class="hold"/>
+  <text x="1084" y="824" class="body">视觉精修、动效细节、钻取视图，以及任何不服务月底固定 Demo 的新增业务分支。</text>
+</svg>

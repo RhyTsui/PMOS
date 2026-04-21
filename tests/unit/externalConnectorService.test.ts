@@ -40,4 +40,39 @@ describe('ExternalConnectorService', () => {
     expect(imported.sourcePath).toContain('docs/sources/inbox/dingtalk-meeting-');
     expect(await store.read(imported.sourcePath)).toContain('Knowledge base demo sync');
   });
+
+  it('reads Figma team id readiness and lists team projects', async () => {
+    const store = createStore();
+    const previousApiKey = process.env.FIGMA_API_KEY;
+    const previousTeamId = process.env.FIGMA_TEAM_ID;
+    process.env.FIGMA_API_KEY = 'figma-test-key';
+    process.env.FIGMA_TEAM_ID = 'team-1';
+
+    const service = new ExternalConnectorService(store, undefined, async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => '',
+      json: async () => ({ projects: [{ id: 'project-1', name: 'Product Design' }] }),
+    }));
+
+    const status = await service.getStatus();
+    const projects = await service.listFigmaTeamProjects();
+
+    expect(status.figma.configured).toBe(true);
+    expect(status.figma.missing).toHaveLength(0);
+    expect(status.figma.teamId).toBe('team-1');
+    expect(projects).toEqual([{ id: 'project-1', name: 'Product Design' }]);
+
+    if (previousApiKey === undefined) {
+      delete process.env.FIGMA_API_KEY;
+    } else {
+      process.env.FIGMA_API_KEY = previousApiKey;
+    }
+    if (previousTeamId === undefined) {
+      delete process.env.FIGMA_TEAM_ID;
+    } else {
+      process.env.FIGMA_TEAM_ID = previousTeamId;
+    }
+  });
 });

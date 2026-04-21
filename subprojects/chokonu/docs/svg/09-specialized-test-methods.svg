@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1200" viewBox="0 0 1480 1200" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="40" x2="1420" y2="1160" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9F2"/>
+      <stop offset="1" stop-color="#F5F7FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#D1B48A" flood-opacity="0.22"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #3A2C1E; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #7A6857; }
+      .cardTitle { font-size: 20px; font-weight: 700; fill: #423223; }
+      .body { font-size: 13px; font-weight: 500; fill: #66594E; }
+      .tag { font-size: 12px; font-weight: 700; fill: #A05C21; }
+      .foot { font-size: 13px; font-weight: 600; fill: #7A6E63; }
+    </style>
+  </defs>
+  <rect width="1480" height="1200" fill="url(#bg)"/>
+  <text x="76" y="70" class="title">09 六类专项测试方法板</text>
+  <text x="76" y="102" class="subtitle">这张图直接吸收 AI 应用分类测试框架与六份专项草案，说明 ChoKoNu 未来不是只测试一个“通用对象”。</text>
+
+  <rect x="76" y="146" width="430" height="260" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="108" y="188" class="cardTitle">MCP</text>
+  <text x="108" y="220" class="body">测试目标：工具发现、schema、参数映射、返回结构、鉴权确认、高风险工具边界。</text>
+  <text x="108" y="250" class="body">方法：契约测试、参数映射测试、请求响应差异测试、Trace 分阶段校验。</text>
+  <text x="108" y="280" class="body">指标：契约通过率、参数命中率、schema 差异率、失败阶段分布、误触发率。</text>
+  <text x="108" y="320" class="tag">更偏契约与安全边界</text>
+
+  <rect x="526" y="146" width="430" height="260" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="558" y="188" class="cardTitle">Chat</text>
+  <text x="558" y="220" class="body">测试目标：回答正确性、完整性、业务口径、多轮承接、用户问题是否真正解决。</text>
+  <text x="558" y="250" class="body">方法：语义问答测试、多轮会话测试、会话解决率测试、拒答与升级测试。</text>
+  <text x="558" y="280" class="body">指标：正确率、关键点覆盖率、幻觉率、多轮一致性、会话解决率、上下文丢失率。</text>
+  <text x="558" y="320" class="tag">更偏语义与会话结果</text>
+
+  <rect x="976" y="146" width="430" height="260" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="1008" y="188" class="cardTitle">Skill</text>
+  <text x="1008" y="220" class="body">测试目标：单项能力边界、输入输出格式、触发准确性、异常恢复和组合稳定性。</text>
+  <text x="1008" y="250" class="body">方法：边界测试、输入变体测试、输出格式测试、显式/隐式触发测试、负样本触发测试。</text>
+  <text x="1008" y="280" class="body">指标：任务完成率、格式一致率、异常恢复率、触发准确率、误触发率、漏触发率。</text>
+  <text x="1008" y="320" class="tag">更偏单能力稳定性</text>
+
+  <rect x="76" y="438" width="430" height="260" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="108" y="480" class="cardTitle">Agent</text>
+  <text x="108" y="512" class="body">测试目标：任务是否完成、工具路线是否合理、步数是否受控、失败是否正确回退。</text>
+  <text x="108" y="542" class="body">方法：任务完成度测试、工具选择路径测试、计划执行一致性测试、多 trial 稳定性测试。</text>
+  <text x="108" y="572" class="body">指标：任务完成率、正确工具路径命中率、平均完成步数、无效步骤占比、多 trial 一致性。</text>
+  <text x="108" y="612" class="tag">更偏任务完成与执行效率</text>
+
+  <rect x="526" y="438" width="430" height="260" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="558" y="480" class="cardTitle">知识检索</text>
+  <text x="558" y="512" class="body">测试目标：召回是否相关、证据是否足够支撑回答、知识版本切换后是否退化。</text>
+  <text x="558" y="542" class="body">方法：检索相关性测试、Top-K 命中、证据支撑测试、知识版本对比、库外问题拒答测试。</text>
+  <text x="558" y="572" class="body">指标：Recall@K、Precision@K、证据命中率、回答可支撑率、groundedness、拒答正确率。</text>
+  <text x="558" y="612" class="tag">更偏证据链与回答可支撑性</text>
+
+  <rect x="976" y="438" width="430" height="260" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="1008" y="480" class="cardTitle">Workflow</text>
+  <text x="1008" y="512" class="body">测试目标：节点协同、条件分支、回退补偿、状态传递、关键路径业务是否完成。</text>
+  <text x="1008" y="542" class="body">方法：链路回放、分支覆盖、状态一致性、关键路径回归、节点 I/O 契约测试。</text>
+  <text x="1008" y="572" class="body">指标：链路成功率、分支覆盖率、状态一致率、回退成功率、关键路径业务成功率。</text>
+  <text x="1008" y="612" class="tag">更偏链路稳定性与业务闭环</text>
+
+  <rect x="76" y="730" width="1330" height="238" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="108" y="772" class="cardTitle">为什么这组方法要进入首版而不是继续留在 legacy</text>
+  <text x="108" y="804" class="body">1. 这组方法决定了 ChoKoNu 的评测对象边界，直接影响评测集、评估器、报告和门禁如何设计。</text>
+  <text x="108" y="834" class="body">2. 没有专项方法，平台只能停留在“通用执行和报告”，无法指导真实 AI 应用质量建设。</text>
+  <text x="108" y="864" class="body">3. 竞品已经把 trace、dataset、evaluator、monitoring 做成行业标准语言，ChoKoNu 的差异化只能来自更强的业务治理和专项方法。</text>
+  <text x="108" y="894" class="body">4. legacy 文档明确建议首批聚焦：MCP + Chat/Agent + 知识检索 + Workflow，Skill 可以作为第二优先级补齐。</text>
+  <text x="108" y="928" class="tag">首版对象建议</text>
+
+  <rect x="76" y="998" width="1330" height="140" rx="26" fill="#FFFFFF" stroke="#F0DDC7" filter="url(#shadow)"/>
+  <text x="108" y="1040" class="cardTitle">直接落地建议</text>
+  <text x="108" y="1072" class="body">下一轮 active docs 应至少新增：专项测试对象范围说明、首批对象的指标口径、专项测试样本模板、专项评估器绑定规则。</text>
+  <text x="108" y="1104" class="foot">这张图是 legacy 研究里最贴近“怎么真的测试 AI 应用”的部分。</text>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 920" width="1360" height="920">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #0f172a; font-size: 28px; font-weight: 700; }
+    .sub { fill: #64748b; font-size: 13px; }
+    .card { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 12; }
+    .cardTitle { fill: #0f172a; font-size: 17px; font-weight: 700; }
+    .body { fill: #334155; font-size: 13px; }
+    .meta { fill: #6b7280; font-size: 12px; }
+    .linkText { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+  <rect width="1360" height="920" fill="#ffffff"/>
+  <a href="../../boards/index.svg"><text x="72" y="46" class="linkText">Back to PMAIOS directory</text></a>
+  <text x="72" y="88" class="title">Ad Project Board</text>
+  <text x="72" y="116" class="sub">Demo-first active project with SVG-first communication for the current governed document set.</text>
+
+  <rect x="72" y="160" width="392" height="190" class="card"/>
+  <rect x="72" y="160" width="5" height="190" fill="#10a37f"/>
+  <text x="100" y="198" class="cardTitle">Current Position</text>
+  <text x="100" y="223" class="meta">active / delivery pressure</text>
+  <text x="100" y="258" class="body">This project is not blocked on broad direction. It needs first-batch demo execution artifacts and a clean SVG communication layer under the new workflow shell.</text>
+
+  <rect x="484" y="160" width="392" height="190" class="card"/>
+  <text x="512" y="198" class="cardTitle">Needed Package</text>
+  <text x="512" y="258" class="body">Demo task breakdown, user flow, acceptance checklist, workflow board, task sheet board, and post-demo MVP inputs are the immediate governed outputs.</text>
+
+  <rect x="896" y="160" width="392" height="190" class="card"/>
+  <text x="924" y="198" class="cardTitle">Rule</text>
+  <text x="924" y="258" class="body">Do not keep expanding long-range product narratives. Lock onto demo-first execution and use SVG as the primary communication surface.</text>
+
+  <rect x="72" y="390" width="392" height="250" class="card"/>
+  <text x="100" y="428" class="cardTitle">Main Docs</text>
+  <a href="README.md"><text x="100" y="470" class="linkText">README.md</text></a>
+  <a href="docs/svg/index.svg"><text x="100" y="502" class="linkText">docs/svg/index.svg</text></a>
+  <a href="docs/广告项目执行工作流.md"><text x="100" y="534" class="linkText">project workflow markdown</text></a>
+  <a href="docs/广告项目产品经理任务单.md"><text x="100" y="566" class="linkText">PM task sheet markdown</text></a>
+
+  <rect x="484" y="390" width="804" height="250" class="card"/>
+  <text x="512" y="428" class="cardTitle">SVG Boards</text>
+  <a href="demo-board.svg"><text x="512" y="470" class="linkText">demo-board.svg</text></a>
+  <a href="user-flow-board.svg"><text x="512" y="502" class="linkText">user-flow-board.svg</text></a>
+  <a href="acceptance-board.svg"><text x="512" y="534" class="linkText">acceptance-board.svg</text></a>
+  <a href="docs/svg/workflow-board.svg"><text x="512" y="566" class="linkText">docs/svg/workflow-board.svg</text></a>
+  <a href="docs/svg/task-sheet-board.svg"><text x="512" y="598" class="linkText">docs/svg/task-sheet-board.svg</text></a>
+
+  <rect x="72" y="682" width="1216" height="152" class="card"/>
+  <text x="100" y="720" class="cardTitle">Default Communication Mode</text>
+  <text x="100" y="760" class="body">Future project-facing summaries, plans, and review artifacts should default to SVG boards. Markdown remains the detailed appendix layer and source material.</text>
+</svg>

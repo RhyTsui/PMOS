@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #6b7280; }
+      .section { font-size: 20px; font-weight: 700; fill: #111827; }
+      .nodeTitle { font-size: 18px; font-weight: 700; fill: #111827; }
+      .body { font-size: 14px; font-weight: 500; fill: #374151; }
+      .small { font-size: 12px; font-weight: 600; fill: #6b7280; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#94a3b8" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="980" fill="#ffffff"/>
+  <text x="80" y="70" class="title">Delay 根因与 AI 切入点</text>
+  <text x="80" y="102" class="subtitle">项目 delay 不是单一执行问题，而是灰区、歧义、依赖、变更和结果解释断裂叠加出来的。</text>
+
+  <rect x="60" y="150" width="1480" height="220" rx="24" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="90" y="194" class="section">一层根因：为什么会 delay</text>
+  <rect x="100" y="240" width="260" height="84" rx="18" fill="#ffffff" stroke="#fca5a5" filter="url(#shadow)"/>
+  <text x="126" y="274" class="nodeTitle">灰区</text>
+  <text x="126" y="300" class="body">没人拍板、责任不清、例外没定义</text>
+  <rect x="390" y="240" width="260" height="84" rx="18" fill="#ffffff" stroke="#fca5a5" filter="url(#shadow)"/>
+  <text x="416" y="274" class="nodeTitle">歧义</text>
+  <text x="416" y="300" class="body">术语不清、口径冲突、触发条件含糊</text>
+  <rect x="680" y="240" width="260" height="84" rx="18" fill="#ffffff" stroke="#fca5a5" filter="url(#shadow)"/>
+  <text x="706" y="274" class="nodeTitle">依赖未暴露</text>
+  <text x="706" y="300" class="body">上下游没准备好，影响面没人看见</text>
+  <rect x="970" y="240" width="260" height="84" rx="18" fill="#ffffff" stroke="#fca5a5" filter="url(#shadow)"/>
+  <text x="996" y="274" class="nodeTitle">变更失控</text>
+  <text x="996" y="300" class="body">版本改了但补验和通知没跟上</text>
+  <rect x="1260" y="240" width="240" height="84" rx="18" fill="#ffffff" stroke="#fca5a5" filter="url(#shadow)"/>
+  <text x="1286" y="274" class="nodeTitle">结果不解释</text>
+  <text x="1286" y="300" class="body">知道错了，不知道伤到谁</text>
+
+  <rect x="60" y="420" width="1480" height="220" rx="24" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="90" y="464" class="section">二层切入：AI 应该具体做什么</text>
+  <rect x="100" y="510" width="260" height="84" rx="18" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="126" y="544" class="nodeTitle">自动抽对象</text>
+  <text x="126" y="570" class="body">从纪要、群聊、文档里抽需求与规格对象</text>
+  <rect x="390" y="510" width="260" height="84" rx="18" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="416" y="544" class="nodeTitle">自动追问</text>
+  <text x="416" y="570" class="body">只追问真正的歧义和缺失信息</text>
+  <rect x="680" y="510" width="260" height="84" rx="18" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="706" y="544" class="nodeTitle">自动识别 blocker</text>
+  <text x="706" y="570" class="body">把灰区、依赖、待确认项显式化</text>
+  <rect x="970" y="510" width="260" height="84" rx="18" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="996" y="544" class="nodeTitle">自动生成动作</text>
+  <text x="996" y="570" class="body">补验、通知、追踪、版本更新</text>
+  <rect x="1260" y="510" width="240" height="84" rx="18" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="1286" y="544" class="nodeTitle">自动解释影响</text>
+  <text x="1286" y="570" class="body">把技术异常翻译成业务后果</text>
+
+  <rect x="60" y="690" width="1480" height="170" rx="24" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="90" y="734" class="section">三层目标：真正减少什么</text>
+  <rect x="120" y="772" width="300" height="44" rx="12" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="150" y="799" class="body">减少口头往返和重复解释</text>
+  <rect x="470" y="772" width="300" height="44" rx="12" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="500" y="799" class="body">减少模糊需求进入研发</text>
+  <rect x="820" y="772" width="300" height="44" rx="12" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="850" y="799" class="body">减少变更后遗漏补验</text>
+  <rect x="1170" y="772" width="300" height="44" rx="12" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="1200" y="799" class="body">减少结果出来却无法决策</text>
+
+  <path d="M230 324 V486" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+  <path d="M520 324 V486" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+  <path d="M810 324 V486" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+  <path d="M1100 324 V486" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+  <path d="M1380 324 V486" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+
+  <path d="M230 594 V748" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M520 594 V748" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M810 594 V748" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M1100 594 V748" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <path d="M1380 594 V748" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <rect x="60" y="890" width="1480" height="60" rx="18" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="90" y="927" class="body">核心判断：AI 不是为了“加一个新流程”，而是为了把 delay 的结构性来源提前暴露、自动归类、自动推动解决。</text>
+</svg>

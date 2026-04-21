@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 980" width="1500" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #111827; font-size: 30px; font-weight: 700; }
+    .sub { fill: #4b5563; font-size: 14px; }
+    .panel { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+    .panelTitle { fill: #0f172a; font-size: 18px; font-weight: 700; }
+    .nodeTitle { fill: #0f172a; font-size: 15px; font-weight: 700; }
+    .body { fill: #334155; font-size: 13px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 14px; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect width="1500" height="980" fill="#f8fafc"/>
+  <a href="index.svg"><text x="72" y="48" class="link">Back to SVG index</text></a>
+  <text x="72" y="94" class="title">Ad Workflow Board</text>
+  <text x="72" y="122" class="sub">Active execution order from the governed workflow doc: keep Demo First separate from long-range PRD expansion.</text>
+
+  <rect x="72" y="156" width="1356" height="322" class="panel"/>
+  <text x="100" y="194" class="panelTitle">Execution Sequence</text>
+
+  <rect x="112" y="258" width="210" height="150" fill="#dbeafe" stroke="#93c5fd" rx="14"/>
+  <text x="136" y="292" class="nodeTitle">1. Confirm Goal</text>
+  <text x="136" y="322" class="body">Freeze deadline, success</text>
+  <text x="136" y="344" class="body">criteria, in-scope, out-of-scope.</text>
+
+  <rect x="374" y="258" width="210" height="150" fill="#dcfce7" stroke="#86efac" rx="14"/>
+  <text x="398" y="292" class="nodeTitle">2. Shape Demo Plan</text>
+  <text x="398" y="322" class="body">Lock story arc, workbench IA,</text>
+  <text x="398" y="344" class="body">two scenario flows, card structure.</text>
+
+  <rect x="636" y="258" width="210" height="150" fill="#fef3c7" stroke="#fcd34d" rx="14"/>
+  <text x="660" y="292" class="nodeTitle">3. Break Down Work</text>
+  <text x="660" y="322" class="body">Split product, frontend, backend,</text>
+  <text x="660" y="344" class="body">data/content, and acceptance tasks.</text>
+
+  <rect x="898" y="258" width="210" height="150" fill="#fee2e2" stroke="#fca5a5" rx="14"/>
+  <text x="922" y="292" class="nodeTitle">4. Demo Validation</text>
+  <text x="922" y="322" class="body">Run pre-demo checks, list</text>
+  <text x="922" y="344" class="body">leftovers, decide readiness.</text>
+
+  <rect x="1160" y="258" width="210" height="150" fill="#ede9fe" stroke="#c4b5fd" rx="14"/>
+  <text x="1184" y="292" class="nodeTitle">5. Feed MVP</text>
+  <text x="1184" y="322" class="body">Convert validated learnings into</text>
+  <text x="1184" y="344" class="body">ranked post-demo capability inputs.</text>
+
+  <path d="M322 333 L374 333" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M584 333 L636 333" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M846 333 L898 333" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1108 333 L1160 333" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="72" y="516" width="654" height="344" class="panel"/>
+  <text x="100" y="554" class="panelTitle">Role Boundary</text>
+  <text x="100" y="598" class="body">Real product chief: decides scope compression and cross-project/platform boundary issues.</text>
+  <text x="100" y="640" class="body">Virtual product chief agent: judges current stage, dispatches tasks, and returns accepted / blocked style review outcomes.</text>
+  <text x="100" y="682" class="body">Ad project PM agent: drafts demo-facing outputs, consolidates PRD and demo materials, and must not expand scope on its own.</text>
+  <text x="100" y="742" class="meta">Rule: the chief reviews and converges; the PM agent does the first-draft execution.</text>
+
+  <rect x="774" y="516" width="654" height="344" class="panel"/>
+  <text x="802" y="554" class="panelTitle">Submission Contract</text>
+  <text x="802" y="598" class="body">Allowed document types at this stage:</text>
+  <text x="802" y="632" class="body">`demo-scope-note`, `demo-flow-note`, `demo-task-breakdown`, `demo-acceptance-checklist`, `mvp-input-note`</text>
+  <text x="802" y="682" class="body">Every submission must include: core conclusion, source basis, current scope, uncertainties, and questions that need chief decision.</text>
+  <text x="802" y="742" class="body">No sync means no submission. Sync is required at task receipt, after each first draft, and at 30-minute stalls.</text>
+</svg>

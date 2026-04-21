@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1320" role="img" aria-labelledby="title desc">
+  <title id="title">公司 AI 应用与知识库二开权限架构</title>
+  <desc id="desc">面向企业内部 AI 应用、公共知识库、部门知识库、项目知识库和个人知识管理的权限架构图。</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #12263f; }
+      .title { font-size: 31px; font-weight: 700; }
+      .subtitle { font-size: 16px; fill: #536b84; }
+      .section-title { font-size: 22px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 600; }
+      .body { font-size: 15px; fill: #38526d; }
+      .small { font-size: 14px; fill: #61788f; }
+      .chip { font-size: 14px; font-weight: 700; }
+    </style>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2f6fed"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#ea7a22"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#1f9d72"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f8fc"/>
+      <stop offset="100%" stop-color="#edf3fa"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#a5b6cb" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1680" height="1320" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1632" height="1272" rx="28" fill="#ffffff" stroke="#d8e2ef"/>
+
+  <text x="64" y="82" class="title">公司 AI 应用与知识库二开权限架构</text>
+  <text x="64" y="110" class="subtitle">针对数据部 AI 应用、公司公共支持库、部门应用挂库、个人知识管理与企业级 AI 挂载能力的目标态设计</text>
+
+  <rect x="56" y="146" width="1568" height="228" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="186" class="section-title">1. 业务需求拆成五类场景</text>
+
+  <rect x="84" y="218" width="286" height="124" rx="18" fill="#edf3ff" stroke="#c9d9ff" filter="url(#shadow)"/>
+  <text x="106" y="250" class="label">A. 数据部内置 AI 应用</text>
+  <text x="106" y="276" class="body">游戏数据分析 chat</text>
+  <text x="106" y="298" class="body">广告助手 / 诊断 / 联调</text>
+  <text x="106" y="320" class="small">特点：知识库 + BI / 诊断 / 工具权限一起管。</text>
+
+  <rect x="394" y="218" width="286" height="124" rx="18" fill="#eefaf6" stroke="#c7eadc" filter="url(#shadow)"/>
+  <text x="416" y="250" class="label">B. 数据部公共支持库</text>
+  <text x="416" y="276" class="body">公司可查询的数据部 FAQ</text>
+  <text x="416" y="298" class="body">公共支持资料 / 问答库</text>
+  <text x="416" y="320" class="small">特点：全员可读，数据部维护。</text>
+
+  <rect x="704" y="218" width="286" height="124" rx="18" fill="#fff8eb" stroke="#f0d8a6" filter="url(#shadow)"/>
+  <text x="726" y="250" class="label">C. 各部门 AI 应用挂库</text>
+  <text x="726" y="276" class="body">各部门自己的 chat / 助手</text>
+  <text x="726" y="298" class="body">项目成员维护知识库</text>
+  <text x="726" y="320" class="small">特点：项目成员可维护，其他人可使用。</text>
+
+  <rect x="1014" y="218" width="286" height="124" rx="18" fill="#f8f1ff" stroke="#ddc9ff" filter="url(#shadow)"/>
+  <text x="1036" y="250" class="label">D. 个人知识管理</text>
+  <text x="1036" y="276" class="body">会议纪要 / 周报 / 策划案 / 外部知识</text>
+  <text x="1036" y="298" class="body">个人 AI 洞察与提炼</text>
+  <text x="1036" y="320" class="small">特点：默认私有，可逐步分享。</text>
+
+  <rect x="1324" y="218" width="272" height="124" rx="18" fill="#eef7ff" stroke="#c7dff7" filter="url(#shadow)"/>
+  <text x="1346" y="250" class="label">E. 企业统一 AI 挂载能力</text>
+  <text x="1346" y="276" class="body">每个员工的 AI 应用可挂个人库</text>
+  <text x="1346" y="298" class="body">也可挂公开库 / 授权库</text>
+  <text x="1346" y="320" class="small">特点：同一应用可组合多类知识源。</text>
+
+  <rect x="56" y="404" width="1010" height="558" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="444" class="section-title">2. 建议新增的权限对象模型</text>
+
+  <rect x="84" y="478" width="206" height="126" rx="18" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="104" y="510" class="label">主体层</text>
+  <text x="104" y="536" class="body">员工 user</text>
+  <text x="104" y="558" class="body">部门 department</text>
+  <text x="104" y="580" class="body">项目 project</text>
+
+  <rect x="332" y="478" width="218" height="126" rx="18" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="352" y="510" class="label">应用层</text>
+  <text x="352" y="536" class="body">AI 应用 app</text>
+  <text x="352" y="558" class="body">应用成员 app_member</text>
+  <text x="352" y="580" class="body">应用角色 owner / maintainer / user</text>
+
+  <rect x="592" y="478" width="218" height="126" rx="18" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="612" y="510" class="label">知识资产层</text>
+  <text x="612" y="536" class="body">knowledge_asset</text>
+  <text x="612" y="558" class="body">asset_scope</text>
+  <text x="612" y="580" class="body">asset_owner</text>
+
+  <rect x="852" y="478" width="186" height="126" rx="18" fill="#f8f1ff" stroke="#ddc9ff"/>
+  <text x="872" y="510" class="label">策略层</text>
+  <text x="872" y="536" class="body">resource_policy</text>
+  <text x="872" y="558" class="body">access_rule</text>
+  <text x="872" y="580" class="body">approval_flow</text>
+
+  <line x1="290" y1="540" x2="332" y2="540" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="550" y1="540" x2="592" y2="540" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="810" y1="540" x2="852" y2="540" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+  <rect x="84" y="644" width="954" height="134" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="106" y="676" class="label">建议补的核心对象</text>
+  <text x="106" y="704" class="body">1. `knowledge_asset`：统一表示个人库、部门库、项目库、公共库、应用内置库。</text>
+  <text x="106" y="728" class="body">2. `app_knowledge_binding`：记录某个 AI 应用挂了哪些知识库，挂载方式是内置还是外挂。</text>
+  <text x="106" y="752" class="body">3. `connector_policy`：记录谁能查 BI、多维分析、诊断服务、自动联调工具。</text>
+
+  <rect x="84" y="812" width="954" height="118" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="106" y="844" class="label">建议把知识库可见范围做成显式 scope</text>
+  <text x="106" y="872" class="body">`personal` 个人私有  |  `project` 项目共享  |  `department` 部门共享</text>
+  <text x="106" y="896" class="body">`company_public` 公司公开  |  `app_private` 应用专属  |  `app_shared` 跨应用授权</text>
+
+  <rect x="1102" y="404" width="522" height="558" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="1130" y="444" class="section-title">3. 权限判定链建议改成这样</text>
+
+  <rect x="1130" y="478" width="466" height="74" rx="16" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="1150" y="508" class="chip" fill="#2f6fed">Step 1</text>
+  <text x="1212" y="508" class="label">先判定员工身份与组织关系</text>
+  <text x="1150" y="532" class="body">user 属于哪个部门、哪些项目、哪些 AI 应用。</text>
+
+  <rect x="1130" y="574" width="466" height="74" rx="16" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="1150" y="604" class="chip" fill="#1f9d72">Step 2</text>
+  <text x="1212" y="604" class="label">再判定知识资产 scope</text>
+  <text x="1150" y="628" class="body">个人 / 项目 / 部门 / 公司公开 / 应用专属。</text>
+
+  <rect x="1130" y="670" width="466" height="74" rx="16" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="1150" y="700" class="chip" fill="#ea7a22">Step 3</text>
+  <text x="1212" y="700" class="label">再判定操作权限而不是只判定可见</text>
+  <text x="1150" y="724" class="body">拆成 view / retrieve / quote / edit / publish / bind / admin。</text>
+
+  <rect x="1130" y="766" width="466" height="74" rx="16" fill="#f8f1ff" stroke="#ddc9ff"/>
+  <text x="1150" y="796" class="chip" fill="#7a4dd8">Step 4</text>
+  <text x="1212" y="796" class="label">最后再判定工具和数据源权限</text>
+  <text x="1150" y="820" class="body">是否能查 BI、是否能跑诊断、是否能触发自动联调。</text>
+
+  <rect x="1130" y="862" width="466" height="74" rx="16" fill="#eef7ff" stroke="#c7dff7"/>
+  <text x="1150" y="892" class="chip" fill="#2b7ec1">Step 5</text>
+  <text x="1212" y="892" class="label">给应用返回最终可用知识与工具集合</text>
+  <text x="1150" y="916" class="body">不是“这个人能否进库”，而是“这个应用此刻能调用什么”。</text>
+
+  <line x1="1363" y1="552" x2="1363" y2="574" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="1363" y1="648" x2="1363" y2="670" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="1363" y1="744" x2="1363" y2="766" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="1363" y1="840" x2="1363" y2="862" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+  <rect x="56" y="992" width="1568" height="272" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="1032" class="section-title">4. 你们到底要不要二开：结论与范围</text>
+
+  <rect x="84" y="1064" width="466" height="164" rx="18" fill="#ffffff" stroke="#dbe5f1" filter="url(#shadow)"/>
+  <text x="106" y="1096" class="label">一期建议先做够用版</text>
+  <text x="106" y="1124" class="body">1. 个人库 / 部门库 / 公共库</text>
+  <text x="106" y="1148" class="body">2. AI 应用挂知识库</text>
+  <text x="106" y="1172" class="body">3. 维护权限和使用权限分离</text>
+  <text x="106" y="1196" class="body">4. 数据部公共问答先跑起来</text>
+
+  <rect x="602" y="1064" width="466" height="164" rx="18" fill="#ffffff" stroke="#dbe5f1" filter="url(#shadow)"/>
+  <text x="624" y="1096" class="label">二期再做企业完整版</text>
+  <text x="624" y="1124" class="body">1. 项目级权限</text>
+  <text x="624" y="1148" class="body">2. BI / 诊断 / 联调的数据源权限</text>
+  <text x="624" y="1172" class="body">3. 审批流 / 审计日志 / 发布流转</text>
+  <text x="624" y="1196" class="body">4. 个人库升级成团队库 / 公共库</text>
+
+  <rect x="1120" y="1064" width="476" height="164" rx="18" fill="#edf3ff" stroke="#c9d9ff" filter="url(#shadow)"/>
+  <text x="1142" y="1096" class="label">最终判断</text>
+  <text x="1142" y="1124" class="body">需要二开，而且不是改几个角色能解决。</text>
+  <text x="1142" y="1148" class="body">WeKnora 原生适合做底座，但你们必须补一层</text>
+  <text x="1142" y="1172" class="body">企业业务权限模型：部门、项目、应用、资产、策略、工具权限。</text>
+  <text x="1142" y="1198" class="small">一句话：现有是“空间协作权限”，你们要的是“企业应用与知识资产权限”。</text>
+
+  <path d="M550 1148 C570 1148, 582 1148, 602 1148" fill="none" stroke="#ea7a22" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <path d="M1068 1148 C1088 1148, 1100 1148, 1120 1148" fill="none" stroke="#1f9d72" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+  <rect x="1318" y="70" width="278" height="66" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1338" y="98" class="chip" fill="#2f6fed">蓝色箭头</text>
+  <text x="1428" y="98" class="small">权限判定链</text>
+  <text x="1338" y="122" class="chip" fill="#ea7a22">橙色 / 绿色箭头</text>
+  <text x="1478" y="122" class="small">建设阶段推进</text>
+</svg>

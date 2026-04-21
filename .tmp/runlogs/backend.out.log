@@ -1,0 +1,5 @@
+
+> pmaios@0.4.0 start:backend
+> tsx src/backend/server.ts
+
+PMAIOS backend listening on http://localhost:4312

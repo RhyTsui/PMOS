@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1120" viewBox="0 0 1480 1120" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="40" x2="1420" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6FFF9"/>
+      <stop offset="1" stop-color="#F7F8FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#B6D5C5" flood-opacity="0.22"/>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 34px; font-weight: 700; fill: #21433C; }
+      .subtitle { font-size: 16px; font-weight: 500; fill: #648078; }
+      .cardTitle { font-size: 22px; font-weight: 700; fill: #234840; }
+      .body { font-size: 14px; font-weight: 500; fill: #5B746F; }
+      .tag { font-size: 12px; font-weight: 700; fill: #237A63; }
+      .foot { font-size: 13px; font-weight: 600; fill: #687F79; }
+    </style>
+  </defs>
+  <rect width="1480" height="1120" fill="url(#bg)"/>
+  <text x="76" y="70" class="title">15 工作台与对象映射图</text>
+  <text x="76" y="102" class="subtitle">这张图不讨论视觉皮肤，而是回答每类对象应该落在哪个工作台，避免工作台继续按模糊功能词拆分。</text>
+
+  <rect x="76" y="156" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="108" y="204" class="cardTitle">规则中心</text>
+  <text x="108" y="242" class="body">承接：standard、规则定义、契约定义、场景分类、通过/失败口径。</text>
+  <text x="108" y="272" class="body">不是写说明文，而是定义系统如何判断质量。</text>
+  <text x="108" y="306" class="tag">定义层工作台</text>
+
+  <rect x="530" y="156" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="562" y="204" class="cardTitle">样本中心</text>
+  <text x="562" y="242" class="body">承接：case、样本模板、来源归档、优先级、预期结果、回归候选标记。</text>
+  <text x="562" y="272" class="body">这里是平台资产层，不是脚本列表页。</text>
+  <text x="562" y="306" class="tag">资产层工作台</text>
+
+  <rect x="984" y="156" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="1016" y="204" class="cardTitle">评测集中心</text>
+  <text x="1016" y="242" class="body">承接：baseline、scenario、regression 三类 suite，负责编排和范围选择。</text>
+  <text x="1016" y="272" class="body">它是 case 的组织层，不应被稀释成一个简单筛选页。</text>
+  <text x="1016" y="306" class="tag">组织层工作台</text>
+
+  <rect x="76" y="420" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="108" y="468" class="cardTitle">执行中心</text>
+  <text x="108" y="506" class="body">承接：run、目标模型/工具、环境、并发、超时、重试、人工复核挂点。</text>
+  <text x="108" y="536" class="body">这里负责把 suite 变成一次真正的执行任务。</text>
+  <text x="108" y="570" class="tag">运行层工作台</text>
+
+  <rect x="530" y="420" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="562" y="468" class="cardTitle">评估中心</text>
+  <text x="562" y="506" class="body">承接：规则、契约、语义、人工复核四类 evaluator，以及 pass/fail/review 决策。</text>
+  <text x="562" y="536" class="body">这里应当能看到“谁判了什么、为什么这么判”。</text>
+  <text x="562" y="570" class="tag">判定层工作台</text>
+
+  <rect x="984" y="420" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="1016" y="468" class="cardTitle">Trace 与结果中心</text>
+  <text x="1016" y="506" class="body">承接：原始输出、Trace、结果分层、失败定位、case-result-trace 关联。</text>
+  <text x="1016" y="536" class="body">这是排障和复盘入口，不是附属日志页。</text>
+  <text x="1016" y="570" class="tag">追溯层工作台</text>
+
+  <rect x="304" y="684" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="336" y="732" class="cardTitle">报告中心</text>
+  <text x="336" y="770" class="body">承接：run report、aggregate report、版本对比、待回归问题单、建议动作。</text>
+  <text x="336" y="800" class="body">这里负责把测试结果翻译成人能直接读的版本信息。</text>
+  <text x="336" y="834" class="tag">交付层工作台</text>
+
+  <rect x="758" y="684" width="420" height="216" rx="28" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="790" y="732" class="cardTitle">治理中心</text>
+  <text x="790" y="770" class="body">承接：regression、版本 gate、风险样本、基线维护、版本晋升判断。</text>
+  <text x="790" y="800" class="body">这里是 chief 和版本负责人的决策层，而不是运营看板。</text>
+  <text x="790" y="834" class="tag">治理层工作台</text>
+
+  <rect x="76" y="948" width="1328" height="120" rx="26" fill="#FFFFFF" stroke="#D8ECE3" filter="url(#shadow)"/>
+  <text x="108" y="990" class="cardTitle">映射结论</text>
+  <text x="108" y="1022" class="body">工作台应按对象和动作链拆分，而不是按泛功能词拆分。只有这样，ChoKoNu 才能从“页面集合”变成真正的测试平台方案。</text>
+</svg>

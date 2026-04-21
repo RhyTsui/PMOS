@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChoKoNu 首页原型</title>
+    <style>
+      :root {
+        --bg: #f3f6fb;
+        --paper: rgba(255, 255, 255, 0.96);
+        --line: #d7dfec;
+        --ink: #17202d;
+        --muted: #617083;
+        --accent: #175fe5;
+        --accent-soft: #eaf1ff;
+        --good: #14805f;
+        --warn: #c76a10;
+        --danger: #cb4730;
+        --shadow: 0 18px 50px rgba(30, 47, 84, 0.08);
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 8% 0%, rgba(23, 95, 229, 0.16), transparent 20%),
+          radial-gradient(circle at 100% 0%, rgba(27, 161, 126, 0.1), transparent 26%),
+          linear-gradient(180deg, #f8fbff 0%, #f2f6fd 46%, #eff4fb 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        width: min(1400px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-mark {
+        display: grid;
+        grid-template-columns: repeat(2, 10px);
+        gap: 4px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+      }
+
+      .blue { background: #4285f4; }
+      .red { background: #ea4335; }
+      .yellow { background: #fbbc04; }
+      .green { background: #34a853; }
+
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+      }
+
+      h1, h2, h3, p, ul {
+        margin: 0;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 18px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, #175fe5, #4a84ff);
+        color: #fff;
+        box-shadow: 0 12px 32px rgba(23, 95, 229, 0.18);
+      }
+
+      .button.ghost {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: var(--line);
+        color: var(--ink);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.25fr 0.85fr;
+        gap: 18px;
+        padding: 28px;
+        border: 1px solid rgba(219, 227, 240, 0.9);
+        border-radius: 34px;
+        background:
+          radial-gradient(circle at top right, rgba(23, 95, 229, 0.14), transparent 28%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(245, 249, 255, 0.98));
+        box-shadow: var(--shadow);
+      }
+
+      .hero h1 {
+        font-size: 52px;
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+        max-width: 11ch;
+        margin: 8px 0 12px;
+      }
+
+      .hero p,
+      .hero li {
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .hero ul {
+        padding-left: 18px;
+        margin-top: 14px;
+      }
+
+      .hero-side {
+        display: grid;
+        gap: 12px;
+      }
+
+      .meta-card,
+      .panel,
+      .mini-card {
+        padding: 18px;
+        border-radius: 24px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+
+      .meta-card span,
+      .metric span {
+        display: block;
+        color: var(--muted);
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .meta-card strong {
+        font-size: 24px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .section-head h2 {
+        font-size: 24px;
+      }
+
+      .section-head p {
+        color: var(--muted);
+        margin-top: 6px;
+        line-height: 1.65;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        padding: 18px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: #f6f9ff;
+      }
+
+      .metric strong {
+        font-size: 30px;
+      }
+
+      .accent { color: var(--accent); }
+      .good { color: var(--good); }
+      .warn { color: var(--warn); }
+      .danger { color: var(--danger); }
+
+      .capabilities {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .capability h3,
+      .blockers h3,
+      .result-card h3,
+      .workbench h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .capability p,
+      .blockers li,
+      .result-card p,
+      .workbench p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .result-card {
+        background:
+          radial-gradient(circle at top right, rgba(203, 71, 48, 0.08), transparent 34%),
+          linear-gradient(180deg, #ffffff, #fff8f6);
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .status.bad {
+        background: rgba(203, 71, 48, 0.12);
+        color: var(--danger);
+      }
+
+      .blockers ul {
+        padding-left: 18px;
+      }
+
+      .workbench-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .workbench-tag {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: var(--accent-soft);
+        color: #10388a;
+        border: 1px solid #cadbff;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .side {
+        display: grid;
+        gap: 18px;
+        align-self: start;
+      }
+
+      .side ul {
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      @media (max-width: 1100px) {
+        .hero,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .metrics,
+        .capabilities,
+        .workbench-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          width: min(100%, calc(100% - 20px));
+          padding-top: 14px;
+        }
+
+        .topbar,
+        .section-head {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .hero h1 {
+          font-size: 36px;
+          max-width: none;
+        }
+
+        .metrics,
+        .capabilities,
+        .workbench-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span class="dot blue"></span>
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div>
+            <div style="font-size: 22px; font-weight: 700;">ChoKoNu</div>
+            <div class="eyebrow">连弩-AI 测试平台 / 首页原型</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="button ghost" href="./docs/svg/16-page-architecture.svg">页面架构图</a>
+          <a class="button ghost" href="./docs/svg/13-gate-decision-board.svg">门禁判断图</a>
+          <a class="button primary" href="./docs/svg/15-workbench-mapping.svg">工作台映射图</a>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow">首页 / 能力与测试结论</div>
+          <h1>把平台能力和当前测试结论，直接放在首页讲清楚。</h1>
+          <p>首页先回答三件事：平台能测什么、这轮跑出了什么结果、当前版本能不能继续往前走。</p>
+          <ul>
+            <li>统一承接 MCP、Chat / Agent、知识检索、Workflow 四类测试对象。</li>
+            <li>把样本、评测集、执行、评估、Trace、报告串成一条可回归主链。</li>
+            <li>把测试结果直接翻译成版本 gate 判断，而不是只出一份结果单。</li>
+          </ul>
+        </div>
+        <div class="hero-side">
+          <div class="meta-card">
+            <span>当前版本判断</span>
+            <strong>继续收口</strong>
+          </div>
+          <div class="meta-card">
+            <span>红线命中</span>
+            <strong class="danger">1 条</strong>
+          </div>
+          <div class="meta-card">
+            <span>关键路径成功率</span>
+            <strong class="warn">81%</strong>
+          </div>
+        </div>
+      </section>
+
+      <div class="layout">
+        <div class="stack">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>当前测试概况</h2>
+                <p>首页直接看到覆盖规模和当前结果。</p>
+              </div>
+            </div>
+            <div class="metrics">
+              <div class="metric"><span>评测对象</span><strong class="accent">4 类</strong></div>
+              <div class="metric"><span>活跃评测集</span><strong>18 组</strong></div>
+              <div class="metric"><span>今日执行批次</span><strong class="good">12 次</strong></div>
+              <div class="metric"><span>阻塞项</span><strong class="warn">2 个</strong></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>平台能力</h2>
+                <p>首页先讲清楚平台到底具备什么能力。</p>
+              </div>
+            </div>
+            <div class="capabilities">
+              <div class="mini-card capability">
+                <h3>规则与契约</h3>
+                <p>字段契约、行为规则、业务口径、红线项统一定义。</p>
+              </div>
+              <div class="mini-card capability">
+                <h3>样本与评测集</h3>
+                <p>把 contract_case 和 semantic_case 编进 baseline、scenario、regression 三类评测集。</p>
+              </div>
+              <div class="mini-card capability">
+                <h3>执行与评估</h3>
+                <p>run 配置、规则/契约/语义/人工复核 evaluator 组合执行。</p>
+              </div>
+              <div class="mini-card capability">
+                <h3>Trace 与报告</h3>
+                <p>失败阶段定位、重点失败样本、版本对比、建议动作一体化输出。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>工作台骨架</h2>
+                <p>首页底部展示平台骨架，说明这些结论来自哪里。</p>
+              </div>
+            </div>
+            <div class="workbench-grid">
+              <div class="mini-card workbench"><div class="workbench-tag">standard</div><h3>规则中心</h3><p>规则、契约、口径、通过失败判断。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">case</div><h3>样本中心</h3><p>contract_case、semantic_case、来源与预期。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">suite</div><h3>评测集中心</h3><p>baseline、scenario、regression 编排。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">run</div><h3>执行中心</h3><p>目标模型/工具、环境、并发、超时、重试。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">evaluator</div><h3>评估中心</h3><p>规则、契约、语义、人工复核四层评估器。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">trace/result</div><h3>Trace 与结果</h3><p>失败阶段定位、case-result-trace 关联。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">report</div><h3>报告中心</h3><p>概览、分布、重点失败、版本对比、建议动作。</p></div>
+              <div class="mini-card workbench"><div class="workbench-tag">gate/regression</div><h3>治理中心</h3><p>回归集、版本 gate、风险样本、版本晋级判断。</p></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="side">
+          <section class="panel result-card">
+            <div class="section-head">
+              <div>
+                <h2>本轮结论</h2>
+                <p>首页不是展示壳子，要能直接给结论。</p>
+              </div>
+            </div>
+            <div class="status bad">当前不放行</div>
+            <h3 style="font-size: 24px; line-height: 1.2; margin-bottom: 10px;">当前版本结论：继续收口，不允许直接晋级</h3>
+            <p>本轮回归里出现 1 个红线风险和 2 条关键路径失败，说明平台骨架方向是对的，但执行稳定性还不够进入下一阶段版本晋升。</p>
+          </section>
+
+          <section class="panel blockers">
+            <div class="section-head">
+              <div>
+                <h2>关键阻塞项</h2>
+                <p>哪些问题正在阻止这轮版本继续往前走。</p>
+              </div>
+            </div>
+            <ul>
+              <li>MCP 高风险工具在未二次确认时仍可触发，命中红线。</li>
+              <li>Workflow 关键路径成功率从 95% 降到 81%，当前版本不能直接放行。</li>
+              <li>Chat / Agent 会话解决率下降 7%，需要补强回归集和语义评估器。</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

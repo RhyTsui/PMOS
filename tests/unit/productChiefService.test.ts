@@ -20,6 +20,7 @@ async function createFixture() {
   await store.write('docs/memory/global-rules.md', '# Rules\n');
   await store.write('docs/context/project/overview.md', '# Project Context\nNeed AI Product Office operating model.\n');
   await store.write('config/product-management/agent-blueprints.json', await repoStore.read('config/product-management/agent-blueprints.json'));
+  await store.write('skills/registry.json', await repoStore.read('skills/registry.json'));
   return {
     store,
     productChiefService: new ProductChiefService(store),
@@ -71,6 +72,8 @@ describe('ProductChiefService', () => {
     expect(report.requiredGovernedOutputs.some((output) => output.type === 'user-manual' && output.priority === 'P1')).toBe(true);
     expect(report.requiredGovernedOutputs.some((output) => output.type === 'external-capability-evaluation' && output.priority === 'P2')).toBe(true);
     expect(report.engagedSpecialists.length).toBeGreaterThan(0);
+    expect(report.recommendedSkills.map((skill) => skill.skillId)).toContain('schema-driven-ui-design');
+    expect(report.recommendedSkills.map((skill) => skill.skillId)).toContain('product-chief-manager-agent');
 
     const ecosystemScan = await productChiefService.generateGovernedOutput({
       reportId: report.id,
@@ -97,6 +100,8 @@ describe('ProductChiefService', () => {
     expect(ecosystemScan.artifactPath).toContain('docs/product-office/outputs/');
     expect(await store.read(ecosystemScan.artifactPath)).toContain('adopt');
     expect(await store.read(uiSchema.artifactPath)).toContain('Schema-Driven UI / Business Blocks');
+    expect(await store.read(uiSchema.artifactPath)).toContain('Recommended Skills');
+    expect(uiSchema.metadata.recommendedSkillIds).toContain('schema-driven-ui-design');
     expect(await store.read(versionPlan.artifactPath)).toContain('Requirement Inputs');
     expect(await store.read(versionPlan.artifactPath)).toContain('Version Trace Inputs');
     expect(await store.read(versionPlan.artifactPath)).toContain('Hermes Policy Signals');
