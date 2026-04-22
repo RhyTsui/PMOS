@@ -15,6 +15,7 @@ import { ProductChiefService } from '../core/productChiefService.js';
 import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
 import { McpContextSyncService, type CollaborationMode, type ToolIdentity } from '../core/mcpContextSyncService.js';
 import { SkillRegistry } from '../core/skillRegistry.js';
+import { CodexLocalStateService } from '../core/codexLocalStateService.js';
 import { LlmRouter } from '../llm_router/index.js';
 import { syncActiveModelToSettings } from '../llm_router/claudeSettingsSync.js';
 import type { ProviderCapability } from '../shared/schemas.js';
@@ -30,6 +31,7 @@ const reviewCommittee = new ReviewCommittee();
 const subprojectRegistry = new SubprojectRegistry(store);
 const productAgentService = new ProductAgentService(store);
 const skillRegistry = new SkillRegistry(store);
+const codexLocalStateService = new CodexLocalStateService(store, skillRegistry);
 const productChiefService = new ProductChiefService(store, memoryService, productAgentService, skillRegistry);
 const documentationNormalizationService = new DocumentationNormalizationService(store, memoryService);
 const mcpContextSync = new McpContextSyncService(rootDir);
@@ -130,6 +132,9 @@ function printUsage() {
     '  npm run cli -- product-agent show <id> [--subproject <id>]',
     '  npm run cli -- skill list [--subproject <id>]',
     '  npm run cli -- skill find <brief> [stageId] [outputType] [--subproject <id>]',
+    '  npm run cli -- codex-state status [--subproject <id>]',
+    '  npm run cli -- codex-state write [relativePath] [--subproject <id>]',
+    '  npm run cli -- codex-state sync [relativePath] [--subproject <id>]',
     '  npm run cli -- product-chief analyze <brief> [--subproject <id>]',
     '  npm run cli -- product-chief output <reportId> [type] [--subproject <id>]',
     '  npm run cli -- product-chief reports [--subproject <id>]',
@@ -493,6 +498,58 @@ async function skillFind(query?: string, stageId?: string, outputType?: string, 
           outputType: normalizeSubprojectId(outputType),
           subprojectId,
         }),
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function codexStateStatus(subprojectId?: string | null) {
+  console.log(JSON.stringify(await codexLocalStateService.inspect(subprojectId), null, 2));
+}
+
+async function codexStateWrite(relativePath?: string, subprojectId?: string | null) {
+  const result = await codexLocalStateService.writeSnapshot(relativePath?.trim() || undefined, subprojectId);
+  console.log(
+    JSON.stringify(
+      {
+        path: result.path,
+        localSkillCount: result.snapshot.localSkills.length,
+        localPluginCount: result.snapshot.localPlugins.length,
+        localOnlySkills: result.snapshot.diff.localOnlySkills,
+        pmaiosOnlyExternalSkills: result.snapshot.diff.pmaiosOnlyExternalSkills,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function codexStateSync(relativePath?: string, subprojectId?: string | null) {
+  const result = await codexLocalStateService.writeSnapshot(relativePath?.trim() || undefined, subprojectId);
+  const { snapshot } = result;
+  console.log(
+    JSON.stringify(
+      {
+        status:
+          snapshot.diff.localOnlySkills.length === 0 &&
+          snapshot.diff.runtimeVisibleOnlySkills.length === 0 &&
+          snapshot.diff.enabledPluginsNotTrackedByPmaios.length === 0
+            ? 'aligned'
+            : 'drift-detected',
+        path: result.path,
+        codexHome: snapshot.codexHome,
+        localSkillCount: snapshot.localSkills.length,
+        runtimeVisibleSkillCount: snapshot.runtimeVisibleSkills.length,
+        localPluginCount: snapshot.localPlugins.length,
+        syncedExternalSkills: snapshot.diff.localVisibleAndRegisteredSkills,
+        governedRuntimeCapabilities: snapshot.governedRuntimeCapabilities.map((item) => item.id),
+        governedLocalRuntimeCore: snapshot.governedLocalRuntimeCore.map((item) => item.id),
+        governedPlugins: snapshot.governedPlugins.map((item) => item.id),
+        localOnlySkills: snapshot.diff.localOnlySkills,
+        runtimeVisibleOnlySkills: snapshot.diff.runtimeVisibleOnlySkills,
+        enabledPluginsNotTrackedByPmaios: snapshot.diff.enabledPluginsNotTrackedByPmaios,
       },
       null,
       2,
@@ -1007,6 +1064,21 @@ async function main() {
 
   if (scope === 'skill' && action === 'find') {
     await skillFind(target, extraName, extraDescription, subprojectId);
+    return;
+  }
+
+  if (scope === 'codex-state' && action === 'status') {
+    await codexStateStatus(subprojectId);
+    return;
+  }
+
+  if (scope === 'codex-state' && action === 'write') {
+    await codexStateWrite(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'codex-state' && action === 'sync') {
+    await codexStateSync(target, subprojectId);
     return;
   }
 

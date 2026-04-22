@@ -1,0 +1,59 @@
+{
+  "version": "2026-04-22",
+  "status": "active-baseline",
+  "purpose": "Track which PMAIOS collaboration layers have already been migrated into Codex-aligned operation.",
+  "layers": {
+    "startup": {
+      "status": "migrated",
+      "sources": [
+        "AGENTS.md",
+        "docs/operations/startup-whoami.md",
+        "docs/memory/mcp-context/session-state.json"
+      ]
+    },
+    "modes": {
+      "status": "partial",
+      "sources": [
+        "docs/architecture/mode-architecture.md",
+        "docs/operations/do-mode-execution-protocol.md",
+        "docs/operations/do-mode-task-start-contract.md"
+      ],
+      "note": "Same-repo Codex CLI can follow these rules. External GUI/web Codex still needs explicit recovery."
+    },
+    "shared_context": {
+      "status": "migrated",
+      "sources": [
+        "docs/memory/mcp-context/session-state.json",
+        "mcp-context task-start/checkpoint/task-complete",
+        "mcp-context mode/mode-history"
+      ]
+    },
+    "skills": {
+      "status": "migrated",
+      "sources": [
+        "skills/registry.json",
+        "docs/operations/codex-runtime-capability-classification.json",
+        "docs/operations/codex-local-runtime-core-classification.json",
+        "docs/operations/codex-runtime-visible-skills.json",
+        "docs/operations/codex-local-state-sync-status.json"
+      ],
+      "note": "follow-builders, fireworks-tech-graph, frontend-skill are aligned, runtime builtin capabilities are classified, and codex-primary-runtime is governed as local runtime core."
+    },
+    "plugins_tools": {
+      "status": "migrated",
+      "sources": [
+        "docs/operations/codex-plugin-tool-registry.json",
+        "docs/operations/codex-local-state-sync-status.json"
+      ],
+      "note": "gmail@openai-curated is governed and enabled plugin drift is currently zero."
+    },
+    "progress_protocol": {
+      "status": "migrated",
+      "sources": [
+        "docs/operations/requirement-change-control.md",
+        "docs/operations/requirement-promotion-and-loss-prevention.md",
+        "docs/operations/current-version-progress.md"
+      ]
+    }
+  }
+}

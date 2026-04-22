@@ -1,0 +1,245 @@
+{
+  "codexHome": "C:\\Users\\xuyun\\.codex",
+  "configPath": "C:\\Users\\xuyun\\.codex\\config.toml",
+  "skillsPath": "C:\\Users\\xuyun\\.codex\\skills",
+  "pluginsPath": "C:\\Users\\xuyun\\.codex\\plugins",
+  "configExists": true,
+  "localSkills": [
+    {
+      "id": ".system",
+      "path": "C:\\Users\\xuyun\\.codex\\skills\\.system",
+      "hasSkillMd": false,
+      "scope": "system"
+    },
+    {
+      "id": "codex-primary-runtime",
+      "path": "C:\\Users\\xuyun\\.codex\\skills\\codex-primary-runtime",
+      "hasSkillMd": false,
+      "scope": "runtime"
+    },
+    {
+      "id": "fireworks-tech-graph",
+      "path": "C:\\Users\\xuyun\\.codex\\skills\\fireworks-tech-graph",
+      "hasSkillMd": true,
+      "scope": "user"
+    },
+    {
+      "id": "follow-builders",
+      "path": "C:\\Users\\xuyun\\.codex\\skills\\follow-builders",
+      "hasSkillMd": true,
+      "scope": "user"
+    },
+    {
+      "id": "frontend-skill",
+      "path": "C:\\Users\\xuyun\\.codex\\skills\\frontend-skill",
+      "hasSkillMd": true,
+      "scope": "user"
+    }
+  ],
+  "runtimeVisibleSkills": [
+    {
+      "id": "excel",
+      "name": "Excel",
+      "scope": "personal",
+      "description": "Create and edit spreadsheet or excel files"
+    },
+    {
+      "id": "fireworks-tech-graph",
+      "name": "Fireworks Tech Graph",
+      "scope": "personal",
+      "description": "Generate polished SVG and PNG technical diagrams"
+    },
+    {
+      "id": "follow-builders",
+      "name": "Follow Builders",
+      "scope": "personal",
+      "description": "AI builders digest — monitors top AI builders on X and YouTube podcasts, remixes their content into digestible summaries."
+    },
+    {
+      "id": "frontend-skill",
+      "name": "Frontend Skill",
+      "scope": "personal",
+      "description": "Design visually strong landing pages, websites, apps, and UI"
+    },
+    {
+      "id": "gmail",
+      "name": "Gmail",
+      "scope": "personal",
+      "description": "Summarize threads and draft replies"
+    },
+    {
+      "id": "imagegen",
+      "name": "Image Gen",
+      "scope": "system",
+      "description": "Generate or edit images for websites, games, and more"
+    },
+    {
+      "id": "inbox-triage",
+      "name": "Inbox Triage",
+      "scope": "personal",
+      "description": "Triage an inbox into action buckets"
+    },
+    {
+      "id": "openai-docs",
+      "name": "OpenAI Docs",
+      "scope": "system",
+      "description": "Reference official OpenAI docs, including upgrade guidance"
+    },
+    {
+      "id": "plugin-creator",
+      "name": "Plugin Creator",
+      "scope": "system",
+      "description": "Scaffold plugins and marketplace entries"
+    },
+    {
+      "id": "powerpoint",
+      "name": "PowerPoint",
+      "scope": "personal",
+      "description": "Create and edit presentation slide decks"
+    },
+    {
+      "id": "skill-creator",
+      "name": "Skill Creator",
+      "scope": "system",
+      "description": "Create or update a skill"
+    },
+    {
+      "id": "skill-installer",
+      "name": "Skill Installer",
+      "scope": "system",
+      "description": "Install curated skills from openai/skills or other repos"
+    }
+  ],
+  "governedRuntimeCapabilities": [
+    {
+      "id": "excel",
+      "name": "Excel",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "imagegen",
+      "name": "Image Gen",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "inbox-triage",
+      "name": "Inbox Triage",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "openai-docs",
+      "name": "OpenAI Docs",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "plugin-creator",
+      "name": "Plugin Creator",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "powerpoint",
+      "name": "PowerPoint",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "skill-creator",
+      "name": "Skill Creator",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    },
+    {
+      "id": "skill-installer",
+      "name": "Skill Installer",
+      "type": "runtime-builtin-skill",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities"
+    }
+  ],
+  "governedLocalRuntimeCore": [
+    {
+      "id": "codex-primary-runtime",
+      "name": "Codex Primary Runtime",
+      "type": "local-runtime-core",
+      "status": "governed",
+      "targetRegistry": "local-runtime-core"
+    }
+  ],
+  "localPlugins": [
+    {
+      "id": "gmail@openai-curated",
+      "enabled": true,
+      "source": "config+cache",
+      "cachePath": "C:\\Users\\xuyun\\.codex\\plugins\\cache\\openai-curated\\gmail"
+    }
+  ],
+  "governedPlugins": [
+    {
+      "id": "gmail@openai-curated",
+      "name": "Gmail",
+      "type": "plugin",
+      "status": "governed",
+      "runtimeVisibleSkillId": "gmail"
+    }
+  ],
+  "enabledPluginIds": [
+    "gmail@openai-curated"
+  ],
+  "pmaiosExternalSkills": [
+    {
+      "id": "fireworks-tech-graph",
+      "name": "Fireworks Tech Graph",
+      "promptPath": "~/.codex/skills/fireworks-tech-graph/SKILL.md",
+      "command": "fireworks-tech-graph",
+      "deploymentStatus": "installed"
+    },
+    {
+      "id": "follow-builders",
+      "name": "Follow Builders",
+      "promptPath": "~/.codex/skills/follow-builders/SKILL.md",
+      "command": "follow-builders",
+      "deploymentStatus": "installed"
+    },
+    {
+      "id": "frontend-skill",
+      "name": "Frontend Skill",
+      "promptPath": "~/.codex/skills/frontend-skill/SKILL.md",
+      "command": "frontend-skill",
+      "deploymentStatus": "installed"
+    }
+  ],
+  "pmaiosReadiness": {
+    "total": 22,
+    "enabled": 22,
+    "disabled": 0,
+    "byStatus": {
+      "integrated": 18,
+      "installed": 4
+    },
+    "autoTriggerable": 22,
+    "integrated": 18
+  },
+  "diff": {
+    "localOnlySkills": [],
+    "pmaiosOnlyExternalSkills": [],
+    "localVisibleAndRegisteredSkills": [
+      "fireworks-tech-graph",
+      "follow-builders",
+      "frontend-skill"
+    ],
+    "runtimeVisibleOnlySkills": [],
+    "enabledPluginsNotTrackedByPmaios": []
+  }
+}

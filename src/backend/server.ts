@@ -26,6 +26,7 @@ import { DocumentationNormalizationService } from '../core/documentationNormaliz
 import { SkillRegistry } from '../core/skillRegistry.js';
 import { ExternalConnectorService } from '../core/externalConnectorService.js';
 import { McpContextSyncService, type ToolIdentity } from '../core/mcpContextSyncService.js';
+import { CodexLocalStateService } from '../core/codexLocalStateService.js';
 import { LlmRouter } from '../llm_router/index.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
@@ -49,6 +50,7 @@ const hermesPolicyService = new HermesPolicyService(store, memoryService);
 const productChiefService = new ProductChiefService(store, memoryService, productAgentService);
 const documentationNormalizationService = new DocumentationNormalizationService(store, memoryService);
 const skillRegistry = new SkillRegistry(store);
+const codexLocalStateService = new CodexLocalStateService(store, skillRegistry);
 const externalConnectorService = new ExternalConnectorService(store);
 const mcpContextSync = new McpContextSyncService(rootDir);
 const llmRouter = new LlmRouter(store);
@@ -344,6 +346,14 @@ function renderDirectEntryHtml(
         <h2>每日蒸馏</h2>
         <p>这里展示最近的对话蒸馏结果，方便从首页直接回到方法论沉淀。</p>
         ${digestSection}
+      </section>
+      <section class="panel">
+        <h2>Codex 同步标准动作</h2>
+        <p>如果你在 <code>codex.exe</code> 里新增或调整了 skill / plugin，默认先跑这一条，不用分别查本地目录、运行时和 PMAIOS registry。</p>
+        <div class="link-list">
+          <span><code>npm run cli -- codex-state sync</code></span>
+        </div>
+        <p class="empty">这个动作会重写同步快照，并直接告诉你当前是 <code>aligned</code> 还是 <code>drift-detected</code>。</p>
       </section>
       <section class="panel">
         <h2>已发现的项目入口</h2>
@@ -959,6 +969,10 @@ app.get('/api/skills/find', async (req, res) => {
       subprojectId: normalizeSubprojectId(req.query.subprojectId),
     }),
   });
+});
+
+app.get('/api/codex/local-state', async (req, res) => {
+  res.json(await codexLocalStateService.inspect(normalizeSubprojectId(req.query.subprojectId)));
 });
 
 app.get('/api/connectors/status', async (req, res) => {

@@ -260,6 +260,12 @@ When resuming work after restart:
 4. identify whether the target subproject is adopted, partial, or not adopted
 5. continue from repo truth, not from memory reconstruction or hidden chat context
 
+If the work involves Codex local skills, plugins, or Codex runtime-visible capabilities, also run:
+
+6. `npm run cli -- codex-state sync`
+
+This is the standard CLI-to-codex.exe alignment action. It rewrites the local-state snapshot and reports whether PMAIOS and local Codex are still aligned.
+
 ## What Not To Do
 
 Do not:

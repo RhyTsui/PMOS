@@ -1,0 +1,78 @@
+{
+  "version": "2026-04-22",
+  "source": "pmaios-codex-runtime-capability-classification",
+  "items": [
+    {
+      "id": "excel",
+      "name": "Excel",
+      "type": "runtime-builtin-skill",
+      "scope": "personal",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Spreadsheet creation and editing capability exposed by Codex runtime. Governed as a builtin runtime capability, not a local ~/.codex skill."
+    },
+    {
+      "id": "powerpoint",
+      "name": "PowerPoint",
+      "type": "runtime-builtin-skill",
+      "scope": "personal",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Slide deck creation and editing capability exposed by Codex runtime. Governed as a builtin runtime capability."
+    },
+    {
+      "id": "openai-docs",
+      "name": "OpenAI Docs",
+      "type": "runtime-builtin-skill",
+      "scope": "system",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Official OpenAI documentation lookup capability. Governed as a builtin runtime capability."
+    },
+    {
+      "id": "imagegen",
+      "name": "Image Gen",
+      "type": "runtime-builtin-skill",
+      "scope": "system",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Raster image generation/editing capability exposed by runtime. Governed as a builtin runtime capability."
+    },
+    {
+      "id": "inbox-triage",
+      "name": "Inbox Triage",
+      "type": "runtime-builtin-skill",
+      "scope": "personal",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Inbox triage capability exposed by Codex runtime. Governed as a builtin runtime capability rather than a local ~/.codex skill."
+    },
+    {
+      "id": "plugin-creator",
+      "name": "Plugin Creator",
+      "type": "runtime-builtin-skill",
+      "scope": "system",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Plugin scaffolding capability exposed by Codex runtime. Governed as a builtin runtime capability."
+    },
+    {
+      "id": "skill-creator",
+      "name": "Skill Creator",
+      "type": "runtime-builtin-skill",
+      "scope": "system",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Skill creation/update capability exposed by Codex runtime. Governed as a builtin runtime capability."
+    },
+    {
+      "id": "skill-installer",
+      "name": "Skill Installer",
+      "type": "runtime-builtin-skill",
+      "scope": "system",
+      "status": "governed",
+      "targetRegistry": "builtin-runtime-capabilities",
+      "notes": "Skill installation capability exposed by Codex runtime. Governed as a builtin runtime capability."
+    }
+  ]
+}

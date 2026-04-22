@@ -1,0 +1,27 @@
+{
+  "version": "2026-04-22",
+  "source": "pmaios-minimal-codex-plugin-tool-registry",
+  "items": [
+    {
+      "id": "gmail@openai-curated",
+      "name": "Gmail",
+      "type": "plugin",
+      "runtimeVisibleSkillId": "gmail",
+      "scope": "personal",
+      "status": "governed",
+      "discovery": {
+        "configId": "gmail@openai-curated",
+        "cachePath": "C:/Users/xuyun/.codex/plugins/cache/openai-curated/gmail"
+      },
+      "capability": {
+        "summary": "Summarize threads and draft replies",
+        "surfaces": [
+          "codex-runtime",
+          "local-config",
+          "plugin-cache"
+        ]
+      },
+      "notes": "Added from Codex runtime after manual enablement in Codex. PMAIOS now treats it as a governed plugin/tool baseline item."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 980" width="1400" height="980">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .section { fill: #0f172a; font-size: 20px; font-weight: 700; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 16; }
+    .okBar { fill: #10b981; }
+    .partialBar { fill: #f59e0b; }
+    .text { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .chip { fill: #ecfeff; stroke: #bae6fd; stroke-width: 1; rx: 14; }
+    .chipText { fill: #0f766e; font-size: 12px; font-weight: 600; }
+    .num { fill: #0f172a; font-size: 28px; font-weight: 700; }
+    .label { fill: #64748b; font-size: 12px; }
+    .link { fill: #2563eb; font-size: 13px; font-weight: 600; }
+  </style>
+
+  <rect width="1400" height="980" fill="#f8fafc"/>
+
+  <text x="64" y="72" class="title">Codex 协作迁移基线</text>
+  <text x="64" y="102" class="sub">目标：让 Codex 与 PMAIOS 不只同步 skill / plugin，还同步启动规则、共享上下文、{do} 协议和治理口径。</text>
+
+  <rect x="64" y="128" width="160" height="34" class="chip"/>
+  <text x="88" y="150" class="chipText">状态：active baseline</text>
+  <rect x="240" y="128" width="194" height="34" class="chip"/>
+  <text x="264" y="150" class="chipText">本轮结果：zero-drift sync</text>
+  <rect x="450" y="128" width="208" height="34" class="chip"/>
+  <text x="474" y="150" class="chipText">默认语言：中文</text>
+
+  <rect x="64" y="192" width="286" height="118" class="card"/>
+  <rect x="64" y="192" width="6" height="118" class="okBar"/>
+  <text x="88" y="228" class="num">0</text>
+  <text x="88" y="250" class="label">localOnlySkills</text>
+  <text x="88" y="284" class="text">本地 skill / runtime core 漂移已经清零。</text>
+
+  <rect x="374" y="192" width="286" height="118" class="card"/>
+  <rect x="374" y="192" width="6" height="118" class="okBar"/>
+  <text x="398" y="228" class="num">0</text>
+  <text x="398" y="250" class="label">runtimeVisibleOnlySkills</text>
+  <text x="398" y="284" class="text">运行时可见能力全部进入治理分类。</text>
+
+  <rect x="684" y="192" width="286" height="118" class="card"/>
+  <rect x="684" y="192" width="6" height="118" class="okBar"/>
+  <text x="708" y="228" class="num">0</text>
+  <text x="708" y="250" class="label">enabledPluginsNotTrackedByPmaios</text>
+  <text x="708" y="284" class="text">已启用插件不再处于“看得到但未治理”。</text>
+
+  <rect x="994" y="192" width="342" height="118" class="card"/>
+  <rect x="994" y="192" width="6" height="118" class="partialBar"/>
+  <text x="1018" y="228" class="num">partial</text>
+  <text x="1018" y="250" class="label">external GUI / web Codex</text>
+  <text x="1018" y="284" class="text">同仓库 Codex CLI 已基本对齐；外部 GUI / 网页端仍需显式恢复规则。</text>
+
+  <text x="64" y="366" class="section">五层迁移</text>
+
+  <rect x="64" y="388" width="300" height="182" class="card"/>
+  <rect x="64" y="388" width="6" height="182" class="okBar"/>
+  <text x="88" y="424" class="section" font-size="18">1. 启动层</text>
+  <text x="88" y="456" class="text">已迁移</text>
+  <text x="88" y="488" class="text">- AGENTS.md</text>
+  <text x="88" y="514" class="text">- startup-whoami</text>
+  <text x="88" y="540" class="text">- session-state / events / tasks</text>
+  <text x="88" y="566" class="meta">默认中文、共享状态恢复、{do} 前置规则都走这一层。</text>
+
+  <rect x="388" y="388" width="300" height="182" class="card"/>
+  <rect x="388" y="388" width="6" height="182" class="partialBar"/>
+  <text x="412" y="424" class="section" font-size="18">2. 模式层</text>
+  <text x="412" y="456" class="text">partial</text>
+  <text x="412" y="488" class="text">- default / plan / deep / do</text>
+  <text x="412" y="514" class="text">- 同仓库 CLI 可沿用</text>
+  <text x="412" y="540" class="text">- 外部 GUI / web 需补恢复</text>
+  <text x="412" y="566" class="meta">模式规则已成真源，但跨入口一致性还没完全自动化。</text>
+
+  <rect x="712" y="388" width="300" height="182" class="card"/>
+  <rect x="712" y="388" width="6" height="182" class="okBar"/>
+  <text x="736" y="424" class="section" font-size="18">3. 共享上下文层</text>
+  <text x="736" y="456" class="text">已迁移</text>
+  <text x="736" y="488" class="text">- task-start / checkpoint</text>
+  <text x="736" y="514" class="text">- task-complete</text>
+  <text x="736" y="540" class="text">- mode / mode-history</text>
+  <text x="736" y="566" class="meta">Codex 与 Claude 共用 mcp-context，而不是各自依赖黑盒会话记忆。</text>
+
+  <rect x="1036" y="388" width="300" height="182" class="card"/>
+  <rect x="1036" y="388" width="6" height="182" class="okBar"/>
+  <text x="1060" y="424" class="section" font-size="18">4. 能力层</text>
+  <text x="1060" y="456" class="text">已迁移到基线</text>
+  <text x="1060" y="488" class="text">- user skills</text>
+  <text x="1060" y="514" class="text">- runtime builtin capabilities</text>
+  <text x="1060" y="540" class="text">- plugin / tool</text>
+  <text x="1060" y="566" class="meta">现在能明确区分本地 skill、内置能力、plugin，而不是都混成“Codex 有”。</text>
+
+  <rect x="64" y="596" width="1272" height="148" class="card"/>
+  <rect x="64" y="596" width="6" height="148" class="okBar"/>
+  <text x="88" y="632" class="section" font-size="18">5. 差异审计层</text>
+  <text x="88" y="664" class="text">核心快照：`docs/operations/codex-local-state-sync-status.json`</text>
+  <text x="88" y="692" class="text">当前状态：</text>
+  <text x="202" y="692" class="text">- localVisibleAndRegisteredSkills：follow-builders / fireworks-tech-graph / frontend-skill</text>
+  <text x="202" y="720" class="text">- governedPlugin：gmail@openai-curated</text>
+  <text x="202" y="748" class="text">- governedRuntimeBuiltin：Excel / PowerPoint / OpenAI Docs / Image Gen / Inbox Triage / Plugin Creator / Skill Creator / Skill Installer</text>
+
+  <text x="64" y="796" class="section">当前边界</text>
+
+  <rect x="64" y="818" width="408" height="102" class="card"/>
+  <text x="88" y="852" class="text">不会自动安装 skill / plugin</text>
+  <text x="88" y="880" class="text">不会自动改写 config.toml</text>
+  <text x="88" y="908" class="meta">这版先做“读、比、登记、看差异”。</text>
+
+  <rect x="496" y="818" width="408" height="102" class="card"/>
+  <text x="520" y="852" class="text">新增能力后仍建议执行：</text>
+  <text x="520" y="880" class="text">`npm run cli -- codex-state status`</text>
+  <text x="520" y="908" class="meta">需要时再 `codex-state write` 写出治理快照。</text>
+
+  <rect x="928" y="818" width="408" height="102" class="card"/>
+  <text x="952" y="852" class="text">最关键结论</text>
+  <text x="952" y="880" class="text">Codex 里新加能力不再是黑盒，PMAIOS 现在能识别并收口。</text>
+  <text x="952" y="908" class="meta">下一步重点是继续加强外部 GUI / web Codex 的规则恢复。</text>
+
+  <text x="64" y="956" class="link">相关真源：docs/operations/codex-local-state-sync.md / codex-collaboration-migration-baseline.md / codex-local-state-sync-status.json</text>
+</svg>

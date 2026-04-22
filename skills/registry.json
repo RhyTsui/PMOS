@@ -306,6 +306,25 @@
       }
     },
     {
+      "id": "frontend-skill",
+      "name": "Frontend Skill",
+      "category": "design",
+      "description": "Designs visually strong landing pages, websites, apps, prototypes, demos, and UI with stronger visual hierarchy and composition.",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "~/.codex/skills/frontend-skill/SKILL.md",
+      "stageIds": ["operations-surface", "schema-contract-upgrade", "multimodal"],
+      "outputs": ["landing page", "prototype UI", "frontend visual direction", "demo shell"],
+      "triggerKeywords": ["frontend", "landing page", "ui", "prototype", "demo", "website", "app"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "installed",
+        "command": "frontend-skill",
+        "statusPath": "docs/operations/codex-local-state-sync-status.json",
+        "integration": "external-tool",
+        "notes": "Installed into the local Codex skills directory and now governed through the Codex local-state sync baseline."
+      }
+    },
+    {
       "id": "task-breakdown",
       "name": "Task Breakdown",
       "category": "planning",

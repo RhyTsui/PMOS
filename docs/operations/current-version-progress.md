@@ -93,11 +93,18 @@ Current counted set:
   - Workspace denominator-progress and user-backcheck panel
   - execution checklist summary now reads from `docs/operations/v0.4-v0.5-execution-checklist.md`
   - minimal daily conversation digestion automation
+  - Codex local state sync baseline for `~/.codex` skills / plugins / config with CLI/API visibility and diff output
+  - runtime-visible Codex skill snapshot and PMAIOS registration of `frontend-skill`
+  - Codex collaboration migration baseline for startup rules, `{do}` continuity, shared context, and plugin/tool governance
+  - Codex collaboration migration SVG board and board-index entry for direct human-reading access
+  - standard `npm run cli -- codex-state sync` action for one-step CLI-to-codex.exe alignment and drift reporting
+  - governed Codex runtime builtin capability classification for `Excel`, `PowerPoint`, `OpenAI Docs`, `Image Gen`, `Inbox Triage`, `Plugin Creator`, `Skill Creator`, and `Skill Installer`
+  - governed local runtime core classification for `codex-primary-runtime`, eliminating remaining local-only drift in the sync snapshot
 - mapping back to user-demand scenario:
   - “漏需求 / 漏计划”现在已有显式防漏、晋升与回查机制
   - “不要只报完成项，要看长目标分母”现在已有清单真源、Workspace 摘要和回查面
 - whether the user-demand scenario is actually closed:
-  - not yet, because the default daily reporting path is still being switched over and not every runtime surface uses the new protocol yet
+  - not yet, because the default daily reporting path is still being switched over and not every runtime surface uses the new protocol yet, although Codex local-state sync has now reached a governed zero-drift baseline
 
 ## Completed In v0.4
 

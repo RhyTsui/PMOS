@@ -1,0 +1,90 @@
+{
+  "version": "2026-04-22",
+  "source": "codex-runtime-ui-visible-snapshot",
+  "skills": [
+    {
+      "id": "excel",
+      "name": "Excel",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "Create and edit spreadsheet or excel files"
+    },
+    {
+      "id": "fireworks-tech-graph",
+      "name": "Fireworks Tech Graph",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "Generate polished SVG and PNG technical diagrams"
+    },
+    {
+      "id": "follow-builders",
+      "name": "Follow Builders",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "AI builders digest — monitors top AI builders on X and YouTube podcasts, remixes their content into digestible summaries."
+    },
+    {
+      "id": "frontend-skill",
+      "name": "Frontend Skill",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "Design visually strong landing pages, websites, apps, and UI"
+    },
+    {
+      "id": "gmail",
+      "name": "Gmail",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "Summarize threads and draft replies"
+    },
+    {
+      "id": "inbox-triage",
+      "name": "Inbox Triage",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "Triage an inbox into action buckets"
+    },
+    {
+      "id": "imagegen",
+      "name": "Image Gen",
+      "visibility": "runtime",
+      "scope": "system",
+      "description": "Generate or edit images for websites, games, and more"
+    },
+    {
+      "id": "openai-docs",
+      "name": "OpenAI Docs",
+      "visibility": "runtime",
+      "scope": "system",
+      "description": "Reference official OpenAI docs, including upgrade guidance"
+    },
+    {
+      "id": "plugin-creator",
+      "name": "Plugin Creator",
+      "visibility": "runtime",
+      "scope": "system",
+      "description": "Scaffold plugins and marketplace entries"
+    },
+    {
+      "id": "powerpoint",
+      "name": "PowerPoint",
+      "visibility": "runtime",
+      "scope": "personal",
+      "description": "Create and edit presentation slide decks"
+    },
+    {
+      "id": "skill-creator",
+      "name": "Skill Creator",
+      "visibility": "runtime",
+      "scope": "system",
+      "description": "Create or update a skill"
+    },
+    {
+      "id": "skill-installer",
+      "name": "Skill Installer",
+      "visibility": "runtime",
+      "scope": "system",
+      "description": "Install curated skills from openai/skills or other repos"
+    }
+  ]
+}

@@ -174,6 +174,79 @@ type ProductSkillSurface = {
   };
 };
 
+type CodexLocalSkill = {
+  id: string;
+  path: string;
+  hasSkillMd: boolean;
+  scope: 'system' | 'runtime' | 'user';
+};
+
+type CodexLocalPlugin = {
+  id: string;
+  enabled: boolean;
+  source: 'config' | 'cache' | 'config+cache';
+  cachePath: string | null;
+};
+
+type CodexLocalStateSnapshot = {
+  codexHome: string;
+  configPath: string;
+  skillsPath: string;
+  pluginsPath: string;
+  configExists: boolean;
+  localSkills: CodexLocalSkill[];
+  runtimeVisibleSkills: Array<{
+    id: string;
+    name: string;
+    scope: 'personal' | 'system';
+    description: string;
+  }>;
+  governedRuntimeCapabilities: Array<{
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+    targetRegistry: string;
+  }>;
+  governedLocalRuntimeCore: Array<{
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+    targetRegistry: string;
+  }>;
+  localPlugins: CodexLocalPlugin[];
+  governedPlugins: Array<{
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+    runtimeVisibleSkillId: string | null;
+  }>;
+  enabledPluginIds: string[];
+  pmaiosExternalSkills: Array<{
+    id: string;
+    name: string;
+    promptPath: string;
+    command: string | null;
+    deploymentStatus: string;
+  }>;
+  pmaiosReadiness: {
+    total: number;
+    enabled: number;
+    integrated: number;
+    autoTriggerable: number;
+    byStatus: Record<string, number>;
+  };
+  diff: {
+    localOnlySkills: string[];
+    pmaiosOnlyExternalSkills: string[];
+    localVisibleAndRegisteredSkills: string[];
+    runtimeVisibleOnlySkills: string[];
+    enabledPluginsNotTrackedByPmaios: string[];
+  };
+};
+
 type ExternalConnectorStatus = {
   notion: {
     configured: boolean;
@@ -1002,6 +1075,10 @@ async function listProductAgentBlueprints() {
 
 async function loadProductSkills(subprojectId: string | null) {
   return fetchJson<ProductSkillSurface>(buildScopedUrl('/api/skills', subprojectId));
+}
+
+async function loadCodexLocalState(subprojectId: string | null) {
+  return fetchJson<CodexLocalStateSnapshot>(buildScopedUrl('/api/codex/local-state', subprojectId));
 }
 
 async function loadConnectorStatus(subprojectId: string | null) {
@@ -2250,10 +2327,12 @@ function ProductAgentPanel({
 
 function ProductSkillPanel({
   surface,
+  codexLocalState,
   busy,
   onRefresh,
 }: {
   surface: ProductSkillSurface | null;
+  codexLocalState: CodexLocalStateSnapshot | null;
   busy: boolean;
   onRefresh: () => void;
 }) {
@@ -2287,6 +2366,96 @@ function ProductSkillPanel({
               {surface.designTooling.command} / {surface.designTooling.status}
             </strong>
           </div>
+          <div className="inspector-field">
+            <span>Codex Local Sync</span>
+            <strong>
+              {codexLocalState
+                ? `${codexLocalState.diff.localVisibleAndRegisteredSkills.length} 已同步 / ${codexLocalState.diff.localOnlySkills.length} 本地待注册 / ${codexLocalState.diff.runtimeVisibleOnlySkills.length} 运行时待治理 / ${codexLocalState.diff.enabledPluginsNotTrackedByPmaios.length} 待治理插件`
+                : 'Not loaded'}
+            </strong>
+          </div>
+          {codexLocalState ? (
+            <div className="trace-list">
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">已同步到 PMAIOS 的本地技能</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.diff.localVisibleAndRegisteredSkills.join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  local skills: {codexLocalState.localSkills.length} / plugins: {codexLocalState.localPlugins.length}
+                </div>
+              </article>
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">标准同步动作</div>
+                <div className="trace-event__detail">
+                  <code>npm run cli -- codex-state sync</code>
+                </div>
+                <div className="trace-event__meta">
+                  这一个命令会重写同步快照，并返回当前是 aligned 还是 drift-detected。
+                </div>
+              </article>
+              <article className={`trace-event trace-event--${codexLocalState.diff.localOnlySkills.length ? 'warning' : 'ok'}`}>
+                <div className="trace-event__kind">本地存在但 PMAIOS 未注册</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.diff.localOnlySkills.join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  这些 skill 当前只在本地 Codex 可见，还没有进入 PMAIOS registry。
+                </div>
+              </article>
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">已治理的本地 runtime core</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.governedLocalRuntimeCore.map((item) => item.name).join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  {codexLocalState.governedLocalRuntimeCore
+                    .map((item) => `${item.id} -> ${item.targetRegistry}`)
+                    .join(' / ') || 'No governed local runtime core yet'}
+                </div>
+              </article>
+              <article className={`trace-event trace-event--${codexLocalState.diff.enabledPluginsNotTrackedByPmaios.length ? 'warning' : 'ok'}`}>
+                <div className="trace-event__kind">已启用但未治理的插件</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.diff.enabledPluginsNotTrackedByPmaios.join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  当前主要从 <code>config.toml</code> 读取启用态，后续再补 plugin registry。
+                </div>
+              </article>
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">已治理 plugin/tool</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.governedPlugins.map((item) => item.name).join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  {codexLocalState.governedPlugins
+                    .map((item) => `${item.id} -> ${item.runtimeVisibleSkillId ?? '-'}`)
+                    .join(' / ') || 'No governed plugin yet'}
+                </div>
+              </article>
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">已分类的运行时内置能力</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.governedRuntimeCapabilities.map((item) => item.name).join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  {codexLocalState.governedRuntimeCapabilities
+                    .map((item) => `${item.id} -> ${item.targetRegistry}`)
+                    .join(' / ') || 'No governed runtime capability yet'}
+                </div>
+              </article>
+              <article className={`trace-event trace-event--${codexLocalState.diff.runtimeVisibleOnlySkills.length ? 'warning' : 'ok'}`}>
+                <div className="trace-event__kind">Codex 运行时可见但 PMAIOS 未治理</div>
+                <div className="trace-event__detail">
+                  {codexLocalState.diff.runtimeVisibleOnlySkills.join(' / ') || 'None'}
+                </div>
+                <div className="trace-event__meta">
+                  这层口径来自当前 Codex UI 可见技能快照，不等于本地目录层。
+                </div>
+              </article>
+            </div>
+          ) : null}
           <div className="trace-list">
             {groups.map((group) => {
               const skills = surface.byMainline[group.key];
@@ -3459,6 +3628,7 @@ export default function App() {
   const [productAgents, setProductAgents] = useState<ProductAgent[]>([]);
   const [productAgentBlueprints, setProductAgentBlueprints] = useState<ProductAgentBlueprintSummary[]>([]);
   const [productSkillSurface, setProductSkillSurface] = useState<ProductSkillSurface | null>(null);
+  const [codexLocalState, setCodexLocalState] = useState<CodexLocalStateSnapshot | null>(null);
   const [externalConnectorStatus, setExternalConnectorStatus] = useState<ExternalConnectorStatus | null>(null);
   const [latestWebFetch, setLatestWebFetch] = useState<WebFetchArtifact | null>(null);
   const [latestFigmaInspection, setLatestFigmaInspection] = useState<FigmaInspection | null>(null);
@@ -3776,14 +3946,16 @@ export default function App() {
   }, []);
 
   const loadProductAgentData = useCallback(async (subprojectId: string | null) => {
-    const [agentResult, blueprintResult, skillSurface] = await Promise.all([
+    const [agentResult, blueprintResult, skillSurface, localState] = await Promise.all([
       listProductAgents(subprojectId),
       listProductAgentBlueprints(),
       loadProductSkills(subprojectId),
+      loadCodexLocalState(subprojectId),
     ]);
     setProductAgents(agentResult.items);
     setProductAgentBlueprints(blueprintResult.items);
     setProductSkillSurface(skillSurface);
+    setCodexLocalState(localState);
   }, []);
 
   const loadProductChiefData = useCallback(async (subprojectId: string | null) => {
@@ -5333,6 +5505,12 @@ export default function App() {
                 onInvoke={() => void handleInvokeCapability()}
               />
             </div>
+            <ProductSkillPanel
+              surface={productSkillSurface}
+              codexLocalState={codexLocalState}
+              busy={productAgentBusy}
+              onRefresh={() => void loadProductAgentData(selectedSubprojectId)}
+            />
             <RetrievalGovernancePanel
               settings={retrievalGovernance}
               searchResult={retrievalSearchResult}

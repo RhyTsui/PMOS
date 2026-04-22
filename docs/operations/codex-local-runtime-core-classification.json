@@ -1,0 +1,14 @@
+{
+  "version": "2026-04-22",
+  "source": "pmaios-codex-local-runtime-core-classification",
+  "items": [
+    {
+      "id": "codex-primary-runtime",
+      "name": "Codex Primary Runtime",
+      "type": "local-runtime-core",
+      "status": "governed",
+      "targetRegistry": "local-runtime-core",
+      "notes": "Core runtime capability directory under ~/.codex/skills. This is not a user-installed skill and should not be treated as PMAIOS external-skill drift."
+    }
+  ]
+}
