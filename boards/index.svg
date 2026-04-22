@@ -223,4 +223,9 @@
 
   <text x="924" y="1128" class="sub">公司演示推荐阅读路径：演示介绍图板 -&gt; 整体能力介绍 -&gt; 架构 + 路线图 -&gt; 未来版本演进探究 -&gt; v0.5 清单板。</text>
   <text x="924" y="1152" class="sub">实施工作推荐路径：v0.5 清单文档 -&gt; v0.5 实施索引 -&gt; 模式架构 / AI 产研协同闭环 / 认知阶梯 / 人机协同深研。</text>
+  <a href="project-entry-rollout-status.svg">
+    <rect x="1188" y="1102" width="240" height="46" class="card"/>
+    <text x="1216" y="1130" class="cardTitle">项目入口 Rollout</text>
+    <text x="1348" y="1130" class="linkText">打开 -&gt;</text>
+  </a>
 </svg>

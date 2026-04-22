@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="1400" height="900">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { fill: #0f172a; font-size: 30px; font-weight: 700; }
+    .sub { fill: #475569; font-size: 14px; }
+    .card { fill: #ffffff; stroke: #dbe2ea; stroke-width: 1.5; rx: 16; }
+    .section { fill: #0f172a; font-size: 20px; font-weight: 700; }
+    .body { fill: #334155; font-size: 14px; }
+    .meta { fill: #64748b; font-size: 12px; }
+    .ok { fill: #ecfdf5; stroke: #86efac; }
+    .warn { fill: #fff7ed; stroke: #fdba74; }
+    .miss { fill: #f8fafc; stroke: #cbd5e1; }
+    .metric { fill: #eff6ff; stroke: #93c5fd; }
+    .metricTitle { fill: #1d4ed8; font-size: 16px; font-weight: 700; }
+    .metricValue { fill: #0f172a; font-size: 28px; font-weight: 700; }
+    .small { fill: #475569; font-size: 13px; }
+  </style>
+
+  <rect width="1400" height="900" fill="#f8fafc"/>
+
+  <text x="64" y="68" class="title">项目标准入口 Rollout 状态</text>
+  <text x="64" y="98" class="sub">按统一分母跟踪 project-board / roadmap-board / decision-board / change-log，而不是笼统说“部分完成”。</text>
+
+  <rect x="64" y="136" width="240" height="118" rx="16" class="metric"/>
+  <text x="88" y="174" class="metricTitle">活跃项目</text>
+  <text x="88" y="218" class="metricValue">5</text>
+  <text x="88" y="238" class="small">knowledge-base / ad / chokonu / server / tracking-acceptance</text>
+
+  <rect x="328" y="136" width="240" height="118" rx="16" class="metric"/>
+  <text x="352" y="174" class="metricTitle">project-board</text>
+  <text x="352" y="218" class="metricValue">3 / 5</text>
+  <text x="352" y="238" class="small">已有首轮覆盖，但还不是完整叙事面</text>
+
+  <rect x="592" y="136" width="220" height="118" rx="16" class="metric"/>
+  <text x="616" y="174" class="metricTitle">roadmap-board</text>
+  <text x="616" y="218" class="metricValue">0 / 5</text>
+  <text x="616" y="238" class="small">当前是普遍缺口</text>
+
+  <rect x="836" y="136" width="220" height="118" rx="16" class="metric"/>
+  <text x="860" y="174" class="metricTitle">decision-board</text>
+  <text x="860" y="218" class="metricValue">0 / 5</text>
+  <text x="860" y="238" class="small">当前是普遍缺口</text>
+
+  <rect x="1080" y="136" width="256" height="118" rx="16" class="metric"/>
+  <text x="1104" y="174" class="metricTitle">change-log</text>
+  <text x="1104" y="218" class="metricValue">0 / 5</text>
+  <text x="1104" y="238" class="small">版本叙事与持续更新面仍未拉起</text>
+
+  <text x="64" y="308" class="section">各项目现状</text>
+
+  <rect x="64" y="332" width="248" height="190" rx="16" class="card ok"/>
+  <text x="88" y="368" class="section">knowledge-base</text>
+  <text x="88" y="394" class="meta">当前阶段：有总览入口，缺完整叙事面</text>
+  <text x="88" y="430" class="body">已具备</text>
+  <text x="88" y="454" class="small">• project-board.svg</text>
+  <text x="88" y="488" class="body">待补</text>
+  <text x="88" y="512" class="small">• roadmap-board.svg</text>
+  <text x="88" y="534" class="small">• decision-board.svg</text>
+  <text x="88" y="556" class="small">• change-log.md</text>
+
+  <rect x="332" y="332" width="248" height="190" rx="16" class="card ok"/>
+  <text x="356" y="368" class="section">ad</text>
+  <text x="356" y="394" class="meta">当前阶段：有总览入口，缺完整叙事面</text>
+  <text x="356" y="430" class="body">已具备</text>
+  <text x="356" y="454" class="small">• project-board.svg</text>
+  <text x="356" y="488" class="body">待补</text>
+  <text x="356" y="512" class="small">• roadmap-board.svg</text>
+  <text x="356" y="534" class="small">• decision-board.svg</text>
+  <text x="356" y="556" class="small">• change-log.md</text>
+
+  <rect x="600" y="332" width="248" height="190" rx="16" class="card ok"/>
+  <text x="624" y="368" class="section">chokonu</text>
+  <text x="624" y="394" class="meta">当前阶段：有总览入口，缺完整叙事面</text>
+  <text x="624" y="430" class="body">已具备</text>
+  <text x="624" y="454" class="small">• project-board.svg</text>
+  <text x="624" y="488" class="body">待补</text>
+  <text x="624" y="512" class="small">• roadmap-board.svg</text>
+  <text x="624" y="534" class="small">• decision-board.svg</text>
+  <text x="624" y="556" class="small">• change-log.md</text>
+
+  <rect x="868" y="332" width="224" height="190" rx="16" class="card warn"/>
+  <text x="892" y="368" class="section">server</text>
+  <text x="892" y="394" class="meta">当前阶段：尚未进入标准入口集</text>
+  <text x="892" y="430" class="body">缺失</text>
+  <text x="892" y="454" class="small">• project-board.svg</text>
+  <text x="892" y="476" class="small">• roadmap-board.svg</text>
+  <text x="892" y="498" class="small">• decision-board.svg</text>
+  <text x="892" y="520" class="small">• change-log.md</text>
+
+  <rect x="1112" y="332" width="224" height="190" rx="16" class="card warn"/>
+  <text x="1136" y="368" class="section">tracking-acceptance</text>
+  <text x="1136" y="394" class="meta">当前阶段：尚未进入标准入口集</text>
+  <text x="1136" y="430" class="body">缺失</text>
+  <text x="1136" y="454" class="small">• project-board.svg</text>
+  <text x="1136" y="476" class="small">• roadmap-board.svg</text>
+  <text x="1136" y="498" class="small">• decision-board.svg</text>
+  <text x="1136" y="520" class="small">• change-log.md</text>
+
+  <text x="64" y="592" class="section">当前判断</text>
+  <rect x="64" y="616" width="612" height="200" rx="16" class="card"/>
+  <text x="88" y="654" class="body">• 当前“workflow rollout = partial adoption”这个说法过于粗。</text>
+  <text x="88" y="684" class="body">• 更准确的状态是：`project-board` 已有首轮覆盖，但 `roadmap / decision / change-log` 仍是普遍缺口。</text>
+  <text x="88" y="714" class="body">• `knowledge-base / ad / chokonu` 已进入“可展示项目总览”的阶段，但还不能算完整实时叙事面。</text>
+  <text x="88" y="744" class="body">• `server / tracking-acceptance` 还没有进入标准入口集，仍是下一轮补齐重点。</text>
+  <text x="88" y="774" class="body">• 这份分母既是 `v0.4` 收口依据，也是 `v0.5` 人阅读层 rollout 的基线。</text>
+
+  <text x="724" y="592" class="section">下一步顺序</text>
+  <rect x="724" y="616" width="612" height="200" rx="16" class="card miss"/>
+  <text x="748" y="654" class="body">1. 先给 `knowledge-base / ad / chokonu` 补齐 `roadmap-board.svg`。</text>
+  <text x="748" y="686" class="body">2. 再补 `decision-board.svg`，把关键判断和待确认事项显出来。</text>
+  <text x="748" y="718" class="body">3. 再补 `change-log.md`，把“更新日志驱动实时叙事面”真正落下来。</text>
+  <text x="748" y="750" class="body">4. 最后拉起 `server / tracking-acceptance` 的首个 `project-board.svg`。</text>
+  <text x="748" y="782" class="body">5. 后续再把这套分母接到更完整的 reading surface 和知识图谱里。</text>
+
+  <text x="64" y="860" class="sub">真源文档：docs/operations/project-entry-rollout-status.md</text>
+</svg>
