@@ -157,6 +157,13 @@ Current counted set:
 - The human-reading manifest now includes the direct-entry homepage, workspace entry, execution checklist, and user-requirement backcheck sample, so key reading assets are discoverable from one runtime index.
 - Runtime project entries now expose not only human-facing boards and change logs, but also linked README / governance / memory / workflow / PRD / architecture sources, so human-facing entry assets can immediately drill back into the underlying AI-facing and governance evidence layer.
 - Runtime project entry views now also expose missing standard assets per subproject, so `knowledge-base / ad / chokonu / server` rollout gaps are visible from the reading surface instead of hidden in manual audits.
+- Runtime workspace and direct-entry reading surfaces now also show aggregate project-entry coverage, so rollout completion is visible as a denominator instead of only per-project missing-file lists.
+- Latest repository sync has been pushed to GitHub `main` at commit `c66a358`, so the current v0.4/v0.5 reading-surface and version-governance state is no longer only local.
+- `docs/operations/project-entry-rollout-status.md` now records the real rollout denominator:
+  - `project-board.svg`: `3 / 5`
+  - `roadmap-board.svg`: `0 / 5`
+  - `decision-board.svg`: `0 / 5`
+  - `change-log.md`: `0 / 5`
 
 ## v0.4 Task Checklist
 
