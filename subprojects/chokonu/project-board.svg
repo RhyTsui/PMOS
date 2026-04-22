@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 1040" width="1360" height="1040">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 980" width="1360" height="980">
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
     .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
@@ -9,56 +9,50 @@
     .meta { fill: #6e6e80; font-size: 12px; }
     .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
   </style>
-  <rect width="1360" height="1040" fill="#ffffff"/>
-  <a href="../../boards/index.svg"><text x="72" y="46" class="linkText">返回 PMAIOS 总目录</text></a>
-  <text x="72" y="88" class="title">ChoKoNu / 连弩-AI 测试平台</text>
-  <text x="72" y="116" class="sub">当前 AI 测试平台子项目的根板。</text>
+  <rect width="1360" height="980" fill="#ffffff"/>
+  <a href="../../boards/index.svg"><text x="72" y="46" class="linkText">&lt;- Back to PMAIOS directory</text></a>
+  <text x="72" y="88" class="title">连弩测试平台 / ChoKoNu</text>
+  <text x="72" y="116" class="sub">Active root board for the AI testing platform subproject.</text>
 
   <rect x="72" y="160" width="392" height="180" class="card"/>
   <rect x="72" y="160" width="5" height="180" fill="#10a37f"/>
-  <text x="100" y="198" class="cardTitle">当前状态</text>
-  <text x="100" y="223" class="meta">部分采纳 / 首版规划包已到位 / legacy 研究已开始系统吸收</text>
-  <text x="100" y="258" class="body">ChoKoNu 不再只有抽象规划。现在已经把 legacy 里的竞品、专项测试方法和执行主链草案重新整理进新的 SVG 研究层。</text>
+  <text x="100" y="198" class="cardTitle">Current Position</text>
+  <text x="100" y="223" class="meta">partial adoption / planning package in place</text>
+  <text x="100" y="258" class="body">ChoKoNu has an active project workflow, PM task sheet, first-version master planning package, and requirement/review input docs. The next valuable step is a real review round.</text>
 
   <rect x="484" y="160" width="392" height="180" class="card"/>
-  <text x="512" y="198" class="cardTitle">首版核心主链</text>
-  <text x="512" y="258" class="body">标准 -&gt; 样本 -&gt; 评测集 -&gt; 运行 -&gt; 评估器 -&gt; Trace -&gt; 报告 -&gt; 回归资产</text>
+  <text x="512" y="198" class="cardTitle">Core First-Version Chain</text>
+  <text x="512" y="258" class="body">rules -&gt; samples -&gt; evaluation suites -&gt; runs -&gt; evaluators -&gt; trace -&gt; report -&gt; regression asset</text>
 
   <rect x="896" y="160" width="392" height="180" class="card"/>
-  <text x="924" y="198" class="cardTitle">主要输出规则</text>
-  <text x="924" y="258" class="body">优先使用 SVG 作为规划、研究和评审沟通物，Markdown 作为详细支撑层。</text>
+  <text x="924" y="198" class="cardTitle">Primary Output Rule</text>
+  <text x="924" y="258" class="body">Use SVG planning and decision boards first. Markdown remains the detailed support layer for PM, testing, and review work.</text>
 
   <rect x="72" y="380" width="392" height="232" class="card"/>
-  <text x="100" y="418" class="cardTitle">核心文档</text>
+  <text x="100" y="418" class="cardTitle">Main Docs</text>
   <a href="README.md"><text x="100" y="460" class="linkText">README.md</text></a>
-  <a href="docs/workflow/ChoKoNu项目执行工作流.md"><text x="100" y="492" class="linkText">项目执行工作流</text></a>
-  <a href="docs/workflow/ChoKoNu产品经理任务单.md"><text x="100" y="524" class="linkText">产品经理任务单</text></a>
-  <a href="docs/requirements/ChoKoNu首版总规划.md"><text x="100" y="556" class="linkText">首版总规划</text></a>
-  <a href="docs/review/ChoKoNu版本评审输入稿.md"><text x="100" y="588" class="linkText">版本评审输入稿</text></a>
+  <a href="docs/workflow/ChoKoNu项目执行工作流.md"><text x="100" y="492" class="linkText">project workflow</text></a>
+  <a href="docs/workflow/ChoKoNu产品经理任务单.md"><text x="100" y="524" class="linkText">PM task sheet</text></a>
+  <a href="docs/requirements/ChoKoNu首版总规划.md"><text x="100" y="556" class="linkText">first-version master plan</text></a>
+  <a href="docs/review/ChoKoNu版本评审输入稿.md"><text x="100" y="588" class="linkText">version review input</text></a>
 
   <rect x="484" y="380" width="392" height="232" class="card"/>
-  <text x="512" y="418" class="cardTitle">当前最该做的事</text>
-  <text x="512" y="460" class="body">1. 基于 07、08、09、10、11 这组图做一次正式首版评审。</text>
-  <text x="512" y="492" class="body">2. 从 legacy 方法稿里挑出首批必须进入真源的专项测试对象。</text>
-  <text x="512" y="524" class="body">3. 把评测集、评估器和报告链进一步落成 execution-ready 切片。</text>
+  <text x="512" y="418" class="cardTitle">Immediate Needed Work</text>
+  <text x="512" y="460" class="body">1. Run a real first review round against the current planning package.</text>
+  <text x="512" y="492" class="body">2. Convert planning and review artifacts into navigable SVG boards.</text>
+  <text x="512" y="524" class="body">3. Refine evaluation-set, evaluator, and report chain into execution-ready slices.</text>
 
   <rect x="896" y="380" width="392" height="232" class="card"/>
-  <text x="924" y="418" class="cardTitle">新补研究层</text>
-  <text x="924" y="460" class="body">08：legacy 研究地图</text>
-  <text x="924" y="492" class="body">09：六类专项测试方法</text>
-  <text x="924" y="524" class="body">10：资产到报告执行主链</text>
-  <text x="924" y="556" class="body">11：legacy 吸收路线图</text>
+  <text x="924" y="418" class="cardTitle">Rule Hooks</text>
+  <text x="924" y="460" class="body">Uses SVG-first artifact policy, async PM sync, fixed questioning phase, and first-version planning templates from the platform layer.</text>
 
-  <rect x="72" y="652" width="1216" height="292" class="card"/>
-  <text x="100" y="690" class="cardTitle">下一层可视化</text>
-  <text x="100" y="732" class="body">现已覆盖的重点板：</text>
-  <text x="100" y="764" class="body">- 研究地图</text>
-  <text x="100" y="796" class="body">- 规划板</text>
-  <text x="100" y="828" class="body">- 评审板</text>
-  <text x="340" y="764" class="body">- 专项测试方法板</text>
-  <text x="340" y="796" class="body">- 执行主链板</text>
-  <text x="340" y="828" class="body">- legacy 吸收板</text>
-  <text x="100" y="884" class="body">建议后续再补：</text>
-  <text x="100" y="916" class="body">- 版本门禁板</text>
-  <text x="340" y="916" class="body">- 首批专项测试对象切片板</text>
+  <rect x="72" y="652" width="1216" height="212" class="card"/>
+  <text x="100" y="690" class="cardTitle">Next Visual Layer</text>
+  <text x="100" y="732" class="body">Recommended follow-up boards for this subproject:</text>
+  <text x="100" y="764" class="body">- research-map.svg</text>
+  <text x="100" y="796" class="body">- planning-board.svg</text>
+  <text x="100" y="828" class="body">- decision-board.svg</text>
+  <text x="340" y="764" class="body">- workflow-board.svg</text>
+  <text x="340" y="796" class="body">- capability-map.svg</text>
+  <text x="340" y="828" class="body">- review-board.svg</text>
 </svg>

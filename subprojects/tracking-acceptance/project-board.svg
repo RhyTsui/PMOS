@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 900" width="1360" height="900">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
+    .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
+    .sub { fill: #6e6e80; font-size: 13px; }
+    .card { fill: #ffffff; stroke: #e5e5e5; stroke-width: 1.5; rx: 10; }
+    .cardTitle { fill: #0d0d0d; font-size: 17px; font-weight: 600; }
+    .body { fill: #374151; font-size: 13px; }
+    .meta { fill: #6e6e80; font-size: 12px; }
+    .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
+  </style>
+  <rect width="1360" height="900" fill="#ffffff"/>
+  <a href="../../boards/index.svg"><text x="72" y="46" class="linkText">&lt;- Back to PMAIOS directory</text></a>
+  <text x="72" y="88" class="title">游戏埋点验收工具 / Game Telemetry Acceptance Tool</text>
+  <text x="72" y="116" class="sub">Display board for the tracking-acceptance subproject, now treated as a separate project from ChoKoNu.</text>
+
+  <rect x="72" y="160" width="392" height="190" class="card"/>
+  <rect x="72" y="160" width="5" height="190" fill="#10a37f"/>
+  <text x="100" y="198" class="cardTitle">Current Position</text>
+  <text x="100" y="223" class="meta">separate project identity</text>
+  <text x="100" y="258" class="body">This project is now distinct from ChoKoNu. It should focus on game event telemetry acceptance and related validation flow rather than the broader AI testing platform scope.</text>
+
+  <rect x="484" y="160" width="392" height="190" class="card"/>
+  <text x="512" y="198" class="cardTitle">Primary Role</text>
+  <text x="512" y="258" class="body">Telemetry event acceptance, field validation, acceptance workflow, and related data-quality checks for game-side tracking scenarios.</text>
+
+  <rect x="896" y="160" width="392" height="190" class="card"/>
+  <text x="924" y="198" class="cardTitle">Next Needed Work</text>
+  <text x="924" y="258" class="body">Rebuild a separate workflow shell, PM task sheet, and independent planning artifacts so it no longer inherits ChoKoNu assumptions.</text>
+
+  <rect x="72" y="390" width="1216" height="216" class="card"/>
+  <text x="100" y="428" class="cardTitle">Follow-Up Boards</text>
+  <text x="100" y="470" class="body">Recommended next SVG boards:</text>
+  <text x="100" y="502" class="body">- acceptance-flow-board.svg</text>
+  <text x="100" y="534" class="body">- telemetry-scope-board.svg</text>
+  <text x="100" y="566" class="body">- validation-checklist-board.svg</text>
+</svg>
