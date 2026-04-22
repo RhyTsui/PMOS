@@ -137,6 +137,22 @@ function renderDirectEntryHtml(
             </article>`,
           )
           .join('')}</div>`;
+  const rolloutSection = `<div class="summary-grid">
+      <article class="summary-card">
+        <strong>项目入口 rollout 分母</strong>
+        <span>活跃项目：5</span>
+        <span>project-board：3 / 5</span>
+        <span>roadmap-board：0 / 5</span>
+        <span>decision-board：0 / 5</span>
+        <span>change-log：0 / 5</span>
+      </article>
+      <article class="summary-card">
+        <strong>真源与图板入口</strong>
+        <span><a href="/pmaios/docs/operations/project-entry-rollout-status.md" target="_blank" rel="noreferrer">打开 rollout 真源</a></span>
+        <span><a href="/pmaios/boards/project-entry-rollout-status.svg" target="_blank" rel="noreferrer">打开 rollout 图板</a></span>
+        <span>用途：v0.4 收口依据 + v0.5 人阅读层 rollout 基线</span>
+      </article>
+    </div>`;
   return `<!doctype html>
 <html lang="zh-CN">
   <head>
@@ -324,6 +340,11 @@ function renderDirectEntryHtml(
         <h2>已发现的项目入口</h2>
         <p>这些入口来自当前仓库里已经存在的 project-board、roadmap-board、decision-board 和 change-log 资产。当前已补齐标准入口的项目：${fullyCoveredProjects}/${projectEntries.length || 0}。</p>
         ${projectSection}
+      </section>
+      <section class="panel">
+        <h2>项目入口 Rollout</h2>
+        <p>把“partial adoption”拆成可追踪的分母：哪些项目已经有总览入口，哪些项目还缺 roadmap、decision 和 change-log。</p>
+        ${rolloutSection}
       </section>
     </main>
   </body>
