@@ -776,7 +776,17 @@ function ProjectEntryPanel({ items }: { items: ProjectEntrySummary[] }) {
     governance: '治理依据',
     'ai-facing': 'AI 依据',
   };
+  const rolloutAssets: ProjectEntryAsset['name'][] = [
+    'project-board.svg',
+    'roadmap-board.svg',
+    'decision-board.svg',
+    'change-log.md',
+  ];
   const fullyCoveredProjects = items.filter((item) => item.missingAssets.length === 0).length;
+  const rolloutCounts = rolloutAssets.map((assetName) => ({
+    name: assetName,
+    present: items.filter((item) => item.assets.some((asset) => asset.name === assetName)).length,
+  }));
 
   return (
     <section className="sidebar-section">
@@ -789,6 +799,16 @@ function ProjectEntryPanel({ items }: { items: ProjectEntrySummary[] }) {
           已补齐标准入口的项目：{fullyCoveredProjects}/{items.length}
         </div>
         <div className="trace-event__meta">标准集：project-board / roadmap-board / decision-board / change-log</div>
+      </div>
+      <div className="trace-list" style={{ marginBottom: 10 }}>
+        {rolloutCounts.map((item) => (
+          <article key={item.name} className="trace-event trace-event--ok">
+            <div className="trace-event__kind">{item.name}</div>
+            <div className="trace-event__detail">
+              {item.present}/{items.length || 0}
+            </div>
+          </article>
+        ))}
       </div>
       <div className="trace-list">
         {items.length === 0 ? (

@@ -62,7 +62,17 @@ function renderDirectEntryHtml(
   checklistSummary: ExecutionChecklistSummary = { versions: [], userBackchecks: [] },
   dailyDigests: DailyDigestEntry[] = [],
 ) {
+  const rolloutAssets: ProjectEntryAsset['name'][] = [
+    'project-board.svg',
+    'roadmap-board.svg',
+    'decision-board.svg',
+    'change-log.md',
+  ];
   const fullyCoveredProjects = projectEntries.filter((entry) => entry.missingAssets.length === 0).length;
+  const rolloutCounts = rolloutAssets.map((assetName) => ({
+    name: assetName,
+    present: projectEntries.filter((entry) => entry.assets.some((asset) => asset.name === assetName)).length,
+  }));
   const versionSection =
     checklistSummary.versions.length === 0
       ? '<p class="empty">当前还没有可展示的分母进度。</p>'
@@ -140,11 +150,10 @@ function renderDirectEntryHtml(
   const rolloutSection = `<div class="summary-grid">
       <article class="summary-card">
         <strong>项目入口 rollout 分母</strong>
-        <span>活跃项目：5</span>
-        <span>project-board：3 / 5</span>
-        <span>roadmap-board：0 / 5</span>
-        <span>decision-board：0 / 5</span>
-        <span>change-log：0 / 5</span>
+        <span>活跃项目：${projectEntries.length}</span>
+        ${rolloutCounts
+          .map((item) => `<span>${item.name}：${item.present} / ${projectEntries.length}</span>`)
+          .join('')}
       </article>
       <article class="summary-card">
         <strong>真源与图板入口</strong>
