@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1160" role="img" aria-labelledby="title desc">
+  <title id="title">权限判定示例</title>
+  <desc id="desc">通过具体案例展示同一个知识资产在归属层、空间层、操作层共同作用下如何判定查看、修改、挂载、管理权限。</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #10243e; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 16px; fill: #536b84; }
+      .section { font-size: 22px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 700; }
+      .body { font-size: 14px; fill: #38526d; }
+      .small { font-size: 13px; fill: #61788f; }
+      .mono { font-size: 14px; font-family: "Cascadia Code", "Consolas", monospace; fill: #1d3557; }
+    </style>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2f6fed"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f8fc"/>
+      <stop offset="100%" stop-color="#edf3fa"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1680" height="1160" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1632" height="1112" rx="28" fill="#ffffff" stroke="#d8e2ef"/>
+  <text x="64" y="82" class="title">权限判定示例</text>
+  <text x="64" y="110" class="subtitle">主权看归属，协作看空间，动作看操作层。空间不会覆盖资产主权，查看权也不会自动变成挂载权。</text>
+
+  <rect x="56" y="148" width="1568" height="230" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="188" class="section">案例资产</text>
+
+  <rect x="84" y="228" width="520" height="112" rx="18" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="108" y="260" class="label">指间山海埋点知识库</text>
+  <text x="108" y="288" class="body">归属：项目A / 数据部联合维护</text>
+  <text x="108" y="312" class="body">进入空间：游戏数据分析域、游戏研发域</text>
+
+  <rect x="646" y="228" width="430" height="112" rx="18" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="670" y="260" class="label">操作定义</text>
+  <text x="670" y="288" class="body">查看：能看和检索</text>
+  <text x="670" y="312" class="body">修改：能编辑和更新</text>
+
+  <rect x="1118" y="228" width="478" height="112" rx="18" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="1142" y="260" class="label">关键原则</text>
+  <text x="1142" y="288" class="body">进入空间不改变归属；空间成员默认不拥有管理权。</text>
+  <text x="1142" y="312" class="body">挂载权需要单独判定。</text>
+
+  <rect x="56" y="416" width="492" height="650" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="456" class="section">人物 A</text>
+  <text x="84" y="482" class="small">数据部游戏分析组成员，同时在游戏数据分析域空间</text>
+
+  <rect x="84" y="520" width="436" height="124" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="108" y="552" class="label">身份</text>
+  <text x="108" y="580" class="body">部门：数据部 / 游戏分析组</text>
+  <text x="108" y="604" class="body">空间：游戏数据分析域</text>
+  <text x="108" y="628" class="body">与资产归属方存在直接维护关系</text>
+
+  <rect x="84" y="676" width="436" height="328" rx="18" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="108" y="708" class="label">判定结果</text>
+  <text x="108" y="740" class="body">查看：允许</text>
+  <text x="108" y="768" class="body">修改：允许</text>
+  <text x="108" y="796" class="body">挂载：视挂载策略，可允许</text>
+  <text x="108" y="824" class="body">管理：通常不自动允许，除非被设为资产管理员</text>
+  <text x="108" y="860" class="small">因为他不只是空间成员，还是归属维护链条上的人。</text>
+
+  <rect x="594" y="416" width="492" height="650" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="622" y="456" class="section">人物 B</text>
+  <text x="622" y="482" class="small">研发客户端组成员，同时在游戏研发域空间</text>
+
+  <rect x="622" y="520" width="436" height="124" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="646" y="552" class="label">身份</text>
+  <text x="646" y="580" class="body">部门：研发中心 / 客户端组</text>
+  <text x="646" y="604" class="body">空间：游戏研发域</text>
+  <text x="646" y="628" class="body">不是该资产主归属维护者</text>
+
+  <rect x="622" y="676" width="436" height="328" rx="18" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="646" y="708" class="label">判定结果</text>
+  <text x="646" y="740" class="body">查看：允许</text>
+  <text x="646" y="768" class="body">修改：通常不允许</text>
+  <text x="646" y="796" class="body">挂载：默认不允许，除非获得额外授权</text>
+  <text x="646" y="824" class="body">管理：不允许</text>
+  <text x="646" y="860" class="small">因为空间给了协作消费资格，但没有改变资产主权。</text>
+
+  <rect x="1132" y="416" width="492" height="650" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="1160" y="456" class="section">判定链</text>
+
+  <rect x="1160" y="520" width="436" height="76" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1184" y="550" class="mono">1. 识别主体</text>
+  <text x="1184" y="574" class="small">用户属于哪个个人 / 部门 / 组织</text>
+
+  <rect x="1160" y="618" width="436" height="76" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1184" y="648" class="mono">2. 识别空间</text>
+  <text x="1184" y="672" class="small">用户当前在哪些业务域空间中</text>
+
+  <rect x="1160" y="716" width="436" height="76" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1184" y="746" class="mono">3. 识别资产</text>
+  <text x="1184" y="770" class="small">资产归属是谁，进入了哪些空间</text>
+
+  <rect x="1160" y="814" width="436" height="76" rx="16" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1184" y="844" class="mono">4. 判定动作</text>
+  <text x="1184" y="868" class="small">查看 / 修改 / 挂载 / 管理分开判断</text>
+
+  <rect x="1160" y="912" width="436" height="76" rx="16" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="1184" y="942" class="mono">最终结论</text>
+  <text x="1184" y="966" class="small">空间只提供协作消费资格，不能直接覆盖归属层的主权。</text>
+</svg>

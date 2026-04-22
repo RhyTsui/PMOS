@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1080" role="img" aria-labelledby="title desc">
+  <title id="title">部门树与业务域空间网示例</title>
+  <desc id="desc">展示正式组织部门树与业务域协作空间网如何并存，部门是树，空间是网，不能混成一套层级。</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #10243e; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 16px; fill: #536b84; }
+      .section { font-size: 22px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 700; }
+      .body { font-size: 14px; fill: #38526d; }
+      .small { font-size: 13px; fill: #61788f; }
+    </style>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2f6fed"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f8fc"/>
+      <stop offset="100%" stop-color="#edf3fa"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1680" height="1080" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1632" height="1032" rx="28" fill="#ffffff" stroke="#d8e2ef"/>
+  <text x="64" y="82" class="title">部门树与业务域空间网示例</text>
+  <text x="64" y="110" class="subtitle">关键结论：部门是正式归属树，空间是跨部门协作网。空间不能替代部门树，部门树也不应该直接变成空间树。</text>
+
+  <rect x="56" y="148" width="708" height="864" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="84" y="188" class="section">A. 正式组织树</text>
+  <text x="84" y="214" class="small">回答谁归谁管、谁主维护、谁负责升级/下线。</text>
+
+  <rect x="286" y="240" width="220" height="60" rx="16" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="348" y="276" class="label">组织</text>
+
+  <rect x="98" y="356" width="180" height="60" rx="16" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="146" y="392" class="label">数据部</text>
+  <rect x="310" y="356" width="180" height="60" rx="16" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="344" y="392" class="label">发行中心</text>
+  <rect x="522" y="356" width="180" height="60" rx="16" fill="#f8f1ff" stroke="#ddc9ff"/>
+  <text x="568" y="392" class="label">研发中心</text>
+
+  <rect x="76" y="496" width="224" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="100" y="529" class="body">广告数据组</text>
+  <rect x="76" y="576" width="224" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="100" y="609" class="body">游戏分析组</text>
+
+  <rect x="288" y="496" width="224" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="312" y="529" class="body">发行一部</text>
+  <rect x="288" y="576" width="224" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="312" y="609" class="body">发行二部</text>
+
+  <rect x="500" y="496" width="224" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="524" y="529" class="body">客户端组</text>
+  <rect x="500" y="576" width="224" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="524" y="609" class="body">服务端组</text>
+
+  <rect x="200" y="724" width="360" height="72" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="224" y="756" class="label">特点</text>
+  <text x="302" y="756" class="body">单一上级、稳定层级、管理边界清晰</text>
+  <text x="224" y="782" class="small">适合承载归属、负责人、默认可见范围。</text>
+
+  <line x1="396" y1="300" x2="188" y2="356" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="396" y1="300" x2="400" y2="356" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="396" y1="300" x2="612" y2="356" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+  <line x1="188" y1="416" x2="188" y2="496" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="188" y1="416" x2="188" y2="576" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="400" y1="416" x2="400" y2="496" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="400" y1="416" x2="400" y2="576" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="612" y1="416" x2="612" y2="496" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="612" y1="416" x2="612" y2="576" stroke="#2f6fed" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+  <rect x="812" y="148" width="812" height="864" rx="22" fill="#f9fbfe" stroke="#dbe5f1"/>
+  <text x="840" y="188" class="section">B. 业务域空间网</text>
+  <text x="840" y="214" class="small">回答哪些人围绕哪个业务问题协作、消费、共建知识。</text>
+
+  <rect x="1120" y="250" width="220" height="60" rx="16" fill="#edf3ff" stroke="#c9d9ff"/>
+  <text x="1162" y="286" class="label">游戏数据分析域</text>
+  <rect x="928" y="418" width="220" height="60" rx="16" fill="#eefaf6" stroke="#c7eadc"/>
+  <text x="976" y="454" class="label">游戏研发域</text>
+  <rect x="1314" y="418" width="220" height="60" rx="16" fill="#fff8eb" stroke="#f0d8a6"/>
+  <text x="1344" y="454" class="label">游戏发行运营域</text>
+  <rect x="1120" y="602" width="220" height="60" rx="16" fill="#f8f1ff" stroke="#ddc9ff"/>
+  <text x="1168" y="638" class="label">产品经理域</text>
+
+  <rect x="884" y="744" width="668" height="176" rx="18" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="908" y="776" class="label">特点</text>
+  <text x="986" y="776" class="body">一个空间可跨多个部门；一个部门的人也可同时在多个空间里。</text>
+  <text x="908" y="804" class="body">例如：</text>
+  <text x="980" y="804" class="body">数据部的游戏分析组、发行二部、研发客户端组、产品经理，都可能同时进入“游戏数据分析域”。</text>
+  <text x="908" y="832" class="body">所以空间是网状关系，不是上下级树。</text>
+  <text x="908" y="860" class="small">空间适合承载知识消费、协作共建、应用挂载，而不是主权归属。</text>
+
+  <line x1="1230" y1="310" x2="1038" y2="418" stroke="#2f6fed" stroke-width="3"/>
+  <line x1="1230" y1="310" x2="1424" y2="418" stroke="#2f6fed" stroke-width="3"/>
+  <line x1="1038" y1="478" x2="1230" y2="602" stroke="#2f6fed" stroke-width="3"/>
+  <line x1="1424" y1="478" x2="1230" y2="602" stroke="#2f6fed" stroke-width="3"/>
+
+  <rect x="1258" y="74" width="336" height="56" rx="14" fill="#ffffff" stroke="#dbe5f1"/>
+  <text x="1280" y="108" class="small">一句话：部门是树，空间是网，不能合并成一套层级。</text>
+</svg>

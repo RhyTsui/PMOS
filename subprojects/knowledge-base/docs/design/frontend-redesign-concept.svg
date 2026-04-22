@@ -1,0 +1,133 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1480" y2="1120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4EFE4"/>
+      <stop offset="0.48" stop-color="#E8F1E8"/>
+      <stop offset="1" stop-color="#DCE9F5"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0F3D3E"/>
+      <stop offset="1" stop-color="#1F6F5F"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFDF8"/>
+      <stop offset="1" stop-color="#F2F6F7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#113C3A" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      text { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+      .eyebrow { font-size: 18px; font-weight: 700; letter-spacing: 2px; fill: #2D5B5A; }
+      .title { font-size: 50px; font-weight: 800; fill: #F8F4EA; }
+      .subtitle { font-size: 21px; font-weight: 500; fill: #D8E7E1; }
+      .section { font-size: 28px; font-weight: 800; fill: #113C3A; }
+      .label { font-size: 18px; font-weight: 700; fill: #183C3A; }
+      .body { font-size: 17px; font-weight: 500; fill: #416160; }
+      .small { font-size: 15px; font-weight: 600; fill: #587775; }
+      .chip { font-size: 14px; font-weight: 700; fill: #0F3D3E; }
+      .white { fill: #FFFFFF; }
+      .mint { fill: #DAEEE6; }
+      .sand { fill: #F4E8CE; }
+      .blue { fill: #DDE8F5; }
+      .ink { fill: #113C3A; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#bg)"/>
+  <circle cx="1360" cy="210" r="180" fill="#F6D8A6" fill-opacity="0.45"/>
+  <circle cx="230" cy="980" r="220" fill="#B9D8D1" fill-opacity="0.38"/>
+  <circle cx="1240" cy="1020" r="140" fill="#BDD0EC" fill-opacity="0.42"/>
+
+  <text x="120" y="90" class="eyebrow">FRONTEND REDESIGN CONCEPT</text>
+  <text x="120" y="135" class="body">前端改动设计图 v1｜先确定主框架，再落到二开模块</text>
+
+  <g filter="url(#shadow)">
+    <rect x="100" y="170" width="1040" height="760" rx="34" fill="#FCFBF8"/>
+    <rect x="100" y="170" width="1040" height="120" rx="34" fill="url(#hero)"/>
+    <rect x="100" y="256" width="1040" height="34" fill="url(#hero)"/>
+  </g>
+
+  <circle cx="150" cy="222" r="8" fill="#F3B4A6"/>
+  <circle cx="178" cy="222" r="8" fill="#F6D8A6"/>
+  <circle cx="206" cy="222" r="8" fill="#9DD4C3"/>
+  <text x="260" y="228" class="label white">品牌 / 产品导航</text>
+  <text x="880" y="228" class="small white">首页</text>
+  <text x="940" y="228" class="small white">任务流</text>
+  <text x="1015" y="228" class="small white">知识库</text>
+
+  <rect x="140" y="320" width="450" height="250" rx="30" fill="url(#hero)"/>
+  <text x="172" y="372" class="eyebrow white">01 核心首屏</text>
+  <text x="172" y="438" class="title">把复杂能力压缩成</text>
+  <text x="172" y="492" class="title">一个主工作台入口</text>
+  <text x="172" y="534" class="subtitle">强调“当前目标 / 当前状态 / 下一步动作”，避免首页沦为信息墙。</text>
+
+  <rect x="172" y="598" width="180" height="52" rx="26" fill="#F6D8A6"/>
+  <text x="208" y="630" class="label">开始主任务</text>
+  <rect x="366" y="598" width="170" height="52" rx="26" fill="#DCEBE8"/>
+  <text x="403" y="630" class="label">查看上下文</text>
+
+  <rect x="620" y="320" width="470" height="290" rx="30" fill="#F6F2E9"/>
+  <text x="654" y="368" class="section">主工作台布局</text>
+  <rect x="654" y="396" width="402" height="56" rx="18" fill="#FFFFFF"/>
+  <text x="680" y="430" class="label">全局输入框 / 当前任务指令</text>
+  <rect x="654" y="472" width="186" height="106" rx="20" fill="#DAEEE6"/>
+  <text x="676" y="510" class="label">进行中</text>
+  <text x="676" y="540" class="body">任务状态、阻塞、</text>
+  <text x="676" y="566" class="body">下一安全步</text>
+  <rect x="870" y="472" width="186" height="106" rx="20" fill="#DDE8F5"/>
+  <text x="892" y="510" class="label">上下文</text>
+  <text x="892" y="540" class="body">记忆、历史决定、</text>
+  <text x="892" y="566" class="body">关键依赖</text>
+
+  <rect x="140" y="690" width="950" height="190" rx="30" fill="#EFF4F1"/>
+  <text x="172" y="736" class="section">中段改造重点：从“模块堆叠”改成“任务驱动”</text>
+  <rect x="172" y="766" width="210" height="78" rx="22" fill="#FFFFFF"/>
+  <text x="194" y="802" class="label">任务卡</text>
+  <text x="194" y="829" class="small">目标、负责人、进度、风险</text>
+  <rect x="406" y="766" width="210" height="78" rx="22" fill="#FFFFFF"/>
+  <text x="428" y="802" class="label">知识片段</text>
+  <text x="428" y="829" class="small">摘要、来源、动作建议</text>
+  <rect x="640" y="766" width="210" height="78" rx="22" fill="#FFFFFF"/>
+  <text x="662" y="802" class="label">行动面板</text>
+  <text x="662" y="829" class="small">合并、同步、回写、导出</text>
+  <rect x="874" y="766" width="184" height="78" rx="22" fill="#FFFFFF"/>
+  <text x="896" y="802" class="label">审阅区</text>
+  <text x="896" y="829" class="small">差异、批注、确认</text>
+
+  <g filter="url(#shadow)">
+    <rect x="1175" y="210" width="315" height="720" rx="32" fill="url(#panel)"/>
+  </g>
+  <text x="1210" y="260" class="section">二开切入点</text>
+  <rect x="1210" y="292" width="245" height="34" rx="17" fill="#F6D8A6"/>
+  <text x="1232" y="314" class="chip">优先做可插拔，而不是重写全页</text>
+
+  <rect x="1210" y="350" width="245" height="94" rx="22" fill="#FFFFFF"/>
+  <text x="1232" y="384" class="label">A. 顶部导航壳</text>
+  <text x="1232" y="412" class="body">品牌位、场景切换、</text>
+  <text x="1232" y="438" class="body">全局搜索入口</text>
+
+  <rect x="1210" y="462" width="245" height="112" rx="22" fill="#FFFFFF"/>
+  <text x="1232" y="496" class="label">B. 主工作台组件</text>
+  <text x="1232" y="524" class="body">支持多状态卡片、</text>
+  <text x="1232" y="550" class="body">侧栏插槽、行为编排</text>
+
+  <rect x="1210" y="592" width="245" height="112" rx="22" fill="#FFFFFF"/>
+  <text x="1232" y="626" class="label">C. 数据映射层</text>
+  <text x="1232" y="654" class="body">任务、知识、事件流</text>
+  <text x="1232" y="680" class="body">统一成前端视图模型</text>
+
+  <rect x="1210" y="722" width="245" height="162" rx="22" fill="#113C3A"/>
+  <text x="1232" y="756" class="label white">建议先做的不是</text>
+  <text x="1232" y="786" class="body" fill="#D8E7E1">不是先美化按钮，也不是先补零散卡片。</text>
+  <text x="1232" y="816" class="body" fill="#D8E7E1">先把：</text>
+  <text x="1232" y="846" class="body" fill="#D8E7E1">首页入口、任务容器、侧栏能力</text>
+  <text x="1232" y="876" class="body" fill="#D8E7E1">做成稳定骨架。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="160" y="970" width="1290" height="160" rx="28" fill="#FCFBF8"/>
+  </g>
+  <text x="198" y="1020" class="section">设计判断</text>
+  <text x="198" y="1060" class="body">这版图不是视觉稿终稿，而是“前端二开结构图”。核心判断是把页面重心从展示模块切到任务主线。</text>
+  <text x="198" y="1092" class="body">这样后续分析改动点时，可以直接按壳层、工作台、视图模型、交互动作四层拆，不会陷入只改样式不改结构。</text>
+</svg>

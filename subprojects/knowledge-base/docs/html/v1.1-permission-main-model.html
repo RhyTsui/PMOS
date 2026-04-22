@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>v1.1 权限主模型</title>
+  <style>
+    :root {
+      --bg: #f3f7fb;
+      --panel: #ffffff;
+      --ink: #10243e;
+      --muted: #55708a;
+      --line: #d8e2ef;
+      --blue: #2f6fed;
+      --green: #1f9d72;
+      --orange: #ea7a22;
+      --purple: #7c3aed;
+      --teal: #0f766e;
+      --red: #d9485f;
+      --shadow: 0 18px 40px rgba(16, 36, 62, 0.08);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(47, 111, 237, 0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(31, 157, 114, 0.10), transparent 24%),
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 100%);
+    }
+
+    .page {
+      width: min(1600px, calc(100vw - 40px));
+      margin: 24px auto 48px;
+      padding: 32px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(216, 226, 239, 0.9);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 38px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    .hero-note {
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, #fdfefe 0%, #f4f8fc 100%);
+    }
+
+    .hero-note h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .hero-note p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-top: 28px;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 24px;
+    }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .layer {
+      position: relative;
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      min-height: 300px;
+      box-shadow: var(--shadow);
+    }
+
+    .layer::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 6px;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .layer.owner::before { background: var(--blue); }
+    .layer.space::before { background: var(--green); }
+    .layer.asset::before { background: var(--orange); }
+    .layer.action::before { background: var(--purple); }
+
+    .chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: white;
+      margin-bottom: 12px;
+    }
+
+    .owner .chip { background: var(--blue); }
+    .space .chip { background: var(--green); }
+    .asset .chip { background: var(--orange); }
+    .action .chip { background: var(--purple); }
+
+    .layer h3 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    .layer p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f8fbfe;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .rules {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .rule-item, .step {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f8fbfe;
+      border: 1px solid #e2ebf4;
+      margin-top: 12px;
+    }
+
+    .rule-item:first-child, .step:first-child { margin-top: 0; }
+
+    .rule-item strong, .step strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .rule-item span, .step span {
+      display: block;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .examples {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .space-card {
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .space-card h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .space-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .asset-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid #e3ecf5;
+    }
+
+    .asset-row small {
+      color: var(--muted);
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .tag.owner { background: var(--blue); }
+    .tag.department { background: var(--green); }
+    .tag.org { background: var(--orange); }
+
+    .foot {
+      margin-top: 24px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: linear-gradient(90deg, rgba(47, 111, 237, 0.08), rgba(31, 157, 114, 0.08));
+      border: 1px solid rgba(191, 219, 254, 0.9);
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1280px) {
+      .hero,
+      .rules,
+      .examples,
+      .model-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <h1>v1.1 权限主模型</h1>
+        <p class="subtitle">
+          当前权限不是单纯的角色设计，而是要先把 <strong>归属层</strong>、<strong>业务域空间层</strong>、<strong>资产层</strong> 和 <strong>操作层</strong> 四层关系立住。
+          这样后面的更新、接入、广场、自动标签结构、主题推荐才不会把权限打穿。
+        </p>
+      </div>
+      <div class="hero-note">
+        <h2>模型主结论</h2>
+        <p>
+          资产先有归属，空间只做协作；一个资产可以被多个业务域空间消费，但不会因为进入空间就改变主权。
+          权限判定要先看归属，再看空间，再看操作。
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">四层主模型</h2>
+      <div class="model-grid">
+        <article class="layer owner">
+          <span class="chip">Layer 1</span>
+          <h3>归属层</h3>
+          <p>回答“这份知识本来归谁负责、谁主维护、谁决定升级/下线/共享”。</p>
+          <div class="pill-list">
+            <span class="pill">个人</span>
+            <span class="pill">部门</span>
+            <span class="pill">组织</span>
+          </div>
+        </article>
+
+        <article class="layer space">
+          <span class="chip">Layer 2</span>
+          <h3>协作层</h3>
+          <p>按业务域组织跨部门协作，不直接等于组织架构树，也不改变资产归属。</p>
+          <div class="pill-list">
+            <span class="pill">广告数据分析域</span>
+            <span class="pill">游戏数据分析域</span>
+            <span class="pill">游戏发行运营域</span>
+            <span class="pill">游戏研发域</span>
+            <span class="pill">财务域</span>
+            <span class="pill">产品经理域</span>
+            <span class="pill">自动化测试域</span>
+            <span class="pill">AICoding域</span>
+          </div>
+        </article>
+
+        <article class="layer asset">
+          <span class="chip">Layer 3</span>
+          <h3>资产层</h3>
+          <p>知识库、数据库、方法论库、项目知识库、SKILL知识库等都属于资产层。</p>
+          <div class="pill-list">
+            <span class="pill">广告知识库</span>
+            <span class="pill">游戏数据分析数据库</span>
+            <span class="pill">SDK知识库</span>
+            <span class="pill">策划案知识库</span>
+            <span class="pill">产品方法论知识库</span>
+            <span class="pill">产品SKILL知识库</span>
+            <span class="pill">活动复盘知识库</span>
+            <span class="pill">埋点知识库</span>
+          </div>
+        </article>
+
+        <article class="layer action">
+          <span class="chip">Layer 4</span>
+          <h3>操作层</h3>
+          <p>先用四个动作把权限打粗粒度主框，后续再细化检索、引用、发布等动作。</p>
+          <div class="pill-list">
+            <span class="pill">查看</span>
+            <span class="pill">修改</span>
+            <span class="pill">挂载</span>
+            <span class="pill">管理</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section rules">
+      <div class="panel">
+        <h3>关键原则</h3>
+        <div class="rule-item">
+          <strong>原则 1：资产先有归属</strong>
+          <span>每个知识资产必须先归到个人、部门或组织之一，先解决主权，再谈共享。</span>
+        </div>
+        <div class="rule-item">
+          <strong>原则 2：空间不改变归属</strong>
+          <span>业务域空间只负责协作和消费，一个资产进入空间后仍然保持原有 owner。</span>
+        </div>
+        <div class="rule-item">
+          <strong>原则 3：一个资产可以进入多个空间</strong>
+          <span>例如 `SDK知识库` 可以同时被游戏研发域和游戏数据分析域消费。</span>
+        </div>
+        <div class="rule-item">
+          <strong>原则 4：挂载权独立于查看权</strong>
+          <span>能看某个知识库，不代表能把它挂到 AI 应用或 Agent 上。</span>
+        </div>
+        <div class="rule-item">
+          <strong>原则 5：自动生成结构必须继承原权限</strong>
+          <span>后面的自动标签、自动聚合、自动主题、自动导航，都不能绕开原资产权限。</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>判定链</h3>
+        <div class="step">
+          <strong>Step 1</strong>
+          <span>先识别用户属于哪个个人 / 部门 / 组织主体。</span>
+        </div>
+        <div class="step">
+          <strong>Step 2</strong>
+          <span>再识别用户当前处在哪些业务域空间中。</span>
+        </div>
+        <div class="step">
+          <strong>Step 3</strong>
+          <span>判断目标资产的归属、分类和被挂入的空间集合。</span>
+        </div>
+        <div class="step">
+          <strong>Step 4</strong>
+          <span>判断用户对该资产是否拥有 `查看 / 修改 / 挂载 / 管理` 中的动作权限。</span>
+        </div>
+        <div class="step">
+          <strong>Step 5</strong>
+          <span>输出可见资产、可修改资产、可挂载资产、可管理资产四个结果面。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">业务域空间示例</h2>
+      <div class="examples">
+        <article class="space-card">
+          <h3>游戏数据分析域空间</h3>
+          <p>按业务域而不是按单项目建空间。空间里放的是“这个域需要消费的资产”，不是“项目资料大包”。</p>
+          <div class="stack">
+            <div class="asset-row">
+              <div>
+                游戏数据分析数据库
+                <small>归属：数据部</small>
+              </div>
+              <span class="tag department">部门归属</span>
+            </div>
+            <div class="asset-row">
+              <div>
+                指间山海埋点知识库
+                <small>归属：项目 / 数据联合维护</small>
+              </div>
+              <span class="tag owner">个人/项目侧维护</span>
+            </div>
+            <div class="asset-row">
+              <div>
+                SDK知识库
+                <small>归属：研发 / 平台</small>
+              </div>
+              <span class="tag department">部门归属</span>
+            </div>
+            <div class="asset-row">
+              <div>
+                指间山海活动复盘知识库
+                <small>归属：项目或组织</small>
+              </div>
+              <span class="tag org">组织归属</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="space-card">
+          <h3>产品经理域空间</h3>
+          <p>同一个资产可以被多个空间消费。空间是协作入口，不是主权边界。</p>
+          <div class="stack">
+            <div class="asset-row">
+              <div>
+                策划案知识库
+                <small>归属：项目 / 产品团队</small>
+              </div>
+              <span class="tag owner">个人/项目侧维护</span>
+            </div>
+            <div class="asset-row">
+              <div>
+                产品方法论知识库
+                <small>归属：组织</small>
+              </div>
+              <span class="tag org">组织归属</span>
+            </div>
+            <div class="asset-row">
+              <div>
+                产品SKILL知识库
+                <small>归属：组织</small>
+              </div>
+              <span class="tag org">组织归属</span>
+            </div>
+            <div class="asset-row">
+              <div>
+                指间山海知识库
+                <small>可同时进入产品经理域、发行运营域、数据分析域</small>
+              </div>
+              <span class="tag department">多空间消费</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="foot">
+      这版主模型先把权限的根定住：<strong>归属层稳定，协作层按业务域组织，资产层承载知识对象，操作层决定动作边界</strong>。
+      后续如果继续拆，就应该从这里往下展开“归属层字段模型”“空间成员模型”“资产挂载模型”“权限判定链模型”。
+    </div>
+  </main>
+</body>
+</html>

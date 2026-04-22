@@ -2,6 +2,10 @@
 
 ## v1.1 正式规划文档
 
+- [v1.1 权限主模型 HTML](./html/v1.1-permission-main-model.html)
+- [示例：部门树与业务域空间网 SVG](./svg/v1.1-example-org-tree-vs-domain-spaces-cn.svg)
+- [示例：知识库拆分与分类规则 SVG](./svg/v1.1-example-knowledge-base-splitting-cn.svg)
+- [示例：权限判定示例 SVG](./svg/v1.1-example-permission-judgement-cn.svg)
 - [知识资产平台 v1.1 自上而下工程拆解 SVG](./svg/v1.1-engineering-breakdown.svg)
 - [知识资产平台 v1.1 权限需求分析 SVG](./svg/v1.1-permission-requirement-analysis-cn.svg)
 - [企业知识库到 Skill Agent 爆发路线图 SVG](./svg/v1-roadmap-enterprise-chat-personal-skill-agent-cn.svg)
