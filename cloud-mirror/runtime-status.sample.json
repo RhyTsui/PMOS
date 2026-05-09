@@ -1,0 +1,14 @@
+{
+  "productVersion": "v1.0",
+  "runtimeBaseline": "v0.7",
+  "status": "in_progress",
+  "currentHighestPriorityLine": "assemble standalone PMOS product repo",
+  "currentTask": {
+    "id": "task-sample-product-repo",
+    "label": "Assemble first-release standalone product repo",
+    "owner": "product-office",
+    "state": "in_progress",
+    "artifact": "docs/operations/v1.0-product-repo-skeleton.md"
+  },
+  "lastUpdatedAt": "2026-05-09T09:37:35.640Z"
+}

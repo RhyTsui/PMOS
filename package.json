@@ -1,0 +1,52 @@
+{
+  "name": "pmaios",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "tsx watch src/backend/server.ts",
+    "dev:frontend": "vite",
+    "start": "node dist/backend/src/backend/server.js",
+    "start:backend": "tsx src/backend/server.ts",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "vite build",
+    "build:backend": "tsc -p tsconfig.backend.json",
+    "test": "vitest run",
+    "lint": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.backend.json",
+    "audit:frontend-style": "node scripts/audit-frontend-workbench-style.mjs",
+    "verify:frontend-browser": "node scripts/run-playwright-frontend-verification.mjs",
+    "cli": "tsx src/cli/aios.ts"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.39",
+    "@langchain/langgraph": "^1.2.8",
+    "@notionhq/client": "^5.17.0",
+    "@xenova/transformers": "^2.17.2",
+    "chromadb": "^3.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.1",
+    "langchain": "^1.3.1",
+    "mammoth": "^1.12.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "xlsx": "^0.18.5",
+    "yaml": "^2.8.1",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.1.2"
+  }
+}

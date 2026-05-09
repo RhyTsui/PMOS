@@ -1,0 +1,6 @@
+{
+  "reviewId": "review-sample-standalone-001",
+  "score": 82,
+  "decision": "conditional_pass",
+  "summary": "Repo boundary and public entry docs exist, but full extraction is not yet complete."
+}

@@ -1,0 +1,29 @@
+{
+  "defaultProvider": "mock",
+  "providers": [
+    {
+      "name": "mock",
+      "type": "mock",
+      "capabilities": ["text", "code", "review"],
+      "model": "mock-default",
+      "priority": 100
+    },
+    {
+      "name": "anthropic",
+      "type": "anthropic",
+      "envKey": "ANTHROPIC_API_KEY",
+      "capabilities": ["text", "code", "review"],
+      "model": "claude-sonnet",
+      "priority": 90
+    },
+    {
+      "name": "openai-compatible",
+      "type": "openai-compatible",
+      "envKey": "OPENAI_COMPATIBLE_API_KEY",
+      "capabilities": ["text", "code", "review"],
+      "baseUrl": "https://api.example.com/v1",
+      "model": "example-model",
+      "priority": 80
+    }
+  ]
+}

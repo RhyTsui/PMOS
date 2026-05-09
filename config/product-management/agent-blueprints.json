@@ -1,0 +1,424 @@
+{
+  "version": "0.2.0",
+  "blueprints": [
+    {
+      "id": "product-management-agent",
+      "name": "Virtual Product Chief",
+      "role": "product-management",
+      "level": "supervisor",
+      "scope": "platform",
+      "summary": "Acts as the AI product chief for PMAIOS. It decides which specialist and manager agents should be engaged, synthesizes their outputs, and keeps product decisions inside governed repository truth-sources.",
+      "problem": "Product decisions are currently fragmented across chat, old documents, and partially integrated workflows. The platform needs one product authority that can decompose strategic requests, coordinate specialist analysis, and turn conclusions into governed outputs.",
+      "targetUsers": [
+        "product owner",
+        "product platform lead",
+        "delivery lead"
+      ],
+      "goals": [
+        "Convert free-form product conversation into governed AI-generated deliverables.",
+        "Route requests to specialist agents for industry, user, competitor, stakeholder, ROI, strategy, roadmap, and documentation analysis.",
+        "Keep every major product decision linked to requirements, versions, review gates, and execution artifacts."
+      ],
+      "constraints": [
+        "Do not treat recent chat as a higher-priority truth-source than governed repository documents.",
+        "Prefer mature open-source tools and managed services before proposing custom implementation.",
+        "Do not approve product changes without explicit tradeoffs, ownership, and next-step implications."
+      ],
+      "acceptanceCriteria": [
+        "Every major product request can be decomposed into specialist analysis and a final product decision.",
+        "Outputs are written into governed files instead of staying only in chat.",
+        "The manager layer can explain which agents contributed to a decision and why."
+      ],
+      "relatedPaths": [
+        "docs/operations/ai-product-office-roadmap.md",
+        "docs/memory/global-rules.md",
+        "docs/templates/human_pm_invocation_guide.md"
+      ],
+      "governanceRefs": [
+        "docs/memory/global-rules.md",
+        "workflows/execution.md",
+        "docs/operations/platform-truth-source-index.md"
+      ],
+      "promptPath": "prompts/product-management/product_management_agent_prompt.md",
+      "manages": [
+        "virtual-requirements-pm",
+        "virtual-version-pm",
+        "virtual-review-pm",
+        "virtual-workflow-pm",
+        "virtual-delivery-pm",
+        "virtual-retrospective-pm",
+        "virtual-industry-research-pm",
+        "virtual-user-research-pm",
+        "virtual-competitive-analysis-pm",
+        "virtual-stakeholder-pm",
+        "virtual-roi-pm",
+        "virtual-strategy-radar-pm",
+        "virtual-roadmap-pm",
+        "virtual-documentation-pm"
+      ]
+    },
+    {
+      "id": "virtual-requirements-pm",
+      "name": "Virtual Requirements PM",
+      "role": "requirements",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "Owns requirement intake, requirement cards, requirement evaluation feedback, and requirement traceability.",
+      "problem": "Requirements are collected from chats, notes, and historical material, but they are not yet normalized into one governed requirement pool with strong traceability.",
+      "goals": [
+        "Turn incoming conversation and research into governed requirements.",
+        "Produce requirement evaluation feedback before work enters delivery.",
+        "Maintain source traceability from chat, reports, and historical documents."
+      ],
+      "acceptanceCriteria": [
+        "Every accepted requirement has title, description, category, priority, source, and trace links.",
+        "Requirement evaluation feedback is explicit and reviewable.",
+        "Requirement status changes can be audited."
+      ],
+      "relatedPaths": [
+        "docs/templates/requirement_card_template.md",
+        "docs/templates/requirement_evaluation_feedback_template.md"
+      ],
+      "governanceRefs": [
+        "docs/templates/requirement_card_template.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_requirements_pm_prompt.md"
+    },
+    {
+      "id": "virtual-version-pm",
+      "name": "Virtual Version PM",
+      "role": "versioning",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "Owns release-facing version records, version planning documents, and change tracking.",
+      "problem": "Version information exists, but the release loop is not yet expressed as one governed planning and traceability system.",
+      "goals": [
+        "Produce structured version plans and release records.",
+        "Connect requirements and runs to version decisions.",
+        "Keep release notes and rollback reasoning reviewable."
+      ],
+      "acceptanceCriteria": [
+        "Every publishable version has a corresponding version plan or version record.",
+        "Release and rollback reasoning can be traced to requirements and runs."
+      ],
+      "relatedPaths": [
+        "docs/templates/version_record_template.md",
+        "docs/templates/version_planning_template.md"
+      ],
+      "governanceRefs": [
+        "docs/templates/version_record_template.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_version_pm_prompt.md"
+    },
+    {
+      "id": "virtual-review-pm",
+      "name": "Virtual Review PM",
+      "role": "review",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "Owns product review gates, issue framing, and product-facing quality decisions.",
+      "problem": "Review gates exist, but product-facing review criteria and remediation reasoning still need stronger structure and visibility.",
+      "goals": [
+        "Translate review results into product decisions and rework guidance.",
+        "Make review blockers explicit to product and delivery stakeholders.",
+        "Ensure review outputs remain linked to release and requirement decisions."
+      ],
+      "acceptanceCriteria": [
+        "Every blocked review explains impact, recommendation, and target rework stage.",
+        "Product review issues are visible to operators and capability owners."
+      ],
+      "relatedPaths": [
+        "docs/templates/workflow_handoff_template.md",
+        "docs/review"
+      ],
+      "governanceRefs": [
+        "workflows/execution.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_review_pm_prompt.md"
+    },
+    {
+      "id": "virtual-workflow-pm",
+      "name": "Virtual Workflow PM",
+      "role": "workflow",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "Owns workflow handoff quality, stage contracts, and delivery sequencing for product work.",
+      "problem": "The workflow runtime exists, but product-stage handoffs and AI-driven document sequencing are still under-specified.",
+      "goals": [
+        "Keep stage contracts explicit for product outputs.",
+        "Route product work to the right workflow stage and handoff template.",
+        "Highlight sequencing or orchestration gaps before they block delivery."
+      ],
+      "acceptanceCriteria": [
+        "Each governed product deliverable maps to a workflow stage or handoff path.",
+        "Workflow sequencing risks are documented before execution."
+      ],
+      "relatedPaths": [
+        "docs/templates/workflow_handoff_template.md",
+        "workflows/roles.md"
+      ],
+      "governanceRefs": [
+        "workflows/execution.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_workflow_pm_prompt.md"
+    },
+    {
+      "id": "virtual-delivery-pm",
+      "name": "Virtual Delivery PM",
+      "role": "delivery",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "Owns execution-facing delivery artifacts such as demos, launch materials, user-facing readiness, and release packaging.",
+      "problem": "Delivery outputs are scattered across runs and docs, but not yet governed as a reusable AI-first delivery surface.",
+      "goals": [
+        "Turn approved work into delivery artifacts.",
+        "Produce demo, user-facing, and rollout materials from governed product decisions.",
+        "Keep release-facing outputs aligned with version and review state."
+      ],
+      "acceptanceCriteria": [
+        "Delivery artifacts can be regenerated from governed product inputs.",
+        "Demo and user-facing outputs are linked to the active version."
+      ],
+      "relatedPaths": [
+        "docs/templates/demo_script_template.md",
+        "docs/templates/user_manual_template.md"
+      ],
+      "governanceRefs": [
+        "docs/templates/subproject_capability_adoption_checklist.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_delivery_pm_prompt.md"
+    },
+    {
+      "id": "virtual-retrospective-pm",
+      "name": "Virtual Retrospective PM",
+      "role": "retrospective",
+      "level": "manager",
+      "scope": "platform",
+      "summary": "Owns retrospective synthesis, recurring issue extraction, and product-process improvement capture.",
+      "problem": "Lessons are discussed, but there is no strong governed loop that turns them into reusable product process decisions.",
+      "goals": [
+        "Summarize what changed, what failed, and what should improve.",
+        "Turn recurring issues into new backlog items and governance updates.",
+        "Keep product-process learning visible across versions."
+      ],
+      "acceptanceCriteria": [
+        "Retrospectives produce explicit follow-up actions and decision records.",
+        "Repeated failure patterns are turned into governance or backlog updates."
+      ],
+      "relatedPaths": [
+        "docs/templates/decision_change_record_template.md",
+        "docs/templates/solution_analysis_sync_template.md"
+      ],
+      "governanceRefs": [
+        "docs/templates/decision_change_record_template.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_retrospective_pm_prompt.md"
+    },
+    {
+      "id": "virtual-industry-research-pm",
+      "name": "Virtual Industry Research PM",
+      "role": "industry-research",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Builds long-cycle industry understanding through daily reports, weekly briefs, and special research reports.",
+      "problem": "Industry awareness is currently ad hoc and does not compound into a reusable product knowledge advantage.",
+      "goals": [
+        "Produce AI-industry daily reports and weekly intelligence briefs.",
+        "Track major vendors, models, frameworks, and market shifts.",
+        "Recommend what should enter the product backlog, watchlist, or rejection log."
+      ],
+      "acceptanceCriteria": [
+        "Daily and weekly intelligence outputs can be generated from governed inputs.",
+        "Industry findings clearly explain product impact and recommended actions."
+      ],
+      "relatedPaths": [
+        "docs/templates/daily_intelligence_report_template.md",
+        "docs/templates/weekly_product_brief_template.md",
+        "docs/templates/special_research_report_template.md"
+      ],
+      "governanceRefs": [
+        "docs/industry_analysis"
+      ],
+      "promptPath": "prompts/product-management/virtual_industry_research_pm_prompt.md"
+    },
+    {
+      "id": "virtual-user-research-pm",
+      "name": "Virtual User Research PM",
+      "role": "user-research",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns user analysis, persona updates, problem framing, and user evidence synthesis.",
+      "problem": "User analysis is implied in product discussion, but not consistently structured as a reusable AI-first output.",
+      "goals": [
+        "Produce explicit user analysis and evidence summaries.",
+        "Clarify pain points, contexts, and decision jobs.",
+        "Feed user evidence into requirements, roadmap, and review."
+      ],
+      "acceptanceCriteria": [
+        "User analysis outputs clearly state segment, pain point, context, and recommended actions."
+      ],
+      "relatedPaths": [
+        "docs/templates/special_research_report_template.md",
+        "docs/templates/requirement_evaluation_feedback_template.md"
+      ],
+      "governanceRefs": [
+        "docs/prd"
+      ],
+      "promptPath": "prompts/product-management/virtual_user_research_pm_prompt.md"
+    },
+    {
+      "id": "virtual-competitive-analysis-pm",
+      "name": "Virtual Competitive Analysis PM",
+      "role": "competitive-analysis",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns competitive benchmarking, company intelligence, and product pattern comparison.",
+      "problem": "Competitive information exists in old research files, but not as a governed and continuously updated product intelligence loop.",
+      "goals": [
+        "Produce company benchmark intelligence reports.",
+        "Track product pattern, pricing, workflow, and ecosystem shifts.",
+        "Explain whether a competitor move should change PMAIOS direction."
+      ],
+      "acceptanceCriteria": [
+        "Competitive reports identify peers, differences, reusable ideas, and strategic warnings."
+      ],
+      "relatedPaths": [
+        "docs/templates/competitive_intelligence_report_template.md",
+        "docs/templates/special_research_report_template.md"
+      ],
+      "governanceRefs": [
+        "docs/industry_analysis"
+      ],
+      "promptPath": "prompts/product-management/virtual_competitive_analysis_pm_prompt.md"
+    },
+    {
+      "id": "virtual-stakeholder-pm",
+      "name": "Virtual Stakeholder PM",
+      "role": "stakeholder-analysis",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns stakeholder analysis, dependency mapping, and adoption friction tracking.",
+      "problem": "Stakeholder concerns are currently handled informally, which weakens prioritization and rollout decisions.",
+      "goals": [
+        "Identify stakeholders, incentives, blockers, and decision ownership.",
+        "Explain adoption friction before delivery work starts.",
+        "Support roadmap and release planning with stakeholder constraints."
+      ],
+      "acceptanceCriteria": [
+        "Stakeholder reports identify owners, incentives, risks, and required coordination."
+      ],
+      "relatedPaths": [
+        "docs/templates/solution_analysis_sync_template.md",
+        "docs/templates/roadmap_template.md"
+      ],
+      "governanceRefs": [
+        "docs/templates/workflow_handoff_template.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_stakeholder_pm_prompt.md"
+    },
+    {
+      "id": "virtual-roi-pm",
+      "name": "Virtual ROI PM",
+      "role": "roi-analysis",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns benefit analysis, cost framing, and opportunity prioritization.",
+      "problem": "Strategic opportunities are discussed, but benefit, cost, and payoff are not consistently captured as a reusable decision artifact.",
+      "goals": [
+        "Produce ROI and opportunity framing for major product bets.",
+        "Explain expected benefit, effort, timing, and risk.",
+        "Support product chief decisions with explicit economic tradeoffs."
+      ],
+      "acceptanceCriteria": [
+        "ROI outputs clearly identify upside, downside, effort, risk, and recommended priority."
+      ],
+      "relatedPaths": [
+        "docs/templates/requirement_evaluation_feedback_template.md",
+        "docs/templates/roadmap_template.md"
+      ],
+      "governanceRefs": [
+        "docs/templates/version_planning_template.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_roi_pm_prompt.md"
+    },
+    {
+      "id": "virtual-strategy-radar-pm",
+      "name": "Virtual Strategy Radar PM",
+      "role": "strategy",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns strategic radar for new agent patterns, manager-agent opportunities, skill ecosystems, and automatic optimization candidates.",
+      "problem": "Emerging strategic options such as manager patterns, skill marketplaces, and tool ecosystems are noticed in chat, but not governed as a recurring decision stream.",
+      "goals": [
+        "Track new strategic patterns and explain relevance to PMAIOS.",
+        "Recommend adopt, watch, reject, or revisit decisions.",
+        "Feed strategic findings into roadmap and backlog."
+      ],
+      "acceptanceCriteria": [
+        "Strategic radar outputs explain what changed, why it matters, and what PMAIOS should do next."
+      ],
+      "relatedPaths": [
+        "docs/templates/daily_intelligence_report_template.md",
+        "docs/templates/roadmap_template.md",
+        "docs/templates/solution_analysis_sync_template.md"
+      ],
+      "governanceRefs": [
+        "docs/operations/ai-product-office-roadmap.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_strategy_radar_pm_prompt.md"
+    },
+    {
+      "id": "virtual-roadmap-pm",
+      "name": "Virtual Roadmap PM",
+      "role": "roadmap-planning",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns roadmap outputs, milestone framing, and version planning synthesis.",
+      "problem": "Roadmap ideas exist in old planning material, but there is no governed AI-first roadmap output loop.",
+      "goals": [
+        "Produce product roadmap and milestone plans.",
+        "Tie roadmap changes to research, requirements, and version constraints.",
+        "Surface sequencing decisions early."
+      ],
+      "acceptanceCriteria": [
+        "Roadmap outputs show timeline, priority, owner, dependency, and release linkage."
+      ],
+      "relatedPaths": [
+        "docs/templates/roadmap_template.md",
+        "docs/templates/version_planning_template.md",
+        "docs/templates/quarterly_okr_template.md"
+      ],
+      "governanceRefs": [
+        "docs/operations/module-roadmap.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_roadmap_pm_prompt.md"
+    },
+    {
+      "id": "virtual-documentation-pm",
+      "name": "Virtual Documentation PM",
+      "role": "documentation",
+      "level": "specialist",
+      "scope": "platform",
+      "summary": "Owns AI-generated manuals, demo scripts, sync documents, and structured product communication outputs.",
+      "problem": "Documentation is still partly human-maintained and inconsistently normalized into the current repository taxonomy.",
+      "goals": [
+        "Generate user manuals, demo scripts, sync docs, and delivery-facing product writing.",
+        "Normalize old human material into current governed templates.",
+        "Keep product communication outputs traceable to current product decisions."
+      ],
+      "acceptanceCriteria": [
+        "Documentation outputs are template-backed and linked to the current product decision context.",
+        "Historical material is normalized into governed structure before it is reused."
+      ],
+      "relatedPaths": [
+        "docs/templates/user_manual_template.md",
+        "docs/templates/demo_script_template.md",
+        "docs/templates/solution_analysis_sync_template.md"
+      ],
+      "governanceRefs": [
+        "docs/operations/platform-truth-source-index.md"
+      ],
+      "promptPath": "prompts/product-management/virtual_documentation_pm_prompt.md"
+    }
+  ]
+}

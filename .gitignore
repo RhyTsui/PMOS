@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+coverage/
+cloud-mirror/runtime-status.json
+cloud-mirror/runtime-status.md
+cloud-mirror/checkpoints/latest.json
+cloud-mirror/review-scorecards/latest.json
