@@ -4,7 +4,7 @@
 
 它把需求承接、拆解、评审、治理、交付证据和知识同步放进同一条受控工作流里，目标不是“更像聊天”，而是“更像一个能持续推进产品工作的系统”。
 
-![PMOS v1.0 Panorama](docs/multimodal/pmos-v1-panorama-cn-premium-v2.png)
+![PMOS v1.0 Panorama](docs/multimodal/pmos-v1-panorama-final-2026-05-09.jpg)
 
 ## What PMOS Solves
 
