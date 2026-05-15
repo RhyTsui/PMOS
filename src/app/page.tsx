@@ -10,9 +10,9 @@ import {
   FileText,
   Link2,
   MapPin,
-  Menu,
+  PanelRightClose,
+  PanelRightOpen,
   PlayCircle,
-  Plus,
   Search,
   Trash2,
   Upload,
@@ -21,11 +21,13 @@ import {
 import { AgentProvider, useAgent } from '@/hooks/useAgent';
 import { useConversation } from '@/hooks/useConversation';
 import { useSpeech } from '@/hooks/useSpeech';
-import ChatContainer from '@/components/cognitive/ChatContainer';
+import ChatContainer, { type SourcePanelPayload } from '@/components/cognitive/ChatContainer';
 import InputArea from '@/components/cognitive/InputArea';
 import { TaskSidebar } from '@/components/workspace/TaskSidebar';
 import { ContextEditDrawer } from '@/components/cognitive/ContextEditDrawer';
 import { AutoDebugWorkbench } from '@/components/agents/AutoDebugWorkbench';
+import { IconAsset } from '@/components/ui/IconAsset';
+import YkProjectSelect from '@/components/yokaui/YkProjectSelect';
 import { useChatSettings } from '@/hooks/useChatSettings';
 import { useThemeColors } from '@/hooks/useTheme';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -61,13 +63,18 @@ interface ConversationSearchHit {
   snippets: string[];
 }
 
+interface ProjectOption {
+  app_id: string | number;
+  app_name: string;
+  app_alias?: string;
+  app_en_name?: string;
+  app_status?: string | number;
+  icon?: string;
+  source?: string;
+}
+
 function SharePlaneIcon({ size = 17 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M4.1 10.2L15.8 4.4L10 16L8.7 11.4L4.1 10.2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M9 11L15.6 4.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
+  return <IconAsset name="share-plane" size={size} />;
 }
 
 const ASSET_SOURCE_FILTERS: Array<{ key: AssetSourceFilter; label: string }> = [
@@ -272,7 +279,7 @@ function getAssetPreview(asset: AssetRecord) {
   );
 }
 
-function getKnowledgeSourceDetails(message: Message | null): Array<{ title: string; source?: string; url?: string }> {
+function getKnowledgeSourceDetails(message: Message | null): Array<{ title: string; source?: string; url?: string; prompt?: string }> {
   const meta = message?.metadata || {};
   const rawRefs = [meta.source_refs, meta.sourceRefs, meta.sources, meta.citations]
     .find((item) => Array.isArray(item)) as unknown[] | undefined;
@@ -284,10 +291,11 @@ function getKnowledgeSourceDetails(message: Message | null): Array<{ title: stri
         title: String(obj.title || obj.name || obj.source || obj.id || '知识库来源'),
         source: obj.source ? String(obj.source) : undefined,
         url: obj.url ? String(obj.url) : undefined,
+        prompt: obj.prompt ? String(obj.prompt) : undefined,
       };
     }
     return null;
-  }).filter((item): item is { title: string; source?: string; url?: string } => Boolean(item));
+  }).filter((item): item is { title: string; source?: string; url?: string; prompt?: string } => Boolean(item));
 
   const knowledge = meta.knowledge_base;
   if (knowledge && typeof knowledge === 'object') {
@@ -314,6 +322,8 @@ function WorkspaceContent() {
     currentAgent,
     setCurrentAgent,
     addAttachment,
+    removeAttachment,
+    replaceAttachments,
     conversationMode,
   } = useAgent();
 
@@ -336,7 +346,7 @@ function WorkspaceContent() {
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [showContextDrawer, setShowContextDrawer] = useState(false);
   const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(false);
-  const [sourceMessage, setSourceMessage] = useState<Message | null>(null);
+  const [sourcePanelPayload, setSourcePanelPayload] = useState<SourcePanelPayload | null>(null);
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [sidebarDrawerVisible, setSidebarDrawerVisible] = useState(false);
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>('chat');
@@ -354,10 +364,17 @@ function WorkspaceContent() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<ConversationSearchHit[]>([]);
   const [activeSidePanel, setActiveSidePanel] = useState<AgentType | null>(null);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<Array<string | number>>([12701]);
+  const [followedProjectIds, setFollowedProjectIds] = useState<Array<string | number>>([]);
   const lastSpokenMessageIdRef = useRef<string | null>(null);
 
   const activeResult = currentResult || agentResult;
-  const showDebugPanel = workspaceView === 'chat' && !isMobile && (currentAgent === 'debugging' || activeSidePanel === 'debugging');
+  const showDebugPanel = workspaceView === 'chat' && !isMobile && (
+    activeSidePanel === 'debugging' ||
+    activeResult?.result_type === 'debugging_report'
+  );
   const activeConversation = useMemo(
     () => conversations.find((item) => item.conversation_id === activeConversationId) || null,
     [activeConversationId, conversations],
@@ -367,13 +384,14 @@ function WorkspaceContent() {
     [messages],
   );
   const isCompactLayout = isMobile || viewportWidth < 1200;
-  const showSourcePanel = workspaceView === 'chat' && !isMobile && !!sourceMessage;
+  const showSourcePanel = workspaceView === 'chat' && !!sourcePanelPayload;
   const pageSidePadding = isCompactLayout ? 20 : 30;
-  const isBlankNewConversation = workspaceView === 'chat' && messages.length === 0 && (
-    !activeConversation ||
-    activeConversation.title === '新对话' ||
-    activeConversation.title === '鏂板璇?'
-  );
+  const isCurrentConversationEmpty = workspaceView === 'chat'
+    && messages.length === 0
+    && (activeConversation?.message_count || 0) === 0
+    && attachments.length === 0
+    && referencedAssets.length === 0
+    && !currentResult;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -382,6 +400,60 @@ function WorkspaceContent() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/xiaoqiao/projects?page=1&page_size=50')
+      .then((res) => res.json())
+      .then((payload: { projects?: ProjectOption[]; source?: string }) => {
+        if (cancelled) return;
+        const projects = Array.isArray(payload.projects) ? payload.projects : [];
+        setProjectOptions(projects.map((project) => ({ ...project, source: payload.source })));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProjectOptions([{ app_id: 12701, app_name: '项目 12701', app_alias: '默认项目', source: 'fallback' }]);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('zhitou-chat-followed-projects');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setFollowedProjectIds(parsed.filter((item): item is string | number => (
+          typeof item === 'string' || typeof item === 'number'
+        )));
+      }
+    } catch {
+      // ignore malformed local state
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('zhitou-chat-followed-projects', JSON.stringify(followedProjectIds));
+  }, [followedProjectIds]);
+
+  const selectedProjects = useMemo(
+    () => projectOptions.filter((project) => selectedProjectIds.includes(project.app_id)),
+    [projectOptions, selectedProjectIds],
+  );
+
+  const projectContextText = useMemo(() => {
+    if (selectedProjectIds.length === 0) return '项目范围：全部项目';
+    const selected = selectedProjects.length > 0
+      ? selectedProjects
+      : projectOptions.filter((project) => selectedProjectIds.includes(project.app_id));
+    if (selected.length === 0) return `项目范围：APPID ${selectedProjectIds.join('、')}`;
+    return `项目范围：${selected.map((project) => `${project.app_name}(APPID:${project.app_id})`).join('、')}`;
+  }, [projectOptions, selectedProjectIds, selectedProjects]);
 
   useEffect(() => {
     if (sidebarDrawerOpen) {
@@ -424,10 +496,35 @@ function WorkspaceContent() {
     return () => window.clearTimeout(timer);
   }, [searchOpen, searchQuery]);
 
+  useEffect(() => {
+    if (!activeConversationId) {
+      replaceAttachments([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetch(`/api/xiaoqiao/conversations/${activeConversationId}/attachments`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error(await response.text());
+        return response.json() as Promise<AttachmentRecord[]>;
+      })
+      .then((items) => {
+        if (!cancelled) replaceAttachments(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {
+        if (!cancelled) replaceAttachments([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeConversationId, replaceAttachments]);
+
   const handleFollowUpClick = useCallback((question: string) => {
     setWorkspaceView('chat');
-    sendMessage(question);
-  }, [sendMessage]);
+    setComposerDraft(question);
+  }, []);
 
   const handleAgentChange = useCallback((agent: typeof currentAgent) => {
     setCurrentAgent(agent);
@@ -436,35 +533,38 @@ function WorkspaceContent() {
   const handleOpenAgentPanel = useCallback((agent: AgentType) => {
     if (!['demand', 'diagnosis', 'debugging'].includes(agent)) return;
     setWorkspaceView('chat');
-    setSourceMessage(null);
+    setSourcePanelPayload(null);
     setCurrentAgent(agent);
     setActiveSidePanel(agent);
+    setRightPanelCollapsed(false);
   }, [setCurrentAgent]);
 
   const handleCreateConversationRequest = useCallback(async () => {
-    if (isBlankNewConversation) return;
     setWorkspaceView('chat');
-    setSourceMessage(null);
+    setSourcePanelPayload(null);
     setActiveSidePanel(null);
+    setRightPanelCollapsed(false);
+    if (isCurrentConversationEmpty) return;
     await createConversation();
-  }, [createConversation, isBlankNewConversation]);
+  }, [createConversation, isCurrentConversationEmpty]);
 
-  const handleUpload = useCallback((file: File, sourceType: 'click' | 'drag' | 'paste') => {
+  const handleUpload = useCallback(async (file: File, sourceType: 'click' | 'drag' | 'paste') => {
     const kind = file.type.startsWith('image/')
       ? 'image' as const
+      : file.type.startsWith('video/')
+        ? 'video' as const
       : file.name.endsWith('.pdf') || file.name.endsWith('.doc') || file.name.endsWith('.docx')
         ? 'document' as const
         : file.name.endsWith('.xls') || file.name.endsWith('.xlsx') || file.name.endsWith('.csv')
           ? 'table' as const
           : 'log' as const;
 
-    const previewUrl = kind === 'image' ? URL.createObjectURL(file) : undefined;
-    const thumbnailPlan = kind === 'image' || file.type.startsWith('video/')
-      ? '上传完成后调用多模态模型，为该文件生成专属封面和缩略图。'
-      : '文件类型使用统一图标，不生成封面。';
+    const previewUrl = kind === 'image' || kind === 'video' ? URL.createObjectURL(file) : undefined;
+    const conversationId = activeConversationId || (await createConversation()).conversation_id;
+    const attachmentId = `att-local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const attachment: AttachmentRecord = {
-      id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      conversation_id: activeConversationId || 'conv-current',
+      id: attachmentId,
+      conversation_id: conversationId,
       name: file.name,
       filename: file.name,
       kind,
@@ -474,22 +574,63 @@ function WorkspaceContent() {
       status: 'uploading',
       source_type: sourceType,
       created_at: new Date().toISOString(),
-      summary: thumbnailPlan,
+      preview_url: previewUrl,
+      url: previewUrl,
     };
 
     addAttachment(attachment);
-    setTimeout(() => addAttachment({ ...attachment, status: 'uploaded' }), 300);
-    setTimeout(() => addAttachment({ ...attachment, status: 'parsing' }), 900);
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('source_type', sourceType);
+      const response = await fetch(`/api/xiaoqiao/conversations/${conversationId}/attachments`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      addAttachment({ ...attachment, status: 'parsing' });
+      const parsed = await response.json() as AttachmentRecord;
+      removeAttachment(attachmentId);
+      addAttachment({
+        ...parsed,
+        preview_url: previewUrl || parsed.preview_url,
+        url: previewUrl || parsed.url,
+      });
+      message.success(`${file.name} 已上传并解析`);
+    } catch {
       addAttachment({
         ...attachment,
-        status: 'parsed',
-        preview_url: previewUrl,
-        url: previewUrl,
-        summary: `已解析 ${file.name}`,
+        status: 'upload_failed',
+        summary: '上传失败，请重试。',
       });
-    }, 1800);
-  }, [activeConversationId, addAttachment]);
+      message.error(`${file.name} 上传失败`);
+    }
+  }, [activeConversationId, addAttachment, createConversation, removeAttachment]);
+
+  const handleRetryAttachment = useCallback(async (attachmentId: string) => {
+    const current = attachments.find((item) => item.id === attachmentId);
+    if (current) addAttachment({ ...current, status: 'parsing' });
+
+    try {
+      const response = await fetch(`/api/xiaoqiao/attachments/${attachmentId}/retry`, { method: 'POST' });
+      if (!response.ok) throw new Error(await response.text());
+      const next = await response.json() as AttachmentRecord;
+      addAttachment(next);
+      message.success(`${next.name || '附件'} 已重新解析`);
+    } catch {
+      if (current) addAttachment({ ...current, status: 'parse_failed', summary: '重新解析失败，请稍后再试。' });
+      message.error('重新解析失败');
+    }
+  }, [addAttachment, attachments]);
+
+  const handleRemoveAttachment = useCallback(async (attachmentId: string) => {
+    removeAttachment(attachmentId);
+    await fetch(`/api/xiaoqiao/attachments/${attachmentId}`, { method: 'DELETE' }).catch(() => undefined);
+  }, [removeAttachment]);
 
   const handleContextSave = useCallback(() => {
     // 保持既有配置链路不变。
@@ -646,13 +787,190 @@ function WorkspaceContent() {
     message.success(`已打开「${asset.anchorText}」所在会话`);
   }, [selectConversation]);
 
+  const projectMenuItems = useMemo<MenuProps['items']>(() => {
+    const items: MenuProps['items'] = [
+      {
+        key: '__all__',
+        label: (
+          <span style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+            <span>全部项目</span>
+            {selectedProjectIds.length === 0 && <span style={{ color: c.accent }}>已选</span>}
+          </span>
+        ),
+      },
+      { type: 'divider' },
+    ];
+    for (const project of projectOptions) {
+      items.push({
+        key: String(project.app_id),
+        label: (
+          <span style={{ display: 'grid', gap: 2 }}>
+            <span style={{ color: c.textPrimary }}>{project.app_name}</span>
+            <span style={{ color: c.textMuted, fontSize: 11 }}>APPID {project.app_id}</span>
+          </span>
+        ),
+      });
+    }
+    return items;
+  }, [c.accent, c.textMuted, c.textPrimary, projectOptions, selectedProjectIds.length]);
+
+  const renderLegacyProjectSelector = () => {
+    const selectedLabel = selectedProjectIds.length === 0
+      ? '全部项目'
+      : selectedProjects[0]?.app_name || `APPID ${selectedProjectIds[0]}`;
+    return (
+      <Dropdown
+        trigger={['click']}
+        placement="bottom"
+        menu={{
+          items: projectMenuItems,
+          onClick: ({ key }) => {
+            setSelectedProjectIds(key === '__all__' ? [] : [Number.isNaN(Number(key)) ? key : Number(key)]);
+          },
+        }}
+      >
+        <button
+          type="button"
+          style={{
+            maxWidth: isMobile ? 'calc(100vw - 112px)' : 360,
+            minWidth: isMobile ? 0 : 240,
+            width: isMobile ? '100%' : 300,
+            height: 34,
+            borderRadius: 12,
+            border: `1px solid ${c.borderFaint}`,
+            background: '#fff',
+            color: c.textPrimary,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            padding: '0 12px',
+            fontSize: 13,
+            fontWeight: 600,
+          }}
+          title={projectContextText}
+        >
+          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {selectedLabel}
+          </span>
+          <span style={{ color: c.textMuted, fontSize: 11 }}>APPID</span>
+        </button>
+      </Dropdown>
+    );
+  };
+
+  const projectSelectOptions = useMemo(() => [
+    {
+      label: '全部项目',
+      value: '__all__',
+      icon: '',
+      recent_visit: selectedProjectIds.length === 0,
+      closed: false,
+    },
+    ...projectOptions.map((project, index) => ({
+      label: project.app_name || `APPID ${project.app_id}`,
+      value: project.app_id,
+      icon: project.icon || '',
+      followed: followedProjectIds.some((id) => String(id) === String(project.app_id)),
+      recent_visit: index < 3,
+      closed: String(project.app_status || '').includes('关服') || String(project.app_status || '') === '0',
+    })),
+  ], [followedProjectIds, projectOptions]);
+
+  const renderProjectSelector = () => {
+    const selectedLabel = selectedProjectIds.length === 0
+      ? '全部项目'
+      : selectedProjects[0]?.app_name || `APPID ${selectedProjectIds[0]}`;
+    const currentValue = selectedProjectIds.length === 0 ? '__all__' : selectedProjectIds[0];
+    const selectedProjectIcon = selectedProjectIds.length === 1
+      ? selectedProjects[0]?.icon
+      : '';
+    return (
+      <YkProjectSelect
+        value={currentValue}
+        options={projectSelectOptions}
+        maxVisibleItems={isMobile ? 5 : undefined}
+        onChange={(value) => {
+          if (value === '__all__') {
+            setSelectedProjectIds([]);
+            return;
+          }
+          setSelectedProjectIds([Number.isNaN(Number(value)) ? value : Number(value)]);
+        }}
+        followedCallback={(item, followed) => {
+          if (item.value === '__all__') return;
+          setFollowedProjectIds((prev) => {
+            const withoutCurrent = prev.filter((id) => String(id) !== String(item.value));
+            return followed ? [...withoutCurrent, item.value] : withoutCurrent;
+          });
+        }}
+        customShow={(
+          <button
+            type="button"
+            className="project-select-trigger"
+            style={{
+              maxWidth: isMobile ? 'calc(100vw - 112px)' : 360,
+              minWidth: isMobile ? 0 : 240,
+              width: isMobile ? 168 : 300,
+              height: 34,
+              borderRadius: 12,
+              border: '1px solid rgba(15, 23, 42, 0.04)',
+              background: '#f3f4f6',
+              boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.05)',
+              color: c.textPrimary,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 8,
+              padding: '0 10px 0 7px',
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+            title={projectContextText}
+          >
+            <span
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 8,
+                overflow: 'hidden',
+                flexShrink: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#e5e7eb',
+                color: '#4c7dff',
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              {selectedProjectIcon ? (
+                <img src={selectedProjectIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : selectedProjectIds.length === 0 ? (
+                '全'
+              ) : (
+                '项'
+              )}
+            </span>
+            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedLabel}
+            </span>
+            <span style={{ color: c.textMuted, fontSize: 11 }}>APPID</span>
+          </button>
+        )}
+      />
+    );
+  };
+
   const handleSendWithAssets = useCallback(async (rawMessage: string) => {
     if (openedAsset) {
       const conversation = await createConversation(`关于${openedAsset.title}`);
       setWorkspaceView('chat');
       setReferencedAssets([]);
       setOpenedAsset(null);
-      sendMessage(`[引用资产] ${getAssetFileName(openedAsset)}（${openedAsset.format}）\n\n${rawMessage}`, conversation.conversation_id);
+      sendMessage(`[引用资产] ${getAssetFileName(openedAsset)}（${openedAsset.format}）\n\n${rawMessage}`, conversation.conversation_id, { projectContext: projectContextText });
       return;
     }
 
@@ -660,20 +978,220 @@ function WorkspaceContent() {
     const assetPrefix = referencedAssets.length > 0
       ? `${referencedAssets.map((asset) => `[引用资产] ${asset.title}（${asset.format}）`).join('\n')}\n\n`
       : '';
-    sendMessage(`${assetPrefix}${rawMessage}`);
+    const attachmentPrefix = attachments.length > 0
+      ? `${attachments
+        .filter((attachment) => attachment.status === 'parsed')
+        .map((attachment) => `[引用附件] ${attachment.name}：${attachment.summary || '已解析'} `)
+        .join('\n')}\n\n`
+      : '';
+    sendMessage(`${assetPrefix}${attachmentPrefix}${rawMessage}`, undefined, { projectContext: projectContextText });
     setReferencedAssets([]);
-  }, [createConversation, openedAsset, referencedAssets, sendMessage]);
+  }, [attachments, createConversation, openedAsset, projectContextText, referencedAssets, sendMessage]);
 
   const renderRightPanel = () => {
     if (workspaceView !== 'chat') return null;
 
-    if (showSourcePanel) {
-      const sourceDetails = getKnowledgeSourceDetails(sourceMessage);
-      return (
-        <aside
-          className="flex w-[360px] flex-shrink-0 flex-col"
-          style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard }}
+    const collapsedRail = (title: string) => (
+      <aside
+        className="flex w-[52px] flex-shrink-0 flex-col items-center"
+        style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard, padding: '12px 8px' }}
+      >
+        <button
+          type="button"
+          onClick={() => setRightPanelCollapsed(false)}
+          className="right-panel-icon-button"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 12,
+            border: 'none',
+            background: 'transparent',
+            color: c.textSecondary,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          title={`展开${title}`}
+          aria-label={`展开${title}`}
         >
+          <PanelRightOpen size={17} />
+        </button>
+        <div
+          style={{
+            marginTop: 12,
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            fontSize: 12,
+            color: c.textMuted,
+            letterSpacing: 2,
+          }}
+        >
+          {title}
+        </div>
+      </aside>
+    );
+
+    const collapseButton = (label = '收起右侧栏') => (
+      <button
+        type="button"
+        onClick={() => setRightPanelCollapsed(true)}
+        className="right-panel-icon-button"
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          border: 'none',
+          background: 'transparent',
+          color: c.textSecondary,
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        title={label}
+        aria-label={label}
+      >
+        <PanelRightClose size={18} />
+      </button>
+    );
+
+    const closeButton = (onClick: () => void, label = '关闭') => (
+      <button
+        type="button"
+        onClick={onClick}
+        className="right-panel-icon-button"
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          border: 'none',
+          background: 'transparent',
+          color: c.textSecondary,
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        title={label}
+        aria-label={label}
+      >
+        <X size={18} />
+      </button>
+    );
+
+    const rightPanelClassName = 'right-side-panel flex w-[360px] flex-shrink-0 flex-col';
+    const rightPanelBodyStyle = {
+      flex: 1,
+      minWidth: 0,
+      overflow: 'auto',
+      overflowX: 'auto',
+      padding: 16,
+      wordBreak: 'break-word',
+      overflowWrap: 'anywhere',
+    } as const;
+
+    if (showSourcePanel) {
+      const sourceDetails = sourcePanelPayload?.source
+        ? [{
+          title: sourcePanelPayload.source.title,
+          source: sourcePanelPayload.source.source,
+          url: sourcePanelPayload.source.url,
+          prompt: sourcePanelPayload.source.prompt,
+          sourceType: sourcePanelPayload.source.sourceType,
+          detail: sourcePanelPayload.source.detail,
+        }]
+        : getKnowledgeSourceDetails(sourcePanelPayload?.message || null);
+      const capabilityDetails = sourcePanelPayload?.capability;
+      const capabilityUrl = capabilityDetails?.providerUrl;
+      const isWebCapability = capabilityDetails?.kind === 'web_search' && capabilityUrl;
+      if (rightPanelCollapsed) {
+        if (isMobile) {
+          return (
+            <div
+              style={{
+                position: 'fixed',
+                right: 12,
+                top: 74,
+                zIndex: 42,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                borderRadius: 14,
+                background: '#fff',
+                padding: 6,
+                boxShadow: '0 16px 42px rgba(15, 23, 42, 0.14)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setRightPanelCollapsed(false)}
+                className="right-panel-icon-button"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  border: 'none',
+                  background: 'transparent',
+                  color: c.textSecondary,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="展开来源"
+                aria-label="展开来源"
+              >
+                <PanelRightOpen size={17} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setSourcePanelPayload(null)}
+                className="right-panel-icon-button"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  border: 'none',
+                  background: 'transparent',
+                  color: c.textSecondary,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="关闭来源"
+                aria-label="关闭来源"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          );
+        }
+        return collapsedRail('来源');
+      }
+      return (
+        <>
+          {isMobile && (
+            <div
+              onClick={() => setSourcePanelPayload(null)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 39,
+                background: 'rgba(15, 23, 42, 0.16)',
+              }}
+            />
+          )}
+          <aside
+            className={`${rightPanelClassName} ${isMobile ? 'fixed bottom-0 right-0 top-0 z-40 shadow-[0_24px_60px_rgba(15,23,42,0.18)]' : ''}`}
+            style={{
+              borderLeft: `1px solid ${c.borderFaint}`,
+              background: c.bgCard,
+              width: isMobile ? 'min(88vw, 360px)' : undefined,
+              maxWidth: isMobile ? '88vw' : undefined,
+            }}
+          >
           <div
             style={{
               padding: '14px 16px 10px',
@@ -691,23 +1209,52 @@ function WorkspaceContent() {
                 查看本条回复关联的会话内容、附件和结果摘要。
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setSourceMessage(null)}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                color: c.textMuted,
-                cursor: 'pointer',
-                fontSize: 18,
-                lineHeight: 1,
-              }}
-            >
-              ×
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+              {collapseButton()}
+              {closeButton(() => setSourcePanelPayload(null))}
+            </div>
           </div>
 
-          <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
+          <div style={rightPanelBodyStyle}>
+            <div style={{ display: 'grid', gap: 12, marginBottom: 16, minWidth: 320 }}>
+              {capabilityDetails ? (
+                <>
+                  <div style={{ border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{capabilityDetails.name}</div>
+                    <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>{capabilityDetails.kind}</div>
+                    {capabilityDetails.providerUrl && <a href={capabilityDetails.providerUrl} target="_blank" rel="noreferrer" style={{ marginTop: 6, display: 'block', color: c.accent, fontSize: 12, wordBreak: 'break-all' }}>{capabilityDetails.providerUrl}</a>}
+                  </div>
+                  {capabilityDetails.prompt && <pre style={{ margin: 0, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{capabilityDetails.prompt}</pre>}
+                  {capabilityDetails.arguments && <pre style={{ margin: 0, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{capabilityDetails.arguments}</pre>}
+                  {capabilityDetails.result && <pre style={{ margin: 0, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{capabilityDetails.result}</pre>}
+                  {isWebCapability && (
+                    <iframe
+                      title={capabilityDetails.name}
+                      src={capabilityUrl}
+                      style={{ width: '100%', minWidth: 520, height: 460, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff' }}
+                    />
+                  )}
+                </>
+              ) : (
+                sourceDetails.length > 0 ? sourceDetails.map((item, index) => (
+                  <div key={`${item.title}-${index}`} style={{ border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{item.title}</div>
+                    {item.source && <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>{item.source}</div>}
+                    {item.url && <a href={item.url} target="_blank" rel="noreferrer" style={{ marginTop: 6, display: 'block', color: c.accent, fontSize: 12, wordBreak: 'break-all' }}>{item.url}</a>}
+                    {'prompt' in item && item.prompt && <pre style={{ margin: '10px 0 0', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{String(item.prompt)}</pre>}
+                    {'detail' in item && item.detail && <div style={{ marginTop: 10, whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{String(item.detail)}</div>}
+                    {'sourceType' in item && item.sourceType === 'web_search' && item.url && (
+                      <iframe
+                        title={item.title}
+                        src={item.url}
+                        style={{ marginTop: 12, width: '100%', height: 460, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff' }}
+                      />
+                    )}
+                  </div>
+                )) : <div style={{ fontSize: 12, color: c.textMuted, lineHeight: 1.7 }}>当前没有可披露的来源信息。</div>
+              )}
+            </div>
+            <div style={{ display: 'none' }}>
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 6 }}>关联会话</div>
               <div
@@ -739,7 +1286,7 @@ function WorkspaceContent() {
                   whiteSpace: 'pre-wrap',
                 }}
               >
-                {sourceMessage?.content || '暂无内容'}
+                {capabilityDetails ? '当前查看的是一次能力调用。' : sourcePanelPayload?.message.content || '暂无内容'}
               </div>
             </div>
 
@@ -808,26 +1355,32 @@ function WorkspaceContent() {
                 {typeof activeResult?.summary === 'string' ? activeResult.summary : '当前没有可展示的结果摘要。'}
               </div>
             </div>
+            </div>
           </div>
-        </aside>
+          </aside>
+        </>
       );
     }
 
     if (currentAgent === 'demand' && activeResult?.result_type === 'demand_form') {
       const nextActions = Array.isArray(activeResult.next_actions) ? activeResult.next_actions : [];
       const pendingChecks = Array.isArray(activeResult.pending_checks) ? activeResult.pending_checks : [];
+      if (rightPanelCollapsed) return collapsedRail('需求待办');
       return (
         <aside
-          className="flex w-[360px] flex-shrink-0 flex-col"
-          style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard }}
+          className={rightPanelClassName}
+          style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard, position: 'relative' }}
         >
+          <div style={{ position: 'absolute', top: 10, right: 12, zIndex: 1 }}>
+            {collapseButton()}
+          </div>
           <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${c.borderFaint}` }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>需求代办</div>
             <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
               选择代办后继续当前会话，补齐新增媒体对接所需资料。
             </div>
           </div>
-          <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
+          <div style={rightPanelBodyStyle}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[...pendingChecks, ...nextActions].map((item, index) => (
                 <button
@@ -868,9 +1421,10 @@ function WorkspaceContent() {
         },
       };
       const panel = panelMap[activeSidePanel] || panelMap.demand;
+      if (rightPanelCollapsed) return collapsedRail(panel.title);
       return (
         <aside
-          className="flex w-[360px] flex-shrink-0 flex-col"
+          className={rightPanelClassName}
           style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard }}
         >
           <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', gap: 12, justifyContent: 'space-between' }}>
@@ -878,16 +1432,12 @@ function WorkspaceContent() {
               <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{panel.title}</div>
               <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>{panel.desc}</div>
             </div>
-            <button
-              type="button"
-              onClick={() => setActiveSidePanel(null)}
-              style={{ width: 28, height: 28, borderRadius: 10, border: 'none', background: 'transparent', color: c.textMuted, cursor: 'pointer' }}
-              aria-label="关闭"
-            >
-              <X size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+              {collapseButton()}
+              {closeButton(() => setActiveSidePanel(null))}
+            </div>
           </div>
-          <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
+          <div style={rightPanelBodyStyle}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {panel.actions.map((item) => (
                 <button
@@ -907,11 +1457,17 @@ function WorkspaceContent() {
     }
 
     if (showDebugPanel) {
+      if (rightPanelCollapsed) return collapsedRail('联调记录');
       return (
-        <AutoDebugWorkbench
-          conversationId={activeConversationId}
-          onOpenContext={() => setShowContextDrawer(true)}
-        />
+        <div className="right-side-panel" style={{ position: 'relative', flexShrink: 0, overflowX: 'auto' }}>
+          <div style={{ position: 'absolute', top: 10, right: 58, zIndex: 2 }}>
+            {collapseButton()}
+          </div>
+          <AutoDebugWorkbench
+            conversationId={activeConversationId}
+            onOpenContext={() => setShowContextDrawer(true)}
+          />
+        </div>
       );
     }
 
@@ -1251,10 +1807,11 @@ function WorkspaceContent() {
                 style={{
                   width: '100%',
                   padding: `0 ${pageSidePadding}px 12px`,
-                  display: 'flex',
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '40px minmax(0, 1fr) auto' : 'minmax(0, 1fr) auto minmax(0, 1fr)',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
                   gap: 16,
+                  position: 'relative',
                 }}
               >
                 <div className="flex min-w-0 items-center gap-3">
@@ -1277,13 +1834,14 @@ function WorkspaceContent() {
                       }}
                       title="打开侧边栏"
                     >
-                      <Menu size={18} />
+                      <IconAsset name="collapse" size={18} />
                     </button>
                   )}
                   <div
                     style={{
                       minWidth: 0,
-                      fontSize: isMobile ? 15 : 16,
+                      display: isMobile ? 'none' : 'block',
+                      fontSize: 16,
                       fontWeight: 600,
                       color: c.textPrimary,
                       letterSpacing: '-0.01em',
@@ -1296,18 +1854,33 @@ function WorkspaceContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {isCompactLayout && workspaceView === 'chat' && (
+                <div style={{ minWidth: 0 }} />
+
+                <div
+                  className="flex items-center justify-end gap-2"
+                  style={{
+                    position: isMobile ? 'static' : 'absolute',
+                    right: pageSidePadding,
+                    top: '50%',
+                    transform: isMobile ? undefined : 'translateY(-50%)',
+                    maxWidth: isMobile ? undefined : `calc(50% - ${pageSidePadding + 90}px)`,
+                    zIndex: 60,
+                  }}
+                >
+                  {workspaceView === 'chat' ? renderProjectSelector() : null}
+
+                  {workspaceView === 'chat' && (
                     <button
                       type="button"
                       onClick={handleCreateConversationRequest}
+                      className="topbar-icon-button"
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: 34,
                         height: 34,
-                        borderRadius: 12,
+                        borderRadius: 999,
                         border: 'none',
                         background: 'transparent',
                         color: c.textSecondary,
@@ -1316,7 +1889,7 @@ function WorkspaceContent() {
                       }}
                       title="开启新对话"
                     >
-                      <Plus size={16} />
+                      <IconAsset name="plus-circle" size={18} />
                     </button>
                   )}
 
@@ -1324,13 +1897,14 @@ function WorkspaceContent() {
                     <Dropdown menu={{ items: shareMenuItems }} trigger={['click']} placement="bottomRight">
                       <button
                         type="button"
+                        className="topbar-icon-button"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           width: 34,
                           height: 34,
-                          borderRadius: 12,
+                          borderRadius: 999,
                           border: 'none',
                           background: 'transparent',
                           color: c.textSecondary,
@@ -1354,46 +1928,57 @@ function WorkspaceContent() {
                   devMode={false}
                   onFollowUpClick={handleFollowUpClick}
                   onViewCallChain={() => undefined}
-                  onOpenSourcePanel={(msg) => setSourceMessage(msg)}
-                  onEditUserMessage={(content) => setComposerDraft(content)}
+                  onOpenSourcePanel={(payload) => {
+                    setSourcePanelPayload(payload);
+                    setRightPanelCollapsed(false);
+                  }}
+                  onEditUserMessage={(content) => { void handleSendWithAssets(content); }}
+                  onSubmitFollowUp={(content) => { void handleSendWithAssets(content); }}
                   contextThinkingSteps={contextThinkingSteps}
                   currentResult={activeResult as WorkflowResult | Record<string, unknown> | null}
                   chatSettings={chatSettings}
                   onToggleSystemPrompt={() => setShowSystemPrompt((prev) => !prev)}
                   showSystemPrompt={showSystemPrompt}
                   systemPrompt=""
+                  onOpenAgentPanel={handleOpenAgentPanel}
                 />
               )}
               {renderOpenedAsset()}
             </div>
 
             {(workspaceView === 'chat' || openedAsset) && (
-              <InputArea
-                onSend={handleSendWithAssets}
-                currentAgent={currentAgent}
-                onAgentChange={handleAgentChange}
-                onOpenAgentPanel={handleOpenAgentPanel}
-                onToggleAutoSpeak={handleToggleAutoSpeak}
-                autoSpeakEnabled={autoSpeakEnabled || speaking}
-                onFileUpload={(files) => {
-                  for (let i = 0; i < files.length; i += 1) {
-                    handleUpload(files[i], 'click');
-                  }
-                }}
-                longTextThreshold={2000}
-                placeholder={openedAsset ? '询问关于此文件的问题' : '发消息或按住说话'}
-                hideAgentOptions={Boolean(openedAsset)}
-                referencedAssets={referencedAssets.map((asset) => ({
-                  id: asset.id,
-                  title: asset.title,
-                  type: asset.format,
-                }))}
-                onRemoveReferencedAsset={(assetId) => {
-                  setReferencedAssets((prev) => prev.filter((asset) => asset.id !== assetId));
-                }}
-                draftValue={composerDraft}
-                onDraftConsumed={() => setComposerDraft('')}
-              />
+              <div>
+                <InputArea
+                  onSend={handleSendWithAssets}
+                  currentAgent={currentAgent}
+                  onAgentChange={handleAgentChange}
+                  onOpenAgentPanel={handleOpenAgentPanel}
+                  onToggleAutoSpeak={handleToggleAutoSpeak}
+                  autoSpeakEnabled={autoSpeakEnabled || speaking}
+                  onFileUpload={(files) => {
+                    for (let i = 0; i < files.length; i += 1) {
+                      void handleUpload(files[i], 'click');
+                    }
+                  }}
+                  longTextThreshold={2000}
+                  placeholder={attachments.length > 0 ? '输入提示语，我会结合文件继续处理' : openedAsset ? '询问关于此文件的问题' : '发消息或按住说话'}
+                  hideAgentOptions
+                  referencedAssets={referencedAssets.map((asset) => ({
+                    id: asset.id,
+                    title: asset.title,
+                    type: asset.format,
+                  }))}
+                  onRemoveReferencedAsset={(assetId) => {
+                    setReferencedAssets((prev) => prev.filter((asset) => asset.id !== assetId));
+                  }}
+                  draftValue={composerDraft}
+                  onDraftConsumed={() => setComposerDraft('')}
+                  attachments={attachments}
+                  onRemoveAttachment={handleRemoveAttachment}
+                  onRetryAttachment={handleRetryAttachment}
+                  onPreviewAttachment={(attachment) => message.info(attachment.summary || attachment.name)}
+                />
+              </div>
             )}
           </div>
 
