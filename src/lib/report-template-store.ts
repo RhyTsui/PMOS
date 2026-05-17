@@ -215,13 +215,13 @@ async function readTemplatesFile(): Promise<ReportTemplatesFile> {
       const raw = await readFile(templatesPath, 'utf8');
       const parsed = JSON.parse(raw) as Partial<ReportTemplatesFile>;
       return {
-        templates: Array.isArray(parsed.templates) ? parsed.templates.map(normalizeTemplate) : defaultTemplates(),
+        templates: Array.isArray(parsed.templates) ? parsed.templates.map(normalizeTemplate) : [],
       };
     } catch {
       // 尝试下一个存储位置。
     }
   }
-  return { templates: defaultTemplates() };
+  return { templates: [] };
 }
 
 async function writeTemplatesFile(file: ReportTemplatesFile): Promise<void> {

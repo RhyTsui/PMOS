@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dropdown, Modal, message, type MenuProps } from 'antd';
+import { Dropdown, Input, Modal, message, type MenuProps } from 'antd';
 import {
   CheckCircle2,
   Download,
@@ -372,6 +372,7 @@ function WorkspaceContent() {
   const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | number>(NO_PROJECT_VALUE);
   const [followedProjectIds, setFollowedProjectIds] = useState<Array<string | number>>([]);
+  const [projectSearch, setProjectSearch] = useState('');
   const lastSpokenMessageIdRef = useRef<string | null>(null);
 
   const activeResult = currentResult || agentResult;
@@ -403,23 +404,32 @@ function WorkspaceContent() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch('/api/xiaoqiao/projects?page=1&page_size=50')
-      .then((res) => res.json())
-      .then((payload: { projects?: ProjectOption[]; source?: string }) => {
-        if (cancelled) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const keyword = projectSearch.trim();
+        const params = new URLSearchParams({
+          page: '1',
+          page_size: '200',
+        });
+        if (keyword) params.set('keyword', keyword);
+        const response = await fetch(`/api/xiaoqiao/projects?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        const payload = await response.json() as { projects?: ProjectOption[]; source?: string };
         const projects = Array.isArray(payload.projects) ? payload.projects : [];
         setProjectOptions(projects.map((project) => ({ ...project, source: payload.source })));
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setProjectOptions([{ app_id: 12701, app_name: '项目 12701', app_alias: '默认项目', source: 'fallback' }]);
+      } catch {
+        if (!controller.signal.aborted) {
+          setProjectOptions([]);
         }
-      });
+      }
+    }, 220);
     return () => {
-      cancelled = true;
+      controller.abort();
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [projectSearch]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -446,6 +456,23 @@ function WorkspaceContent() {
     () => projectOptions.find((project) => String(project.app_id) === String(selectedProjectId)) || null,
     [projectOptions, selectedProjectId],
   );
+
+  const visibleProjectOptions = useMemo(() => {
+    const keyword = projectSearch.trim().toLowerCase();
+    if (!keyword) return projectOptions;
+    return projectOptions.filter((project) => {
+      const fields = [
+        project.app_id,
+        project.app_name,
+        project.app_alias,
+        project.app_en_name,
+      ]
+        .filter((value) => value !== undefined && value !== null && String(value).trim())
+        .map((value) => String(value).toLowerCase())
+        .join(' ');
+      return fields.includes(keyword);
+    });
+  }, [projectOptions, projectSearch]);
 
   const projectContextText = useMemo(() => {
     if (selectedProjectId === NO_PROJECT_VALUE) return '项目范围：未选择项目';
@@ -801,7 +828,7 @@ function WorkspaceContent() {
       recent_visit: selectedProjectId === ALL_PROJECT_VALUE,
       closed: false,
     },
-    ...projectOptions.map((project, index) => ({
+    ...visibleProjectOptions.map((project, index) => ({
       label: project.app_name || `APPID ${project.app_id}`,
       value: project.app_id,
       icon: project.icon || '',
@@ -809,7 +836,7 @@ function WorkspaceContent() {
       recent_visit: index < 3,
       closed: false,
     })),
-  ], [followedProjectIds, projectOptions, selectedProjectId]);
+  ], [followedProjectIds, selectedProjectId, visibleProjectOptions]);
 
   const renderProjectSelector = () => {
     const selectedLabel = selectedProjectId === NO_PROJECT_VALUE
@@ -822,78 +849,92 @@ function WorkspaceContent() {
       ? 'clamp(150px, calc(100vw - 164px), 210px)'
       : 'clamp(168px, calc(100vw - 122px), 230px)';
     return (
-      <YkProjectSelect
-        value={selectedProjectId}
-        options={projectSelectOptions}
-        maxVisibleItems={isMobile ? 5 : undefined}
-        onChange={(value) => {
-          setSelectedProjectId(value === ALL_PROJECT_VALUE || value === NO_PROJECT_VALUE ? value : (Number.isNaN(Number(value)) ? value : Number(value)));
-        }}
-        followedCallback={(item, followed) => {
-          if (item.value === ALL_PROJECT_VALUE || item.value === NO_PROJECT_VALUE) return;
-          setFollowedProjectIds((prev) => {
-            const withoutCurrent = prev.filter((id) => String(id) !== String(item.value));
-            return followed ? [...withoutCurrent, item.value] : withoutCurrent;
-          });
-        }}
-        customShow={(
-          <button
-            type="button"
-            className="project-select-trigger"
-            style={{
-              maxWidth: isMobile ? 'calc(100vw - 112px)' : 360,
-              minWidth: 0,
-              width: isMobile ? mobileProjectWidth : 'fit-content',
-              flexShrink: 1,
-              height: 36,
-              borderRadius: 18,
-              border: '1px solid rgba(15, 23, 42, 0.05)',
-              background: '#fff',
-              boxShadow: 'none',
-              color: c.textPrimary,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: 8,
-              padding: '0 10px 0 7px',
-              fontSize: 13,
-              fontWeight: 400,
-            }}
-            title={projectContextText}
-          >
-            <span
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        <Input
+          allowClear
+          value={projectSearch}
+          onChange={(event) => setProjectSearch(event.target.value)}
+          placeholder="搜索项目 ID / 名称"
+          prefix={<Search size={14} />}
+          style={{
+            width: isMobile ? 146 : 188,
+            height: 36,
+            borderRadius: 18,
+          }}
+        />
+        <YkProjectSelect
+          value={selectedProjectId}
+          options={projectSelectOptions}
+          maxVisibleItems={isMobile ? 5 : undefined}
+          onChange={(value) => {
+            setSelectedProjectId(value === ALL_PROJECT_VALUE || value === NO_PROJECT_VALUE ? value : (Number.isNaN(Number(value)) ? value : Number(value)));
+          }}
+          followedCallback={(item, followed) => {
+            if (item.value === ALL_PROJECT_VALUE || item.value === NO_PROJECT_VALUE) return;
+            setFollowedProjectIds((prev) => {
+              const withoutCurrent = prev.filter((id) => String(id) !== String(item.value));
+              return followed ? [...withoutCurrent, item.value] : withoutCurrent;
+            });
+          }}
+          customShow={(
+            <button
+              type="button"
+              className="project-select-trigger"
               style={{
-                width: 24,
-                height: 24,
-                borderRadius: 8,
-                overflow: 'hidden',
-                flexShrink: 0,
+                maxWidth: isMobile ? 'calc(100vw - 280px)' : 360,
+                minWidth: 0,
+                width: isMobile ? mobileProjectWidth : 'fit-content',
+                flexShrink: 1,
+                height: 36,
+                borderRadius: 18,
+                border: '1px solid rgba(15, 23, 42, 0.05)',
+                background: '#fff',
+                boxShadow: 'none',
+                color: c.textPrimary,
+                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                background: '#e5e7eb',
-                color: '#4c7dff',
-                fontSize: 11,
-                fontWeight: 600,
+                justifyContent: 'flex-start',
+                gap: 8,
+                padding: '0 10px 0 7px',
+                fontSize: 13,
+                fontWeight: 400,
               }}
+              title={projectContextText}
             >
-              {selectedProjectIcon ? (
-                <img src={selectedProjectIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : selectedProjectId === ALL_PROJECT_VALUE ? (
-                '全'
-              ) : selectedProjectId === NO_PROJECT_VALUE ? (
-                '选'
-              ) : (
-                '项'
-              )}
-            </span>
-            <span className="project-select-label" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {selectedLabel}
-            </span>
-          </button>
-        )}
-      />
+              <span
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 8,
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#e5e7eb',
+                  color: '#4c7dff',
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
+              >
+                {selectedProjectIcon ? (
+                  <img src={selectedProjectIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : selectedProjectId === ALL_PROJECT_VALUE ? (
+                  '全'
+                ) : selectedProjectId === NO_PROJECT_VALUE ? (
+                  '选'
+                ) : (
+                  '项'
+                )}
+              </span>
+              <span className="project-select-label" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {selectedLabel}
+              </span>
+            </button>
+          )}
+        />
+      </div>
     );
   };
 

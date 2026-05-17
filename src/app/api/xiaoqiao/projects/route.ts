@@ -8,6 +8,13 @@ interface ProjectApiItem {
   app_en_name?: string;
   app_status?: string | number;
   icon?: string;
+  app_type?: string | number;
+  project_type?: string | number;
+  category?: string;
+  industry?: string;
+  biz_type?: string;
+  game_type?: string;
+  is_game?: boolean | string | number;
 }
 
 function pickList(payload: unknown): ProjectApiItem[] {
@@ -31,7 +38,59 @@ function normalize(item: ProjectApiItem) {
     app_en_name: item.app_en_name,
     app_status: item.app_status,
     icon: item.icon,
+    app_type: item.app_type,
+    project_type: item.project_type,
+    category: item.category,
+    industry: item.industry,
+    biz_type: item.biz_type,
+    game_type: item.game_type,
+    is_game: item.is_game,
   };
+}
+
+function isGameProject(item: ProjectApiItem): boolean {
+  if (item.is_game !== undefined && item.is_game !== null) {
+    const raw = String(item.is_game).toLowerCase();
+    if (raw === 'true' || raw === '1' || raw === 'yes') return true;
+    if (raw === 'false' || raw === '0' || raw === 'no') return false;
+  }
+
+  const typeText = [
+    item.app_type,
+    item.project_type,
+    item.category,
+    item.industry,
+    item.biz_type,
+    item.game_type,
+  ]
+    .filter((value) => value !== undefined && value !== null && String(value).trim())
+    .map((value) => String(value))
+    .join(' ');
+
+  if (!typeText) return true;
+  return /游戏|game/i.test(typeText);
+}
+
+function matchesProjectKeyword(item: ProjectApiItem, keyword: string) {
+  if (!keyword) return true;
+  const normalizedKeyword = keyword.trim().toLowerCase();
+  if (!normalizedKeyword) return true;
+  const joined = [
+    item.app_id,
+    item.app_name,
+    item.app_alias,
+    item.app_en_name,
+    item.app_type,
+    item.project_type,
+    item.category,
+    item.industry,
+    item.biz_type,
+    item.game_type,
+  ]
+    .filter((value) => value !== undefined && value !== null && String(value).trim())
+    .map((value) => String(value).toLowerCase())
+    .join(' ');
+  return joined.includes(normalizedKeyword);
 }
 
 export async function GET(request: Request) {
@@ -41,6 +100,7 @@ export async function GET(request: Request) {
   const pageSize = searchParams.get('page_size') || '50';
   const appName = searchParams.get('app_name');
   const appId = searchParams.get('app_id');
+  const keyword = searchParams.get('keyword') || searchParams.get('q') || '';
   const params = new URLSearchParams({
     access_token: config.apiToken,
     page,
@@ -48,6 +108,7 @@ export async function GET(request: Request) {
   });
   if (appName) params.set('app_name', appName);
   if (appId) params.set('app_id', appId);
+  if (keyword) params.set('keyword', keyword);
 
   try {
     if (!hasConfiguredProjectService(config)) {
@@ -64,23 +125,20 @@ export async function GET(request: Request) {
     }).finally(() => clearTimeout(timer));
     if (!response.ok) throw new Error(`Project API ${response.status}`);
     const payload = await response.json();
-    const projects = pickList(payload).map(normalize).filter((item) => item.app_id);
-    if (projects.length > 0) {
-      return NextResponse.json({ source: baseUrl, projects });
-    }
+    const projects = pickList(payload)
+      .filter((item) => item.app_id)
+      .filter((item) => isGameProject(item))
+      .filter((item) => !/烽火工作室/i.test(`${item.app_name || ''} ${item.app_alias || ''} ${item.app_en_name || ''}`))
+      .filter((item) => matchesProjectKeyword(item, keyword))
+      .map(normalize);
+
+    return NextResponse.json({ source: baseUrl, projects });
   } catch (error) {
     console.warn('Project API unavailable', error);
   }
 
   return NextResponse.json({
-    source: 'fallback',
-    projects: [
-      {
-        app_id: 12701,
-        app_name: '项目 12701',
-        app_alias: '默认项目',
-        app_status: 'unknown',
-      },
-    ],
+    source: hasConfiguredProjectService(config) ? 'empty' : 'unavailable',
+    projects: [],
   });
 }
