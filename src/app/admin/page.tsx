@@ -11,7 +11,7 @@ import {
   Wifi, Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { DemandPoolItem, ReportDraft, ReportTemplate } from '@/types';
+import type { DemandPoolItem, McpSkill, McpSkillCategory } from '@/types';
 import { xiaoqiaoApi } from '@/lib/api';
 import type { McpServerConfig } from '@/types';
 import { THINKING_LENGTH_OPTIONS, useChatSettings } from '@/hooks/useChatSettings';
@@ -396,7 +396,64 @@ const scopeLabels: Record<string, string> = {
 };
 
 type DetailTab = 'content' | 'versions' | 'bindings';
-type AdminTab = 'service-config' | 'chat-display' | 'prompts' | 'feature-switches' | 'auto-debug-config' | 'demand-pool' | 'mcp-config' | 'report-center';
+type AdminTab = 'service-config' | 'chat-display' | 'prompts' | 'skills' | 'feature-switches' | 'auto-debug-config' | 'demand-pool' | 'mcp-config';
+
+const ADMIN_TAB_STORAGE_KEY = 'zhitou-admin-active-tab';
+const ADMIN_PROMPT_STORAGE_KEY = 'zhitou-admin-selected-prompt';
+const ADMIN_DEBUG_CONFIG_STORAGE_KEY = 'zhitou-admin-selected-debug-config';
+const ADMIN_DEBUG_CONFIGS_STATE_KEY = 'zhitou-admin-debug-configs-state';
+const ADMIN_DEMAND_STORAGE_KEY = 'zhitou-admin-selected-demand';
+const ADMIN_SKILL_STORAGE_KEY = 'zhitou-admin-selected-skill';
+const ADMIN_MCP_STORAGE_KEY = 'zhitou-admin-selected-mcp';
+
+const ADMIN_TABS: AdminTab[] = [
+  'service-config',
+  'chat-display',
+  'prompts',
+  'skills',
+  'feature-switches',
+  'auto-debug-config',
+  'demand-pool',
+  'mcp-config',
+];
+
+function readClientStorage(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeClientStorage(key: string, value: string | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (value) {
+      window.localStorage.setItem(key, value);
+    } else {
+      window.localStorage.removeItem(key);
+    }
+  } catch {
+    // 浏览器隐私模式下 localStorage 可能不可写，忽略即可。
+  }
+}
+
+function readStoredAdminTab(): AdminTab {
+  const stored = readClientStorage(ADMIN_TAB_STORAGE_KEY);
+  return ADMIN_TABS.includes(stored as AdminTab) ? stored as AdminTab : 'service-config';
+}
+
+function readStoredDebugConfigs(): DebugAutomationConfigItem[] {
+  const stored = readClientStorage(ADMIN_DEBUG_CONFIGS_STATE_KEY);
+  if (!stored) return MOCK_DEBUG_CONFIGS;
+  try {
+    const parsed = JSON.parse(stored) as DebugAutomationConfigItem[];
+    return Array.isArray(parsed) && parsed.length ? parsed : MOCK_DEBUG_CONFIGS;
+  } catch {
+    return MOCK_DEBUG_CONFIGS;
+  }
+}
 
 // ---- Auto-Debugging Config Types ----
 interface DebugAutomationConfigItem {
@@ -409,10 +466,43 @@ interface DebugAutomationConfigItem {
   status: 'active' | 'inactive' | 'draft';
   keywords: { match_type: 'exact' | 'contains' | 'regex'; pattern: string; description: string }[];
   timeout_config: { stage: string; timeout_seconds: number; retry_count: number }[];
+  media_config?: { username: string; password: string; default_account: string; event_asset_url: string; postback_result_view: string; aadvid: string; target_channel: string };
+  channel_config?: {
+    app_package: string;
+    app_activity: string;
+    deeplink: string;
+    auth_keyword: string;
+    feed_keyword: string;
+    action_keyword: string;
+    max_swipe_count: number;
+    keyword_settle_seconds: number;
+    install_password: string;
+    game_package: string;
+  };
+  game_config?: { package_name: string; login_type: string; account: string; password: string };
+  mobile_env?: { device_id: string };
   instruction_text: string;
   updated_at: string;
   created_by: string;
 }
+
+const defaultDebugRuntimeConfig = {
+  media_config: { username: '', password: '', default_account: '', event_asset_url: '', postback_result_view: '', aadvid: '', target_channel: '' },
+  channel_config: {
+    app_package: '',
+    app_activity: '',
+    deeplink: '',
+    auth_keyword: '',
+    feed_keyword: '',
+    action_keyword: '',
+    max_swipe_count: 12,
+    keyword_settle_seconds: 1,
+    install_password: '',
+    game_package: '',
+  },
+  game_config: { package_name: '', login_type: 'account', account: '', password: '' },
+  mobile_env: { device_id: '' },
+};
 
 // ---- Auto-Debugging Config Mock Data ----
 const MOCK_DEBUG_CONFIGS: DebugAutomationConfigItem[] = [
@@ -436,6 +526,36 @@ const MOCK_DEBUG_CONFIGS: DebugAutomationConfigItem[] = [
       { stage: 'mobile_launch', timeout_seconds: 45, retry_count: 2 },
       { stage: 'success_poll', timeout_seconds: 120, retry_count: 3 },
     ],
+    media_config: {
+      username: '',
+      password: '',
+      default_account: 'wuyanlan@dobest.com',
+      event_asset_url: '',
+      postback_result_view: '巨量事件管理器 > 联调工具 > 回传结果',
+      aadvid: '1812330415881259',
+      target_channel: '311348_20251020',
+    },
+    channel_config: {
+      app_package: 'com.ss.android.ugc.aweme',
+      app_activity: '.splash.SplashActivity',
+      deeplink: 'snssdk1128://scan',
+      auth_keyword: '授权测试',
+      feed_keyword: '转化联调广告',
+      action_keyword: '打开',
+      max_swipe_count: 12,
+      keyword_settle_seconds: 1,
+      install_password: 'wyl@1002',
+      game_package: 'com.yoka.sgs.x',
+    },
+    game_config: {
+      package_name: 'com.yoka.sgs.x',
+      login_type: 'account',
+      account: '15921311749',
+      password: '1qaz@WSX',
+    },
+    mobile_env: {
+      device_id: '5EF0218918001054',
+    },
     instruction_text: '请确保测试设备已加入白名单，广告计划已创建且处于投放状态。联调过程中请勿操作测试设备。',
     updated_at: '2026-05-08 14:30',
     created_by: '张工',
@@ -535,7 +655,7 @@ const environmentLabels: Record<string, string> = {
 };
 
 // ---- Feature Switch Mock Data ----
-const MOCK_SWITCHES = [
+const MOCK_SWITCHES: AdminSwitchItem[] = [
   { key: 'auto_debug_full', name: '全自动联调开关', type: 'boolean', enabled: true, config: {}, description: '开启后联调任务自动执行，无需人工确认' },
   { key: 'auto_debug_takeover', name: '人工接管开关', type: 'boolean', enabled: true, config: {}, description: '允许在联调失败时由人工接管' },
   { key: 'evidence_auto_collect', name: '证据自动采集', type: 'boolean', enabled: true, config: {}, description: '自动采集排查所需日志和数据' },
@@ -543,13 +663,25 @@ const MOCK_SWITCHES = [
   { key: 'clarification_max_rounds', name: '追问轮数上限', type: 'number', enabled: true, config: { value: 3 }, description: '单次任务最多追问轮数' },
   { key: 'risk_alert_threshold', name: '风险告警阈值', type: 'number', enabled: true, config: { value: 0.7 }, description: '置信度低于此值时触发告警' },
 ];
+interface AdminSwitchItem {
+  key: string;
+  name: string;
+  type: 'boolean' | 'number';
+  enabled: boolean;
+  config: Record<string, unknown>;
+  description: string;
+}
 
 // ---- Component ----
 export default function AdminPage() {
-  const [adminTab, setAdminTab] = useState<AdminTab>('service-config');
+  useEffect(() => {
+    document.title = '智投chat-配置管理';
+  }, []);
+
+  const [adminTab, setAdminTabRaw] = useState<AdminTab>(() => readStoredAdminTab());
   const [searchTerm, setSearchTerm] = useState('');
   const [filterScope, setFilterScope] = useState<string>('all');
-  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [selectedPromptId, setSelectedPromptIdRaw] = useState<string | null>(() => readClientStorage(ADMIN_PROMPT_STORAGE_KEY));
   const [detailTab, setDetailTab] = useState<DetailTab>('content');
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
@@ -560,13 +692,14 @@ export default function AdminPage() {
   const [dbgFilterPlatform, setDbgFilterPlatform] = useState<string>('all');
   const [dbgFilterEnv, setDbgFilterEnv] = useState<string>('all');
   const [dbgFilterStatus, setDbgFilterStatus] = useState<string>('all');
-  const [selectedDbgConfigId, setSelectedDbgConfigId] = useState<string | null>(null);
-  const [dbgDetailTab, setDbgDetailTab] = useState<'keywords' | 'timeout' | 'instruction'>('keywords');
+  const [debugConfigs, setDebugConfigs] = useState<DebugAutomationConfigItem[]>(() => readStoredDebugConfigs());
+  const [selectedDbgConfigId, setSelectedDbgConfigIdRaw] = useState<string | null>(() => readClientStorage(ADMIN_DEBUG_CONFIG_STORAGE_KEY));
+  const [dbgDetailTab, setDbgDetailTab] = useState<'runtime' | 'keywords' | 'timeout' | 'instruction'>('runtime');
 
   // Feature switch state
-  const [switchStates, setSwitchStates] = useState<Record<string, boolean>>(
-    Object.fromEntries(MOCK_SWITCHES.map(s => [s.key, s.enabled]))
-  );
+  const [featureSwitches, setFeatureSwitches] = useState<AdminSwitchItem[]>([]);
+  const [switchStates, setSwitchStates] = useState<Record<string, boolean>>({});
+  const [selectedSwitchKey, setSelectedSwitchKey] = useState<string | null>(null);
 
   const filtered = MOCK_PROMPTS.filter((p) => {
     const matchSearch = p.name.includes(searchTerm) || p.description.includes(searchTerm);
@@ -575,6 +708,21 @@ export default function AdminPage() {
   });
 
   const selectedPrompt = MOCK_PROMPTS.find(p => p.id === selectedPromptId) || null;
+
+  const setAdminTab = (tab: AdminTab) => {
+    setAdminTabRaw(tab);
+    writeClientStorage(ADMIN_TAB_STORAGE_KEY, tab);
+  };
+
+  const setSelectedPromptId = (id: string | null) => {
+    setSelectedPromptIdRaw(id);
+    writeClientStorage(ADMIN_PROMPT_STORAGE_KEY, id);
+  };
+
+  const setSelectedDbgConfigId = (id: string | null) => {
+    setSelectedDbgConfigIdRaw(id);
+    writeClientStorage(ADMIN_DEBUG_CONFIG_STORAGE_KEY, id);
+  };
 
   const handleSelectPrompt = (id: string) => {
     setSelectedPromptId(id);
@@ -595,7 +743,7 @@ export default function AdminPage() {
   };
 
   // Auto-debug config helpers
-  const filteredDbgConfigs = MOCK_DEBUG_CONFIGS.filter((c) => {
+  const filteredDbgConfigs = debugConfigs.filter((c) => {
     const matchSearch = c.name.includes(dbgSearchTerm) || c.media.includes(dbgSearchTerm);
     const matchMedia = dbgFilterMedia === 'all' || c.media === dbgFilterMedia;
     const matchPlatform = dbgFilterPlatform === 'all' || c.platform === dbgFilterPlatform || (dbgFilterPlatform === 'both' && c.platform === 'both');
@@ -604,16 +752,62 @@ export default function AdminPage() {
     return matchSearch && matchMedia && matchPlatform && matchEnv && matchStatus;
   });
 
-  const selectedDbgConfig = MOCK_DEBUG_CONFIGS.find(c => c.id === selectedDbgConfigId) || null;
+  const selectedDbgConfig = debugConfigs.find(c => c.id === selectedDbgConfigId) || null;
 
-  const uniqueMedias = [...new Set(MOCK_DEBUG_CONFIGS.map(c => c.media))];
+  const uniqueMedias = [...new Set(debugConfigs.map(c => c.media))];
 
-  const toggleSwitch = (key: string) => {
-    setSwitchStates(prev => ({ ...prev, [key]: !prev[key] }));
+  const handleUpdateDebugConfig = (id: string, patch: Partial<DebugAutomationConfigItem>) => {
+    setDebugConfigs(prev => {
+      const next = prev.map(item => item.id === id ? {
+        ...item,
+        ...patch,
+        updated_at: new Date().toLocaleString('zh-CN', { hour12: false }),
+      } : item);
+      writeClientStorage(ADMIN_DEBUG_CONFIGS_STATE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetch('/api/xiaoqiao/admin/feature-switches');
+        if (!response.ok) throw new Error(await response.text());
+        const data = await response.json() as AdminSwitchItem[];
+        setFeatureSwitches(data);
+        setSwitchStates(Object.fromEntries(data.map(item => [item.key, item.enabled])));
+        setSelectedSwitchKey(current => current && data.some(item => item.key === current) ? current : data[0]?.key || null);
+      } catch {
+        setFeatureSwitches(MOCK_SWITCHES);
+        setSwitchStates(Object.fromEntries(MOCK_SWITCHES.map(item => [item.key, item.enabled])));
+        setSelectedSwitchKey(current => current || MOCK_SWITCHES[0]?.key || null);
+      }
+    })();
+  }, []);
+
+  const toggleSwitch = async (key: string) => {
+    const current = switchStates[key] ?? false;
+    const nextEnabled = !current;
+    setSwitchStates(prev => ({ ...prev, [key]: nextEnabled }));
+    setFeatureSwitches(prev => prev.map(item => item.key === key ? { ...item, enabled: nextEnabled } : item));
+    try {
+      const response = await fetch(`/api/xiaoqiao/admin/feature-switches/${key}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: nextEnabled }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      const saved = await response.json() as AdminSwitchItem;
+      setFeatureSwitches(prev => prev.map(item => item.key === key ? saved : item));
+      setSwitchStates(prev => ({ ...prev, [key]: saved.enabled }));
+    } catch {
+      setSwitchStates(prev => ({ ...prev, [key]: current }));
+      setFeatureSwitches(prev => prev.map(item => item.key === key ? { ...item, enabled: current } : item));
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f3f6fb] text-[#1f2937]">
+    <div className="admin-page min-h-screen flex flex-col bg-white text-[#1f2937]">
       {/* Header with Tabs */}
       <header className="sticky top-0 z-20 border-b border-[#dbe4f0] bg-[rgba(243,246,251,0.95)] backdrop-blur">
         <div className="flex items-center justify-between gap-4 px-4 py-3 md:px-6">
@@ -629,10 +823,7 @@ export default function AdminPage() {
               <p className="text-[11px] text-[#6b7c93]">问答服务 &middot; MCP服务 &middot; 观测配置</p>
             </div>
           </div>
-          <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0f6fff] text-white text-sm font-medium hover:bg-[#0b5ad1] transition-colors shadow-[0_10px_30px_rgba(15,111,255,0.18)]">
-            <Plus className="w-4 h-4" />
-            {adminTab === 'prompts' ? '新建提示词' : adminTab === 'auto-debug-config' ? '新建配置' : '新建'}
-          </button>
+          <div className="hidden md:block" />
         </div>
         {/* Tab Navigation */}
         <div className="flex overflow-x-auto px-3 md:px-6 gap-1 scrollbar-hide">
@@ -640,10 +831,10 @@ export default function AdminPage() {
             { key: 'service-config' as AdminTab, label: '配置服务', icon: Cpu },
             { key: 'chat-display' as AdminTab, label: '会话展示', icon: MessageSquare },
             { key: 'prompts' as AdminTab, label: '提示词管理', icon: FileText },
+            { key: 'skills' as AdminTab, label: 'Skill管理', icon: GitBranch },
             { key: 'feature-switches' as AdminTab, label: '功能开关', icon: ToggleRight },
             { key: 'auto-debug-config' as AdminTab, label: '自动联调配置', icon: Zap },
             { key: 'demand-pool' as AdminTab, label: '需求池', icon: ClipboardList },
-            { key: 'report-center' as AdminTab, label: '自动报表', icon: Clock },
             { key: 'mcp-config' as AdminTab, label: 'MCP配置', icon: Plug },
           ] as const).map((tab) => (
             <button
@@ -687,11 +878,15 @@ export default function AdminPage() {
         />
       )}
 
+      {adminTab === 'skills' && <SkillManagementTab />}
+
       {adminTab === 'feature-switches' && (
         <FeatureSwitchesTab
-          switches={MOCK_SWITCHES}
+          switches={featureSwitches.length ? featureSwitches : MOCK_SWITCHES}
           switchStates={switchStates}
           onToggle={toggleSwitch}
+          selectedSwitchKey={selectedSwitchKey}
+          onSelectSwitch={setSelectedSwitchKey}
         />
       )}
 
@@ -708,17 +903,17 @@ export default function AdminPage() {
           filterStatus={dbgFilterStatus}
           setFilterStatus={setDbgFilterStatus}
           selectedConfigId={selectedDbgConfigId}
-          setSelectedConfigId={(id) => { setSelectedDbgConfigId(id); setDbgDetailTab('keywords'); }}
+          setSelectedConfigId={(id) => { setSelectedDbgConfigId(id); setDbgDetailTab('runtime'); }}
           detailTab={dbgDetailTab}
           setDetailTab={setDbgDetailTab}
           filteredConfigs={filteredDbgConfigs}
           selectedConfig={selectedDbgConfig}
           uniqueMedias={uniqueMedias}
+          onUpdateConfig={handleUpdateDebugConfig}
         />
       )}
 
       {adminTab === 'demand-pool' && <DemandPoolTab />}
-      {adminTab === 'report-center' && <AutoReportTab />}
       {adminTab === 'mcp-config' && <McpConfigTab />}
     </div>
   );
@@ -775,22 +970,20 @@ function ChatDisplaySettingsTab() {
                 key={item.key}
                 type="button"
                 onClick={() => updateSetting(item.key, !item.value)}
-                className="grid gap-3 rounded-xl border border-[#e2eaf5] bg-[#f8fbff] p-4 text-left transition-colors hover:border-[#b8d7ff] md:grid-cols-[minmax(0,1fr)_96px]"
+                className="grid gap-3 border-b border-[#edf2f8] p-4 text-left transition-colors hover:bg-[#fafcff] md:grid-cols-[minmax(0,1fr)_96px]"
               >
                 <span>
                   <span className="block text-sm font-semibold text-[#10233f]">{item.title}</span>
                   <span className="mt-1 block text-xs leading-6 text-[#6b7c93]">{item.desc}</span>
                 </span>
-                <span className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg text-xs font-semibold ${
-                  item.value ? 'bg-[#e8f3ff] text-[#0f6fff]' : 'bg-[#eef2f7] text-[#6b7c93]'
-                }`}>
+                <span className={`inline-flex h-8 items-center justify-center gap-1.5 text-xs font-semibold ${item.value ? 'text-[#0f6fff]' : 'text-[#6b7c93]'}`}>
                   {item.value ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
                   {item.value ? '已开启' : '已关闭'}
                 </span>
               </button>
             ))}
 
-            <div className="rounded-xl border border-[#e2eaf5] bg-[#f8fbff] p-4">
+            <div className="border-b border-[#edf2f8] p-4">
               <div className="text-sm font-semibold text-[#10233f]">思维链展示长度</div>
               <div className="mt-3 grid gap-2 md:grid-cols-3">
                 {(Object.entries(THINKING_LENGTH_OPTIONS) as Array<[keyof typeof THINKING_LENGTH_OPTIONS, { label: string; desc: string }]>).map(([key, option]) => (
@@ -798,10 +991,10 @@ function ChatDisplaySettingsTab() {
                     key={key}
                     type="button"
                     onClick={() => updateSetting('thinkingLength', key)}
-                    className={`rounded-xl border p-3 text-left transition-colors ${
+                    className={`border-b p-3 text-left transition-colors ${
                       settings.thinkingLength === key
-                        ? 'border-[#8ec5ff] bg-[#eef7ff] text-[#0f6fff]'
-                        : 'border-[#e2eaf5] bg-white text-[#355070] hover:border-[#b8d7ff]'
+                        ? 'border-[#8ec5ff] text-[#0f6fff]'
+                        : 'border-[#e2eaf5] text-[#355070] hover:bg-[#fafcff]'
                     }`}
                   >
                     <span className="block text-xs font-semibold">{option.label}</span>
@@ -811,7 +1004,7 @@ function ChatDisplaySettingsTab() {
               </div>
             </div>
 
-            <label className="grid gap-2 rounded-xl border border-[#e2eaf5] bg-[#f8fbff] p-4">
+            <label className="grid gap-2 border-b border-[#edf2f8] p-4">
               <span className="text-sm font-semibold text-[#10233f]">长文本转文件阈值</span>
               <span className="text-xs leading-6 text-[#6b7c93]">输入内容超过该长度时，优先按资料处理，减少对话区被长文本占满。</span>
               <input
@@ -824,7 +1017,7 @@ function ChatDisplaySettingsTab() {
               />
             </label>
 
-            <label className="grid gap-2 rounded-xl border border-[#e2eaf5] bg-[#f8fbff] p-4">
+            <label className="grid gap-2 border-b border-[#edf2f8] p-4">
               <span className="text-sm font-semibold text-[#10233f]">代码块样式</span>
               <span className="text-xs leading-6 text-[#6b7c93]">影响回答中代码、配置片段和排查脚本的展示样式。</span>
               <select
@@ -1136,44 +1329,51 @@ function PromptManagementTab({
 
 // ---- Feature Switches Tab Component ----
 function FeatureSwitchesTab({
-  switches, switchStates, onToggle,
+  switches, switchStates, onToggle, selectedSwitchKey, onSelectSwitch,
 }: {
-  switches: typeof MOCK_SWITCHES;
+  switches: AdminSwitchItem[];
   switchStates: Record<string, boolean>;
   onToggle: (key: string) => void;
+  selectedSwitchKey: string | null;
+  onSelectSwitch: (key: string) => void;
 }) {
+  const selectedSwitch = switches.find(item => item.key === selectedSwitchKey) || switches[0] || null;
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[#f3f6fb]">
-      <div className="max-w-4xl mx-auto space-y-4">
-        <div className="flex items-center justify-between mb-2">
+    <div className="flex-1 flex overflow-hidden bg-white">
+      <div className="w-[420px] border-r border-[#dbe4f0] bg-white">
+        <div className="border-b border-[#e5edf7] px-5 py-4">
           <div>
             <h2 className="text-lg font-semibold text-[#10233f]">功能开关</h2>
-            <p className="text-[11px] text-[#6b7c93] mt-1">灰度 / 全量 / 按角色控制</p>
+            <p className="text-[11px] text-[#6b7c93] mt-1">列表查看，点击后在右侧查看详情</p>
           </div>
         </div>
-        <div className="space-y-3">
+        <div className="custom-scrollbar h-full overflow-y-auto">
           {switches.map((sw) => (
-            <div key={sw.key} className="p-4 rounded-2xl bg-white border border-[#dbe4f0] shadow-[0_10px_30px_rgba(15,35,63,0.05)]">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
+            <div
+              role="button"
+              tabIndex={0}
+              key={sw.key}
+              onClick={() => onSelectSwitch(sw.key)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') onSelectSwitch(sw.key);
+              }}
+              className={`w-full border-b border-[#edf2f8] px-5 py-4 text-left transition-colors ${
+                selectedSwitch?.key === sw.key ? 'border-l-2 border-l-[#0f6fff] bg-[#f7fbff]' : 'hover:bg-[#fafcff]'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-3">
                     <span className="text-sm font-medium text-[#10233f]">{sw.name}</span>
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                      sw.type === 'boolean' ? 'bg-[#eaf3ff] text-[#0f6fff]' : 'bg-[#fff6df] text-[#b7791f]'
-                    }`}>
-                      {sw.type === 'boolean' ? '布尔' : '数值'}
-                    </span>
+                    <span className="text-[10px] text-[#8ea0b8]">{sw.type === 'boolean' ? '布尔' : '数值'}</span>
                   </div>
                   <div className="text-[11px] text-[#6b7c93]">{sw.description}</div>
-                  {sw.type === 'number' && sw.config.value !== undefined && (
-                    <div className="text-[11px] text-[#355070] mt-1">当前值: {String(sw.config.value)}</div>
-                  )}
                 </div>
-                <button onClick={() => onToggle(sw.key)} className="flex items-center">
+                <button onClick={(event) => { event.stopPropagation(); onToggle(sw.key); }} className="flex items-center">
                   {switchStates[sw.key] ? (
-                    <ToggleRight className="w-8 h-8 text-[#00FF88]" />
+                    <ToggleRight className="h-7 w-7 text-[#0f9f6e]" />
                   ) : (
-                    <ToggleLeft className="w-8 h-8 text-[#5a6a8a]" />
+                    <ToggleLeft className="h-7 w-7 text-[#8ea0b8]" />
                   )}
                 </button>
               </div>
@@ -1181,6 +1381,44 @@ function FeatureSwitchesTab({
           ))}
         </div>
       </div>
+      <aside className="flex-1 overflow-y-auto bg-white px-6 py-5">
+        {selectedSwitch ? (
+          <div className="max-w-3xl">
+            <div className="mb-5 flex items-start justify-between gap-4 border-b border-[#edf2f8] pb-4">
+              <div>
+                <h3 className="text-base font-semibold text-[#10233f]">{selectedSwitch.name}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#6b7c93]">{selectedSwitch.description}</p>
+              </div>
+              <button onClick={() => onToggle(selectedSwitch.key)} className="flex items-center gap-2 text-sm text-[#355070]">
+                {switchStates[selectedSwitch.key] ? <ToggleRight className="h-8 w-8 text-[#0f9f6e]" /> : <ToggleLeft className="h-8 w-8 text-[#8ea0b8]" />}
+                {switchStates[selectedSwitch.key] ? '已开启' : '已关闭'}
+              </button>
+            </div>
+            <div className="grid gap-4 text-sm text-[#355070]">
+              <div className="grid grid-cols-[120px_minmax(0,1fr)] border-b border-[#edf2f8] py-3">
+                <span className="text-[#8ea0b8]">开关标识</span>
+                <code>{selectedSwitch.key}</code>
+              </div>
+              <div className="grid grid-cols-[120px_minmax(0,1fr)] border-b border-[#edf2f8] py-3">
+                <span className="text-[#8ea0b8]">类型</span>
+                <span>{selectedSwitch.type === 'boolean' ? '开关型' : '数值型'}</span>
+              </div>
+              <div className="grid grid-cols-[120px_minmax(0,1fr)] border-b border-[#edf2f8] py-3">
+                <span className="text-[#8ea0b8]">当前状态</span>
+                <span>{switchStates[selectedSwitch.key] ? '开启' : '关闭'}</span>
+              </div>
+              {selectedSwitch.type === 'number' && selectedSwitch.config.value !== undefined && (
+                <div className="grid grid-cols-[120px_minmax(0,1fr)] border-b border-[#edf2f8] py-3">
+                  <span className="text-[#8ea0b8]">当前值</span>
+                  <span>{String(selectedSwitch.config.value)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-[#8ea0b8]">选择一个开关查看详情。</div>
+        )}
+      </aside>
     </div>
   );
 }
@@ -1193,6 +1431,7 @@ function AutoDebugConfigTab({
   selectedConfigId, setSelectedConfigId,
   detailTab, setDetailTab,
   filteredConfigs, selectedConfig, uniqueMedias,
+  onUpdateConfig,
 }: {
   searchTerm: string;
   setSearchTerm: (v: string) => void;
@@ -1206,12 +1445,48 @@ function AutoDebugConfigTab({
   setFilterStatus: (v: string) => void;
   selectedConfigId: string | null;
   setSelectedConfigId: (id: string) => void;
-  detailTab: 'keywords' | 'timeout' | 'instruction';
-  setDetailTab: (v: 'keywords' | 'timeout' | 'instruction') => void;
+  detailTab: 'runtime' | 'keywords' | 'timeout' | 'instruction';
+  setDetailTab: (v: 'runtime' | 'keywords' | 'timeout' | 'instruction') => void;
   filteredConfigs: DebugAutomationConfigItem[];
   selectedConfig: DebugAutomationConfigItem | null;
   uniqueMedias: string[];
+  onUpdateConfig: (id: string, patch: Partial<DebugAutomationConfigItem>) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<DebugAutomationConfigItem | null>(null);
+
+  useEffect(() => {
+    setEditing(false);
+    setDraft(selectedConfig ? {
+      ...selectedConfig,
+      media_config: { ...defaultDebugRuntimeConfig.media_config, ...(selectedConfig.media_config || {}) },
+      channel_config: { ...defaultDebugRuntimeConfig.channel_config, ...(selectedConfig.channel_config || {}) },
+      game_config: { ...defaultDebugRuntimeConfig.game_config, ...(selectedConfig.game_config || {}) },
+      mobile_env: { ...defaultDebugRuntimeConfig.mobile_env, ...(selectedConfig.mobile_env || {}) },
+    } : null);
+  }, [selectedConfig?.id]);
+
+  const activeConfig = draft || selectedConfig;
+  const updateDraftGroup = <K extends 'media_config' | 'channel_config' | 'game_config' | 'mobile_env'>(
+    group: K,
+    key: keyof NonNullable<DebugAutomationConfigItem[K]>,
+    value: string | number,
+  ) => {
+    setDraft(prev => prev ? ({
+      ...prev,
+      [group]: {
+        ...defaultDebugRuntimeConfig[group],
+        ...(prev[group] || {}),
+        [key]: value,
+      },
+    }) : prev);
+  };
+
+  const saveDraft = () => {
+    if (!draft) return;
+    onUpdateConfig(draft.id, draft);
+    setEditing(false);
+  };
   const dbgConfigStatusStyles: Record<string, string> = {
     active: 'bg-[rgba(0,255,136,0.1)] text-[#00FF88]',
     inactive: 'bg-[rgba(100,116,139,0.15)] text-[#64748B]',
@@ -1370,10 +1645,33 @@ function AutoDebugConfigTab({
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-semibold text-[#10233f]">{selectedConfig.name}</h2>
                 <div className="flex items-center gap-2">
-                    <button className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#5f6f86] transition-colors hover:bg-[#f3f8ff] hover:text-[#0f6fff]">
-                    <Edit3 className="w-3.5 h-3.5" /> 编辑
-                  </button>
-                    <button className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#5f6f86] transition-colors hover:bg-[#f3f8ff] hover:text-[#0f6fff]">
+                  {editing ? (
+                    <>
+                      <button
+                        onClick={saveDraft}
+                        className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#0f6fff] transition-colors hover:bg-[#f3f8ff]"
+                      >
+                        <Save className="w-3.5 h-3.5" /> 保存
+                      </button>
+                      <button
+                        onClick={() => { setEditing(false); setDraft(selectedConfig); }}
+                        className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#5f6f86] transition-colors hover:bg-[#f3f8ff]"
+                      >
+                        <X className="w-3.5 h-3.5" /> 取消
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => { setDraft(selectedConfig); setEditing(true); }}
+                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#5f6f86] transition-colors hover:bg-[#f3f8ff] hover:text-[#0f6fff]"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" /> 编辑
+                    </button>
+                  )}
+                    <button
+                      onClick={() => onUpdateConfig(selectedConfig.id, { status: selectedConfig.status === 'active' ? 'inactive' : 'active' })}
+                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#5f6f86] transition-colors hover:bg-[#f3f8ff] hover:text-[#0f6fff]"
+                    >
                     {selectedConfig.status === 'active' ? (
                       <>
                         <Pause className="w-3.5 h-3.5 text-[#FFB800]" /> 停用
@@ -1401,6 +1699,7 @@ function AutoDebugConfigTab({
             <div className="border-b border-[#edf3fb] bg-white px-6">
               <div className="flex gap-1">
                 {[
+                  { key: 'runtime' as const, label: '联调参数', icon: Settings },
                   { key: 'keywords' as const, label: '关键词配置', icon: Search },
                   { key: 'timeout' as const, label: '超时配置', icon: Timer },
                   { key: 'instruction' as const, label: '说明文案', icon: MessageSquare },
@@ -1420,6 +1719,95 @@ function AutoDebugConfigTab({
 
             {/* Detail Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+              {detailTab === 'runtime' && activeConfig && (
+                <div className="space-y-6">
+                  {([
+                    {
+                      key: 'media_config' as const,
+                      title: '媒体账号与事件资产',
+                      fields: [
+                        ['username', '账号'],
+                        ['password', '密码'],
+                        ['default_account', '默认账户'],
+                        ['event_asset_url', '事件资产地址'],
+                        ['postback_result_view', '回传查看位置'],
+                        ['aadvid', '广告主ID'],
+                        ['target_channel', '目标渠道包'],
+                      ],
+                    },
+                    {
+                      key: 'channel_config' as const,
+                      title: '渠道端执行参数',
+                      fields: [
+                        ['app_package', '媒体应用包名'],
+                        ['app_activity', '启动Activity'],
+                        ['deeplink', '扫码DeepLink'],
+                        ['auth_keyword', '授权关键词'],
+                        ['feed_keyword', '广告关键词'],
+                        ['action_keyword', '动作关键词'],
+                        ['max_swipe_count', '最大滑动次数'],
+                        ['keyword_settle_seconds', '关键词停留秒数'],
+                        ['install_password', '安装密码'],
+                        ['game_package', '游戏包名'],
+                      ],
+                    },
+                    {
+                      key: 'game_config' as const,
+                      title: '游戏登录参数',
+                      fields: [
+                        ['package_name', '游戏包名'],
+                        ['login_type', '登录方式'],
+                        ['account', '测试账号'],
+                        ['password', '测试密码'],
+                      ],
+                    },
+                    {
+                      key: 'mobile_env' as const,
+                      title: '移动设备环境',
+                      fields: [
+                        ['device_id', '设备ID'],
+                      ],
+                    },
+                  ]).map((group) => {
+                    const values = {
+                      ...defaultDebugRuntimeConfig[group.key],
+                      ...(activeConfig[group.key] || {}),
+                    } as Record<string, string | number>;
+                    return (
+                      <section key={group.key} className="space-y-3">
+                        <div>
+                          <div className="text-sm font-semibold text-[#10233f]">{group.title}</div>
+                          <div className="mt-1 text-xs text-[#6b7c93]">由后台维护，用户发起联调时只选择项目、媒体、应用包和联调目标。</div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-x-4 gap-y-3 md:grid-cols-2">
+                          {group.fields.map(([field, label]) => (
+                            <label key={`${group.key}-${field}`} className="flex flex-col gap-1.5">
+                              <span className="text-[11px] text-[#6b7c93]">{label}</span>
+                              {editing ? (
+                                <input
+                                  type={String(field).includes('password') ? 'password' : 'text'}
+                                  value={String(values[field] ?? '')}
+                                  onChange={(event) => {
+                                    const raw = event.target.value;
+                                    const nextValue = ['max_swipe_count', 'keyword_settle_seconds'].includes(String(field)) ? Number(raw || 0) : raw;
+                                    updateDraftGroup(group.key, field as never, nextValue);
+                                  }}
+                                  className="h-9 rounded-xl border border-[#dbe4f0] bg-white px-3 text-xs text-[#10233f] outline-none focus:border-[#0f6fff]"
+                                />
+                              ) : (
+                                <div className="min-h-9 rounded-xl px-3 py-2 text-xs text-[#10233f]">
+                                  {String(field).includes('password') && values[field] ? '••••••••' : String(values[field] || '未配置')}
+                                </div>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+
               {detailTab === 'keywords' && (
                 <div className="space-y-4">
                   <div className="text-xs text-[#5a6a8a] mb-2">触发关键词规则</div>
@@ -1527,7 +1915,7 @@ function AutoDebugConfigTab({
 
 // ---- Demand Pool Tab Component (需求池模板增强建议) ----
 function DemandPoolTab() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedIdRaw, setSelectedIdRaw] = useState<string | null>(() => readClientStorage(ADMIN_DEMAND_STORAGE_KEY));
   const [filterFlow, setFilterFlow] = useState<string>('all');
   const [filterPhase, setFilterPhase] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -1536,6 +1924,13 @@ function DemandPoolTab() {
   useEffect(() => {
     xiaoqiaoApi.getDemandPool().then(setPool).catch(() => undefined);
   }, []);
+
+  const setSelectedId = (id: string | null) => {
+    setSelectedIdRaw(id);
+    writeClientStorage(ADMIN_DEMAND_STORAGE_KEY, id);
+  };
+
+  const selectedId = selectedIdRaw && pool.some(d => d.id === selectedIdRaw) ? selectedIdRaw : null;
   const selected = pool.find(d => d.id === selectedId);
 
   const filtered = pool.filter(d => {
@@ -1560,8 +1955,8 @@ function DemandPoolTab() {
   const flowLabel = (f: string) => f === 'help' ? '使用帮助' : f === 'demand' ? '需求沟通' : f === 'diagnosis' ? '问题排查' : '广告联调';
 
   return (
-    <div className="flex flex-1 overflow-hidden rounded-[28px] border border-[#dbe4f0] bg-white shadow-[0_18px_40px_rgba(15,35,63,0.06)]" style={{ height: 'calc(100vh - 120px)' }}>
-      <div className="w-56 shrink-0 overflow-y-auto border-r border-[#e8eef7] bg-[#fbfdff] p-4">
+    <div className="admin-demand-pool flex flex-1 overflow-hidden bg-white" style={{ height: 'calc(100vh - 104px)' }}>
+      <div className="w-56 shrink-0 overflow-y-auto border-r border-[#e8eef7] bg-white p-4">
         <div className="mb-3 text-xs font-medium text-[#5f6f86]">业务流</div>
         <div className="mb-5 space-y-1">
           {[['all', '全部'], ['help', '使用帮助'], ['demand', '需求沟通'], ['diagnosis', '问题排查'], ['debugging', '广告联调']].map(([v, l]) => (
@@ -1599,7 +1994,10 @@ function DemandPoolTab() {
 
       <div className="w-80 shrink-0 overflow-y-auto border-r border-[#e8eef7] bg-white">
         <div className="flex items-center justify-between border-b border-[#edf3fb] px-4 py-4">
-          <span className="text-xs text-[#6b7c93]">{filtered.length} 条需求</span>
+          <div>
+            <div className="text-sm font-semibold text-[#10233f]">需求池列表</div>
+            <span className="mt-0.5 block text-[11px] text-[#6b7c93]">{filtered.length} 条需求</span>
+          </div>
           <button className="flex items-center gap-1 text-xs text-[#0f6fff] hover:text-[#0b5ad1]">
             <Plus className="w-3 h-3" />新建需求
           </button>
@@ -1630,11 +2028,12 @@ function DemandPoolTab() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-[#f6f9fd] p-5">
+      <div className="flex-1 overflow-y-auto bg-white px-6 py-5">
         {selected ? (
           <div className="space-y-4">
-            <div className="flex items-start justify-between rounded-[24px] border border-[#dbe4f0] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(15,35,63,0.05)]">
+            <div className="flex items-start justify-between border-b border-[#dbe4f0] pb-5">
               <div>
+                <div className="mb-2 text-xs font-medium text-[#6b7c93]">需求详情</div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono font-bold" style={{ color: priorityColor(selected.priority) }}>{selected.priority}</span>
                   <h3 className="text-base font-semibold text-[#10233f]">{selected.title}</h3>
@@ -1802,7 +2201,7 @@ function DemandPoolTab() {
 function McpConfigTab() {
   const [mcpServers, setMcpServers] = useState<McpServerConfig[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [selectedMcp, setSelectedMcp] = useState<string | null>(null);
+  const [selectedMcpRaw, setSelectedMcpRaw] = useState<string | null>(() => readClientStorage(ADMIN_MCP_STORAGE_KEY));
   const [editMode, setEditMode] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [toolKeyword, setToolKeyword] = useState('');
@@ -1812,6 +2211,7 @@ function McpConfigTab() {
     name: '',
     category: 'data' as string,
     endpoint_url: '',
+    transport: 'streamable-http' as McpServerConfig['transport'],
     auth_type: 'none' as string,
     auth_token: '',
     auth_api_key: '',
@@ -1821,6 +2221,7 @@ function McpConfigTab() {
   });
   const [editForm, setEditForm] = useState({
     endpoint_url: '',
+    transport: 'streamable-http' as McpServerConfig['transport'],
     auth_type: 'none' as string,
     auth_token: '',
     auth_api_key: '',
@@ -1860,6 +2261,9 @@ function McpConfigTab() {
   };
 
   const filtered = filterCategory === 'all' ? mcpServers : mcpServers.filter(server => server.category === filterCategory);
+  const selectedMcp = selectedMcpRaw && mcpServers.some(server => server.id === selectedMcpRaw)
+    ? selectedMcpRaw
+    : null;
   const selected = filtered.find(server => server.id === selectedMcp) || mcpServers.find(server => server.id === selectedMcp) || null;
   const visibleTools = selected
     ? selected.tools.filter(tool => {
@@ -1893,6 +2297,11 @@ function McpConfigTab() {
     api_key: 'API Key',
     oauth2: 'OAuth 2.0',
   };
+  const transportLabels: Record<McpServerConfig['transport'], string> = {
+    'streamable-http': 'Streamable HTTP',
+    sse: 'SSE',
+    stdio: 'stdio',
+  };
 
   const buildAuthConfig = (authType: string, form: typeof editForm | typeof addForm): Record<string, string> => {
     const config: Record<string, string> = {};
@@ -1920,7 +2329,8 @@ function McpConfigTab() {
   };
 
   const handleSelectMcp = (id: string) => {
-    setSelectedMcp(id);
+    setSelectedMcpRaw(id);
+    writeClientStorage(ADMIN_MCP_STORAGE_KEY, id);
     setEditMode(false);
     setShowAddForm(false);
     setSaveMsg('');
@@ -1929,6 +2339,7 @@ function McpConfigTab() {
     if (!mcp) return;
     setEditForm({
       endpoint_url: mcp.endpoint_url,
+      transport: mcp.transport || 'streamable-http',
       auth_type: mcp.auth_type,
       auth_token: stripPrefix(mcp.auth_type, mcp.auth_config?.token || mcp.auth_config?.bearer_token || ''),
       auth_api_key: mcp.auth_config?.api_key || '',
@@ -1943,7 +2354,8 @@ function McpConfigTab() {
     }
     if (filtered.length === 0) {
       if (selectedMcp) {
-        setSelectedMcp(null);
+        setSelectedMcpRaw(null);
+        writeClientStorage(ADMIN_MCP_STORAGE_KEY, null);
       }
       return;
     }
@@ -2011,7 +2423,7 @@ function McpConfigTab() {
       description: addForm.description || addForm.name,
       category: addForm.category as McpServerConfig['category'],
       endpoint_url: addForm.endpoint_url,
-      transport: 'streamable-http',
+      transport: addForm.transport,
       auth_type: addForm.auth_type as McpServerConfig['auth_type'],
       auth_config: buildAuthConfig(addForm.auth_type, addForm),
       status: 'disconnected',
@@ -2028,7 +2440,8 @@ function McpConfigTab() {
       try {
         const created = await xiaoqiaoApi.createMcpServer(newMcp);
         setMcpServers(prev => [...prev, created]);
-        setSelectedMcp(created.id);
+        setSelectedMcpRaw(created.id);
+        writeClientStorage(ADMIN_MCP_STORAGE_KEY, created.id);
         setSaveMsg('注册成功');
         setTimeout(() => {
           setShowAddForm(false);
@@ -2037,6 +2450,7 @@ function McpConfigTab() {
             name: '',
             category: 'data',
             endpoint_url: '',
+            transport: 'streamable-http',
             auth_type: 'none',
             auth_token: '',
             auth_api_key: '',
@@ -2074,6 +2488,7 @@ function McpConfigTab() {
       try {
         const updated = await xiaoqiaoApi.updateMcpServer(selectedMcp, {
           endpoint_url: editForm.endpoint_url,
+          transport: editForm.transport,
           auth_type: editForm.auth_type as McpServerConfig['auth_type'],
           auth_config: buildAuthConfig(editForm.auth_type, editForm),
           updated_at: Date.now(),
@@ -2254,6 +2669,7 @@ function McpConfigTab() {
                     </span>
                     <span className="rounded-full bg-[#f3f7fd] px-2 py-0.5 text-[#6b7c93]">{mcp.tools.length} 工具</span>
                     <span className="rounded-full bg-[#f3f7fd] px-2 py-0.5 text-[#6b7c93]">{categoryLabels[mcp.category]}</span>
+                    <span className="rounded-full bg-[#f3f7fd] px-2 py-0.5 text-[#6b7c93]">{transportLabels[mcp.transport] || mcp.transport}</span>
                   </div>
                 </button>
               ))}
@@ -2298,6 +2714,20 @@ function McpConfigTab() {
                       value={addForm.endpoint_url}
                       onChange={e => setAddForm(prev => ({ ...prev, endpoint_url: e.target.value }))}
                     />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-[#6b7c93]">连接协议</label>
+                    <select
+                      className="mt-1 w-full rounded-xl border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-sm text-[#10233f] outline-none transition-colors focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)]"
+                      value={addForm.transport}
+                      onChange={e => setAddForm(prev => ({ ...prev, transport: e.target.value as McpServerConfig['transport'] }))}
+                    >
+                      <option value="streamable-http">Streamable HTTP</option>
+                      <option value="sse">SSE</option>
+                    </select>
+                    <div className="mt-1 text-[11px] leading-5 text-[#8ea0b8]">
+                      巨量引擎等只支持 SSE 的服务，请直接填写完整 SSE URL。
+                    </div>
                   </div>
                   <div className="rounded-2xl border border-[#dbe4f0] bg-[#f8fbff] p-4">
                     <label className="text-[11px] text-[#6b7c93]">鉴权方式</label>
@@ -2409,6 +2839,20 @@ function McpConfigTab() {
                             />
                           </div>
                           <div>
+                            <label className="text-[11px] text-[#6b7c93]">连接协议</label>
+                            <select
+                              className="mt-1 w-full rounded-xl border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-sm text-[#10233f] outline-none transition-colors focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)]"
+                              value={editForm.transport}
+                              onChange={e => setEditForm(prev => ({ ...prev, transport: e.target.value as McpServerConfig['transport'] }))}
+                            >
+                              <option value="streamable-http">Streamable HTTP</option>
+                              <option value="sse">SSE</option>
+                            </select>
+                            <div className="mt-1 text-[11px] leading-5 text-[#8ea0b8]">
+                              SSE 模式按后台填写的完整 URL 建立连接。
+                            </div>
+                          </div>
+                          <div>
                             <label className="text-[11px] text-[#6b7c93]">鉴权方式</label>
                             <select
                               className="mt-1 w-full rounded-xl border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-sm text-[#10233f] outline-none transition-colors focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)]"
@@ -2432,6 +2876,13 @@ function McpConfigTab() {
                           <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3">
                             <div className="text-[11px] text-[#8ea0b8]">Endpoint</div>
                             <div className="mt-2 break-all font-mono text-[12px] text-[#10233f]">{selected.endpoint_url || '未配置'}</div>
+                          </div>
+                          <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3">
+                            <div className="text-[11px] text-[#8ea0b8]">连接协议</div>
+                            <div className="mt-2 text-sm text-[#10233f]">{transportLabels[selected.transport] || selected.transport}</div>
+                            <div className="mt-1 text-[11px] text-[#6b7c93]">
+                              {selected.transport === 'sse' ? '按完整 SSE URL 连接' : '按标准 HTTP MCP 连接'}
+                            </div>
                           </div>
                           <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3">
                             <div className="text-[11px] text-[#8ea0b8]">鉴权方式</div>
@@ -2545,318 +2996,308 @@ function McpConfigTab() {
   );
 }
 
-function AutoReportTab() {
-  const [templates, setTemplates] = useState<ReportTemplate[]>([]);
-  const [drafts, setDrafts] = useState<ReportDraft[]>([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
-  const [reportDate, setReportDate] = useState(new Date().toISOString().slice(0, 10));
+const skillCategoryLabels: Record<McpSkillCategory | 'all', string> = {
+  all: '全部',
+  data: '数据服务',
+  operation: '执行流程',
+  monitor: '监控任务',
+  analysis: '分析洞察',
+  integration: '对接集成',
+  other: '其他',
+};
+
+function SkillManagementTab() {
+  const [skills, setSkills] = useState<McpSkill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterCategory, setFilterCategory] = useState<McpSkillCategory | 'all'>('all');
+  const [filterInstall, setFilterInstall] = useState<'all' | 'installed' | 'not-installed'>('all');
+  const [selectedSkillIdRaw, setSelectedSkillIdRaw] = useState<string | null>(() => readClientStorage(ADMIN_SKILL_STORAGE_KEY));
   const [message, setMessage] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  const setSelectedSkillId = (id: string | null) => {
+    setSelectedSkillIdRaw(id);
+    writeClientStorage(ADMIN_SKILL_STORAGE_KEY, id);
+  };
+
+  const loadSkills = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/xiaoqiao/skills');
+      if (!response.ok) throw new Error(await response.text());
+      const data = await response.json() as McpSkill[];
+      setSkills(data);
+      setSelectedSkillIdRaw(current => {
+        const next = current && data.some(skill => skill.id === current)
+          ? current
+          : data[0]?.id || null;
+        writeClientStorage(ADMIN_SKILL_STORAGE_KEY, next);
+        return next;
+      });
+    } catch {
+      setMessage('Skill配置加载失败');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const [templateList, draftList] = await Promise.all([
-          xiaoqiaoApi.getReportTemplates(),
-          xiaoqiaoApi.getReportDrafts(),
-        ]);
-        setTemplates(templateList);
-        setDrafts(draftList);
-        if (templateList[0]) setSelectedTemplateId(current => current || templateList[0].id);
-        if (draftList[0]) setSelectedDraftId(current => current || draftList[0].id);
-      } catch {
-        setMessage('自动报表配置加载失败');
-      }
-    })();
+    void loadSkills();
   }, []);
 
-  const selectedTemplate = templates.find(item => item.id === selectedTemplateId) || null;
-  const selectedDraft = drafts.find(item => item.id === selectedDraftId)
-    || drafts.find(item => item.templateId === selectedTemplateId)
-    || null;
+  const filteredSkills = skills.filter(skill => {
+    const categoryMatched = filterCategory === 'all' || skill.category === filterCategory;
+    const installMatched = filterInstall === 'all' ||
+      (filterInstall === 'installed' ? skill.installed : !skill.installed);
+    return categoryMatched && installMatched;
+  });
+  const selectedSkillId = selectedSkillIdRaw && skills.some(skill => skill.id === selectedSkillIdRaw)
+    ? selectedSkillIdRaw
+    : null;
+  const selectedSkill = skills.find(skill => skill.id === selectedSkillId) || filteredSkills[0] || null;
+  const installedCount = skills.filter(skill => skill.installed).length;
+  const p0Count = skills.filter(skill => skill.tags.includes('P0')).length;
 
-  const handleGenerate = async () => {
-    if (!selectedTemplateId) return;
-    setIsGenerating(true);
+  const updateSkillInstall = async (skill: McpSkill, nextInstalled: boolean) => {
     setMessage('');
     try {
-      const draft = await xiaoqiaoApi.generateReportDraft({ templateId: selectedTemplateId, reportDate });
-      setDrafts(prev => [draft, ...prev.filter(item => item.id !== draft.id)]);
-      setSelectedDraftId(draft.id);
-      setMessage('报表草稿已生成，可复核后导出到小闪');
-    } catch {
-      setMessage('报表生成失败，请检查模板和报表源绑定');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleMarkReviewed = async () => {
-    if (!selectedDraft) return;
-    try {
-      const next = await xiaoqiaoApi.updateReportDraft(selectedDraft.id, {
-        status: 'reviewed',
-        reviewedAt: new Date().toISOString(),
+      const response = await fetch(`/api/xiaoqiao/skills/${skill.id}/${nextInstalled ? 'install' : 'uninstall'}`, {
+        method: 'POST',
       });
-      setDrafts(prev => prev.map(item => item.id === next.id ? next : item));
-      setSelectedDraftId(next.id);
-      setMessage('报表草稿已标记为待导出');
+      if (!response.ok) throw new Error(await response.text());
+      await loadSkills();
+      setMessage(`${skill.name} 已${nextInstalled ? '启用' : '停用'}`);
     } catch {
-      setMessage('更新复核状态失败');
-    }
-  };
-
-  const handleMarkExported = async () => {
-    if (!selectedDraft) return;
-    try {
-      const next = await xiaoqiaoApi.updateReportDraft(selectedDraft.id, {
-        status: 'exported',
-        exportedAt: new Date().toISOString(),
-      });
-      setDrafts(prev => prev.map(item => item.id === next.id ? next : item));
-      setSelectedDraftId(next.id);
-      setMessage('已标记为已导出到小闪');
-    } catch {
-      setMessage('更新导出状态失败');
+      setMessage(`${skill.name} 状态更新失败`);
     }
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[#f3f6fb] px-4 py-5 md:px-6">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex flex-col gap-4 rounded-[28px] border border-[#dbe4f0] bg-white p-5 shadow-[0_18px_50px_rgba(15,35,63,0.08)] md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-[#10233f]">自动报表</h2>
-            <p className="mt-1 text-xs leading-5 text-[#6b7c93]">
-              基于发行定义的模板，自动拉取报表指标拼成宽表，并生成待人工复核的报表草稿。当前先支持复核后导出到小闪，不直接发邮件。
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <input
-              type="date"
-              value={reportDate}
-              onChange={e => setReportDate(e.target.value)}
-              className="rounded-xl border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-sm text-[#10233f] focus:outline-none focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)]"
-            />
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={!selectedTemplateId || isGenerating}
-              className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                isGenerating
-                  ? 'bg-[#dbe8ff] text-[#0f6fff]'
-                  : 'bg-[#0f6fff] text-white hover:bg-[#0b5ad1] shadow-[0_10px_30px_rgba(15,111,255,0.18)]'
-              }`}
-            >
-              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-              {isGenerating ? '生成中...' : '生成报表草稿'}
-            </button>
-          </div>
-        </div>
-
-        {message && (
-          <div className="rounded-2xl border border-[#c8d8ee] bg-[#f8fbff] px-4 py-3 text-sm text-[#355070]">
-            {message}
-          </div>
-        )}
-
-        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="space-y-4">
-            <div className="rounded-[24px] border border-[#dbe4f0] bg-white p-4 shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-[#355070]">模板中心</h3>
-                <span className="text-[11px] text-[#8ea0b8]">{templates.length} 个模板</span>
+    <main className="flex-1 overflow-y-auto bg-white">
+      <div className="mx-auto max-w-7xl">
+        <section className="border-b border-[#dbe4f0] bg-white p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-[#10233f]">Skill管理</h2>
+              <p className="mt-1 max-w-3xl text-xs leading-5 text-[#6b7c93]">
+                管理智投 Chat 可调用的业务能力单元。Agent 负责识别意图和追问，Skill 负责执行稳定流程，MCP 提供系统连接。
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="px-4 py-3">
+                <div className="text-lg font-semibold text-[#10233f]">{skills.length}</div>
+                <div className="mt-1 text-[11px] text-[#8ea0b8]">全部Skill</div>
               </div>
-              <div className="mt-4 space-y-3">
-                {templates.map(template => (
+              <div className="px-4 py-3">
+                <div className="text-lg font-semibold text-[#157f54]">{installedCount}</div>
+                <div className="mt-1 text-[11px] text-[#8ea0b8]">已启用</div>
+              </div>
+              <div className="px-4 py-3">
+                <div className="text-lg font-semibold text-[#0f6fff]">{p0Count}</div>
+                <div className="mt-1 text-[11px] text-[#8ea0b8]">P0能力</div>
+              </div>
+            </div>
+          </div>
+          {message && (
+            <div className="mt-4 border-t border-[#edf2f8] px-4 py-3 text-sm text-[#355070]">
+              {message}
+            </div>
+          )}
+        </section>
+
+        <section className="grid min-h-[calc(100vh-170px)] xl:grid-cols-[220px_360px_minmax(0,1fr)]">
+          <aside className="border-r border-[#dbe4f0] bg-white p-4">
+            <div className="mb-3 px-1 text-[11px] font-medium text-[#8ea0b8]">能力分类</div>
+            <div className="space-y-2">
+              {(Object.keys(skillCategoryLabels) as Array<McpSkillCategory | 'all'>).map(category => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setFilterCategory(category)}
+                  className={`w-full rounded-2xl px-3 py-3 text-left text-sm transition-colors ${
+                    filterCategory === category
+                      ? 'border border-[#cfe0ff] bg-[#eef5ff] text-[#0f6fff]'
+                      : 'border border-transparent text-[#4f647d] hover:border-[#dbe4f0] hover:bg-[#f8fbff]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{skillCategoryLabels[category]}</span>
+                    <span className="rounded-full bg-white px-2 py-0.5 text-[11px] text-[#8ea0b8]">
+                      {(category === 'all' ? skills : skills.filter(skill => skill.category === category)).length}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 border-t border-[#edf2f8] pt-4">
+              <div className="mb-3 px-1 text-[11px] font-medium text-[#8ea0b8]">启用状态</div>
+              <div className="space-y-2">
+                {[
+                  ['all', '全部'],
+                  ['installed', '已启用'],
+                  ['not-installed', '未启用'],
+                ].map(([key, label]) => (
                   <button
-                    key={template.id}
+                    key={key}
                     type="button"
-                    onClick={() => {
-                      setSelectedTemplateId(template.id);
-                      const matchedDraft = drafts.find(item => item.templateId === template.id);
-                      if (matchedDraft) setSelectedDraftId(matchedDraft.id);
-                    }}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${
-                      selectedTemplateId === template.id
-                        ? 'border-[#0f6fff] bg-[#eef5ff]'
-                        : 'border-[#dbe4f0] bg-[#fbfdff] hover:border-[#b8cae6]'
+                    onClick={() => setFilterInstall(key as typeof filterInstall)}
+                    className={`w-full rounded-2xl px-3 py-2 text-left text-sm transition-colors ${
+                      filterInstall === key ? 'bg-[#eef5ff] text-[#0f6fff]' : 'text-[#4f647d] hover:bg-[#f8fbff]'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-medium text-[#10233f]">{template.name}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] ${
-                        template.enabled ? 'bg-[#e9fff4] text-[#157f54]' : 'bg-[#f1f5f9] text-[#64748b]'
-                      }`}>
-                        {template.enabled ? '已启用' : '已停用'}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-[11px] leading-5 text-[#6b7c93]">{template.description}</p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-[#8ea0b8]">
-                      <span className="rounded-full bg-[#f3f7fd] px-2 py-1">{template.scene}</span>
-                      <span className="rounded-full bg-[#f3f7fd] px-2 py-1">{template.frequency}</span>
-                      <span className="rounded-full bg-[#f3f7fd] px-2 py-1">{template.sources.length} 个数据源</span>
-                    </div>
+                    {label}
                   </button>
                 ))}
               </div>
             </div>
+          </aside>
 
-            <div className="rounded-[24px] border border-[#dbe4f0] bg-white p-4 shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-[#355070]">最近草稿</h3>
-                <span className="text-[11px] text-[#8ea0b8]">{drafts.length} 条</span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {drafts.slice(0, 6).map(draft => (
-                  <button
-                    key={draft.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDraftId(draft.id);
-                      setSelectedTemplateId(draft.templateId);
-                    }}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${
-                      selectedDraftId === draft.id
-                        ? 'border-[#0f6fff] bg-[#eef5ff]'
-                        : 'border-[#dbe4f0] bg-[#fbfdff] hover:border-[#b8cae6]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-medium text-[#10233f]">{draft.templateName}</span>
-                      <span className="text-[10px] text-[#8ea0b8]">{draft.reportDate}</span>
+          <div className="border-r border-[#dbe4f0] bg-white p-4">
+            <div className="text-sm font-medium text-[#355070]">Skill列表</div>
+            <div className="mt-1 text-[11px] text-[#8ea0b8]">{filteredSkills.length} 个能力单元</div>
+            <div className="mt-4 max-h-[680px] space-y-3 overflow-y-auto pr-1">
+              {loading ? (
+                <div className="rounded-[20px] border border-dashed border-[#dbe4f0] px-4 py-8 text-center text-sm text-[#8ea0b8]">正在加载Skill...</div>
+              ) : filteredSkills.map(skill => (
+                <button
+                  key={skill.id}
+                  type="button"
+                  onClick={() => setSelectedSkillId(skill.id)}
+                  className={`w-full border-b border-[#edf2f8] px-4 py-3 text-left transition-colors ${
+                    selectedSkill?.id === skill.id
+                      ? 'border-l-2 border-l-[#0f6fff] bg-[#f7fbff]'
+                      : 'hover:bg-[#fafcff]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span>{skill.icon}</span>
+                        <span className="truncate text-sm font-medium text-[#10233f]">{skill.name}</span>
+                      </div>
+                      <div className="mt-1 line-clamp-2 text-[12px] leading-5 text-[#6b7c93]">{skill.description}</div>
                     </div>
-                    <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[#6b7c93]">{draft.summary}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-[24px] border border-[#dbe4f0] bg-white p-5 shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <h3 className="text-base font-semibold text-[#10233f]">{selectedTemplate?.name || '请选择报表模板'}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[#5f6f86]">
-                    {selectedTemplate?.description || '先从左侧选择一个模板，再生成对应日期的报表草稿。'}
-                  </p>
-                </div>
-                {selectedDraft && (
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={handleMarkReviewed}
-                      className="rounded-xl border border-[#c8d8ee] bg-white px-4 py-2 text-sm font-medium text-[#355070] hover:border-[#0f6fff] hover:text-[#0f6fff]"
-                    >
-                      标记已复核
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleMarkExported}
-                      className="rounded-xl bg-[#10233f] px-4 py-2 text-sm font-medium text-white hover:bg-[#0b1a31]"
-                    >
-                      导出到小闪
-                    </button>
+                    <span className={`shrink-0 text-[10px] ${skill.installed ? 'text-[#157f54]' : 'text-[#64748b]'}`}>
+                      {skill.installed ? '启用' : '停用'}
+                    </span>
                   </div>
-                )}
-              </div>
-
-              {selectedTemplate && (
-                <div className="mt-5 grid gap-4 md:grid-cols-3">
-                  <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] p-4">
-                    <div className="text-[11px] text-[#8ea0b8]">报表来源</div>
-                    <div className="mt-2 text-sm font-medium text-[#10233f]">{selectedTemplate.sources.length} 个</div>
-                    <div className="mt-2 text-[11px] leading-5 text-[#6b7c93]">
-                      {selectedTemplate.sources.map(item => item.sourceName).join('、')}
-                    </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {skill.tags.slice(0, 3).map(tag => (
+                      <span key={tag} className="text-[10px] text-[#6b7c93]">{tag}</span>
+                    ))}
+                    <span className="text-[10px] text-[#6b7c93]">{skill.expected_tools.length} 工具</span>
                   </div>
-                  <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] p-4">
-                    <div className="text-[11px] text-[#8ea0b8]">宽表列数</div>
-                    <div className="mt-2 text-sm font-medium text-[#10233f]">{selectedTemplate.metricBindings.length + 1} 列</div>
-                    <div className="mt-2 text-[11px] leading-5 text-[#6b7c93]">
-                      主体列 + {selectedTemplate.metricBindings.length} 个指标列
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] p-4">
-                    <div className="text-[11px] text-[#8ea0b8]">复核方式</div>
-                    <div className="mt-2 text-sm font-medium text-[#10233f]">
-                      {selectedTemplate.reviewRequired ? '人工复核后导出' : '自动导出'}
-                    </div>
-                    <div className="mt-2 text-[11px] leading-5 text-[#6b7c93]">
-                      当前目标渠道：小闪
-                    </div>
-                  </div>
+                </button>
+              ))}
+              {!loading && filteredSkills.length === 0 && (
+                <div className="rounded-[20px] border border-dashed border-[#dbe4f0] px-4 py-8 text-center text-sm text-[#8ea0b8]">
+                  当前筛选下没有Skill。
                 </div>
               )}
             </div>
+          </div>
 
-            {selectedDraft ? (
-              <>
-                <div className="grid gap-4 md:grid-cols-4">
-                  {selectedDraft.summaryCards.map(card => (
-                    <div key={card.label} className="rounded-[24px] border border-[#dbe4f0] bg-white p-4 shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-                      <div className="text-[11px] text-[#8ea0b8]">{card.label}</div>
-                      <div className="mt-2 text-xl font-semibold text-[#10233f]">{String(card.value)}</div>
-                      <div className="mt-2 text-[11px] text-[#6b7c93]">
-                        {card.trend === 'up' ? '较前期上升' : card.trend === 'down' ? '较前期下降' : '整体稳定'}
-                      </div>
+          <div className="bg-white p-5">
+            {selectedSkill ? (
+              <div className="space-y-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{selectedSkill.icon}</span>
+                      <h3 className="text-base font-semibold text-[#10233f]">{selectedSkill.name}</h3>
                     </div>
-                  ))}
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-[#6b7c93]">{selectedSkill.description}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => updateSkillInstall(selectedSkill, !selectedSkill.installed)}
+                    className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                      selectedSkill.installed
+                        ? 'border border-[#dbe4f0] bg-white text-[#355070] hover:border-[#b8cae6]'
+                        : 'bg-[#0f6fff] text-white hover:bg-[#0b5ad1]'
+                    }`}
+                  >
+                    {selectedSkill.installed ? '停用Skill' : '启用Skill'}
+                  </button>
                 </div>
 
-                <div className="rounded-[24px] border border-[#dbe4f0] bg-white p-5 shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-                  <h4 className="text-sm font-medium text-[#355070]">解读草稿</h4>
-                  <div className="mt-4 space-y-3">
-                    {selectedDraft.narrative.map((item, index) => (
-                      <div key={index} className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3 text-sm leading-6 text-[#355070]">
-                        {item}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3">
+                    <div className="text-[11px] text-[#8ea0b8]">分类</div>
+                    <div className="mt-1 text-sm text-[#10233f]">{skillCategoryLabels[selectedSkill.category]}</div>
+                  </div>
+                  <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3">
+                    <div className="text-[11px] text-[#8ea0b8]">来源</div>
+                    <div className="mt-1 text-sm text-[#10233f]">{selectedSkill.source === 'builtin' ? '内置' : '自定义'}</div>
+                  </div>
+                  <div className="rounded-2xl border border-[#e5edf7] bg-[#f8fbff] px-4 py-3">
+                    <div className="text-[11px] text-[#8ea0b8]">MCP地址</div>
+                    <div className="mt-1 truncate font-mono text-[12px] text-[#10233f]">{selectedSkill.endpoint_url || '未配置'}</div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <section className="rounded-[20px] border border-[#dbe4f0] bg-white p-4">
+                    <div className="text-sm font-medium text-[#355070]">适用场景</div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {selectedSkill.use_cases.map(useCase => (
+                        <span key={useCase} className="rounded-full bg-[#f3f7fd] px-3 py-1 text-[12px] text-[#4f647d]">{useCase}</span>
+                      ))}
+                    </div>
+                  </section>
+                  <section className="rounded-[20px] border border-[#dbe4f0] bg-white p-4">
+                    <div className="text-sm font-medium text-[#355070]">触发策略</div>
+                    <div className="mt-3 space-y-2 text-[12px] leading-5 text-[#4f647d]">
+                      <div>Agent 先判断意图、业务对象和缺失字段。</div>
+                      <div>字段不足时先结构化追问，不直接调用Skill。</div>
+                      <div>字段满足后调用Skill，并在消息区保留过程、来源和结果。</div>
+                    </div>
+                  </section>
+                </div>
+
+                <section className="rounded-[20px] border border-[#dbe4f0] bg-white p-4">
+                  <div className="mb-3 text-sm font-medium text-[#355070]">绑定工具</div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {selectedSkill.expected_tools.map(tool => (
+                      <div key={tool.name} className="rounded-2xl border border-[#e5edf7] bg-[#fbfdff] px-4 py-3">
+                        <div className="font-mono text-sm text-[#10233f]">{tool.name}</div>
+                        <div className="mt-1 text-[12px] leading-5 text-[#6b7c93]">{tool.description}</div>
                       </div>
                     ))}
                   </div>
-                </div>
+                </section>
 
-                <div className="rounded-[24px] border border-[#dbe4f0] bg-white p-5 shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-[#355070]">宽表预览</h4>
-                    <span className="text-[11px] text-[#8ea0b8]">{selectedDraft.rows.length} 行</span>
-                  </div>
-                  <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e5edf7]">
-                    <table className="min-w-full divide-y divide-[#e5edf7]">
-                      <thead className="bg-[#f8fbff]">
-                        <tr>
-                          {selectedDraft.columns.map(column => (
-                            <th key={column} className="whitespace-nowrap px-4 py-3 text-left text-[11px] font-medium text-[#6b7c93]">
-                              {column}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#eef3fb] bg-white">
-                        {selectedDraft.rows.slice(0, 5).map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            {selectedDraft.columns.map(column => (
-                              <td key={column} className="whitespace-nowrap px-4 py-3 text-sm text-[#10233f]">
-                                {String(row[column] ?? '--')}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
+                <section className="rounded-[20px] border border-[#dbe4f0] bg-[#f8fbff] p-4">
+                  <div className="text-sm font-medium text-[#355070]">Agent调用提示词骨架</div>
+                  <pre className="mt-3 max-h-[260px] overflow-auto whitespace-pre-wrap rounded-2xl border border-[#e5edf7] bg-white p-4 text-[12px] leading-6 text-[#10233f]">{`你是智投 Chat 的服务路由 Agent。
+当前候选 Skill：${selectedSkill.name}
+
+调用前必须确认：
+1. 用户意图是否匹配该 Skill。
+2. 必填字段是否已齐全。
+3. 用户是否有对应项目、账户、媒体的数据权限。
+4. 是否需要先追问，而不是直接调用。
+
+如果满足调用条件：
+- 输出 skill_id=${selectedSkill.id}
+- 输出 normalized_input
+- 调用绑定工具
+- 返回过程、来源、结构化结果和下一步动作
+
+如果不满足：
+- 输出 missing_fields
+- 生成一个结构化补充表单
+- 不把缺失条件当成新的自由问题发送`}</pre>
+                </section>
+              </div>
             ) : (
-              <div className="rounded-[24px] border border-dashed border-[#c8d8ee] bg-white px-6 py-14 text-center text-sm text-[#6b7c93] shadow-[0_12px_36px_rgba(15,35,63,0.06)]">
-                还没有报表草稿。选择模板后生成一版，再由发行复核并导出到小闪。
+              <div className="flex min-h-[420px] items-center justify-center text-sm text-[#8ea0b8]">
+                选择一个Skill查看调用契约、工具绑定和启用状态。
               </div>
             )}
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -2884,6 +3325,14 @@ interface ModelServiceConfigForm {
   knowledgeBaseUrl: string;
   knowledgeBaseApiKey: string;
   knowledgeBaseDataset: string;
+  notes: string;
+  updatedAt?: string;
+}
+
+interface ProjectServiceConfigForm {
+  enabled: boolean;
+  apiBaseUrl: string;
+  apiToken: string;
   notes: string;
   updatedAt?: string;
 }
@@ -2921,6 +3370,12 @@ function TraceConfigTab() {
     knowledgeBaseDataset: '',
     notes: '',
   });
+  const [projectService, setProjectService] = useState<ProjectServiceConfigForm>({
+    enabled: true,
+    apiBaseUrl: 'https://apps-api.dobest.com/v1.0/apps',
+    apiToken: '',
+    notes: '',
+  });
   const [saved, setSaved] = useState(false);
   const [traceTest, setTraceTest] = useState<ServiceTestFeedback>({
     state: 'idle',
@@ -2937,14 +3392,17 @@ function TraceConfigTab() {
   useEffect(() => {
     (async () => {
       try {
-        const [traceRes, modelRes] = await Promise.all([
+        const [traceRes, modelRes, projectRes] = await Promise.all([
           fetch('/api/xiaoqiao/admin/trace-config'),
           fetch('/api/xiaoqiao/admin/model-service-config'),
+          fetch('/api/xiaoqiao/admin/project-service-config'),
         ]);
         const traceData = await traceRes.json();
         const modelData = await modelRes.json();
+        const projectData = await projectRes.json();
         setConfig(prev => ({ ...prev, ...traceData }));
         setModelService(prev => ({ ...prev, ...modelData }));
+        setProjectService(prev => ({ ...prev, ...projectData }));
       } catch { /* use defaults */ }
     })();
   }, []);
@@ -2961,6 +3419,11 @@ function TraceConfigTab() {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(modelService),
+        }),
+        fetch('/api/xiaoqiao/admin/project-service-config', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(projectService),
         }),
       ]);
       setSaved(true);
@@ -2989,6 +3452,14 @@ function TraceConfigTab() {
         knowledge: { state: 'idle', message: '配置已变更，请重新测试' },
       }));
     }
+  };
+
+  const updateProjectServiceField = <K extends keyof ProjectServiceConfigForm>(
+    key: K,
+    value: ProjectServiceConfigForm[K],
+  ) => {
+    setProjectService(prev => ({ ...prev, [key]: value }));
+    setSaved(false);
   };
 
   const fields: { key: keyof TraceConfigForm; label: string; type?: string; placeholder?: string }[] = [
@@ -3275,6 +3746,67 @@ function TraceConfigTab() {
               onChange={e => updateModelServiceField('notes', e.target.value)}
               placeholder="例如：生产环境走统一 AI 网关，模型地址需包含 /v1"
               className="w-full min-h-[96px] bg-[#f8fbff] border border-[#dbe4f0] rounded-xl px-3 py-2.5 text-xs text-[#10233f] placeholder-[#93a1b2] focus:outline-none focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)] transition-colors resize-none"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#dbe4f0] bg-white p-5 space-y-4 shadow-[0_10px_30px_rgba(15,35,63,0.06)]">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-[#355070] flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" /> 项目信息接口配置
+              </h3>
+              <p className="text-[11px] text-[#6b7c93] mt-1">
+                首页项目下拉和项目列表接口从这里读取 token，不再在代码中内置生产凭证。
+              </p>
+            </div>
+            <button
+              onClick={() => updateProjectServiceField('enabled', !projectService.enabled)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                projectService.enabled
+                  ? 'bg-[#e9fff4] text-[#157f54] border border-[#b8ebd0]'
+                  : 'bg-[#fff1f2] text-[#c2415c] border border-[#fecdd3]'
+              }`}
+            >
+              {projectService.enabled ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+              {projectService.enabled ? '已启用' : '已禁用'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="text-[11px] text-[#6b7c93] block mb-1">接口地址</label>
+              <input
+                value={projectService.apiBaseUrl}
+                onChange={e => updateProjectServiceField('apiBaseUrl', e.target.value)}
+                placeholder="https://apps-api.dobest.com/v1.0/apps"
+                className="w-full bg-[#f8fbff] border border-[#dbe4f0] rounded-xl px-3 py-2.5 text-xs text-[#10233f] placeholder-[#93a1b2] focus:outline-none focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] text-[#6b7c93] block mb-1">Access Token</label>
+              <input
+                type="password"
+                value={projectService.apiToken}
+                onChange={e => updateProjectServiceField('apiToken', e.target.value)}
+                placeholder="在后台配置项目接口 token"
+                className="w-full bg-[#f8fbff] border border-[#dbe4f0] rounded-xl px-3 py-2.5 text-xs text-[#10233f] placeholder-[#93a1b2] focus:outline-none focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] text-[#6b7c93] block mb-1">最近更新时间</label>
+              <div className="w-full min-h-[40px] bg-[#f8fbff] border border-[#dbe4f0] rounded-xl px-3 py-2.5 text-xs text-[#355070]">
+                <ClientTime value={projectService.updatedAt} empty="未保存" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="text-[11px] text-[#6b7c93] block mb-1">备注</label>
+            <textarea
+              value={projectService.notes}
+              onChange={e => updateProjectServiceField('notes', e.target.value)}
+              placeholder="例如：生产项目接口 token 由后台配置，过期后在此更新"
+              className="w-full min-h-[80px] bg-[#f8fbff] border border-[#dbe4f0] rounded-xl px-3 py-2.5 text-xs text-[#10233f] placeholder-[#93a1b2] focus:outline-none focus:border-[#0f6fff] focus:ring-4 focus:ring-[rgba(15,111,255,0.12)] transition-colors resize-none"
             />
           </div>
         </div>

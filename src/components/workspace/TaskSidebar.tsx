@@ -12,13 +12,13 @@ import {
   LogOut,
   PencilLine,
   Pin,
-  Plus,
   Search,
   Star,
   Trash2,
   Wrench,
   X,
 } from 'lucide-react';
+import { IconAsset } from '@/components/ui/IconAsset';
 
 interface TaskSidebarProps {
   conversations: Conversation[];
@@ -50,30 +50,33 @@ const PROFILE_AVATAR =
   );
 
 function SidebarToggleGlyph({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path d="M5 7H15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M5 13H15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
+  return <IconAsset name="sidebar" size={className.includes('h-5') ? 20 : 18} className={className} />;
 }
 
 function DesktopSidebarGlyph({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <rect x="3.5" y="4" width="13" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M8.2 4.8V15.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M12.8 8L10.8 10L12.8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <IconAsset name="sidebar" size={className.includes('h-5') ? 20 : 18} className={className} />;
 }
 
 function SharePlaneIcon({ className = '' }: { className?: string }) {
+  return <IconAsset name="share-plane" size={14} className={className} />;
+}
+
+function PlusCircleIcon({ className = '', size = 18 }: { className?: string; size?: number }) {
+  return <IconAsset name="plus-circle" size={size} className={className} />;
+}
+
+function CollapsedBrandToggle() {
   return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path d="M4.1 10.2L15.8 4.4L10 16L8.7 11.4L4.1 10.2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M9 11L15.6 4.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
+    <>
+      <Image
+        src="/brand-icon.png"
+        alt=""
+        width={24}
+        height={24}
+        className="h-6 w-6 object-contain opacity-100 transition-opacity duration-150 group-hover:opacity-0"
+      />
+      <DesktopSidebarGlyph className="absolute h-5 w-5 opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
+    </>
   );
 }
 
@@ -249,7 +252,7 @@ export function TaskSidebar({
         key: 'delete',
         label: '删除',
         icon: <Trash2 size={14} />,
-        danger: true,
+        className: 'conversation-delete-menu-item',
         onClick: () => void onDeleteConversation(conversation.conversation_id),
       },
     ];
@@ -257,13 +260,13 @@ export function TaskSidebar({
     return (
       <div
         key={conversation.conversation_id}
-        className={`group rounded-[14px] px-2 py-1 ${active ? 'bg-[#edf4ff]' : 'hover:bg-white/92'}`}
+        className={`group rounded-[10px] px-1 py-0 ${active ? 'bg-[#edf4ff]' : 'hover:bg-[#eef1f5]'}`}
       >
         <div className="flex items-start gap-2">
           <button
             type="button"
             onClick={() => onSelectConversation(conversation.conversation_id)}
-            className="min-w-0 flex-1 rounded-[12px] px-2 py-2.5 text-left"
+            className="min-w-0 flex-1 rounded-[9px] px-2 py-[5px] text-left"
           >
             {isEditing ? (
               <input
@@ -282,13 +285,13 @@ export function TaskSidebar({
                 className="w-full rounded-[12px] border border-[#d8e3f8] bg-white px-3 py-2 text-sm text-[#111827] outline-none"
               />
             ) : (
-              <div className="truncate text-[14px] font-medium text-[#666666] transition-colors group-hover:text-[#3f6fff]">
+              <div className="truncate text-[13px] font-normal leading-[18px] text-[#4d4d4d] transition-colors group-hover:text-[#1f1f1f]">
                 {conversation.title}
               </div>
             )}
           </button>
 
-          <div className="flex items-center gap-1 pt-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="flex items-center gap-1 pt-[3px] opacity-0 transition-opacity group-hover:opacity-100">
             {isEditing ? (
               <button
                 type="button"
@@ -307,7 +310,7 @@ export function TaskSidebar({
               <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
                 <button
                   type="button"
-                  className="rounded-[10px] p-1.5 text-[#94a3b8] hover:bg-white hover:text-[#3f6fff]"
+                  className="rounded-[10px] p-1.5 text-[#7a7f87] hover:bg-white hover:text-[#1f1f1f]"
                   onClick={(event) => event.stopPropagation()}
                   title="更多"
                 >
@@ -331,30 +334,30 @@ export function TaskSidebar({
   }));
 
   const actionButtonClass =
-    `flex h-9 w-9 items-center justify-center rounded-[12px] text-[#6b7280] transition-colors duration-200 ${SIDEBAR_HOVER_CLASS}`;
+    `flex h-9 w-9 items-center justify-center rounded-[12px] text-[#5f6368] transition-colors duration-200 ${SIDEBAR_HOVER_CLASS}`;
 
   if (collapsed) {
     return (
       <aside
-        className={`flex h-full ${floating ? 'w-[72px]' : 'w-[68px] border-r border-[#edf2f7]'} flex-col items-center bg-[#f7f9fc] px-3 py-4`}
+        className={`flex h-full ${floating ? 'w-[72px]' : 'w-[68px] border-r border-[#dbe4f0]'} flex-col items-center bg-[#f7f9fc] px-3 py-4`}
       >
         <button
           type="button"
           onClick={() => setCollapsedWithDelay(false)}
-          className={`group relative flex h-10 w-10 items-center justify-center rounded-[12px] text-[#6b7280] transition-colors duration-200 ${SIDEBAR_HOVER_CLASS} ${transitioning ? 'opacity-80' : ''}`}
+          className={`group relative flex h-10 w-10 items-center justify-center rounded-[12px] text-[#5f6368] transition-colors duration-200 ${SIDEBAR_HOVER_CLASS} ${transitioning ? 'opacity-80' : ''}`}
           title="展开侧边栏"
         >
-          {floating ? <SidebarToggleGlyph className="h-5 w-5" /> : <DesktopSidebarGlyph className="h-5 w-5" />}
+          {floating ? <SidebarToggleGlyph className="h-5 w-5" /> : <CollapsedBrandToggle />}
         </button>
 
         <div className="mt-7 flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={() => void handleCreateConversation()}
-            className={`flex h-10 w-10 items-center justify-center rounded-[12px] bg-white text-[#6b7280] shadow-[0_2px_8px_rgba(15,23,42,0.06)] transition-all duration-200 hover:shadow-[0_10px_24px_rgba(15,23,42,0.13)] active:translate-y-[1px] ${transitioning ? 'opacity-70' : ''}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full text-[#5f6368] transition-colors duration-200 hover:bg-[#ececec] hover:text-[#111827] active:translate-y-[1px] ${transitioning ? 'opacity-70' : ''}`}
             title="开启新对话"
           >
-            <Plus className="h-4 w-4" />
+            <PlusCircleIcon size={19} />
           </button>
 
           <button
@@ -386,17 +389,14 @@ export function TaskSidebar({
   }
 
   return (
-    <aside className={`group/sidebar flex h-full w-[248px] flex-col bg-[#f7f9fc] ${floating ? '' : 'border-r border-[#edf2f7]'}`}>
+    <aside className={`group/sidebar flex h-full w-[248px] flex-col bg-[#f7f9fc] ${floating ? '' : 'border-r border-[#dbe4f0]'}`}>
       <div className="px-4 pb-3 pt-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center">
-            <Image
+          <div className="flex min-w-0 flex-1 items-center overflow-hidden">
+            <img
               src="/zt-chat-logo-clean.png"
               alt="智投chat"
-              width={136}
-              height={34}
-              priority
-              className="h-8 w-auto object-contain"
+              className={`block w-auto object-contain ${floating ? 'h-7 max-w-[128px]' : 'h-6 max-w-[128px]'}`}
             />
           </div>
 
@@ -435,29 +435,29 @@ export function TaskSidebar({
         <button
           type="button"
           onClick={() => void handleCreateConversation()}
-          className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-white text-[14px] font-medium text-[#1f2937] shadow-[0_2px_8px_rgba(15,23,42,0.06)] transition-all duration-200 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,23,42,0.13)] active:translate-y-[1px] active:shadow-[0_5px_14px_rgba(15,23,42,0.1)] ${transitioning ? 'opacity-70' : ''}`}
+          className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-white text-[14px] font-medium text-[#1f2937] shadow-[0_2px_8px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_24px_rgba(15,23,42,0.13)] active:translate-y-[1px] active:shadow-[0_5px_14px_rgba(15,23,42,0.1)] ${transitioning ? 'opacity-70' : ''}`}
         >
-          <Plus className="h-4 w-4 text-[#3f6fff]" />
+          <PlusCircleIcon size={18} className="text-[#3f6fff]" />
           开启新对话
         </button>
       </div>
 
-      <div className="sidebar-scroll-area min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+      <div className="sidebar-scroll-area min-h-0 flex-1 overflow-y-auto px-2.5 pb-3">
         {pinnedConversations.length > 0 && (
-          <section className="mb-5">
-            <div className="px-2 py-2 text-[11px] font-medium uppercase tracking-[0.04em] text-[#9aa3b2]">置顶</div>
-            <div className="space-y-1">
+          <section className="mb-2.5">
+            <div className="px-2 py-1 text-[11px] font-medium uppercase tracking-[0.04em] text-[#7a7f87]">置顶</div>
+            <div className="space-y-px">
               {pinnedConversations.map((conversation) => renderConversationRow(conversation, true))}
             </div>
           </section>
         )}
 
         {sections.map((section) => (
-          <section key={section} className="mb-5">
-            <div className="px-2 py-2 text-[11px] font-medium uppercase tracking-[0.04em] text-[#9aa3b2]">
+          <section key={section} className="mb-2.5">
+            <div className="px-2 py-1 text-[11px] font-medium uppercase tracking-[0.04em] text-[#7a7f87]">
               {section}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-px">
               {groupedConversations[section].map((conversation) => renderConversationRow(conversation, false))}
             </div>
           </section>
@@ -475,7 +475,7 @@ export function TaskSidebar({
               }}
               className="group flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm text-[#111827] transition-all duration-200 hover:bg-[#f7f9fc] hover:text-[#3f6fff]"
             >
-              <Star className="h-4 w-4 text-[#94a3b8] transition-colors duration-200 group-hover:text-[#3f6fff]" />
+              <Star className="h-4 w-4 text-[#7a7f87] transition-colors duration-200 group-hover:text-[#1f1f1f]" />
               <span>我的资产</span>
             </button>
 
@@ -483,7 +483,7 @@ export function TaskSidebar({
               href="/admin"
               className="group flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-sm text-[#111827] transition-all duration-200 hover:bg-[#f7f9fc] hover:text-[#3f6fff]"
             >
-              <Wrench className="h-4 w-4 text-[#94a3b8] transition-colors duration-200 group-hover:text-[#3f6fff]" />
+              <Wrench className="h-4 w-4 text-[#7a7f87] transition-colors duration-200 group-hover:text-[#1f1f1f]" />
               <span>管理中心</span>
             </Link>
 
@@ -491,7 +491,7 @@ export function TaskSidebar({
               type="button"
               className="group flex w-full items-center gap-2 rounded-[12px] px-3 py-2 text-left text-sm text-[#111827] transition-all duration-200 hover:bg-[#f7f9fc] hover:text-[#3f6fff]"
             >
-              <LogOut className="h-4 w-4 text-[#94a3b8] transition-colors duration-200 group-hover:text-[#3f6fff]" />
+              <LogOut className="h-4 w-4 text-[#7a7f87] transition-colors duration-200 group-hover:text-[#1f1f1f]" />
               <span>退出登录</span>
             </button>
           </div>
@@ -510,7 +510,7 @@ export function TaskSidebar({
             className="h-9 w-9 rounded-full object-cover"
           />
           <div className="min-w-0 flex-1 truncate text-sm font-medium text-[#111827]">吴燕兰</div>
-          <div className="flex h-7 w-7 items-center justify-center text-[#94a3b8] transition-colors hover:text-[#3f6fff]">
+          <div className="flex h-7 w-7 items-center justify-center text-[#7a7f87] transition-colors hover:text-[#1f1f1f]">
             <Ellipsis className="h-4 w-4" />
           </div>
         </button>

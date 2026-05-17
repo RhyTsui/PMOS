@@ -1,13 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { deleteAttachment, getAttachment } from '@/lib/attachment-store';
 
-// DELETE /api/xiaoqiao/attachments/[attachment_id]
-export async function DELETE(
+export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ attachment_id: string }> }
+  { params }: { params: Promise<{ attachment_id: string }> },
 ) {
   const { attachment_id } = await params;
-  void attachment_id;
+  const attachment = await getAttachment(attachment_id);
 
-  // Demo mode: acknowledge deletion
-  return NextResponse.json({ success: true });
+  if (!attachment) {
+    return NextResponse.json({
+      error: 'attachment_not_found',
+      message: '没有找到该附件。',
+    }, { status: 404 });
+  }
+
+  return NextResponse.json(attachment);
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ attachment_id: string }> },
+) {
+  const { attachment_id } = await params;
+  const success = await deleteAttachment(attachment_id);
+  return NextResponse.json({ success });
 }

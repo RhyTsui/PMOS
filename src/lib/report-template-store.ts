@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
 import type {
   ReportCellValue,
   ReportDraft,
@@ -12,9 +13,10 @@ import type {
   ReportTemplate,
 } from '@/types';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const TEMPLATES_PATH = path.join(DATA_DIR, 'report-templates.json');
-const DRAFTS_PATH = path.join(DATA_DIR, 'report-drafts.json');
+const TEMPLATES_PATH = runtimeDataPath('report-templates.json');
+const LEGACY_TEMPLATES_PATH = legacyDataPath('report-templates.json');
+const DRAFTS_PATH = runtimeDataPath('report-drafts.json');
+const LEGACY_DRAFTS_PATH = legacyDataPath('report-drafts.json');
 
 interface ReportTemplatesFile {
   templates: ReportTemplate[];
@@ -208,36 +210,42 @@ function normalizeDraft(input: Partial<ReportDraft>): ReportDraft {
 }
 
 async function readTemplatesFile(): Promise<ReportTemplatesFile> {
-  try {
-    const raw = await readFile(TEMPLATES_PATH, 'utf8');
-    const parsed = JSON.parse(raw) as Partial<ReportTemplatesFile>;
-    return {
-      templates: Array.isArray(parsed.templates) ? parsed.templates.map(normalizeTemplate) : defaultTemplates(),
-    };
-  } catch {
-    return { templates: defaultTemplates() };
+  for (const templatesPath of [TEMPLATES_PATH, LEGACY_TEMPLATES_PATH]) {
+    try {
+      const raw = await readFile(templatesPath, 'utf8');
+      const parsed = JSON.parse(raw) as Partial<ReportTemplatesFile>;
+      return {
+        templates: Array.isArray(parsed.templates) ? parsed.templates.map(normalizeTemplate) : defaultTemplates(),
+      };
+    } catch {
+      // 尝试下一个存储位置。
+    }
   }
+  return { templates: defaultTemplates() };
 }
 
 async function writeTemplatesFile(file: ReportTemplatesFile): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(path.dirname(TEMPLATES_PATH), { recursive: true });
   await writeFile(TEMPLATES_PATH, JSON.stringify(file, null, 2), 'utf8');
 }
 
 async function readDraftsFile(): Promise<ReportDraftsFile> {
-  try {
-    const raw = await readFile(DRAFTS_PATH, 'utf8');
-    const parsed = JSON.parse(raw) as Partial<ReportDraftsFile>;
-    return {
-      drafts: Array.isArray(parsed.drafts) ? parsed.drafts.map(normalizeDraft) : [],
-    };
-  } catch {
-    return { drafts: [] };
+  for (const draftsPath of [DRAFTS_PATH, LEGACY_DRAFTS_PATH]) {
+    try {
+      const raw = await readFile(draftsPath, 'utf8');
+      const parsed = JSON.parse(raw) as Partial<ReportDraftsFile>;
+      return {
+        drafts: Array.isArray(parsed.drafts) ? parsed.drafts.map(normalizeDraft) : [],
+      };
+    } catch {
+      // 尝试下一个存储位置。
+    }
   }
+  return { drafts: [] };
 }
 
 async function writeDraftsFile(file: ReportDraftsFile): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(path.dirname(DRAFTS_PATH), { recursive: true });
   await writeFile(DRAFTS_PATH, JSON.stringify(file, null, 2), 'utf8');
 }
 

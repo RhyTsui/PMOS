@@ -2,10 +2,10 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 
-const isStartScript = process.env.npm_lifecycle_event === 'start';
+const isDevScript = process.env.npm_lifecycle_event === 'dev';
 const dev = process.env.COZE_PROJECT_ENV
   ? process.env.COZE_PROJECT_ENV !== 'PROD'
-  : !isStartScript && process.env.NODE_ENV !== 'production';
+  : isDevScript && process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || process.env.HOST || '0.0.0.0';
 const port = parseInt(process.env.PORT || '8002', 10);
 

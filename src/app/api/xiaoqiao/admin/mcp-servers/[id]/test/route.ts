@@ -14,6 +14,7 @@ export async function POST(
 
   const result = await discoverMcpServer({
     endpoint_url: server.endpoint_url,
+    transport: server.transport,
     auth_type: server.auth_type,
     auth_config: server.auth_config,
   });

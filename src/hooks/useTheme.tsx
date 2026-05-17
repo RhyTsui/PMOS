@@ -104,11 +104,11 @@ export function useThemeColors() {
     info: isDark ? '#7B61FF' : '#6B46E0',
 
     // Text
-    textPrimary: isDark ? '#FFFFFF' : '#0F172A',
-    textSecondary: isDark ? '#8B9DC3' : '#64748B',
-    textMuted: isDark ? '#4A5568' : '#94A3B8',
-    textSubtle: isDark ? '#3A4558' : '#B0BEC5',
-    textBody: isDark ? '#C8D0DC' : '#334155',
+    textPrimary: isDark ? '#FFFFFF' : '#1F1F1F',
+    textSecondary: isDark ? '#8B9DC3' : '#4D4D4D',
+    textMuted: isDark ? '#4A5568' : '#7A7F87',
+    textSubtle: isDark ? '#3A4558' : '#A0A4AA',
+    textBody: isDark ? '#C8D0DC' : '#2F2F2F',
 
     // Surfaces
     bgMain: isDark ? '#0F1724' : '#F8FAFC',

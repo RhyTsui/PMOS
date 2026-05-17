@@ -38,19 +38,19 @@ export function CodeBlock({
   };
 
   return (
-    <div className={cn('code-block overflow-hidden', className)}>
+    <div className={cn('code-block w-full max-w-full overflow-hidden rounded-xl border border-[#dbe4f0] bg-[#f8fafc]', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-black/30 border-b border-[var(--aifs-border)]">
+      <div className="flex items-center justify-between border-b border-[#e5edf7] bg-[#f1f5f9] px-4 py-2">
         <div className="flex items-center gap-2">
-          <Code2 className="w-4 h-4 text-[var(--aifs-accent)]" />
-          <span className="text-xs text-[var(--aifs-text-secondary)] uppercase">
+          <Code2 className="w-4 h-4 text-[#64748b]" />
+          <span className="text-xs text-[#64748b] uppercase">
             {languageLabels[language] || language}
           </span>
         </div>
         {showCopy && (
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 text-xs text-[var(--aifs-text-secondary)] hover:text-[var(--aifs-accent)] transition-colors"
+            className="flex items-center gap-1 text-xs text-[#64748b] transition-colors hover:text-[#0f6fff]"
           >
             {copied ? (
               <>
@@ -68,8 +68,8 @@ export function CodeBlock({
       </div>
 
       {/* Code Content */}
-      <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
-        <code className="font-mono text-[var(--aifs-text-primary)] whitespace-pre">
+      <pre className="w-full max-w-full overflow-x-auto overflow-y-hidden p-4 text-sm leading-relaxed">
+        <code className="inline-block min-w-max whitespace-pre font-mono text-[#1f2937]">
           {code}
         </code>
       </pre>

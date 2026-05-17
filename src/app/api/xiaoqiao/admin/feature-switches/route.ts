@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDemoSwitches } from '@/lib/demo-data';
+import { listFeatureSwitches } from '@/lib/feature-switch-store';
 
 export async function GET() {
-  return NextResponse.json(getDemoSwitches());
+  return NextResponse.json(await listFeatureSwitches());
 }

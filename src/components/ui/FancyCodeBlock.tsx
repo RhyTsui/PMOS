@@ -16,7 +16,7 @@ import { useThemeColors } from '@/hooks/useTheme';
 export type CodeStyle = 'fancy' | 'minimal' | 'github' | 'dracula' | 'one-dark';
 
 export const CODE_STYLES: Record<CodeStyle, { label: string; headerBg: string; bodyBg: string; headerColor: string; borderColor: string; langBadgeBg: string; langBadgeColor: string }> = {
-  fancy: { label: '花式', headerBg: 'var(--code-fancy-header)', bodyBg: 'var(--code-fancy-body)', headerColor: 'var(--code-fancy-header-text)', borderColor: 'var(--code-fancy-border)', langBadgeBg: 'var(--accent)', langBadgeColor: '#fff' },
+  fancy: { label: '浅灰', headerBg: 'var(--code-fancy-header)', bodyBg: 'var(--code-fancy-body)', headerColor: 'var(--code-fancy-header-text)', borderColor: 'var(--code-fancy-border)', langBadgeBg: '#e8eef7', langBadgeColor: '#334155' },
   minimal: { label: '极简', headerBg: 'transparent', bodyBg: 'var(--code-minimal-body)', headerColor: 'var(--text-secondary)', borderColor: 'var(--border)', langBadgeBg: 'var(--bg-subtle)', langBadgeColor: 'var(--text-secondary)' },
   github: { label: 'GitHub', headerBg: 'var(--code-github-header)', bodyBg: 'var(--code-github-body)', headerColor: 'var(--code-github-header-text)', borderColor: 'var(--code-github-border)', langBadgeBg: '#d73a4920', langBadgeColor: '#d73a49' },
   dracula: { label: 'Dracula', headerBg: '#1a1a2e', bodyBg: '#16162a', headerColor: '#bd93f9', borderColor: '#bd93f930', langBadgeBg: '#bd93f920', langBadgeColor: '#bd93f9' },
@@ -44,6 +44,16 @@ export default function FancyCodeBlock({
   const c = useThemeColors();
 
   const style = CODE_STYLES[codeStyle] || CODE_STYLES.fancy;
+  const readableColors = useMemo(() => {
+    const palette: Record<CodeStyle, { body: string; lineNumber: string }> = {
+      fancy: { body: '#1f2937', lineNumber: '#94a3b8' },
+      minimal: { body: '#10233f', lineNumber: '#8ea0b8' },
+      github: { body: '#24292f', lineNumber: '#8c959f' },
+      dracula: { body: '#f8f8f2', lineNumber: '#6272a4' },
+      'one-dark': { body: '#abb2bf', lineNumber: '#636d83' },
+    };
+    return palette[codeStyle] || palette.fancy;
+  }, [codeStyle]);
   const lines = children.split('\n');
   const totalLines = lines.length;
   const isLong = totalLines > LINE_COLLAPSE_THRESHOLD;
@@ -63,11 +73,13 @@ export default function FancyCodeBlock({
     <div
       style={{
         margin: '12px 0',
+        width: '100%',
+        maxWidth: '100%',
         borderRadius: 10,
         overflow: 'hidden',
         border: `1px solid ${style.borderColor}`,
         background: style.bodyBg,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+        boxShadow: 'none',
       }}
     >
       {/* Header Bar */}
@@ -82,15 +94,6 @@ export default function FancyCodeBlock({
           fontSize: 12,
         }}
       >
-        {/* Traffic Lights (macOS style) */}
-        {codeStyle === 'fancy' && (
-          <div style={{ display: 'flex', gap: 6, marginRight: 4 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57' }} />
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#febc2e' }} />
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
-          </div>
-        )}
-
         {/* Language Badge */}
         {langDisplay && (
           <span
@@ -133,7 +136,7 @@ export default function FancyCodeBlock({
                 display: 'flex',
                 alignItems: 'center',
               }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(15,23,42,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '0.6'; e.currentTarget.style.background = 'none'; }}
             >
               {expanded ? <CompressOutlined style={{ fontSize: 12 }} /> : <ExpandOutlined style={{ fontSize: 12 }} />}
@@ -158,7 +161,7 @@ export default function FancyCodeBlock({
               gap: 4,
               fontSize: 11,
             }}
-            onMouseEnter={e => { if (!copied) { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; } }}
+            onMouseEnter={e => { if (!copied) { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(15,23,42,0.06)'; } }}
             onMouseLeave={e => { if (!copied) { e.currentTarget.style.opacity = '0.6'; e.currentTarget.style.background = 'none'; } }}
           >
             {copied ? <CheckOutlined style={{ fontSize: 11 }} /> : <CopyOutlined style={{ fontSize: 11 }} />}
@@ -171,15 +174,18 @@ export default function FancyCodeBlock({
       <div
         style={{
           padding: '12px 16px',
+          width: '100%',
+          maxWidth: '100%',
           overflowX: 'auto',
+          overflowY: 'hidden',
           fontSize: 13,
           lineHeight: 1.7,
           fontFamily: 'var(--font-mono)',
-          color: c.textBody,
+          color: readableColors.body,
           position: 'relative',
         }}
       >
-        <pre style={{ margin: 0, whiteSpace: 'pre', tabSize: 2 }}>
+        <pre style={{ margin: 0, whiteSpace: 'pre', tabSize: 2, minWidth: 'max-content' }}>
           <code>
             {displayLines.map((line, idx) => (
               <div key={idx} style={{ display: 'flex' }}>
@@ -191,8 +197,8 @@ export default function FancyCodeBlock({
                       minWidth: 40,
                       textAlign: 'right',
                       paddingRight: 16,
-                      color: c.textMuted,
-                      opacity: 0.4,
+                      color: readableColors.lineNumber,
+                      opacity: 0.8,
                       userSelect: 'none',
                       fontSize: 12,
                     }}

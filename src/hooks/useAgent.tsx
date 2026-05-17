@@ -40,6 +40,7 @@ interface AgentContextType {
   missingFields: MissingField[];
   addAttachment: (attachment: AttachmentRecord) => void;
   removeAttachment: (id: string) => void;
+  replaceAttachments: (attachments: AttachmentRecord[]) => void;
   fillMissingField: (field: string, value: string) => void;
 
   // UI State
@@ -157,6 +158,10 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     setAttachments(prev => prev.filter(a => a.id !== id));
   }, []);
 
+  const replaceAttachments = useCallback((nextAttachments: AttachmentRecord[]) => {
+    setAttachments(nextAttachments);
+  }, []);
+
   const fillMissingField = useCallback((field: string, value: string) => {
     void value;
     setMissingFields(prev => prev.filter(f => f.field_key !== field));
@@ -187,6 +192,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     missingFields,
     addAttachment,
     removeAttachment,
+    replaceAttachments,
     fillMissingField,
     uiState,
     toggleResultPanel,

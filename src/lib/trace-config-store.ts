@@ -2,9 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { TraceConfig } from '@/lib/trace';
+import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const CONFIG_PATH = path.join(DATA_DIR, 'trace-config.json');
+const CONFIG_PATH = runtimeDataPath('trace-config.json');
+const LEGACY_CONFIG_PATH = legacyDataPath('trace-config.json');
 
 export function getTraceConfigFromEnvDefaults(): TraceConfig {
   return {
@@ -38,21 +39,24 @@ function normalizeTraceConfig(input?: Partial<TraceConfig>): TraceConfig {
 }
 
 export function getTraceConfigSync(): TraceConfig {
-  try {
-    if (!existsSync(CONFIG_PATH)) {
-      return normalizeTraceConfig();
+  for (const configPath of [CONFIG_PATH, LEGACY_CONFIG_PATH]) {
+    try {
+      if (!existsSync(configPath)) {
+        continue;
+      }
+      const raw = readFileSync(configPath, 'utf8');
+      return normalizeTraceConfig(JSON.parse(raw) as Partial<TraceConfig>);
+    } catch {
+      // 尝试下一个存储位置。
     }
-    const raw = readFileSync(CONFIG_PATH, 'utf8');
-    return normalizeTraceConfig(JSON.parse(raw) as Partial<TraceConfig>);
-  } catch {
-    return normalizeTraceConfig();
   }
+  return normalizeTraceConfig();
 }
 
 export async function updateTraceConfig(patch: Partial<TraceConfig>): Promise<TraceConfig> {
   const current = getTraceConfigSync();
   const next = normalizeTraceConfig({ ...current, ...patch });
-  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(path.dirname(CONFIG_PATH), { recursive: true });
   await writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), 'utf8');
   return next;
 }

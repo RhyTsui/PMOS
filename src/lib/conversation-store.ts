@@ -1,9 +1,12 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Conversation, Message } from '@/types';
+import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const STORE_PATH = path.join(DATA_DIR, 'conversations.json');
+const STORE_PATH = runtimeDataPath('conversations.json');
+const LEGACY_STORE_PATH = legacyDataPath('conversations.json');
+const SHOULD_PERSIST_STORE = process.env.NODE_ENV === 'production' || process.env.XIAOQIAO_PERSIST_DEV_STORE === 'true';
+let memoryStore: ConversationStoreFile | null = null;
 
 interface ConversationStoreFile {
   conversations: Conversation[];
@@ -30,20 +33,45 @@ function defaultStore(): ConversationStoreFile {
 }
 
 async function readStore(): Promise<ConversationStoreFile> {
-  try {
-    const raw = await readFile(STORE_PATH, 'utf8');
-    const parsed = JSON.parse(raw) as Partial<ConversationStoreFile>;
+  if (memoryStore) {
     return {
-      conversations: Array.isArray(parsed.conversations) ? parsed.conversations : [],
-      messagesByConversation: parsed.messagesByConversation || {},
+      conversations: [...memoryStore.conversations],
+      messagesByConversation: { ...memoryStore.messagesByConversation },
     };
-  } catch {
-    return defaultStore();
   }
+
+  for (const storePath of [STORE_PATH, LEGACY_STORE_PATH]) {
+    try {
+      const raw = await readFile(storePath, 'utf8');
+      const parsed = JSON.parse(raw) as Partial<ConversationStoreFile>;
+      memoryStore = {
+        conversations: Array.isArray(parsed.conversations) ? parsed.conversations : [],
+        messagesByConversation: parsed.messagesByConversation || {},
+      };
+      return {
+        conversations: [...memoryStore.conversations],
+        messagesByConversation: { ...memoryStore.messagesByConversation },
+      };
+    } catch {
+      // 尝试下一个存储位置。
+    }
+  }
+  memoryStore = defaultStore();
+  return {
+    conversations: [...memoryStore.conversations],
+    messagesByConversation: { ...memoryStore.messagesByConversation },
+  };
 }
 
 async function writeStore(store: ConversationStoreFile): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
+  memoryStore = {
+    conversations: [...store.conversations],
+    messagesByConversation: { ...store.messagesByConversation },
+  };
+  if (!SHOULD_PERSIST_STORE) {
+    return;
+  }
+  await mkdir(path.dirname(STORE_PATH), { recursive: true });
   await writeFile(STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
 }
 
@@ -129,7 +157,21 @@ export async function listMessages(conversationId: string): Promise<Message[]> {
 
 export async function addMessage(
   conversationId: string,
-  input: { role: Message['role']; content: string; message_type?: Message['message_type'] },
+  input: {
+    role: Message['role'];
+    content: string;
+    message_type?: Message['message_type'];
+    agent?: Message['agent'];
+    intent_type?: Message['intent_type'];
+    thinking?: Message['thinking'];
+    thinking_steps?: Message['thinking_steps'];
+    tool_calls?: Message['tool_calls'];
+    process_events?: Message['process_events'];
+    missing_fields?: Message['missing_fields'];
+    evidence_ids?: Message['evidence_ids'];
+    routing_decision?: Message['routing_decision'];
+    metadata?: Message['metadata'];
+  },
 ): Promise<Message> {
   const store = await readStore();
   const conversation = store.conversations.find(item => item.conversation_id === conversationId);
@@ -148,6 +190,16 @@ export async function addMessage(
     message_type: input.message_type || (input.role === 'assistant' ? 'assistant_reply' : 'user_input'),
     created_at: now,
     timestamp: Date.now(),
+    agent: input.agent,
+    intent_type: input.intent_type,
+    thinking: input.thinking,
+    thinking_steps: input.thinking_steps,
+    tool_calls: input.tool_calls,
+    process_events: input.process_events,
+    missing_fields: input.missing_fields,
+    evidence_ids: input.evidence_ids,
+    routing_decision: input.routing_decision,
+    metadata: input.metadata,
   };
 
   const currentMessages = store.messagesByConversation[conversationId] || [];

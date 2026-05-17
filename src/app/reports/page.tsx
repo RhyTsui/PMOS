@@ -209,6 +209,10 @@ function getIntakeModeText(mode?: ReportRequirementAnalysis['intakeMode']) {
 }
 
 export default function ReportsPage() {
+  useEffect(() => {
+    document.title = '智投chat-报表';
+  }, []);
+
   const [templates, setTemplates] = useState<ReportTemplate[]>([]);
   const [drafts, setDrafts] = useState<ReportDraft[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([

@@ -7,11 +7,10 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: '智投chat - 广告支持与投放协同工作台',
-    template: '%s | 智投chat',
+    default: '智投chat',
+    template: '智投chat-%s',
   },
-  description:
-    '智投chat是AI驱动的广告支持与投放协同自动化工作台，以对话入口驱动使用帮助、需求沟通、问题排查与广告联调。',
+  description: '广告业务需求端到端直接交付。',
   keywords: [
     '智投chat',
     '广告智能',
@@ -24,11 +23,16 @@ export const metadata: Metadata = {
   authors: [{ name: 'XiaoQiao Team' }],
   generator: 'XiaoQiao',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/brand-icon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/brand-icon.png',
   },
   openGraph: {
-    title: '智投chat - 广告支持与投放协同工作台',
-    description: 'AI驱动的广告支持与投放协同自动化工作台',
+    title: '智投chat',
+    description: '广告业务需求端到端直接交付。',
     locale: 'zh_CN',
     type: 'website',
   },

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateDemoSwitch } from '@/lib/demo-data';
+import { updateFeatureSwitch } from '@/lib/feature-switch-store';
 
 export async function PUT(
   request: Request,
@@ -7,7 +7,7 @@ export async function PUT(
 ) {
   const { key } = await params;
   const body = await request.json();
-  const sw = updateDemoSwitch(key, body);
+  const sw = await updateFeatureSwitch(key, body);
   if (!sw) return NextResponse.json({ error: 'Switch not found' }, { status: 404 });
   return NextResponse.json(sw);
 }

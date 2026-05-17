@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Paperclip, X, Upload, FileText, ImageIcon, Table, File, CheckCircle, Loader2 } from 'lucide-react';
+import { Paperclip, X, Upload, FileText, ImageIcon, Table, File, CheckCircle, Loader2, PlayCircle } from 'lucide-react';
 import type { AttachmentRecord, AttachmentKind, AttachmentStatus } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
 
@@ -15,6 +15,7 @@ interface AttachmentBarProps {
 
 const kindIcons: Record<AttachmentKind, typeof File> = {
   image: ImageIcon,
+  video: PlayCircle,
   document: FileText,
   table: Table,
   log: File,
@@ -60,7 +61,7 @@ export function AttachmentBar({ attachments, onUpload, onRemove, onRetry, onPrev
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {/* Upload Button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {onUpload && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <label style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '6px 10px', borderRadius: 8,
@@ -81,7 +82,7 @@ export function AttachmentBar({ attachments, onUpload, onRemove, onRetry, onPrev
           />
         </label>
         <span style={{ fontSize: 10, color: c.textSubtle }}>支持图片、文档、表格、日志</span>
-      </div>
+      </div>}
 
       {/* Attachment List */}
       {attachments.length > 0 && (

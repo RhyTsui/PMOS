@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Config } from 'coze-coding-dev-sdk';
+import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
 
 export interface ModelServiceConfig {
   enabled: boolean;
@@ -17,8 +18,16 @@ export interface ModelServiceConfig {
   updatedAt: string;
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const CONFIG_PATH = path.join(DATA_DIR, 'runtime-config.json');
+export interface ProjectServiceConfig {
+  enabled: boolean;
+  apiBaseUrl: string;
+  apiToken: string;
+  notes: string;
+  updatedAt: string;
+}
+
+const CONFIG_PATH = runtimeDataPath('runtime-config.json');
+const LEGACY_CONFIG_PATH = legacyDataPath('runtime-config.json');
 
 const DEFAULT_MODEL_SERVICE_CONFIG: ModelServiceConfig = {
   enabled: true,
@@ -41,8 +50,17 @@ const DEFAULT_MODEL_SERVICE_CONFIG: ModelServiceConfig = {
   updatedAt: new Date().toISOString(),
 };
 
+const DEFAULT_PROJECT_SERVICE_CONFIG: ProjectServiceConfig = {
+  enabled: true,
+  apiBaseUrl: process.env.XIAOQIAO_PROJECT_API_BASE_URL || 'https://apps-api.dobest.com/v1.0/apps',
+  apiToken: process.env.XIAOQIAO_PROJECT_API_TOKEN || '',
+  notes: '',
+  updatedAt: new Date().toISOString(),
+};
+
 interface RuntimeConfigFile {
   modelService: ModelServiceConfig;
+  projectService: ProjectServiceConfig;
 }
 
 function normalizeModelServiceConfig(input?: Partial<ModelServiceConfig>): ModelServiceConfig {
@@ -63,22 +81,39 @@ function normalizeModelServiceConfig(input?: Partial<ModelServiceConfig>): Model
   };
 }
 
+function normalizeProjectServiceConfig(input?: Partial<ProjectServiceConfig>): ProjectServiceConfig {
+  return {
+    ...DEFAULT_PROJECT_SERVICE_CONFIG,
+    ...input,
+    enabled: typeof input?.enabled === 'boolean' ? input.enabled : DEFAULT_PROJECT_SERVICE_CONFIG.enabled,
+    apiBaseUrl: input?.apiBaseUrl?.trim() || DEFAULT_PROJECT_SERVICE_CONFIG.apiBaseUrl,
+    apiToken: input?.apiToken?.trim() || '',
+    notes: input?.notes?.trim() || '',
+    updatedAt: input?.updatedAt || new Date().toISOString(),
+  };
+}
+
 async function readRuntimeConfigFile(): Promise<RuntimeConfigFile> {
-  try {
-    const raw = await readFile(CONFIG_PATH, 'utf8');
-    const parsed = JSON.parse(raw) as Partial<RuntimeConfigFile>;
-    return {
-      modelService: normalizeModelServiceConfig(parsed.modelService),
-    };
-  } catch {
-    return {
-      modelService: normalizeModelServiceConfig(),
-    };
+  for (const configPath of [CONFIG_PATH, LEGACY_CONFIG_PATH]) {
+    try {
+      const raw = await readFile(configPath, 'utf8');
+      const parsed = JSON.parse(raw) as Partial<RuntimeConfigFile>;
+      return {
+        modelService: normalizeModelServiceConfig(parsed.modelService),
+        projectService: normalizeProjectServiceConfig(parsed.projectService),
+      };
+    } catch {
+      // 尝试下一个存储位置。
+    }
   }
+  return {
+    modelService: normalizeModelServiceConfig(),
+    projectService: normalizeProjectServiceConfig(),
+  };
 }
 
 async function writeRuntimeConfigFile(file: RuntimeConfigFile): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(path.dirname(CONFIG_PATH), { recursive: true });
   await writeFile(CONFIG_PATH, JSON.stringify(file, null, 2), 'utf8');
 }
 
@@ -101,6 +136,31 @@ export async function updateModelServiceConfig(
     modelService: next,
   });
   return next;
+}
+
+export async function getProjectServiceConfig(): Promise<ProjectServiceConfig> {
+  const file = await readRuntimeConfigFile();
+  return file.projectService;
+}
+
+export async function updateProjectServiceConfig(
+  patch: Partial<ProjectServiceConfig>,
+): Promise<ProjectServiceConfig> {
+  const file = await readRuntimeConfigFile();
+  const next = normalizeProjectServiceConfig({
+    ...file.projectService,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  });
+  await writeRuntimeConfigFile({
+    ...file,
+    projectService: next,
+  });
+  return next;
+}
+
+export function hasConfiguredProjectService(config: ProjectServiceConfig): boolean {
+  return Boolean(config.enabled && config.apiBaseUrl && config.apiToken);
 }
 
 export function hasConfiguredModelCredentials(config: ModelServiceConfig): boolean {

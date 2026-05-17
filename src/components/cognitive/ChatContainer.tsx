@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ThoughtChain } from '@ant-design/x';
@@ -279,6 +279,51 @@ function getDebugProcessPayload(message: Message): DebugProcessPayload | null {
   };
 }
 
+function getDebugThinkingStepsFromWorkflowResult(message: Message): NonNullable<Message['thinking_steps']> {
+  const workflowResult = asRecord(message.metadata?.workflow_result);
+  if (!workflowResult) return [];
+
+  const debugPayload: DebugProcessPayload = {
+    status: String(workflowResult.status || workflowResult.result_status || workflowResult.resultType || workflowResult.kind || ''),
+    conclusion: String(workflowResult.summary || workflowResult.conclusion || ''),
+    task_detail: workflowResult.task_detail || workflowResult,
+    steps: Array.isArray(workflowResult.steps) ? workflowResult.steps as DebugProcessStep[] : [],
+  };
+  const steps = normalizeMcpDebugSteps(debugPayload);
+  if (steps.length === 0) return [];
+  const thinkingSteps = steps.map((step, index) => ({
+    key: step.key || `debug-step-${index}`,
+    label: cleanDebugLine(step.name || step.message || `联调步骤 ${index + 1}`) || `联调步骤 ${index + 1}`,
+    content: cleanDebugLine(step.message || step.status || '') || '',
+    status: String(step.status || '').toLowerCase().includes('error') || String(step.status || '').toLowerCase().includes('fail')
+      ? 'error' as const
+      : String(step.status || '').toLowerCase().includes('running') || String(step.status || '').toLowerCase().includes('loading')
+        ? 'loading' as const
+        : 'completed' as const,
+    started_at: typeof step.started_at === 'number' ? step.started_at : step.started_at ? new Date(step.started_at).getTime() : undefined,
+    duration_ms: getDebugStepDurationMs(step, normalizeDebugStatus(step, index, steps.length - 1), Date.now()),
+    input: step.response && typeof step.response === 'object' ? step.response as Record<string, unknown> : undefined,
+    output: step.raw_output && typeof step.raw_output === 'object' ? step.raw_output as Record<string, unknown> : undefined,
+  }));
+  const hasCreateSummary = thinkingSteps.some((step) => String(step.label || '').includes('创建联调任务'));
+  const hasObserveSummary = thinkingSteps.some((step) => String(step.label || '').includes('观测联调过程'));
+  return [
+    ...thinkingSteps,
+    ...(hasCreateSummary ? [] : [{
+      key: 'debug-create-task',
+      label: '创建联调任务',
+      content: '联调任务已发起',
+      status: 'loading' as const,
+    }]),
+    ...(hasObserveSummary ? [] : [{
+      key: 'debug-observe-process',
+      label: '观测联调过程',
+      content: '正在观测联调步骤',
+      status: 'loading' as const,
+    }]),
+  ];
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
 }
@@ -427,6 +472,14 @@ function cleanDebugLogLine(line: string): string {
     .trim();
 }
 
+function safeDebugStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '';
+  }
+}
+
 function debugProcessStepText(step: DebugProcessStep): string {
   let rawText = '';
   try {
@@ -472,17 +525,20 @@ function normalizeMcpDebugSteps(payload: DebugProcessPayload): DebugProcessStep[
   const returnedSteps = originalSteps.flatMap((step) => {
     const response = unwrapMcpResponse(step.response || step.raw_output);
     const list = findDebugStepArray(response);
-    return list.map((item, itemIndex) => {
+    return list.flatMap((item, itemIndex): DebugProcessStep[] => {
       if (typeof item === 'string') {
-        return {
+        const isFindAdSwipe = /find_ad_swipe/i.test(item);
+        const name = normalizeDebugStepDisplayName(item) || (isFindAdSwipe ? '滑动查找广告' : '');
+        if (!name && !/图片上传中/.test(item)) return [];
+        return [{
           index: itemIndex + 1,
           key: `${step.key || 'mcp-step'}-${itemIndex}`,
-          name: cleanDebugLine(item),
+          name: name || '图片上传中',
           status: step.status,
           available: step.available,
           message: item,
-          sub_steps: [{ name: item, status: step.status }],
-        } satisfies DebugProcessStep;
+          sub_steps: [],
+        }];
       }
       const record = asRecord(item) || {};
       const parsedLog = parseDebugStepLog(record.logText || record.log_text);
@@ -493,15 +549,62 @@ function normalizeMcpDebugSteps(payload: DebugProcessPayload): DebugProcessStep[
       const screenshotUrl = String(record.screenshot_url || record.screenshotUrl || progress.screenshot_url || progress.screenshotUrl || '');
       const hasScreenshotUploading = logLines.some((line) => /screenshot uploaded|upload.*screenshot|上传截图|图片上传中/i.test(line))
         || /true/i.test(String(progress.has_screenshot || ''));
+      const screenshotCandidates = [
+        ...(Array.isArray(record.screenshots) ? record.screenshots : []),
+        ...(Array.isArray(record.images) ? record.images : []),
+      ].filter((candidate) => {
+        if (typeof candidate === 'string') return isDebugScreenshotUrl(candidate);
+        const itemRecord = asRecord(candidate);
+        const url = itemRecord?.url || itemRecord?.src || itemRecord?.path || itemRecord?.screenshotUrl || itemRecord?.screenshot_url;
+        return isDebugScreenshotUrl(url);
+      }) as DebugProcessStep['screenshots'];
       const resolvedSubSteps = effectiveSubList.length > 0
         ? effectiveSubList
         : hasScreenshotUploading
           ? ['图片上传中']
           : [];
-      return {
-        index: Number(record.index || record.order || record.step_order || progress.phase_step_index || itemIndex + 1),
+      const isFindAdSwipe = /find_ad_swipe/i.test(
+        `${record.key || ''} ${record.name || ''} ${record.step_name || ''} ${record.stepName || ''} ${record.title || ''} ${record.stage || ''} ${record.message || ''} ${record.log_summary || ''} ${record.summary || ''} ${JSON.stringify(record)}`,
+      );
+      const displayName = normalizeDebugStepDisplayName(
+        String(progress.step_description || record.name || record.step_name || record.stepName || record.title || record.stage || progress.step_name || step.name || ''),
+      ) || (isFindAdSwipe ? '滑动查找广告' : '');
+      const normalizedSubSteps = resolvedSubSteps.flatMap((sub): NonNullable<DebugProcessStep['sub_steps']>[number][] => {
+        if (typeof sub === 'string') {
+          const subName = normalizeDebugStepDisplayName(sub);
+          if (!subName && !/图片上传中/.test(sub)) return [];
+          return [{
+            name: subName || '图片上传中',
+            status: String(record.status || progress.status || step.status || ''),
+            message: sub,
+          }];
+        }
+        const subRecord = asRecord(sub) || {};
+        const subName = normalizeDebugStepDisplayName(
+          String(subRecord.name || subRecord.title || subRecord.action || subRecord.step_name || subRecord.message || subRecord.log || ''),
+        );
+        if (!subName) return [];
+        return [{
+          name: subName,
+          status: String(subRecord.status || record.status || ''),
+          message: String(subRecord.message || subRecord.log_summary || subRecord.detail || ''),
+          screenshot: typeof subRecord.screenshot === 'string' ? subRecord.screenshot : undefined,
+          screenshot_url: typeof subRecord.screenshot_url === 'string'
+            ? subRecord.screenshot_url
+            : typeof subRecord.screenshotUrl === 'string'
+              ? subRecord.screenshotUrl
+              : undefined,
+          started_at: typeof subRecord.started_at === 'string' || typeof subRecord.started_at === 'number' ? subRecord.started_at : undefined,
+          duration_ms: Number(subRecord.duration_ms || subRecord.duration || subRecord.cost_ms || 0) || undefined,
+          elapsed_ms: Number(subRecord.elapsed_ms || subRecord.elapsed || 0) || undefined,
+          latency_ms: Number(subRecord.latency_ms || 0) || undefined,
+        }];
+      }).filter(Boolean) as NonNullable<DebugProcessStep['sub_steps']>;
+      if (!displayName && normalizedSubSteps.length === 0 && !hasScreenshotUploading) return [];
+      return [{
+        index: itemIndex + 1,
         key: String(record.key || record.id || `${step.key || 'mcp-step'}-${itemIndex}`),
-        name: normalizeDebugStepName(progress.step_description || record.name || record.step_name || record.stepName || record.title || record.stage || progress.step_name || step.name || '联调步骤'),
+        name: displayName || '图片上传中',
         status: String(record.status || progress.status || step.status || ''),
         available: record.available === undefined ? step.available : Boolean(record.available),
         message: String(record.message || record.log_summary || record.summary || record.detail || logLines[logLines.length - 1] || ''),
@@ -509,44 +612,35 @@ function normalizeMcpDebugSteps(payload: DebugProcessPayload): DebugProcessStep[
         duration_ms: Number(record.duration_ms || record.durationMs || record.duration || record.cost_ms || 0) || undefined,
         elapsed_ms: Number(record.elapsed_ms || record.elapsed || 0) || undefined,
         latency_ms: Number(record.latency_ms || 0) || undefined,
-        screenshots: (Array.isArray(record.screenshots) ? record.screenshots : Array.isArray(record.images) ? record.images : []) as DebugProcessStep['screenshots'],
-        screenshot: typeof record.screenshot === 'string' ? record.screenshot : undefined,
-        screenshot_url: isDebugScreenshotUrl(screenshotUrl) ? screenshotUrl : undefined,
+        screenshots: hasScreenshotUploading ? [] : screenshotCandidates,
+        screenshot: hasScreenshotUploading ? undefined : (typeof record.screenshot === 'string' ? record.screenshot : undefined),
+        screenshot_url: hasScreenshotUploading ? undefined : (isDebugScreenshotUrl(screenshotUrl) ? screenshotUrl : undefined),
         response: record,
         raw_output: item,
         logs: logLines,
-        sub_steps: resolvedSubSteps.map((sub, subIndex) => {
-          if (typeof sub === 'string') {
-            return { name: cleanDebugLine(sub), status: String(record.status || progress.status || step.status || ''), message: sub };
-          }
-          const subRecord = asRecord(sub) || {};
-          return {
-            name: String(subRecord.name || subRecord.title || subRecord.action || subRecord.step_name || subRecord.message || subRecord.log || `子步骤 ${subIndex + 1}`),
-            status: String(subRecord.status || record.status || ''),
-            message: String(subRecord.message || subRecord.log_summary || subRecord.detail || ''),
-            screenshot: typeof subRecord.screenshot === 'string' ? subRecord.screenshot : undefined,
-            screenshot_url: typeof subRecord.screenshot_url === 'string'
-              ? subRecord.screenshot_url
-              : typeof subRecord.screenshotUrl === 'string'
-                ? subRecord.screenshotUrl
-                : undefined,
-            started_at: typeof subRecord.started_at === 'string' || typeof subRecord.started_at === 'number' ? subRecord.started_at : undefined,
-            duration_ms: Number(subRecord.duration_ms || subRecord.duration || subRecord.cost_ms || 0) || undefined,
-            elapsed_ms: Number(subRecord.elapsed_ms || subRecord.elapsed || 0) || undefined,
-            latency_ms: Number(subRecord.latency_ms || 0) || undefined,
-          };
-        }),
-      } satisfies DebugProcessStep;
-    });
+        sub_steps: normalizedSubSteps,
+      } satisfies DebugProcessStep];
+    }).filter((item): item is DebugProcessStep => Boolean(item));
   });
 
-  if (returnedSteps.length > 0) {
-    return returnedSteps.sort((a, b) => Number(a.index || 0) - Number(b.index || 0));
+  const truncatedSteps = (() => {
+    const lastSwipeIndex = returnedSteps.reduce((acc, step, index) => {
+      const text = `${step.key || ''} ${step.name || ''} ${step.message || ''} ${safeDebugStringify(step.response || step.raw_output || '')}`;
+      return /find_ad_swipe/i.test(text) || /find_ad_swipe/i.test(debugProcessStepText(step)) ? index : acc;
+    }, -1);
+    if (lastSwipeIndex >= 0) {
+      return returnedSteps.slice(0, lastSwipeIndex + 1);
+    }
+    return returnedSteps;
+  })();
+
+  if (truncatedSteps.length > 0) {
+    return dedupeDebugSteps(truncatedSteps);
   }
 
   const taskSnapshot = findDebugTaskSnapshot(payload);
   if (taskSnapshot.length > 0) {
-    return taskSnapshot;
+    return dedupeDebugSteps(taskSnapshot);
   }
 
   const authExpiredStep = originalSteps.find((step) => {
@@ -655,6 +749,60 @@ function cleanDebugLine(raw?: string): string {
     .slice(0, 80);
 }
 
+function stripDebugAbsoluteTime(raw?: string): string {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  return text
+    .replace(/\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[,.]\d+)?/g, '')
+    .replace(/\d{4}\/\d{2}\/\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[,.]\d+)?/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractDebugStepDisplayName(raw?: string): string {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  const directPatterns = [
+    /\bstep_name\s*=\s*([^\s|,，;]+(?:\s+[^\s|,，;]+)?)/i,
+    /\bstep\s*=\s*([^\s|,，;]+(?:\s+[^\s|,，;]+)?)/i,
+    /\bname\s*=\s*([^\s|,，;]+(?:\s+[^\s|,，;]+)?)/i,
+    /\btitle\s*=\s*([^\s|,，;]+(?:\s+[^\s|,，;]+)?)/i,
+    /\bstage\s*=\s*([^\s|,，;]+(?:\s+[^\s|,，;]+)?)/i,
+  ];
+  for (const pattern of directPatterns) {
+    const matched = text.match(pattern);
+    if (matched?.[1]) {
+      return stripDebugAbsoluteTime(cleanDebugLine(matched[1]) || matched[1])
+        .replace(/[\]\)】》]+$/g, '')
+        .trim();
+    }
+  }
+
+  const shortText = stripDebugAbsoluteTime(cleanDebugLine(text) || text);
+  const parts = shortText.split(/[:：]/).map((part) => part.trim()).filter(Boolean);
+  const lastPart = parts.length > 0 ? parts[parts.length - 1] : shortText;
+  return lastPart
+    .replace(/\b(seq|phase|phase_index|step_index|step|index|kind|type|status|progress|Web Step \d+)\s*=\s*[^ ]+/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function normalizeDebugStepDisplayName(raw?: string): string {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  const extracted = extractDebugStepDisplayName(text) || cleanDebugLine(text);
+  const mapped = normalizeDebugStepName(extracted);
+  const hasChinese = /[\u4e00-\u9fff]/.test(mapped) || /[\u4e00-\u9fff]/.test(extracted);
+  if (hasChinese) {
+    return stripDebugAbsoluteTime(mapped || extracted).trim();
+  }
+  return '';
+}
+
+function isMeaningfulDebugStepText(raw?: string): boolean {
+  return Boolean(normalizeDebugStepDisplayName(raw));
+}
+
 function normalizeDebugStatus(step: DebugProcessStep, index: number, latestActiveIndex: number): 'success' | 'running' | 'error' | 'waiting' {
   const status = String(step.status || '').toLowerCase();
   if (status.includes('error') || status.includes('fail') || step.available === false) return 'error';
@@ -673,6 +821,57 @@ function normalizeDebugSubStatus(
   if (status.includes('success') || status.includes('done') || status.includes('complete')) return 'success';
   if (status.includes('running') || status.includes('loading') || status.includes('progress')) return 'running';
   return parentStatus;
+}
+
+function normalizeDebugStepSignature(step: DebugProcessStep): string {
+  const subSteps = Array.isArray(step.sub_steps)
+    ? step.sub_steps.map((item) => cleanDebugLine(item.name || item.message || '')).filter(Boolean).join('|')
+    : '';
+  const screenshots = collectStepScreenshots(step).join('|');
+  return [
+    cleanDebugLine(step.name || ''),
+    String(step.status || '').toLowerCase(),
+    cleanDebugLine(step.message || ''),
+    subSteps,
+    screenshots,
+  ].join('::').toLowerCase();
+}
+
+function mergeDebugStep(base: DebugProcessStep, next: DebugProcessStep): DebugProcessStep {
+  return {
+    ...base,
+    ...next,
+    index: Number(base.index || next.index || 0) || undefined,
+    key: base.key || next.key,
+    name: next.name || base.name,
+    status: next.status || base.status,
+    message: next.message || base.message,
+    started_at: next.started_at || base.started_at,
+    duration_ms: next.duration_ms || base.duration_ms,
+    elapsed_ms: next.elapsed_ms || base.elapsed_ms,
+    latency_ms: next.latency_ms || base.latency_ms,
+    screenshot: next.screenshot || base.screenshot,
+    screenshot_url: next.screenshot_url || base.screenshot_url,
+    screenshots: [...new Set([...(base.screenshots || []), ...(next.screenshots || [])].map((item) => typeof item === 'string' ? item : item?.url || item?.src || '').filter(Boolean))],
+    logs: [...new Set([...(base.logs || []), ...(next.logs || [])].map((line) => cleanDebugLogLine(line)).filter(Boolean))],
+    sub_steps: (next.sub_steps && next.sub_steps.length > 0 ? next.sub_steps : base.sub_steps) || [],
+  };
+}
+
+function dedupeDebugSteps(steps: DebugProcessStep[]): DebugProcessStep[] {
+  const deduped: DebugProcessStep[] = [];
+  const indexBySignature = new Map<string, number>();
+  steps.forEach((step) => {
+    const signature = normalizeDebugStepSignature(step);
+    const existingIndex = indexBySignature.get(signature);
+    if (existingIndex === undefined) {
+      indexBySignature.set(signature, deduped.length);
+      deduped.push(step);
+      return;
+    }
+    deduped[existingIndex] = mergeDebugStep(deduped[existingIndex], step);
+  });
+  return deduped.sort((a, b) => Number(a.index || 0) - Number(b.index || 0));
 }
 
 function getDebugStepDurationMs(
@@ -810,14 +1009,28 @@ function collectStepScreenshots(step: DebugProcessStep): string[] {
 }
 
 function getDebugStepDetailText(step: DebugProcessStep): string {
-  const detail = {
-    message: step.message || undefined,
-    logs: step.logs && step.logs.length > 0 ? step.logs : undefined,
-    response: step.response || undefined,
-    raw_output: step.raw_output || undefined,
-  };
-  if (!detail.message && !detail.logs && !detail.response && !detail.raw_output) return '';
-  return stringifyDebugTaskDetail(detail);
+  const lines: string[] = [];
+  const name = normalizeDebugStepDisplayName(step.name || '') || cleanDebugLine(step.name || '') || '联调步骤';
+  const status = cleanDebugLine(step.status || '');
+  const subSteps = Array.isArray(step.sub_steps) ? step.sub_steps : [];
+  const screenshots = collectStepScreenshots(step);
+
+  lines.push(`步骤: ${name}`);
+  if (status) lines.push(`状态: ${status}`);
+  if (subSteps.length > 0) {
+    lines.push('子步骤:');
+    subSteps.forEach((subStep, index) => {
+      const subName = normalizeDebugStepDisplayName(subStep.name || subStep.message || '') || cleanDebugLine(subStep.name || subStep.message || '');
+      if (!subName) return;
+      const subStatus = cleanDebugLine(subStep.status || '');
+      lines.push(`  ${index + 1}. ${subName}${subStatus ? ` (${subStatus})` : ''}`);
+    });
+  }
+  if (screenshots.length > 0) {
+    lines.push(`截图: ${screenshots.length}`);
+  }
+
+  return lines.length > 1 ? lines.join('\n') : '';
 }
 
 function collectDebugImages(value: unknown): string[] {
@@ -870,15 +1083,7 @@ function collectDebugImages(value: unknown): string[] {
 }
 
 function compactProcessThinkingSteps(events: AgentProcessEvent[]): NonNullable<Message['thinking_steps']> {
-  const visibleEvents = events.filter((event) => event.visibility !== 'debug');
-  if (visibleEvents.length === 0) return [];
-  const isDebugFlow = visibleEvents.some((event) => {
-    const text = (event.label || '') + ' ' + (event.summary || '') + ' ' + (event.tool_name || '') + ' ' + (event.skill_name || '');
-    return event.ui_component?.type === 'debug_workbench'
-      || text.includes('debug_automation')
-      || text.includes('????')
-      || text.includes('??');
-  });
+  if (events.length === 0) return [];
 
   const buildStep = (
     key: string,
@@ -898,7 +1103,7 @@ function compactProcessThinkingSteps(events: AgentProcessEvent[]): NonNullable<M
       key,
       label,
       content: names.length > 0
-        ? fallbackSummary + '?' + names.slice(0, 4).join('?') + (names.length > 4 ? ' ?' + names.length + ' ?' : '')
+        ? `${fallbackSummary}：${names.slice(0, 4).join('、')}${names.length > 4 ? ` 等 ${names.length} 项` : ''}`
         : fallbackSummary,
       status: hasError ? 'error' as const : hasRunning ? 'loading' as const : 'completed' as const,
       started_at: groupedEvents[0]?.started_at ? new Date(groupedEvents[0].started_at).getTime() : undefined,
@@ -906,80 +1111,90 @@ function compactProcessThinkingSteps(events: AgentProcessEvent[]): NonNullable<M
     };
   };
 
-  const steps: NonNullable<Message['thinking_steps']> = [
-    buildStep('agent-route', '??????', visibleEvents.filter((event) => event.type === 'intent.detected' || event.type === 'context.prepared'), '????????????'),
-    buildStep('skill-flow', '?? Skill', visibleEvents.filter((event) => event.type.startsWith('skill.')), '?????????'),
-    buildStep('mcp-flow', '?? MCP', visibleEvents.filter((event) => event.type.startsWith('mcp.') || event.type === 'capability.checked'), '???????'),
-    buildStep('knowledge-flow', '????', visibleEvents.filter((event) => event.type.startsWith('knowledge.') || event.type.startsWith('web.')), '???????'),
-    buildStep('result-render', '????', visibleEvents.filter((event) => event.type === 'ui.component_rendered' || event.type === 'answer.final' || event.type === 'model.step'), '????????'),
+  const isDebugFlow = events.some((event) => {
+    const text = [event.label || '', event.summary || '', event.tool_name || '', event.skill_name || ''].filter(Boolean).join(' ');
+    return event.ui_component?.type === 'debug_workbench'
+      || event.visibility === 'debug'
+      || /debug_automation|mcp_debug|自动联调|联调/.test(text);
+  });
+
+  const genericSteps: NonNullable<Message['thinking_steps']> = [
+    buildStep('agent-route', '识别处理路径', events.filter((event) => event.type === 'intent.detected' || event.type === 'context.prepared'), '已识别为当前问题并整理处理路径'),
+    buildStep('skill-flow', '调用 Skill', events.filter((event) => event.type.startsWith('skill.')), '已匹配可复用的处理能力'),
+    buildStep('mcp-flow', '调用 MCP', events.filter((event) => event.type.startsWith('mcp.') || event.type === 'capability.checked'), '已调用外部能力进行核验'),
+    buildStep('knowledge-flow', '查询知识', events.filter((event) => event.type.startsWith('knowledge.') || event.type.startsWith('web.')), '已查询可用知识与参考'),
+    buildStep('result-render', '生成回复', events.filter((event) => event.type === 'ui.component_rendered' || event.type === 'answer.final' || event.type === 'model.step'), '已整理为可读结果'),
   ].filter((step): step is NonNullable<Message['thinking_steps']>[number] => Boolean(step));
 
-  if (isDebugFlow) {
-    const createEvents = visibleEvents.filter((event) => {
-      const text = (event.label || '') + ' ' + (event.summary || '') + ' ' + (event.tool_name || '') + ' ' + (event.skill_name || '');
-      return text.includes('intent.detected')
-        || text.includes('context.prepared')
-        || text.includes('debug_automation_create_task')
-        || text.includes('debug_automation_start_task')
-        || text.includes('mcp_debug_start_task')
-        || text.includes('start_task')
-        || text.includes('??????');
-    });
-    const observeEvents = visibleEvents.filter((event) => {
-      const text = (event.label || '') + ' ' + (event.summary || '') + ' ' + (event.tool_name || '') + ' ' + (event.skill_name || '');
-      return text.includes('debug_automation_get_steps')
-        || text.includes('debug_automation_get_result')
-        || text.includes('mcp_debug_watch_steps')
-        || text.includes('watch_steps')
-        || text.includes('??????')
-        || text.includes('debug_workbench')
-        || event.ui_component?.type === 'debug_workbench';
-    });
-    const summarize = (
-      key: string,
-      label: string,
-      phaseEvents: AgentProcessEvent[],
-      runningText: string,
-      doneText: string,
-    ): NonNullable<Message['thinking_steps']>[number] | null => {
-      if (phaseEvents.length === 0) return null;
-      const hasError = phaseEvents.some((event) => event.status === 'error' || event.status === 'rejected');
-      const hasRunning = phaseEvents.some((event) => event.status === 'running' || event.status === 'waiting');
-      const duration = phaseEvents.reduce((sum, event) => sum + (event.duration_ms || 0), 0);
-      const lastSummary = phaseEvents
-        .map((event) => cleanDebugLine(event.summary || event.label || event.tool_name || ''))
-        .filter(Boolean)
-        .pop() || '';
-      const startedAt = phaseEvents.find((event) => event.started_at)?.started_at;
-      return {
-        key,
-        label,
-        content: hasRunning ? runningText : lastSummary || doneText,
-        status: hasError ? 'error' as const : hasRunning ? 'loading' as const : 'completed' as const,
-        started_at: startedAt ? new Date(String(startedAt)).getTime() : undefined,
-        duration_ms: duration || undefined,
-      };
-    };
-
-    const createSummary = summarize(
-      'debug-create-task',
-      '??????',
-      createEvents.length > 0 ? createEvents : visibleEvents.slice(0, Math.max(1, Math.ceil(visibleEvents.length / 2))),
-      '????????',
-      '???????',
-    );
-    const observeSummary = summarize(
-      'debug-observe-process',
-      '??????',
-      observeEvents.length > 0 ? observeEvents : visibleEvents.slice(Math.max(1, Math.floor(visibleEvents.length / 2))),
-      '????????',
-      '???????',
-    );
-    if (createSummary) steps.push(createSummary);
-    if (observeSummary) steps.push(observeSummary);
+  if (!isDebugFlow) {
+    return genericSteps.length > 0 ? genericSteps : events.slice(0, 5).map((event) => thinkingStepFromProcessEvent(event));
   }
 
-  return steps.length > 0 ? steps : visibleEvents.slice(0, 5).map((event) => thinkingStepFromProcessEvent(event));
+  const debugEvents = events.filter((event) => {
+    const text = [event.label || '', event.summary || '', event.tool_name || ''].filter(Boolean).join(' ');
+    return event.ui_component?.type === 'debug_workbench'
+      || event.visibility === 'debug'
+      || /debug_automation|mcp_debug|自动联调|联调/.test(text);
+  });
+
+  const uniqueDebugEvents = debugEvents.filter((event, index, array) => {
+    const text = [event.label || '', event.summary || '', event.tool_name || '', event.skill_name || '', event.type || ''].filter(Boolean).join('|').toLowerCase();
+    return array.findIndex((other) => [other.label || '', other.summary || '', other.tool_name || '', other.skill_name || '', other.type || ''].filter(Boolean).join('|').toLowerCase() === text) === index;
+  });
+
+  const createEvents = uniqueDebugEvents.filter((event) => {
+    const text = [event.label || '', event.summary || '', event.tool_name || ''].filter(Boolean).join(' ');
+    return /debug_automation_create_task|debug_automation_start_task|mcp_debug_start_task|start_task|创建联调任务|发起联调/.test(text);
+  });
+  const observeEvents = uniqueDebugEvents.filter((event) => {
+    const text = [event.label || '', event.summary || '', event.tool_name || ''].filter(Boolean).join(' ');
+    return /debug_automation_get_steps|debug_automation_get_result|mcp_debug_watch_steps|watch_steps|观测联调|联调步骤/.test(text)
+      || event.ui_component?.type === 'debug_workbench';
+  });
+
+  const summarizePhase = (
+    key: string,
+    label: string,
+    phaseEvents: AgentProcessEvent[],
+    runningText: string,
+    doneText: string,
+  ): NonNullable<Message['thinking_steps']>[number] | null => {
+    if (phaseEvents.length === 0) return null;
+    const hasError = phaseEvents.some((event) => event.status === 'error' || event.status === 'rejected');
+    const hasRunning = phaseEvents.some((event) => event.status === 'running' || event.status === 'waiting');
+    const duration = phaseEvents.reduce((sum, event) => sum + (event.duration_ms || 0), 0);
+    const lastSummary = phaseEvents.map((event) => cleanDebugLine(event.summary || event.label || event.tool_name || '')).filter(Boolean).pop() || '';
+    const startedAt = phaseEvents.find((event) => event.started_at)?.started_at;
+    return {
+      key,
+      label,
+      content: hasRunning ? runningText : lastSummary || doneText,
+      status: hasError ? 'error' as const : hasRunning ? 'loading' as const : 'completed' as const,
+      started_at: startedAt ? new Date(String(startedAt)).getTime() : undefined,
+      duration_ms: duration || undefined,
+    };
+  };
+
+  const createSummary = summarizePhase(
+    'debug-create-task',
+    '创建联调任务',
+    createEvents.length > 0 ? createEvents : uniqueDebugEvents.slice(0, Math.max(1, Math.ceil(uniqueDebugEvents.length / 2))),
+    '联调任务已发起',
+    '联调任务已创建',
+  );
+  const observeSummary = summarizePhase(
+    'debug-observe-process',
+    '观测联调过程',
+    observeEvents.length > 0 ? observeEvents : uniqueDebugEvents.slice(Math.max(1, Math.floor(uniqueDebugEvents.length / 2))),
+    '正在观测联调步骤',
+    '联调步骤已返回',
+  );
+
+  return [
+    ...uniqueDebugEvents.map((event) => thinkingStepFromProcessEvent(event)),
+    ...(createSummary ? [createSummary] : []),
+    ...(observeSummary ? [observeSummary] : []),
+  ];
 }
 function stripInlineSourceSection(content: string): string {
   const lines = content.split('\n');
@@ -1177,7 +1392,6 @@ function ThinkingChain({
       return next;
     });
   };
-  const totalDuration = steps.reduce((sum, step) => sum + (step.duration_ms || 0), 0);
   const running = steps.some((step) => step.status === 'loading');
   const items = steps.map((step, index) => {
     const itemKey = step.key || `${step.label}-${index}`;
@@ -1252,11 +1466,7 @@ function ThinkingChain({
           )}
         </div>
       ) : undefined,
-      footer: (
-        <span style={{ color: c.textMuted, fontSize: 10 }}>
-          {formatDebugDuration(step.status === 'loading' ? now - (step.started_at || Date.now()) : step.duration_ms || 0)}
-        </span>
-      ),
+      footer: undefined,
     };
   });
 
@@ -1266,7 +1476,7 @@ function ThinkingChain({
         marginBottom: 8,
         borderRadius: 14,
         border: `1px solid ${c.borderFaint}`,
-        background: expanded ? '#fff' : c.accentBgFaint,
+        background: '#fff',
         overflow: 'visible',
       }}
     >
@@ -1279,10 +1489,8 @@ function ThinkingChain({
           alignItems: 'center',
           gap: 8,
           padding: '8px 12px',
-          position: expanded ? 'sticky' : 'static',
-          top: 0,
-          zIndex: 8,
-          background: expanded ? '#fff' : c.accentBgFaint,
+          position: 'static',
+          background: c.accentBgFaint,
           border: 'none',
           borderBottom: expanded ? `1px solid ${c.borderFaint}` : 'none',
           cursor: 'pointer',
@@ -1309,7 +1517,6 @@ function ThinkingChain({
           </span>
         )}
         <span style={{ color: c.textMuted }}>{running ? '正在思考' : `完成 ${steps.length} 步`}</span>
-        {totalDuration > 0 && <span style={{ color: c.textMuted }}>{formatDebugDuration(totalDuration)}</span>}
         <span style={{ marginLeft: 'auto', color: c.textMuted, fontSize: 10 }}>
           {expanded ? '收起' : '展开'}
         </span>
@@ -1958,7 +2165,6 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
   const [expanded, setExpanded] = useState(false);
   const [expandedStepKeys, setExpandedStepKeys] = useState<Set<string>>(new Set());
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [now, setNow] = useState(Date.now());
   const parsedSteps = normalizeMcpDebugSteps(payload);
   const taskDetailText = '';
   const detailTextForFallback = stringifyDebugTaskDetail(payload.task_detail);
@@ -1983,6 +2189,7 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
     return !status.includes('success') && !status.includes('done') && step.available !== true ? index : latest;
   }, -1));
   const hasRunningStep = steps.some((step, index) => normalizeDebugStatus(step, index, latestActiveIndex) === 'running');
+  const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!hasRunningStep) return undefined;
     const timer = window.setInterval(() => setNow(Date.now()), 500);
@@ -2001,8 +2208,8 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
   const currentSubStep = currentStep.sub_steps?.find((item) => String(item.status || '').toLowerCase().includes('running'))
     || currentStep.sub_steps?.[currentStep.sub_steps.length - 1];
   const currentLabel = outcome.state === 'failed'
-    ? `卡在：${cleanDebugLine(currentSubStep?.name || currentSubStep?.message || currentStep.message || currentStep.name) || currentStep.name || '联调步骤'}`
-    : cleanDebugLine(currentSubStep?.name || currentSubStep?.message || currentStep.message || currentStep.name) || '准备联调';
+    ? `卡在：${extractDebugStepDisplayName(currentSubStep?.name || currentSubStep?.message || currentStep.message || currentStep.name) || '联调步骤'}`
+    : extractDebugStepDisplayName(currentSubStep?.name || currentSubStep?.message || currentStep.message || currentStep.name) || '准备联调';
   const isRunning = String(payload.status || '').toLowerCase() !== 'blocked'
     && hasRunningStep
     && outcome.state === 'running';
@@ -2036,7 +2243,7 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
         marginBottom: 8,
         borderRadius: 14,
         border: `1px solid ${c.borderFaint}`,
-        background: expanded ? '#fff' : c.accentBgFaint,
+        background: '#fff',
         overflow: 'hidden',
       }}
     >
@@ -2049,7 +2256,7 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
           alignItems: 'center',
           gap: 8,
           padding: '8px 12px',
-          background: expanded ? '#fff' : c.accentBgFaint,
+          background: c.accentBgFaint,
           border: 'none',
           borderBottom: expanded ? `1px solid ${c.borderFaint}` : 'none',
           cursor: 'pointer',
@@ -2179,7 +2386,12 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
                       cursor: 'zoom-in',
                     }}
                   >
-                    <img src={src} alt="运行截图" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img
+                      src={src}
+                      alt="运行截图"
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   </button>
                 ))}
               </div>
@@ -2216,14 +2428,15 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
           )}
           {steps.map((step, index) => {
             const normalizedStatus = normalizeDebugStatus(step, index, latestActiveIndex);
-            const subSteps = step.sub_steps?.length ? step.sub_steps : [{ name: step.message || step.name, status: step.status }];
+            const subSteps = step.sub_steps?.length ? step.sub_steps : [];
             const screenshots = collectStepScreenshots(step);
-            const stepKey = step.key || `${step.name}-${index}`;
+            const stepKey = `${step.key || step.name || 'step'}-${index}`;
             const stepDetailText = getDebugStepDetailText(step);
             const isStepExpanded = expandedStepKeys.has(stepKey);
             const failureReason = normalizedStatus === 'error'
-              ? cleanDebugLine(step.message || outcome.reason)
+              ? extractDebugStepDisplayName(step.message || outcome.reason)
               : '';
+            const displayStepName = normalizeDebugStepDisplayName(step.name || '') || step.name || '';
             return (
               <div
                 key={stepKey}
@@ -2241,8 +2454,8 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
                 </span>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, fontSize: 10, color: c.textPrimary, fontWeight: 650 }}>
-                    <span style={{ color: c.textMuted }}>{step.index || index + 1}.</span>
-                    <span style={{ flex: 1, minWidth: 0, whiteSpace: 'normal', wordBreak: 'break-word' }}>{step.name || '联调步骤'}</span>
+                    <span style={{ color: c.textMuted }}>{index + 1}.</span>
+                    <span style={{ flex: 1, minWidth: 0, whiteSpace: 'normal', wordBreak: 'break-word' }}>{displayStepName}</span>
                     {stepDetailText && (
                       <button
                         type="button"
@@ -2277,6 +2490,10 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
                   <div style={{ marginTop: 5, display: 'grid', gap: 4 }}>
                     {subSteps.map((subStep, subIndex) => {
                       const subStatus = normalizeDebugSubStatus(subStep, normalizedStatus);
+                      const displaySubStepName = normalizeDebugStepDisplayName(
+                        subStep.name || subStep.message || step.message,
+                      );
+                      if (!displaySubStepName) return null;
                       return (
                       <div key={`${step.key || index}-${subIndex}`} style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, fontSize: 10, color: c.textSecondary }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 12, flexShrink: 0 }}>
@@ -2284,7 +2501,7 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
                         </span>
                         <span style={{ color: c.textMuted, flexShrink: 0 }}>{subIndex + 1}.</span>
                         <span style={{ minWidth: 0, whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                          {cleanDebugLine(subStep.name || subStep.message) || cleanDebugLine(step.message) || '处理中'}
+                          {displaySubStepName}
                         </span>
                       </div>
                       );
@@ -2309,7 +2526,12 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
                             cursor: 'zoom-in',
                           }}
                         >
-                          <img src={src} alt="运行截图" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <img
+                            src={src}
+                            alt="运行截图"
+                            loading="lazy"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
                         </button>
                       ))}
                     </div>
@@ -2331,7 +2553,7 @@ function DebugProcessStrip({ payload, collapseToken }: { payload: DebugProcessPa
         footer={null}
         centered
         width={920}
-        destroyOnClose
+        destroyOnHidden
         styles={{
           body: { padding: 12, background: '#0b1220' },
         }}
@@ -3891,16 +4113,19 @@ export default function ChatContainer({
         ? msg.metadata.process_events as NonNullable<Message['process_events']>
         : [];
     const processThinkingSteps = compactProcessThinkingSteps(processEvents);
+    const workflowThinkingSteps = msg.role === 'assistant' ? getDebugThinkingStepsFromWorkflowResult(msg) : [];
     const processToolCalls = processEvents
       .map((event) => toolCallFromProcessEvent(event))
       .filter((event): event is NonNullable<ReturnType<typeof toolCallFromProcessEvent>> => Boolean(event));
-    const ownThinkingSteps = processThinkingSteps.length > 0
-      ? processThinkingSteps
-      : Array.isArray(msg.thinking_steps) && msg.thinking_steps.length > 0
-        ? msg.thinking_steps.slice(0, 8)
-        : msg.thinking
-          ? [{ label: '模型思考', content: String(msg.thinking), status: 'completed' as const }]
-          : [];
+    const ownThinkingSteps = Array.isArray(msg.thinking_steps) && msg.thinking_steps.length > 0
+      ? msg.thinking_steps
+      : processThinkingSteps.length > 0
+        ? processThinkingSteps
+        : workflowThinkingSteps.length > 0
+          ? workflowThinkingSteps
+          : msg.thinking
+            ? [{ label: '模型思考', content: String(msg.thinking), status: 'completed' as const }]
+            : [];
     const thinkingSteps = ownThinkingSteps.length > 0
       ? ownThinkingSteps
       : msg.role === 'assistant' && index === messages.length - 1 && !suppressContextThinking
@@ -4374,3 +4599,4 @@ export default function ChatContainer({
     </>
   );
 }
+

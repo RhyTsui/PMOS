@@ -23,6 +23,112 @@ export type OwnerType = 'xiaoqiao' | 'sub-agent' | 'human-escalation';
 /** 消息类型 (数据对象真源 §4.3) */
 export type MessageType = 'user_input' | 'assistant_reply' | 'clarification' | 'system_notice' | 'workflow_summary';
 
+export type ProcessEventStatus = 'running' | 'success' | 'error' | 'waiting' | 'rejected';
+
+export type ProcessEventVisibility = 'user' | 'internal' | 'debug';
+
+export type ProcessEventType =
+  | 'intent.detected'
+  | 'context.prepared'
+  | 'capability.checked'
+  | 'clarify.requested'
+  | 'clarify.submitted'
+  | 'skill.selected'
+  | 'skill.started'
+  | 'skill.step'
+  | 'skill.finished'
+  | 'skill.failed'
+  | 'mcp.tool_call'
+  | 'mcp.tool_result'
+  | 'mcp.tool_error'
+  | 'knowledge.search'
+  | 'knowledge.result'
+  | 'knowledge.rejected'
+  | 'web.search'
+  | 'web.result'
+  | 'model.step'
+  | 'source.attached'
+  | 'ui.component_rendered'
+  | 'answer.delta'
+  | 'answer.final';
+
+export interface SourceRef {
+  id?: string;
+  title: string;
+  source: string;
+  url?: string;
+  source_type: 'knowledge_base' | 'report_mcp' | 'mcp' | 'skill' | 'web_search' | 'manual';
+  report_name?: string;
+  icon?: 'knowledge' | 'report_mcp' | 'mcp' | 'skill' | 'web_search' | 'manual' | string;
+  snippet?: string;
+  prompt?: string;
+  status?: ProcessEventStatus;
+}
+
+export interface AgentProcessEvent {
+  id: string;
+  run_id?: string;
+  conversation_id?: string;
+  message_id?: string;
+  type: ProcessEventType;
+  label: string;
+  status: ProcessEventStatus;
+  visibility: ProcessEventVisibility;
+  summary?: string;
+  started_at: string;
+  completed_at?: string;
+  duration_ms?: number;
+  agent?: AgentType | string;
+  intent_type?: IntentType | string;
+  skill_id?: string;
+  skill_name?: string;
+  tool_name?: string;
+  provider?: string;
+  source_refs?: SourceRef[];
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  prompt?: string;
+  ui_component?: {
+    type:
+      | 'clarification_form'
+      | 'metric_explainer'
+      | 'debug_workbench'
+      | 'inspection_result'
+      | 'diagnosis_report'
+      | 'tracking_link_card'
+      | 'report_template'
+      | 'data_preview'
+      | 'source_detail'
+      | string;
+    title?: string;
+    payload?: Record<string, unknown>;
+  };
+}
+
+export interface SkillContract {
+  skill_id: string;
+  name: string;
+  description?: string;
+  category: 'help' | 'diagnosis' | 'debugging' | 'report' | 'monitor' | 'integration' | 'analysis';
+  priority?: 'P0' | 'P1' | 'P2' | 'P3';
+  enabled?: boolean;
+  version?: string;
+  intent_triggers: string[];
+  input_schema: Record<string, unknown>;
+  clarification_schema?: Record<string, unknown>;
+  workflow_steps: Array<{
+    key: string;
+    label: string;
+    tool_bindings?: string[];
+    ui_component?: string;
+  }>;
+  output_schema: Record<string, unknown>;
+  evaluation_cases: string[];
+  risk_guardrails?: string[];
+  created_at?: number;
+  updated_at?: number;
+}
+
 /** 置信度 (数据对象真源 §7) */
 export type ConfidenceLevel = 'high' | 'medium' | 'low';
 
@@ -30,7 +136,7 @@ export type ConfidenceLevel = 'high' | 'medium' | 'low';
 export type EvidenceSourceType = 'upload' | 'knowledge' | 'media-data' | 'callback-log' | 'client-log' | 'report';
 
 /** 附件种类 (会话支撑能力设计 §6.1) */
-export type AttachmentKind = 'image' | 'document' | 'table' | 'log';
+export type AttachmentKind = 'image' | 'video' | 'document' | 'table' | 'log';
 
 /** 附件上传状态 (会话支撑能力设计 §8.2) */
 export type AttachmentStatus = 'uploading' | 'uploaded' | 'parsing' | 'parsed' | 'upload_failed' | 'parse_failed';
@@ -85,6 +191,8 @@ export interface Message {
   attachments?: AttachmentRecord[];
   /** Agent 运行时元数据: thinking/tool_calls/route 等 */
   metadata?: Record<string, unknown>;
+  /** 统一 Agent 运行时事件：Skill / MCP / 知识库 / 来源 / 组件 / 回答 */
+  process_events?: AgentProcessEvent[];
   /** 思考过程内容 (来自SSE thinking事件) */
   thinking?: string;
   /** 思考步骤列表 (结构化) */
@@ -93,12 +201,24 @@ export interface Message {
     label: string;
     content: string;
     status: 'loading' | 'completed' | 'error';
+    started_at?: number;
     duration_ms?: number;
     input?: Record<string, unknown>;
     output?: Record<string, unknown>;
   }[];
   /** 工具调用列表 (来自SSE tool_call事件) */
-  tool_calls?: { name: string; type?: string; status?: string; arguments?: string; result?: string }[];
+  tool_calls?: {
+    name: string;
+    type?: string;
+    kind?: 'skill' | 'mcp' | 'knowledge' | 'web_search' | 'model' | string;
+    status?: string;
+    arguments?: string;
+    result?: string;
+    display_name?: string;
+    provider_url?: string;
+    prompt?: string;
+    step_key?: string;
+  }[];
   /** 缺失字段 (来自SSE done事件) */
   missing_fields?: MissingField[];
   /** 证据ID列表 */
@@ -454,6 +574,36 @@ export interface DebugAutomationConfig {
   vision_provider: string;
   adb_path?: string;
   app_package?: string;
+  media_config?: {
+    username?: string;
+    password?: string;
+    default_account?: string;
+    event_asset_url?: string;
+    postback_result_view?: string;
+    aadvid?: string;
+    target_channel?: string;
+  };
+  channel_config?: {
+    app_package?: string;
+    app_activity?: string;
+    deeplink?: string;
+    auth_keyword?: string;
+    feed_keyword?: string;
+    action_keyword?: string;
+    max_swipe_count?: number;
+    keyword_settle_seconds?: number;
+    install_password?: string;
+    game_package?: string;
+  };
+  game_config?: {
+    package_name?: string;
+    login_type?: string;
+    account?: string;
+    password?: string;
+  };
+  mobile_env?: {
+    device_id?: string;
+  };
   keywords_json: string;
   timeouts_json: string;
   is_active: boolean;
@@ -605,6 +755,8 @@ export type MemorySource = 'auto_extract' | 'user_input' | 'agent_summary' | 'sy
 /** 全局记忆条目 */
 export interface MemoryEntry {
   id: string;
+  /** 用户 ID */
+  user_id?: string;
   /** 记忆内容 */
   content: string;
   /** 记忆类型 */

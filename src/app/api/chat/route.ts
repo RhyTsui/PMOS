@@ -1427,7 +1427,10 @@ async function executeDebugAutomationMcpStep(
       result: parseDebugMcpPayload(finalResult?.response),
     },
   });
-  for (let attempt = 0; attempt < 30; attempt += 1) {
+  const maxAttempts = 120;
+  let stableTerminalCount = 0;
+  let lastSnapshotCount = -1;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     [taskResult, stepsResult, finalResult] = await Promise.all([
       taskTool ? callMcpTool(server, taskTool, { task_id: taskId }) : Promise.resolve(null),
       callMcpTool(server, stepsTool, { task_id: taskId }),
@@ -1439,7 +1442,8 @@ async function executeDebugAutomationMcpStep(
     const parsedResult = parseDebugMcpPayload(finalResult?.response);
     const rawSteps = extractDebugAutomationStepRecords(parsedSteps);
     const status = readDebugAutomationStatus(parsedResult, parsedTask, parsedSteps);
-    if (rawSteps.length !== latestStepCount || attempt === 0 || /success|failed|error|complete|done|manual/.test(status)) {
+    const isTerminalStatus = /success|failed|error|complete|done|manual/.test(status);
+    if (rawSteps.length !== latestStepCount || attempt === 0 || isTerminalStatus) {
       latestStepCount = rawSteps.length;
       options?.onSnapshot?.({
         ...step,
@@ -1450,7 +1454,13 @@ async function executeDebugAutomationMcpStep(
         output: buildWatchOutput(),
       });
     }
-    if (/success|failed|error|complete|done|manual/.test(status)) break;
+    if (rawSteps.length === lastSnapshotCount && isTerminalStatus) {
+      stableTerminalCount += 1;
+    } else {
+      stableTerminalCount = 0;
+    }
+    lastSnapshotCount = rawSteps.length;
+    if (isTerminalStatus && stableTerminalCount >= 2) break;
     await delay(2500);
   }
   if (isDebugMcpError(stepsResult)) {

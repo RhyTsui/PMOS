@@ -114,18 +114,21 @@ function DataPreview({ label, data }: { label: string; data?: Record<string, unk
         <div style={{
           marginTop: 4,
           padding: '8px 10px',
-          background: c.codeBg,
+          background: '#f8fafc',
           borderRadius: 6,
           border: `1px solid ${c.borderFaint}`,
           fontSize: 11,
           fontFamily: 'JetBrains Mono, monospace',
-          color: c.textSecondary,
+          color: '#1f2937',
           lineHeight: 1.6,
           maxHeight: 160,
+          width: '100%',
+          maxWidth: '100%',
+          overflowX: 'auto',
           overflowY: 'auto',
           position: 'relative',
         }}>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+          <pre style={{ margin: 0, minWidth: 'max-content', whiteSpace: 'pre' }}>
             {JSON.stringify(data, null, 2)}
           </pre>
           <div style={{ position: 'absolute', top: 4, right: 4 }}>

@@ -62,13 +62,15 @@ export async function apiFetch<T>(
   const url = activeMode === 'demo'
     ? `/api/xiaoqiao${path}`
     : `${baseUrl}/api/v1/xiaoqiao${path}`;
+  const isFormData = typeof FormData !== 'undefined' && fetchOpts.body instanceof FormData;
+  const headers = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(fetchOpts.headers || {}),
+  };
 
   const res = await fetch(url, {
     ...fetchOpts,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(fetchOpts.headers || {}),
-    },
+    headers,
   });
 
   if (!res.ok) {
@@ -147,7 +149,7 @@ export const conversationApi = {
     }),
   getMessages: (id: string) =>
     apiFetch<Message[]>(`/conversations/${id}/messages`),
-  sendMessage: (id: string, data: { content: string; role?: 'user' | 'assistant'; message_type?: string; attachments?: string[] }) =>
+  sendMessage: (id: string, data: Partial<Message> & { content: string; role?: 'user' | 'assistant'; message_type?: string; attachments?: string[] }) =>
     apiFetch<Message>(`/conversations/${id}/messages`, {
       method: 'POST',
       body: JSON.stringify(data),

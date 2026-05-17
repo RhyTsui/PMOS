@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const result = await discoverMcpServer({
       endpoint_url: String(body.endpoint_url || ''),
+      transport: body.transport || 'streamable-http',
       auth_type: body.auth_type || 'none',
       auth_config: (body.auth_config || {}) as Record<string, string>,
     });

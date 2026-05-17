@@ -1,8 +1,8 @@
 'use client';
 
 import { YkPorjectSelect } from '@yoka-ui/ui';
-import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { useMemo } from 'react';
 
 export interface YkProjectOption {
   label: string;
@@ -31,26 +31,27 @@ export default function YkProjectSelect({
   followedCallback,
   slot,
   customShow,
+  maxVisibleItems,
 }: YkProjectSelectProps) {
-  const [instanceKey, setInstanceKey] = useState(0);
-
   const normalizedOptions = useMemo(
-    () => options.map((item) => ({ ...item, closed: false })),
+    () => options.map((item) => ({ ...item, closed: item.closed ?? false })),
     [options],
   );
 
+  const shellStyle = {
+    '--project-select-visible-items': maxVisibleItems || 9,
+  } as CSSProperties;
+
   return (
+    <span className="yoka-project-selector-shell" style={shellStyle}>
     <YkPorjectSelect
-      key={instanceKey}
       value={value}
       options={normalizedOptions}
-      onChange={(nextValue) => {
-        onChange(nextValue);
-        setInstanceKey((prev) => prev + 1);
-      }}
+      onChange={onChange}
       followedCallback={followedCallback}
       slot={slot}
       customShow={customShow}
     />
+    </span>
   );
 }

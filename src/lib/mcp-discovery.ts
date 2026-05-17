@@ -1,7 +1,8 @@
-import type { McpAuthType, McpToolConfig } from '@/types';
+import type { McpAuthType, McpServerConfig, McpToolConfig } from '@/types';
 
 export interface McpDiscoveryInput {
   endpoint_url: string;
+  transport?: McpServerConfig['transport'];
   auth_type: McpAuthType;
   auth_config: Record<string, string>;
 }
@@ -45,6 +46,13 @@ function buildHeaders(input: McpDiscoveryInput): Record<string, string> {
     headers['X-API-Key'] = input.auth_config.api_key;
   }
 
+  return headers;
+}
+
+function buildSseHeaders(input: McpDiscoveryInput): Record<string, string> {
+  const headers = buildHeaders(input);
+  delete headers['Content-Type'];
+  headers.Accept = 'text/event-stream';
   return headers;
 }
 
@@ -95,6 +103,86 @@ async function postNotification(
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function resolveSseMessageEndpoint(
+  endpoint: string,
+  input: McpDiscoveryInput,
+  timeoutMs: number,
+): Promise<{ endpoint: string; rawText: string }> {
+  const { controller, timer } = createTimeoutController(timeoutMs);
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  try {
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: buildSseHeaders(input),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(`SSE HTTP ${response.status}: ${text.slice(0, 160)}`);
+    }
+
+    if (!response.body) {
+      throw new Error('SSE 响应没有可读取的事件流');
+    }
+
+    reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      buffer += decoder.decode(chunk.value, { stream: true });
+
+      const endpointEvent = parseSseEndpointEvent(buffer);
+      if (endpointEvent) {
+        return {
+          endpoint: new URL(endpointEvent, endpoint).toString(),
+          rawText: buffer.slice(0, 300),
+        };
+      }
+
+      if (buffer.length > 4096) {
+        buffer = buffer.slice(-2048);
+      }
+    }
+
+    throw new Error('SSE 事件流未返回消息端点');
+  } finally {
+    clearTimeout(timer);
+    await reader?.cancel().catch(() => undefined);
+  }
+}
+
+function parseSseEndpointEvent(rawText: string): string | null {
+  const events = rawText.split(/\n\n|\r\n\r\n/);
+  for (const eventText of events) {
+    const lines = eventText.split(/\r?\n/);
+    const eventName = lines
+      .find(line => line.startsWith('event:'))
+      ?.slice(6)
+      .trim();
+    const data = lines
+      .filter(line => line.startsWith('data:'))
+      .map(line => line.slice(5).trim())
+      .join('\n')
+      .trim();
+
+    if (!data) continue;
+    if (eventName === 'endpoint') return data;
+
+    try {
+      const parsed = JSON.parse(data) as { endpoint?: unknown; url?: unknown; messageEndpoint?: unknown };
+      const candidate = parsed.endpoint || parsed.messageEndpoint || parsed.url;
+      if (typeof candidate === 'string' && candidate.trim()) return candidate.trim();
+    } catch {
+      if (/^\/|^https?:\/\//i.test(data)) return data;
+    }
+  }
+  return null;
 }
 
 function parseJsonRpcResponse(rawText: string): JsonRpcEnvelope | null {
@@ -203,6 +291,7 @@ function extractRawTools(resultBody: Record<string, unknown>): unknown[] {
 
 export async function discoverMcpServer(input: McpDiscoveryInput): Promise<McpDiscoveryResult> {
   const startTime = Date.now();
+  const transport = input.transport || 'streamable-http';
 
   if (!input.endpoint_url) {
     return {
@@ -213,7 +302,38 @@ export async function discoverMcpServer(input: McpDiscoveryInput): Promise<McpDi
     };
   }
 
+  if (transport === 'stdio') {
+    return {
+      ok: false,
+      msg: '后台连通测试暂不支持 stdio MCP，请使用 SSE 或 streamable-http。',
+      latency_ms: 0,
+      tools: [],
+    };
+  }
+
   const headers = buildHeaders(input);
+  let rpcEndpoint = input.endpoint_url;
+  let ssePreview = '';
+
+  if (transport === 'sse') {
+    try {
+      const resolved = await resolveSseMessageEndpoint(input.endpoint_url, input, 8000);
+      rpcEndpoint = resolved.endpoint;
+      ssePreview = resolved.rawText;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        ok: false,
+        msg: message.includes('abort')
+          ? 'SSE 连接超时(8s)，请检查后台填写的完整 SSE URL 是否正确。'
+          : `SSE 连接失败: ${message}`,
+        latency_ms: Date.now() - startTime,
+        tools: [],
+        raw_response_preview: ssePreview,
+      };
+    }
+  }
+
   const initRequest = {
     jsonrpc: '2.0',
     id: 1,
@@ -233,7 +353,7 @@ export async function discoverMcpServer(input: McpDiscoveryInput): Promise<McpDi
   let initText = '';
 
   try {
-    const initResult = await postJsonRpc(input.endpoint_url, headers, initRequest, 8000);
+    const initResult = await postJsonRpc(rpcEndpoint, headers, initRequest, 8000);
     initResponse = initResult.response;
     initEnvelope = initResult.envelope;
     initText = initResult.rawText;
@@ -287,21 +407,22 @@ export async function discoverMcpServer(input: McpDiscoveryInput): Promise<McpDi
   const sessionId = initResponse.headers.get(MCP_SESSION_HEADER);
   const toolHeaders = sessionId ? { ...headers, [MCP_SESSION_HEADER]: sessionId } : headers;
 
-  await postNotification(input.endpoint_url, toolHeaders, {
+  await postNotification(rpcEndpoint, toolHeaders, {
     jsonrpc: '2.0',
     method: 'notifications/initialized',
     params: {},
   }, 3000);
 
-  const tools = await listAllTools(input.endpoint_url, toolHeaders, capabilities);
+  const tools = await listAllTools(rpcEndpoint, toolHeaders, capabilities);
 
   return {
     ok: true,
     msg: `连接成功${serverInfo?.name ? ` - ${String(serverInfo.name)}` : ''}${serverInfo?.version ? ` v${String(serverInfo.version)}` : ''}`,
     latency_ms,
     tools,
-    server_info: serverInfo,
+    server_info: { ...serverInfo, transport, rpcEndpoint: transport === 'sse' ? rpcEndpoint : undefined },
     capabilities: Object.keys(capabilities),
+    raw_response_preview: ssePreview || undefined,
   };
 }
 

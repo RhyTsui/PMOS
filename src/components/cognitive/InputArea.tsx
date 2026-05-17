@@ -2,19 +2,18 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tooltip, notification } from 'antd';
-import { ArrowUp, Keyboard, Mic, Paperclip, X } from 'lucide-react';
-import type { AgentType } from '@/types';
+import { ArrowUp, File as FileIcon, FileText, ImageIcon, Keyboard, Loader2, Mic, Paperclip, PlayCircle, Table, X } from 'lucide-react';
+import type { AgentType, AttachmentRecord, AttachmentKind } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const AGENT_OPTIONS: Array<{
   key: AgentType;
   label: string;
-  colorVar: string;
 }> = [
-  { key: 'demand', label: '需求跟踪', colorVar: '--flow-demand' },
-  { key: 'diagnosis', label: '排查记录', colorVar: '--flow-diagnosis' },
-  { key: 'debugging', label: '联调记录', colorVar: '--aifs-success' },
+  { key: 'demand', label: '需求跟踪' },
+  { key: 'diagnosis', label: '排查记录' },
+  { key: 'debugging', label: '联调记录' },
 ];
 
 interface ReferencedAsset {
@@ -39,6 +38,26 @@ interface InputAreaProps {
   placeholder?: string;
   hideAgentOptions?: boolean;
   onOpenAgentPanel?: (agent: AgentType) => void;
+  attachments?: AttachmentRecord[];
+  onRemoveAttachment?: (attachmentId: string) => void;
+  onRetryAttachment?: (attachmentId: string) => void;
+  onPreviewAttachment?: (attachment: AttachmentRecord) => void;
+}
+
+const attachmentIconMap: Record<AttachmentKind, typeof FileIcon> = {
+  image: ImageIcon,
+  video: PlayCircle,
+  document: FileText,
+  table: Table,
+  log: FileIcon,
+};
+
+function shortenFileName(name: string) {
+  if (name.length <= 10) return name;
+  const dotIndex = name.lastIndexOf('.');
+  const ext = dotIndex > 0 ? name.slice(dotIndex) : '';
+  const baseLength = Math.max(4, 10 - ext.length);
+  return `${name.slice(0, baseLength)}...${ext}`;
 }
 
 export default function InputArea({
@@ -56,6 +75,10 @@ export default function InputArea({
   placeholder = '发消息或按住说话',
   hideAgentOptions = false,
   onOpenAgentPanel,
+  attachments = [],
+  onRemoveAttachment,
+  onRetryAttachment,
+  onPreviewAttachment,
 }: InputAreaProps) {
   const c = useThemeColors();
   const isMobile = useIsMobile();
@@ -67,12 +90,7 @@ export default function InputArea({
   const [pasteFileHint, setPasteFileHint] = useState<string | null>(null);
   const [mobileInputMode, setMobileInputMode] = useState<'voice' | 'text'>(isMobile ? 'voice' : 'text');
 
-  const activeAgent = AGENT_OPTIONS.find((item) => item.key === currentAgent) || AGENT_OPTIONS[0];
-
-  const activeColor = useMemo(() => {
-    if (typeof window === 'undefined') return c.accent;
-    return getComputedStyle(document.documentElement).getPropertyValue(activeAgent.colorVar).trim() || c.accent;
-  }, [activeAgent.colorVar, c.accent]);
+  const activeColor = c.accent;
 
   const isMobileVoiceMode = isMobile && mobileInputMode === 'voice' && !value.trim();
   const canSubmit = !disabled;
@@ -144,7 +162,17 @@ export default function InputArea({
 
   useEffect(() => {
     resizeTextarea();
-  }, [resizeTextarea, value, mobileInputMode, referencedAssets.length]);
+  }, [resizeTextarea, value, mobileInputMode, referencedAssets.length, attachments.length]);
+
+  useEffect(() => {
+    if (attachments.length === 0) return;
+    setMobileInputMode('text');
+    const timer = window.setTimeout(() => {
+      textareaRef.current?.focus();
+      resizeTextarea();
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [attachments.length, resizeTextarea]);
 
   useEffect(() => {
     if (!isMobile || mobileInputMode !== 'text') return;
@@ -176,9 +204,7 @@ export default function InputArea({
         {!hideAgentOptions && <div className="flex min-w-0 flex-wrap items-center gap-2" style={{ marginBottom: 10, padding: '0 2px' }}>
           {AGENT_OPTIONS.map((agent) => {
             const isActive = currentAgent === agent.key;
-            const agentColor = typeof window === 'undefined'
-              ? c.accent
-              : getComputedStyle(document.documentElement).getPropertyValue(agent.colorVar).trim() || c.accent;
+            const agentColor = c.accent;
 
             return (
               <button
@@ -276,6 +302,115 @@ export default function InputArea({
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {attachments.length > 0 && (
+            <div
+              style={{
+                padding: referencedAssets.length > 0 ? '8px 14px 0 14px' : '12px 14px 0 14px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              {attachments.map((attachment) => {
+                const Icon = attachmentIconMap[attachment.kind] || FileIcon;
+                const isMedia = attachment.kind === 'image' || attachment.kind === 'video';
+                const isLoading = attachment.status === 'uploading' || attachment.status === 'parsing';
+                const isFailed = attachment.status === 'upload_failed' || attachment.status === 'parse_failed';
+                return (
+                  <div
+                    key={attachment.id}
+                    role="button"
+                    tabIndex={0}
+                    title={attachment.name}
+                    onClick={() => onPreviewAttachment?.(attachment)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') onPreviewAttachment?.(attachment);
+                    }}
+                    style={{
+                      height: 38,
+                      maxWidth: isMedia ? 38 : 132,
+                      minWidth: isMedia ? 38 : 92,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 7,
+                      borderRadius: 12,
+                      padding: isMedia ? 0 : '0 8px',
+                      border: `1px solid ${isFailed ? c.danger : focused ? c.accentBorder : c.borderFaint}`,
+                      background: isFailed ? `${c.danger}10` : c.bgCard,
+                      color: c.textSecondary,
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {isMedia && attachment.preview_url ? (
+                      attachment.kind === 'video' ? (
+                        <video src={attachment.preview_url} muted style={{ width: 38, height: 38, objectFit: 'cover' }} />
+                      ) : (
+                        <img src={attachment.preview_url} alt="" style={{ width: 38, height: 38, objectFit: 'cover' }} />
+                      )
+                    ) : (
+                      <span
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 8,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: c.bgSubtle,
+                          color: isFailed ? c.danger : c.textMuted,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Icon size={14} />}
+                      </span>
+                    )}
+                    {!isMedia && (
+                      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12 }}>
+                        {shortenFileName(attachment.name)}
+                      </span>
+                    )}
+                    {isFailed && onRetryAttachment && (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRetryAttachment(attachment.id);
+                        }}
+                        style={{ border: 'none', background: 'transparent', color: c.danger, fontSize: 11, padding: 0, cursor: 'pointer' }}
+                      >
+                        重试
+                      </button>
+                    )}
+                    {onRemoveAttachment && (
+                      <button
+                        type="button"
+                        aria-label="移除附件"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRemoveAttachment(attachment.id);
+                        }}
+                        style={{
+                          border: 'none',
+                          background: 'transparent',
+                          color: c.textSubtle,
+                          padding: 0,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              <span style={{ color: c.accent, fontSize: 12 }}>输入提示语，我会结合文件继续处理</span>
             </div>
           )}
 
