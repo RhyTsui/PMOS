@@ -24,9 +24,10 @@ import { useSpeech } from '@/hooks/useSpeech';
 import ChatContainer, { type SourcePanelPayload } from '@/components/cognitive/ChatContainer';
 import InputArea from '@/components/cognitive/InputArea';
 import { TaskSidebar } from '@/components/workspace/TaskSidebar';
-import { ContextEditDrawer } from '@/components/cognitive/ContextEditDrawer';
 import { AutoDebugWorkbench } from '@/components/agents/AutoDebugWorkbench';
+import { ContextEditDrawer } from '@/components/cognitive/ContextEditDrawer';
 import { IconAsset } from '@/components/ui/IconAsset';
+import FancyCodeBlock from '@/components/ui/FancyCodeBlock';
 import YkProjectSelect from '@/components/yokaui/YkProjectSelect';
 import { useChatSettings } from '@/hooks/useChatSettings';
 import { useThemeColors } from '@/hooks/useTheme';
@@ -72,6 +73,9 @@ interface ProjectOption {
   icon?: string;
   source?: string;
 }
+
+const ALL_PROJECT_VALUE = '__all__';
+const NO_PROJECT_VALUE = '__none__';
 
 function SharePlaneIcon({ size = 17 }: { size?: number }) {
   return <IconAsset name="share-plane" size={size} />;
@@ -366,15 +370,12 @@ function WorkspaceContent() {
   const [activeSidePanel, setActiveSidePanel] = useState<AgentType | null>(null);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<Array<string | number>>([12701]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | number>(NO_PROJECT_VALUE);
   const [followedProjectIds, setFollowedProjectIds] = useState<Array<string | number>>([]);
   const lastSpokenMessageIdRef = useRef<string | null>(null);
 
   const activeResult = currentResult || agentResult;
-  const showDebugPanel = workspaceView === 'chat' && !isMobile && (
-    activeSidePanel === 'debugging' ||
-    activeResult?.result_type === 'debugging_report'
-  );
+  const showDebugPanel = false;
   const activeConversation = useMemo(
     () => conversations.find((item) => item.conversation_id === activeConversationId) || null,
     [activeConversationId, conversations],
@@ -441,19 +442,17 @@ function WorkspaceContent() {
     window.localStorage.setItem('zhitou-chat-followed-projects', JSON.stringify(followedProjectIds));
   }, [followedProjectIds]);
 
-  const selectedProjects = useMemo(
-    () => projectOptions.filter((project) => selectedProjectIds.includes(project.app_id)),
-    [projectOptions, selectedProjectIds],
+  const selectedProject = useMemo(
+    () => projectOptions.find((project) => String(project.app_id) === String(selectedProjectId)) || null,
+    [projectOptions, selectedProjectId],
   );
 
   const projectContextText = useMemo(() => {
-    if (selectedProjectIds.length === 0) return '项目范围：全部项目';
-    const selected = selectedProjects.length > 0
-      ? selectedProjects
-      : projectOptions.filter((project) => selectedProjectIds.includes(project.app_id));
-    if (selected.length === 0) return `项目范围：APPID ${selectedProjectIds.join('、')}`;
-    return `项目范围：${selected.map((project) => `${project.app_name}(APPID:${project.app_id})`).join('、')}`;
-  }, [projectOptions, selectedProjectIds, selectedProjects]);
+    if (selectedProjectId === NO_PROJECT_VALUE) return '项目范围：未选择项目';
+    if (selectedProjectId === ALL_PROJECT_VALUE) return '项目范围：全部项目';
+    if (selectedProject) return `项目范围：${selectedProject.app_name}(APPID:${selectedProject.app_id})`;
+    return '项目范围：未选择项目';
+  }, [selectedProject, selectedProjectId]);
 
   useEffect(() => {
     if (sidebarDrawerOpen) {
@@ -787,85 +786,19 @@ function WorkspaceContent() {
     message.success(`已打开「${asset.anchorText}」所在会话`);
   }, [selectConversation]);
 
-  const projectMenuItems = useMemo<MenuProps['items']>(() => {
-    const items: MenuProps['items'] = [
-      {
-        key: '__all__',
-        label: (
-          <span style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-            <span>全部项目</span>
-            {selectedProjectIds.length === 0 && <span style={{ color: c.accent }}>已选</span>}
-          </span>
-        ),
-      },
-      { type: 'divider' },
-    ];
-    for (const project of projectOptions) {
-      items.push({
-        key: String(project.app_id),
-        label: (
-          <span style={{ display: 'grid', gap: 2 }}>
-            <span style={{ color: c.textPrimary }}>{project.app_name}</span>
-            <span style={{ color: c.textMuted, fontSize: 11 }}>APPID {project.app_id}</span>
-          </span>
-        ),
-      });
-    }
-    return items;
-  }, [c.accent, c.textMuted, c.textPrimary, projectOptions, selectedProjectIds.length]);
-
-  const renderLegacyProjectSelector = () => {
-    const selectedLabel = selectedProjectIds.length === 0
-      ? '全部项目'
-      : selectedProjects[0]?.app_name || `APPID ${selectedProjectIds[0]}`;
-    return (
-      <Dropdown
-        trigger={['click']}
-        placement="bottom"
-        menu={{
-          items: projectMenuItems,
-          onClick: ({ key }) => {
-            setSelectedProjectIds(key === '__all__' ? [] : [Number.isNaN(Number(key)) ? key : Number(key)]);
-          },
-        }}
-      >
-        <button
-          type="button"
-          style={{
-            maxWidth: isMobile ? 'calc(100vw - 112px)' : 360,
-            minWidth: isMobile ? 0 : 240,
-            width: isMobile ? '100%' : 300,
-            height: 34,
-            borderRadius: 12,
-            border: `1px solid ${c.borderFaint}`,
-            background: '#fff',
-            color: c.textPrimary,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            padding: '0 12px',
-            fontSize: 13,
-            fontWeight: 600,
-          }}
-          title={projectContextText}
-        >
-          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {selectedLabel}
-          </span>
-          <span style={{ color: c.textMuted, fontSize: 11 }}>APPID</span>
-        </button>
-      </Dropdown>
-    );
-  };
-
   const projectSelectOptions = useMemo(() => [
     {
-      label: '全部项目',
-      value: '__all__',
+      label: '请选择一个项目',
+      value: NO_PROJECT_VALUE,
       icon: '',
-      recent_visit: selectedProjectIds.length === 0,
+      recent_visit: selectedProjectId === NO_PROJECT_VALUE,
+      closed: false,
+    },
+    {
+      label: '全部项目',
+      value: ALL_PROJECT_VALUE,
+      icon: '',
+      recent_visit: selectedProjectId === ALL_PROJECT_VALUE,
       closed: false,
     },
     ...projectOptions.map((project, index) => ({
@@ -874,32 +807,30 @@ function WorkspaceContent() {
       icon: project.icon || '',
       followed: followedProjectIds.some((id) => String(id) === String(project.app_id)),
       recent_visit: index < 3,
-      closed: String(project.app_status || '').includes('关服') || String(project.app_status || '') === '0',
+      closed: false,
     })),
-  ], [followedProjectIds, projectOptions]);
+  ], [followedProjectIds, projectOptions, selectedProjectId]);
 
   const renderProjectSelector = () => {
-    const selectedLabel = selectedProjectIds.length === 0
+    const selectedLabel = selectedProjectId === NO_PROJECT_VALUE
+      ? '请选择一个项目'
+      : selectedProjectId === ALL_PROJECT_VALUE
       ? '全部项目'
-      : selectedProjects[0]?.app_name || `APPID ${selectedProjectIds[0]}`;
-    const currentValue = selectedProjectIds.length === 0 ? '__all__' : selectedProjectIds[0];
-    const selectedProjectIcon = selectedProjectIds.length === 1
-      ? selectedProjects[0]?.icon
-      : '';
+      : selectedProject?.app_name || '请选择一个项目';
+    const selectedProjectIcon = selectedProjectId === ALL_PROJECT_VALUE || selectedProjectId === NO_PROJECT_VALUE ? '' : selectedProject?.icon || '';
+    const mobileProjectWidth = messages.length > 0
+      ? 'clamp(150px, calc(100vw - 164px), 210px)'
+      : 'clamp(168px, calc(100vw - 122px), 230px)';
     return (
       <YkProjectSelect
-        value={currentValue}
+        value={selectedProjectId}
         options={projectSelectOptions}
         maxVisibleItems={isMobile ? 5 : undefined}
         onChange={(value) => {
-          if (value === '__all__') {
-            setSelectedProjectIds([]);
-            return;
-          }
-          setSelectedProjectIds([Number.isNaN(Number(value)) ? value : Number(value)]);
+          setSelectedProjectId(value === ALL_PROJECT_VALUE || value === NO_PROJECT_VALUE ? value : (Number.isNaN(Number(value)) ? value : Number(value)));
         }}
         followedCallback={(item, followed) => {
-          if (item.value === '__all__') return;
+          if (item.value === ALL_PROJECT_VALUE || item.value === NO_PROJECT_VALUE) return;
           setFollowedProjectIds((prev) => {
             const withoutCurrent = prev.filter((id) => String(id) !== String(item.value));
             return followed ? [...withoutCurrent, item.value] : withoutCurrent;
@@ -911,13 +842,14 @@ function WorkspaceContent() {
             className="project-select-trigger"
             style={{
               maxWidth: isMobile ? 'calc(100vw - 112px)' : 360,
-              minWidth: isMobile ? 0 : 240,
-              width: isMobile ? 168 : 300,
-              height: 34,
-              borderRadius: 12,
-              border: '1px solid rgba(15, 23, 42, 0.04)',
-              background: '#f3f4f6',
-              boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.05)',
+              minWidth: 0,
+              width: isMobile ? mobileProjectWidth : 'fit-content',
+              flexShrink: 1,
+              height: 36,
+              borderRadius: 18,
+              border: '1px solid rgba(15, 23, 42, 0.05)',
+              background: '#fff',
+              boxShadow: 'none',
               color: c.textPrimary,
               cursor: 'pointer',
               display: 'inline-flex',
@@ -926,7 +858,7 @@ function WorkspaceContent() {
               gap: 8,
               padding: '0 10px 0 7px',
               fontSize: 13,
-              fontWeight: 600,
+              fontWeight: 400,
             }}
             title={projectContextText}
           >
@@ -943,21 +875,22 @@ function WorkspaceContent() {
                 background: '#e5e7eb',
                 color: '#4c7dff',
                 fontSize: 11,
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
               {selectedProjectIcon ? (
                 <img src={selectedProjectIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : selectedProjectIds.length === 0 ? (
+              ) : selectedProjectId === ALL_PROJECT_VALUE ? (
                 '全'
+              ) : selectedProjectId === NO_PROJECT_VALUE ? (
+                '选'
               ) : (
                 '项'
               )}
             </span>
-            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span className="project-select-label" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {selectedLabel}
             </span>
-            <span style={{ color: c.textMuted, fontSize: 11 }}>APPID</span>
           </button>
         )}
       />
@@ -1105,6 +1038,8 @@ function WorkspaceContent() {
       const capabilityDetails = sourcePanelPayload?.capability;
       const capabilityUrl = capabilityDetails?.providerUrl;
       const isWebCapability = capabilityDetails?.kind === 'web_search' && capabilityUrl;
+      const isDebugLogPanel = capabilityDetails?.kind === 'debug_log';
+      const panelTitle = isDebugLogPanel ? '联调日志' : '来源';
       if (rightPanelCollapsed) {
         if (isMobile) {
           return (
@@ -1168,7 +1103,7 @@ function WorkspaceContent() {
             </div>
           );
         }
-        return collapsedRail('来源');
+        return collapsedRail(panelTitle);
       }
       return (
         <>
@@ -1184,12 +1119,12 @@ function WorkspaceContent() {
             />
           )}
           <aside
-            className={`${rightPanelClassName} ${isMobile ? 'fixed bottom-0 right-0 top-0 z-40 shadow-[0_24px_60px_rgba(15,23,42,0.18)]' : ''}`}
+            className={`${rightPanelClassName} ${isDebugLogPanel ? 'debug-log-panel' : ''} ${isMobile ? 'fixed bottom-0 right-0 top-0 z-40 shadow-[0_24px_60px_rgba(15,23,42,0.18)]' : ''}`}
             style={{
               borderLeft: `1px solid ${c.borderFaint}`,
               background: c.bgCard,
-              width: isMobile ? 'min(88vw, 360px)' : undefined,
-              maxWidth: isMobile ? '88vw' : undefined,
+              width: isMobile ? (isDebugLogPanel ? 'min(92vw, 420px)' : 'min(88vw, 360px)') : undefined,
+              maxWidth: isMobile ? (isDebugLogPanel ? '92vw' : '88vw') : undefined,
             }}
           >
           <div
@@ -1204,10 +1139,12 @@ function WorkspaceContent() {
             }}
           >
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>来源</div>
-              <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
-                查看本条回复关联的会话内容、附件和结果摘要。
-              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{panelTitle}</div>
+              {!isDebugLogPanel && (
+                <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
+                  查看本条回复关联的会话内容、附件和结果摘要。
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
               {collapseButton()}
@@ -1217,7 +1154,11 @@ function WorkspaceContent() {
 
           <div style={rightPanelBodyStyle}>
             <div style={{ display: 'grid', gap: 12, marginBottom: 16, minWidth: 320 }}>
-              {capabilityDetails ? (
+              {isDebugLogPanel ? (
+                <FancyCodeBlock language="text" codeStyle="minimal" showLineNumbers={false}>
+                  {(capabilityDetails?.result || '').replace(/\d{4}-\d{2}-\d{2}[ T](\d{2}:\d{2}:\d{2})(?:\.\d+)?/g, '$1')}
+                </FancyCodeBlock>
+              ) : capabilityDetails ? (
                 <>
                   <div style={{ border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{capabilityDetails.name}</div>
@@ -1748,8 +1689,8 @@ function WorkspaceContent() {
             style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(15, 23, 42, 0.16)',
-              zIndex: 30,
+              background: 'transparent',
+              zIndex: 70,
               opacity: sidebarDrawerVisible ? 1 : 0,
               transition: 'opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)',
             }}
@@ -1760,10 +1701,11 @@ function WorkspaceContent() {
               left: 0,
               top: 0,
               bottom: 0,
-              zIndex: 31,
-              width: 280,
+              zIndex: 71,
+              width: 248,
               maxWidth: '88vw',
-              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.18)',
+              borderRight: 'none',
+              boxShadow: '1px 0 3px rgba(15, 23, 42, 0.05)',
               transform: sidebarDrawerVisible ? 'translateX(0)' : 'translateX(-100%)',
               transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
             }}
@@ -1808,13 +1750,21 @@ function WorkspaceContent() {
                   width: '100%',
                   padding: `0 ${pageSidePadding}px 12px`,
                   display: 'grid',
-                  gridTemplateColumns: isMobile ? '40px minmax(0, 1fr) auto' : 'minmax(0, 1fr) auto minmax(0, 1fr)',
+                  gridTemplateColumns: isMobile ? '40px minmax(0, 1fr) auto' : 'minmax(0, 1fr) auto',
                   alignItems: 'center',
                   gap: 16,
                   position: 'relative',
                 }}
               >
-                <div className="flex min-w-0 items-center gap-3">
+                <div
+                  className="flex min-w-0 items-center gap-3"
+                  style={{
+                    height: 36,
+                    alignItems: 'center',
+                    minWidth: 0,
+                    overflow: 'hidden',
+                  }}
+                >
                   {isCompactLayout && (
                     <button
                       type="button"
@@ -1840,7 +1790,11 @@ function WorkspaceContent() {
                   <div
                     style={{
                       minWidth: 0,
+                      flex: '1 1 auto',
+                      maxWidth: '100%',
                       display: isMobile ? 'none' : 'block',
+                      height: 36,
+                      lineHeight: '36px',
                       fontSize: 16,
                       fontWeight: 600,
                       color: c.textPrimary,
@@ -1854,22 +1808,23 @@ function WorkspaceContent() {
                   </div>
                 </div>
 
-                <div style={{ minWidth: 0 }} />
+                <div style={{ minWidth: 0, display: isMobile ? 'block' : 'none' }} />
 
                 <div
                   className="flex items-center justify-end gap-2"
                   style={{
-                    position: isMobile ? 'static' : 'absolute',
+                    position: isMobile ? 'absolute' : 'static',
+                    left: isMobile ? 58 : undefined,
                     right: pageSidePadding,
-                    top: '50%',
-                    transform: isMobile ? undefined : 'translateY(-50%)',
-                    maxWidth: isMobile ? undefined : `calc(50% - ${pageSidePadding + 90}px)`,
-                    zIndex: 60,
+                    top: 0,
+                    minWidth: isMobile ? 0 : 'max-content',
+                    maxWidth: isMobile ? `calc(100% - ${pageSidePadding + 58}px)` : undefined,
+                    zIndex: sidebarDrawerOpen ? 20 : 60,
                   }}
                 >
                   {workspaceView === 'chat' ? renderProjectSelector() : null}
 
-                  {workspaceView === 'chat' && (
+                  {workspaceView === 'chat' && isCompactLayout && (
                     <button
                       type="button"
                       onClick={handleCreateConversationRequest}
@@ -1879,7 +1834,7 @@ function WorkspaceContent() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: 34,
-                        height: 34,
+                        height: 36,
                         borderRadius: 999,
                         border: 'none',
                         background: 'transparent',
@@ -1903,7 +1858,7 @@ function WorkspaceContent() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           width: 34,
-                          height: 34,
+                          height: 36,
                           borderRadius: 999,
                           border: 'none',
                           background: 'transparent',
