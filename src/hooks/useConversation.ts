@@ -1436,7 +1436,13 @@ export function useConversation() {
         }
 
         const responseSummary = String(responseResult?.summary || responseMetadata?.summary || '').trim();
-        const finalContent = accumulated || (routing.intent_type === 'debugging' && !responseSummary ? '' : '未生成有效回复');
+        const confirmationNeeded = Boolean(
+          responseMetadata?.confirmation_needed
+          || responseResult?.confirmation_needed
+        );
+        const finalContent = confirmationNeeded
+          ? ''
+          : (accumulated || (routing.intent_type === 'debugging' && !responseSummary ? '' : '未生成有效回复'));
         const persistedAssistant = await xiaoqiaoApi.sendMessage(convId, {
           content: finalContent,
           role: 'assistant',

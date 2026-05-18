@@ -222,6 +222,28 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
         access_mode: 'read',
         call_count: 0,
       },
+      {
+        tool_id: 'get_app_package_list',
+        name: 'get_app_package_list',
+        description: '查询应用列表。用于查询应用数据，支持按项目ID、应用名称、应用类型、终端、创建人、状态、平台等多条件筛选。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' }, description: '项目ID、APPID或应用名称' },
+            app_name: { type: 'string', description: '应用名称' },
+            app_type: { type: 'string', description: '应用类型' },
+            terminal: { type: 'string', description: '终端，例如 android 或 ios' },
+            creator: { type: 'string', description: '创建人' },
+            status: { type: 'string', description: '状态' },
+            platform: { type: 'string', description: '平台' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['debugging', 'demand', 'monitoring'],
+        access_mode: 'read',
+        call_count: 0,
+      },
     ],
     created_at: 0,
     updated_at: 0,
@@ -247,7 +269,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
         description: '查询巨量默认账户下 Android 应用列表，用包名+终端匹配智投应用与巨量应用。',
         input_schema: {
           type: 'object',
-          required: ['package_name', 'terminal'],
+          required: ['package_name', 'terminal', 'default_account'],
           properties: {
             package_name: { type: 'string', description: '智投应用包名' },
             terminal: { type: 'string', description: 'android' },

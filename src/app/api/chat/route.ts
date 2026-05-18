@@ -397,6 +397,350 @@ function selectMcpTool(intent: IntentType, message: string, servers: McpServerCo
   };
 }
 
+function isCapabilityDiscoveryRequest(message: string): boolean {
+  const text = normalizeForMatch(message);
+  return /(?:获取|查询|查看|检索|搜索|列出|拉取|读取|找出)/.test(text)
+    && /(?:应用|项目|包|分包|列表|状态|表|工具|能力|接口)/.test(text);
+}
+
+function extractCapabilitySubject(message: string): string | undefined {
+  const suffixes = ['应用列表', '项目列表', '包列表', '分包', '应用', '项目', '表', '状态'];
+  for (const suffix of suffixes) {
+    const pattern = new RegExp(`(?:获取|查询|查看|检索|搜索|列出|拉取|读取)?\\s*([\\u4e00-\\u9fa5A-Za-z0-9_\\-]{2,30}?)(?:的)?${suffix}`);
+    const match = message.match(pattern);
+    if (match?.[1]) return match[1].trim();
+  }
+  return undefined;
+}
+
+function extractCapabilityTerminal(message: string): string | undefined {
+  if (/(?:ios|iOS|苹果|iphone|iPhone)/.test(message)) return 'ios';
+  if (/(?:安卓|android|Android)/.test(message)) return 'android';
+  return undefined;
+}
+
+function extractMediaHint(message: string): '巨量' | '智投' | undefined {
+  if (/(?:巨量|巨量引擎|oceanengine)/i.test(message)) return '巨量';
+  if (/(?:智投|zhitou)/i.test(message)) return '智投';
+  return undefined;
+}
+
+function humanizeFieldKey(fieldKey: string): string {
+  const map: Record<string, string> = {
+    account_id: '账户ID',
+    account_type: '账户类型',
+    app_id: '应用ID',
+    app_name: '应用名称',
+    app_type: '应用类型',
+    creator: '创建人',
+    status: '状态',
+    platform: '平台',
+    package_name: '包名',
+    terminal: '终端',
+    project_scope: '项目',
+    media_scope: '媒体',
+  };
+  return map[fieldKey] || fieldKey.replace(/_/g, ' ');
+}
+
+function isAmbiguousApplicationRequest(message: string): boolean {
+  const text = normalizeForMatch(message);
+  const mentionsApplicationScope = [
+    '应用列表',
+    '应用清单',
+    '应用信息',
+    '应用明细',
+    '项目下应用',
+    '项目应用',
+    '有哪些应用',
+    '哪些应用',
+  ].some(term => text.includes(term));
+  const hasQueryIntent = [
+    '获取',
+    '查询',
+    '查看',
+    '列出',
+    '拉取',
+    '读取',
+    '找出',
+  ].some(term => text.includes(term));
+  const hasMediaHint = Boolean(extractMediaHint(message));
+  return mentionsApplicationScope && hasQueryIntent && !hasMediaHint;
+}
+
+function buildCapabilityDiscoveryInput(tool: McpToolConfig, message: string): Record<string, unknown> {
+  const subject = extractCapabilitySubject(message);
+  const terminal = extractCapabilityTerminal(message);
+  const toolName = `${tool.tool_id || ''} ${tool.name || ''}`.toLowerCase();
+  if (/get_app_package_list|app_package_list/.test(toolName)) {
+    return {
+      project_scope: [subject || 'current_project'],
+      app_name: '',
+      app_type: 'all',
+      terminal: terminal || 'auto_detect',
+      creator: 'auto_detect',
+      status: 'all',
+      platform: 'auto_detect',
+      user_question: truncate(message, 1000),
+      intent: 'general',
+    };
+  }
+  if (/android_app_list_v2|app_list/.test(toolName)) {
+    return {
+      package_name: subject || '当前项目',
+      terminal: terminal || 'android',
+      user_question: truncate(message, 1000),
+      intent: 'general',
+    };
+  }
+  if (/channel_package_query/.test(toolName)) {
+    return {
+      project_scope: [subject || 'current_project'],
+      media_scope: ['auto_detect'],
+      package_name: subject || '当前项目',
+      terminal: terminal || 'auto_detect',
+      mode: 'query_only',
+      user_question: truncate(message, 1000),
+      intent: 'general',
+    };
+  }
+  if (/download_url_query/.test(toolName)) {
+    return {
+      project_scope: [subject || 'current_project'],
+      media_scope: ['auto_detect'],
+      package_name: subject || '当前项目',
+      terminal: terminal || 'auto_detect',
+      user_question: truncate(message, 1000),
+      intent: 'general',
+    };
+  }
+  return {
+    user_question: truncate(message, 1000),
+    intent: 'general',
+  };
+}
+
+function getMissingRequiredFields(tool: McpToolConfig, input: Record<string, unknown>): string[] {
+  const required = Array.isArray(tool.input_schema?.required)
+    ? tool.input_schema.required.map(String)
+    : [];
+  return required.filter((key) => {
+    const value = input[key];
+    return value === undefined
+      || value === null
+      || value === ''
+      || (Array.isArray(value) && value.length === 0);
+  });
+}
+
+async function attemptCapabilityDiscovery(
+  push: (payload: unknown) => void,
+  message: string,
+  intent: IntentType,
+  startedAt: number,
+): Promise<{
+  status: 'success' | 'missing' | 'failed';
+  summary: string;
+  selected?: { server: McpServerConfig; tool: McpToolConfig };
+  input?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  sourceRefs: SourceRefPayload[];
+  }> {
+  const servers = await listMcpServers();
+  const mediaHint = extractMediaHint(message);
+  const candidateGroups = mediaHint === '巨量'
+    ? [
+      [/tools_app_management_android_app_list_v2/i],
+      [/oceanengine\.app_package_query/i],
+    ]
+      : mediaHint === '智投'
+      ? [
+        [/get_app_package_list/i],
+        [/app_package_list/i],
+        [/zhitou_package\.channel_package_query/i],
+        [/zhitou_package\.download_url_query/i],
+      ]
+      : [
+        [/get_app_package_list/i],
+        [/app_package_list/i],
+        [/tools_app_management_android_app_list_v2/i],
+        [/oceanengine\.app_package_query/i],
+        [/zhitou_package\.channel_package_query/i],
+        [/zhitou_package\.download_url_query/i],
+        [/channel_package_query/i],
+        [/download_url_query/i],
+        [/android_app_list_v2/i],
+        [/app_list/i],
+      ];
+  const selected = candidateGroups.map(patterns => findMcpToolByKeywords(servers, patterns)).find(Boolean);
+
+  if (!selected) {
+    const summary = '当前未检索到可直接调用的 MCP 工具，请补充项目、应用或终端等必要信息后再继续。';
+    push(buildThinkingStep('capability-discovery', '检查可用能力', '当前问题未命中固定业务 Skill，且未检索到可直接调用的 MCP 工具', 'error', startedAt, { message }, { searched: true }));
+    return {
+      status: 'missing',
+      summary,
+      sourceRefs: [],
+    };
+  }
+
+  const input = buildCapabilityDiscoveryInput(selected.tool, message);
+  const missingFields = getMissingRequiredFields(selected.tool, input);
+  const sourceRefs: SourceRefPayload[] = [{
+    title: selected.tool.name,
+    source: selected.server.name,
+    url: selected.server.endpoint_url,
+    source_type: 'mcp',
+    icon: 'mcp',
+    prompt: selected.tool.description,
+  }];
+
+  if (missingFields.length > 0) {
+    const followUpFields = missingFields.slice(0, 3).map((fieldKey) => {
+      const fieldLabel = humanizeFieldKey(fieldKey);
+      return {
+        label: fieldLabel,
+        prompt: `请补充${fieldLabel}，继续获取${extractCapabilitySubject(message) || '当前项目'}的应用列表。`,
+      };
+    });
+    const followUpHint = `已找到 ${selected.server.name}.${selected.tool.name}，还需要补充 ${followUpFields.map(item => item.label).join('、')}。`;
+    push(buildThinkingStep('capability-discovery', '继续补充信息', followUpHint, 'completed', startedAt, { message }, { selected_server: selected.server.name, selected_tool: selected.tool.name, missing_fields: missingFields }));
+    push({
+      type: 'process_event',
+      event: createProcessEvent({
+        type: 'ui.component_rendered',
+        label: '需要补充信息',
+        status: 'success',
+        summary: followUpHint,
+        completed_at: new Date().toISOString(),
+        tool_name: selected.tool.name,
+        provider: selected.server.name,
+        ui_component: {
+          type: 'capability_follow_up',
+          title: '继续补充信息',
+          payload: {
+            title: '继续补充信息',
+            hint: followUpHint,
+            fields: followUpFields,
+            source_refs: sourceRefs,
+          },
+        },
+        input: { message, selected_server: selected.server.name, selected_tool: selected.tool.name, missing_fields: missingFields },
+        output: { missing_fields: missingFields, selected_server: selected.server.name, selected_tool: selected.tool.name, source_refs: sourceRefs },
+      }),
+    });
+    return {
+      status: 'missing',
+      summary: followUpHint,
+      selected,
+      input,
+      sourceRefs,
+    };
+  }
+
+  const toolStartedAt = Date.now();
+  push(buildThinkingStep('capability-discovery', '检查可用能力', `已发现可用工具 ${selected.server.name}.${selected.tool.name}，正在准备参数并发起调用`, 'loading', startedAt, { message }, { selected_server: selected.server.name, selected_tool: selected.tool.name }));
+  push({
+    type: 'tool_call',
+    name: selected.tool.name,
+    kind: 'mcp',
+    display_name: selected.tool.name,
+    provider_url: selected.server.endpoint_url,
+    prompt: selected.tool.description,
+    step_key: 'capability_discovery',
+    query: truncate(message, 1000),
+    arguments: JSON.stringify(input),
+  });
+  const result = await callMcpTool(selected.server, selected.tool, input);
+  push({
+    type: 'tool_result',
+    name: selected.tool.name,
+    kind: 'mcp',
+    display_name: selected.tool.name,
+    provider_url: selected.server.endpoint_url,
+    prompt: selected.tool.description,
+    step_key: 'capability_discovery',
+    result: JSON.stringify(result),
+  });
+
+  const summary = result.status === 'success'
+    ? `已通过 ${selected.server.name}.${selected.tool.name} 获取结果。`
+    : `已找到可用工具 ${selected.server.name}.${selected.tool.name}，但调用失败，请补充参数或检查服务状态。`;
+  push(buildThinkingStep('capability-discovery', '检查可用能力', summary, result.status === 'success' ? 'completed' : 'error', toolStartedAt, input, result));
+  return {
+    status: result.status === 'success' ? 'success' : 'failed',
+    summary,
+    selected,
+    input,
+    result,
+    sourceRefs,
+  };
+}
+
+async function attemptAmbiguityClarification(
+  push: (payload: unknown) => void,
+  message: string,
+  intent: IntentType,
+  startedAt: number,
+  modelServiceConfig: Awaited<ReturnType<typeof getModelServiceConfig>>,
+): Promise<{
+  status: 'confirm';
+  summary: string;
+  sourceRefs: SourceRefPayload[];
+  payload: {
+    title: string;
+    hint: string;
+    options: Array<{ label: string; prompt: string }>;
+  };
+}> {
+  const query = `${message} 应用列表 歧义 巨量 智投 确认`;
+  const knowledge = await searchKnowledge(query, modelServiceConfig);
+  const sourceRefs: SourceRefPayload[] = knowledge.items.slice(0, 3).map((item, index) => ({
+    title: item.knowledge_title || `歧义说明 ${index + 1}`,
+    source: item.knowledge_id || getKnowledgeBaseId(modelServiceConfig) || '知识库',
+    url: modelServiceConfig.knowledgeBaseUrl || modelServiceConfig.baseUrl || '',
+    source_type: 'knowledge_base',
+    icon: 'knowledge',
+  }));
+  const title = '先确认查询对象';
+  const hint = knowledge.items.length > 0
+    ? '知识库里命中同名歧义，请先选一个查询对象继续。'
+    : '“应用列表”在巨量应用和智投配置里都可能成立，请先选一个查询对象继续。';
+  const options = [
+    { label: '巨量应用', prompt: `已确认查询对象：巨量应用。请继续${message.replace(/^[\s\u3000]+|[。！？!?]+$/g, '')}。` },
+    { label: '智投配置', prompt: `已确认查询对象：智投配置。请继续${message.replace(/^[\s\u3000]+|[。！？!?]+$/g, '')}。` },
+  ];
+  push(buildThinkingStep('ambiguity-resolution', '歧义消解', hint, 'completed', startedAt, { query, knowledge_hits: knowledge.items.length }, { source_refs: sourceRefs }));
+  push({
+    type: 'process_event',
+    event: createProcessEvent({
+      type: 'ui.component_rendered',
+      label: '需要确认查询对象',
+      status: 'success',
+      summary: '先选择查询对象后继续',
+      completed_at: new Date().toISOString(),
+      ui_component: {
+        type: 'ambiguity_confirm',
+        title,
+        payload: {
+          title,
+          hint,
+          options,
+          source_refs: sourceRefs,
+        },
+      },
+      input: { message, intent, query },
+      output: { need_confirm: true, knowledge_hits: knowledge.items.length, source_refs: sourceRefs },
+    }),
+  });
+  return {
+    status: 'confirm',
+    summary: '',
+    sourceRefs,
+    payload: { title, hint, options },
+  };
+}
+
 function getStrictMcpPrefix(toolName: string): string | null {
   if (/collect\./i.test(toolName)) return 'collect.';
   if (/debug\./i.test(toolName)) return 'debug.';
@@ -2733,6 +3077,8 @@ export async function POST(request: NextRequest) {
         let fullResponse = '';
         let toolSummary: Record<string, unknown> = {};
         let finalKnowledgeResult: Awaited<ReturnType<typeof searchKnowledge>> = { items: [] };
+        let ambiguityOutcome: Awaited<ReturnType<typeof attemptAmbiguityClarification>> | null = null;
+        let capabilityDiscoveryOutcome: Awaited<ReturnType<typeof attemptCapabilityDiscovery>> | null = null;
         const servicePlan = buildServicePlan(intent, message);
 
         await cozeLoopTracer.traceable(async (rootSpan) => {
@@ -3030,6 +3376,15 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          if (!servicePlan && isAmbiguousApplicationRequest(message)) {
+            ambiguityOutcome = await attemptAmbiguityClarification(push, message, intent, routeStartedAt, modelServiceConfig);
+            return;
+          }
+
+          if (!servicePlan && isCapabilityDiscoveryRequest(message)) {
+            capabilityDiscoveryOutcome = await attemptCapabilityDiscovery(push, message, intent, routeStartedAt);
+            return;
+          }
           finalKnowledgeResult = await cozeLoopTracer.traceable(async (toolSpan) => {
             const toolStartedAt = Date.now();
             push(buildThinkingStep('knowledge_search', '查询知识库', '确认可访问知识库并检索相关片段', 'loading', toolStartedAt, { query: truncate(message, 1000), provider: 'weknora' }));
@@ -3137,6 +3492,42 @@ export async function POST(request: NextRequest) {
 
           if (closed) return;
 
+          const ambiguityConfirmOutcome = ambiguityOutcome as any;
+          if (ambiguityConfirmOutcome) {
+            push({
+              type: 'route',
+              intent,
+              hasThinking: false,
+              toolsUsed: [],
+              knowledgeWarning: '',
+              knowledgeBaseCount: 0,
+            });
+            push({ type: 'phase', phase: 'generating' });
+            const result = buildStructuredResult(intent, '');
+            result.structured_payload = {
+              confirmation_needed: true,
+              confirmation: {
+                title: ambiguityConfirmOutcome.payload.title,
+                hint: ambiguityConfirmOutcome.payload.hint,
+                options: ambiguityConfirmOutcome.payload.options,
+              },
+              source_refs: ambiguityConfirmOutcome.sourceRefs,
+            };
+            push({
+              type: 'done',
+              result,
+              metadata: {
+                source_refs: ambiguityConfirmOutcome.sourceRefs,
+                confirmation_needed: true,
+                confirmation_title: ambiguityConfirmOutcome.payload.title,
+                confirmation_hint: ambiguityConfirmOutcome.payload.hint,
+                confirmation_options: ambiguityConfirmOutcome.payload.options,
+                process_events: processEvents,
+              },
+            });
+            return;
+          }
+
           const messages = [
             { role: 'system' as const, content: buildSystemPrompt(finalKnowledgeResult.items) },
             ...(servicePlan ? [{ role: 'system' as const, content: buildServiceExecutionContext(servicePlan) }] : []),
@@ -3213,6 +3604,71 @@ export async function POST(request: NextRequest) {
             ],
           });
         }, { name: 'xiaoqiao.zhitou.chat', type: SpanKind.Tool });
+
+        const capabilityOutcome = capabilityDiscoveryOutcome as any;
+        if (capabilityOutcome) {
+          const followUpNeeded = capabilityOutcome.status === 'missing';
+          push({
+            type: 'route',
+            intent,
+            hasThinking: false,
+            toolsUsed: capabilityOutcome.selected ? [capabilityOutcome.selected.tool.name] : [],
+            knowledgeWarning: '',
+            knowledgeBaseCount: 0,
+          });
+          push({ type: 'phase', phase: 'generating' });
+          push({ type: 'content', content: followUpNeeded ? '' : capabilityOutcome.summary });
+          const result = buildStructuredResult(intent, followUpNeeded ? '' : capabilityOutcome.summary);
+          result.structured_payload = {
+            ...(followUpNeeded ? {
+              confirmation_needed: true,
+              follow_up: {
+                title: '继续补充信息',
+                hint: capabilityOutcome.summary,
+                fields: capabilityOutcome.selected?.tool?.input_schema?.required
+                  ? capabilityOutcome.selected.tool.input_schema.required
+                      .slice(0, 3)
+                      .map((fieldKey: string) => ({
+                        label: humanizeFieldKey(fieldKey),
+                        prompt: `请补充${humanizeFieldKey(fieldKey)}，继续获取${extractCapabilitySubject(message) || '当前项目'}的应用列表。`,
+                      }))
+                  : [],
+              },
+            } : {}),
+            capability_discovery: {
+              status: capabilityOutcome.status,
+              selected_server: capabilityOutcome.selected?.server.name || '',
+              selected_tool: capabilityOutcome.selected?.tool.name || '',
+              input: capabilityOutcome.input || {},
+              result: capabilityOutcome.result || {},
+            },
+            source_refs: capabilityOutcome.sourceRefs,
+          };
+          push({
+            type: 'done',
+            result,
+            metadata: {
+              source_refs: capabilityOutcome.sourceRefs,
+              capability_discovery: true,
+              capability_status: capabilityOutcome.status,
+              ...(followUpNeeded ? {
+                confirmation_needed: true,
+                follow_up_title: '继续补充信息',
+                follow_up_hint: capabilityOutcome.summary,
+                follow_up_fields: capabilityOutcome.selected?.tool?.input_schema?.required
+                  ? capabilityOutcome.selected.tool.input_schema.required
+                      .slice(0, 3)
+                      .map((fieldKey: string) => ({
+                        label: humanizeFieldKey(fieldKey),
+                        prompt: `请补充${humanizeFieldKey(fieldKey)}，继续获取${extractCapabilitySubject(message) || '当前项目'}的应用列表。`,
+                      }))
+                  : [],
+              } : {}),
+              process_events: processEvents,
+            },
+          });
+          return;
+        }
 
         const knowledgeBaseAddress = modelServiceConfig.knowledgeBaseUrl || modelServiceConfig.baseUrl || '';
         const knowledgeSourceRefs: SourceRefPayload[] = finalKnowledgeResult.items.slice(0, 5).map((item, index) => ({

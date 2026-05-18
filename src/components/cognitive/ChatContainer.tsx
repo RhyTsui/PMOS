@@ -35,6 +35,8 @@ import {
   type MetricAction,
   type MetricExplainerUISchema,
 } from '@/features/metric-explainer';
+import { AmbiguityConfirmCard, type AmbiguityConfirmPayload } from './AmbiguityConfirmCard';
+import { CapabilityFollowUpCard, type CapabilityFollowUpPayload } from './CapabilityFollowUpCard';
 
 interface ChatContainerProps {
   messages: Message[];
@@ -277,6 +279,66 @@ function getDebugProcessPayload(message: Message): DebugProcessPayload | null {
     steps: [...eventSteps, ...callSteps],
     logs: debugEvents,
   };
+}
+
+function getAmbiguityConfirmPayload(message: Message): AmbiguityConfirmPayload | null {
+  const events = Array.isArray(message.process_events)
+    ? message.process_events
+    : Array.isArray(message.metadata?.process_events)
+      ? message.metadata.process_events as NonNullable<Message['process_events']>
+      : [];
+  const event = [...events].reverse().find((item) => item.ui_component?.type === 'ambiguity_confirm');
+  const payload = event?.ui_component?.payload || event?.output;
+  if (!payload || typeof payload !== 'object') return null;
+
+  const raw = payload as Record<string, unknown>;
+  const title = typeof raw.title === 'string' ? raw.title : '先确认媒体';
+  const hint = typeof raw.hint === 'string' ? raw.hint : '请先选择一个媒体再继续。';
+  const options = Array.isArray(raw.options)
+    ? raw.options
+        .map((item) => {
+          if (!item || typeof item !== 'object') return null;
+          const option = item as Record<string, unknown>;
+          const label = typeof option.label === 'string' ? option.label : '';
+          const prompt = typeof option.prompt === 'string' ? option.prompt : '';
+          if (!label || !prompt) return null;
+          return { label, prompt };
+        })
+        .filter((item): item is { label: string; prompt: string } => Boolean(item))
+    : [];
+
+  if (!options.length) return null;
+  return { title, hint, options };
+}
+
+function getCapabilityFollowUpPayload(message: Message): CapabilityFollowUpPayload | null {
+  const events = Array.isArray(message.process_events)
+    ? message.process_events
+    : Array.isArray(message.metadata?.process_events)
+      ? message.metadata.process_events as NonNullable<Message['process_events']>
+      : [];
+  const event = [...events].reverse().find((item) => item.ui_component?.type === 'capability_follow_up');
+  const payload = event?.ui_component?.payload || event?.output;
+  if (!payload || typeof payload !== 'object') return null;
+
+  const raw = payload as Record<string, unknown>;
+  const title = typeof raw.title === 'string' ? raw.title : '继续补充信息';
+  const hint = typeof raw.hint === 'string' ? raw.hint : '请先补充缺失信息后继续。';
+  const fields = Array.isArray(raw.fields)
+    ? raw.fields
+        .map((item) => {
+          if (!item || typeof item !== 'object') return null;
+          const field = item as Record<string, unknown>;
+          const label = typeof field.label === 'string' ? field.label : '';
+          const prompt = typeof field.prompt === 'string' ? field.prompt : '';
+          if (!label || !prompt) return null;
+          return { label, prompt };
+        })
+        .filter((item): item is { label: string; prompt: string } => Boolean(item))
+    : [];
+
+  if (!fields.length) return null;
+  return { title, hint, fields };
 }
 
 function getDebugThinkingStepsFromWorkflowResult(message: Message): NonNullable<Message['thinking_steps']> {
@@ -4348,6 +4410,8 @@ export default function ChatContainer({
           const sourceRefs = isAi ? collectSourceRefs(item.rawMessage) : [];
           const capabilities = isAi ? collectCapabilities(item.rawMessage) : [];
           const debugProcessPayload = isAi ? getDebugProcessPayload(item.rawMessage) : null;
+          const ambiguityConfirmPayload = isAi ? getAmbiguityConfirmPayload(item.rawMessage) : null;
+          const capabilityFollowUpPayload = isAi ? getCapabilityFollowUpPayload(item.rawMessage) : null;
           const workflowCard = isAi ? getWorkflowCard(item.rawMessage) : null;
           const metricExplainerSchema = isAi
             ? getMetricExplainerSchema(item.rawMessage)
@@ -4417,6 +4481,22 @@ export default function ChatContainer({
 
                   {isAi && debugProcessPayload && (
                     <DebugProcessStrip payload={debugProcessPayload} collapseToken={panelCollapseToken} />
+                  )}
+
+                  {isAi && ambiguityConfirmPayload && (
+                    <AmbiguityConfirmCard
+                      payload={ambiguityConfirmPayload}
+                      onSubmitChoose={onSubmitFollowUp}
+                      onChoose={onFollowUpClick}
+                    />
+                  )}
+
+                  {isAi && capabilityFollowUpPayload && (
+                    <CapabilityFollowUpCard
+                      payload={capabilityFollowUpPayload}
+                      onSubmitChoose={onSubmitFollowUp}
+                      onChoose={onFollowUpClick}
+                    />
                   )}
 
                   {isAi && item.kind === 'assistant' && (capabilities.length > 0 || sourceRefs.length > 0) && (
