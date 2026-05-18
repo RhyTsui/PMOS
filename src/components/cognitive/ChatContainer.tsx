@@ -4161,28 +4161,67 @@ export default function ChatContainer({
   }), [contextThinkingSteps, messageVersions, messages]);
 
   if (messages.length === 0 && !isTyping) {
-    const starterGroups = [
+    const starterGroups: Array<{
+      title: string;
+      items: Array<{
+        label: string;
+        description: string;
+        prompt: string;
+        agent: AgentType;
+        disabled?: boolean;
+      }>;
+    }> = [
       {
-        title: '能做什么',
+        title: '包体检查 / 数据排查',
         items: [
-          { label: '解答', prompt: '帮我解答一个广告投放问题', agent: 'help' as AgentType },
-          { label: '排查', prompt: '帮我排查媒体回传数据不一致的问题', agent: 'diagnosis' as AgentType },
-          { label: '对接', prompt: '帮我整理一个新增媒体对接需求', agent: 'demand' as AgentType },
-          { label: '联调', prompt: '帮我查看联调记录并准备发起联调', agent: 'debugging' as AgentType },
-          { label: '报表', prompt: '帮我创建一个报表定时任务', agent: 'help' as AgentType },
-          { label: '分析', prompt: '帮我分析投放素材和转化表现', agent: 'material' as AgentType },
-          { label: '监控', prompt: '帮我查看监控任务告警', agent: 'monitoring' as AgentType },
+          {
+            label: '包体检查',
+            description: '直接输出“已经通过我们检测、可以交付投放”的包',
+            prompt: '获取当前项目下通过检测的可交付包，并告诉我哪些包已经可以交付投放',
+            agent: 'demand',
+          },
+          {
+            label: '数据排查',
+            description: '操作异常排查、归因异常排查、回推异常排查、采集异常排查',
+            prompt: '请帮我排查当前项目的数据异常，包含操作异常、归因异常、回推异常和采集异常',
+            agent: 'diagnosis',
+          },
         ],
       },
-    ];
-    const starterItems: Array<{ label: string; prompt: string; agent: AgentType; disabled?: boolean }> = [
-      { label: '解答', prompt: '请解释注册数、注册设备数和注册账号数的区别', agent: 'help' },
-      { label: '排查', prompt: '请帮我排查媒体消耗异常：媒体ID、账户ID、日期、指标和预期值如下：', agent: 'diagnosis' },
-      { label: '对接', prompt: '请帮我整理一个新增媒体对接需求，需要接入的媒体、数据范围和期望上线时间如下：', agent: 'demand' },
-      { label: '联调', prompt: '请帮我发起自动联调，媒体、应用、事件和联调地址如下：', agent: 'debugging' },
-      { label: '报表', prompt: '请帮我创建一个广告日报定时任务，项目、指标、发送时间和接收人如下：', agent: 'help' },
-      { label: '分析', prompt: '请帮我分析投放素材和转化表现，时间范围、媒体和分析目标如下：', agent: 'material' },
-      { label: '监控', prompt: '请帮我创建一个监控任务，监控对象、指标、阈值和通知方式如下：', agent: 'monitoring' },
+      {
+        title: '效果分析 / 创意沉淀',
+        items: [
+          {
+            label: '效果分析',
+            description: '取数拼表、分析解读、用户洞察、广告预测',
+            prompt: '请帮我做当前项目的效果分析，包括取数拼表、分析解读、用户洞察和广告预测',
+            agent: 'material',
+          },
+          {
+            label: '创意沉淀',
+            description: '视频脚本解析、跨媒体汇总、跨项目沉淀',
+            prompt: '请帮我整理当前项目的创意沉淀内容，包含视频脚本解析、跨媒体汇总和跨项目沉淀',
+            agent: 'material',
+          },
+        ],
+      },
+      {
+        title: '采集对接 / 使用帮助',
+        items: [
+          {
+            label: '采集对接',
+            description: '自动阅读文档、快速对接新媒体、快速集成行业数据',
+            prompt: '请帮我阅读对接文档并推进当前项目的新媒体采集对接',
+            agent: 'demand',
+          },
+          {
+            label: '使用帮助',
+            description: '出包规范、归因回推逻辑、指标解释、报表看数指引',
+            prompt: '请帮我解释当前项目的使用帮助，包括出包规范、归因回推逻辑、指标解释和报表看数指引',
+            agent: 'help',
+          },
+        ],
+      },
     ];
 
     return (
@@ -4208,42 +4247,64 @@ export default function ChatContainer({
               }}
             />
             <p style={{ margin: 0, maxWidth: 620, fontSize: 14, color: c.textSecondary, lineHeight: 1.75, fontWeight: 400 }}>
-              欢迎使用智投chat，输入问题、需求或联调目标，我会按对话方式继续推进。
+              欢迎使用智投chat，输入问题、需求或操作任务，我会按对话方式继续推进。
             </p>
           </div>
 
-          <div style={{ display: 'none' }}>我可以帮你：</div>
-
           <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
             <section style={{ borderRadius: 16, background: '#f6f7f9', padding: 18, minHeight: 160 }}>
-              <div style={{ fontSize: 16, fontWeight: 680, color: c.textPrimary }}>核心功能</div>
-              <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {starterItems.map((item) => {
-                  const button = (
-                    <button
-                      key={item.label}
-                      type="button"
-                      disabled={item.disabled}
-                      onClick={() => {
-                        if (item.disabled) return;
-                        onOpenAgentPanel?.(item.agent);
-                        onFollowUpClick?.(item.prompt);
-                      }}
-                      style={{
-                        border: `1px solid ${c.borderFaint}`,
-                        background: item.disabled ? '#f1f3f5' : '#fff',
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        color: item.disabled ? c.textMuted : c.textSecondary,
-                        cursor: item.disabled ? 'not-allowed' : 'pointer',
-                        fontSize: 13,
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                  return item.disabled ? <Tooltip key={item.label} title="规划中">{button}</Tooltip> : button;
-                })}
+              <div style={{ fontSize: 16, fontWeight: 680, color: c.textPrimary }}>你可以直接这样问</div>
+              <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+                {starterGroups.map((group) => (
+                  <div
+                    key={group.title}
+                    style={{
+                      background: '#fff',
+                      border: `1px solid ${c.borderFaint}`,
+                      borderRadius: 14,
+                      padding: '14px 14px 10px',
+                    }}
+                  >
+                    <div style={{ fontSize: 14, fontWeight: 650, color: c.textPrimary, marginBottom: 10 }}>
+                      {group.title}
+                    </div>
+                    <div style={{ display: 'grid', gap: 8 }}>
+                      {group.items.map((item) => {
+                        const button = (
+                          <button
+                            key={item.label}
+                            type="button"
+                            disabled={item.disabled}
+                            onClick={() => {
+                              if (item.disabled) return;
+                              onOpenAgentPanel?.(item.agent);
+                              onFollowUpClick?.(item.prompt);
+                            }}
+                            style={{
+                              width: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 12,
+                              border: `1px solid ${c.borderFaint}`,
+                              background: item.disabled ? '#f1f3f5' : '#fff',
+                              borderRadius: 12,
+                              padding: '10px 12px',
+                              color: item.disabled ? c.textMuted : c.textPrimary,
+                              cursor: item.disabled ? 'not-allowed' : 'pointer',
+                              fontSize: 13,
+                              textAlign: 'left',
+                            }}
+                          >
+                            <span style={{ minWidth: 66, fontWeight: 650, flexShrink: 0 }}>{item.label}</span>
+                            <span style={{ flex: 1, color: c.textSecondary, lineHeight: 1.5 }}>{item.description}</span>
+                          </button>
+                        );
+                        return item.disabled ? <Tooltip key={item.label} title="规划中">{button}</Tooltip> : button;
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
           </div>

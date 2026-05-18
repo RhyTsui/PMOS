@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dropdown, Input, Modal, message, type MenuProps } from 'antd';
+import { Dropdown, Modal, message, type MenuProps } from 'antd';
 import {
   CheckCircle2,
   Download,
@@ -28,7 +28,7 @@ import { AutoDebugWorkbench } from '@/components/agents/AutoDebugWorkbench';
 import { ContextEditDrawer } from '@/components/cognitive/ContextEditDrawer';
 import { IconAsset } from '@/components/ui/IconAsset';
 import FancyCodeBlock from '@/components/ui/FancyCodeBlock';
-import YkProjectSelect from '@/components/yokaui/YkProjectSelect';
+import ProjectSelectorCombo from '@/components/yokaui/ProjectSelectorCombo';
 import { useChatSettings } from '@/hooks/useChatSettings';
 import { useThemeColors } from '@/hooks/useTheme';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -63,19 +63,6 @@ interface ConversationSearchHit {
   matchCount: number;
   snippets: string[];
 }
-
-interface ProjectOption {
-  app_id: string | number;
-  app_name: string;
-  app_alias?: string;
-  app_en_name?: string;
-  app_status?: string | number;
-  icon?: string;
-  source?: string;
-}
-
-const ALL_PROJECT_VALUE = '__all__';
-const NO_PROJECT_VALUE = '__none__';
 
 function SharePlaneIcon({ size = 17 }: { size?: number }) {
   return <IconAsset name="share-plane" size={size} />;
@@ -369,10 +356,7 @@ function WorkspaceContent() {
   const [searchResults, setSearchResults] = useState<ConversationSearchHit[]>([]);
   const [activeSidePanel, setActiveSidePanel] = useState<AgentType | null>(null);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
-  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | number>(NO_PROJECT_VALUE);
-  const [followedProjectIds, setFollowedProjectIds] = useState<Array<string | number>>([]);
-  const [projectSearch, setProjectSearch] = useState('');
+  const [projectContextText, setProjectContextText] = useState('项目范围：未选择项目');
   const lastSpokenMessageIdRef = useRef<string | null>(null);
 
   const activeResult = currentResult || agentResult;
@@ -402,84 +386,6 @@ function WorkspaceContent() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const timer = window.setTimeout(async () => {
-      try {
-        const keyword = projectSearch.trim();
-        const params = new URLSearchParams({
-          page: '1',
-          page_size: '200',
-        });
-        if (keyword) params.set('keyword', keyword);
-        const response = await fetch(`/api/xiaoqiao/projects?${params.toString()}`, {
-          signal: controller.signal,
-        });
-        const payload = await response.json() as { projects?: ProjectOption[]; source?: string };
-        const projects = Array.isArray(payload.projects) ? payload.projects : [];
-        setProjectOptions(projects.map((project) => ({ ...project, source: payload.source })));
-      } catch {
-        if (!controller.signal.aborted) {
-          setProjectOptions([]);
-        }
-      }
-    }, 220);
-    return () => {
-      controller.abort();
-      window.clearTimeout(timer);
-    };
-  }, [projectSearch]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem('zhitou-chat-followed-projects');
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        setFollowedProjectIds(parsed.filter((item): item is string | number => (
-          typeof item === 'string' || typeof item === 'number'
-        )));
-      }
-    } catch {
-      // ignore malformed local state
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('zhitou-chat-followed-projects', JSON.stringify(followedProjectIds));
-  }, [followedProjectIds]);
-
-  const selectedProject = useMemo(
-    () => projectOptions.find((project) => String(project.app_id) === String(selectedProjectId)) || null,
-    [projectOptions, selectedProjectId],
-  );
-
-  const visibleProjectOptions = useMemo(() => {
-    const keyword = projectSearch.trim().toLowerCase();
-    if (!keyword) return projectOptions;
-    return projectOptions.filter((project) => {
-      const fields = [
-        project.app_id,
-        project.app_name,
-        project.app_alias,
-        project.app_en_name,
-      ]
-        .filter((value) => value !== undefined && value !== null && String(value).trim())
-        .map((value) => String(value).toLowerCase())
-        .join(' ');
-      return fields.includes(keyword);
-    });
-  }, [projectOptions, projectSearch]);
-
-  const projectContextText = useMemo(() => {
-    if (selectedProjectId === NO_PROJECT_VALUE) return '项目范围：未选择项目';
-    if (selectedProjectId === ALL_PROJECT_VALUE) return '项目范围：全部项目';
-    if (selectedProject) return `项目范围：${selectedProject.app_name}(APPID:${selectedProject.app_id})`;
-    return '项目范围：未选择项目';
-  }, [selectedProject, selectedProjectId]);
 
   useEffect(() => {
     if (sidebarDrawerOpen) {
@@ -812,131 +718,6 @@ function WorkspaceContent() {
     }, 420);
     message.success(`已打开「${asset.anchorText}」所在会话`);
   }, [selectConversation]);
-
-  const projectSelectOptions = useMemo(() => [
-    {
-      label: '请选择一个项目',
-      value: NO_PROJECT_VALUE,
-      icon: '',
-      recent_visit: selectedProjectId === NO_PROJECT_VALUE,
-      closed: false,
-    },
-    {
-      label: '全部项目',
-      value: ALL_PROJECT_VALUE,
-      icon: '',
-      recent_visit: selectedProjectId === ALL_PROJECT_VALUE,
-      closed: false,
-    },
-    ...visibleProjectOptions.map((project, index) => ({
-      label: project.app_name || `APPID ${project.app_id}`,
-      value: project.app_id,
-      icon: project.icon || '',
-      followed: followedProjectIds.some((id) => String(id) === String(project.app_id)),
-      recent_visit: index < 3,
-      closed: false,
-    })),
-  ], [followedProjectIds, selectedProjectId, visibleProjectOptions]);
-
-  const renderProjectSelector = () => {
-    const selectedLabel = selectedProjectId === NO_PROJECT_VALUE
-      ? '请选择一个项目'
-      : selectedProjectId === ALL_PROJECT_VALUE
-      ? '全部项目'
-      : selectedProject?.app_name || '请选择一个项目';
-    const selectedProjectIcon = selectedProjectId === ALL_PROJECT_VALUE || selectedProjectId === NO_PROJECT_VALUE ? '' : selectedProject?.icon || '';
-    const mobileProjectWidth = messages.length > 0
-      ? 'clamp(150px, calc(100vw - 164px), 210px)'
-      : 'clamp(168px, calc(100vw - 122px), 230px)';
-    return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <Input
-          allowClear
-          value={projectSearch}
-          onChange={(event) => setProjectSearch(event.target.value)}
-          placeholder="搜索项目 ID / 名称"
-          prefix={<Search size={14} />}
-          style={{
-            width: isMobile ? 146 : 188,
-            height: 36,
-            borderRadius: 18,
-          }}
-        />
-        <YkProjectSelect
-          value={selectedProjectId}
-          options={projectSelectOptions}
-          maxVisibleItems={isMobile ? 5 : undefined}
-          onChange={(value) => {
-            setSelectedProjectId(value === ALL_PROJECT_VALUE || value === NO_PROJECT_VALUE ? value : (Number.isNaN(Number(value)) ? value : Number(value)));
-          }}
-          followedCallback={(item, followed) => {
-            if (item.value === ALL_PROJECT_VALUE || item.value === NO_PROJECT_VALUE) return;
-            setFollowedProjectIds((prev) => {
-              const withoutCurrent = prev.filter((id) => String(id) !== String(item.value));
-              return followed ? [...withoutCurrent, item.value] : withoutCurrent;
-            });
-          }}
-          customShow={(
-            <button
-              type="button"
-              className="project-select-trigger"
-              style={{
-                maxWidth: isMobile ? 'calc(100vw - 280px)' : 360,
-                minWidth: 0,
-                width: isMobile ? mobileProjectWidth : 'fit-content',
-                flexShrink: 1,
-                height: 36,
-                borderRadius: 18,
-                border: '1px solid rgba(15, 23, 42, 0.05)',
-                background: '#fff',
-                boxShadow: 'none',
-                color: c.textPrimary,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                gap: 8,
-                padding: '0 10px 0 7px',
-                fontSize: 13,
-                fontWeight: 400,
-              }}
-              title={projectContextText}
-            >
-              <span
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 8,
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#e5e7eb',
-                  color: '#4c7dff',
-                  fontSize: 11,
-                  fontWeight: 600,
-                }}
-              >
-                {selectedProjectIcon ? (
-                  <img src={selectedProjectIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : selectedProjectId === ALL_PROJECT_VALUE ? (
-                  '全'
-                ) : selectedProjectId === NO_PROJECT_VALUE ? (
-                  '选'
-                ) : (
-                  '项'
-                )}
-              </span>
-              <span className="project-select-label" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {selectedLabel}
-              </span>
-            </button>
-          )}
-        />
-      </div>
-    );
-  };
 
   const handleSendWithAssets = useCallback(async (rawMessage: string) => {
     if (openedAsset) {
@@ -1863,7 +1644,7 @@ function WorkspaceContent() {
                     zIndex: sidebarDrawerOpen ? 20 : 60,
                   }}
                 >
-                  {workspaceView === 'chat' ? renderProjectSelector() : null}
+                  {workspaceView === 'chat' ? <ProjectSelectorCombo onContextChange={setProjectContextText} /> : null}
 
                   {workspaceView === 'chat' && isCompactLayout && (
                     <button

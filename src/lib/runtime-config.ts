@@ -52,7 +52,7 @@ const DEFAULT_MODEL_SERVICE_CONFIG: ModelServiceConfig = {
 
 const DEFAULT_PROJECT_SERVICE_CONFIG: ProjectServiceConfig = {
   enabled: true,
-  apiBaseUrl: process.env.XIAOQIAO_PROJECT_API_BASE_URL || 'https://apps-api.dobest.com/v1.0/apps',
+  apiBaseUrl: process.env.XIAOQIAO_PROJECT_API_BASE_URL || 'https://ads.dobest.com/api/aiad-setting/v2/app/list',
   apiToken: process.env.XIAOQIAO_PROJECT_API_TOKEN || '',
   notes: '',
   updatedAt: new Date().toISOString(),

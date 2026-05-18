@@ -44,14 +44,14 @@ export default function YkProjectSelect({
 
   return (
     <span className="yoka-project-selector-shell" style={shellStyle}>
-    <YkPorjectSelect
-      value={value}
-      options={normalizedOptions}
-      onChange={onChange}
-      followedCallback={followedCallback}
-      slot={slot}
-      customShow={customShow}
-    />
+      <YkPorjectSelect
+        value={value}
+        options={normalizedOptions}
+        onChange={onChange}
+        followedCallback={followedCallback}
+        slot={slot}
+        customShow={customShow}
+      />
     </span>
   );
 }
