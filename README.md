@@ -1,8 +1,38 @@
-# PMAIOS v0.4
+# PMAIOS v1.0
 
 PMAIOS is a file-driven local AI operating system for product management and software delivery. It keeps workflow definitions, project memory, requirements, capabilities, review outputs, product-agent skills, and subproject state inside the repository, then exposes them through a local backend, frontend, and CLI.
 
-The current v0.4 focus is a Product Management AI OS / product-agent runtime: daily project PM outputs, product skills, design/documentation skills, external source intake, and governed Product Chief review.
+The platform-level active product version is now `v1.0`. The current runtime baseline is a landed `v0.7` governed runtime that is being pushed into a deployable, collaborative, product-grade PM Agent system.
+
+## PMAIOS Introduction
+
+PMAIOS is not only a chat workspace. It is a repository-native product operating system that turns requirement intake, research, solution design, review, visual delivery, and documentation into governed assets.
+
+The current design-delivery baseline is:
+
+- use `image2` for visual design delivery
+- require page-by-page prompt coverage before final image generation
+- keep design, schema, handoff, and frontend contracts governable in repo truth sources
+
+## Current Platform State
+
+The landed `v0.7` runtime baseline already includes:
+
+- SchedulerRun minimum automation
+- Gate Runtime actionable controls
+- requirement backwrite and design landing guardrails
+- machine-readable UI schema contracts
+- Hermes compare/promote minimum loop
+- proof-of-work evidence bundles
+
+To understand the current platform truth, start with:
+
+1. `docs/operations/platform-truth-source-index.md`
+2. `docs/operations/current-version-progress.md`
+3. `docs/operations/pmaios-v1.0-direction.md`
+4. `docs/operations/v1.0-product-version-program.md`
+5. `docs/operations/v1.0-acceptance-standard.md`
+6. `docs/operations/v0.7-minimum-loop-summary.md`
 
 ## What Is In This Repo
 
@@ -15,13 +45,11 @@ The current v0.4 focus is a Product Management AI OS / product-agent runtime: da
 
 ## Current Delivery Status
 
-- Project PM outputs are generated through governed Product Chief workflows with specialist tasks and deterministic multi-agent review artifacts.
-- Product, design, and documentation skills are surfaced through the backend and frontend for daily product work.
-- External intake supports Notion/Figma status checks, web page fetch into the source inbox, and DingTalk meeting-note paste/import with normalization.
-- TypeScript frontend and backend build successfully.
-- Vitest suite passes: `20` files, `72` tests.
-- Backend can serve the built frontend from the same port in production mode.
-- Chroma falls back to in-memory collections when the remote server is unavailable.
+- PMAIOS has an active platform-level `v1.0` product narrative on top of a landed `v0.7` runtime baseline.
+- Product, design, and documentation workflows are governed through repository truth sources.
+- Design / schema / handoff / frontend downstream work is no longer intended to depend on screenshots or prose alone.
+- Workspace surfaces already expose runtime, gates, proof-of-work, and related governance signals at minimum-loop level.
+- The repository still contains older version docs and release snapshots, but they should be treated as historical or reference-only unless the platform truth index says otherwise.
 
 ## Local Development
 
@@ -44,7 +72,7 @@ Run the dev stack:
 npm run dev
 ```
 
-This starts only the active PMAIOS frontend and backend runtime. The legacy API entrypoint remains available via `npm run dev:api` and `npm run start:legacy-api` when you explicitly need it.
+This starts the active PMAIOS frontend and backend runtime. The legacy API entrypoint remains available via `npm run dev:api` and `npm run start:legacy-api` when you explicitly need it.
 
 Default dev URLs:
 
@@ -84,11 +112,6 @@ Container runtime URL:
 - App + API: `http://localhost:4312`
 
 The container builds the frontend, compiles the backend, and serves the static app from the backend process.
-`docker-compose.yml` defaults `NODE_IMAGE` to `docker.m.daocloud.io/library/node:22-alpine` for environments where Docker Hub is unreliable. Override it if you want the standard upstream image:
-
-```bash
-NODE_IMAGE=node:22-alpine docker compose up --build
-```
 
 ## Environment Variables
 
@@ -129,27 +152,24 @@ Basic backend health check after startup:
 curl http://localhost:4312/api/health
 ```
 
-## Repository Layout
+For the last documented local-runtime release snapshot, read:
 
-- `docs/`: architecture, decisions, implementation notes, templates, memory, and generated outputs
-- `knowledge/`: weekly reports, meeting notes, and OKR source material
-- `mcp/`: MCP contracts and examples
-- `infra/`: infrastructure manifests
-- `tests/`: unit and integration tests
+- `docs/operations/release-summary.md`
 
 ## Operations Docs
 
+- `docs/operations/platform-truth-source-index.md`: platform truth entry index
+- `docs/operations/current-version-progress.md`: active platform runtime snapshot
+- `docs/operations/pmaios-v1.0-direction.md`: current version direction
+- `docs/operations/v1.0-product-version-program.md`: current product-version program
+- `docs/operations/v1.0-acceptance-standard.md`: current product-version acceptance denominator
+- `docs/operations/v0.7-minimum-loop-summary.md`: landed minimum-loop closeout
+- `docs/operations/pmaios-version-plan.md`: accepted timeline and version discipline
+- `docs/operations/module-roadmap.md`: module priorities and recommended continuation order
 - `docs/operations/local-runbook.md`: local startup and smoke-check steps
-- `docs/operations/current-version-progress.md`: active v0.4 progress, acceptance status, and remaining work
-- `docs/operations/pmaios-version-plan.md`: accepted version timeline and roadmap
-- `docs/operations/external-connectors-status.md`: connector configuration and operational status
-- `docs/operations/release-summary.md`: current delivery and verification summary
-- `docs/operations/module-roadmap.md`: module ownership, priorities, and recommended completion order
-- `docs/operations/ai-product-office-roadmap.md`: target operating model for the Virtual Product Chief and specialist product agents
 
 ## Notes
 
 - `src/server/index.ts` is an older API surface kept in the repo, but the active runtime entrypoint used by `npm start`, `npm run dev:backend`, and the production build is `src/backend/server.ts`.
 - Chroma remote mode is optional. If `http://localhost:8000` is unavailable, the project continues with in-memory vector collections for local testing.
-- The frontend review inspector surfaces review gate status, blocking stage, and issue details for the selected run.
-- `docs/templates/` includes AI-first product output templates for intelligence briefs, roadmap/version docs, manuals, demos, learning guidance, ecosystem scans, and UI schema specs.
+- Platform version identity should be taken from the operations truth documents, not from subproject state or old release summaries.

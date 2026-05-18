@@ -1,0 +1,34 @@
+{
+  "id": "ver-ca836054-7a35-4e95-b803-de4474eac43a",
+  "subprojectId": null,
+  "entityType": "requirement",
+  "entityId": "req-fd202ffe-0e5d-46c4-bc6a-2683a1f1c2b9",
+  "changeType": "extract",
+  "summary": "Extracted requirement from docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-fd202ffe-0e5d-46c4-bc6a-2683a1f1c2b9"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "| 连弩 | 测试 | 测试平台项目跟进 | 徐韵 | 0.35 | 解决需求和工程卡点",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Extracted requirement needs operator review before implementation planning."
+  },
+  "createdAt": "2026-05-09T05:50:38.611Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

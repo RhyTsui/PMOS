@@ -1,5 +1,5 @@
 {
-  "defaultProvider": "claude",
+  "defaultProvider": "gemini",
   "providers": [
     {
       "name": "gpt",
@@ -13,7 +13,7 @@
       "comment": "GPT account login mode is only available inside Codex itself. PMAIOS runtime skips this provider."
     },
     {
-      "name": "claude",
+      "name": "anthropic",
       "type": "anthropic",
       "envKey": "ANTHROPIC_API_KEY",
       "legacyEnvKeys": ["ANTHROPIC_AUTH_TOKEN"],
@@ -21,7 +21,7 @@
       "model": "claude-sonnet-4-6",
       "baseUrl": "https://aicoding.dobest.com/v1",
       "priority": 90,
-      "comment": "Claude proxy internal routing mode. First runtime provider for PMAIOS, Claude CLI, and Web defaults."
+      "comment": "Anthropic-compatible runtime provider. Kept as a generic model provider instead of a Claude executor contract."
     },
     {
       "name": "gemini",
@@ -32,7 +32,7 @@
       "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
       "model": "gemini-3-flash-preview",
       "priority": 80,
-      "comment": "Gemini direct API mode. Runtime fallback after Claude quota or proxy failure."
+      "comment": "Gemini direct API mode. Primary PMOS runtime provider after Claude-era executor removal."
     },
     {
       "name": "minimax",

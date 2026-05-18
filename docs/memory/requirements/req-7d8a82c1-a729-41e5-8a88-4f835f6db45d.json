@@ -1,0 +1,53 @@
+{
+  "id": "req-7d8a82c1-a729-41e5-8a88-4f835f6db45d",
+  "subprojectId": null,
+  "title": "Normalize historical document: 连弩测试平台5月版本计划.md",
+  "description": "Normalize inbox source into governed PMAIOS taxonomy and background knowledge.\n\nSource: docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md\nSuggested target: docs/sources/version-planning/连弩测试平台5月版本计划.md\nDocument type: version-planning\nProject hints: ad, tracking-acceptance, testing-platform, platform",
+  "category": "architecture",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "document-normalization",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "document-normalization",
+      "entityId": "docnorm-78bdf315-6873-4d84-9517-f7ab73ac70c7",
+      "path": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+      "label": "version-planning"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-1834ca94-b560-4de6-8ac7-fe45c97a6731"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+      "docs/product-office/document-normalization/docnorm-78bdf315-6873-4d84-9517-f7ab73ac70c7-docs-sources-inbox-5.md",
+      "docs/context/project/inbox-background/docnorm-78bdf315-6873-4d84-9517-f7ab73ac70c7-docs-sources-inbox-5.md"
+    ]
+  },
+  "createdAt": "2026-05-09T05:44:50.396Z",
+  "updatedAt": "2026-05-09T05:44:50.399Z",
+  "metadata": {
+    "poolScope": "platform",
+    "lifecycle": "normalized",
+    "source": "documentation-normalization",
+    "sourcePath": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/sources/version-planning/连弩测试平台5月版本计划.md",
+    "documentType": "version-planning",
+    "projectHints": [
+      "ad",
+      "tracking-acceptance",
+      "testing-platform",
+      "platform"
+    ],
+    "backgroundContextPath": "docs/context/project/inbox-background/docnorm-78bdf315-6873-4d84-9517-f7ab73ac70c7-docs-sources-inbox-5.md",
+    "notionPageId": null,
+    "notionPageUrl": null
+  }
+}

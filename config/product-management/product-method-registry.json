@@ -1,0 +1,206 @@
+{
+  "version": "0.1.0",
+  "status": "draft",
+  "lastUpdated": "2026-04-27",
+  "purpose": "Governed registry of PMAIOS product methods before they are fully routed into Product Chief and workflow execution.",
+  "categories": [
+    {
+      "id": "product-definition",
+      "name": "Product Definition",
+      "priority": "P0",
+      "description": "Methods used to define what the product is, why it exists, and where the boundary sits."
+    },
+    {
+      "id": "user-research",
+      "name": "User Research",
+      "priority": "P0",
+      "description": "Methods used to clarify users, stakeholders, jobs-to-be-done, pains, and usage context."
+    },
+    {
+      "id": "requirement-decision",
+      "name": "Requirement Decision",
+      "priority": "P1",
+      "description": "Methods used to classify, compare, and accept/reject requirements."
+    },
+    {
+      "id": "prioritization",
+      "name": "Prioritization",
+      "priority": "P1",
+      "description": "Methods used to sequence scope, rank opportunity, and cut release scope."
+    },
+    {
+      "id": "value-metric",
+      "name": "Value And Metrics",
+      "priority": "P1",
+      "description": "Methods used to define value hypotheses and measurable product success."
+    },
+    {
+      "id": "solution-architecture",
+      "name": "Solution And Architecture",
+      "priority": "P1",
+      "description": "Methods used to translate product intent into capability, boundary, and interaction structure."
+    },
+    {
+      "id": "retrospective-learning",
+      "name": "Retrospective And Learning",
+      "priority": "P2",
+      "description": "Methods used to turn outcomes, defects, and drift into future product-process upgrades."
+    }
+  ],
+  "methods": [
+    {
+      "id": "five-w-two-h",
+      "name": "5W2H",
+      "categoryId": "product-definition",
+      "priority": "P0",
+      "status": "integrated",
+      "ownerRole": "Product Manager Agent",
+      "cardPath": "docs/product-methods/five-w-two-h.md",
+      "skillId": "five-w-two-h",
+      "problem": "Ambiguous product idea needs structured framing before solution or PRD work.",
+      "useWhen": [
+        "brief is vague",
+        "goal is known but scope is unclear",
+        "product definition must be clarified before delivery"
+      ],
+      "outputs": [
+        "5W2H analysis",
+        "scope baseline",
+        "constraints",
+        "success criteria"
+      ]
+    },
+    {
+      "id": "persona",
+      "name": "Persona",
+      "categoryId": "user-research",
+      "priority": "P0",
+      "status": "integrated",
+      "ownerRole": "Product Manager Agent",
+      "cardPath": "docs/product-methods/persona.md",
+      "skillId": "persona",
+      "problem": "User target is fuzzy, stakeholder expectations conflict, or scenario assumptions are missing.",
+      "useWhen": [
+        "target user is unclear",
+        "stakeholder needs differ",
+        "user-facing requirement needs evidence"
+      ],
+      "outputs": [
+        "persona",
+        "stakeholder map",
+        "usage scenario",
+        "pain summary"
+      ]
+    },
+    {
+      "id": "jobs-to-be-done",
+      "name": "Jobs-To-Be-Done",
+      "categoryId": "user-research",
+      "priority": "P0",
+      "status": "draft",
+      "ownerRole": "Product Manager Agent",
+      "cardPath": "docs/product-methods/jobs-to-be-done.md",
+      "skillId": "jobs-to-be-done",
+      "problem": "Feature request exists, but the underlying user progress and switching pressure are not understood.",
+      "useWhen": [
+        "user request sounds feature-led",
+        "real user progress is unclear",
+        "need to distinguish task from desired outcome"
+      ],
+      "outputs": [
+        "job statement",
+        "switch trigger",
+        "desired outcome",
+        "solution-fit judgment"
+      ]
+    },
+    {
+      "id": "kano-model",
+      "name": "Kano Model",
+      "categoryId": "requirement-decision",
+      "priority": "P1",
+      "status": "draft",
+      "ownerRole": "Requirements Manager Agent",
+      "cardPath": "docs/product-methods/kano-model.md",
+      "skillId": "kano-model",
+      "problem": "Requirement set is large, but the team cannot distinguish hygiene items from delight items.",
+      "useWhen": [
+        "many requirements compete for attention",
+        "need to classify expectation level",
+        "release scope must protect basics first"
+      ],
+      "outputs": [
+        "kano classification",
+        "must-have baseline",
+        "delighter candidates",
+        "scope warning"
+      ]
+    },
+    {
+      "id": "rice",
+      "name": "RICE",
+      "categoryId": "prioritization",
+      "priority": "P1",
+      "status": "draft",
+      "ownerRole": "Requirements Manager Agent",
+      "cardPath": "docs/product-methods/rice.md",
+      "skillId": "rice",
+      "problem": "Competing opportunities exist but prioritization is still qualitative and unstable.",
+      "useWhen": [
+        "multiple candidate items must be ranked",
+        "impact and effort both matter",
+        "need a transparent prioritization rationale"
+      ],
+      "outputs": [
+        "RICE score",
+        "ranking table",
+        "priority rationale",
+        "confidence warning"
+      ]
+    },
+    {
+      "id": "north-star-metric",
+      "name": "North Star Metric",
+      "categoryId": "value-metric",
+      "priority": "P1",
+      "status": "draft",
+      "ownerRole": "Strategy Manager Agent",
+      "cardPath": "docs/product-methods/north-star-metric.md",
+      "skillId": "north-star-metric",
+      "problem": "Value is discussed abstractly and the product lacks one governing success measure.",
+      "useWhen": [
+        "strategy needs one leading value metric",
+        "teams optimize local metrics without common direction",
+        "need to connect product work to measurable outcome"
+      ],
+      "outputs": [
+        "north star metric",
+        "guardrail metrics",
+        "metric rationale",
+        "measurement caveats"
+      ]
+    },
+    {
+      "id": "system-boundary",
+      "name": "System Boundary",
+      "categoryId": "solution-architecture",
+      "priority": "P1",
+      "status": "integrated",
+      "ownerRole": "Architecture Agent",
+      "cardPath": "docs/product-methods/system-boundary.md",
+      "skillId": "system-boundary",
+      "problem": "Solution direction exists, but scope, integration seams, and non-goals are still mixed together.",
+      "useWhen": [
+        "solution touches multiple systems",
+        "ownership is unclear",
+        "non-goals must be frozen before build"
+      ],
+      "outputs": [
+        "system boundary",
+        "integration seams",
+        "ownership split",
+        "non-goals"
+      ]
+    }
+  ]
+}

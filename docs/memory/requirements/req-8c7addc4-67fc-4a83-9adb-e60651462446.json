@@ -1,0 +1,42 @@
+{
+  "id": "req-8c7addc4-67fc-4a83-9adb-e60651462446",
+  "subprojectId": null,
+  "title": "Extracted source requirement: | 埋点 | 数分 | 埋点验收需求沟通 | 徐韵 | 0.55 | 1.杭州数分和上海数分的工作模式不同，验收标准不同",
+  "description": "| 埋点 | 数分 | 埋点验收需求沟通 | 徐韵 | 0.55 | 1.杭州数分和上海数分的工作模式不同，验收标准不同\n\nExtracted from: docs/sources/inbox/周报-产品组-徐韵-0509.xlsx\nNormalization artifact: docs/product-office/document-normalization/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md\nBackground digest: docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P1",
+  "source": {
+    "kind": "document",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "source-document",
+      "entityId": null,
+      "path": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "label": "documentation-requirement-extraction"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-f8987dc6-d438-4fc2-9872-14351b3b9970"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "docs/product-office/document-normalization/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md"
+    ]
+  },
+  "createdAt": "2026-05-09T06:12:57.926Z",
+  "updatedAt": "2026-05-09T06:12:57.928Z",
+  "metadata": {
+    "poolScope": "platform",
+    "lifecycle": "normalized",
+    "source": "documentation-requirement-extraction",
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

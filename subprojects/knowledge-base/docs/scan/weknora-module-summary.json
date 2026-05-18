@@ -1,0 +1,171 @@
+{
+  "generatedAt": "2026-04-23T14:36:29.071Z",
+  "moduleSummary": {
+    "internalPackages": [
+      {
+        "name": "application",
+        "fileCount": 135
+      },
+      {
+        "name": "types",
+        "fileCount": 77
+      },
+      {
+        "name": "models",
+        "fileCount": 64
+      },
+      {
+        "name": "agent",
+        "fileCount": 54
+      },
+      {
+        "name": "im",
+        "fileCount": 42
+      },
+      {
+        "name": "handler",
+        "fileCount": 32
+      },
+      {
+        "name": "infrastructure",
+        "fileCount": 24
+      },
+      {
+        "name": "datasource",
+        "fileCount": 18
+      },
+      {
+        "name": "utils",
+        "fileCount": 12
+      },
+      {
+        "name": "event",
+        "fileCount": 8
+      },
+      {
+        "name": "sandbox",
+        "fileCount": 7
+      },
+      {
+        "name": "middleware",
+        "fileCount": 6
+      },
+      {
+        "name": "mcp",
+        "fileCount": 4
+      },
+      {
+        "name": "router",
+        "fileCount": 3
+      },
+      {
+        "name": "searchutil",
+        "fileCount": 3
+      },
+      {
+        "name": "stream",
+        "fileCount": 3
+      },
+      {
+        "name": "assets",
+        "fileCount": 2
+      },
+      {
+        "name": "container",
+        "fileCount": 2
+      },
+      {
+        "name": "errors",
+        "fileCount": 2
+      },
+      {
+        "name": "common",
+        "fileCount": 1
+      },
+      {
+        "name": "config",
+        "fileCount": 1
+      },
+      {
+        "name": "database",
+        "fileCount": 1
+      },
+      {
+        "name": "logger",
+        "fileCount": 1
+      },
+      {
+        "name": "runtime",
+        "fileCount": 1
+      },
+      {
+        "name": "tracing",
+        "fileCount": 1
+      }
+    ],
+    "frontendModules": [
+      {
+        "name": "views",
+        "fileCount": 64
+      },
+      {
+        "name": "assets",
+        "fileCount": 47
+      },
+      {
+        "name": "components",
+        "fileCount": 26
+      },
+      {
+        "name": "api",
+        "fileCount": 17
+      },
+      {
+        "name": "utils",
+        "fileCount": 10
+      },
+      {
+        "name": "stores",
+        "fileCount": 6
+      },
+      {
+        "name": "i18n",
+        "fileCount": 5
+      },
+      {
+        "name": "wailsjs",
+        "fileCount": 5
+      },
+      {
+        "name": "hooks",
+        "fileCount": 2
+      },
+      {
+        "name": "App.vue",
+        "fileCount": 1
+      },
+      {
+        "name": "composables",
+        "fileCount": 1
+      },
+      {
+        "name": "main.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "router",
+        "fileCount": 1
+      },
+      {
+        "name": "types",
+        "fileCount": 1
+      }
+    ],
+    "keyFiles": [
+      "WeKnora/internal/router/router.go",
+      "WeKnora/frontend/src/router/index.ts",
+      "WeKnora/docker-compose.yml",
+      "WeKnora/.env"
+    ]
+  }
+}

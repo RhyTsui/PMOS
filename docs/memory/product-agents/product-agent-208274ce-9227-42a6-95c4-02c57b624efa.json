@@ -1,0 +1,38 @@
+{
+  "id": "product-agent-208274ce-9227-42a6-95c4-02c57b624efa",
+  "subprojectId": null,
+  "name": "Virtual Stakeholder PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "stakeholder-analysis",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns stakeholder analysis, dependency mapping, and adoption friction tracking.",
+  "problem": "Stakeholder concerns are currently handled informally, which weakens prioritization and rollout decisions.",
+  "targetUsers": [],
+  "goals": [
+    "Identify stakeholders, incentives, blockers, and decision ownership.",
+    "Explain adoption friction before delivery work starts.",
+    "Support roadmap and release planning with stakeholder constraints."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Stakeholder reports identify owners, incentives, risks, and required coordination."
+  ],
+  "relatedPaths": [
+    "docs/templates/solution_analysis_sync_template.md",
+    "docs/templates/roadmap_template.md"
+  ],
+  "governanceRefs": [
+    "docs/templates/workflow_handoff_template.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_stakeholder_pm_prompt.md",
+  "templateId": "virtual-stakeholder-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.128Z",
+  "updatedAt": "2026-04-27T10:04:22.128Z"
+}

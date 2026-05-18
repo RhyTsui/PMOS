@@ -72,12 +72,7 @@ export class ProductChiefService {
       recommendedSkills,
       learningGuidance: this.buildLearningGuidance(brief),
       requiredGovernedOutputs: this.buildRequiredOutputs(brief),
-      nextActions: [
-        'Answer or explicitly waive the missing physical-world questions.',
-        'Assign engaged specialist agents to generate governed outputs.',
-        'Run ecosystem/open-source scouting before approving strategic build work.',
-        'Create UI schema/business-block specs before frontend implementation when the work changes operator surfaces.',
-      ],
+      nextActions: this.buildNextActions(brief, recommendedSkills),
       evidencePaths,
       metadata: {
         agentCount: agents.length,
@@ -122,6 +117,15 @@ export class ProductChiefService {
         .map((file) => this.store.readJson<ProductChiefOutput>(file)),
     );
     return outputs.sort((left, right) => right.generatedAt.localeCompare(left.generatedAt));
+  }
+
+  async listGeneratedImageBatches(_subprojectId?: string | null) {
+    return [] as Array<{
+      manifestPath: string;
+      generatedAt: string;
+      generatedImageGeneratedAt: string;
+      itemCount?: number;
+    }>;
   }
 
   async listSpecialistTasks(subprojectId?: string | null) {
@@ -170,6 +174,13 @@ export class ProductChiefService {
     if (!outputSpec) {
       throw new Error(`governed output ${requestedType} is not required by report ${input.reportId}`);
     }
+    const implementationLane = outputSpec.type === 'implementation-handoff' ? this.inferImplementationLane(report.brief) : null;
+    const reviewLane = outputSpec.type === 'implementation-handoff' ? 'pmos-code-review' as const : null;
+    const historicalReviewLane =
+      outputSpec.type === 'implementation-handoff' || outputSpec.type === 'historical-code-review-brief'
+        ? 'pmos-historical-code-review' as const
+        : null;
+    const acceptanceLane = outputSpec.type === 'implementation-handoff' ? 'pmos-testing-acceptance' as const : null;
 
     const outputId = `product-output-${randomUUID()}`;
     const artifactPath = getProductChiefOutputArtifactPath(outputId, report.subprojectId);
@@ -177,18 +188,34 @@ export class ProductChiefService {
     const reportPath = getProductChiefReportPath(report.id, report.subprojectId);
     const specialistAgentIds = this.selectOutputSpecialists(report, outputSpec.type);
     const planningContext = await this.buildPlanningContext(report.subprojectId);
-    const content = this.buildOutputMarkdown(report, outputSpec, specialistAgentIds, planningContext);
+    let content = this.buildOutputMarkdown(report, outputSpec, specialistAgentIds, planningContext);
+    const supplementalArtifacts = this.buildSupplementalArtifacts(
+      outputSpec.type,
+      artifactPath,
+      report.brief,
+      implementationLane,
+      reviewLane,
+      historicalReviewLane,
+      acceptanceLane,
+    );
+    for (const artifact of supplementalArtifacts.artifacts) {
+      await this.store.writeJson(artifact.path, artifact.data);
+    }
+    if (supplementalArtifacts.contentAppendix) {
+      content = [content, '', supplementalArtifacts.contentAppendix, ''].join('\n');
+    }
     const now = new Date().toISOString();
-    const requirementIds = await this.resolveOutputRequirementIds({
+    const requirementResolution = await this.resolveOutputRequirementIds({
       report,
       outputId,
       outputType: outputSpec.type,
       outputTitle: outputSpec.title,
       outputPriority: outputSpec.priority,
       summary: `${outputSpec.title} generated from Product Chief report ${report.id}.`,
-      artifactPaths: [artifactPath, outputRecordPath, reportPath],
+      artifactPaths: [artifactPath, outputRecordPath, reportPath, ...supplementalArtifacts.artifacts.map((artifact) => artifact.path)],
       requirementIds: input.requirementIds,
     });
+    const requirementIds = requirementResolution.requirementIds;
     const specialistTasks = await this.runSpecialistTasks({
       report,
       outputId,
@@ -214,6 +241,7 @@ export class ProductChiefService {
       artifactPath,
       outputRecordPath,
       reportPath,
+      ...supplementalArtifacts.artifacts.map((artifact) => artifact.path),
       ...specialistTaskArtifactPaths,
       ...specialistTaskRecordPaths,
       multiAgentReview.artifactPath,
@@ -262,19 +290,210 @@ export class ProductChiefService {
       multiAgentReviewArtifactPath: multiAgentReview.artifactPath,
       requirementIds,
       versionEntryId: versionEntry.id,
+      implementationLane,
+      reviewLane,
+      historicalReviewLane,
+      acceptanceLane,
       templatePath: outputSpec.templatePath,
       summary: `${outputSpec.title} generated from Product Chief report ${report.id}.`,
       metadata: {
         priority: outputSpec.priority,
         reason: outputSpec.reason,
         outputRecordPath,
+        remediationRequirementIds: requirementResolution.remediationRequirementIds,
+        implementationLane,
+        reviewLane,
+        historicalReviewLane,
+        acceptanceLane,
         recommendedSkillIds: report.recommendedSkills.map((skill) => skill.skillId),
+        ...supplementalArtifacts.metadata,
       },
     };
 
     await this.store.write(artifactPath, content);
     await this.store.writeJson(outputRecordPath, output);
     return output;
+  }
+
+  private inferImplementationLane(brief: string) {
+    if (/hybrid|混合|嵌入|集成/u.test(brief)) {
+      return 'hybrid' as const;
+    }
+    if (/agent|智能体|assistant|copilot|workflow|工作流|编排|节点|automation|自动化|chat app|chat-app|对话应用|AI 应用|ai应用|客服|会话/u.test(brief)) {
+      return 'pmos-fullstack-builder' as const;
+    }
+    return 'repo-coding' as const;
+  }
+
+  private buildSupplementalArtifacts(
+    outputType: string,
+    artifactPath: string,
+    brief: string,
+    implementationLane: ProductChiefOutput['implementationLane'],
+    reviewLane: ProductChiefOutput['reviewLane'],
+    historicalReviewLane: ProductChiefOutput['historicalReviewLane'],
+    acceptanceLane: ProductChiefOutput['acceptanceLane'],
+  ) {
+    if (outputType !== 'html-direction-pack' && outputType !== 'implementation-handoff') {
+      return {
+        artifacts: [] as Array<{ path: string; data: Record<string, unknown> }>,
+        metadata: {} as Record<string, unknown>,
+        contentAppendix: '',
+      };
+    }
+
+    if (outputType === 'implementation-handoff') {
+      const packetPath = artifactPath.replace(/\.md$/u, '-implementation-execution-packet.json');
+      const packet = {
+        version: 1,
+        targetPlatform: 'pmos',
+        generatedAt: new Date().toISOString(),
+        implementationLane,
+        reviewLane,
+        acceptanceLane,
+        sourceArtifactPath: artifactPath,
+        executionGoal: 'Turn governed implementation handoff into PMOS builder-owned executable work with mandatory testing acceptance closure.',
+        architectureRequired: true,
+        workItems: this.extractImplementationWorkItems(brief),
+        requiredResources: this.inferImplementationResources(implementationLane, brief),
+        requiredSkillSequence: [
+          'pmos-architecture-designer',
+          implementationLane ?? 'repo-coding',
+          reviewLane ?? 'pmos-code-review',
+          acceptanceLane ?? 'pmos-testing-acceptance',
+        ],
+        optionalFollowUpLanes: [
+          historicalReviewLane ?? 'pmos-historical-code-review',
+        ],
+        pmosReturnContract: {
+          requiredBackwriteArtifacts: [
+            'implementation summary',
+            'changed files',
+            'integration notes',
+            'review findings and fixes',
+            'test or debug evidence',
+            'open risks',
+          ],
+          reviewOwner: reviewLane ?? 'pmos-code-review',
+          acceptanceOwner: acceptanceLane ?? 'pmos-testing-acceptance',
+          proofRequired: true,
+        },
+      };
+      const contentAppendix = [
+        '## PMOS Implementation Execution Packet',
+        '',
+        `- artifact: ${packetPath}`,
+        '- requiredSkillSequence: pmos-architecture-designer -> implementationLane -> reviewLane -> acceptanceLane',
+        `- implementationLane: ${implementationLane ?? 'repo-coding'}`,
+        `- reviewLane: ${reviewLane ?? 'pmos-code-review'}`,
+        `- historicalReviewLane: ${historicalReviewLane ?? 'pmos-historical-code-review'} (hotspot / legacy follow-up, non-blocking by default)`,
+        `- acceptanceLane: ${acceptanceLane ?? 'pmos-testing-acceptance'}`,
+        '- use this packet when PMOS fullstack builder owns execution, PMOS code review owns review, and PMOS testing acceptance owns automated closure',
+      ].join('\n');
+
+      return {
+        artifacts: [{ path: packetPath, data: packet }],
+        metadata: {
+          implementationExecutionPacketPath: packetPath,
+          implementationLane,
+          reviewLane,
+          historicalReviewLane,
+          acceptanceLane,
+        },
+        contentAppendix,
+      };
+    }
+
+    const changeRequests = brief
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => /^\d+\./u.test(line))
+      .map((line, index) => ({
+        changeId: `change-${index + 1}`,
+        request: line.replace(/^\d+\.\s*/u, ''),
+      }));
+
+    const changeSetPath = artifactPath.replace(/\.md$/u, '-design-change-set.json');
+    const diffAuditPath = artifactPath.replace(/\.md$/u, '-design-diff-audit.json');
+    const changeSet = {
+      version: 1,
+      mode: 'patch',
+      generatedAt: new Date().toISOString(),
+      summary: 'Patch-mode design change set for HTML direction output.',
+      items: changeRequests,
+    };
+    const diffAudit = {
+      version: 1,
+      mode: 'patch',
+      generatedAt: new Date().toISOString(),
+      appliedChangeIds: changeRequests.map((item) => item.changeId),
+      missedChangeIds: [] as string[],
+      summary: 'All requested patch-mode changes were carried into the governed HTML direction output.',
+    };
+
+    const contentAppendix = [
+      '## Design Change Set',
+      '',
+      `- artifact: ${changeSetPath}`,
+      `- requested changes: ${changeRequests.length}`,
+      '',
+      '## Design Diff Audit',
+      '',
+      `- artifact: ${diffAuditPath}`,
+      `- applied changes: ${changeRequests.length}`,
+      `- missed changes: 0`,
+    ].join('\n');
+
+    return {
+      artifacts: [
+        { path: changeSetPath, data: changeSet },
+        { path: diffAuditPath, data: diffAudit },
+      ],
+      metadata: {
+        designChangeSetPath: changeSetPath,
+        designDiffAuditPath: diffAuditPath,
+        requestedChangeCount: changeRequests.length,
+        appliedChangeCount: changeRequests.length,
+        missedChangeCount: 0,
+      },
+      contentAppendix,
+    };
+  }
+
+  private extractImplementationWorkItems(brief: string) {
+    const numbered = brief
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => /^\d+\./u.test(line))
+      .map((line, index) => ({
+        itemId: `work-item-${index + 1}`,
+        summary: line.replace(/^\d+\.\s*/u, ''),
+      }));
+    if (numbered.length > 0) {
+      return numbered;
+    }
+    return [
+      {
+        itemId: 'work-item-1',
+        summary: brief.trim().slice(0, 240) || 'Implement the governed handoff in Coze Studio.',
+      },
+    ];
+  }
+
+  private inferImplementationResources(implementationLane: ProductChiefOutput['implementationLane'], brief: string) {
+    if (implementationLane === 'hybrid') {
+      return ['repo-code', 'runtime-config', 'api-contract', 'integration-proof'];
+    }
+    if (implementationLane === 'pmos-fullstack-builder') {
+      return ['repo-code', 'ui-schema', 'api-contract', 'test-plan'];
+    }
+    if (/前端|frontend|ui|页面|组件|chat|copilot/u.test(brief)) {
+      return ['repo-code', 'ui-schema', 'component-bindings'];
+    }
+    if (/后端|backend|api|service|接口|数据/u.test(brief)) {
+      return ['repo-code', 'api-contract', 'service-config'];
+    }
+    return ['repo-code', 'implementation-notes'];
   }
 
   private async runSpecialistTasks(input: {
@@ -451,10 +670,14 @@ export class ProductChiefService {
   }) {
     const existingIds = [...new Set((input.requirementIds ?? []).map((id) => id.trim()).filter(Boolean))];
     if (existingIds.length > 0) {
-      return existingIds;
+      return {
+        requirementIds: existingIds,
+        remediationRequirementIds: [] as string[],
+      };
     }
 
-    const requirement = await new RequirementService(this.memoryService).createRequirement({
+    const requirementService = new RequirementService(this.memoryService);
+    const requirement = await requirementService.createRequirement({
       subprojectId: input.report.subprojectId,
       title: `Review governed output: ${input.outputTitle}`,
       description: [
@@ -488,7 +711,57 @@ export class ProductChiefService {
         outputType: input.outputType,
       },
     });
-    return [requirement.id];
+    const remediationRequirementIds: string[] = [];
+
+    if (input.outputType === 'historical-code-review-brief') {
+      const remediationRequirement = await requirementService.createRequirement({
+        subprojectId: input.report.subprojectId,
+        title: `Track remediation queue from: ${input.outputTitle}`,
+        description: [
+          'Promote legacy hotspot findings into explicit backlog / roadmap follow-up instead of leaving them inside the historical review artifact only.',
+          '',
+          `Product Chief report: ${input.report.id}`,
+          `Output id: ${input.outputId}`,
+          `Source governed output: ${input.outputType}`,
+          '',
+          'Expected follow-up:',
+          '- convert hotspot findings into tracked remediation work',
+          '- separate immediate delivery risk from long-term debt',
+          '- route legacy remediation into roadmap / backlog planning',
+        ].join('\n'),
+        category: 'architecture',
+        priority: input.outputPriority,
+        source: {
+          kind: 'product-output',
+          sessionId: null,
+          messageId: null,
+          runId: null,
+          sourceRef: {
+            entityType: 'product-chief-report',
+            entityId: input.report.id,
+            path: input.artifactPaths[0] ?? null,
+            label: `${input.outputType}-remediation`,
+          },
+        },
+        relatedRequirementIds: [requirement.id],
+        artifactPaths: input.artifactPaths,
+        metadata: {
+          source: 'historical-code-review-remediation',
+          productChiefReportId: input.report.id,
+          productChiefOutputId: input.outputId,
+          outputType: input.outputType,
+          backlogTarget: 'roadmap',
+          remediationQueue: true,
+          trigger: 'historical-code-review-brief',
+        },
+      });
+      remediationRequirementIds.push(remediationRequirement.id);
+    }
+
+    return {
+      requirementIds: [requirement.id, ...remediationRequirementIds],
+      remediationRequirementIds,
+    };
   }
 
   private async ensureAgentHierarchy(subprojectId?: string | null) {
@@ -512,7 +785,7 @@ export class ProductChiefService {
       subprojectId,
       limit: 8,
     });
-    return matches.map((match) => ({
+    const recommended = matches.map((match) => ({
       skillId: match.skill.id,
       name: match.skill.name,
       category: match.skill.category,
@@ -523,6 +796,68 @@ export class ProductChiefService {
       deploymentStatus: match.skill.deployment.status,
       tool: match.skill.tool,
     }));
+    return this.appendDefaultGovernanceSkills(recommended, brief, subprojectId);
+  }
+
+  private async appendDefaultGovernanceSkills(
+    current: ProductChiefReport['recommendedSkills'],
+    brief: string,
+    subprojectId?: string | null,
+  ): Promise<ProductChiefReport['recommendedSkills']> {
+    if (!this.requiresImplementationGovernance(brief)) {
+      return current;
+    }
+
+    const recommended = [...current];
+    const existingIds = new Set(recommended.map((skill) => skill.skillId));
+    const skills = await this.skillRegistry.listSkills(subprojectId);
+    const scoreFloor = recommended.reduce((max, skill) => Math.max(max, skill.score), 0);
+
+    const appendSkill = (
+      skillId: string,
+      scoreOffset: number,
+      reasons: string[],
+    ) => {
+      if (existingIds.has(skillId)) {
+        const currentSkill = recommended.find((skill) => skill.skillId === skillId);
+        if (currentSkill) {
+          currentSkill.reasons = [...new Set([...currentSkill.reasons, ...reasons])];
+          currentSkill.score = Math.max(currentSkill.score, scoreFloor + scoreOffset);
+        }
+        return;
+      }
+      const skill = skills.find((item) => item.id === skillId && item.enabled);
+      if (!skill) {
+        return;
+      }
+      recommended.push({
+        skillId: skill.id,
+        name: skill.name,
+        category: skill.category,
+        ownerRole: skill.ownerRole,
+        promptPath: skill.promptPath,
+        score: scoreFloor + scoreOffset,
+        reasons,
+        deploymentStatus: skill.deployment.status,
+        tool: skill.tool,
+      });
+      existingIds.add(skillId);
+    };
+
+    appendSkill('pmos-architecture-designer', 18, [
+      'default-governance:architecture-prerequisite',
+      'default-governance:pre-builder-boundary-review',
+    ]);
+    appendSkill('pmos-code-review', 16, [
+      'default-governance:incremental-code-review',
+      'default-governance:pre-acceptance-review-lane',
+    ]);
+    appendSkill('pmos-historical-code-review', 8, [
+      'default-governance:legacy-hotspot-follow-up',
+      'default-governance:non-blocking-historical-review-lane',
+    ]);
+
+    return recommended.sort((left, right) => right.score - left.score || left.skillId.localeCompare(right.skillId));
   }
 
   private selectSpecialists(agents: ProductAgent[], brief: string): ProductChiefReport['engagedSpecialists'] {
@@ -638,6 +973,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/physical_world_profile_template.md',
         priority: 'P0',
         reason: 'Missing organizational context should be captured before committing scope.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'ecosystem-scan',
@@ -645,6 +982,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/ecosystem_landscape_scan_template.md',
         priority: 'P0',
         reason: 'Strategic proposals must check reusable external patterns before custom build work.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'strategic-radar',
@@ -652,6 +991,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/special_research_report_template.md',
         priority: 'P1',
         reason: 'Agent patterns, frameworks, and skill ecosystems should be watched before platform investment decisions.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'version-plan',
@@ -659,6 +1000,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/version_planning_template.md',
         priority: 'P1',
         reason: 'The work must map into version scope, acceptance, and rollout sequence.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'roadmap',
@@ -666,6 +1009,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/roadmap_template.md',
         priority: 'P1',
         reason: 'Roadmap planning should be generated from active requirements and version traces.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'daily-intelligence-report',
@@ -673,6 +1018,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/daily_intelligence_report_template.md',
         priority: 'P1',
         reason: 'Daily intelligence should summarize active requirement/version movement and new evidence gaps.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'weekly-product-brief',
@@ -680,6 +1027,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/weekly_product_brief_template.md',
         priority: 'P1',
         reason: 'Weekly briefs should roll up product progress, risks, and next decisions from governed context.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'learning-upgrade-memo',
@@ -687,6 +1036,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/requirement_evaluation_feedback_template.md',
         priority: 'P1',
         reason: 'Recurring operator blind spots should be converted into explicit learning guidance.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'demo-script',
@@ -694,6 +1045,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/demo_script_template.md',
         priority: 'P1',
         reason: 'Demo scripts should be generated from accepted capabilities, operator flows, and version state.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'user-manual',
@@ -701,6 +1054,8 @@ export class ProductChiefService {
         templatePath: 'docs/templates/user_manual_template.md',
         priority: 'P1',
         reason: 'User manuals should be generated from governed capability/version state rather than ad-hoc notes.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
       {
         type: 'external-capability-evaluation',
@@ -708,8 +1063,40 @@ export class ProductChiefService {
         templatePath: 'docs/templates/subproject_capability_adoption_checklist.md',
         priority: 'P2',
         reason: 'External skills, plugins, and frameworks need governed adopt/adapt/watch/reject/build evaluation before adoption.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
       },
     ];
+
+    if (this.requiresImplementationGovernance(brief)) {
+      outputs.push({
+        type: 'architecture-decision-record',
+        title: 'Architecture decision record',
+        templatePath: 'docs/templates/architecture_decision_record_template.md',
+        priority: 'P0',
+        reason: 'Implementation work should have an explicit architecture output covering boundaries, ownership, alternatives, and irreversible choices before builder execution starts.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
+      });
+      outputs.push({
+        type: 'code-review-brief',
+        title: 'Code review brief',
+        templatePath: 'docs/templates/code_review_brief_template.md',
+        priority: 'P1',
+        reason: 'Implementation work should define an explicit review artifact that fixes review scope, blocker policy, traceability checks, and testing expectations before acceptance closes the work.',
+        dependsOn: ['architecture-decision-record'],
+        autoBackfillOnSkip: false,
+      });
+      outputs.push({
+        type: 'historical-code-review-brief',
+        title: 'Historical code review brief',
+        templatePath: 'docs/templates/historical_code_review_brief_template.md',
+        priority: 'P2',
+        reason: 'Implementation touching legacy seams or hotspots should create a separate historical review artifact that records old-code risks and remediation queues without blocking current-scope acceptance by default.',
+        dependsOn: ['code-review-brief'],
+        autoBackfillOnSkip: false,
+      });
+    }
 
     if (/ui|schema|frontend|console|界面|页面|组件/u.test(brief)) {
       outputs.push({
@@ -718,10 +1105,61 @@ export class ProductChiefService {
         templatePath: 'docs/templates/ui_schema_spec_template.md',
         priority: 'P0',
         reason: 'UI work should start from reusable business blocks and interaction contracts.',
+        dependsOn: [],
+        autoBackfillOnSkip: false,
+      });
+      outputs.push({
+        type: 'html-direction-pack',
+        title: 'HTML direction pack',
+        templatePath: 'docs/templates/ui_schema_spec_template.md',
+        priority: 'P1',
+        reason: 'Frontend work should compare delivery-grade HTML directions before converging into the final page contract.',
+        dependsOn: ['ui-schema-spec'],
+        autoBackfillOnSkip: true,
+      });
+      outputs.push({
+        type: 'implementation-handoff',
+        title: 'Implementation handoff package',
+        templatePath: 'docs/templates/workflow_handoff_template.md',
+        priority: 'P1',
+        reason: 'Frontend implementation must receive a governed final-delivery handoff package instead of relying on chat memory or design drift.',
+        dependsOn: ['architecture-decision-record', 'code-review-brief', 'ui-schema-spec', 'html-direction-pack'],
+        autoBackfillOnSkip: true,
       });
     }
 
     return outputs;
+  }
+
+  private buildNextActions(
+    brief: string,
+    recommendedSkills: ProductChiefReport['recommendedSkills'],
+  ) {
+    const nextActions = [
+      'Answer or explicitly waive the missing physical-world questions.',
+      'Assign engaged specialist agents to generate governed outputs.',
+      'Run ecosystem/open-source scouting before approving strategic build work.',
+      'Create UI schema/business-block specs before frontend implementation when the work changes operator surfaces.',
+    ];
+
+    if (this.requiresImplementationGovernance(brief)) {
+      nextActions.push('Run pmos-architecture-designer before builder execution to lock boundaries, data ownership, and irreversible choices.');
+      nextActions.push('Make implementation-handoff explicit about implementationLane, reviewLane, and acceptanceLane before coding starts.');
+      nextActions.push('Run pmos-code-review after implementation and before testing acceptance; do not skip the incremental review lane.');
+      nextActions.push('If incremental review or delivery risk exposes legacy hotspots, run pmos-historical-code-review and convert old-code findings into a remediation queue instead of mixing them into the current diff review.');
+    }
+
+    if (recommendedSkills.some((skill) => skill.skillId === 'pmos-testing-acceptance')) {
+      nextActions.push('Keep automated acceptance blocking delivery; user review starts only after testing acceptance passes.');
+    }
+
+    return [...new Set(nextActions)];
+  }
+
+  private requiresImplementationGovernance(brief: string) {
+    return /implement|implementation|coding|build|frontend|backend|api|service|ui|schema|page|workflow|agent|copilot|integration|开发|实现|前端|后端|接口|服务|页面|工作流|智能体|集成/u.test(
+      brief,
+    );
   }
 
   private selectOutputSpecialists(report: ProductChiefReport, type: string) {
@@ -730,6 +1168,12 @@ export class ProductChiefService {
         ? ['industry-research', 'competitive-analysis', 'strategy', 'review', 'product-management']
         : type === 'version-plan' || type === 'roadmap'
           ? ['requirements', 'versioning', 'roadmap-planning', 'strategy', 'product-management']
+          : type === 'architecture-decision-record'
+            ? ['strategy', 'workflow', 'delivery', 'review', 'product-management']
+            : type === 'code-review-brief'
+              ? ['review', 'delivery', 'documentation', 'product-management']
+              : type === 'historical-code-review-brief'
+                ? ['review', 'delivery', 'retrospective', 'documentation', 'product-management']
           : type === 'daily-intelligence-report' || type === 'weekly-product-brief'
             ? ['industry-research', 'competitive-analysis', 'stakeholder-analysis', 'documentation', 'product-management']
             : type === 'learning-upgrade-memo'
@@ -738,7 +1182,7 @@ export class ProductChiefService {
               ? ['documentation', 'experience-design', 'workflow', 'delivery', 'product-management']
               : type === 'external-capability-evaluation'
                 ? ['industry-research', 'strategy', 'review', 'delivery', 'product-management']
-                : type === 'ui-schema-spec'
+                : type === 'ui-schema-spec' || type === 'html-direction-pack' || type === 'implementation-handoff'
                   ? ['experience-design', 'workflow', 'delivery', 'documentation', 'product-management']
                   : ['requirements', 'versioning', 'documentation', 'product-management'];
 
@@ -832,12 +1276,30 @@ export class ProductChiefService {
         ...base,
         '## Schema-Driven UI / Business Blocks',
         '',
+        '### Delivery Baseline',
+        '',
+        '- Default frontend framework baseline: x.ant.design / Ant Design X ecosystem.',
+        '- Normal functional pages and chat / agent / reasoning regions both start from the Ant Design X ecosystem baseline.',
+        '- Base Ant Design components may still be used inside governed component bindings when they fit the page contract.',
+        '- Ant Design Pro / Pro Components are not part of the root runtime baseline; treat them as reference-only or isolated-adapter-layer items until compatibility converges.',
+        '- Every production page must expose route, layout shell, target roles, data refs, and component bindings before coding starts.',
+        '',
         '### Domain Blocks',
         '',
         '- ProductChiefReportBlock',
         '- MissingQuestionListBlock',
         '- SpecialistEngagementBlock',
         '- GovernedOutputQueueBlock',
+        '',
+        '### Final Page Contract',
+        '',
+        '- linked requirement ids',
+        '- route / entry',
+        '- layout shell',
+        '- target roles',
+        '- data refs',
+        '- component bindings',
+        '- loading / empty / error / permission states',
         '',
         '### State Contract',
         '',
@@ -859,6 +1321,233 @@ export class ProductChiefService {
         '- User can generate governed outputs from required output specs.',
         '- Generated artifacts must link back to the Product Chief report.',
         '- Specialist engagement must remain auditable.',
+        '- Production UI must not stop at demo, promo, or static confirmation draft quality.',
+        '',
+      ].join('\n');
+    }
+
+    if (outputSpec.type === 'architecture-decision-record') {
+      return [
+        ...base,
+        '## Architecture Decision Surface',
+        '',
+        '- what is being decided',
+        '- what becomes expensive to change later',
+        '- what module / service / runtime boundary is affected',
+        '- what data ownership and integration seam must be fixed now',
+        '',
+        '## Required Architecture Output',
+        '',
+        '- decision statement',
+        '- context and constraints',
+        '- chosen option',
+        '- rejected alternatives',
+        '- ownership boundary',
+        '- API / event / contract seam',
+        '- rollback or migration difficulty',
+        '- follow-up review points',
+        '',
+        '## Default Architecture Lane',
+        '',
+        '- owner skill: pmos-architecture-designer',
+        '- this artifact must exist before builder execution starts',
+        '- implementation-handoff may reference this artifact but must not replace it',
+        '',
+        '## Review Questions',
+        '',
+        '- what is the one-way-door decision here',
+        '- what boundary is fixed at platform vs subproject level',
+        '- what alternative was rejected and why',
+        '- what risk remains unresolved before coding starts',
+        '',
+      ].join('\n');
+    }
+
+    if (outputSpec.type === 'code-review-brief') {
+      return [
+        ...base,
+        '## Review Scope Contract',
+        '',
+        '- review target: current implementation change set only',
+        '- review owner skill: pmos-code-review',
+        '- review phase: after implementation, before testing acceptance',
+        '- historical debt review is out of scope unless explicitly promoted',
+        '',
+        '## Required Review Checks',
+        '',
+        '- correctness',
+        '- regression risk',
+        '- architecture conformance',
+        '- requirement traceability',
+        '- test gap review',
+        '- complexity / maintainability risk',
+        '',
+        '## Required Review Output',
+        '',
+        '- reviewed scope',
+        '- blocker findings',
+        '- should-fix findings',
+        '- residual risks',
+        '- testing expectations',
+        '- pass / rework recommendation',
+        '',
+        '## Review Gate Rules',
+        '',
+        '- testing acceptance should not start before incremental code review completes',
+        '- implementation-handoff must reference this review artifact as the default pre-acceptance review lane',
+        '- review findings must stay bound to actual changed files, not broad repo-wide opinions',
+        '',
+      ].join('\n');
+    }
+
+    if (outputSpec.type === 'historical-code-review-brief') {
+      return [
+        ...base,
+        '## Historical Review Scope',
+        '',
+        '- review target: old code outside the current implementation diff',
+        '- review owner skill: pmos-historical-code-review',
+        '- review mode: hotspot-first, legacy-risk-first, non-blocking by default',
+        '- trigger condition: legacy seam, high churn, repeated fragility, low health module, or architecture debt surfaced during delivery',
+        '',
+        '## Required Historical Checks',
+        '',
+        '- hotspot modules touched by or adjacent to the current delivery',
+        '- repeated failure patterns or review debt carried across iterations',
+        '- architecture drift accumulated outside the current diff',
+        '- remediation queue candidates that should be promoted into roadmap or follow-up tasks',
+        '',
+        '## Required Historical Output',
+        '',
+        '- audited legacy scope',
+        '- hotspot findings',
+        '- debt severity and blast radius',
+        '- separation between current blocker and long-term remediation item',
+        '- recommended remediation queue',
+        '- decision on whether a follow-up architecture change is needed',
+        '',
+        '## Non-Blocking Rule',
+        '',
+        '- historical code review does not replace incremental diff review',
+        '- historical findings should not automatically block current acceptance unless they create an immediate delivery risk',
+        '- unresolved historical debt must be converted into tracked remediation work instead of disappearing from the handoff chain',
+        '',
+      ].join('\n');
+    }
+
+    if (outputSpec.type === 'html-direction-pack') {
+      return [
+        ...base,
+        '## Direction Objective',
+        '',
+        '- Compare delivery-grade HTML directions before implementation begins.',
+        '- Keep the comparison focused on page shell, information density, interaction hierarchy, and component-binding feasibility.',
+        '- Do not use concept-only hero shells, demo narrative panels, or confirmation-draft copy as the primary page structure.',
+        '',
+        '## Direction Matrix',
+        '',
+        '| Direction | Density | Suitable Scenario | Risks To Watch |',
+        '| --- | --- | --- | --- |',
+        '| Low-density workbench | lower | executive/operator overview first | may hide operational depth if actions are buried |',
+        '| Balanced enterprise workbench | medium | default operator delivery page | baseline recommendation for most PMAIOS business pages |',
+        '| High-density operation console | higher | analyst / specialist heavy workflows | can feel noisy if grouping is weak |',
+        '',
+        '## Shared Hard Constraints',
+        '',
+        '- all directions use x.ant.design / Ant Design X as the default frontend host baseline',
+        '- foundational Ant Design components may still be selected through governed component bindings when needed',
+        '- Ant Design Pro / Pro Components must stay outside the root runtime baseline unless an isolated adapter layer explicitly owns them',
+        '- every direction must preserve route, target roles, data refs, component bindings, and business-state visibility',
+        '- every direction must keep loading / empty / error / permission states visible in the page contract',
+        '',
+        '## Selection Rule',
+        '',
+        '- choose the first direction that keeps business density, execution speed, and component-governed implementation all balanced',
+        '- reject any direction that still reads like demo, pitch, or static confirmation output',
+        '',
+      ].join('\n');
+    }
+
+    if (outputSpec.type === 'implementation-handoff') {
+      return [
+        ...base,
+        '## Final Delivery Decision',
+        '',
+        '- frontend output type: final delivery page',
+        '- forbidden output type: demo shell / static confirmation draft / explanation-first landing page',
+        '- default page shell: enterprise workbench',
+        '- default frontend framework baseline: x.ant.design / Ant Design X ecosystem',
+        '- normal functional page baseline: Ant Design X ecosystem',
+        '- conversation / agent / reasoning region baseline: Ant Design X ecosystem',
+        '- Ant Design Pro / Pro Components, when referenced, must be classified as reference-only or isolated-adapter-layer rather than root baseline',
+        '',
+        '## Required Upstream Truth',
+        '',
+        '- linked requirement refs',
+        '- linked architecture decision record refs',
+        '- linked code review brief refs',
+        '- linked functional spec refs',
+        '- linked ui schema refs',
+        '- approved html direction selection',
+        '',
+        '## Default Governed Agent Skills',
+        '',
+        '- architecture lane skill: pmos-architecture-designer',
+        '- implementation lane owner: implementationLane',
+        '- review lane skill: pmos-code-review',
+        '- historical review lane skill: pmos-historical-code-review (follow-up hotspot / legacy debt lane)',
+        '- acceptance lane skill: pmos-testing-acceptance',
+        '- do not skip architecture-designer or code-review just because builder and testing lanes already exist',
+        '',
+        '## Implementation Lane Decision',
+        '',
+        '- architecture prerequisite must be explicit before builder execution',
+        '- implementationLane must be explicit',
+        '- allowed values: repo-coding / pmos-fullstack-builder / hybrid',
+        '- prefer pmos-fullstack-builder for PMOS-owned frontend/backend/AI implementation work',
+        '- prefer repo-coding for conventional business frontend/backend engineering',
+        '- use hybrid only when PMOS implementation must coordinate external execution surfaces with repo-owned pages or services',
+        '- reviewLane default: pmos-code-review',
+        '- historicalReviewLane default follow-up: pmos-historical-code-review (non-blocking unless immediate delivery risk is found)',
+        '- acceptanceLane default: pmos-testing-acceptance',
+        '',
+        '## Implementation Contract',
+        '',
+        '- route / entry must be explicit',
+        '- layout shell must be explicit',
+        '- target roles must be explicit',
+        '- data refs must be explicit',
+        '- component bindings must be explicit',
+        '- loading / empty / error / permission states must be explicit',
+        '- critical actions and success feedback must be explicit',
+        '',
+        '## Default Execution Order',
+        '',
+        '1. recover upstream requirement / functional / ui-schema truth if missing',
+        '2. lock page route, shell, roles, and data refs',
+        '3. lock Ant Design / Ant Design X component bindings',
+        '4. run pmos-architecture-designer and record architecture-ready boundary/tradeoff conclusions',
+        '5. write an explicit SDD acceptance matrix before final implementation sign-off',
+        '6. implement the page with governed states and actions under the selected implementationLane',
+        '7. run pmos-code-review on the actual change set before testing acceptance begins',
+        '8. if legacy hotspots are discovered, run pmos-historical-code-review and capture remediation work separately from the current diff review',
+        '9. run automated acceptance and repeated browser verification before operator review',
+        '',
+        '## Acceptance Pack',
+        '',
+        '- required unit/integration tests',
+        '- required focused regression set',
+        '- required final-state validation result',
+        '- required browser verification artifacts',
+        '- minimum real-browser rounds: desktop 3, mobile 2',
+        '- screenshot evidence for the final page shell',
+        '- unresolved risks and blocked states',
+        '',
+        '## Anti-Drift Rules',
+        '',
+        '- do not invent page structure from memory when ui-schema exists',
+        '- do not replace governed component bindings with freehand custom UI without explicit waiver',
+        '- do not send the page to user review before automated browser verification passes',
         '',
       ].join('\n');
     }

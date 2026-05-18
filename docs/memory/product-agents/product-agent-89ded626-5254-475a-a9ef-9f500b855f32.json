@@ -1,0 +1,38 @@
+{
+  "id": "product-agent-89ded626-5254-475a-a9ef-9f500b855f32",
+  "subprojectId": null,
+  "name": "Virtual Competitive Analysis PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "competitive-analysis",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns competitive benchmarking, company intelligence, and product pattern comparison.",
+  "problem": "Competitive information exists in old research files, but not as a governed and continuously updated product intelligence loop.",
+  "targetUsers": [],
+  "goals": [
+    "Produce company benchmark intelligence reports.",
+    "Track product pattern, pricing, workflow, and ecosystem shifts.",
+    "Explain whether a competitor move should change PMAIOS direction."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Competitive reports identify peers, differences, reusable ideas, and strategic warnings."
+  ],
+  "relatedPaths": [
+    "docs/templates/competitive_intelligence_report_template.md",
+    "docs/templates/special_research_report_template.md"
+  ],
+  "governanceRefs": [
+    "docs/industry_analysis"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_competitive_analysis_pm_prompt.md",
+  "templateId": "virtual-competitive-analysis-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.122Z",
+  "updatedAt": "2026-04-27T10:04:22.122Z"
+}

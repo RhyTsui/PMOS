@@ -1,0 +1,47 @@
+{
+  "id": "req-0cdb4808-1d76-4dbd-b9f6-0d52aa574f5e",
+  "subprojectId": null,
+  "title": "Review governed output: Product definition baseline",
+  "description": "Product definition baseline generated from Product Chief report product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905.\n\nProduct Chief report: product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905\nOutput id: product-output-f4c96a07-e5f4-4e5e-9499-07948c530049\nOutput type: product-definition-baseline\n\n请直接给一个 AI 埋点平台出首页、需求中心、事件字典三页的设计图，后续可能还会做前端，但现在先要出图。",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "product-output",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "product-chief-report",
+      "entityId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+      "path": "docs/product-office/outputs/product-output-f4c96a07-e5f4-4e5e-9499-07948c530049.md",
+      "label": "product-definition-baseline"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-1f810950-6d37-4ca3-8f9d-7c6384a7da6f"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/product-office/outputs/product-output-f4c96a07-e5f4-4e5e-9499-07948c530049.md",
+      "docs/memory/product-chief/outputs/product-output-f4c96a07-e5f4-4e5e-9499-07948c530049.json",
+      "docs/memory/product-chief/reports/product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905.json",
+      "docs/product-office/specialist-tasks/product-chief-task-504f2bb3-7dd1-4487-89b0-c9582a7ce9a3.md",
+      "docs/product-office/specialist-tasks/product-chief-task-4f8ad7e5-7536-4d10-986d-be6fbdadcdb8.md",
+      "docs/memory/product-chief/specialist-tasks/product-chief-task-504f2bb3-7dd1-4487-89b0-c9582a7ce9a3.json",
+      "docs/memory/product-chief/specialist-tasks/product-chief-task-4f8ad7e5-7536-4d10-986d-be6fbdadcdb8.json",
+      "docs/product-office/multi-agent-reviews/product-chief-review-ca065228-427f-4ec6-a2c5-6d59830e956c.md",
+      "docs/memory/product-chief/multi-agent-reviews/product-chief-review-ca065228-427f-4ec6-a2c5-6d59830e956c.json"
+    ]
+  },
+  "createdAt": "2026-04-28T01:41:33.131Z",
+  "updatedAt": "2026-04-28T01:41:33.146Z",
+  "metadata": {
+    "source": "product-chief-output",
+    "productChiefReportId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+    "productChiefOutputId": "product-output-f4c96a07-e5f4-4e5e-9499-07948c530049",
+    "outputType": "product-definition-baseline"
+  }
+}

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>连擎 - 项目台原型 Demo</title>
+  <style>
+    :root{
+      --bg:#f7f8fa;
+      --panel:#fff;
+      --line:#e6e8ef;
+      --line2:#edf0f5;
+      --text:#172033;
+      --muted:#697386;
+      --subtle:#8b95a7;
+      --primary:#5b5cff;
+      --p50:#f0edff;
+      --p100:#e8e5ff;
+      --green:#12a667;
+      --gbg:#eafaf3;
+      --red:#e5484d;
+      --rbg:#fff0f0;
+      --orange:#d97706;
+      --obg:#fff7ed;
+      --purple:#7c3aed;
+      --vbg:#f3efff;
+      --shadow:0 10px 30px rgba(17,24,39,.06);
+      --radius:14px;
+      --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+    .app{display:flex;min-height:100vh}
+
+    /* Sidebar */
+    .side{width:236px;background:#fff;border-right:1px solid var(--line);padding:14px 10px;position:sticky;top:0;height:100vh;flex:0 0 auto}
+    .brand{display:flex;gap:10px;align-items:center;padding:8px 10px 16px;border-bottom:1px solid var(--line2)}
+    .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4f6bff,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+    .brand b{display:block;font-size:15px}
+    .brand span{font-size:12px;color:var(--muted)}
+    .workspace{margin:14px 4px 8px;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;gap:9px;background:#fff}
+    .ws-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--p50);color:var(--primary);font-weight:800}
+    .ws-text{flex:1;min-width:0}
+    .ws-text b{display:block;font-size:13px;color:var(--text)}
+    .ws-text span{display:block;font-size:12px;color:var(--subtle);margin-top:2px}
+    .ws-arrow{color:var(--subtle);font-size:12px}
+    .nav-title{font-size:12px;color:#8b95a7;padding:16px 12px 6px}
+    .nav{height:36px;border-radius:10px;padding:0 12px;display:flex;align-items:center;gap:9px;color:#3f4757;cursor:pointer}
+    .nav:hover{background:#f6f7fb}
+    .nav.active{background:var(--p50);color:var(--primary);font-weight:700}
+    .nav-ico{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;color:#64748b;flex:0 0 auto}
+    .nav.active .nav-ico{color:var(--primary)}
+    .nav-ico svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+    /* Layout */
+    .main{flex:1;min-width:0}
+    .top{height:58px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:5}
+    .crumb{color:var(--muted);font-size:13px}.crumb b{color:var(--text)}
+    .page{padding:24px 26px 36px}
+    h1{margin:0;font-size:24px;letter-spacing:-.02em}
+    .desc{margin-top:8px;color:var(--muted);line-height:1.55;max-width:900px}
+    .head{margin-bottom:18px}
+
+    /* Components */
+    .btn{height:34px;border:1px solid transparent;border-radius:9px;background:var(--primary);color:#fff;padding:0 13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn:hover{opacity:.92}
+    .btn.sec{background:#fff;color:#3f4757;border-color:var(--line)}
+    .btn.small{height:28px;padding:0 9px;font-size:12px;border-radius:8px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+    .metric{padding:16px}
+    .label{color:var(--muted);font-size:13px}
+    .value{font-size:26px;font-weight:800;margin-top:8px}
+    .tip{font-size:12px;color:#8b95a7;margin-top:8px}
+    .section{padding:16px;margin-bottom:16px}
+    .section-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+    .title{font-weight:800}
+    .sub{font-size:12px;color:var(--muted);margin-top:3px}
+    .toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    input,select,textarea{height:34px;border:1px solid var(--line);border-radius:9px;padding:0 10px;background:#fff;font-family:var(--font);font-size:13px}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#b7c4ff;box-shadow:0 0 0 3px rgba(91,92,255,.1)}
+    textarea{height:90px;padding:10px;font-family:var(--mono);line-height:1.45;resize:vertical}
+    .search{width:280px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    th,td{border-bottom:1px solid var(--line2);text-align:left;padding:12px 10px;font-size:13px;vertical-align:middle}
+    th{background:#fbfcff;color:var(--muted);font-weight:700}
+    tr:hover td{background:#fcfdff}
+    .status{display:inline-flex;height:22px;border-radius:999px;padding:0 8px;align-items:center;font-size:12px;font-weight:700;white-space:nowrap}
+    .ok{background:var(--gbg);color:var(--green)}
+    .fail{background:var(--rbg);color:var(--red)}
+    .warn{background:var(--obg);color:var(--orange)}
+    .gray{background:#f2f3f5;color:var(--muted)}
+    .blue{background:var(--p50);color:var(--primary)}
+    .purple{background:var(--vbg);color:var(--purple)}
+    .icon{width:28px;height:28px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;margin-right:8px}
+    .mcp{background:var(--p50);color:var(--primary)}
+    .chat{background:var(--gbg);color:var(--green)}
+    .web{background:var(--vbg);color:var(--purple)}
+    .name{font-weight:800;display:flex;align-items:center}
+    .small{font-size:12px;color:#8b95a7;margin-top:4px}
+    .link{color:var(--primary);font-weight:700;cursor:pointer;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .divider{height:1px;background:var(--line2);margin:16px 0}
+
+    /* Drawer */
+    .drawer-mask{position:fixed;inset:0;background:rgba(15,23,42,.22);display:none;z-index:20}
+    .drawer{position:fixed;right:0;top:0;height:100vh;width:720px;background:#fff;border-left:1px solid var(--line);display:none;z-index:21;box-shadow:-12px 0 40px rgba(15,23,42,.12)}
+    .drawer.open{display:flex;flex-direction:column}
+    .drawer-mask.open{display:block}
+    .drawer-head{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+    .drawer-title{font-weight:800}
+    .drawer-body{padding:16px 18px;overflow:auto;flex:1}
+    .drawer-foot{border-top:1px solid var(--line);padding:12px 18px;display:flex;justify-content:flex-end;gap:8px;background:#fff}
+
+    .stepper{display:flex;gap:8px;margin-bottom:16px}
+    .step{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
+    .step.active{border-color:#b7c4ff;background:#f8faff}
+    .step b{display:block;font-size:13px}
+    .step span{font-size:12px;color:var(--muted)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form{margin-bottom:14px}
+    .form label{display:flex;justify-content:space-between;font-weight:700;margin-bottom:7px;color:#364152}
+    .form label span{font-weight:500;color:#8b95a7}
+    .form input,.form select,.form textarea{width:100%}
+    .type-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+    .type-card{border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;background:#fff}
+    .type-card.active{border-color:#b7c4ff;background:#f8faff;box-shadow:0 0 0 3px rgba(79,107,255,.08)}
+    .type-card b{display:block;margin-bottom:6px}
+    .type-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+    .env-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:#fbfcff}
+    .env-card.optional{background:#fff}
+    .env-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .env-head b{font-size:14px}
+    .env-summary{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:#fff}
+    .env-summary .env-name{font-weight:800}
+    .env-summary .env-desc{font-size:12px;color:var(--muted)}
+    .hint{border:1px solid #dbe3ff;background:#f8faff;color:#4b5dcc;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.55;margin-bottom:14px}
+    .connect-tip{border:1px solid #d1fae5;background:#f0fdf4;color:#166534;border-radius:10px;padding:9px 10px;font-size:12px;line-height:1.5;margin:4px 0 12px}
+    .prod-tip{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.45;margin-bottom:10px}
+    .advanced{border:1px dashed #d9dee8;border-radius:12px;margin-top:10px;background:#fff}
+    .advanced summary{cursor:pointer;padding:10px 12px;font-weight:700;color:#4b5563}
+    .advanced-body{padding:0 12px 12px}
+    .code{background:#111827;color:#dbeafe;border-radius:12px;padding:13px;line-height:1.55;font-family:var(--mono);font-size:12px;white-space:pre;overflow:auto;max-height:340px}
+    .hidden{display:none!important}
+
+    @media(max-width:1100px){
+      .metrics{grid-template-columns:1fr 1fr}
+      .side{display:none}
+      .drawer{width:92vw}
+      .form-grid,.type-cards{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">连</div>
+      <div>
+        <b>连擎</b>
+        <span>智能质量测试平台</span>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <div class="ws-icon">◇</div>
+      <div class="ws-text">
+        <b>个人空间</b>
+        <span>质量测试工作区</span>
+      </div>
+      <div class="ws-arrow">∨</div>
+    </div>
+
+    <div class="nav-title">质量工作台</div>
+    <div class="nav">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></span>
+      总览
+    </div>
+    <div class="nav active">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span>
+      项目台
+    </div>
+
+    <div class="nav-title">测试资产</div>
+    <div class="nav">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span>
+      用例台
+    </div>
+
+    <div class="nav-title">执行观测</div>
+    <div class="nav">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+      执行台
+    </div>
+    <div class="nav">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M4 12h4l2-6 4 12 2-6h4"/></svg></span>
+      Trace台
+    </div>
+    <div class="nav">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/><path d="M4 12a8 8 0 0 1 8-8"/></svg></span>
+      复盘台
+    </div>
+
+    <div class="nav-title">设置与报告</div>
+    <div class="nav">
+      <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span>
+      报告台
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div class="crumb">项目台 / <b>项目列表</b></div>
+      <div></div>
+    </header>
+
+    <div class="page">
+      <div class="head">
+        <h1>项目台</h1>
+        <div class="desc">项目台用于管理 MCP、Chat API、Web 自动化等被测项目，支持环境配置、测试连通和 Trace 追踪。</div>
+      </div>
+
+      <div class="metrics">
+        <div class="card metric"><div class="label">项目总数</div><div class="value">3</div><div class="tip">MCP / Chat API / Web</div></div>
+        <div class="card metric"><div class="label">MCP 项目</div><div class="value">1</div><div class="tip">广告报表 MCP</div></div>
+        <div class="card metric"><div class="label">Chat API 项目</div><div class="value">1</div><div class="tip">广告问答 Chat API</div></div>
+        <div class="card metric"><div class="label">Web 项目</div><div class="value">1</div><div class="tip">魔方后台 Web</div></div>
+      </div>
+
+      <section class="card section">
+        <div class="section-head">
+          <div><div class="title">项目列表</div></div>
+          <button class="btn" onclick="openNewProject()">新建项目</button>
+        </div>
+        <div class="toolbar">
+          <input class="search" placeholder="搜索项目名称 / URL / 分类"/>
+          <select><option>全部类型</option><option>MCP</option><option>Chat API</option><option>Web</option></select>
+          <select><option>全部状态</option><option>启用</option><option>草稿</option><option>停用</option></select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:28%">项目</th>
+              <th>类型</th>
+              <th>分类</th>
+              <th>版本池</th>
+              <th>环境覆盖</th>
+              <th>最近测试连通</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="name"><span class="icon mcp">M</span>广告报表 MCP</div><div class="small">proj_mcp_ad_report</div></td>
+              <td><span class="status blue">MCP</span></td>
+              <td>魔方报表查看接口</td>
+              <td>v1.0 / v1.1 / v1.2</td>
+              <td>测试 / 预发 / 生产</td>
+              <td><span class="status ok">测试 v1.2 成功</span></td>
+              <td><span class="link" onclick="openDetail()">详情</span> · <span class="link" onclick="openEditProject()">编辑</span></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="icon chat">C</span>广告问答 Chat API</div><div class="small">proj_chat_ad_qa</div></td>
+              <td><span class="status ok">Chat API</span></td>
+              <td>广告问答</td>
+              <td>v0.9 / v1.0</td>
+              <td>测试 / 生产</td>
+              <td><span class="status fail">测试 v1.0 失败</span></td>
+              <td><span class="link" onclick="openDetail()">详情</span> · <span class="link" onclick="openEditProject()">编辑</span></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="icon web">W</span>魔方后台 Web</div><div class="small">proj_web_cube_admin</div></td>
+              <td><span class="status purple">Web</span></td>
+              <td>后台系统</td>
+              <td>v3.10 / v3.11</td>
+              <td>测试 / 生产</td>
+              <td><span class="status ok">测试 v3.11 成功</span></td>
+              <td><span class="link" onclick="openDetail()">详情</span> · <span class="link" onclick="openEditProject()">编辑</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="drawer-mask" id="mask" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-title" id="drawerTitle"></div>
+    <button class="btn sec" onclick="closeDrawer()">关闭</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+
+<script>
+let projectType='mcp';
+let step=1;
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function closeDrawer(){
+  mask.classList.remove('open');
+  drawer.classList.remove('open');
+}
+
+/* New Project */
+function openNewProject(){
+  step=1;
+  projectType='mcp';
+  renderNewProject();
+}
+function renderNewProject(){
+  drawerTitle.innerText='新建项目';
+  mask.classList.add('open');
+  drawer.classList.add('open');
+
+  drawerBody.innerHTML=`
+    <div class="stepper">
+      <div class="step ${step===1?'active':''}"><b>1. 基本信息</b><span>选择项目类型和分类</span></div>
+      <div class="step ${step===2?'active':''}"><b>2. 版本能力</b><span>schema / 请求模板 / 页面规则</span></div>
+      <div class="step ${step===3?'active':''}"><b>3. 环境配置</b><span>默认展开测试环境</span></div>
+      <div class="step ${step===4?'active':''}"><b>4. 测试连通</b><span>保存并测试连通</span></div>
+    </div>
+    ${step===1?renderStep1():''}
+    ${step===2?renderStep2():''}
+    ${step===3?renderStep3():''}
+    ${step===4?renderStep4():''}
+  `;
+
+  if(step === 4){
+    drawerFoot.innerHTML=`<button class="btn sec" onclick="prevStep()">上一步</button>
+      <button class="btn sec" onclick="closeDrawer()">保存项目</button>
+      <button class="btn" onclick="openConnectResult()">保存并测试连通</button>`;
+  }else{
+    drawerFoot.innerHTML=`<button class="btn sec" onclick="${step===1?'closeDrawer()':'prevStep()'}">${step===1?'取消':'上一步'}</button>
+      <button class="btn" onclick="nextStep()">下一步</button>`;
+  }
+}
+function nextStep(){step=Math.min(4,step+1);renderNewProject()}
+function prevStep(){step=Math.max(1,step-1);renderNewProject()}
+
+function renderStep1(){
+  return `
+    <div class="hint">新建项目时先选择项目类型。不同类型对应不同版本能力和测试连通方式。</div>
+    <div class="type-cards">
+      <div class="type-card ${projectType==='mcp'?'active':''}" onclick="projectType='mcp';renderNewProject()"><b>MCP 项目</b><p>接入 MCP Server，拉取工具列表、解析 schema、试调工具。</p></div>
+      <div class="type-card ${projectType==='chat'?'active':''}" onclick="projectType='chat';renderNewProject()"><b>Chat API 项目</b><p>接入 Chat 服务，配置请求模板和 answer / trace / tool_calls 解析路径。</p></div>
+      <div class="type-card ${projectType==='web'?'active':''}" onclick="projectType='web';renderNewProject()"><b>Web 自动化项目</b><p>接入 Web 页面，配置登录方式、断言、截图、Network 采集。</p></div>
+    </div>
+    <div class="form-grid">
+      <div class="form"><label>项目名称 <span>必填</span></label><input value="${projectType==='mcp'?'广告报表 MCP':projectType==='chat'?'广告问答 Chat API':'魔方后台 Web'}"/></div>
+      <div class="form"><label>项目标识 <span>全局唯一</span></label><input value="${projectType==='mcp'?'proj_mcp_ad_report':projectType==='chat'?'proj_chat_ad_qa':'proj_web_cube_admin'}"/></div>
+      <div class="form"><label>项目类型</label><input disabled value="${projectType==='mcp'?'MCP':projectType==='chat'?'Chat API':'Web 自动化'}"/></div>
+      <div class="form"><label>项目分类 <span>必填</span></label>${renderCategory()}</div>
+      <div class="form"><label>负责人 <span>必填</span></label><input value="zoee"/></div>
+      <div class="form"><label>状态</label><select><option>草稿</option><option>启用</option></select></div>
+    </div>
+    <div class="form"><label>项目说明</label><textarea>${projectType==='mcp'?'用于验证魔方/智投报表查看接口 MCP 封装、参数映射和后续业务数据一致性。':projectType==='chat'?'用于验证广告问答 Chat API 的自然语言到 MCP 调用链路。':'用于验证魔方后台页面流程、元素断言和 Network 请求。'}</textarea></div>
+  `;
+}
+function renderCategory(){
+  if(projectType==='mcp')return `<select><option>魔方报表查看接口 MCP</option><option>智投报表查看接口 MCP</option><option>看板报表查看接口 MCP</option><option>SQL查询接口 MCP</option><option>暂不配置</option></select>`;
+  if(projectType==='chat')return `<select><option>广告问答</option><option>报表诊断 Chat API</option><option>通用 Agent</option></select>`;
+  return `<select><option>后台系统</option><option>报表页面</option><option>投放平台</option><option>质量平台</option></select>`;
+}
+function renderStep2(){
+  if(projectType==='mcp')return `
+    <div class="hint">能力快照名称用于标记“这一版 MCP schema 快照”。不填写时系统默认生成 v1.0。</div>
+    <div class="form-grid">
+      <div class="form"><label>能力快照名称 <span>可选，默认 v1.0</span></label><input placeholder="v1.0"/></div>
+      <div class="form"><label>版本状态</label><select><option>开发中</option><option>已发布</option></select></div>
+      <div class="form"><label>Schema 获取方式</label><select><option>自动拉取工具列表</option><option>手动上传 schema JSON</option></select></div>
+    </div>
+    <div class="form"><label>schema_snapshot</label><textarea>{
+  "tools": [
+    {
+      "name": "cube_report_query",
+      "description": "查询魔方报表数据",
+      "inputSchema": {"type": "object", "required": ["project_id", "date_range"]}
+    }
+  ]
+}</textarea></div>
+    <div class="form"><label>版本说明</label><textarea>初始 schema 快照。系统默认保存快照，并在后续测试连通时对比 schema 变化。</textarea></div>
+  `;
+  if(projectType==='chat')return `
+    <div class="hint">能力快照名称用于标记“这一版 Chat 请求模板和响应解析路径”。没有正式接口版本时可留空。</div>
+    <div class="form-grid">
+      <div class="form"><label>能力快照名称 <span>可选，默认 v1.0</span></label><input placeholder="v1.0"/></div>
+      <div class="form"><label>版本状态</label><select><option>开发中</option><option>已发布</option></select></div>
+      <div class="form"><label>answer 路径 <span>必填</span></label><input value="$.data.answer"/></div>
+      <div class="form"><label>trace_id 路径</label><input value="$.data.trace_id"/></div>
+      <div class="form"><label>tool_calls 路径</label><input value="$.data.tool_calls"/></div>
+      <div class="form"><label>错误信息路径</label><input value="$.message"/></div>
+    </div>
+    <div class="form"><label>请求体模板</label><textarea>{
+  "user_id": "{{user_id}}",
+  "module": "{{module}}",
+  "project_id": "{{project_id}}",
+  "messages": [
+    {"role": "user", "content": "{{question}}"}
+  ],
+  "stream": false
+}</textarea></div>
+  `;
+  return `
+    <div class="hint">能力快照名称用于标记“这一版页面结构和断言规则”。没有正式前端版本时可留空。</div>
+    <div class="form-grid">
+      <div class="form"><label>能力快照名称 <span>可选，默认 v1.0</span></label><input placeholder="v3.11"/></div>
+      <div class="form"><label>版本状态</label><select><option>开发中</option><option>已发布</option></select></div>
+      <div class="form"><label>成功判定方式</label><select><option>页面标题包含</option><option>关键元素存在</option><option>URL 包含</option><option>HTTP 200</option></select></div>
+      <div class="form"><label>成功判定值</label><input value="魔方后台"/></div>
+    </div>
+    <div class="form"><label>页面结构说明</label><textarea>入口：/home
+核心菜单：项目台、用例台、执行台、Trace台
+关键元素：新增接入、测试连通、查看 Trace</textarea></div>
+    <div class="form"><label>默认断言规则 JSON</label><textarea>{
+  "assertions": [
+    {"type": "title_contains", "expected": "魔方后台"},
+    {"type": "visible", "selector": "text=项目台"}
+  ]
+}</textarea></div>
+  `;
+}
+function renderStep3(){
+  return `
+    <div class="hint">新建项目时默认只展开测试环境；预发和生产环境为可选配置。生产环境敏感，建议保存后在项目详情页单独配置和测试连通。</div>
+    ${renderEnvCard('测试环境','test',true)}
+    <div class="env-summary">
+      <div class="env-name">预发环境</div>
+      <div class="env-desc">可选配置。用于版本发布前验证，可保存后在项目详情页补充。</div>
+      <button class="btn small sec" onclick="toggleOptionalEnv('pre')">配置</button>
+    </div>
+    <div id="optional-pre" class="hidden">${renderEnvCard('预发环境','pre',false)}</div>
+    <div class="env-summary">
+      <div class="env-name">生产环境</div>
+      <div class="env-desc">可选配置。生产环境敏感，建议仅做只读类测试连通。</div>
+      <button class="btn small sec" onclick="toggleOptionalEnv('prod')">配置</button>
+    </div>
+    <div id="optional-prod" class="hidden">${renderEnvCard('生产环境','prod',false)}</div>
+  `;
+}
+function toggleOptionalEnv(code){
+  const el=document.getElementById('optional-'+code);
+  if(el) el.classList.toggle('hidden');
+}
+function readableConnectText(){
+  if(projectType==='mcp') return '保存后将获取 MCP 工具列表，确认 Server 能访问、工具列表能返回、schema 能解析，并生成 Trace。';
+  if(projectType==='chat') return '保存后将发送一条测试问题，确认 Chat API 能请求成功，并解析 answer / trace_id / tool_calls，生成 Trace。';
+  return '保存后将打开入口 URL，确认页面可访问、登录态可用、页面断言通过，并采集截图 / Console / Network。';
+}
+function renderEnvCard(name,code,isRequired){
+  const url = projectType==='mcp' ? `https://mcp-${code}.example.com` : projectType==='chat' ? `https://chat-${code}.example.com/api/chat` : `https://${code}-mofang.example.com`;
+  return `
+    <div class="env-card ${isRequired?'':'optional'}">
+      <div class="env-head">
+        <b>${name} ${isRequired?'<span class="status blue">默认必填</span>':'<span class="status gray">可选</span>'}</b>
+        <span class="status ${code==='prod'?'warn':'gray'}">${code}</span>
+      </div>
+      ${code==='prod'?'<div class="prod-tip">生产环境建议只做只读类测试连通；保存前请确认 Token / Cookie / API Key 权限范围。</div>':''}
+      <div class="form-grid">
+        <div class="form"><label>${projectType==='mcp'?'Server URL':projectType==='chat'?'API URL':'入口 URL'} ${isRequired?'<span>必填</span>':'<span>可选</span>'}</label><input value="${url}"/></div>
+        <div class="form"><label>${projectType==='mcp'?'协议类型':projectType==='chat'?'请求方法':'登录方式'}</label>${envSelect()}</div>
+        <div class="form"><label>鉴权方式</label><select><option>Bearer Token</option><option>API Key</option><option>Cookie</option><option>无</option></select></div>
+        <div class="form"><label>鉴权内容 <span>加密存储</span></label><input value="sk-**************"/></div>
+        <div class="form"><label>超时时间</label><input value="${projectType==='chat'?'60000':'30000'}"/></div>
+      </div>
+      <div class="connect-tip">${readableConnectText()}</div>
+      <details class="advanced">
+        <summary>高级配置（可选）：Headers / 网关参数</summary>
+        <div class="advanced-body">
+          <div class="form"><label>Headers / 扩展配置</label><textarea>{"x-env":"${code}","x-module":"${projectType}"}</textarea></div>
+        </div>
+      </details>
+    </div>
+  `;
+}
+function envSelect(){
+  if(projectType==='mcp')return `<select><option>Streamable HTTP</option><option>HTTP</option><option>SSE</option></select>`;
+  if(projectType==='chat')return `<select><option>POST</option><option>GET</option></select>`;
+  return `<select><option>Cookie</option><option>Token</option><option>账号密码</option><option>无需登录</option></select>`;
+}
+function renderStep4(){
+  return `
+    <div class="hint">保存项目只保存配置；保存并测试连通会立即验证测试环境，并保存测试连通记录和 Trace。该流程不会自动生成用例。</div>
+    <table>
+      <tr><th>检查项</th><th>状态</th><th>说明</th></tr>
+      <tr><td>基本信息</td><td><span class="status ok">完整</span></td><td>项目名称、类型、分类、负责人已填写</td></tr>
+      <tr><td>版本能力</td><td><span class="status ok">完整</span></td><td>${projectType==='mcp'?'schema 快照已配置':projectType==='chat'?'请求模板和解析路径已配置':'页面结构和断言规则已配置'}</td></tr>
+      <tr><td>测试环境配置</td><td><span class="status ok">完整</span></td><td>测试环境已配置；预发/生产可后续补充</td></tr>
+      <tr><td>安全提示</td><td><span class="status warn">已提示</span></td><td>Token / Cookie / API Key 将加密存储并脱敏展示</td></tr>
+    </table>
+  `;
+}
+
+/* Detail: read-only */
+function openDetail(){
+  mask.classList.add('open');
+  drawer.classList.add('open');
+  drawerTitle.innerText='项目详情';
+
+  drawerBody.innerHTML=`<div class="hint">项目详情用于查看项目整体情况、版本池、接口包装适配摘要、环境访问配置、最近测试连通记录和 Trace。需要修改配置时从列表点击“编辑”。</div>
+  <div class="divider"></div>
+
+  <div class="title" style="margin-bottom:10px;">基本信息</div>
+  <table>
+    <tr><th>字段</th><th>内容</th></tr>
+    <tr><td>项目名称</td><td>广告报表 MCP</td></tr>
+    <tr><td>项目类型</td><td>MCP</td></tr>
+    <tr><td>项目分类</td><td>魔方报表查看接口</td></tr>
+    <tr><td>负责人</td><td>zoee</td></tr>
+  </table>
+
+  <div class="divider"></div>
+  <div class="title" style="margin-bottom:10px;">版本池</div>
+  <table>
+    <tr><th>版本</th><th>状态</th><th>能力快照</th></tr>
+    <tr><td>v1.2</td><td><span class="status ok">已发布</span></td><td>12 个 MCP 能力项，schema valid，新增 3 项</td></tr>
+    <tr><td>v1.1</td><td><span class="status ok">已发布</span></td><td>11 个 MCP 能力项，schema valid</td></tr>
+    <tr><td>v1.0</td><td><span class="status gray">已废弃</span></td><td>9 个 MCP 能力项</td></tr>
+  </table>
+
+  <div class="divider"></div>
+  <div class="title" style="margin-bottom:10px;">MCP 接口包装适配摘要</div>
+  <table>
+    <tr><th>包装接口类型</th><th>能力项数量</th><th>默认操作</th><th>副作用</th><th>数据准确率</th><th>用例生成用途</th></tr>
+    <tr><td>魔方报表查看接口</td><td>1</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td>MCP 数据准确性 / Chat 编排</td></tr>
+    <tr><td>智投报表查看接口</td><td>1</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td>MCP 数据准确性 / Chat 编排</td></tr>
+    <tr><td>看板报表查看接口</td><td>1</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td>看板数据准确性 / Chat 编排</td></tr>
+    <tr><td>SQL查询接口</td><td>1</td><td>SQL查询</td><td><span class="status ok">只读</span></td><td><span class="status gray">不默认启用</span></td><td>SQL安全 / 表权限 / 返回结构</td></tr>
+    <tr><td>暂不配置</td><td>1</td><td>-</td><td><span class="status gray">未配置</span></td><td><span class="status gray">否</span></td><td>MCP 基础测试</td></tr>
+  </table>
+  <div class="hint">这里不作为独立 Tool 管理模块，只展示当前 MCP 项目能力快照下的接口包装适配摘要。详细配置在编辑页进入“接口包装适配”。</div>
+
+  <div class="divider"></div>
+  <div class="title" style="margin-bottom:10px;">环境访问配置</div>
+  <table>
+    <tr><th>环境</th><th>访问地址</th><th>状态</th></tr>
+    <tr><td>测试环境</td><td>https://mcp-test.example.com</td><td><span class="status ok">已配置</span></td></tr>
+    <tr><td>预发环境</td><td>https://mcp-pre.example.com</td><td><span class="status ok">已配置</span></td></tr>
+    <tr><td>生产环境</td><td>https://mcp-prod.example.com</td><td><span class="status warn">敏感环境</span></td></tr>
+  </table>
+
+  <div class="divider"></div>
+  <div class="title" style="margin-bottom:10px;">最近测试连通记录</div>
+  <table>
+    <tr><th>时间</th><th>环境</th><th>版本</th><th>结果</th><th>摘要</th><th>操作</th></tr>
+    <tr><td>15:42</td><td>测试</td><td>v1.2</td><td><span class="status ok">成功</span></td><td>已获取 12 个工具，schema 解析通过</td><td><span class="link" onclick="openTrace()">查看 Trace</span></td></tr>
+    <tr><td>15:21</td><td>预发</td><td>v1.1</td><td><span class="status fail">失败</span></td><td>鉴权失败</td><td><span class="link" onclick="openTrace()">查看 Trace</span></td></tr>
+  </table>`;
+
+  drawerFoot.innerHTML=`<button class="btn sec" onclick="closeDrawer()">关闭</button>`;
+}
+
+/* Edit: editable + test connectivity actions */
+function openEditProject(){
+  mask.classList.add('open');
+  drawer.classList.add('open');
+  drawerTitle.innerText='编辑项目';
+
+  drawerBody.innerHTML=`<div class="hint">编辑项目只用于修改可配置内容。最近测试连通记录和 Trace 在项目详情中查看，不在编辑页展示。</div>
+  <div class="form-grid">
+    <div class="form"><label>项目名称</label><input value="广告报表 MCP"/></div>
+    <div class="form"><label>项目标识</label><input value="proj_mcp_ad_report"/></div>
+    <div class="form"><label>项目类型</label><input value="MCP" disabled/></div>
+    <div class="form"><label>项目分类</label><select><option>魔方报表查看接口 MCP</option><option>智投报表查看接口 MCP</option><option>看板报表查看接口 MCP</option><option>SQL查询接口 MCP</option><option>暂不配置</option></select></div>
+    <div class="form"><label>负责人</label><input value="zoee"/></div>
+    <div class="form"><label>状态</label><select><option>启用</option><option>草稿</option><option>停用</option></select></div>
+  </div>
+  <div class="form"><label>项目说明</label><textarea>用于验证魔方/智投报表查看接口 MCP 封装、参数映射和后续业务数据一致性。</textarea></div>
+
+  <div class="divider"></div>
+  <div class="title" style="margin-bottom:10px;">可编辑配置</div>
+  <table>
+    <tr><th>配置项</th><th>当前状态</th><th>操作</th></tr>
+    <tr><td>版本能力</td><td>v1.0 / v1.1 / v1.2</td><td><span class="link">管理版本</span></td></tr>
+    <tr><td>环境访问配置</td><td>测试 / 预发 / 生产</td><td><span class="link">配置环境</span></td></tr>
+    <tr><td>MCP 接口包装适配</td><td>魔方报表查看 1 项，智投报表查看 1 项，看板报表查看 1 项，暂未配置 1 项</td><td><span class="link" onclick="openWrappedApiConfig('summary','edit')">配置</span></td></tr>
+  </table>
+
+  <div class="divider"></div>
+  <div class="hint">接口包装适配只维护“能力项属于哪类接口、是否只读、是否支持数据准确率、使用哪个模板”。具体用例怎么生成由用例台负责。</div>`;
+
+  drawerFoot.innerHTML=`<button class="btn sec" onclick="closeDrawer()">取消</button>
+  <button class="btn sec">保存修改</button>
+  <button class="btn" onclick="openConnectResult()">保存并测试连通</button>`;
+}
+
+
+function openWrappedApiConfig(type, mode){
+  const readonly = mode === 'view';
+  const foot = readonly
+    ? `<button class="btn sec" onclick="closeDrawer()">关闭</button>`
+    : `<button class="btn sec" onclick="openEditProject()">返回编辑</button><button class="btn">保存配置</button>`;
+  drawerTitle.innerText = type === 'summary' ? 'MCP 接口包装适配' : '接口包装适配配置';
+  drawerBody.innerHTML = renderWrappedApiConfig(readonly);
+  drawerFoot.innerHTML = foot;
+  mask.classList.add('open');
+  drawer.classList.add('open');
+}
+
+function renderWrappedApiConfig(readonly){
+  const disabled = readonly ? 'disabled' : '';
+  return `<div class="hint">这里不是单独的 Tool 管理模块，而是 MCP 能力快照下的“接口包装适配”。项目接入只声明类型和模板引用，用例台根据类型生成候选用例。</div>
+  <table>
+    <tr><th>能力项</th><th>包装接口类型</th><th>操作</th><th>副作用</th><th>数据准确率</th><th>操作</th></tr>
+    <tr><td>cube_project_report_query_v2</td><td>魔方报表查看接口</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td><span class="link" onclick="openWrappedApiDetail('report')">配置</span></td></tr>
+    <tr><td>zt_project_report_query_v2</td><td>智投报表查看接口</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td><span class="link" onclick="openWrappedApiDetail('zt')">配置</span></td></tr>
+    <tr><td>cube_material_report_query_v2</td><td>魔方报表查看接口</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td><span class="link" onclick="openWrappedApiDetail('report')">配置</span></td></tr>
+    <tr><td>dashboard_report_view_query</td><td>看板报表查看接口</td><td>查询</td><td><span class="status ok">只读</span></td><td><span class="status ok">支持</span></td><td><span class="link" onclick="openWrappedApiDetail('dashboard')">配置</span></td></tr>
+    <tr><td>cube_sql_query</td><td>SQL查询接口</td><td>SQL查询</td><td><span class="status ok">只读</span></td><td><span class="status gray">不默认启用</span></td><td><span class="link" onclick="openWrappedApiDetail('sql')">配置</span></td></tr>
+    <tr><td>unknown_tool_x</td><td>暂不配置</td><td>-</td><td><span class="status gray">未配置</span></td><td><span class="status gray">否</span></td><td><span class="link" onclick="openWrappedApiDetail('none')">配置</span></td></tr>
+  </table>
+  <div class="divider"></div>
+  <table>
+    <tr><th>包装接口类型</th><th>默认用例模板</th><th>默认评估方案</th></tr>
+    <tr><td>报表查看接口</td><td>MCP 数据准确性、参数映射、权限、Chat 编排</td><td>执行成功、参数映射、数据准确率、权限、Trace</td></tr>
+    <tr><td>看板报表查看接口</td><td>看板数据准确性、参数映射、权限、Chat 编排</td><td>执行成功、参数映射、数据准确率、权限、Trace</td></tr>
+    <tr><td>暂不配置</td><td>MCP 基础测试</td><td>schema、基础调用、参数校验、Trace</td></tr>
+  </table>`;
+}
+
+function openWrappedApiDetail(type){
+  let title = '接口包装适配｜魔方报表查看接口';
+  let body = renderReportApiDetail();
+  if(type === 'zt'){
+    title = '接口包装适配｜智投报表查看接口';
+    body = renderZtReportApiDetail();
+  }else if(type === 'sql'){
+    title = '接口包装适配｜SQL查询接口';
+    body = renderSqlQueryApiDetail();
+  }else if(type === 'dashboard'){
+    title = '接口包装适配｜看板报表查看接口';
+    body = renderDashboardApiDetail();
+  }else if(type === 'none'){
+    title = '接口包装适配｜暂不配置';
+    body = renderUnconfiguredApiDetail();
+  }
+  drawerTitle.innerText = title;
+  drawerBody.innerHTML = body;
+  drawerFoot.innerHTML = `<button class="btn sec" onclick="openWrappedApiConfig('summary','edit')">返回列表</button><button class="btn">保存配置</button>`;
+}
+
+function renderReportApiDetail(){
+  return `<div class="hint">魔方报表查看接口是只读查询类能力，默认支持 MCP 层数据准确性测试。</div>
+  <div class="form-grid">
+    <div class="form"><label>能力项名称</label><input value="cube_project_report_query_v2"/></div>
+    <div class="form"><label>包装接口类型</label><select><option>魔方报表查看接口</option><option>智投报表查看接口</option><option>看板报表查看接口</option><option>SQL查询接口</option><option>暂不配置</option></select></div>
+    <div class="form"><label>operation_type</label><input value="查询"/></div>
+    <div class="form"><label>side_effect_level</label><input value="只读"/></div>
+    <div class="form"><label>backend_api_name</label><input value="cube_report_page_query"/></div>
+    <div class="form"><label>permission_profile</label><input value="cube_project_scope"/></div>
+    <div class="form"><label>oracle_config_template</label><input value="report_api_oracle_template_01"/></div>
+    <div class="form"><label>numeric_tolerance</label><input value="0.01"/></div>
+  </div>
+  <div class="form"><label>对比字段 / 行匹配字段</label><textarea>compare_fields: cost, roi, ltv
+row_match_keys: media_id, date, project_id</textarea></div>`;
+}
+
+
+function renderZtReportApiDetail(){
+  return `<div class="hint">智投魔方报表查看接口是只读查询类能力，默认支持 MCP 层数据准确性测试；权限模型和 oracle 模板与魔方报表查看接口分开配置。</div>
+  <div class="form-grid">
+    <div class="form"><label>能力项名称</label><input value="zt_project_report_query_v2"/></div>
+    <div class="form"><label>包装接口类型</label><select><option>智投报表查看接口</option><option>魔方报表查看接口</option><option>看板报表查看接口</option><option>SQL查询接口</option><option>暂不配置</option></select></div>
+    <div class="form"><label>operation_type</label><input value="查询"/></div>
+    <div class="form"><label>side_effect_level</label><input value="只读"/></div>
+    <div class="form"><label>backend_api_name</label><input value="zt_report_query_api"/></div>
+    <div class="form"><label>permission_profile</label><input value="zt_project_scope"/></div>
+    <div class="form"><label>oracle_config_template</label><input value="zt_report_api_oracle_template_01"/></div>
+    <div class="form"><label>numeric_tolerance</label><input value="0.01"/></div>
+  </div>
+  <div class="form"><label>对比字段 / 行匹配字段</label><textarea>compare_fields: cost, roi, conversion
+row_match_keys: campaign_id, date, project_id</textarea></div>`;
+}
+
+
+
+function renderSqlQueryApiDetail(){
+  return `<div class="hint">SQL查询接口是只读查询类能力，默认不做报表数据准确率对照，重点验证 SQL 安全、表权限、扫描限制、返回结构和 Trace 完整性。</div>
+  <div class="form-grid">
+    <div class="form"><label>能力项名称</label><input value="cube_sql_query"/></div>
+    <div class="form"><label>包装接口类型</label><select><option>SQL查询接口</option><option>魔方报表查看接口</option><option>智投报表查看接口</option><option>看板报表查看接口</option><option>SQL查询接口</option><option>暂不配置</option></select></div>
+    <div class="form"><label>operation_type</label><input value="SQL查询"/></div>
+    <div class="form"><label>side_effect_level</label><input value="只读"/></div>
+    <div class="form"><label>sql_safety_policy</label><input value="readonly_select_only"/></div>
+    <div class="form"><label>permission_profile</label><input value="sql_table_scope"/></div>
+    <div class="form"><label>allowed_tables_profile</label><input value="ad_report_allowed_tables"/></div>
+    <div class="form"><label>max_scan_rows</label><input value="10000"/></div>
+  </div>
+  <div class="form"><label>默认校验规则</label><textarea>forbidden_keywords: INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE
+result_assertions: column_schema, row_limit, timeout
+trace_required: sql_text_desensitized, table_list, duration_ms</textarea></div>`;
+}
+
+
+function renderDashboardApiDetail(){
+  return `<div class="hint">看板报表查看接口本质仍是只读查询，不是发布或写入接口。它可参与数据准确性验证，但 oracle 和行匹配字段通常按 dashboard_id / widget_id 组织。</div>
+  <div class="form-grid">
+    <div class="form"><label>能力项名称</label><input value="dashboard_report_view_query"/></div>
+    <div class="form"><label>包装接口类型</label><select><option>看板报表查看接口</option><option>魔方报表查看接口</option><option>智投报表查看接口</option><option>通用业务接口</option><option>暂不配置</option></select></div>
+    <div class="form"><label>operation_type</label><input value="查询"/></div>
+    <div class="form"><label>side_effect_level</label><input value="只读"/></div>
+    <div class="form"><label>backend_api_name</label><input value="dashboard_report_view_api"/></div>
+    <div class="form"><label>permission_profile</label><input value="dashboard_report_scope"/></div>
+    <div class="form"><label>oracle_config_template</label><input value="dashboard_report_oracle_template_01"/></div>
+    <div class="form"><label>numeric_tolerance</label><input value="0.01"/></div>
+  </div>
+  <div class="form"><label>对比字段 / 行匹配字段</label><textarea>compare_fields: cost, roi, pay_amount
+row_match_keys: dashboard_id, widget_id, date</textarea></div>`;
+}
+
+function renderUnconfiguredApiDetail(){
+  return `<div class="hint">暂不配置时，该能力项只参与 MCP 基础测试，不生成业务准确性或 Chat 指定 Tools 分层专项用例。</div>
+  <table>
+    <tr><th>可参与测试</th><th>说明</th></tr>
+    <tr><td>tools/list</td><td>能力项是否暴露</td></tr>
+    <tr><td>schema 有效性</td><td>inputSchema 是否可解析</td></tr>
+    <tr><td>基础调用</td><td>合法参数是否可调用</td></tr>
+    <tr><td>参数校验</td><td>缺参、错参、非法枚举</td></tr>
+    <tr><td>Trace 完整性</td><td>请求和响应是否完整记录</td></tr>
+  </table>`;
+}
+
+
+/* Result + Trace */
+function openConnectResult(){
+  mask.classList.add('open');
+  drawer.classList.add('open');
+  drawerTitle.innerText='测试连通结果';
+
+  drawerBody.innerHTML=`<div class="hint">本次测试连通用于确认当前配置是否可访问目标服务，并保存测试连通记录和 Trace。</div>
+  <table>
+    <tr><th>检查项</th><th>结果</th></tr>
+    <tr><td>项目</td><td>广告报表 MCP</td></tr>
+    <tr><td>环境</td><td>测试环境</td></tr>
+    <tr><td>版本</td><td>v1.2</td></tr>
+    <tr><td>测试连通结果</td><td><span class="status ok">成功</span></td></tr>
+    <tr><td>摘要</td><td>已获取 12 个工具，schema 解析通过</td></tr>
+    <tr><td>耗时</td><td>850ms</td></tr>
+  </table>
+  <div class="divider"></div>
+  <div class="title" style="margin-bottom:10px;">后续操作</div>
+  <table>
+    <tr><th>操作</th><th>说明</th></tr>
+    <tr><td><span class="link" onclick="openTrace()">查看 Trace</span></td><td>查看本次请求、响应、错误、耗时和脱敏 Header</td></tr>
+    <tr><td><span class="link" onclick="openDetail()">返回项目详情</span></td><td>在项目详情中查看历史测试连通记录</td></tr>
+  </table>`;
+
+  drawerFoot.innerHTML=`<button class="btn sec" onclick="openEditProject()">返回编辑</button><button class="btn" onclick="openTrace()">查看 Trace</button>`;
+}
+
+function openTrace(){
+  mask.classList.add('open');
+  drawer.classList.add('open');
+  drawerTitle.innerText='测试连通 Trace';
+
+  drawerBody.innerHTML=`<div class="code">${escapeHtml(`{
+  "project_id": "proj_mcp_ad_report",
+  "project_type": "mcp",
+  "env_id": "test",
+  "version_id": "v1.2",
+  "connect_check": "测试连通",
+  "operation": "tools/list",
+  "request": {
+    "url": "https://mcp-test.example.com",
+    "headers": {"Authorization": "Bearer sk-********"}
+  },
+  "response": {
+    "tool_count": 12,
+    "schema_status": "valid"
+  },
+  "duration_ms": 850,
+  "status": "success"
+}`)}</div>`;
+
+  drawerFoot.innerHTML=`<button class="btn sec" onclick="openDetail()">返回详情</button><button class="btn sec" onclick="closeDrawer()">关闭</button>`;
+}
+</script>
+</body>
+</html>

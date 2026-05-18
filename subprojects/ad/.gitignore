@@ -1,8 +1,73 @@
 __pycache__/
 *.pyc
 .venv/
+.venv-wsl/
 node_modules/
 dist/
 build/
 coverage/
 .vite/
+.next/
+.turbo/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local runtime and tool state
+.runtime/
+.codex/
+.claude/
+tmp/
+output/
+
+# Logs
+*.log
+*.err.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files
+.env
+.env.local
+.env.*.local
+.env.pre.local
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Nested imported app generated files
+imported/**/node_modules/
+imported/**/.next/
+imported/**/dist/
+imported/**/build/
+imported/**/coverage/
+imported/**/test-results/
+imported/**/tmp/
+imported/**/*.tsbuildinfo
+imported/**/*.log
+imported/**/*.err.log
+
+# Frontend source tree generated files
+frontend/**/node_modules/
+frontend/**/.next/
+frontend/**/dist/
+frontend/**/build/
+frontend/**/out/
+frontend/**/coverage/
+frontend/**/test-results/
+frontend/**/tmp/
+frontend/**/artifacts/
+frontend/**/*.tsbuildinfo
+frontend/**/*.log
+frontend/**/*.err.log
+frontend/**/.env
+frontend/**/.env.local
+frontend/**/.env.*.local
+frontend/**/.turbo/
+frontend/**/.cache/

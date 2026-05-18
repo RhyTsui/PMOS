@@ -1,0 +1,122 @@
+<svg width="1600" height="2400" viewBox="0 0 1600 2400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #f6f2ea; }
+    .panel { fill: #fffdf9; stroke: #dbcfc1; stroke-width: 2; }
+    .soft { fill: #f9f4ec; stroke: #dbcfc1; stroke-width: 2; }
+    .blue { fill: #e9f2fb; stroke: #cfe0f4; stroke-width: 2; }
+    .red { fill: #fcebe8; stroke: #edc7c1; stroke-width: 2; }
+    .gold { fill: #fdf4e6; stroke: #edd8b5; stroke-width: 2; }
+    .green { fill: #eaf6f1; stroke: #c5e4d7; stroke-width: 2; }
+    .title { font: 700 64px 'Segoe UI', 'PingFang SC', sans-serif; fill: #2f241b; }
+    .h1 { font: 700 38px 'Segoe UI', 'PingFang SC', sans-serif; fill: #2f241b; }
+    .h2 { font: 700 28px 'Segoe UI', 'PingFang SC', sans-serif; fill: #2f241b; }
+    .body { font: 400 22px 'Segoe UI', 'PingFang SC', sans-serif; fill: #2f241b; }
+    .meta { font: 400 18px 'Segoe UI', 'PingFang SC', sans-serif; fill: #6d5e50; }
+    .pill { font: 700 16px 'Segoe UI', 'PingFang SC', sans-serif; fill: #ffffff; }
+    .link { font: 700 22px 'Segoe UI', 'PingFang SC', sans-serif; fill: #145ca8; }
+  </style>
+
+  <rect class="bg" width="1600" height="2400"/>
+  <rect x="56" y="56" width="1488" height="2288" rx="36" class="panel"/>
+
+  <rect x="92" y="92" width="190" height="42" rx="21" fill="#1f2a37"/>
+  <text x="125" y="120" class="pill">HUMAN OVERVIEW</text>
+  <text x="92" y="196" class="title">花花世界埋点接入总览</text>
+  <text x="92" y="238" class="body">给人先看的版本。用于项目方、产品、研发、SDK、服务端、数据 BP 快速建立同一套接入认知。</text>
+  <text x="92" y="272" class="meta">正式成品不是 Markdown，而是 HTML 主文档 + AI 结构化规格 + SVG 总览板。</text>
+
+  <rect x="92" y="320" width="338" height="130" rx="24" class="soft"/>
+  <text x="118" y="366" class="meta">主文档</text>
+  <text x="118" y="412" class="h1">2 套</text>
+  <text x="118" y="440" class="body">人读完整版 + AI 结构化规格</text>
+
+  <rect x="452" y="320" width="338" height="130" rx="24" class="soft"/>
+  <text x="478" y="366" class="meta">附录页</text>
+  <text x="478" y="412" class="h1">3 页</text>
+  <text x="478" y="440" class="body">事件字段 / 步骤枚举 / 内容 ID</text>
+
+  <rect x="812" y="320" width="338" height="130" rx="24" class="soft"/>
+  <text x="838" y="366" class="meta">自定义事件</text>
+  <text x="838" y="412" class="h1">27 个</text>
+  <text x="838" y="440" class="body">覆盖玩法、活动、平台特性</text>
+
+  <rect x="1172" y="320" width="338" height="130" rx="24" class="soft"/>
+  <text x="1198" y="366" class="meta">关键挑战</text>
+  <text x="1198" y="412" class="h1">支付闭环</text>
+  <text x="1198" y="440" class="body">字段规范与实现状态冲突最多</text>
+
+  <rect x="92" y="498" width="1416" height="220" rx="28" class="blue"/>
+  <text x="120" y="548" class="h1">这不是“小项目埋点表”</text>
+  <text x="120" y="590" class="body">花花世界当前资料已经是中大型项目量级：RM 主文档、SDK 行为日志表、历史梳理表三套并行，内部又分事件、字段、枚举、步骤版本、内容 ID 和端到端透传。</text>
+  <text x="120" y="628" class="body">真正要做的不是把 Excel 抄一遍，而是把“谁接、接什么、为什么重要、哪里冲突、如何验收”整理成正式文档。</text>
+  <text x="120" y="672" class="meta">当前主源：RM V251222 / SDK 行为日志埋点表 / 数据埋点梳理-20241223</text>
+
+  <rect x="92" y="760" width="1416" height="310" rx="28" class="panel"/>
+  <text x="120" y="812" class="h1">五条关键接入链</text>
+
+  <rect x="120" y="840" width="260" height="190" rx="22" class="soft"/>
+  <text x="140" y="878" class="h2">1. 前置链</text>
+  <text x="140" y="914" class="body">107 - PreEvent</text>
+  <text x="140" y="950" class="meta">启动、登录、设备信息、请求服务器、网关、角色登录等步骤链。</text>
+
+  <rect x="402" y="840" width="260" height="190" rx="22" class="soft"/>
+  <text x="422" y="878" class="h2">2. 新手链</text>
+  <text x="422" y="914" class="body">108 + 20001</text>
+  <text x="422" y="950" class="meta">前端 TutorialStep + 后端 Tutorial 状态，影响新手漏斗和流失分析。</text>
+
+  <rect x="684" y="840" width="260" height="190" rx="22" class="soft"/>
+  <text x="704" y="878" class="h2">3. 支付链</text>
+  <text x="704" y="914" class="body">106 + 221 + 205</text>
+  <text x="704" y="950" class="meta">支付流程前端、后端和发货成功闭环，是最关键的验收链。</text>
+
+  <rect x="966" y="840" width="260" height="190" rx="22" class="soft"/>
+  <text x="986" y="878" class="h2">4. 激励视频链</text>
+  <text x="986" y="914" class="body">110 + 223</text>
+  <text x="986" y="950" class="meta">复用支付式步骤结构，依赖 ad_sid 和 reward_target。</text>
+
+  <rect x="1248" y="840" width="232" height="190" rx="22" class="soft"/>
+  <text x="1268" y="878" class="h2">5. 透传链</text>
+  <text x="1268" y="914" class="body">getTrackingInfo</text>
+  <text x="1268" y="950" class="meta">s_oneid、c_oneid、device_id、cpsid、channel。</text>
+
+  <rect x="92" y="1112" width="1416" height="320" rx="28" class="red"/>
+  <text x="120" y="1164" class="h1">当前最危险的不是“没埋点”，而是“文档里已经写出冲突”</text>
+  <text x="120" y="1210" class="body">1. 107 / 108 在资料里写成必须，但项目推进中常被当成增强项。</text>
+  <text x="120" y="1248" class="body">2. 支付链关键字段 channel_order_id / order_id / pay_channel / recharge_channel 在规范层是关键字段，但实现层多处写了“不发送 / 未获取”。</text>
+  <text x="120" y="1286" class="body">3. getTrackingInfo 已定义透传能力，但服务端关键事件是否全部稳定使用，资料不能完全证明。</text>
+  <text x="120" y="1324" class="body">4. 20001+ 对旧 10001+ 的迁移已经发生，但下游消费同步状态未知。</text>
+  <text x="120" y="1370" class="meta">文档里不应该把这些冲突抹掉，而应该把“规范事实”和“当前实现状态”并列写清楚。</text>
+
+  <rect x="92" y="1474" width="1416" height="350" rx="28" class="panel"/>
+  <text x="120" y="1526" class="h1">全量覆盖范围</text>
+
+  <rect x="120" y="1554" width="432" height="228" rx="24" class="green"/>
+  <text x="146" y="1596" class="h2">核心事件</text>
+  <text x="146" y="1634" class="body">111 / 114 / 102 / 104 / 105</text>
+  <text x="146" y="1668" class="body">106 / 107 / 108 / 110</text>
+  <text x="146" y="1702" class="body">201 / 203 / 204 / 205 / 206 / 207 / 208 / 215 / 221 / 223</text>
+
+  <rect x="584" y="1554" width="432" height="228" rx="24" class="green"/>
+  <text x="610" y="1596" class="h2">自定义事件</text>
+  <text x="610" y="1634" class="body">20001 - 20027</text>
+  <text x="610" y="1668" class="meta">新手、成长、解锁、货币、库存、种植、花艺、订单、剧情、任务、换装、社交、交易、排行、公会、活动、平台特性。</text>
+
+  <rect x="1048" y="1554" width="432" height="228" rx="24" class="green"/>
+  <text x="1074" y="1596" class="h2">附录层</text>
+  <text x="1074" y="1634" class="body">事件与字段索引</text>
+  <text x="1074" y="1668" class="body">步骤与枚举映射</text>
+  <text x="1074" y="1702" class="body">内容 ID 字典说明</text>
+  <text x="1074" y="1738" class="meta">4396 行内容 ID 不塞入主正文，而保留单独附录说明和源文件入口。</text>
+
+  <rect x="92" y="1866" width="1416" height="274" rx="28" class="gold"/>
+  <text x="120" y="1918" class="h1">怎么用这套文档</text>
+  <text x="120" y="1960" class="body">项目方先看这张总览图，理解体系和风险；研发和 SDK 再看《人读完整版接入总册》；要继续做规则生成、自动验收、结构消费，再看《AI 结构化规格总册》。</text>
+  <text x="120" y="1998" class="body">支付链联调时，必须同时看 106、221、205；前置链验收时必须区分 20250122 和 20250724 两套步骤版本；新手链建议同时检查 108 和 20001。</text>
+  <text x="120" y="2040" class="body">对“不发送 / 未获取”的字段，验收结论里不能吞掉，必须写成显式缺口。</text>
+
+  <rect x="92" y="2182" width="1416" height="116" rx="28" class="panel"/>
+  <text x="120" y="2230" class="link">打开人读完整版接入总册 → huahua-human-integration-manual.html</text>
+  <text x="120" y="2264" class="link">打开 AI 结构化规格总册 → huahua-ai-structured-spec.html</text>
+  <text x="920" y="2230" class="meta">本地目录：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\</text>
+  <text x="920" y="2264" class="meta">这张图板用于人先读，不替代主文档。</text>
+</svg>

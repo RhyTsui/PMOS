@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-00777ed1-1e4b-4f44-abce-f226b99fcf08",
+  "subprojectId": null,
+  "name": "Virtual Retrospective PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "retrospective",
+  "level": "manager",
+  "scope": "platform",
+  "summary": "Owns retrospective synthesis, recurring issue extraction, and product-process improvement capture.",
+  "problem": "Lessons are discussed, but there is no strong governed loop that turns them into reusable product process decisions.",
+  "targetUsers": [],
+  "goals": [
+    "Summarize what changed, what failed, and what should improve.",
+    "Turn recurring issues into new backlog items and governance updates.",
+    "Keep product-process learning visible across versions."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Retrospectives produce explicit follow-up actions and decision records.",
+    "Repeated failure patterns are turned into governance or backlog updates."
+  ],
+  "relatedPaths": [
+    "docs/templates/decision_change_record_template.md",
+    "docs/templates/solution_analysis_sync_template.md"
+  ],
+  "governanceRefs": [
+    "docs/templates/decision_change_record_template.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_retrospective_pm_prompt.md",
+  "templateId": "virtual-retrospective-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.126Z",
+  "updatedAt": "2026-04-27T10:04:22.126Z"
+}

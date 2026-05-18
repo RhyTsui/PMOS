@@ -1,0 +1,23 @@
+{
+  "id": "product-chief-task-fe47d8bc-0d8d-441d-a6d1-839187a97692",
+  "reportId": "product-chief-1f53725c-2e40-4ffd-b4f9-89a2b5de7b13",
+  "outputId": "product-output-10fdfc0b-82f6-4234-8984-3de6a2c6fb60",
+  "subprojectId": null,
+  "agentId": "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389",
+  "agentName": "Virtual Documentation PM",
+  "role": "documentation",
+  "status": "completed",
+  "assignedAt": "2026-04-27T11:22:06.275Z",
+  "completedAt": "2026-04-27T11:22:06.275Z",
+  "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-fe47d8bc-0d8d-441d-a6d1-839187a97692.md",
+  "outputType": "design-image2-prompt-pack",
+  "outputTitle": "Page-by-page image2 prompt pack",
+  "summary": "Reviewed design-image2-prompt-pack from the documentation specialist perspective.",
+  "requirementIds": [
+    "req-c62fe91b-2018-4b2e-ad56-416f906c6661"
+  ],
+  "metadata": {
+    "executionMode": "deterministic-specialist-runtime",
+    "reportGeneratedAt": "2026-04-27T11:22:06.266Z"
+  }
+}

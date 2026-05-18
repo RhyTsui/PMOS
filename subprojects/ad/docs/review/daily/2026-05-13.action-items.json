@@ -1,0 +1,159 @@
+{
+  "date": "2026-05-13",
+  "generated_at": "2026-05-14T01:06:55.021Z",
+  "source": {
+    "events": 0,
+    "ad_commits": 0,
+    "product_commits": 1,
+    "review_file": "docs/review/智投chat-深度复盘-2026-05-13.md"
+  },
+  "items": [
+    {
+      "id": "T-001",
+      "title": "定义 `AgentProcessEvent` 思维链事件协议",
+      "requirement": "R-CHAT-003",
+      "acceptance": "route/search/tool/browser/model/handoff 六类事件可被前端渲染",
+      "status": "todo"
+    },
+    {
+      "id": "T-002",
+      "title": "改造 `/api/chat` 流式返回为标准过程事件",
+      "requirement": "R-CHAT-003",
+      "acceptance": "前端不再依赖临时字段拼思维链",
+      "status": "todo"
+    },
+    {
+      "id": "T-003",
+      "title": "设计普通用户/管理员/审计三层过程披露",
+      "requirement": "R-CHAT-003",
+      "acceptance": "同一过程按权限展示不同细节",
+      "status": "todo"
+    },
+    {
+      "id": "T-004",
+      "title": "定义自动联调 `DebugTask` 状态机",
+      "requirement": "R-CHAT-004",
+      "acceptance": "至少覆盖待确认、执行中、需接管、失败、完成、归档",
+      "status": "todo"
+    },
+    {
+      "id": "T-005",
+      "title": "前端右侧联调面板接真实状态流",
+      "requirement": "R-CHAT-004",
+      "acceptance": "后端任务状态变化能驱动面板变化",
+      "status": "todo"
+    },
+    {
+      "id": "T-006",
+      "title": "新媒体对接表单流程组件化",
+      "requirement": "R-REQ-001",
+      "acceptance": "缺字段追问、提交校验、通过/未通过分支明确",
+      "status": "todo"
+    },
+    {
+      "id": "T-007",
+      "title": "新增 `daily:distill` 命令",
+      "requirement": "R-GOV-002",
+      "acceptance": "可按日期生成日报、复盘、action-items",
+      "status": "todo"
+    },
+    {
+      "id": "T-008",
+      "title": "输出 `docs/review/daily/*.action-items.json`",
+      "requirement": "R-GOV-002",
+      "acceptance": "次日可读取并继续推进",
+      "status": "todo"
+    },
+    {
+      "id": "T-009",
+      "title": "我的资产接真实资产对象模型",
+      "requirement": "R-ASSET-001",
+      "acceptance": "文件、图片、视频、链接有统一资产 ID 和来源会话",
+      "status": "todo"
+    },
+    {
+      "id": "T-010",
+      "title": "实现定位到会话锚点",
+      "requirement": "R-ASSET-001",
+      "acceptance": "点击定位后打开原会话并滚到对应消息",
+      "status": "todo"
+    },
+    {
+      "id": "T-011",
+      "title": "接入上传/生成时缩略图钩子",
+      "requirement": "R-ASSET-002",
+      "acceptance": "图片和视频封面来自内容生成，不是统一占位",
+      "status": "todo"
+    },
+    {
+      "id": "T-012",
+      "title": "管理后台增加思维链披露策略",
+      "requirement": "R-CHAT-003",
+      "acceptance": "可配置默认收起、参数披露、来源披露",
+      "status": "todo"
+    },
+    {
+      "id": "T-013",
+      "title": "发布流程增加远端权限预检",
+      "requirement": "R-REL-001",
+      "acceptance": "发布前自动判断可 push 远端",
+      "status": "todo"
+    },
+    {
+      "id": "T-014",
+      "title": "iconfont 图标落成本地资源",
+      "requirement": "R-CHAT-001",
+      "acceptance": "侧栏、分享、上传、发送图标统一",
+      "status": "todo"
+    },
+    {
+      "id": "T-015",
+      "title": "视觉 token 化：圆角、hover、滚动条",
+      "requirement": "R-GOV-001",
+      "acceptance": "不再逐个组件手调",
+      "status": "todo"
+    },
+    {
+      "id": "T-016",
+      "title": "Logo 切图与缓存复查",
+      "requirement": "R-CHAT-001",
+      "acceptance": "左上角和欢迎区 logo 都无背景边界",
+      "status": "todo"
+    },
+    {
+      "id": "T-017",
+      "title": "长消息折叠体验精修",
+      "requirement": "R-CHAT-002",
+      "acceptance": "折叠高度、展开按钮、返回底部交互稳定",
+      "status": "todo"
+    },
+    {
+      "id": "T-018",
+      "title": "和连弩确认评测接口契约",
+      "requirement": "R-EVAL-001",
+      "acceptance": "明确鉴权、请求字段、响应字段、批量执行、回调、错误码",
+      "status": "todo"
+    },
+    {
+      "id": "T-019",
+      "title": "评测接口接真实模型和知识库",
+      "requirement": "R-EVAL-001 / R-CHAT-003",
+      "acceptance": "`/evaluation/run` 的回答、来源和过程事件来自真实调用链",
+      "status": "todo"
+    },
+    {
+      "id": "T-020",
+      "title": "统一评测过程事件与页面思维链协议",
+      "requirement": "R-EVAL-001 / R-CHAT-003",
+      "acceptance": "页面 ThoughtChain、评测 `process_events`、管理后台审计共用同一事件结构",
+      "status": "todo"
+    },
+    {
+      "id": "T-021",
+      "title": "增加评测接口安全与审计",
+      "requirement": "R-EVAL-001",
+      "acceptance": "token/签名、租户隔离、请求大小限制、调用日志完成",
+      "status": "todo"
+    }
+  ]
+}

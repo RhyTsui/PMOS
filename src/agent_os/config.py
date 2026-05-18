@@ -3,7 +3,6 @@ PMAIOS v0.3.3 配置模块
 """
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -18,10 +17,10 @@ class Config:
     worker_pool_size: int = int(os.getenv("WORKER_POOL_SIZE", 10))
     worker_timeout: int = int(os.getenv("WORKER_TIMEOUT", 300))  # 5 分钟
 
-    # Claude API
-    claude_api_key: str = os.getenv("CLAUDE_API_KEY", "")
-    claude_model: str = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-latest")
-    claude_max_tokens: int = int(os.getenv("CLAUDE_MAX_TOKENS", 2000))
+    # Anthropic API
+    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
+    anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+    anthropic_max_tokens: int = int(os.getenv("ANTHROPIC_MAX_TOKENS", 2000))
 
     # LangGraph
     checkpoint_dir: str = os.getenv("CHECKPOINT_DIR", "./checkpoints")
@@ -43,6 +42,6 @@ class Config:
 
     def validate(self) -> bool:
         """验证配置"""
-        if not self.claude_api_key:
-            raise ValueError("CLAUDE_API_KEY 环境变量必须设置")
+        if not self.anthropic_api_key:
+            raise ValueError("ANTHROPIC_API_KEY 环境变量必须设置")
         return True

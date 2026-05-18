@@ -7,6 +7,7 @@ import { OrchestratorRuntime } from './orchestratorRuntime.js';
 import { ProviderRegistry } from './providerRegistry.js';
 import { McpRegistry } from './mcpRegistry.js';
 import { ReviewCommittee } from './reviewCommittee.js';
+import { SpecialistActivationService } from './specialistActivationService.js';
 import { SubprojectRegistry } from './subprojectRegistry.js';
 import { EvaluationRunner } from './evaluationRunner.js';
 import { VersionRegistry } from './versionRegistry.js';
@@ -59,6 +60,7 @@ export class CapabilityRegistry {
     private readonly providerRegistry = new ProviderRegistry(store),
     private readonly mcpRegistry = new McpRegistry(store),
     private readonly reviewCommittee = new ReviewCommittee(),
+    private readonly specialistActivationService = new SpecialistActivationService(),
     private readonly evaluationRunner = new EvaluationRunner(new MemoryService(store)),
     private readonly versionRegistry = new VersionRegistry(new MemoryService(store)),
   ) {}
@@ -658,13 +660,31 @@ export class CapabilityRegistry {
 
   private async resolveReviewPassedFromRun(runId: string, subprojectId?: string | null) {
     const run = await this.orchestratorRuntime.loadRun(runId, subprojectId);
+    const events = await this.orchestratorRuntime.loadEvents(runId, subprojectId);
     const artifacts = await this.workflowEngine.hydrateArtifacts(run);
     const openSourceEvidence = this.reviewCommittee.inspectOpenSourceEvidence(artifacts);
+    const activatedSpecialistRoles = this.specialistActivationService.resolveActivatedRoles({
+      stageId: run.currentStageId,
+      artifacts: artifacts.map((artifact) => ({ path: artifact.path, content: artifact.content })),
+      workflowSignals: events
+        .filter((event) => event.stageId === run.currentStageId)
+        .map((event) => ({
+          activatedSpecialistRoles: Array.isArray(event.metadata.activatedSpecialistRoles)
+            ? event.metadata.activatedSpecialistRoles.filter((item): item is string => typeof item === 'string')
+            : [],
+          taskAssignmentRoles: Array.isArray(event.metadata.taskAssignmentRoles)
+            ? event.metadata.taskAssignmentRoles.filter((item): item is string => typeof item === 'string')
+            : [],
+        })),
+    });
     const review = this.reviewCommittee.buildReportForRun({
       runId,
       artifactCount: artifacts.length,
+      activeStageId: run.currentStageId,
+      activatedSpecialistRoles: activatedSpecialistRoles.length > 0 ? activatedSpecialistRoles : undefined,
       openSourceEvaluationPresent: openSourceEvidence.present,
       openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+      artifacts: artifacts.map((artifact) => ({ path: artifact.path, content: artifact.content })),
     });
     return !review.gate.blocked;
   }
@@ -820,22 +840,39 @@ export class CapabilityRegistry {
 
     if (payload.mode === 'run-until-blocked') {
       let updated = run;
-      while (updated.status === 'running' && updated.currentStageId && updated.currentStageId !== 'review-metrics-telemetry') {
+      while (updated.status === 'running' && updated.currentStageId && updated.currentStageId !== 'frontend-backend-integration') {
         updated = await this.orchestratorRuntime.advanceRun(updated.id);
       }
 
-      if (updated.status === 'running' && updated.currentStageId === 'review-metrics-telemetry') {
+      if (updated.status === 'running' && updated.currentStageId === 'frontend-backend-integration') {
         const events = await this.orchestratorRuntime.loadEvents(updated.id, capability.subprojectId);
         const artifactCount = events.filter((event) => event.kind === 'artifact_written').length;
         const artifacts = await this.workflowEngine.hydrateArtifacts(updated);
         const openSourceEvidence = this.reviewCommittee.inspectOpenSourceEvidence(artifacts);
+        const activatedSpecialistRoles = this.specialistActivationService.resolveActivatedRoles({
+          stageId: updated.currentStageId,
+          artifacts: artifacts.map((artifact) => ({ path: artifact.path, content: artifact.content })),
+          workflowSignals: events
+            .filter((event) => event.stageId === updated.currentStageId)
+            .map((event) => ({
+              activatedSpecialistRoles: Array.isArray(event.metadata.activatedSpecialistRoles)
+                ? event.metadata.activatedSpecialistRoles.filter((item): item is string => typeof item === 'string')
+                : [],
+              taskAssignmentRoles: Array.isArray(event.metadata.taskAssignmentRoles)
+                ? event.metadata.taskAssignmentRoles.filter((item): item is string => typeof item === 'string')
+                : [],
+            })),
+        });
 
         updated = await this.orchestratorRuntime.advanceRun(updated.id, {
           reviewReport: this.reviewCommittee.buildReportForRun({
             runId: updated.id,
             artifactCount,
+            activeStageId: updated.currentStageId,
+            activatedSpecialistRoles: activatedSpecialistRoles.length > 0 ? activatedSpecialistRoles : undefined,
             openSourceEvaluationPresent: openSourceEvidence.present,
             openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+            artifacts: artifacts.map((artifact) => ({ path: artifact.path, content: artifact.content })),
           }),
         });
       }

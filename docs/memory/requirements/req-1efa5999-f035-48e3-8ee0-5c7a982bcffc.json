@@ -1,0 +1,42 @@
+{
+  "id": "req-1efa5999-f035-48e3-8ee0-5c7a982bcffc",
+  "subprojectId": null,
+  "title": "Extracted source requirement: 数分希望一次性录入高频复用，但每次的验收差异都需要录入",
+  "description": "数分希望一次性录入高频复用，但每次的验收差异都需要录入\n\nExtracted from: docs/sources/inbox/周报-产品组-徐韵-0509.xlsx\nNormalization artifact: docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md\nBackground digest: docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P1",
+  "source": {
+    "kind": "document",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "source-document",
+      "entityId": null,
+      "path": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "label": "documentation-requirement-extraction"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-4cd0081b-bf11-4ddd-84e1-626682580f23"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+      "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md"
+    ]
+  },
+  "createdAt": "2026-05-09T05:50:38.617Z",
+  "updatedAt": "2026-05-09T05:50:38.618Z",
+  "metadata": {
+    "poolScope": "platform",
+    "lifecycle": "normalized",
+    "source": "documentation-requirement-extraction",
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

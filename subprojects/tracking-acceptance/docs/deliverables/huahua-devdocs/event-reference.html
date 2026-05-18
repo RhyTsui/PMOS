@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>事件参考 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Event Reference</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">事件参考</h1>
+        <p>事件定义统一从这里查。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="#core">核心事件</a>
+          <a href="#custom">自定义事件</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Reference</span>
+          <h1>事件参考</h1>
+          <p>本页给出核心事件和自定义事件的统一目录。更细的字段请结合字段参考页使用。</p>
+        </section>
+        <section class="section" id="core">
+          <h2>核心事件目录</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>事件 ID</th><th>事件名</th><th>端</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>111 / 114 / 102 / 104 / 105</td><td>SDK 初始化、登录、进入游戏、升级</td><td>客户端/SDK</td><td>基础账号链</td></tr>
+                <tr><td>106</td><td>PayFlow</td><td>客户端/SDK</td><td>支付前端流程</td></tr>
+                <tr><td>107</td><td>PreEvent</td><td>客户端/SDK</td><td>前置流程</td></tr>
+                <tr><td>108</td><td>TutorialStep</td><td>客户端/SDK</td><td>新手引导步骤链</td></tr>
+                <tr><td>110</td><td>AdVideo</td><td>客户端/SDK</td><td>激励视频前端流程</td></tr>
+                <tr><td>201 / 203 / 204 / 205 / 206 / 207 / 208 / 215 / 221 / 223</td><td>后端基础事件</td><td>服务端</td><td>角色、支付、资源、验签等</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="custom">
+          <h2>自定义事件目录</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>事件</th><th>领域</th><th>端</th><th>关键字段</th></tr></thead>
+              <tbody>
+                <tr><td>20001 Tutorial</td><td>引导</td><td>服务端</td><td>tutorial_id, tutorial_state</td></tr>
+                <tr><td>20002 PlayerGrow</td><td>成长</td><td>服务端</td><td>grow_type, grow_target, grow_pre, grow_post</td></tr>
+                <tr><td>20003 GrowUnlock</td><td>解锁</td><td>服务端</td><td>unlock_type, unlock_target</td></tr>
+                <tr><td>20004 GameCurrency</td><td>货币</td><td>服务端</td><td>currency_id, act_type, act_amount, scene</td></tr>
+                <tr><td>20005 Inventory</td><td>库存</td><td>服务端</td><td>inventory</td></tr>
+                <tr><td>20006 Plant</td><td>种植</td><td>服务端</td><td>plant_id, operation_type</td></tr>
+                <tr><td>20007 FloralMake</td><td>花艺制作</td><td>服务端</td><td>formula_id, output_id</td></tr>
+                <tr><td>20008 FloralSell</td><td>花艺售卖</td><td>服务端</td><td>floral_id, operation_type</td></tr>
+                <tr><td>20009 OperateOrder</td><td>经营订单</td><td>服务端</td><td>order_type, order_item</td></tr>
+                <tr><td>20010 SceneEvent</td><td>场景事件</td><td>服务端</td><td>event_type, game_event_id</td></tr>
+                <tr><td>20011 GameStory</td><td>剧情</td><td>客户端</td><td>story_type, story_id, operation_type</td></tr>
+                <tr><td>20012 Task</td><td>任务</td><td>服务端</td><td>task_type, task_id, task_state</td></tr>
+                <tr><td>20013 RankReward</td><td>分档奖励</td><td>服务端</td><td>rank_type, rank_id, operation_type</td></tr>
+                <tr><td>20014 PlayerAvatar</td><td>换装</td><td>服务端</td><td>avatar_type, avatar_id, color_index</td></tr>
+                <tr><td>20015 SceneLayout</td><td>场景布置</td><td>服务端</td><td>layout_type, layout_id</td></tr>
+                <tr><td>20016 Social</td><td>社交</td><td>服务端</td><td>friend_cnt, buddy_cnt, operation_type</td></tr>
+                <tr><td>20017 Trade</td><td>交易</td><td>服务端</td><td>trade_type, trade_id, trade_price</td></tr>
+                <tr><td>20018 GameRanking</td><td>排行</td><td>服务端</td><td>rank_key, cur_rank, pre_rank</td></tr>
+                <tr><td>20019 Guild</td><td>公会</td><td>服务端</td><td>字段待补完</td></tr>
+                <tr><td>20020 GuildLeague</td><td>公会竞赛</td><td>服务端</td><td>字段待补完</td></tr>
+                <tr><td>20021 MiniGame</td><td>内嵌游戏</td><td>服务端</td><td>game_mode, result_rank</td></tr>
+                <tr><td>20022 LaunchFrom</td><td>入口检测</td><td>客户端</td><td>launch_scene, operation_type</td></tr>
+                <tr><td>20023 PlatformFeature</td><td>平台特性</td><td>客户端</td><td>scene, feature_state, feature_extension</td></tr>
+                <tr><td>20024 GoodsPurchase</td><td>商品购买</td><td>服务端</td><td>goods_id, store_id, purchase_amount</td></tr>
+                <tr><td>20025 Gacha</td><td>扭蛋</td><td>服务端</td><td>gacha_id, draw_times, gain_item</td></tr>
+                <tr><td>20026 OpActHUD</td><td>活动展示</td><td>客户端</td><td>act_key, operation_type</td></tr>
+                <tr><td>20027 OpAct</td><td>运营活动</td><td>服务端</td><td>act_key, act_goal, gain_item</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

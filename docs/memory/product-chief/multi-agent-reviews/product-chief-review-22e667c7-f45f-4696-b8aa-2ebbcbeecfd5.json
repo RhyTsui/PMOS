@@ -1,0 +1,84 @@
+{
+  "id": "product-chief-review-22e667c7-f45f-4696-b8aa-2ebbcbeecfd5",
+  "reportId": "product-chief-0389c075-621c-4931-b1b0-592676bbcadb",
+  "outputId": "product-output-9971d04b-27c3-40fa-87f8-97679c3796f4",
+  "subprojectId": null,
+  "mode": "deterministic-multi-agent-review",
+  "status": "needs-human-decision",
+  "startedAt": "2026-04-27T11:19:11.969Z",
+  "completedAt": "2026-04-27T11:19:11.969Z",
+  "participantTaskIds": [
+    "product-chief-task-15060299-78f5-4868-a3c8-25b6a8bd6868",
+    "product-chief-task-23f547f6-1c96-4c40-9386-f85d1e9cbe7a"
+  ],
+  "artifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-22e667c7-f45f-4696-b8aa-2ebbcbeecfd5.md",
+  "consensus": "Project PM output \"Page-by-page image2 prompt pack\" is usable as a draft, with explicit human decisions required before final approval.",
+  "turns": [
+    {
+      "agentId": "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+      "agentName": "Virtual Workflow PM",
+      "role": "workflow",
+      "position": "support",
+      "summary": "Virtual Workflow PM supports the project PM output and links it to auditable evidence.",
+      "evidenceTaskId": "product-chief-task-15060299-78f5-4868-a3c8-25b6a8bd6868",
+      "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-15060299-78f5-4868-a3c8-25b6a8bd6868.md"
+    },
+    {
+      "agentId": "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389",
+      "agentName": "Virtual Documentation PM",
+      "role": "documentation",
+      "position": "support",
+      "summary": "Virtual Documentation PM supports the project PM output and links it to auditable evidence.",
+      "evidenceTaskId": "product-chief-task-23f547f6-1c96-4c40-9386-f85d1e9cbe7a",
+      "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-23f547f6-1c96-4c40-9386-f85d1e9cbe7a.md"
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "physical-world-context",
+      "positions": [
+        "target-users: Who are the exact users or stakeholders affected by this work?",
+        "success-metrics: What measurable outcome proves this work succeeded?",
+        "timeline: Is there a real deadline, launch window, or external dependency?",
+        "ownership: Who owns the final decision, and which teams must coordinate?"
+      ],
+      "resolution": "Project PM can use the draft, but final approval needs explicit human answers or waiver.",
+      "status": "needs-human-decision"
+    }
+  ],
+  "stopConditions": [
+    {
+      "condition": "At least two product agents participated",
+      "satisfied": true,
+      "detail": "2 specialist task(s) completed."
+    },
+    {
+      "condition": "Project output has requirement trace",
+      "satisfied": true,
+      "detail": "req-3873558b-1591-4fbc-b608-87e872ddadd0"
+    },
+    {
+      "condition": "Project output has artifact trace",
+      "satisfied": true,
+      "detail": "docs/product-office/outputs/product-output-9971d04b-27c3-40fa-87f8-97679c3796f4.md; docs/memory/product-chief/outputs/product-output-9971d04b-27c3-40fa-87f8-97679c3796f4.json"
+    },
+    {
+      "condition": "No agent raised a blocker",
+      "satisfied": true,
+      "detail": "0 blocker turn(s)."
+    },
+    {
+      "condition": "Human-decision context is explicit",
+      "satisfied": true,
+      "detail": "Missing physical-world questions remain visible before final approval."
+    }
+  ],
+  "requirementIds": [
+    "req-3873558b-1591-4fbc-b608-87e872ddadd0"
+  ],
+  "metadata": {
+    "outputType": "design-image2-prompt-pack",
+    "outputTitle": "Page-by-page image2 prompt pack",
+    "projectPmUsable": true
+  }
+}

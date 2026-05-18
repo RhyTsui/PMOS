@@ -1,0 +1,320 @@
+# ai_chat 的流式接口 - 预发布实测
+
+# 背景
+
+目前 ai-chat 问数上线小闪，提供 ai-chat 问数的接口供参考
+
+# 接口信息
+
+## 接口 URL
+
+post-http 接口
+
+http://pre-bichat.hz.com/ai_chat/chat/stream/{user_session_id}
+
+## 预发布环境实测 curl
+
+```bash
+curl --location -N 'http://pre-bichat.hz.com/ai_chat/chat/stream/2025739_1778563200000' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{"scoops":"2","input_query":"过去7天指间山海广告消耗是多少？","user_session_id":"2025739_1778563200000","trace_id":"trace_2025739_1778563200000","session_id":"2025739_1778563200000","app_id":"10100042","module":"广告","extra":{"module":"广告","app_name":"指间山海","app_id":"10100042","app_region":"1","scoops":"2"},"messages":[],"user_id":"2025739"}'
+```
+
+## 本次请求 Body
+
+```json
+{"scoops":"2","input_query":"过去7天指间山海广告消耗是多少？","user_session_id":"2025739_1778563200000","trace_id":"trace_2025739_1778563200000","session_id":"2025739_1778563200000","app_id":"10100042","module":"广告","extra":{"module":"广告","app_name":"指间山海","app_id":"10100042","app_region":"1","scoops":"2"},"messages":[],"user_id":"2025739"}
+```
+
+## 本次请求返回信息
+
+```text
+HTTP_STATUS:200
+TOTAL_TIME:38.051059
+SIZE_DOWNLOAD:4107
+```
+
+## 本次请求返回体
+
+```text
+data: {"reasoning_content": "您好，我是游卡数据助手，开始思考并回答您的问题。"}
+
+data: {"reasoning_content": "参数解析完成"}
+
+data: {"reasoning_content": "您的问题与数据相关"}
+
+data: {"reasoning_content": "query问题理解中"}
+
+data: {"reasoning_content": "query问题理解完成"}
+
+data: {"reasoning_content": "MCP开始连接"}
+
+data: {"reasoning_content": "MCP连接完成"}
+
+data: {"reasoning_content": "开始连接加载MCP Tools"}
+
+data: {"reasoning_content": "MCP Tools连接完成"}
+
+data: {"reasoning_content": "开始理解问题并注入hooks"}
+
+data: {"reasoning_content": "即将开始流式回答问题"}
+
+data: {"response": "\n\n\n"}
+
+data: {"tools": "get_zt_ad_account_report", "tools-args": "{\"appId\": \"10100042\", \"startDate\": \"2026-05-06\", \"endDate\": \"2026-05-12\", \"timeType\": \"DAY\"}"}
+
+data: {"response": "\n\n"}
+
+data: {"response": "根据"}
+
+data: {"response": "查询"}
+
+data: {"response": "结果"}
+
+data: {"response": "，"}
+
+data: {"response": "**"}
+
+data: {"response": "过去"}
+
+data: {"response": "7"}
+
+data: {"response": "天"}
+
+data: {"response": "（"}
+
+data: {"response": "202"}
+
+data: {"response": "6"}
+
+data: {"response": "-"}
+
+data: {"response": "05"}
+
+data: {"response": "-"}
+
+data: {"response": "06"}
+
+data: {"response": " 至"}
+
+data: {"response": " "}
+
+data: {"response": "202"}
+
+data: {"response": "6"}
+
+data: {"response": "-"}
+
+data: {"response": "05"}
+
+data: {"response": "-"}
+
+data: {"response": "12"}
+
+data: {"response": "）"}
+
+data: {"response": "指"}
+
+data: {"response": "间"}
+
+data: {"response": "山海"}
+
+data: {"response": "广告"}
+
+data: {"response": "的"}
+
+data: {"response": "消耗"}
+
+data: {"response": "数据"}
+
+data: {"response": "如下"}
+
+data: {"response": "**"}
+
+data: {"response": "：\n\n"}
+
+data: {"response": "|"}
+
+data: {"response": " "}
+
+data: {"response": "指标"}
+
+data: {"response": " |"}
+
+data: {"response": " "}
+
+data: {"response": "数值"}
+
+data: {"response": " |\n"}
+
+data: {"response": "|"}
+
+data: {"response": "------"}
+
+data: {"response": "|"}
+
+data: {"response": "------"}
+
+data: {"response": "|\n"}
+
+data: {"response": "|"}
+
+data: {"response": " **"}
+
+data: {"response": "折"}
+
+data: {"response": "后"}
+
+data: {"response": "消耗"}
+
+data: {"response": "**"}
+
+data: {"response": " |"}
+
+data: {"response": " **"}
+
+data: {"response": "52"}
+
+data: {"response": ","}
+
+data: {"response": "355"}
+
+data: {"response": "."}
+
+data: {"response": "52"}
+
+data: {"response": " 元"}
+
+data: {"response": "**"}
+
+data: {"response": " |\n"}
+
+data: {"response": "|"}
+
+data: {"response": " **"}
+
+data: {"response": "消耗"}
+
+data: {"response": "**"}
+
+data: {"response": " |"}
+
+data: {"response": " **"}
+
+data: {"response": "53"}
+
+data: {"response": ","}
+
+data: {"response": "722"}
+
+data: {"response": "."}
+
+data: {"response": "00"}
+
+data: {"response": " 元"}
+
+data: {"response": "**"}
+
+data: {"response": " |\n\n"}
+
+data: {"response": "**"}
+
+data: {"response": "数据"}
+
+data: {"response": "说明"}
+
+data: {"response": "**"}
+
+data: {"response": "：\n"}
+
+data: {"response": "-"}
+
+data: {"response": " "}
+
+data: {"response": "过去"}
+
+data: {"response": "7"}
+
+data: {"response": "天"}
+
+data: {"response": "共"}
+
+data: {"response": "7"}
+
+data: {"response": "天"}
+
+data: {"response": "数据"}
+
+data: {"response": "\n"}
+
+data: {"response": "-"}
+
+data: {"response": " "}
+
+data: {"response": "消耗"}
+
+data: {"response": "金额"}
+
+data: {"response": "包含"}
+
+data: {"response": "所有"}
+
+data: {"response": "广告"}
+
+data: {"response": "账户"}
+
+data: {"response": "（"}
+
+data: {"response": "杭州"}
+
+data: {"response": "逸"}
+
+data: {"response": "舞"}
+
+data: {"response": "、"}
+
+data: {"response": "游"}
+
+data: {"response": "卡"}
+
+data: {"response": "等"}
+
+data: {"response": "）\n"}
+
+data: {"response": "-"}
+
+data: {"response": " "}
+
+data: {"response": "折"}
+
+data: {"response": "后"}
+
+data: {"response": "消耗"}
+
+data: {"response": "已"}
+
+data: {"response": "扣除"}
+
+data: {"response": "返"}
+
+data: {"response": "点"}
+
+data: {"response": "优惠"}
+```
+
+## 参数 body
+
+```text
+{"trace_id":"aa73cf0c-837f-4042-9aa3-a8bb079ca39d45888899999xxxxx",
+"app_id":"10100042xxxx",
+"scoops": "2",   -- 1： 运营， 2/3：广告，其中2 国内广告，就是海外广告。
+"module": "广告", -- 运营/广告
+"user_id":"xxxxx",
+"session_id":"5f6afc00-7bcc-427e-ac50-8fda7a70c58790899999xxxxxxx",
+"user_session_id":"0c51c0f1-70ed-4736-af82-bfb8d3de9ac5f998999999xxxxxxx",
+"input_query":"过去一周指间山海 广告日消耗",
+"messages":[],
+"extra":{"module":"广告","app_id":"10100042","app_name":"指间山海","scoops": "2", "app_region": "1"}
+}
+```
+

@@ -1,0 +1,40 @@
+{
+  "id": "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389",
+  "subprojectId": null,
+  "name": "Virtual Documentation PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "documentation",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns AI-generated manuals, demo scripts, sync documents, and structured product communication outputs.",
+  "problem": "Documentation is still partly human-maintained and inconsistently normalized into the current repository taxonomy.",
+  "targetUsers": [],
+  "goals": [
+    "Generate user manuals, demo scripts, sync docs, and delivery-facing product writing.",
+    "Normalize old human material into current governed templates.",
+    "Keep product communication outputs traceable to current product decisions."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Documentation outputs are template-backed and linked to the current product decision context.",
+    "Historical material is normalized into governed structure before it is reused."
+  ],
+  "relatedPaths": [
+    "docs/templates/user_manual_template.md",
+    "docs/templates/demo_script_template.md",
+    "docs/templates/solution_analysis_sync_template.md"
+  ],
+  "governanceRefs": [
+    "docs/decisions/adr-0003-document-taxonomy.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_documentation_pm_prompt.md",
+  "templateId": "virtual-documentation-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.124Z",
+  "updatedAt": "2026-04-27T10:04:22.124Z"
+}

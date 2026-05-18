@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智投chat能力接入总表 v1</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #1f2329;
+      --muted: #646a73;
+      --line: #e5e6eb;
+      --soft: #f2f3f5;
+      --blue: #2f6fed;
+      --green: #1f9d70;
+      --orange: #d9822b;
+      --red: #d84a4a;
+      --purple: #7657d6;
+      --shadow: 0 8px 24px rgba(31, 35, 41, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      width: min(1440px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .meta {
+      min-width: 220px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .meta strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid.cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .kpi {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .kpi .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill.p0 { background: #eaf2ff; color: var(--blue); }
+    .pill.p1 { background: #eaf8f2; color: var(--green); }
+    .pill.p2 { background: #f1edff; color: var(--purple); }
+    .pill.done { background: #eaf8f2; color: var(--green); }
+    .pill.partial { background: #fff5e8; color: var(--orange); }
+    .pill.missing { background: #fff0f0; color: var(--red); }
+
+    .section {
+      margin-top: 14px;
+    }
+
+    .matrix {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .matrix th,
+    .matrix td {
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .matrix th {
+      background: #fbfbfc;
+      color: #3b3f45;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .matrix tr:last-child td { border-bottom: 0; }
+    .matrix th:last-child,
+    .matrix td:last-child { border-right: 0; }
+
+    .name {
+      font-weight: 650;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .desc {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    li + li { margin-top: 4px; }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .step {
+      background: #fbfbfc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 112px;
+    }
+
+    .step .index {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eaf2ff;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .callout {
+      border-left: 3px solid var(--blue);
+      background: #f6f9ff;
+      padding: 12px 14px;
+      border-radius: 6px;
+      color: #33415c;
+    }
+
+    .owner-list {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 10px 14px;
+      margin-top: 8px;
+    }
+
+    .owner-list .role {
+      font-weight: 650;
+      color: var(--text);
+    }
+
+    .owner-list .task {
+      color: var(--muted);
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 1100px) {
+      .grid.cols-4,
+      .grid.cols-3,
+      .flow {
+        grid-template-columns: 1fr 1fr;
+      }
+      .topbar {
+        flex-direction: column;
+      }
+      .meta {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100vw - 24px, 720px);
+        padding-top: 18px;
+      }
+      .grid.cols-4,
+      .grid.cols-3,
+      .flow {
+        grid-template-columns: 1fr;
+      }
+      .matrix {
+        display: block;
+        overflow-x: auto;
+      }
+      .owner-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>智投chat能力接入总表 v1</h1>
+        <p class="subtitle">
+          目标是把“解答、排查、联调、监控、监测链接、自动报表”从聊天回复升级为端到端直接交付。此页用于确认还需要哪些 Agent、Skill、MCP、Workflow 和知识资料，方便团队按模块补齐。
+        </p>
+      </div>
+      <aside class="meta">
+        <div><strong>版本</strong>：2026-05-15 v1</div>
+        <div><strong>范围</strong>：P0 + P1</div>
+        <div><strong>原则</strong>：真实数据优先，缺能力不编造</div>
+      </aside>
+    </header>
+
+    <section class="grid cols-4">
+      <div class="panel">
+        <div class="kpi"><span class="num">7</span><span class="label">Agent</span></div>
+        <div class="desc">负责识别意图、选择流程、决定是否追问和调用 Skill。</div>
+      </div>
+      <div class="panel">
+        <div class="kpi"><span class="num">7</span><span class="label">Skill</span></div>
+        <div class="desc">承载可复用业务流程，避免每次靠模型临场发挥。</div>
+      </div>
+      <div class="panel">
+        <div class="kpi"><span class="num">8</span><span class="label">MCP 组</span></div>
+        <div class="desc">连接报表、归因、采集、调度、包、监测链接、联调等系统能力。</div>
+      </div>
+      <div class="panel">
+        <div class="kpi"><span class="num">5</span><span class="label">主流程</span></div>
+        <div class="desc">投放前质量保障、巡检、差异排查、监测链接、自动报表。</div>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <h2>当前结论</h2>
+      <div class="callout">
+        已有报表 MCP、归因 MCP、运维调度 MCP、配置管理 MCP 的部分能力。当前最大缺口不是前端组件，而是“可被 Agent 稳定调用的真实 MCP 契约”和“Skill 级流程验收集”。下一步应优先把 P0 质量保障链路打通，再做 P1 提效能力。
+      </div>
+    </section>
+
+    <section class="section panel">
+      <h2>P0 / P1 能力矩阵</h2>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>能力</th>
+            <th>优先级</th>
+            <th>目标交付</th>
+            <th>Agent</th>
+            <th>Skill</th>
+            <th>关键 MCP</th>
+            <th>当前状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="name">投放异常巡检</div>
+              <div class="desc">用户宽泛问“昨天投放有什么异常”时，先做全链路监控检查。</div>
+            </td>
+            <td><span class="pill p0">P0</span></td>
+            <td>返回监控结果；发现异常后自动转排查。</td>
+            <td>监控巡检 Agent</td>
+            <td>投放异常巡检 Skill</td>
+            <td>采集 MCP、数据质量 MCP、调度 MCP、报表 MCP</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">流程已挂载，采集 MCP endpoint 缺失。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">指标差异排查</div>
+              <div class="desc">处理消耗、激活、注册、付费、ROI 与媒体/BI 不一致。</div>
+            </td>
+            <td><span class="pill p0">P0</span></td>
+            <td>先查两边真实数据，再查口径和链路，给出根因或阻塞项。</td>
+            <td>数据排查 Agent</td>
+            <td>指标差异排查 Skill</td>
+            <td>报表 MCP、归因 MCP、回传 MCP、数据质量 MCP</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">报表和归因已有，差异对比工具需明确。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">自动联调</div>
+              <div class="desc">v1 先打透巨量，确认包、媒体应用、事件上报、回传结果。</div>
+            </td>
+            <td><span class="pill p0">P0</span></td>
+            <td>直接发起联调，右侧观测步骤，结束后给出是否可投放。</td>
+            <td>自动联调 Agent</td>
+            <td>巨量自动联调 Skill</td>
+            <td>自动联调 MCP、包管理 MCP、归因/回传 MCP、配置 MCP</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">Demo 有，需转成标准 MCP tool。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">投放前质量保障</div>
+              <div class="desc">新包、包更新、媒体配置变化后自动触发联调和质量结论。</div>
+            </td>
+            <td><span class="pill p0">P0</span></td>
+            <td>自动发现变更，完成检查，给出能否投放。</td>
+            <td>质量保障 Agent</td>
+            <td>投放前质量保障 Skill</td>
+            <td>包管理 MCP、配置 MCP、自动联调 MCP、监测链接 MCP</td>
+            <td><span class="pill missing">缺失</span><br><span class="desc">需要包下载、分包、新包检测能力。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">疑问解答</div>
+              <div class="desc">解释业务流程、归因回推逻辑、报表指标口径。</div>
+            </td>
+            <td><span class="pill p1">P1</span></td>
+            <td>结构化解释，展示来源，必要时进入指标解释器。</td>
+            <td>解答 Agent</td>
+            <td>知识问答 Skill</td>
+            <td>知识库、指标解释资料</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">知识需结构化补齐。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">指标解释器</div>
+              <div class="desc">激活、注册、注册设备、付费、消耗、ROI 等指标解释。</div>
+            </td>
+            <td><span class="pill p1">P1</span></td>
+            <td>动态组件展示定义、采集、上报、计算、歧义、报表差异。</td>
+            <td>解答 Agent</td>
+            <td>指标解释 Skill</td>
+            <td>指标解释结构化资料、知识库补充</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">后台结构已接，资料需录入。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">监测链接交付</div>
+              <div class="desc">查询已有链接，必要时创建新链接。</div>
+            </td>
+            <td><span class="pill p1">P1</span></td>
+            <td>直接给用户可用监测链接，或说明缺少哪些创建条件。</td>
+            <td>监测链接交付 Agent</td>
+            <td>监测链接交付 Skill</td>
+            <td>配置 MCP、推广活动 MCP、分包 MCP、权限 MCP</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">已有配置类工具，需映射查询/创建/校验。</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="name">自动报表</div>
+              <div class="desc">文本或 Excel 模板转报表，校验指标，拉数预览，创建定时任务。</div>
+            </td>
+            <td><span class="pill p1">P1</span></td>
+            <td>确认模板、展示数据预览、创建日周月报任务。</td>
+            <td>报表 Agent</td>
+            <td>自动报表 Skill</td>
+            <td>报表 MCP、数仓 MCP、定时任务 MCP</td>
+            <td><span class="pill partial">部分已接</span><br><span class="desc">报表编排契约已建，真实编排 endpoint 待接。</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section grid cols-3">
+      <div class="panel">
+        <h2>Agent 清单</h2>
+        <div class="stack">
+          <span class="pill done">意图路由 Agent</span>
+          <span class="pill partial">解答 Agent</span>
+          <span class="pill partial">监控巡检 Agent</span>
+          <span class="pill partial">数据排查 Agent</span>
+          <span class="pill partial">自动联调 Agent</span>
+          <span class="pill partial">报表 Agent</span>
+          <span class="pill partial">监测链接 Agent</span>
+        </div>
+        <ul>
+          <li>需要统一输出 AgentProcessEvent。</li>
+          <li>需要支持多轮上下文和跨会话历史记忆。</li>
+          <li>需要先做能力检查，再决定是否进入交付。</li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h2>Skill 清单</h2>
+        <div class="stack">
+          <span class="pill partial">投放异常巡检</span>
+          <span class="pill partial">指标差异排查</span>
+          <span class="pill partial">巨量自动联调</span>
+          <span class="pill partial">监测链接交付</span>
+          <span class="pill partial">指标解释</span>
+          <span class="pill partial">自动报表</span>
+          <span class="pill partial">知识问答</span>
+        </div>
+        <ul>
+          <li>每个 Skill 需要输入 schema、输出 schema、流程步骤、失败策略。</li>
+          <li>上线前必须有连弩评测 case。</li>
+          <li>不能用 mock 结果作为业务证据。</li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h2>知识清单</h2>
+        <div class="stack">
+          <span class="pill missing">指标口径</span>
+          <span class="pill missing">报表差异</span>
+          <span class="pill missing">归因回推</span>
+          <span class="pill missing">媒体接入</span>
+          <span class="pill missing">联调 SOP</span>
+          <span class="pill missing">常见问题案例</span>
+        </div>
+        <ul>
+          <li>指标解释以后台结构化录入为主。</li>
+          <li>知识库作为补充来源，不应采纳低相关片段。</li>
+          <li>每条知识最好带适用场景、口径、来源、更新时间。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <h2>MCP 接入总表</h2>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>MCP 组</th>
+            <th>需要的工具</th>
+            <th>已知现状</th>
+            <th>阻塞影响</th>
+            <th>提供方</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="name">报表 MCP</div></td>
+            <td>当前时间、项目列表、小时报表、日报、ROI、媒体维度、项目维度、指标明细。</td>
+            <td><span class="pill done">已有</span> 已接入 opendata 报表 MCP，需确认所有指标覆盖。</td>
+            <td>指标差异排查、自动报表、监控巡检。</td>
+            <td>数据平台 / 报表后端</td>
+          </tr>
+          <tr>
+            <td><div class="name">归因 / 回传 MCP</div></td>
+            <td>回推配置、融合归因、归因统计、未回推设备、SDK 启动、804 响应、一键诊断。</td>
+            <td><span class="pill done">已有</span> 已接入归因 MCP，需补事件级验收 case。</td>
+            <td>激活、注册、付费差异排查，自动联调结果验证。</td>
+            <td>归因后端</td>
+          </tr>
+          <tr>
+            <td><div class="name">运维调度 MCP</div></td>
+            <td>任务执行详情、任务日志、最近执行记录、入库状态、失败原因。</td>
+            <td><span class="pill partial">部分已有</span> 已接入 Azkaban MCP，当前仍缺默认 project / flow_id 映射。</td>
+            <td>报表 20 分钟调度、数据延迟、入库失败排查。</td>
+            <td>运维 / 数据开发</td>
+          </tr>
+          <tr>
+            <td><div class="name">配置管理 MCP</div></td>
+            <td>推广活动、媒体列表、账户授权、分包、媒体配置、SDK push 策略、融合配置。</td>
+            <td><span class="pill partial">部分已有</span> 工具很多，需建立中文能力映射。</td>
+            <td>监测链接、自动联调、投放前质量保障。</td>
+            <td>配置平台后端</td>
+          </tr>
+          <tr>
+            <td><div class="name">采集状态 MCP</div></td>
+            <td>媒体报表采集、点击日志采集、自归因采集、数据上报报告。</td>
+            <td><span class="pill partial">部分已接</span> 已通过现有报表、配置、归因 MCP 适配 5 层检查；数据质量和调度映射仍缺。</td>
+            <td>投放异常巡检可跑到真实能力检查，但健康结论仍受数据质量/调度缺口限制。</td>
+            <td>数据采集 / 数仓</td>
+          </tr>
+          <tr>
+            <td><div class="name">数据质量 MCP</div></td>
+            <td>空值、不能为 0、突增突降、延迟、重复、跨表一致性。</td>
+            <td><span class="pill missing">缺 endpoint</span> 需要内置规则和返回结构。</td>
+            <td>监控巡检只能提示缺能力，不能给健康结论。</td>
+            <td>数据质量 / 数仓</td>
+          </tr>
+          <tr>
+            <td><div class="name">包管理 MCP</div></td>
+            <td>查询包、分包、下载地址、新包检测、包更新检测、媒体过审状态。</td>
+            <td><span class="pill missing">缺失</span> 当前是投放前质量保障最大缺口。</td>
+            <td>无法自动判断新包是否可投放。</td>
+            <td>包管理 / 配置平台</td>
+          </tr>
+          <tr>
+            <td><div class="name">自动联调 MCP</div></td>
+            <td>配置校验、媒体应用检查、事件上报检查、发起任务、步骤观测、结果报告。</td>
+            <td><span class="pill partial">Demo 已有</span> 需要封装成标准 MCP tool。</td>
+            <td>巨量自动联调无法由 Agent 直接发起和观测。</td>
+            <td>后端 / 测试自动化</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section panel">
+      <h2>五条 Workflow</h2>
+      <div class="flow">
+        <div class="step">
+          <div class="index">1</div>
+          <h3>投放前质量保障</h3>
+          <div class="desc">新包或配置变化 → 获取包和媒体状态 → 自动联调 → 可投放结论。</div>
+        </div>
+        <div class="step">
+          <div class="index">2</div>
+          <h3>投放异常巡检</h3>
+          <div class="desc">项目/媒体/时间 → 采集、质量、调度、报表检查 → 异常转排查。</div>
+        </div>
+        <div class="step">
+          <div class="index">3</div>
+          <h3>指标差异排查</h3>
+          <div class="desc">查两边数据 → 查口径 → 查采集/归因/回传/入库 → 输出根因。</div>
+        </div>
+        <div class="step">
+          <div class="index">4</div>
+          <h3>监测链接交付</h3>
+          <div class="desc">查询已有链接 → 无链接则预检 → 创建 → 返回可用链接。</div>
+        </div>
+        <div class="step">
+          <div class="index">5</div>
+          <h3>自动报表</h3>
+          <div class="desc">模板确认 → 指标校验 → 拉数预览 → 创建定时任务。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section grid cols-3">
+      <div class="panel">
+        <h2>团队分工</h2>
+        <div class="owner-list">
+          <div class="role">后端 / 数据</div>
+          <div class="task">提供 MCP tool 清单、入参、出参、endpoint、权限、失败码。</div>
+          <div class="role">测试</div>
+          <div class="task">提供连弩评测 case、问题输入、预期流程、预期结果。</div>
+          <div class="role">业务 / 产品</div>
+          <div class="task">提供高频问题、指标解释、排查 SOP、联调验收标准。</div>
+          <div class="role">前端</div>
+          <div class="task">提供动态组件清单：表单、表格、步骤流、来源卡、报告卡。</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>下一步顺序</h2>
+        <ol>
+          <li>先补齐采集状态 MCP 和数据质量 MCP。</li>
+          <li>把巨量自动联调 Demo 封装成标准 MCP。</li>
+          <li>把监测链接查询/创建/校验映射到现有配置 MCP 工具。</li>
+          <li>录入指标解释结构化资料。</li>
+          <li>为每个 Skill 建连弩准入评测。</li>
+        </ol>
+      </div>
+
+      <div class="panel">
+        <h2>验收标准</h2>
+        <ul>
+          <li>每个 Skill 至少 5 条真实业务 case。</li>
+          <li>每条 case 都能看到 AgentProcessEvent。</li>
+          <li>每次引用数据都能看到来源。</li>
+          <li>MCP 不可用时不生成假结论。</li>
+          <li>用户得到的是结果、链接、任务或明确阻塞项。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <h2>需要团队立刻补充的资料</h2>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>资料</th>
+            <th>用途</th>
+            <th>最低要求</th>
+            <th>优先级</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>采集状态 MCP 文档</td>
+            <td>支撑投放异常巡检</td>
+            <td>媒体报表、点击日志、自归因、上报报告的 tool 入参和返回结构。</td>
+            <td><span class="pill p0">P0</span></td>
+          </tr>
+          <tr>
+            <td>数据质量规则清单</td>
+            <td>支撑监控和排查</td>
+            <td>不能为 0、突增突降、延迟、重复、跨表一致性的规则和阈值。</td>
+            <td><span class="pill p0">P0</span></td>
+          </tr>
+          <tr>
+            <td>巨量自动联调 MCP 文档</td>
+            <td>支撑自动联调</td>
+            <td>配置校验、发起任务、步骤观测、结果报告四类 tool。</td>
+            <td><span class="pill p0">P0</span></td>
+          </tr>
+          <tr>
+            <td>包管理能力文档</td>
+            <td>支撑投放前质量保障</td>
+            <td>包查询、分包、下载地址、新包检测、过审状态。</td>
+            <td><span class="pill p0">P0</span></td>
+          </tr>
+          <tr>
+            <td>指标解释资料</td>
+            <td>支撑疑问解答和指标解释器</td>
+            <td>定义、采集位置、上报事件、关键字段、计算过程、常见歧义、报表差异。</td>
+            <td><span class="pill p1">P1</span></td>
+          </tr>
+          <tr>
+            <td>自动报表模板样例</td>
+            <td>支撑自动报表</td>
+            <td>文本模板、Excel 模板、期望输出表样、定时频率。</td>
+            <td><span class="pill p1">P1</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="footer-note">建议把此页作为接入评审入口。团队每补齐一项，就更新“当前状态”和“验收 case”，再进入代码联调。</p>
+    </section>
+  </main>
+</body>
+</html>

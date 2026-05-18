@@ -1,0 +1,49 @@
+{
+  "id": "ver-d8c2db4c-a8d7-40cc-9612-db73d88ea5b7",
+  "subprojectId": null,
+  "entityType": "document-normalization",
+  "entityId": "docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02",
+  "changeType": "normalize",
+  "summary": "Normalized historical document source docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-43607b8e-c4a8-41ed-8022-39d8a2908429"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md",
+    "docs/context/project/by-tag/knowledge-base/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md",
+    "docs/context/project/by-tag/platform/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Created governed normalization artifact docs/product-office/document-normalization/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md and background digest docs/context/project/inbox-background/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Normalization and background knowledge assets are ready for review before moving source material."
+  },
+  "createdAt": "2026-05-09T06:11:23.755Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/sources/historical/周报-产品组-徐韵-0509.xlsx",
+    "documentType": "historical-source",
+    "projectHints": [
+      "knowledge-base",
+      "platform"
+    ],
+    "backgroundContextPath": "docs/context/project/inbox-background/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md",
+    "projectContextPaths": [
+      "docs/context/project/by-tag/knowledge-base/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/platform/docnorm-75597177-2a4a-41a2-aa43-5c801ccc7a02-docs-sources-inbox-0509.md"
+    ],
+    "notionPageId": "35bd53f7-155c-8105-bd15-c2cdd45559c2",
+    "notionPageUrl": "https://www.notion.so/Inbox-Knowledge-Digest-0509-xlsx-35bd53f7155c8105bd15c2cdd45559c2"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-8244294d-d0da-40ea-96bd-8acd9f933dd5",
+  "subprojectId": null,
+  "name": "Virtual Roadmap PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "roadmap-planning",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns roadmap outputs, milestone framing, and version planning synthesis.",
+  "problem": "Roadmap ideas exist in old planning material, but there is no governed AI-first roadmap output loop.",
+  "targetUsers": [],
+  "goals": [
+    "Produce product roadmap and milestone plans.",
+    "Tie roadmap changes to research, requirements, and version constraints.",
+    "Surface sequencing decisions early."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Roadmap outputs show timeline, priority, owner, dependency, and release linkage."
+  ],
+  "relatedPaths": [
+    "docs/templates/roadmap_template.md",
+    "docs/templates/version_planning_template.md",
+    "docs/templates/quarterly_okr_template.md"
+  ],
+  "governanceRefs": [
+    "docs/operations/module-roadmap.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_roadmap_pm_prompt.md",
+  "templateId": "virtual-roadmap-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.127Z",
+  "updatedAt": "2026-04-27T10:04:22.127Z"
+}

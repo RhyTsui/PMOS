@@ -1,0 +1,93 @@
+<svg width="1600" height="920" viewBox="0 0 1600 920" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1480" y2="840" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBF7F1"/>
+      <stop offset="0.55" stop-color="#EEF3FF"/>
+      <stop offset="1" stop-color="#F5EEE6"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="280" y1="280" x2="1060" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165DFF"/>
+      <stop offset="0.52" stop-color="#5B7BFF"/>
+      <stop offset="1" stop-color="#B65C2D"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="1100" y1="160" x2="1360" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF7EC"/>
+      <stop offset="1" stop-color="#FFF0DE"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1600" height="920" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="30" flood-color="#1C1814" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="920" rx="36" fill="url(#bg)"/>
+  <circle cx="1280" cy="138" r="170" fill="#E9F0FF"/>
+  <circle cx="1280" cy="138" r="122" stroke="#D7E2FF" stroke-width="1.5"/>
+  <circle cx="1280" cy="138" r="82" stroke="#D7E2FF" stroke-width="1.5"/>
+  <circle cx="1280" cy="138" r="44" fill="#F8FBFF" stroke="#CAD8FF" stroke-width="1.5"/>
+
+  <path d="M160 560C286 472 430 424 594 416C734 410 850 438 950 474C1048 510 1144 532 1264 510C1338 496 1402 468 1458 424" stroke="url(#accent)" stroke-width="3" stroke-linecap="round" opacity="0.26"/>
+  <path d="M160 610C298 524 454 486 632 484C752 482 860 502 962 534C1068 568 1176 596 1318 578C1384 570 1438 548 1490 514" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" opacity="0.18"/>
+  <path d="M184 658C344 576 504 548 692 554C830 560 942 592 1028 628C1128 670 1226 706 1356 696" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" opacity="0.12"/>
+
+  <g opacity="0.88">
+    <circle cx="602" cy="454" r="8" fill="#165DFF"/>
+    <circle cx="760" cy="436" r="10" fill="#5B7BFF"/>
+    <circle cx="936" cy="502" r="10" fill="#B65C2D"/>
+    <circle cx="1138" cy="546" r="8" fill="#6E63FF"/>
+    <circle cx="1324" cy="510" r="10" fill="#165DFF"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="54" width="1480" height="812" rx="30" fill="white" fill-opacity="0.64"/>
+  </g>
+
+  <g>
+    <text x="108" y="132" fill="#A84F27" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24" letter-spacing="5">PMAIOS RUNTIME SNAPSHOT</text>
+    <text x="108" y="214" fill="#1C1814" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="74" font-weight="700">PMAIOS</text>
+    <text x="108" y="294" fill="#233C7A" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="58" font-weight="700">运行态介绍图</text>
+    <text x="108" y="354" fill="#6F675D" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="28">面向当前状态、最近动作与关键入口的人读总览，而不是把 prompt 和长文都堆在首页。</text>
+  </g>
+
+  <g>
+    <rect x="108" y="422" width="408" height="196" rx="28" fill="#FFF9F1" stroke="#E8D9C7"/>
+    <text x="140" y="468" fill="#A84F27" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">Current Focus</text>
+    <text x="140" y="532" fill="#1C1814" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="34" font-weight="700">状态入口 + Prompt 拆页</text>
+    <text x="140" y="580" fill="#6F675D" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="22">Wiki 只讲最近动作、当前状态、入口路径；</text>
+    <text x="140" y="612" fill="#6F675D" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="22">Prompts 单独成页，避免介绍正文继续膨胀。</text>
+  </g>
+
+  <g>
+    <rect x="548" y="422" width="472" height="196" rx="28" fill="#F7FAFF" stroke="#D8E4FF"/>
+    <text x="580" y="468" fill="#165DFF" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">Live Status</text>
+    <text x="580" y="526" fill="#1C1814" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="30" font-weight="700">Current Mode: do</text>
+    <text x="580" y="570" fill="#6F675D" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="22">Current Task: 补 PMAIOS 介绍图并挂到 Wiki 首页</text>
+    <text x="580" y="612" fill="#6F675D" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="22">Prompt Entry: /pmaios/prompts</text>
+  </g>
+
+  <g>
+    <rect x="1052" y="422" width="378" height="196" rx="28" fill="url(#warm)" stroke="#F0DCC6"/>
+    <text x="1084" y="468" fill="#A84F27" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">Recent Moves</text>
+    <text x="1084" y="524" fill="#1C1814" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">1. 介绍页重构为状态型入口</text>
+    <text x="1084" y="564" fill="#1C1814" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">2. Prompt 清单页独立上线</text>
+    <text x="1084" y="604" fill="#1C1814" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">3. 后端本地 Wiki 已恢复可访问</text>
+  </g>
+
+  <g>
+    <rect x="108" y="664" width="1322" height="148" rx="28" fill="#0F1E49"/>
+    <text x="146" y="714" fill="#8EB2FF" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="22">Key Entries</text>
+    <text x="146" y="760" fill="white" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="28" font-weight="700">/pmaios/wiki</text>
+    <text x="390" y="760" fill="#D8E4FF" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">状态介绍页</text>
+    <text x="594" y="760" fill="white" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="28" font-weight="700">/pmaios/prompts</text>
+    <text x="880" y="760" fill="#D8E4FF" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">提示词清单页</text>
+    <text x="1108" y="760" fill="white" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="28" font-weight="700">/pmaios/graph</text>
+    <text x="1322" y="760" fill="#D8E4FF" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="24">交互图谱</text>
+  </g>
+
+  <g opacity="0.78">
+    <rect x="1180" y="106" width="212" height="212" rx="28" fill="#F8FBFF" stroke="#D8E4FF"/>
+    <circle cx="1286" cy="212" r="52" fill="#EDF4FF" stroke="#CAD8FF"/>
+    <path d="M1268 198L1294 212L1268 226V198Z" fill="#165DFF"/>
+    <path d="M1300 192L1320 212L1300 232" stroke="#5B7BFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1212" y="284" fill="#6F675D" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="18">visual slot for intro image</text>
+  </g>
+</svg>

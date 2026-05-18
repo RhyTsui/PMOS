@@ -25,7 +25,7 @@
 - 规则：`AGENTS.md`
 - 运行口径：本文件
 - 任务状态：`docs/memory/mcp-context/*`
-- 设计总览：`docs/svg/full-demo-coverage-board.svg`
+- 当前交付总控：`docs/小乔智投-交付总控-2026-05-08.md`
 
 ## 当前默认演示地址
 

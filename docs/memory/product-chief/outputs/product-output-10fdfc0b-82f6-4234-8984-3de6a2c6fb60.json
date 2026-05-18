@@ -1,0 +1,51 @@
+{
+  "id": "product-output-10fdfc0b-82f6-4234-8984-3de6a2c6fb60",
+  "reportId": "product-chief-1f53725c-2e40-4ffd-b4f9-89a2b5de7b13",
+  "subprojectId": null,
+  "type": "design-image2-prompt-pack",
+  "title": "Page-by-page image2 prompt pack",
+  "status": "ready-for-review",
+  "artifactPath": "docs/product-office/outputs/product-output-10fdfc0b-82f6-4234-8984-3de6a2c6fb60.md",
+  "generatedAt": "2026-04-27T11:22:06.273Z",
+  "specialistAgentIds": [
+    "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+    "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+  ],
+  "specialistTaskIds": [
+    "product-chief-task-7fddca62-43d6-4cbb-aa3e-a9c3479ff850",
+    "product-chief-task-fe47d8bc-0d8d-441d-a6d1-839187a97692"
+  ],
+  "specialistTaskArtifactPaths": [
+    "docs/product-office/specialist-tasks/product-chief-task-7fddca62-43d6-4cbb-aa3e-a9c3479ff850.md",
+    "docs/product-office/specialist-tasks/product-chief-task-fe47d8bc-0d8d-441d-a6d1-839187a97692.md"
+  ],
+  "multiAgentReviewId": "product-chief-review-ad25d2df-9656-4800-8e28-102e37393b8c",
+  "multiAgentReviewStatus": "needs-human-decision",
+  "multiAgentReviewArtifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-ad25d2df-9656-4800-8e28-102e37393b8c.md",
+  "requirementIds": [
+    "req-c62fe91b-2018-4b2e-ad56-416f906c6661"
+  ],
+  "versionEntryId": "ver-d4ce2531-a3de-4434-9b78-5f50b67805ae",
+  "templatePath": "docs/templates/design_image2_prompt_pack_template.md",
+  "summary": "Page-by-page image2 prompt pack generated from Product Chief report product-chief-1f53725c-2e40-4ffd-b4f9-89a2b5de7b13; image generation was not completed.",
+  "metadata": {
+    "priority": "P0",
+    "reason": "Visual design delivery must first produce a page-by-page image2 prompt pack before final design images are generated.",
+    "outputRecordPath": "docs/memory/product-chief/outputs/product-output-10fdfc0b-82f6-4234-8984-3de6a2c6fb60.json",
+    "recommendedSkillIds": [
+      "five-w-two-h",
+      "persona",
+      "requirement-pool-operations",
+      "system-boundary",
+      "version-repository-operations",
+      "competitive-analysis",
+      "delivery-coordination",
+      "product-management-governance"
+    ],
+    "generatedImagePaths": [],
+    "generatedImagePageCount": 0,
+    "imageGenerationWarnings": [
+      "No page-level image2 prompts could be parsed from the prompt pack."
+    ]
+  }
+}

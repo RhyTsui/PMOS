@@ -1,0 +1,34 @@
+{
+  "id": "ver-80f65aa3-c37a-448f-b11d-936baa8b8068",
+  "subprojectId": null,
+  "entityType": "requirement",
+  "entityId": "req-cfda1102-6ee8-469d-9bbc-8e83c91b93e9",
+  "changeType": "extract",
+  "summary": "Extracted requirement from docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-cfda1102-6ee8-469d-9bbc-8e83c91b93e9"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "数分希望一次性录入高频复用，但每次的验收差异都需要录入",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Extracted requirement needs operator review before implementation planning."
+  },
+  "createdAt": "2026-05-09T06:02:09.257Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

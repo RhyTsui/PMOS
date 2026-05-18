@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>字段参考 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Field Reference</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">字段参考</h1>
+        <p>统一字段字典、通用头和高风险字段。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="#common">通用字段</a>
+          <a href="#tracking">透传字段</a>
+          <a href="#payment">支付字段</a>
+          <a href="#rules">类型规则</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Fields</span>
+          <h1>字段参考</h1>
+          <p>字段定义必须同时说明语义、类型、来源和风险，不能只给字段名。</p>
+        </section>
+        <section class="section" id="common">
+          <h2>通用字段</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>字段</th><th>说明</th><th>要求</th></tr></thead>
+              <tbody>
+                <tr><td>game_uuid</td><td>服务端事件唯一 ID</td><td>必填</td></tr>
+                <tr><td>start_time</td><td>13 位毫秒时间戳</td><td>必填</td></tr>
+                <tr><td>user_id</td><td>账号 ID</td><td>必填</td></tr>
+                <tr><td>role_id</td><td>角色 ID</td><td>必填</td></tr>
+                <tr><td>server / realserver</td><td>区服信息</td><td>必填</td></tr>
+                <tr><td>app_id</td><td>项目 ID</td><td>必填</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="tracking">
+          <h2>透传字段</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>字段</th><th>来源</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>s_oneid</td><td>getTrackingInfo</td><td>服务端设备标识</td></tr>
+                <tr><td>c_oneid</td><td>getTrackingInfo</td><td>客户端设备标识</td></tr>
+                <tr><td>device_id</td><td>getTrackingInfo</td><td>设备 ID</td></tr>
+                <tr><td>cpsid</td><td>getTrackingInfo</td><td>渠道分包 ID</td></tr>
+                <tr><td>channel</td><td>getTrackingInfo / 发货通知映射</td><td>用户渠道</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="payment">
+          <h2>支付字段</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>字段</th><th>作用</th><th>当前问题</th></tr></thead>
+              <tbody>
+                <tr><td>order_id</td><td>中台充值订单号</td><td>部分步骤未获取</td></tr>
+                <tr><td>channel_order_id</td><td>商户/渠道订单号</td><td>部分步骤未获取</td></tr>
+                <tr><td>game_order_id</td><td>游戏内订单号</td><td>部分步骤生成时机靠后</td></tr>
+                <tr><td>pay_channel</td><td>充值渠道</td><td>定义关键但存在不发送</td></tr>
+                <tr><td>recharge_channel</td><td>支付方式</td><td>定义关键但存在不发送</td></tr>
+                <tr><td>currency</td><td>货币类型</td><td>必须按统一口径</td></tr>
+                <tr><td>amount</td><td>金额</td><td>需明确单位</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="rules">
+          <h2>类型与格式规则</h2>
+          <ul>
+            <li>时间字段统一 13 位毫秒时间戳。</li>
+            <li>步骤 ID / 事件 ID 统一使用数字字符串或整型，不混用。</li>
+            <li>map/json 字段必须同时说明 key 和 value 语义。</li>
+            <li>枚举字段必须能回到字典或内容 ID。</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

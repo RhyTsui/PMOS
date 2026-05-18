@@ -1,0 +1,34 @@
+{
+  "id": "ver-7d4ff389-0114-4afe-afa7-c1ae14bf6cc8",
+  "subprojectId": null,
+  "entityType": "requirement",
+  "entityId": "req-96686c6f-ff18-4c42-9e3c-4593d723d7f5",
+  "changeType": "extract",
+  "summary": "Extracted requirement from docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-96686c6f-ff18-4c42-9e3c-4593d723d7f5"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "当前采用需求结构化设计的方式，让系统和AI能理解需求和自动校验",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Extracted requirement needs operator review before implementation planning."
+  },
+  "createdAt": "2026-05-09T05:50:38.615Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

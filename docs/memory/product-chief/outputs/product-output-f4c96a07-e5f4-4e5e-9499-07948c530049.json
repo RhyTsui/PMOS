@@ -1,0 +1,50 @@
+{
+  "id": "product-output-f4c96a07-e5f4-4e5e-9499-07948c530049",
+  "reportId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+  "subprojectId": null,
+  "type": "product-definition-baseline",
+  "title": "Product definition baseline",
+  "status": "ready-for-review",
+  "artifactPath": "docs/product-office/outputs/product-output-f4c96a07-e5f4-4e5e-9499-07948c530049.md",
+  "generatedAt": "2026-04-28T01:41:33.131Z",
+  "specialistAgentIds": [
+    "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+    "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+  ],
+  "specialistTaskIds": [
+    "product-chief-task-504f2bb3-7dd1-4487-89b0-c9582a7ce9a3",
+    "product-chief-task-4f8ad7e5-7536-4d10-986d-be6fbdadcdb8"
+  ],
+  "specialistTaskArtifactPaths": [
+    "docs/product-office/specialist-tasks/product-chief-task-504f2bb3-7dd1-4487-89b0-c9582a7ce9a3.md",
+    "docs/product-office/specialist-tasks/product-chief-task-4f8ad7e5-7536-4d10-986d-be6fbdadcdb8.md"
+  ],
+  "multiAgentReviewId": "product-chief-review-ca065228-427f-4ec6-a2c5-6d59830e956c",
+  "multiAgentReviewStatus": "needs-human-decision",
+  "multiAgentReviewArtifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-ca065228-427f-4ec6-a2c5-6d59830e956c.md",
+  "requirementIds": [
+    "req-0cdb4808-1d76-4dbd-b9f6-0d52aa574f5e"
+  ],
+  "versionEntryId": "ver-1f810950-6d37-4ca3-8f9d-7c6384a7da6f",
+  "templatePath": "docs/templates/product_definition_baseline_template.md",
+  "summary": "Product definition baseline generated from Product Chief report product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905.",
+  "metadata": {
+    "priority": "P0",
+    "reason": "Any downstream design, schema, or implementation work must trace back to an explicit product definition baseline.",
+    "dependsOn": [],
+    "autoBackfillOnSkip": false,
+    "autoBackfilledOutputIds": [],
+    "autoBackfilledOutputTypes": [],
+    "outputRecordPath": "docs/memory/product-chief/outputs/product-output-f4c96a07-e5f4-4e5e-9499-07948c530049.json",
+    "recommendedSkillIds": [
+      "five-w-two-h",
+      "persona",
+      "requirement-pool-operations",
+      "system-boundary",
+      "version-repository-operations",
+      "claude-design-system",
+      "follow-builders",
+      "committee-gate"
+    ]
+  }
+}

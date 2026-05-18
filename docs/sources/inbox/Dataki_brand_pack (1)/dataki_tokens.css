@@ -1,0 +1,119 @@
+:root {
+  /* Brand */
+  --dataki-brand-navy: #0B132B;
+  --dataki-brand-blue: #2563EB;
+  --dataki-brand-cyan: #38BDF8;
+  --dataki-brand-violet: #7C3AED;
+  --dataki-brand-violet-light: #B388FF;
+
+  /* Neutral */
+  --dataki-white: #FFFFFF;
+  --dataki-bg: #F8FAFC;
+  --dataki-gray-900: #111827;
+  --dataki-gray-700: #374151;
+  --dataki-gray-500: #6B7280;
+  --dataki-gray-300: #D1D5DB;
+  --dataki-gray-100: #F3F4F6;
+
+  /* Semantic */
+  --dataki-color-data: var(--dataki-brand-blue);
+  --dataki-color-data-accent: var(--dataki-brand-cyan);
+  --dataki-color-knowledge: var(--dataki-brand-violet);
+  --dataki-color-knowledge-accent: var(--dataki-brand-violet-light);
+  --dataki-color-insight: var(--dataki-brand-navy);
+  --dataki-color-border: var(--dataki-gray-300);
+  --dataki-color-text-primary: var(--dataki-brand-navy);
+  --dataki-color-text-secondary: var(--dataki-gray-700);
+  --dataki-color-text-tertiary: var(--dataki-gray-500);
+  --dataki-color-surface: var(--dataki-white);
+  --dataki-color-surface-subtle: var(--dataki-bg);
+  --dataki-color-surface-data-soft: #EFF6FF;
+  --dataki-color-surface-knowledge-soft: #F5F3FF;
+  --dataki-color-surface-insight-soft: #EEF2FF;
+
+  /* Gradient */
+  --dataki-gradient-data-knowledge: linear-gradient(
+    45deg,
+    #38BDF8 0%,
+    #2563EB 35%,
+    #B388FF 65%,
+    #7C3AED 100%
+  );
+
+  /* Typography */
+  --dataki-font-latin: Inter, "Segoe UI", Arial, sans-serif;
+  --dataki-font-cjk: "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+
+  --dataki-font-size-hero: 64px;
+  --dataki-font-size-h1: 48px;
+  --dataki-font-size-h2: 36px;
+  --dataki-font-size-h3: 28px;
+  --dataki-font-size-body-lg: 20px;
+  --dataki-font-size-body: 16px;
+  --dataki-font-size-body-sm: 14px;
+  --dataki-font-size-caption: 12px;
+
+  --dataki-font-weight-regular: 400;
+  --dataki-font-weight-medium: 500;
+  --dataki-font-weight-semibold: 600;
+  --dataki-font-weight-bold: 700;
+
+  --dataki-line-height-tight: 1.2;
+  --dataki-line-height-normal: 1.5;
+  --dataki-line-height-relaxed: 1.7;
+
+  /* Spacing */
+  --dataki-space-2: 2px;
+  --dataki-space-4: 4px;
+  --dataki-space-8: 8px;
+  --dataki-space-12: 12px;
+  --dataki-space-16: 16px;
+  --dataki-space-20: 20px;
+  --dataki-space-24: 24px;
+  --dataki-space-32: 32px;
+  --dataki-space-40: 40px;
+  --dataki-space-48: 48px;
+  --dataki-space-64: 64px;
+  --dataki-space-80: 80px;
+
+  /* Radius */
+  --dataki-radius-sm: 8px;
+  --dataki-radius-md: 12px;
+  --dataki-radius-lg: 16px;
+  --dataki-radius-xl: 24px;
+  --dataki-radius-app-icon: 104px;
+
+  /* Shadow */
+  --dataki-shadow-sm: 0 1px 2px rgba(11, 19, 43, 0.06);
+  --dataki-shadow-md: 0 8px 24px rgba(11, 19, 43, 0.08);
+  --dataki-shadow-lg: 0 16px 40px rgba(11, 19, 43, 0.12);
+  --dataki-shadow-glow: 0 0 24px rgba(179, 136, 255, 0.45);
+
+  /* Components */
+  --dataki-button-primary-bg: var(--dataki-brand-blue);
+  --dataki-button-primary-text: var(--dataki-white);
+  --dataki-button-secondary-bg: var(--dataki-color-surface-knowledge-soft);
+  --dataki-button-secondary-text: var(--dataki-brand-violet);
+
+  --dataki-card-bg: var(--dataki-white);
+  --dataki-card-border: var(--dataki-gray-300);
+  --dataki-card-radius: var(--dataki-radius-xl);
+  --dataki-card-shadow: var(--dataki-shadow-md);
+
+  --dataki-input-bg: var(--dataki-white);
+  --dataki-input-border: var(--dataki-gray-300);
+  --dataki-input-text: var(--dataki-color-text-primary);
+  --dataki-input-placeholder: var(--dataki-color-text-tertiary);
+  --dataki-input-radius: var(--dataki-radius-lg);
+}
+
+[data-theme="dark"] {
+  --dataki-color-surface: #10192F;
+  --dataki-color-surface-subtle: #0B132B;
+  --dataki-color-border: rgba(209, 213, 219, 0.14);
+  --dataki-color-text-primary: #FFFFFF;
+  --dataki-color-text-secondary: #D1D5DB;
+  --dataki-color-text-tertiary: #9CA3AF;
+  --dataki-card-bg: #10192F;
+  --dataki-input-bg: #111827;
+}

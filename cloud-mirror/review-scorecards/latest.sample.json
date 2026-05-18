@@ -1,0 +1,25 @@
+{
+  "reviewId": "review-sample-001",
+  "scope": "v1.0 planning truth",
+  "score": 84,
+  "decision": "conditional_pass",
+  "dimensions": [
+    {
+      "name": "product_boundary",
+      "score": 90,
+      "comment": "Product repo boundary is now explicit."
+    },
+    {
+      "name": "deployability",
+      "score": 78,
+      "comment": "Actual extracted deployable repo is not yet assembled."
+    },
+    {
+      "name": "cloud_continuity",
+      "score": 84,
+      "comment": "Layering is defined, but runtime mirror is still sample-only."
+    }
+  ],
+  "artifact": "docs/operations/v1.0-product-repo-and-cloud-sync-plan.md",
+  "lastUpdatedAt": "2026-05-09T09:28:24.814Z"
+}

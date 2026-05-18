@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI埋点平台 - 概览页设计稿 v2（历史高保真稿）</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --surface-soft: #f8fbff;
+        --line: #d9e2ef;
+        --text: #152033;
+        --muted: #66758c;
+        --brand: #1f6feb;
+        --brand-soft: #eaf3ff;
+        --green: #14804a;
+        --amber: #d97706;
+        --red: #dc2626;
+        --slate: #344054;
+        --shadow: 0 16px 42px rgba(21, 32, 51, 0.08);
+        --radius-xl: 20px;
+        --radius-lg: 16px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(31, 111, 235, 0.09), transparent 24%),
+          linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
+        font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      }
+      button { font: inherit; }
+      .topbar {
+        height: 72px;
+        display: grid;
+        grid-template-columns: auto auto 1fr auto auto;
+        align-items: center;
+        gap: 14px;
+        padding: 0 24px;
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+      }
+      .logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6ea8fe, #1f6feb);
+        color: #fff;
+        font-weight: 700;
+      }
+      .brand { font-size: 20px; font-weight: 700; }
+      .search {
+        height: 42px;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        color: var(--muted);
+      }
+      .badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 212px 1fr;
+        min-height: calc(100vh - 72px);
+      }
+      .sidebar {
+        padding: 18px 12px;
+        border-right: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.88);
+      }
+      .nav { display: grid; gap: 10px; }
+      .nav-item {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        color: #365173;
+        background: transparent;
+      }
+      .nav-item.active {
+        border-color: #bdd2fb;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-weight: 700;
+      }
+      .main {
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+      }
+      .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .page-head h1 { margin: 0; font-size: 28px; }
+      .page-head p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+      .head-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+      .ghost-btn,
+      .primary-btn {
+        height: 42px;
+        padding: 0 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--slate);
+      }
+      .primary-btn {
+        border-color: var(--brand);
+        background: var(--brand);
+        color: #fff;
+      }
+      .context-panel,
+      .hero-panel,
+      .goal-panel,
+      .summary-panel,
+      .update-panel,
+      .trend-panel,
+      .risk-panel { padding: 18px; display: grid; gap: 14px; }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .section-head h2 { margin: 0; font-size: 16px; }
+      .section-head span { color: var(--muted); font-size: 12px; }
+      .context-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .selector {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--surface-soft);
+        padding: 14px 16px;
+        display: grid;
+        gap: 8px;
+      }
+      .selector label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .selector strong { font-size: 18px; }
+      .selector small { color: var(--muted); }
+      .switch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+      .chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .chip.active {
+        border-color: #bcd2ff;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-weight: 700;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 16px;
+      }
+      .hero-banner {
+        border: 1px solid #f0d7a3;
+        background: linear-gradient(135deg, #fff9ed, #fff3da);
+        border-radius: var(--radius-lg);
+        padding: 18px;
+        display: grid;
+        gap: 10px;
+      }
+      .state-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .state-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(217, 119, 6, 0.12);
+        color: var(--amber);
+        font-weight: 700;
+      }
+      .hero-banner h3,
+      .goal-card h3,
+      .trend-box h3,
+      .update-item h3 { margin: 0; font-size: 16px; }
+      .hero-banner p,
+      .goal-card p,
+      .trend-box p,
+      .update-item p { margin: 0; color: var(--muted); line-height: 1.6; }
+      .deviation-list { display: grid; gap: 8px; }
+      .deviation {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #f4dfb4;
+        background: rgba(255, 255, 255, 0.8);
+      }
+      .goal-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--surface-soft);
+        padding: 16px;
+        display: grid;
+        gap: 10px;
+      }
+      .goal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .goal-field {
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+      .goal-field span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .metric-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        background: #fff;
+        display: grid;
+        gap: 8px;
+      }
+      .metric-card .meta {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .metric-card strong { font-size: 28px; }
+      .metric-card.primary { background: linear-gradient(180deg, #ffffff, #f8fbff); }
+      .metric-card.risk { background: linear-gradient(180deg, #fff7f7, #fffefe); }
+      .update-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .update-item {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: #fff;
+        padding: 16px;
+        display: grid;
+        gap: 10px;
+      }
+      .mini-tag {
+        display: inline-flex;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-size: 12px;
+        width: fit-content;
+      }
+      .trend-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 16px;
+      }
+      .trend-box {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: #fff;
+        padding: 16px;
+      }
+      .chart {
+        margin-top: 16px;
+        height: 230px;
+        position: relative;
+        border-radius: 16px;
+        background:
+          linear-gradient(180deg, rgba(31, 111, 235, 0.04), rgba(31, 111, 235, 0)),
+          repeating-linear-gradient(to top, #eef3f9 0, #eef3f9 1px, transparent 1px, transparent 46px);
+        overflow: hidden;
+      }
+      .chart svg { width: 100%; height: 100%; }
+      .legend {
+        display: flex;
+        gap: 14px;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .legend b {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 99px;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+      .trend-note {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--surface-soft);
+        padding: 16px;
+        display: grid;
+        gap: 10px;
+      }
+      .trend-note ul { margin: 0; padding-left: 18px; color: var(--muted); }
+      .risk-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .risk-table {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: #fff;
+        overflow: hidden;
+      }
+      .risk-head {
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th, td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid #eef3f8;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        background: #fbfcfe;
+      }
+      tr:last-child td { border-bottom: none; }
+      .priority, .status {
+        display: inline-flex;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .priority.p0 {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--red);
+      }
+      .priority.p1 {
+        background: rgba(217, 119, 6, 0.12);
+        color: var(--amber);
+      }
+      .status.fail {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--red);
+      }
+      .status.wait {
+        background: rgba(217, 119, 6, 0.12);
+        color: var(--amber);
+      }
+      @media (max-width: 1440px) {
+        .metrics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .update-list, .risk-grid, .hero-grid, .trend-layout, .context-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 1100px) {
+        .layout { grid-template-columns: 1fr; }
+        .sidebar { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 状态说明：本文件保留为历史高保真稿参考。正式静态HTML确认稿已迁移至 AI埋点平台-概览页-静态HTML确认稿-v1.html，本文件不再作为当前有效确认稿引用。 -->
+    <header class="topbar">
+      <div class="logo">埋</div>
+      <div class="brand">AI埋点平台</div>
+      <div class="search">搜索项目 / 版本 / 事件 / 规则 / 报告</div>
+      <div class="badge">当前角色：项目经理 / 运营</div>
+      <div class="badge">密度：标准</div>
+    </header>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="nav">
+          <button class="nav-item active">概览</button>
+          <button class="nav-item">埋点需求</button>
+          <button class="nav-item">数据字典</button>
+          <button class="nav-item">校验规则</button>
+          <button class="nav-item">日志查询</button>
+          <button class="nav-item">验收报告</button>
+          <button class="nav-item">AI助手</button>
+        </div>
+      </aside>
+      <main class="main">
+        <section class="page-head">
+          <div>
+            <h1>概览</h1>
+            <p>当前页面正式定位为版本验收态势页，先判断局势，再看偏差和风险，不在本页承载 AI 建议和复杂执行动作。</p>
+          </div>
+          <div class="head-actions">
+            <button class="ghost-btn">查看全部变更</button>
+            <button class="ghost-btn">导出概览摘要</button>
+            <button class="primary-btn">进入验收报告</button>
+          </div>
+        </section>
+        <section class="panel context-panel">
+          <div class="section-head">
+            <h2>全局上下文</h2>
+            <span>项目边界 -> 验收版本边界 -> 责任边界</span>
+          </div>
+          <div class="context-grid">
+            <article class="selector">
+              <label>项目切换</label>
+              <strong>花花世界</strong>
+              <small>游戏买量核心项目 · 进行中</small>
+            </article>
+            <article class="selector">
+              <label>验收版本切换</label>
+              <strong>v2.4.0 春季活动版</strong>
+              <small>2026-04-28 至 2026-05-12</small>
+            </article>
+            <article class="selector">
+              <label>视角切换</label>
+              <div class="switch-row">
+                <span class="chip active">全部</span>
+                <span class="chip">游戏客户端</span>
+                <span class="chip">游戏服务端</span>
+              </div>
+              <small>切换后指标、趋势、TOP5 全部按同一责任口径重算</small>
+            </article>
+          </div>
+        </section>
+        <section class="hero-grid">
+          <section class="panel hero-panel">
+            <div class="section-head">
+              <h2>版本验收态势</h2>
+              <span>首屏第一结论</span>
+            </div>
+            <div class="hero-banner">
+              <div class="state-row">
+                <div class="state-tag">存在延期风险</div>
+                <div class="badge">当前偏离目标推进线 12%</div>
+              </div>
+              <h3>当前通过率提升中，但 P0 风险尚未收敛，若维持现有节奏将晚于版本结束时间 2 天。</h3>
+              <p>当前结论受 3 个未收敛 P0 事件和 1 条规则口径变更影响，版本结论暂不能直接放行。</p>
+              <div class="deviation-list">
+                <div class="deviation"><strong>目标偏差</strong><span>实际通过率 68%，目标线 80%</span></div>
+                <div class="deviation"><strong>时间偏差</strong><span>按当前节奏预计延后 2 天</span></div>
+                <div class="deviation"><strong>风险偏差</strong><span>P0 待收敛 3 个，其中服务端 2 个</span></div>
+              </div>
+            </div>
+          </section>
+          <section class="panel goal-panel">
+            <div class="section-head">
+              <h2>版本目标与门槛</h2>
+              <span>目标对齐</span>
+            </div>
+            <div class="goal-card">
+              <h3>v2.4.0 春季活动版</h3>
+              <p>保证春季主活动链路埋点稳定可验，覆盖首登、活动主流程、充值、奖励发放与关键回传链路。</p>
+              <div class="goal-grid">
+                <div class="goal-field"><span>开始时间</span><strong>2026-04-28</strong></div>
+                <div class="goal-field"><span>结束时间</span><strong>2026-05-12</strong></div>
+                <div class="goal-field"><span>当前状态</span><strong>进行中</strong></div>
+                <div class="goal-field"><span>验收范围</span><strong>活动链路 / 充值链路 / 主线关键事件</strong></div>
+              </div>
+              <div class="goal-field">
+                <span>验收通过门槛</span>
+                <strong>P0 埋点全部通过，核心链路通过率不低于 95%，当前范围内无阻塞级问题。</strong>
+              </div>
+            </div>
+          </section>
+        </section>
+        <section class="panel summary-panel">
+          <div class="section-head">
+            <h2>当前进度摘要</h2>
+            <span>进度对齐</span>
+          </div>
+          <div class="metrics-grid">
+            <article class="metric-card primary"><div class="meta">埋点数量</div><strong>328</strong><p>当前验收版本范围内总埋点</p></article>
+            <article class="metric-card primary"><div class="meta">已验收</div><strong style="color: var(--green)">223</strong><p>较昨日新增通过 14 个</p></article>
+            <article class="metric-card primary"><div class="meta">待验收</div><strong style="color: var(--amber)">105</strong><p>仍有 32 个高优先级项未完成</p></article>
+            <article class="metric-card primary"><div class="meta">通过率</div><strong style="color: var(--brand)">68%</strong><p>按当前版本总埋点口径计算</p></article>
+            <article class="metric-card risk"><div class="meta">P0 埋点数量</div><strong style="color: var(--red)">18</strong><p>核心放行风险项</p></article>
+            <article class="metric-card risk"><div class="meta">P0 待验收</div><strong style="color: var(--red)">3</strong><p>当前仍影响版本放行结论</p></article>
+          </div>
+        </section>
+        <section class="panel update-panel">
+          <div class="section-head">
+            <h2>更新影响摘要</h2>
+            <span>只显示影响当前版本判断的变更</span>
+          </div>
+          <div class="update-list">
+            <article class="update-item"><span class="mini-tag">校验规则变更</span><h3>充值回调规则补充金额精度校验</h3><p>更新时间：今天 09:40 · 影响标签：影响结论</p></article>
+            <article class="update-item"><span class="mini-tag">埋点需求变更</span><h3>新增活动奖励弹窗关闭事件</h3><p>更新时间：今天 08:15 · 影响标签：影响范围</p></article>
+            <article class="update-item"><span class="mini-tag">验收批次报告更新</span><h3>客户端批次 #A12 新增 2 个不通过项</h3><p>更新时间：昨天 20:30 · 影响标签：影响结论</p></article>
+          </div>
+        </section>
+        <section class="panel trend-panel">
+          <div class="section-head">
+            <h2>进度趋势</h2>
+            <span>版本开始至结束时间范围内的每日通过率</span>
+          </div>
+          <div class="trend-layout">
+            <div class="trend-box">
+              <h3>实际通过率 vs 目标推进线</h3>
+              <p>当前实际线低于目标线，差距主要来自服务端回传链路和 3 个 P0 事件。</p>
+              <div class="chart">
+                <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg">
+                  <polyline fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="8 6" points="40,188 130,176 220,160 310,144 400,126 490,110 580,98 670,84" />
+                  <polyline fill="none" stroke="#1f6feb" stroke-width="4" points="40,196 130,190 220,179 310,170 400,159 490,144 580,132 670,118" />
+                  <circle cx="670" cy="118" r="5" fill="#1f6feb" />
+                </svg>
+              </div>
+              <div class="legend">
+                <span><b style="background:#1f6feb"></b>实际通过率</span>
+                <span><b style="background:#94a3b8"></b>目标推进线</span>
+              </div>
+            </div>
+            <aside class="trend-note">
+              <h3>统计口径</h3>
+              <ul>
+                <li>分子：当日已验收埋点数量</li>
+                <li>分母：当前验收版本范围内埋点总数</li>
+                <li>版本中途新增埋点时，历史曲线按当日口径展示</li>
+              </ul>
+              <div class="goal-field">
+                <span>今日结论</span>
+                <strong>若明后两天未消化 P0，趋势线将继续落后目标线。</strong>
+              </div>
+            </aside>
+          </div>
+        </section>
+        <section class="panel risk-panel">
+          <div class="section-head">
+            <h2>当前主要风险</h2>
+            <span>问题对齐</span>
+          </div>
+          <div class="risk-grid">
+            <section class="risk-table">
+              <div class="risk-head">
+                <h3>不通过事件 TOP5</h3>
+                <span class="badge">排序：优先级 > 失败次数 > 最近更新</span>
+              </div>
+              <table>
+                <thead>
+                  <tr><th>事件ID</th><th>事件名</th><th>优先级</th><th>数据来源</th><th>问题参数</th><th>触发规则</th><th>状态</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>EVT_20031</td><td>充值回调</td><td><span class="priority p0">P0</span></td><td>游戏服务端</td><td>amount / currency</td><td>金额精度校验</td><td><span class="status fail">不通过</span></td></tr>
+                  <tr><td>EVT_10018</td><td>活动领奖</td><td><span class="priority p0">P0</span></td><td>游戏客户端</td><td>reward_id 等 2 项</td><td>必填参数缺失</td><td><span class="status fail">不通过</span></td></tr>
+                  <tr><td>EVT_30007</td><td>首登奖励发放</td><td><span class="priority p1">P1</span></td><td>游戏服务端</td><td>link_id</td><td>链路关联规则</td><td><span class="status fail">不通过</span></td></tr>
+                  <tr><td>EVT_10042</td><td>春季活动弹窗关闭</td><td><span class="priority p1">P1</span></td><td>游戏客户端</td><td>popup_type</td><td>枚举映射规则</td><td><span class="status fail">不通过</span></td></tr>
+                  <tr><td>EVT_20011</td><td>订单创建</td><td><span class="priority p1">P1</span></td><td>游戏服务端</td><td>order_id</td><td>唯一性规则</td><td><span class="status fail">不通过</span></td></tr>
+                </tbody>
+              </table>
+            </section>
+            <section class="risk-table">
+              <div class="risk-head">
+                <h3>待验收埋点 TOP5</h3>
+                <span class="badge">排序：优先级 > 影响范围 > 挂起时长</span>
+              </div>
+              <table>
+                <thead>
+                  <tr><th>事件ID</th><th>事件名</th><th>优先级</th><th>数据来源</th><th>状态</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>EVT_10077</td><td>活动结算确认</td><td><span class="priority p0">P0</span></td><td>游戏客户端</td><td><span class="status wait">待验收</span></td></tr>
+                  <tr><td>EVT_20076</td><td>结算回传</td><td><span class="priority p0">P0</span></td><td>游戏服务端</td><td><span class="status wait">待验收</span></td></tr>
+                  <tr><td>EVT_10063</td><td>活动任务领取</td><td><span class="priority p1">P1</span></td><td>游戏客户端</td><td><span class="status wait">待验收</span></td></tr>
+                  <tr><td>EVT_20065</td><td>奖励入账</td><td><span class="priority p1">P1</span></td><td>游戏服务端</td><td><span class="status wait">待验收</span></td></tr>
+                  <tr><td>EVT_10088</td><td>付费二次确认</td><td><span class="priority p1">P1</span></td><td>游戏客户端</td><td><span class="status wait">待验收</span></td></tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

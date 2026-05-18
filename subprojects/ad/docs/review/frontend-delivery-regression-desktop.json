@@ -1,0 +1,85 @@
+{
+  "kind": "frontend-delivery-regression",
+  "target": "subprojects/ad/frontend/index.html",
+  "iterations": 4,
+  "generatedAt": "2026-05-11T12:08:21.633Z",
+  "verdict": "pass",
+  "summary": {
+    "total": 4,
+    "passCount": 4,
+    "failCount": 0,
+    "averageTextLength": 2020,
+    "minimumSections": 16
+  },
+  "iterationReports": [
+    {
+      "iteration": 1,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-desktop/playwright-browser-verification-iter-1.png",
+      "metrics": {
+        "headings": 20,
+        "buttons": 6,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 16,
+        "links": 0,
+        "textLength": 2020
+      },
+      "navigationError": null
+    },
+    {
+      "iteration": 2,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-desktop/playwright-browser-verification-iter-2.png",
+      "metrics": {
+        "headings": 20,
+        "buttons": 6,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 16,
+        "links": 0,
+        "textLength": 2020
+      },
+      "navigationError": null
+    },
+    {
+      "iteration": 3,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-desktop/playwright-browser-verification-iter-3.png",
+      "metrics": {
+        "headings": 20,
+        "buttons": 6,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 16,
+        "links": 0,
+        "textLength": 2020
+      },
+      "navigationError": null
+    },
+    {
+      "iteration": 4,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-desktop/playwright-browser-verification-iter-4.png",
+      "metrics": {
+        "headings": 20,
+        "buttons": 6,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 16,
+        "links": 0,
+        "textLength": 2020
+      },
+      "navigationError": null
+    }
+  ],
+  "rules": [
+    "All browser iterations must navigate successfully.",
+    "The page must expose enough visible text to qualify as a real business page.",
+    "The page must expose multiple structural sections instead of a blank shell."
+  ]
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>附录：内容 ID 字典说明</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Appendix</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">内容 ID 字典说明</h1>
+        <p>说明内容 ID 字典在接入文档中的作用、边界和源数据访问方式。</p>
+        <nav class="nav">
+          <a href="./index.html">返回入口</a>
+          <a href="./huahua-human-integration-manual.html">人读总册</a>
+          <a href="./huahua-ai-structured-spec.html">AI 规格总册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="section">
+          <h2>为什么不把 4396 行 ID 全塞进正文</h2>
+          <p>
+            `内容ID字典0.8.4` 是项目级对象字典，不是接入主册的正文部分。它的作用是：
+          </p>
+          <ul>
+            <li>给 `tutorial_id`、`grow_target`、`unlock_target`、`currency_id`、`plant_id`、`goods_id` 等字段提供对象 ID 真相源。</li>
+            <li>为玩法对象、商店对象、植物对象、配方对象、活动对象、扭蛋对象等提供统一编号。</li>
+            <li>作为后续规则生成和验收解释时的补充字典。</li>
+          </ul>
+          <div class="callout assumption">
+            <p><strong>文档策略：</strong>主文档只说明“哪些字段依赖内容 ID 字典”，不在主册正文中内嵌 4396 行字典明细，以免破坏主文档可读性。</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>哪些字段依赖内容 ID 字典</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>字段</th>
+                  <th>来源事件</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>tutorial_id</td><td>20001</td><td>= Tutorial.id</td></tr>
+                <tr><td>grow_target</td><td>20002</td><td>= Store.id / Plant.id</td></tr>
+                <tr><td>unlock_target</td><td>20003</td><td>= GameFunc.id / Plant.id / Formula.id / SocialRes.id</td></tr>
+                <tr><td>currency_id</td><td>20004</td><td>= Item.id</td></tr>
+                <tr><td>item_id</td><td>20005 / 20006 / 20009 / 20018 / 20025 / 20027</td><td>广义物品 ID</td></tr>
+                <tr><td>plant_id</td><td>20006</td><td>= Plant.id</td></tr>
+                <tr><td>formula_id</td><td>20007</td><td>= Formula.id</td></tr>
+                <tr><td>goods_id</td><td>20024</td><td>= Goods.id</td></tr>
+                <tr><td>gacha_id</td><td>20025</td><td>= Gacha.id</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>源文件入口</h2>
+          <div class="callout fact">
+            <p>完整内容 ID 源数据保留在以下本地文件中：</p>
+            <ul>
+              <li><a href="../../sources/converted/RM_______V251222/06_ID__0_8_4.csv">RM 内容 ID 字典 CSV</a></li>
+              <li><a href="../../sources/converted/RM_______V251222/06_ID__0_8_4.md">RM 内容 ID 字典 Markdown 导出</a></li>
+              <li><a href="../../sources/converted/huahua_rm_tracking_v251222/ID__0_8_4.csv">huahua_rm_tracking_v251222 内容 ID 字典 CSV</a></li>
+              <li><a href="../../sources/converted/huahua_rm_tracking_v251222/ID__0_8_4.md">huahua_rm_tracking_v251222 内容 ID 字典 Markdown 导出</a></li>
+            </ul>
+          </div>
+          <div class="callout risk">
+            <p><strong>注意：</strong>本附录不是在回退到 Markdown 成品，而是在说明“完整字典的真相源目前仍来自导出文件”。正式主文档仍然全部以 HTML 交付。</p>
+          </div>
+        </section>
+        <div class="footer">文档地址：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\appendix-content-ids.html</div>
+      </main>
+    </div>
+  </body>
+</html>

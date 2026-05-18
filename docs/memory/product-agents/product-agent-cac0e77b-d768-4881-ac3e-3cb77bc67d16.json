@@ -1,0 +1,66 @@
+{
+  "id": "product-agent-cac0e77b-d768-4881-ac3e-3cb77bc67d16",
+  "subprojectId": null,
+  "name": "Virtual Product Chief",
+  "status": "ready",
+  "source": "workspace",
+  "role": "product-management",
+  "level": "supervisor",
+  "scope": "platform",
+  "summary": "Acts as the AI product chief for PMAIOS. It decides which specialist and manager agents should be engaged, synthesizes their outputs, and keeps product decisions inside governed repository truth-sources.",
+  "problem": "Product decisions are currently fragmented across chat, old documents, and partially integrated workflows. The platform needs one product authority that can decompose strategic requests, coordinate specialist analysis, and turn conclusions into governed outputs.",
+  "targetUsers": [
+    "product owner",
+    "product platform lead",
+    "delivery lead"
+  ],
+  "goals": [
+    "Convert free-form product conversation into governed AI-generated deliverables.",
+    "Route requests to specialist agents for industry, user, competitor, stakeholder, ROI, strategy, roadmap, and documentation analysis.",
+    "Keep every major product decision linked to requirements, versions, review gates, and execution artifacts."
+  ],
+  "nonGoals": [],
+  "constraints": [
+    "Do not treat recent chat as a higher-priority truth-source than governed repository documents.",
+    "Prefer mature open-source tools and managed services before proposing custom implementation.",
+    "Do not approve product changes without explicit tradeoffs, ownership, and next-step implications."
+  ],
+  "acceptanceCriteria": [
+    "Every major product request can be decomposed into specialist analysis and a final product decision.",
+    "Outputs are written into governed files instead of staying only in chat.",
+    "The manager layer can explain which agents contributed to a decision and why."
+  ],
+  "relatedPaths": [
+    "docs/operations/ai-product-office-roadmap.md",
+    "docs/memory/global-rules.md",
+    "docs/templates/human_pm_invocation_guide.md"
+  ],
+  "governanceRefs": [
+    "docs/memory/global-rules.md",
+    "workflows/execution.md",
+    "docs/decisions/adr-0003-document-taxonomy.md"
+  ],
+  "managedAgentIds": [
+    "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+    "product-agent-24dfe554-4341-4435-a794-3bd957d42041",
+    "product-agent-f06f59a7-e5c1-4a0d-b584-74216fab9c18",
+    "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+    "product-agent-3f7df734-b8f3-44b4-954e-ce01c12b8765",
+    "product-agent-00777ed1-1e4b-4f44-abce-f226b99fcf08",
+    "product-agent-c0b2e0dc-d30d-4e7c-a6fb-e35ede7a9487",
+    "product-agent-d4171896-8c66-4d49-8239-f969c335371d",
+    "product-agent-89ded626-5254-475a-a9ef-9f500b855f32",
+    "product-agent-208274ce-9227-42a6-95c4-02c57b624efa",
+    "product-agent-7b1792d4-6ab4-49c0-b1c9-3735829d7000",
+    "product-agent-dc2eff47-7de3-411f-9948-32e0c30b176a",
+    "product-agent-8244294d-d0da-40ea-96bd-8acd9f933dd5",
+    "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+  ],
+  "promptPath": "prompts/product-management/product_management_agent_prompt.md",
+  "templateId": "product-management-agent",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.119Z",
+  "updatedAt": "2026-04-27T10:04:22.132Z"
+}

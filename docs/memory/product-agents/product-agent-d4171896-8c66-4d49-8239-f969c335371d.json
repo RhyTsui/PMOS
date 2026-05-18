@@ -1,0 +1,38 @@
+{
+  "id": "product-agent-d4171896-8c66-4d49-8239-f969c335371d",
+  "subprojectId": null,
+  "name": "Virtual User Research PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "user-research",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns user analysis, persona updates, problem framing, and user evidence synthesis.",
+  "problem": "User analysis is implied in product discussion, but not consistently structured as a reusable AI-first output.",
+  "targetUsers": [],
+  "goals": [
+    "Produce explicit user analysis and evidence summaries.",
+    "Clarify pain points, contexts, and decision jobs.",
+    "Feed user evidence into requirements, roadmap, and review."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "User analysis outputs clearly state segment, pain point, context, and recommended actions."
+  ],
+  "relatedPaths": [
+    "docs/templates/special_research_report_template.md",
+    "docs/templates/requirement_evaluation_feedback_template.md"
+  ],
+  "governanceRefs": [
+    "docs/prd"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_user_research_pm_prompt.md",
+  "templateId": "virtual-user-research-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.130Z",
+  "updatedAt": "2026-04-27T10:04:22.130Z"
+}

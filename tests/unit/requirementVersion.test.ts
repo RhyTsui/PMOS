@@ -102,6 +102,69 @@ describe('Requirement + Version system', () => {
     expect(requirement.category).toBe('feature');
     expect(requirement.priority).toBe('P0');
     expect(requirement.title).toContain('[feature]');
+    expect(requirement.metadata.poolScope).toBe('platform');
+    expect(requirement.metadata.lifecycle).toBe('normalized');
+  });
+
+  it('ingests acceptance review into a governed requirement record', async () => {
+    const { requirementService } = await createFixture();
+
+    const requirement = await requirementService.ingestFromAcceptanceReview({
+      title: 'Acceptance review: release gate still blocked',
+      content: 'P0 blocker: acceptance review found release gate evidence missing and owner confirmation absent.',
+      runId: 'run-acceptance-1',
+      artifactPath: 'docs/review/acceptance-review.md',
+    });
+
+    expect(requirement.source.kind).toBe('acceptance-review');
+    expect(requirement.source.runId).toBe('run-acceptance-1');
+    expect(requirement.source.sourceRef?.path).toBe('docs/review/acceptance-review.md');
+    expect(requirement.priority).toBe('P0');
+    expect(requirement.trace.linkedRunIds).toContain('run-acceptance-1');
+    expect(requirement.trace.artifactPaths).toContain('docs/review/acceptance-review.md');
+    expect(requirement.metadata.ingestedFrom).toBe('acceptance-review');
+    expect(requirement.metadata.poolScope).toBe('platform');
+  });
+
+  it('ingests runtime gate events into governed requirement records', async () => {
+    const { requirementService } = await createFixture();
+
+    const requirement = await requirementService.ingestFromRuntimeGateEvent({
+      title: 'Runtime gate: design-confirmed-gate blocked',
+      content: 'P0 blocker: runtime gate event shows design-confirmed-gate blocked because owner confirmation is still missing.',
+      runId: 'run-gate-1',
+      gateId: 'design-confirmed-gate',
+      artifactPath: 'docs/runtime/gate-events.md',
+    });
+
+    expect(requirement.source.kind).toBe('runtime-gate-event');
+    expect(requirement.source.runId).toBe('run-gate-1');
+    expect(requirement.source.sourceRef?.entityId).toBe('design-confirmed-gate');
+    expect(requirement.priority).toBe('P0');
+    expect(requirement.trace.linkedRunIds).toContain('run-gate-1');
+    expect(requirement.trace.artifactPaths).toContain('docs/runtime/gate-events.md');
+    expect(requirement.metadata.ingestedFrom).toBe('runtime-gate-event');
+    expect(requirement.metadata.linkedGateIds).toEqual(['design-confirmed-gate']);
+  });
+
+  it('ingests auto-captured signals into governed requirement records', async () => {
+    const { requirementService } = await createFixture();
+
+    const requirement = await requirementService.ingestFromAutoCapture({
+      title: 'Auto capture: provider failure requires follow-up',
+      content: 'P1 warning: auto-captured provider_failed event indicates fallback happened repeatedly and needs operator follow-up.',
+      runId: 'run-auto-1',
+      artifactPath: 'docs/runtime/auto-capture.md',
+      eventKind: 'provider_failed',
+    });
+
+    expect(requirement.source.kind).toBe('auto-capture');
+    expect(requirement.source.runId).toBe('run-auto-1');
+    expect(requirement.source.sourceRef?.label).toBe('provider_failed');
+    expect(requirement.trace.linkedRunIds).toContain('run-auto-1');
+    expect(requirement.trace.artifactPaths).toContain('docs/runtime/auto-capture.md');
+    expect(requirement.metadata.ingestedFrom).toBe('auto-capture');
+    expect(requirement.metadata.autoCaptureEventKind).toBe('provider_failed');
   });
 
   it('creates version entries for capability register and publish changes', async () => {
@@ -178,6 +241,8 @@ describe('Requirement + Version system', () => {
     expect(updated.status).toBe('active');
     expect(updated.priority).toBe('P0');
     expect(updated.metadata.owner).toBe('platform');
+    expect(updated.metadata.poolScope).toBe('platform');
+    expect(updated.metadata.lifecycle).toBe('normalized');
     expect(batch).toHaveLength(2);
     expect(batch.every((item) => item.status === 'done')).toBe(true);
     expect(batch.every((item) => item.metadata.syncedBy === 'unit-test')).toBe(true);

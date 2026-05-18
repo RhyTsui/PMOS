@@ -16,7 +16,7 @@ Secrets are stored only in local `.env`. Do not write raw tokens into tracked do
 
 | Connector | Status | Current Capability | Blocker / Note |
 | --- | --- | --- | --- |
-| Notion | token connected / database target missing | API token loaded from `.env`; provided Notion link is stored as `NOTION_PAGE_ID` | The provided Notion URL resolves to a page, not a database; database sync still needs a real Notion database id |
+| Notion | page-mode connected / inbox digest sync verified | API token loaded from local `.env`; connector now supports `NOTION_DATABASE_ID` or `NOTION_PAGE_ID`; inbox knowledge digests have been written into the configured Notion page target | PRD / meeting-note history queries still benefit from real database targets; a live check against Dataki `版本库` still showed `0` retrieval hits for the fresh inbox digest pages, so downstream `Notion -> Dataki` auto-refresh is not yet proven |
 | Figma | team id configured / token remote check failing | `FIGMA_TEAM_ID` is configured from the provided team URL; team-project listing endpoint is implemented | Current local Figma token returns `403 Invalid token`; needs a fresh Figma API token or token with access to the team |
 | Web page fetch | implemented | Fetches a URL and writes source markdown into `docs/sources/inbox/` | Network access depends on local runtime permissions |
 | DingTalk AI meeting notes | implemented as manual import | Paste/export transcript into console; system writes inbox source and runs documentation normalization | Automatic extraction from logged-in DingTalk desktop is not reliable without an official export/API/source path |
@@ -66,7 +66,7 @@ Current limitation:
 
 ## Next Required Inputs
 
-- Notion database IDs for PRD / meeting notes / general product decisions.
+- Optional: dedicated Notion database IDs for PRD / meeting notes / general product decisions if you want queryable structured records instead of page-mode digest pages only.
 - Fresh Figma API token or access fix for team `1627565597168043008`; then use team projects to select an active file key.
 - DingTalk meeting transcript export or copied AI meeting note content.
 - Internal system connectors are intentionally skipped for current v0.4 scope until concrete systems are provided.

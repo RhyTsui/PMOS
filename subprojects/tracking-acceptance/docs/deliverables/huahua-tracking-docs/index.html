@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>花花世界埋点接入文档包</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Tracking Docs</span>
+        <h1 style="margin-top: 12px; font-size: 30px;">花花世界</h1>
+        <p>正式 HTML 文档包入口。用于产品、研发、SDK、服务端、数据 BP 和 AI 后续消费。</p>
+        <nav class="nav">
+          <a href="./huahua-version-comparison.html">多版本对比页</a>
+          <a href="./huahua-human-requirements-spec.html">人读需求总册（按业务清单）</a>
+          <a href="./huahua-human-integration-manual.html">人读完整版接入总册</a>
+          <a href="./huahua-ai-structured-spec.html">AI 结构化规格总册</a>
+          <a href="./appendix-events-fields.html">附录：事件与字段索引</a>
+          <a href="./appendix-steps-enums.html">附录：步骤与枚举映射</a>
+          <a href="./appendix-content-ids.html">附录：内容 ID 字典说明</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Delivery</span>
+          <h1>花花世界完整埋点接入文档包</h1>
+          <p>
+            这套文档不是 demo，也不是 Markdown 草稿，而是把现有 `RM V251222`、`SDK 行为日志埋点表`、
+            `数据埋点梳理-20241223` 重编为正式 HTML 富文本接入文档。
+          </p>
+          <div class="metric-grid">
+            <article class="metric">
+              <span>主文档</span>
+              <strong>2</strong>
+            </article>
+            <article class="metric">
+              <span>附录页</span>
+              <strong>3</strong>
+            </article>
+            <article class="metric">
+              <span>核心事件</span>
+              <strong>12+</strong>
+            </article>
+            <article class="metric">
+              <span>自定义事件</span>
+              <strong>27</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>阅读顺序</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>0. 多版本对比页</h3>
+              <p class="muted">把当前几份文档当作不同版本/不同定位来横向比较，并附 Excel 工作簿。</p>
+              <ul>
+                <li><a href="./huahua-version-comparison.html">打开对比页</a></li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>1. 人读需求总册</h3>
+              <p class="muted">按《代号Q》这类业务需求清单写法重组，更接近业务完整需求与研发交接单。</p>
+              <ul>
+                <li><a href="./huahua-human-requirements-spec.html">打开人读需求总册</a></li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>1. 人读完整版接入总册</h3>
+              <p class="muted">先看整体体系、接入链路、业务影响、必传/不发送冲突和联调建议。</p>
+              <ul>
+                <li><a href="./huahua-human-integration-manual.html">打开人读总册</a></li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>2. AI 结构化规格总册</h3>
+              <p class="muted">再看对象化规格、规则、冲突、默认判断和后续自动化消费视图。</p>
+              <ul>
+                <li><a href="./huahua-ai-structured-spec.html">打开 AI 规格总册</a></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>本轮文档边界</h2>
+          <div class="callout fact">
+            <p><strong>已覆盖：</strong>核心事件、自定义事件、前置步骤、支付链、激励视频链、公共字段、透传字段、关键枚举引用、迁移关系、主要灰区和默认判断。</p>
+          </div>
+          <div class="callout assumption">
+            <p><strong>超长字典处理：</strong>内容 ID 字典共 4396 行，不直接塞入主文档正文，而是单独放在附录说明页，并保留源文件访问入口。</p>
+          </div>
+          <div class="callout risk">
+            <p><strong>必须注意：</strong>文档中凡是本地资料无法完全证实的地方，都被标为“冲突”或“默认判断”，没有被伪装成已验证事实。</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>源材料入口</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>来源</th>
+                  <th>说明</th>
+                  <th>本地地址</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>版本对比</td>
+                  <td>把概览、接入总册、需求总册、AI 规格做成版本矩阵，并提供 Excel</td>
+                  <td><a href="./huahua-version-comparison.html">打开</a></td>
+                </tr>
+                <tr>
+                  <td>人读需求总册</td>
+                  <td>按业务埋点清单、客户端/服务端自定义事件、前置流程、新手引导来组织</td>
+                  <td><a href="./huahua-human-requirements-spec.html">打开</a></td>
+                </tr>
+                <tr>
+                  <td>RM 主文档</td>
+                  <td>事件列表、字段说明、核心事件、自定义事件、字段与枚举字典、内容 ID、安卓接入</td>
+                  <td><a href="../../sources/converted/RM_______V251222/README.md">RM 导出说明</a></td>
+                </tr>
+                <tr>
+                  <td>SDK 行为日志表</td>
+                  <td>SDK 上报结构、登录/支付链路、服务端事件</td>
+                  <td><a href="../../sources/converted/SDK/README.md">SDK 导出说明</a></td>
+                </tr>
+                <tr>
+                  <td>历史梳理表</td>
+                  <td>客户端/服务端事件整理、字段映射、前置 sdk 步骤梳理</td>
+                  <td><a href="../../sources/converted/20241223/README.md">20241223 导出说明</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <div class="footer">路径：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\</div>
+      </main>
+    </div>
+  </body>
+</html>

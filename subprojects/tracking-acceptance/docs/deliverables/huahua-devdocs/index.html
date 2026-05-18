@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>花花世界开发者文档</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Dev Docs</span>
+        <h1 style="margin-top: 12px; font-size: 30px;">花花世界开发者文档</h1>
+        <p>按开发者文档站范式重构：先给快速开始，再给 SDK / 服务端 / 参考文档 / 验收与排障。</p>
+        <nav class="nav">
+          <a href="./getting-started.html">快速开始</a>
+          <a href="./client-sdk-integration.html">客户端 SDK 接入</a>
+          <a href="./server-event-integration.html">服务端事件接入</a>
+          <a href="./event-reference.html">事件参考</a>
+          <a href="./field-reference.html">字段参考</a>
+          <a href="./flows-and-acceptance.html">流程、验收与排障</a>
+          <a href="./changelog-and-compatibility.html">变更与兼容</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Developer Portal</span>
+          <h1>花花世界埋点开发者文档</h1>
+          <p>
+            这套文档不再按“项目概览”写，而是按开发者文档站写。核心目标是让研发能够按页找到自己需要的内容：
+            怎么接入、怎么上报、有哪些事件、字段从哪里来、如何联调、有哪些兼容问题。
+          </p>
+          <div class="metric-grid">
+            <article class="metric"><span>客户端接入</span><strong>SDK 调用</strong></article>
+            <article class="metric"><span>服务端接入</span><strong>事件契约</strong></article>
+            <article class="metric"><span>业务对象</span><strong>20001-20027</strong></article>
+            <article class="metric"><span>版本风险</span><strong>step_version</strong></article>
+          </div>
+          <div class="tag-list">
+            <span class="tag">不伪造不存在的 REST API</span>
+            <span class="tag">只写资料可证明的事实</span>
+            <span class="tag">灰区显式标注</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>阅读路径</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>第一次接入</h3>
+              <ul>
+                <li><a href="./getting-started.html">快速开始</a></li>
+                <li><a href="./client-sdk-integration.html">客户端 SDK 接入</a></li>
+                <li><a href="./server-event-integration.html">服务端事件接入</a></li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>查定义</h3>
+              <ul>
+                <li><a href="./event-reference.html">事件参考</a></li>
+                <li><a href="./field-reference.html">字段参考</a></li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>联调与验收</h3>
+              <ul>
+                <li><a href="./flows-and-acceptance.html">流程、验收与排障</a></li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>版本与变更</h3>
+              <ul>
+                <li><a href="./changelog-and-compatibility.html">变更与兼容</a></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>文档边界</h2>
+          <div class="callout fact">
+            <p><strong>已明确：</strong>客户端接入依赖 <code>GSSDK.getInstance().call("analytics", "track", info)</code> 和 <code>getTrackingInfo</code>；服务端接入依赖后端事件契约。</p>
+          </div>
+          <div class="callout risk">
+            <p><strong>未伪造：</strong>当前资料没有项目组直连 HTTP 网关、鉴权、POST 路径，因此文档不虚构这些内容。</p>
+          </div>
+          <div class="callout assumption">
+            <p><strong>Demo 属性：</strong>这是按开发者文档范式组织的 demo，不是生产环境最终开放平台文档，但结构按最佳实践搭建。</p>
+          </div>
+        </section>
+        <div class="footer">路径：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-devdocs\</div>
+      </main>
+    </div>
+  </body>
+</html>

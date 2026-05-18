@@ -10,7 +10,11 @@ This directory contains the governed templates PMAIOS should use when AI generat
 - `version_planning_template.md`
 - `decision_change_record_template.md`
 - `workflow_handoff_template.md`
+- `subproject_secondary_development_prep_template.md`
 - `subproject_capability_adoption_checklist.md`
+- `architecture_decision_record_template.md`
+- `code_review_brief_template.md`
+- `historical_code_review_brief_template.md`
 - `subproject_readme_template.md`
 - `subproject_manifest_template.json`
 
@@ -29,6 +33,9 @@ This directory contains the governed templates PMAIOS should use when AI generat
 - `ecosystem_landscape_scan_template.md`
 - `ui_schema_spec_template.md`
 - `physical_world_profile_template.md`
+- `architecture_decision_record_template.md`
+- `code_review_brief_template.md`
+- `historical_code_review_brief_template.md`
 - `human_pm_invocation_guide.md`
 
 ## Usage Rules

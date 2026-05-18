@@ -1,0 +1,13 @@
+---
+description: 使用 @yoka-ui/ui 时的导入与文档约定
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# @yoka-ui/ui
+
+- **导入**：仅从 `@yoka-ui/ui` 做**具名** `import`，勿使用未在导出表中出现的符号。
+- **导出清单（权威）**：以安装包内 `node_modules/@yoka-ui/ui/@Docs-yoka/exports.generated.md` 为准，与发布产物类型一致；该文件由 yoka-ui 在导出变更后重新生成。
+- **LLM / 助手入口**：同目录 `node_modules/@yoka-ui/ui/@Docs-yoka/llms.txt`（索引、外链与使用规则摘要）。
+- **API**：不确定 props 时查组件库 Storybook / 源码示例或 README，勿臆造 API；原生 antd 行为对照 [Ant Design 文档](https://ant.design)。
+- **全局样式**：业务入口按需引入，常见为 `import '@yoka-ui/ui/dist/index.less'`（以 `@yoka-ui/ui` 的 README 与当前产物路径为准）。

@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI埋点平台设计图 v2</title>
+    <style>
+      :root {
+        --bg: #edf2f7;
+        --panel: rgba(255, 255, 255, 0.92);
+        --panel-soft: #f8fafc;
+        --line: #dbe4ef;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --brand: #1d4ed8;
+        --brand-soft: #dbeafe;
+        --good: #0f766e;
+        --warn: #b45309;
+        --bad: #b91c1c;
+        --nav: #0f172a;
+        --shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(29, 78, 216, 0.08), transparent 28%),
+          linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+        color: var(--ink);
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      .shell { min-height: 100vh; }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        height: 64px;
+        display: grid;
+        grid-template-columns: 220px 1fr 400px;
+        align-items: center;
+        gap: 20px;
+        padding: 0 20px;
+        background: rgba(15, 23, 42, 0.96);
+        color: #fff;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #38bdf8, #2563eb 64%, #facc15);
+      }
+      .topnav {
+        display: flex;
+        gap: 10px;
+        overflow: auto;
+        white-space: nowrap;
+      }
+      .topnav span {
+        padding: 10px 14px;
+        border-radius: 999px;
+        color: rgba(255,255,255,0.76);
+        font-size: 14px;
+      }
+      .topnav .active {
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+      }
+      .scope-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .scope-pill {
+        padding: 9px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.08);
+        font-size: 12px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 244px 1fr;
+        min-height: calc(100vh - 64px);
+      }
+      .sidebar {
+        padding: 16px 12px;
+        background: rgba(255,255,255,0.9);
+        border-right: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+      }
+      .project-card,
+      .panel,
+      .mini-panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+      .project-card {
+        padding: 14px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #eff6ff, #ffffff);
+      }
+      .menu {
+        margin-top: 16px;
+        display: grid;
+        gap: 8px;
+      }
+      .menu-item {
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid transparent;
+      }
+      .menu-item.active {
+        background: #e8f0ff;
+        border-color: #cfe0ff;
+      }
+      .menu-item small,
+      small,
+      .muted { color: var(--muted); }
+      .content { padding: 22px; }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.35fr 0.85fr;
+        gap: 18px;
+      }
+      .panel { border-radius: 22px; }
+      .hero-main {
+        padding: 22px;
+        background: linear-gradient(135deg, #0f172a, #1d4ed8 70%, #60a5fa);
+        color: #fff;
+      }
+      .hero-main h1 { margin: 0 0 8px; font-size: 28px; }
+      .hero-main p {
+        margin: 0 0 18px;
+        color: rgba(255,255,255,0.82);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .hero-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .hero-tags span,
+      .chip {
+        padding: 7px 10px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.14);
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .hero-side,
+      .section { padding: 18px; }
+      .hero-side h2,
+      .section h2 {
+        margin: 0 0 14px;
+        font-size: 14px;
+      }
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+      .issue-card {
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+      }
+      .issue-card strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+      .issue-card p {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .section-grid {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1.18fr 0.82fr;
+        gap: 18px;
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .metric {
+        min-height: 92px;
+        padding: 12px;
+        border-radius: 16px;
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+      }
+      .metric span {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .metric strong {
+        display: block;
+        margin-top: 10px;
+        font-size: 22px;
+      }
+      .table-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .table-toolbar .chip {
+        background: #eef2ff;
+        color: var(--brand);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+      th, td {
+        height: 30px;
+        padding: 0 10px;
+        text-align: left;
+        border-bottom: 1px solid #edf2f7;
+        white-space: nowrap;
+      }
+      th {
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 0.02em;
+      }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .good { background: #ccfbf1; color: var(--good); }
+      .warn { background: #fef3c7; color: var(--warn); }
+      .bad { background: #fee2e2; color: var(--bad); }
+      .footer-strip {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .mini-panel {
+        min-height: 126px;
+        padding: 14px;
+        border-radius: 18px;
+      }
+      .mini-panel strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 12px;
+      }
+      .mini-panel ul {
+        margin: 0;
+        padding-left: 16px;
+      }
+      .mini-panel li {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <span>AI埋点平台</span>
+        </div>
+        <div class="topnav">
+          <span class="active">数据上报</span>
+          <span>数据质量</span>
+          <span>分析协同</span>
+          <span>知识能力</span>
+        </div>
+        <div class="scope-bar">
+          <div class="scope-pill">当前角色：游戏客户端</div>
+          <div class="scope-pill">默认范围：客户端事件</div>
+          <div class="scope-pill">信息密度：紧凑</div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="project-card">
+            <small>当前版本</small>
+            <div><strong>V251222</strong></div>
+            <small>客户端事件 124 / 服务端事件 88 / 广告事件 26</small>
+          </div>
+          <div class="menu">
+            <div class="menu-item active"><strong>概览</strong><br /><small>角色化 Dashboard</small></div>
+            <div class="menu-item"><strong>埋点需求</strong><br /><small>事件 / 参数 / 差异</small></div>
+            <div class="menu-item"><strong>数据字典</strong><br /><small>中文映射 / 主数据</small></div>
+            <div class="menu-item"><strong>校验规则</strong><br /><small>AI 生成 / 人工修正</small></div>
+            <div class="menu-item"><strong>日志查询</strong><br /><small>中文搜索 / 我的设备</small></div>
+            <div class="menu-item"><strong>验收报告</strong><br /><small>批次 / 通过率 / 分享</small></div>
+            <div class="menu-item"><strong>AI助手</strong><br /><small>MCP / 知识库 / 快捷问答</small></div>
+          </div>
+        </aside>
+
+        <main class="content">
+          <section class="hero">
+            <div class="panel hero-main">
+              <h1>游戏客户端视角：本轮只看客户端相关埋点范围</h1>
+              <p>默认隐藏无关服务端内容。优先处理客户端事件、端上字段、端侧规则、我的设备日志和客户端验收批次。</p>
+              <div class="hero-tags">
+                <span>企业级数据平台风格</span>
+                <span>概览中密</span>
+                <span>列表中高密</span>
+                <span>规则 / 日志 / 报告表紧凑优先</span>
+              </div>
+            </div>
+            <div class="panel hero-side">
+              <h2>版本范围</h2>
+              <div class="stack">
+                <div class="issue-card">
+                  <strong>客户端验收范围</strong>
+                  <p>渠道包 12 个 / 端上核心事件 56 个 / 默认账号 QA-iPhone-17</p>
+                </div>
+                <div class="issue-card">
+                  <strong>时间窗口</strong>
+                  <p>开始：2026-05-01 10:00 / 结束：2026-05-07 20:00</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-grid">
+            <div class="panel section">
+              <h2>关键指标</h2>
+              <div class="metric-grid">
+                <div class="metric"><span>核心事件通过数 / 总数</span><strong>42 / 56</strong></div>
+                <div class="metric"><span>非核心事件通过数 / 总数</span><strong>31 / 48</strong></div>
+                <div class="metric"><span>广告事件通过数 / 总数</span><strong>18 / 26</strong></div>
+                <div class="metric"><span>游戏客户端通过数 / 总数</span><strong>73 / 104</strong></div>
+                <div class="metric"><span>游戏服务端通过数 / 总数</span><strong>--</strong></div>
+                <div class="metric"><span>当前客户端批次</span><strong>3</strong></div>
+              </div>
+            </div>
+
+            <div class="panel section">
+              <h2>当前关键问题</h2>
+              <div class="stack">
+                <div class="issue-card">
+                  <strong>newbie_finish 缺失 core_step_id</strong>
+                  <p>影响首日漏斗。责任人：客户端小李。错误样例与正确样例可下钻查看。</p>
+                  <span class="status bad">阻塞</span>
+                </div>
+                <div class="issue-card">
+                  <strong>iOS 缺少 idfv 规则命中</strong>
+                  <p>AI 规则已生成，待人工确认是否本版本强制执行。</p>
+                  <span class="status warn">待确认</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-grid">
+            <div class="panel section">
+              <h2>最近动态</h2>
+              <div class="stack">
+                <div class="issue-card">
+                  <strong>埋点需求版本更新</strong>
+                  <p>新增客户端事件 6 个，参数定义修改 4 处，移除字段 2 个。</p>
+                </div>
+                <div class="issue-card">
+                  <strong>数据字典更新</strong>
+                  <p>活动名映射新增 12 项；渠道包中文名摘要已同步。</p>
+                </div>
+                <div class="issue-card">
+                  <strong>规则变更</strong>
+                  <p>新增动态条件规则 8 条，人工暂停 2 条历史误报规则。</p>
+                </div>
+              </div>
+            </div>
+            <div class="panel section">
+              <h2>趋势与范围</h2>
+              <div class="stack">
+                <div class="issue-card">
+                  <strong>版本周期通过率趋势</strong>
+                  <p>按批次展开，不按周；支持核心事件 / 非核心事件 / 广告事件切换。</p>
+                </div>
+                <div class="issue-card">
+                  <strong>默认发起验收</strong>
+                  <p>当前角色为游戏客户端，发起验收时默认只选择客户端事件域。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel section" style="margin-top: 18px;">
+            <h2>紧凑表格示意</h2>
+            <div class="table-toolbar">
+              <span class="chip">我的设备：A17-DEV</span>
+              <span class="chip">我的账号：role_test_01</span>
+              <span class="chip">事件域：游戏客户端</span>
+              <span class="chip">模式：紧凑</span>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>事件ID</th>
+                  <th>事件名</th>
+                  <th>来源</th>
+                  <th>优先级</th>
+                  <th>核心参数</th>
+                  <th>规则结果</th>
+                  <th>日志状态</th>
+                  <th>报告归属</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>10012</td>
+                  <td>newbie_finish</td>
+                  <td>客户端</td>
+                  <td>P0</td>
+                  <td>core_step_id / role_id</td>
+                  <td><span class="status bad">失败</span></td>
+                  <td><span class="status warn">样本不足</span></td>
+                  <td>客户端批次 #03</td>
+                </tr>
+                <tr>
+                  <td>10018</td>
+                  <td>payment_click</td>
+                  <td>客户端</td>
+                  <td>P1</td>
+                  <td>pay_scene / goods_id</td>
+                  <td><span class="status good">通过</span></td>
+                  <td><span class="status good">已命中</span></td>
+                  <td>客户端批次 #03</td>
+                </tr>
+                <tr>
+                  <td>10027</td>
+                  <td>activity_jump</td>
+                  <td>客户端</td>
+                  <td>P1</td>
+                  <td>activity_id / source_page</td>
+                  <td><span class="status warn">待确认</span></td>
+                  <td><span class="status good">已命中</span></td>
+                  <td>客户端批次 #02</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section class="footer-strip">
+            <div class="mini-panel">
+              <strong>埋点需求</strong>
+              <ul>
+                <li>默认最新版本</li>
+                <li>按角色事件域过滤</li>
+                <li>参数详情抽屉展开</li>
+              </ul>
+            </div>
+            <div class="mini-panel">
+              <strong>数据字典</strong>
+              <ul>
+                <li>字典版本号</li>
+                <li>更新时间 / 摘要</li>
+                <li>中文映射联动</li>
+              </ul>
+            </div>
+            <div class="mini-panel">
+              <strong>验收报告</strong>
+              <ul>
+                <li>多批次发起</li>
+                <li>抽样 / 全扫说明</li>
+                <li>链接 / 小闪 / 图片分享</li>
+              </ul>
+            </div>
+            <div class="mini-panel">
+              <strong>AI助手</strong>
+              <ul>
+                <li>继承角色作用域</li>
+                <li>MCP + 知识库挂载</li>
+                <li>自然语言查日志 / 拿报告</li>
+              </ul>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

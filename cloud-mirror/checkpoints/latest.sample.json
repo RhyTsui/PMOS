@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "id": "ckpt-sample-001",
+      "time": "2026-05-09T09:28:24.814Z",
+      "taskId": "task-sample-platform-mainline",
+      "summary": "Product-repo inventory landed and next step is runtime-status/cloud-mirror samples."
+    },
+    {
+      "id": "ckpt-sample-002",
+      "time": "2026-05-09T09:23:11.225Z",
+      "taskId": "task-sample-platform-mainline",
+      "summary": "Planning truth was extended to product repo, cloud sync, and codex migration boundary."
+    }
+  ]
+}

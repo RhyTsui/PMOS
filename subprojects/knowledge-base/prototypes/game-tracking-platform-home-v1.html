@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>游戏数据埋点需求与验收平台 - 首页方案 v1</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --paper: rgba(255, 252, 246, 0.92);
+      --paper-strong: #fffdfa;
+      --ink: #1c2d2c;
+      --muted: #657875;
+      --deep: #183936;
+      --green: #2f695f;
+      --mint: #e4f0ea;
+      --sand: #f5e5c3;
+      --blue: #e2ebf7;
+      --rose: #f4ddda;
+      --line: rgba(28, 45, 44, 0.08);
+      --shadow: 0 18px 44px rgba(24, 57, 54, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Segoe UI", "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at right top, rgba(245, 229, 195, 0.7), transparent 24%),
+        radial-gradient(circle at left bottom, rgba(198, 223, 213, 0.65), transparent 22%),
+        linear-gradient(180deg, #faf7f1 0%, var(--bg) 100%);
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar,
+    .hero,
+    .panel,
+    .bottom-banner {
+      background: var(--paper);
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar {
+      border-radius: 28px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand small,
+    .eyebrow {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.08;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero {
+      border-radius: 34px;
+      background: linear-gradient(135deg, #183936 0%, #305f58 100%);
+      color: #fffaf1;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+
+    .hero h2 {
+      margin: 0 0 12px;
+      font-size: 44px;
+      line-height: 1.08;
+      font-family: Georgia, "Times New Roman", serif;
+      max-width: 820px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 840px;
+      line-height: 1.8;
+      color: rgba(255, 250, 241, 0.82);
+    }
+
+    .chips,
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip,
+    .pill {
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip { background: rgba(255,255,255,0.14); }
+    .pill.sand { background: var(--sand); }
+    .pill.mint { background: var(--mint); }
+    .pill.blue { background: var(--blue); }
+    .pill.rose { background: var(--rose); }
+
+    .hero-right {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric {
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .metric .k {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,250,241,0.72);
+    }
+
+    .metric .v {
+      margin: 6px 0;
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.06fr 1.12fr 0.9fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      border-radius: 28px;
+      padding: 18px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .panel-head h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .card {
+      border-radius: 22px;
+      background: var(--paper-strong);
+      border: 1px solid var(--line);
+      padding: 16px;
+    }
+
+    .card + .card { margin-top: 12px; }
+
+    .card h4 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+
+    .muted,
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .focus {
+      background: linear-gradient(180deg, #1d3c39 0%, #264e48 100%);
+      color: #fff8ef;
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .focus .meta,
+    .focus .muted {
+      color: rgba(255,248,239,0.78);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .mini {
+      border-radius: 20px;
+      padding: 14px;
+      min-height: 120px;
+    }
+
+    .mini h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .mini p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .sand { background: #faf4e7; }
+    .mint-bg { background: #edf5ef; }
+    .blue-bg { background: #edf3fb; }
+    .rose-bg { background: #faf0ee; }
+
+    .road {
+      display: grid;
+      gap: 10px;
+    }
+
+    .road-row {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .badge {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      padding: 6px 0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badge.sand { color: #875613; }
+    .badge.mint { color: #22574e; }
+    .badge.blue { color: #365a87; }
+    .badge.rose { color: #8c4338; }
+
+    .chart {
+      height: 126px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to top, rgba(28,45,44,0.05) 1px, transparent 1px) 0 0/100% 31px,
+        linear-gradient(to right, rgba(28,45,44,0.04) 1px, transparent 1px) 0 0/54px 100%,
+        #fff;
+    }
+
+    .line {
+      position: absolute;
+      inset: 0;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .source-item {
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .bottom-banner {
+      border-radius: 24px;
+      padding: 16px 18px;
+      background: rgba(24, 57, 54, 0.95);
+      color: #fff8ef;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1280px) {
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <small>Game Tracking Governance Platform</small>
+          <h1>游戏数据埋点需求与验收平台</h1>
+        </div>
+        <div class="nav">
+          <span>平台首页</span>
+          <span>需求中心</span>
+          <span>事件字典</span>
+          <span>字段标准</span>
+          <span>指标映射</span>
+          <span>验收中心</span>
+          <span>版本治理</span>
+          <span>AI 助手</span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <span class="eyebrow">Homepage Judgment</span>
+          <h2>首页第一屏就回答一个问题：这套平台能不能把游戏埋点真正闭环做起来？</h2>
+          <p>答案不靠一句“支持 AI 智能埋点”，而是直接把业务目标、指标体系、事件模型、字段标准、研发接入、数据验收、BI 输出、版本治理同时放到首页。用户一眼就能看出，现在缺的是事件、字段、接入、验收，还是治理，而不是再靠多角色微信群里反复对口径。</p>
+          <div class="chips" style="margin-top:16px;">
+            <div class="chip">业务目标</div>
+            <div class="chip">指标体系</div>
+            <div class="chip">事件字典</div>
+            <div class="chip">字段标准</div>
+            <div class="chip">接入进度</div>
+            <div class="chip">验收结果</div>
+            <div class="chip">BI 出数</div>
+            <div class="chip">版本 Diff</div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="metric">
+            <div class="k">当前项目</div>
+            <div class="v">Project A</div>
+            <div>全渠道测试，预计 2026-05-31 上线，覆盖 Client / Server / SDK / BI / QA / 数据中台。</div>
+          </div>
+          <div class="metric">
+            <div class="k">闭环完成度</div>
+            <div class="v">68%</div>
+            <div>事件字典已建 42 个，字段标准 86 个，P0 验收通过率 83%，仍有 3 个阻塞项。</div>
+          </div>
+          <div class="metric">
+            <div class="k">当前风险</div>
+            <div class="v">3</div>
+            <div>支付字段类型不一致、创角链路缺渠道字段、BI 次留口径待确认。</div>
+          </div>
+        </div>
+      </section>
+
+      <main class="layout">
+        <section class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>01 业务目标到指标</h3>
+                <span>首页先展示“为什么埋”，而不是先展示“怎么埋”</span>
+              </div>
+            </div>
+            <div class="card focus">
+              <h4>当前测试目标</h4>
+              <div class="meta">全渠道测试 / 留存分析 / 付费转化 / 新手流失 / 玩法深度 / 广告 ROI</div>
+              <div class="muted">如果首页看不到这些目标，就无法判断当前事件设计是否真的服务业务，而不是只是在堆埋点。</div>
+            </div>
+            <div class="grid-2" style="margin-top:12px;">
+              <div class="mini sand">
+                <h4>核心指标</h4>
+                <p>DAU、次留、LTV、ARPU、付费率、新手完成率、关卡漏斗、ROI。</p>
+              </div>
+              <div class="mini blue-bg">
+                <h4>指标映射状态</h4>
+                <p>34 个指标已映射，5 个指标缺依赖事件，2 个指标口径待 BI 确认。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>02 四张核心表</h3>
+                <span>平台不是一份文档，而是四张表驱动的治理系统</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>事件字典表</h4>
+              <div class="muted">`role_create`、`newbie_finish`、`stage_finish`、`pay_success` 等事件统一定义触发时机、上报端、优先级、版本、责任人。</div>
+            </div>
+            <div class="card">
+              <h4>字段字典表</h4>
+              <div class="muted">`user_id`、`role_id`、`server_id`、`channel_id`、`event_time` 统一类型、必填、示例值、枚举范围、复用关系。</div>
+            </div>
+            <div class="card">
+              <h4>指标映射表</h4>
+              <div class="muted">让“新增账号”“首付率”“次留”“LTV”直接反向追溯到依赖事件和计算口径。</div>
+            </div>
+            <div class="card">
+              <h4>验收规则表</h4>
+              <div class="muted">必填校验、类型校验、枚举校验、时序校验、数量校验、金额校验、去重校验、异常检测全部在线管理。</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>03 当前闭环主链</h3>
+                <span>首页要让人直接看到现在卡在闭环的哪一段</span>
+              </div>
+            </div>
+            <div class="road">
+              <div class="road-row">
+                <div class="badge sand">需求阶段</div>
+                <div class="card">
+                  <h4>需求提交与版本管理</h4>
+                  <div class="muted">本周新需求 6 条，覆盖更新 4 条，版本 Diff 待确认 2 条。责任人已指定，开发归属完整率 92%。</div>
+                </div>
+              </div>
+              <div class="road-row">
+                <div class="badge mint">设计阶段</div>
+                <div class="card">
+                  <h4>AI 生成 + 人工确认</h4>
+                  <div class="muted">AI 根据 PRD、玩法文档、渠道目标、历史模板生成事件草案；人工只做修正，不从空白开始写。</div>
+                </div>
+              </div>
+              <div class="road-row">
+                <div class="badge blue">接入阶段</div>
+                <div class="card">
+                  <h4>研发接入与上报联调</h4>
+                  <div class="muted">Client 18 个事件完成，Server 11 个事件完成，SDK 接入文档已导出，支付回调链路仍待修复。</div>
+                </div>
+              </div>
+              <div class="road-row">
+                <div class="badge rose">验收阶段</div>
+                <div class="card focus">
+                  <h4>自动校验与验收报告</h4>
+                  <div class="meta">P0 事件 12 个，已通过 10 个，失败 2 个</div>
+                  <div class="muted">首页必须把验收状态拉到第一屏，因为“能不能解决问题”最终看的是能不能稳定出数，不是文档写得漂不漂亮。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>04 数据质量与版本治理</h3>
+                <span>这部分直接决定平台有没有治理价值</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>今日验收批次</h4>
+              <div class="meta">批次 `2026-04-24-03` ｜ 测试服 ｜ 验收范围 P0 12 个 / P1 18 个</div>
+              <div class="chart" style="margin-top:12px;">
+                <svg class="line" viewBox="0 0 320 126" preserveAspectRatio="none">
+                  <polyline points="18,84 64,76 110,68 156,56 202,44 248,26 302,18" fill="none" stroke="#c6782f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="18,98 64,90 110,84 156,78 202,70 248,64 302,58" fill="none" stroke="#7c93ae" stroke-width="4" stroke-dasharray="8 8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="pills" style="margin-top:12px;">
+                <div class="pill sand">P0 失败 2</div>
+                <div class="pill rose">P1 失败 5</div>
+                <div class="pill blue">待复验 3</div>
+                <div class="pill mint">通过率 83%</div>
+              </div>
+            </div>
+            <div class="grid-2" style="margin-top:12px;">
+              <div class="mini mint-bg">
+                <h4>版本 Diff</h4>
+                <p>`pay_success.amount` 从 string 改 decimal；`role_create` 新增 `channel_id`；`stage_finish.result` 枚举待统一。</p>
+              </div>
+              <div class="mini sand">
+                <h4>群同步</h4>
+                <p>今天新增 1 个 P0、2 个 P1 风险，可手动推送到“小闪-埋点协同群”。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>05 首页为什么这样设计</h3>
+                <span>直接吸收你给的几家产品边界</span>
+              </div>
+            </div>
+            <div class="source-list">
+              <div class="source-item">
+                <strong>阿里云 Quick Tracking</strong> 给了一个重要启发：AI 可以从页面图和标准规范里生成埋点方案，但生成后仍然需要编辑、提交到事件与属性管理。说明 AI 生成只是入口，不是平台终点。
+              </div>
+              <div class="source-item">
+                <strong>火山引擎 DataFinder</strong> 明确区分了代码埋点与全埋点。全埋点适合简单 PV/UV、圈选、热图，但对复杂业务字段“力不从心”。所以游戏场景首页不能把“可视化圈选”当主角。
+              </div>
+              <div class="source-item">
+                <strong>腾讯云 WeData</strong> 证明真正的治理价值来自规则、阻断、告警、质量报告和历史运行结果，而不是只靠埋点接入本身。
+              </div>
+              <div class="source-item">
+                <strong>神策 LogAgent</strong> 说明采集链路与导入运维也必须可观测，比如文件、项目路由、读取进度、起始 offset。这意味着平台首页要能看到接入状态，而不是只展示事件清单。
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>06 首页结论区</h3>
+                <span>让管理者一眼判断“能不能解决问题”</span>
+              </div>
+            </div>
+            <div class="card focus">
+              <h4>当前结论</h4>
+              <div class="meta">这个平台已经能支撑从业务目标到验收报告的主链，但还没完全解决支付事件字段一致性和 BI 次留口径两处阻塞。</div>
+              <div class="muted">如果首页能把阻塞点、责任人、下一步动作直接说清楚，这个平台就是在解决问题；如果首页只展示事件总数和漂亮图表，那就还停留在“展示埋点”而不是“治理埋点”。</div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div class="bottom-banner">
+        这版首页的核心判断是：游戏埋点体系的主战场不在“SDK 文档页”，也不在“圈选页”，而在“闭环驾驶舱”。首页必须同时把目标、指标、标准、接入、验收、BI、版本、风险放到一个视图里，用户看完才能判断平台是不是在真正解决协同和治理问题。
+      </div>
+    </div>
+  </div>
+</body>
+</html>

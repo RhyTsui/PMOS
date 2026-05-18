@@ -1,558 +1,95 @@
-# PMAIOS 产品管理 Agent 运行模型
+# PMAIOS Product Management Agent Operating Model
 
-- 日期：2026-04-17
-- 状态：Draft
-- 适用范围：PMAIOS 平台层与所有子项目
+- version: v0.8
+- date: 2026-05-11
+- status: active
+- owner: product office
 
-## 1. 定位重述
+## 1. Model Statement
 
-结合 `docs/implementation/pmaios4.17.md` 与当前仓库现状，PMAIOS 不应再被理解为“单个产品经理 Agent”。
+`PMAIOS` now operates as:
 
-更准确的定义是：
+`platform control plane + multi-role virtual workflow managers + Hermes governance + human final approval`
 
-**PMAIOS = 虚拟产品主管所驱动的产品管理系统**
+This model exists to prevent three recurring failures:
 
-角色关系如下：
+1. user requirement and product requirement drift apart mid-flight
+2. docs, design, API, and frontend repeat each other but lose contract consistency
+3. AI defaults to demo-style output instead of delivery-grade product output
 
-- `真实产品主管`
-  - 你本人
-  - 负责给出方向、原则、边界、最终裁决
-- `产品管理 Agent`
-  - PMAIOS 的核心管理层
-  - 在角色层级上等同于“虚拟产品主管”
-  - 负责治理人的产品流程，也治理虚拟产品经理的流程
-- `虚拟产品经理群`
-  - 面向具体职责的执行角色
-  - 包括需求、版本、评审、流程、研发协同、复盘等方向
+## 2. Default Product Workflow
 
-一句话：
+正式默认工作流如下：
 
-**真实产品主管定义原则，产品管理 Agent 固化机制，虚拟产品经理按机制执行。**
+`调研文档 -> 规划文档 -> 需求文档 -> 功能文档 -> 设计文档 -> 前端页面 -> 数据表 -> 后端接口 -> 前后端联调与验收`
 
----
+Each stage has a distinct responsibility:
 
-## 2. 结合 4.17 文档后的系统理解
+- `调研文档`
+  Explain current system state, business background, problem boundary, and external constraints.
+- `规划文档`
+  Explain target, scope, priority, benefit, and milestone strategy.
+- `需求文档`
+  Explain requirement decomposition, acceptance criteria, and requirement-to-function mapping.
+- `功能文档`
+  Explain function units, state flows, and function-to-API mapping.
+- `设计文档`
+  Explain IA, page relationships, interaction, state design, and component constraints.
+- `前端页面`
+  默认直接产出最终交付页，而不是简单版、示意稿或静态确认稿。
+- `数据表`
+  Formalize schema; do not invent data semantics for the first time here.
+- `后端接口`
+  Formalize contracts; do not invent request/response semantics for the first time here.
+- `前后端联调与验收`
+  Close the loop on main flow, exceptions, permissions, data consistency, and requirement back-check.
 
-`docs/implementation/pmaios4.17.md` 已经把 PMAIOS 往 `AI Product OS 中台` 的方向推了一步，重点提出了：
+## 3. Review Model
 
-- Product Center
-- Agent Center
-- Workflow Center
-- Policy / Governance
-- Knowledge Center
-- Release Center
-- Observability Center
+The formal review path is:
 
-这和当前仓库已有能力是能对上的：
+`stage output -> self-check -> multi-role review committee -> Hermes governance decision -> human final approval`
 
-- 已有 `subproject` / `capability` / `workflow` / `review` / `memory` / `version` / `requirement`
-- 已有基础的 `product-agent` 抽象
-- 已有 `run / trace / observability`
+Core review slices:
 
-但 4.17 文档中的“中台”表达，当前还没有在角色体系上彻底落地。
+- `Solution-Optimality Review`
+- `Development Review`
+- `Design Review`
+- `Research Review`
+- `Delivery Review`
 
-当前系统更像：
+## 4. Frontend Execution Rule
 
-- 有运行内核
-- 有部分产品能力对象
-- 有需求池、版本库、评审与 trace 的底座
-- 但还没有真正形成“产品管理 Agent 管理多个虚拟产品经理”的稳定协同结构
+Frontend is not a free-form design surface.
 
----
+Current hard rules:
 
-## 3. 当前主要缺口
+1. complete component mapping before implementation
+2. global frontend framework baseline defaults to `x.ant.design / Ant Design X`
+3. foundational `Ant Design` components remain available through governed bindings inside that ecosystem
+4. page implementation must first carry `route / layout shell / target roles / data refs / componentBindings`
+5. enterprise shell, density, tokens, and state semantics remain governed
+6. ban `hero + summary-card + explanation-first`
+7. prioritize actions, outputs, monitoring, and asset access
 
-### 3.1 角色层级还不够清晰
+## 5. Closure Standard
 
-当前 `workflows/roles.md` 和 `prompts/*.md` 仍然是通用阶段角色：
+A capability is only considered complete when it is:
 
-- Product Manager
-- Industry Analyst
-- System Architect
-- Review Committee
+1. runnable in runtime
+2. reviewable in committee / gate evidence
+3. visible in proof-of-work
+4. operable from operator actions
+5. recorded in stable truth docs
+6. back-checked to the original user problem as `solved`
 
-这套角色能跑阶段，但不能体现“虚拟产品主管 -> 虚拟产品经理群”的管理关系。
+## 6. Current Judgment
 
-缺少以下高层角色定义：
+Current judgment for the operating model:
 
-- 产品管理 Agent / 虚拟产品主管
-- 虚拟需求产品经理
-- 虚拟版本产品经理
-- 虚拟评审产品经理
-- 虚拟流程产品经理
-- 虚拟研发协同产品经理
-- 虚拟复盘产品经理
-
-### 3.2 提示词过于粗糙
-
-当前 `prompts/prd_prompt.md`、`task_prompt.md`、`review_prompt.md` 仍是阶段级提示词，问题是：
-
-- 输入范围不明确
-- 输出 schema 不明确
-- 不区分“输入源”与“当前决策”
-- 不强调读写边界
-- 不强调产物必须进入需求池 / 版本库 / 决策链路
-- 没有明确交接对象
-
-也就是说，现在提示词更像“让一个 AI 写文档”，不是“让一个虚拟产品经理在组织里履职”。
-
-### 3.3 协作结构太弱
-
-当前各角色更多是并列阶段角色，不是“结构化协作”。
-
-缺少这些关键机制：
-
-- 上游角色向下游角色的结构化移交
-- 各虚拟产品经理之间的标准 handoff
-- 虚拟产品经理向产品管理 Agent 的回报机制
-- 产品管理 Agent 对子项目应用情况的检查机制
-
-### 3.4 产出物规范不够完整
-
-现在已有 PRD、架构、任务、review、trace，但不够覆盖“产品主管治理”。
-
-还缺：
-
-- 需求入池卡片模板
-- 版本条目模板
-- 决策变更记录模板
-- 虚拟产品经理执行回报模板
-- 子项目能力接入清单模板
-- 人类产品经理调用说明模板
-
-### 3.5 “每个项目都能用”还没形成标准接入面
-
-虽然有 `subprojects/`，但还没有一个真正统一的“产品管理能力接入协议”。
-
-现在每个项目还比较像“放在一个母仓里”，不是“默认继承同一套产品管理操作系统能力”。
-
----
-
-## 4. 产品管理 Agent 的正式职责
-
-产品管理 Agent 的职责，不是直接写所有文档，而是管理整个产品管理体系。
-
-### 4.1 规则治理
-
-- 定义输入源规则
-- 定义需求池入池规则
-- 定义版本库更新规则
-- 定义哪些内容属于决策、哪些属于输入
-- 定义各虚拟产品经理的职责边界
-
-### 4.2 流程治理
-
-- 搭建需求流转 workflow
-- 搭建版本规划 workflow
-- 搭建评审 workflow
-- 搭建发布前检查 workflow
-- 搭建复盘 workflow
-
-### 4.3 产出治理
-
-- 规定每个阶段必须产出什么
-- 规定产出物模板
-- 规定产出物如何进入需求池/版本库/决策库
-- 规定哪些产物可直接执行，哪些只算候选
-
-### 4.4 协作治理
-
-- 管理人类产品经理如何调用虚拟产品经理
-- 管理虚拟产品经理之间如何协作
-- 检查项目是否真正使用了这些能力
-- 检查是否存在流程绕行、产物缺失、规则失效
-
-### 4.5 进化治理
-
-- 从你的对话中提炼全局规则
-- 从输入源材料中提炼新能力需求
-- 把临时指令演化成长期机制
-- 推动 prompts / workflows / schemas / templates 一起升级
-
----
-
-## 5. 建议的虚拟产品经理结构
-
-### 5.1 产品管理 Agent（虚拟产品主管）
-
-职责：
-
-- 总管流程、规则、版本节奏、需求池、评审机制
-- 不直接吞掉所有执行细节
-- 负责收敛和派发
-
-输入：
-
-- 真实产品主管指令
-- inbox 输入源
-- 各虚拟产品经理回报
-
-输出：
-
-- 生效规则
-- 当前执行基线
-- 角色派工
-- 管理性检查结论
-
-### 5.2 虚拟需求产品经理
-
-职责：
-
-- 识别需求
-- 标准化需求卡片
-- 维护需求池状态
-- 检查需求与输入源、版本、项目之间的关联
-
-输出重点：
-
-- 需求入池卡
-- 需求分类
-- 优先级建议
-- 来源追溯
-
-### 5.3 虚拟版本产品经理
-
-职责：
-
-- 维护版本库
-- 管理版本节奏与目标
-- 跟踪版本升级项和未完成项
-- 区分“候选版本分析”和“当前生效版本基线”
-
-输出重点：
-
-- 版本条目
-- 版本目标卡
-- 升级差距清单
-- 版本变更记录
-
-### 5.4 虚拟评审产品经理
-
-职责：
-
-- 汇总各类评审结论
-- 判断是否进入下一阶段
-- 把评审意见转成可执行返工项
-
-输出重点：
-
-- Gate 决策
-- 阻塞项
-- 返工建议
-- 风险说明
-
-### 5.5 虚拟流程产品经理
-
-职责：
-
-- 设计并维护需求、版本、评审、交付的 workflow
-- 规定每个阶段的输入、输出、责任人、门禁
-
-输出重点：
-
-- Workflow 定义
-- Stage 说明
-- 交接规则
-- 检查清单
-
-### 5.6 虚拟研发协同产品经理
-
-职责：
-
-- 把产品结论转成研发可执行项
-- 对接任务拆解、实现说明、验收要求
-
-输出重点：
-
-- 开发任务包
-- 验收条件
-- 变更影响说明
-
-### 5.7 虚拟复盘产品经理
-
-职责：
-
-- 汇总结果、问题、偏差
-- 把复盘结论反馈给需求池、版本库、规则库
-
-输出重点：
-
-- 复盘报告
-- 改进建议
-- 规则更新候选
-
----
-
-## 6. 必须补强的规则
-
-### 6.1 输入规则
-
-- 所有人工原始材料先进入 `docs/sources/inbox/`
-- 所有输入必须被分类为：会议纪要 / 版本分析 / 需求分析 / 架构分析 / 外部资料
-- 所有输入都必须说明是否已搬运到正式目录
-
-### 6.2 决策规则
-
-- 输入源不等于决策
-- 同一主题只能有一个当前生效决策
-- 决策变更必须留下记录
-- AI 生成的文档默认是候选，不自动生效
-
-### 6.3 需求池规则
-
-- 明确什么是“需求”
-- 明确需求何时自动入池
-- 明确入池后状态流转
-- 明确需求与版本、项目、运行实例的关联方式
-
-### 6.4 版本库规则
-
-- 区分版本分析、候选版本、当前基线版本
-- 每个版本必须有目标、范围、状态、关联需求、变更记录
-- 升级未完成项必须能被持续追踪
-
-### 6.5 协作规则
-
-- 每个虚拟产品经理必须声明输入、输出、读写边界
-- 所有移交必须结构化，不能只靠自然语言长文
-- 人类产品经理调用虚拟产品经理应有统一入口与说明
-
-### 6.6 检查规则
-
-- 每个子项目是否已接入需求池能力
-- 每个子项目是否已接入版本库能力
-- 每个子项目是否已接入评审与 trace
-- 每个子项目是否真正使用了虚拟产品经理，而不是仍靠手工散落执行
-
----
-
-## 7. 必须补强的工作流
-
-### 7.1 输入治理工作流
-
-`Inbox -> 分类 -> 提炼 -> 搬运 -> 入池/入库/入决策候选`
-
-### 7.2 需求治理工作流
-
-`输入识别 -> 需求入池 -> 分类优先级 -> 关联项目 -> 进入版本候选`
-
-### 7.3 版本治理工作流
-
-`版本分析 -> 候选版本 -> 产品主管确认 -> 当前基线 -> 跟踪升级进度`
-
-### 7.4 决策治理工作流
-
-`输入源收敛 -> 决策候选 -> 采纳 -> 生效 -> 留存变更记录`
-
-### 7.5 子项目接入工作流
-
-`项目注册 -> 能力检查 -> 绑定需求池/版本库/评审 -> 项目运行 -> 使用审计`
-
-### 7.6 复盘回流工作流
-
-`运行结果 -> 评审 -> 复盘 -> 更新规则/需求/版本候选`
-
----
-
-## 8. 必须补强的产出物模板
-
-建议至少补齐以下模板。
-
-### 8.1 产品主管级模板
-
-- 产品管理规则卡
-- 流程定义卡
-- 决策变更记录
-- 子项目接入检查单
-- 能力使用审计单
-
-### 8.2 虚拟需求产品经理模板
-
-- 需求入池卡
-- 需求分类卡
-- 需求优先级说明
-- 需求来源追溯卡
-
-### 8.3 虚拟版本产品经理模板
-
-- 版本卡
-- 版本升级差距清单
-- 版本变更记录
-- 版本依赖图
-
-### 8.4 虚拟评审产品经理模板
-
-- Gate 审核卡
-- 阻塞项清单
-- 返工任务卡
-- 风险说明卡
-
-### 8.5 虚拟流程产品经理模板
-
-- Stage 输入输出定义
-- Handoff 模板
-- 执行检查清单
-- 例外处理清单
-
-### 8.6 面向人类产品经理模板
-
-- 调用虚拟产品经理说明书
-- 标准提问模板
-- 结果验收模板
-- 人工接管模板
-
----
-
-## 9. 对提示词的具体优化建议
-
-当前提示词应该从“写一份文档”升级成“履行一个岗位职责”。
-
-每个虚拟产品经理 prompt 都应该包含以下结构：
-
-### 9.1 角色定位
-
-- 你是谁
-- 你的上级是谁
-- 你的下游是谁
-
-### 9.2 输入 contract
-
-- 允许读取哪些材料
-- 哪些是输入源
-- 哪些是当前决策
-- 哪些是禁止越权修改的内容
-
-### 9.3 输出 contract
-
-- 固定输出字段
-- 固定文件路径
-- 固定状态字段
-- 是否要写入需求池 / 版本库 / 决策候选
-
-### 9.4 决策边界
-
-- 你能判断什么
-- 你不能拍板什么
-- 什么必须上交产品管理 Agent
-
-### 9.5 Handoff 规范
-
-- 输出交给谁
-- 对方需要的最小结构是什么
-
-### 9.6 检查项
-
-- 是否可追溯
-- 是否进入正确目录
-- 是否符合状态流转
-
-当前仓库的 `prompts/*.md` 明显还不够。
-
----
-
-## 10. 对协作结构的具体优化建议
-
-### 10.1 从“并列角色”升级成“管理链”
-
-当前更像多个角色并列工作。
-
-应改成：
-
-`产品管理 Agent -> 多个虚拟产品经理 -> 具体项目执行`
-
-### 10.2 从“自然语言交接”升级成“结构化交接”
-
-各虚拟产品经理之间不应主要靠长篇描述移交，而应使用：
-
-- requirement record
-- version record
-- decision candidate
-- review gate
-- stage handoff
-
-### 10.3 从“项目可选接入”升级成“项目默认继承”
-
-每个子项目应该默认继承：
-
-- inbox 输入治理
-- 需求池
-- 版本库
-- review gate
-- traceability
-
-否则平台能力无法真正规模化复用。
-
----
-
-## 11. 人类产品经理能否很好调用虚拟产品经理
-
-当前答案是：**还不能稳定地很好调用。**
-
-原因不是模型不行，而是系统缺：
-
-- 统一入口
-- 标准调用模板
-- 明确角色说明
-- 明确输入输出
-- 清晰的回报和校验机制
-
-要解决这个问题，必须补：
-
-- 产品经理调用手册
-- 角色目录
-- 示例命令模板
-- “什么时候找哪个虚拟产品经理”的路由规则
-
----
-
-## 12. 每个项目能否都应用这些能力
-
-当前答案是：**理论上能，实际上还没有形成标准落地。**
-
-要做到真正全项目可用，至少要完成：
-
-1. 子项目注册时自动挂上需求池、版本库、评审、trace。
-2. 子项目有自己的项目记忆，但继承平台规则。
-3. 子项目能声明自己使用哪些虚拟产品经理。
-4. 子项目运行结果能回流到平台层的版本库和规则库。
-
----
-
-## 13. 下一步最该做的事
-
-优先级建议如下：
-
-### P0
-
-- 正式定义 `产品管理 Agent` 与各虚拟产品经理角色
-- 补一套角色 prompt contract 模板
-- 补需求池 / 版本库 / 决策候选的标准模板
-
-### P1
-
-- 建立“人类产品经理调用虚拟产品经理”的统一入口
-- 建立“子项目能力接入检查单”
-- 建立“虚拟产品经理协作 handoff”结构
-
-### P2
-
-- 将这些角色真正挂接到 capability / workflow / requirement / version 运行链路
-- 形成项目级默认启用机制
-
----
-
-## 14. 总结
-
-结合今天新增的中台文档，PMAIOS 的正确方向已经比较清楚：
-
-它不是一个帮产品经理写文档的工具，而是一个由**产品管理 Agent（虚拟产品主管）**统领、用于管理**人类产品经理 + 虚拟产品经理群**协作流程的产品管理操作系统。
-
-当前系统已经有内核，但还缺：
-
-- 更清晰的角色层级
-- 更严格的规则治理
-- 更完整的产物模板
-- 更结构化的协作链路
-- 更统一的项目级接入方式
-
-下一阶段的重点，不是再增加零散 agent，而是把“产品主管的管理机制”真正沉淀成平台级能力。
+- `workflow mainline`: `solved`
+- `multi-role review structure`: `solved`
+- `Hermes full closure`: `partial`
+- `knowledge grounding into review`: `solved`
+- `frontend final-page governance`: `partial`
+- `cross-project delivery closure`: `partial`

@@ -2,6 +2,18 @@
 
 面向买点 / 埋点验收场景的一期 AI 工作流项目，当前聚焦文档基线、规则生成、验收执行与协作提效。
 
+## 运行基线
+
+当前子项目已经补齐最小 PMAIOS 运行规格，恢复或切换工具时先按以下顺序读取：
+
+1. `docs/memory/mcp-context/session-state.json`
+2. `npm run cli -- mcp-context events 20`
+3. `npm run cli -- mcp-context tasks --status in_progress`
+4. `docs/operations/startup-whoami.md`
+5. `AGENTS.md`
+
+这条链路用于 Codex / Claude 共享恢复，不应只依赖会话记忆。
+
 ## 项目定位
 
 本项目当前不是做一个大而全的数据平台，而是先围绕买点 / 埋点验收场景中最卡效率的环节，建立一条：
@@ -23,6 +35,16 @@
 
 ## 当前主入口
 
+- `AGENTS.md`
+  - 子项目 agent 入口合同、目录纪律、协作约束
+- `docs/operations/startup-whoami.md`
+  - 子项目启动身份、恢复顺序、当前优先级、权威文档入口
+- `docs/product/AI埋点平台-实现真源包索引-v1.md`
+  - AI 埋点平台面向产品、前端、后端、测试的统一实现入口
+- `docs/product/AI埋点平台-05-06会议反馈转需求池-v1.md`
+  - 当前项目的正式需求池入口，用于承接会议反馈、用户纠偏和后续产品判断
+- `docs/product/AI埋点平台-需求池总表-v1.md`
+  - 当前项目的常设需求池总表，用于持续维护 accepted / candidate / parked / rejected 条目
 - `docs/overview/`
   - 项目背景、立项说明、一期 AI 方案
 - `docs/svg/`
@@ -34,7 +56,15 @@
 - `docs/product/`
   - PRD 前言与产品结构草图
 - `docs/memory/`
-  - 项目记忆与阶段结论
+  - 项目记忆、共享状态与阶段结论
+- `docs/context/`
+  - 运行上下文与后续补充入口
+- `docs/decisions/`
+  - 子项目级决策沉淀入口
+- `docs/tasks/`
+  - 子项目级任务拆解入口
+- `docs/versions/`
+  - 子项目级版本沉淀入口
 - `frontend/`
   - 一期工作台前端原型
 
@@ -45,6 +75,8 @@
 - `docs/sources/inbox/`
 
 项目目录中只放整理后的正式材料，不直接把原始输入作为主文档使用。
+
+已整理材料继续放在 `docs/sources/converted/` 与 `docs/sources/index/`，不要把它们当作新的原始输入入口。
 
 ## 一期方案原则
 

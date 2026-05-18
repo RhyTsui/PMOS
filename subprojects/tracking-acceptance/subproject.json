@@ -1,7 +1,11 @@
 {
-  "id": "ai-tracking-acceptance",
+  "id": "tracking-acceptance",
   "name": "AI 埋点验收项目",
-  "description": "面向买点/埋点验收场景的一期 AI 工作流项目，聚焦文档基线、规则生成、验收执行与协作提效。",
-  "path": "subprojects/tracking-acceptance",
-  "status": "active"
+  "description": "面向买点 / 埋点验收场景的一期 AI 工作流项目，聚焦文档基线、规则生成、验收执行与协作提效。",
+  "status": "active",
+  "createdAt": "2026-04-21T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/tracking-acceptance",
+  "memoryPath": "subprojects/tracking-acceptance/docs/memory/project-memory.md",
+  "overrides": {}
 }

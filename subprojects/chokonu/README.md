@@ -12,9 +12,15 @@
 - 自动化测试与回归
 - 结果报告、异常 Trace 与治理闭环
 
-当前目录已经从旧 `tracking-acceptance` 语义迁移到：
+当前主目录为：
 
 - `subprojects/chokonu/`
+
+## 与 tracking-acceptance 的关系
+
+- `tracking-acceptance` 现在是独立的 `AI 埋点验收` 子项目
+- `ChoKoNu` 不再把埋点验收文档当作自己的活跃真源
+- 历史上误落在 `ChoKoNu/docs/analysis/` 的埋点验收分析文档，已在 `2026-04-28` 归位回 `subprojects/tracking-acceptance/docs/analysis/`
 
 ## 当前活跃真源
 
@@ -33,7 +39,7 @@
 - `docs/overview/`
   - 项目背景、立项说明、首版方案总述
 - `docs/analysis/`
-  - 会议纪要提炼、问题清单、边界切割
+  - 仅保留 `ChoKoNu` 自身的收口分析与平台定义
 - `docs/workflow/`
   - 项目执行工作流、产品经理任务单
 - `docs/requirements/`
@@ -45,7 +51,7 @@
 - `docs/memory/`
   - 项目记忆与文档验收状态
 - `docs/legacy/`
-  - 旧版 `tracking-acceptance` / ChoKoNu 历史草稿归档
+  - 历史 `tracking-acceptance` / ChoKoNu 草稿归档
 
 ## 输入规则
 
@@ -57,4 +63,4 @@
 
 ## 当前说明
 
-旧目录 `subprojects/tracking-acceptance/` 只保留迁移说明和兼容壳，不再作为当前主路径使用。
+`subprojects/tracking-acceptance/` 不是 `ChoKoNu` 的兼容壳，而是独立的埋点验收子项目。`ChoKoNu` 如需引用埋点验收背景，应通过链接或归档说明引用，不再把相关分析正文继续维护在本目录下。

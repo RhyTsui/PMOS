@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "1.0",
+  "screenId": "xiaoqiao-assets",
+  "screenType": "ai-workflow-console",
+  "workflowStage": "frontend",
+  "title": "我的资产",
+  "description": "在小乔会话工作台中管理会话沉淀、AI 生成和人工上传的资产，并把选中的资料作为上下文带回当前对话。",
+  "productContext": {
+    "productId": "xiaoqiao-v1",
+    "productName": "小乔智投",
+    "projectId": "ad",
+    "projectName": "广告支持与投放协同自动化工作台",
+    "requirementId": "req-xiaoqiao-assets-reference",
+    "requirementTitle": "我的资产页面按新设计规范支持资产筛选、预览和引用回对话",
+    "stageOwner": "Codex",
+    "targetRole": "operator"
+  },
+  "layout": {
+    "desktop": "chat-with-context",
+    "mobile": "stacked-decision-flow",
+    "density": "high",
+    "stickyActions": true
+  },
+  "regions": {
+    "contextRail": [
+      {
+        "type": "ContextRail",
+        "id": "asset-context-rail",
+        "title": "资产上下文",
+        "items": [
+          { "label": "入口", "value": "个人菜单", "status": "normal" },
+          { "label": "用途", "value": "引用到当前对话", "status": "success" },
+          { "label": "范围", "value": "文件、图片、链接、视频", "status": "success" }
+        ]
+      }
+    ],
+    "main": [
+      {
+        "type": "ConversationPanel",
+        "id": "asset-library-panel",
+        "title": "资产库",
+        "aiAssistanceMode": "copilot",
+        "summary": "展示可复用资产，支持按类型筛选、查看来源与更新时间，并选择多个资产加入当前输入区。",
+        "evidenceRefs": ["frontend-default-style", "ui-pmos-copilot-contract", "asset-reference-flow"],
+        "sourceRefs": [
+          "docs/operations/frontend-style-default.md",
+          "docs/operations/ui-pmos-copilot-contract.md",
+          "subprojects/ad/docs/operations/ui-guardrail.md",
+          "imported/projects/assets/image_20260511205304546.png"
+        ]
+      },
+      {
+        "type": "DynamicSurfaceCard",
+        "id": "asset-filter-and-list",
+        "title": "资产筛选与列表",
+        "surfaceKind": "inline-panel",
+        "sourceRefs": ["imported/projects/src/app/page.tsx"],
+        "evidenceRefs": ["asset-reference-flow"]
+      }
+    ],
+    "sidePanel": [
+      {
+        "type": "AIRecommendationCard",
+        "id": "asset-selection-summary",
+        "title": "引用确认",
+        "summary": "用户确认选择后，系统只把资产作为输入上下文带回对话框，不自动发送消息。",
+        "aiAssistanceMode": "copilot",
+        "evidenceRefs": ["asset-reference-flow"],
+        "recommendedActions": [
+          {
+            "id": "attach-assets-to-composer",
+            "label": "引用到对话框",
+            "actionType": "sync_artifact",
+            "riskLevel": "low",
+            "decisionPolicy": "inform",
+            "auditRequired": true,
+            "targetObject": "active-conversation-composer"
+          }
+        ]
+      }
+    ],
+    "evidencePanel": [
+      {
+        "type": "EvidencePanel",
+        "id": "asset-page-evidence",
+        "title": "规范与参考",
+        "evidenceRefs": ["frontend-default-style", "uiux-stack-baseline", "asset-reference-flow"],
+        "sourceRefs": [
+          "docs/operations/frontend-style-default.md",
+          "docs/operations/uiux-stack-baseline.md",
+          "docs/operations/product-workflow-total-design.md",
+          "docs/operations/ui-pmos-copilot-contract.md",
+          "subprojects/ad/docs/operations/ui-guardrail.md",
+          "docs/templates/ui_schema_spec_template.md"
+        ],
+        "lastUpdatedAt": "2026-05-13T16:20:00+08:00"
+      }
+    ],
+    "auditTrail": [
+      {
+        "type": "AuditLog",
+        "id": "asset-page-audit",
+        "title": "处理记录",
+        "logs": [
+          {
+            "id": "asset-log-1",
+            "actor": "Codex",
+            "action": "补齐我的资产页面 UISchema 并重做交付页面",
+            "timestamp": "2026-05-13T16:20:00+08:00",
+            "result": "pending-verification"
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceRefs": ["frontend-default-style", "ui-pmos-copilot-contract", "asset-reference-flow"],
+  "sourceRefs": [
+    "docs/operations/frontend-style-default.md",
+    "docs/operations/ui-pmos-copilot-contract.md",
+    "subprojects/ad/docs/operations/ui-guardrail.md",
+    "imported/projects/src/app/page.tsx"
+  ],
+  "lastUpdatedAt": "2026-05-13T16:20:00+08:00",
+  "decisionPolicy": "inform",
+  "approvalPolicy": "none",
+  "riskLevel": "low",
+  "auditRequired": true,
+  "aiAssistanceMode": "copilot",
+  "recommendedActions": [
+    {
+      "id": "verify-assets-page",
+      "label": "完成页面自检与浏览器验收",
+      "actionType": "request_review",
+      "riskLevel": "low",
+      "decisionPolicy": "inform",
+      "auditRequired": true,
+      "targetObject": "/"
+    }
+  ],
+  "validationRules": [
+    {
+      "id": "no-temporary-card-wall",
+      "description": "资产页不能退化为临时卡片墙，必须保留工作台结构、筛选、状态和引用动作。",
+      "severity": "error"
+    },
+    {
+      "id": "asset-copy-is-user-facing",
+      "description": "用户可见文案必须是产品语言，不得出现工程状态、内部接口名或乱码。",
+      "severity": "error"
+    },
+    {
+      "id": "selection-does-not-auto-send",
+      "description": "引用资产只写入输入区上下文，不自动发送消息。",
+      "severity": "error"
+    }
+  ]
+}

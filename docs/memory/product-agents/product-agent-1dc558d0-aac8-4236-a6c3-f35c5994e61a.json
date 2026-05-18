@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+  "subprojectId": null,
+  "name": "Virtual Workflow PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "workflow",
+  "level": "manager",
+  "scope": "platform",
+  "summary": "Owns workflow handoff quality, stage contracts, and delivery sequencing for product work.",
+  "problem": "The workflow runtime exists, but product-stage handoffs and AI-driven document sequencing are still under-specified.",
+  "targetUsers": [],
+  "goals": [
+    "Keep stage contracts explicit for product outputs.",
+    "Route product work to the right workflow stage and handoff template.",
+    "Highlight sequencing or orchestration gaps before they block delivery."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Each governed product deliverable maps to a workflow stage or handoff path.",
+    "Workflow sequencing risks are documented before execution."
+  ],
+  "relatedPaths": [
+    "docs/templates/workflow_handoff_template.md",
+    "workflows/roles.md"
+  ],
+  "governanceRefs": [
+    "workflows/execution.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_workflow_pm_prompt.md",
+  "templateId": "virtual-workflow-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.131Z",
+  "updatedAt": "2026-04-27T10:04:22.131Z"
+}

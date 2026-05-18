@@ -1,48 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 920" width="1360" height="920">
   <style>
-    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }
-    .title { fill: #0d0d0d; font-size: 28px; font-weight: 600; }
-    .sub { fill: #6e6e80; font-size: 13px; }
-    .card { fill: #ffffff; stroke: #e5e5e5; stroke-width: 1.5; rx: 10; }
-    .cardTitle { fill: #0d0d0d; font-size: 17px; font-weight: 600; }
-    .body { fill: #374151; font-size: 13px; }
-    .meta { fill: #6e6e80; font-size: 12px; }
-    .linkText { fill: #1d4ed8; font-size: 13px; font-weight: 500; }
+    text { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #14213d; }
+    .title { font-size: 30px; font-weight: 700; }
+    .sub { font-size: 14px; fill: #52607a; }
+    .card { fill: #ffffff; stroke: #d6dde8; stroke-width: 1.5; rx: 18; }
+    .h { font-size: 20px; font-weight: 700; }
+    .b { font-size: 14px; }
+    .m { font-size: 13px; fill: #6b7280; }
+    .link { font-size: 14px; fill: #2563eb; font-weight: 600; }
   </style>
-  <rect width="1360" height="920" fill="#ffffff"/>
-  <a href="../../boards/index.svg"><text x="72" y="46" class="linkText">&lt;- Back to PMAIOS directory</text></a>
-  <text x="72" y="88" class="title">小彧知识库 / Knowledge Base</text>
-  <text x="72" y="116" class="sub">Current sample project for product workflow rollout.</text>
+  <rect width="1360" height="920" fill="#f5f7fb"/>
+  <text x="72" y="68" class="title">知识库项目 / project-board</text>
+  <text x="72" y="98" class="sub">当前阶段不是直接做业务功能，而是先把 WeKnora 二开准备包补齐，让项目具备长期迭代和可验证开工能力。</text>
 
-  <rect x="72" y="160" width="392" height="190" class="card"/>
-  <rect x="72" y="160" width="5" height="190" fill="#10a37f"/>
-  <text x="100" y="198" class="cardTitle">Current Position</text>
-  <text x="100" y="223" class="meta">research-first / partial adoption</text>
-  <text x="100" y="258" class="body">This project is still before final solution convergence. The current truth is: broaden research, complete industry best-practice understanding, then converge architecture and product direction.</text>
+  <rect x="72" y="140" width="380" height="220" class="card"/>
+  <text x="100" y="182" class="h">当前定位</text>
+  <text x="100" y="220" class="b">阶段：研究收敛 + 二开准备</text>
+  <text x="100" y="252" class="b">当前真相：WeKnora 已进仓，但环境、扫描、架构边界、</text>
+  <text x="100" y="278" class="b">项目入口和长周期迭代能力还没形成完整开工包。</text>
+  <text x="100" y="320" class="m">禁止在代码扫描前直接改业务主模块。</text>
 
-  <rect x="484" y="160" width="392" height="190" class="card"/>
-  <text x="512" y="198" class="cardTitle">Confirmed Inputs</text>
-  <text x="512" y="258" class="body">WeKnora fit study exists, startup meeting inputs exist, and product-workflow governance has been laid down. Those inputs are starting points, not final locked direction.</text>
+  <rect x="490" y="140" width="380" height="220" class="card"/>
+  <text x="518" y="182" class="h">本轮新增</text>
+  <text x="518" y="220" class="b">1. 二开准备真源与检查清单</text>
+  <text x="518" y="246" class="b">2. WeKnora 代码扫描脚本与扫描产物</text>
+  <text x="518" y="272" class="b">3. knowledge-base 子项目专用 skill registry</text>
+  <text x="518" y="298" class="b">4. project / roadmap / decision / change-log 入口</text>
+  <text x="518" y="330" class="m">这些都属于外挂式补强，不改平台主内核。</text>
 
-  <rect x="896" y="160" width="392" height="190" class="card"/>
-  <text x="924" y="198" class="cardTitle">Needed Next</text>
-  <text x="924" y="258" class="body">Competitor/open-source comparison, broader best-practice research, architecture boundary confirmation, and clearer phase split.</text>
+  <rect x="908" y="140" width="380" height="220" class="card"/>
+  <text x="936" y="182" class="h">当前阻塞</text>
+  <text x="936" y="220" class="b">1. Docker 镜像拉取被外部网络/代理阻断</text>
+  <text x="936" y="246" class="b">2. 本机未检测到 `go`，源码编译路线未满足</text>
+  <text x="936" y="272" class="b">3. WeKnora 是底座还是临时产品壳，仍需拍板</text>
+  <text x="936" y="304" class="m">环境问题当前不是仓库配置错误。</text>
 
-  <rect x="72" y="390" width="392" height="216" class="card"/>
-  <text x="100" y="428" class="cardTitle">Main Docs</text>
-  <a href="README.md"><text x="100" y="470" class="linkText">README.md</text></a>
-  <a href="docs/WeKnora适配性评估.md"><text x="100" y="502" class="linkText">WeKnora fit study</text></a>
-  <a href="docs/知识库项目执行工作流.md"><text x="100" y="534" class="linkText">project workflow</text></a>
-  <a href="docs/知识库项目产品经理任务单.md"><text x="100" y="566" class="linkText">PM task sheet</text></a>
+  <rect x="72" y="408" width="580" height="360" class="card"/>
+  <text x="100" y="450" class="h">主文档</text>
+  <a href="docs/WeKnora二开准备与PMAIOS-v0.5收敛方案.md"><text x="100" y="494" class="link">WeKnora二开准备与PMAIOS-v0.5收敛方案.md</text></a>
+  <a href="docs/WeKnora开工条件检查清单.md"><text x="100" y="528" class="link">WeKnora开工条件检查清单.md</text></a>
+  <a href="docs/WeKnora适配性评估.md"><text x="100" y="562" class="link">WeKnora适配性评估.md</text></a>
+  <a href="docs/知识资产平台二开计划-v1.1.md"><text x="100" y="596" class="link">知识资产平台二开计划-v1.1.md</text></a>
+  <a href="docs/知识资产平台v1.1研发任务单.md"><text x="100" y="630" class="link">知识资产平台v1.1研发任务单.md</text></a>
+  <a href="docs/scan/weknora-prep-scan-report.md"><text x="100" y="664" class="link">docs/scan/weknora-prep-scan-report.md</text></a>
+  <text x="100" y="714" class="m">扫描命令：node subprojects/knowledge-base/tools/weknora-prep-scan.mjs</text>
 
-  <rect x="484" y="390" width="392" height="216" class="card"/>
-  <text x="512" y="428" class="cardTitle">Operating Rule</text>
-  <text x="512" y="470" class="body">Do not jump from early inputs into final PRD. This project is the sample proving that research-first workflow must be real, not ceremonial.</text>
-
-  <rect x="896" y="390" width="392" height="216" class="card"/>
-  <text x="924" y="428" class="cardTitle">Follow-Up Boards</text>
-  <text x="924" y="470" class="body">Recommended next SVG boards:</text>
-  <text x="924" y="502" class="body">- research-map.svg</text>
-  <text x="924" y="534" class="body">- architecture-board.svg</text>
-  <text x="924" y="566" class="body">- decision-board.svg</text>
+  <rect x="690" y="408" width="598" height="360" class="card"/>
+  <text x="718" y="450" class="h">下一步</text>
+  <text x="718" y="494" class="b">1. 跑出首批扫描产物，确认 WeKnora 前后端改造切口</text>
+  <text x="718" y="520" class="b">2. 解决 Docker 镜像访问，或确认改走源码编译路线</text>
+  <text x="718" y="546" class="b">3. 明确 Prompt / Chat / Agent Runtime / 权限控制面归属</text>
+  <text x="718" y="572" class="b">4. 再进入 v1.1 产品壳和业务页面改造</text>
+  <a href="roadmap-board.svg"><text x="718" y="628" class="link">查看 roadmap-board.svg</text></a>
+  <a href="decision-board.svg"><text x="718" y="662" class="link">查看 decision-board.svg</text></a>
+  <a href="change-log.md"><text x="718" y="696" class="link">查看 change-log.md</text></a>
 </svg>

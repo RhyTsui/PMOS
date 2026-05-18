@@ -1,0 +1,38 @@
+{
+  "id": "product-agent-7b1792d4-6ab4-49c0-b1c9-3735829d7000",
+  "subprojectId": null,
+  "name": "Virtual ROI PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "roi-analysis",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns benefit analysis, cost framing, and opportunity prioritization.",
+  "problem": "Strategic opportunities are discussed, but benefit, cost, and payoff are not consistently captured as a reusable decision artifact.",
+  "targetUsers": [],
+  "goals": [
+    "Produce ROI and opportunity framing for major product bets.",
+    "Explain expected benefit, effort, timing, and risk.",
+    "Support product chief decisions with explicit economic tradeoffs."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "ROI outputs clearly identify upside, downside, effort, risk, and recommended priority."
+  ],
+  "relatedPaths": [
+    "docs/templates/requirement_evaluation_feedback_template.md",
+    "docs/templates/roadmap_template.md"
+  ],
+  "governanceRefs": [
+    "docs/templates/version_planning_template.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_roi_pm_prompt.md",
+  "templateId": "virtual-roi-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.128Z",
+  "updatedAt": "2026-04-27T10:04:22.128Z"
+}

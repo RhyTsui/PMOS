@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>花花世界埋点上报需求文档（开发者版）</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Developer Spec</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">埋点上报需求文档</h1>
+        <p>面向客户端、SDK、服务端、测试、数据 BP 的正式接入文档 demo。</p>
+        <nav class="nav">
+          <a href="./index.html">返回入口</a>
+          <a href="#summary">文档摘要</a>
+          <a href="#versioning">版本管理</a>
+          <a href="#architecture">接入架构</a>
+          <a href="#client">客户端 SDK 接入规范</a>
+          <a href="#server">服务端接入规范</a>
+          <a href="#timeline">事件时序</a>
+          <a href="#catalog">事件目录</a>
+          <a href="#dictionary">字段字典</a>
+          <a href="#validation">校验与验收</a>
+          <a href="#change">变更与兼容</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero" id="summary">
+          <span class="eyebrow">Human Readable</span>
+          <h1>花花世界埋点上报需求文档</h1>
+          <p>
+            本文档按开发者文档口径组织，目标是让客户端、SDK、服务端和测试团队可以直接基于本文进行接入、联调和验收。
+            它是 demo，但写法按中大型游戏项目的正式接入文档标准处理，而不是业务说明稿。
+          </p>
+          <div class="metric-grid">
+            <article class="metric">
+              <span>文档定位</span>
+              <strong>开发接入</strong>
+            </article>
+            <article class="metric">
+              <span>客户端链路</span>
+              <strong>107/108/106/110</strong>
+            </article>
+            <article class="metric">
+              <span>服务端链路</span>
+              <strong>201-223</strong>
+            </article>
+            <article class="metric">
+              <span>自定义事件</span>
+              <strong>20001-20027</strong>
+            </article>
+          </div>
+          <div class="callout fact">
+            <p><strong>文档目标：</strong>回答“怎么接、接什么、什么时候发、发成什么样、哪些字段必须有、哪些冲突必须保留、如何验收通过”。</p>
+          </div>
+        </section>
+
+        <section class="section" id="versioning">
+          <h2>一、文档说明与版本管理</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>项</th>
+                  <th>内容</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>项目</td><td>花花世界</td></tr>
+                <tr><td>文档类型</td><td>埋点上报需求文档（开发者版）</td></tr>
+                <tr><td>适用对象</td><td>客户端研发、SDK 接入、服务端研发、测试、数据 BP、项目管理</td></tr>
+                <tr><td>来源</td><td>RM V251222、SDK 行为日志埋点表、数据埋点梳理-20241223</td></tr>
+                <tr><td>当前步骤版本</td><td>至少涉及 20250122、20250724 两套 step_version</td></tr>
+                <tr><td>文档原则</td><td>已定义事实、实现状态、冲突灰区分开写；不把未知写成已完成</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout assumption">
+            <p><strong>说明：</strong>当前源资料未提供项目组直连 HTTP 网关文档，因此本文档把客户端接入面定义为 SDK 调用契约，把服务端接入面定义为服务端事件契约。</p>
+          </div>
+        </section>
+
+        <section class="section" id="architecture">
+          <h2>二、埋点接入架构与职责分工</h2>
+          <h3>1. 总体架构</h3>
+          <div class="card-grid">
+            <article class="card">
+              <h3>客户端 / SDK 层</h3>
+              <ul>
+                <li>负责账号类基础事件、前置事件、新手引导、支付前端流程、激励视频前端流程、客户端自定义事件。</li>
+                <li>通过 <code>GSSDK.getInstance().call("analytics", "track", info)</code> 发起埋点。</li>
+                <li>通过 <code>getTrackingInfo</code> 读取设备/渠道透传信息。</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>服务端层</h3>
+              <ul>
+                <li>负责账号验签、角色登录、登出、支付成功、资源产销、支付流程后端链、自定义玩法事件。</li>
+                <li>负责补充客户端无法稳定获得的业务上下文字段。</li>
+                <li>负责把客户端透传字段接入后端关键链路。</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>数据 BP / 产品层</h3>
+              <ul>
+                <li>定义事件口径、字段意义、步骤命名、验收标准和冲突优先级。</li>
+                <li>维护步骤版本和内容 ID 引用语义。</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>测试 / 验收层</h3>
+              <ul>
+                <li>不只校验“是否上报”，还要校验时序、字段完整性、字段一致性和链路可回查能力。</li>
+              </ul>
+            </article>
+          </div>
+
+          <h3>2. 研发职责边界</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>模块</th>
+                  <th>责任方</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>111/114/102/104/105</td><td>SDK / 客户端</td><td>基础账号链</td></tr>
+                <tr><td>107 PreEvent</td><td>客户端 / SDK</td><td>前置步骤漏斗</td></tr>
+                <tr><td>108 TutorialStep</td><td>客户端 / SDK</td><td>新手引导步骤链</td></tr>
+                <tr><td>106 PayFlow</td><td>客户端 / SDK</td><td>支付前端步骤链</td></tr>
+                <tr><td>110 AdVideo</td><td>客户端 / SDK</td><td>激励视频前端步骤链</td></tr>
+                <tr><td>201/203/204/205/206/207/208/215/221/223</td><td>服务端</td><td>后端业务链、支付后端链、资源链</td></tr>
+                <tr><td>20001-20027</td><td>前端/SDK + 服务端</td><td>按事件定义分端接入</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="client">
+          <h2>三、客户端 SDK 接入规范</h2>
+          <h3>1. 通用调用方式</h3>
+          <div class="callout fact">
+            <p><strong>统一调用：</strong><code>GSSDK.getInstance().call("analytics", "track", info)</code></p>
+          </div>
+          <p>客户端现有资料显示，项目组不是直接自行决定使用 GET/POST 上报，而是通过 SDK analytics 模块发起事件。也就是说，客户端侧的“接口协议”本质上是 SDK 调用协议。</p>
+
+          <h3>2. 客户端事件类型</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>类型</th>
+                  <th>type</th>
+                  <th>场景</th>
+                  <th>必带字段</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>前置事件</td><td>1</td><td>107</td><td>stepId, stepName</td></tr>
+                <tr><td>新手引导</td><td>2</td><td>108</td><td>stepId, stepName</td></tr>
+                <tr><td>自定义事件</td><td>0</td><td>20011 / 20022 / 20023 / 20026 等</td><td>event, extra</td></tr>
+                <tr><td>支付式流程事件</td><td>9</td><td>106 / 110</td><td>event, step_version, step_id, step_name</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>3. 标准请求体示例</h3>
+          <h4>前置事件</h4>
+          <div class="callout fact">
+            <p><code>{ "type": "1", "extra": { "stepId": "100", "stepName": "开始播放CG", "param1": "aaa" } }</code></p>
+          </div>
+
+          <h4>新手引导</h4>
+          <div class="callout fact">
+            <p><code>{ "type": "2", "extra": { "stepId": "100", "stepName": "开始新手引导", "param1": "aaa" } }</code></p>
+          </div>
+
+          <h4>客户端自定义事件</h4>
+          <div class="callout fact">
+            <p><code>{ "type": "0", "event": "20011", "eventName": "GameStory", "extra": { "story_id": "123", "operation_type": "skip" } }</code></p>
+          </div>
+
+          <h4>支付流程事件</h4>
+          <div class="callout fact">
+            <p><code>{ "type": "9", "event": "106", "extra": { "step_version": "20250724", "step_id": "501", "step_name": "支付成功", "result": "0", "game_order_id": "..." } }</code></p>
+          </div>
+
+          <h3>4. 设备透传读取</h3>
+          <div class="callout fact">
+            <p><strong>同步读取：</strong><code>GSSDK.getInstance().callString("analytics", "getTrackingInfo", new HashMap())</code></p>
+          </div>
+          <div class="callout fact">
+            <p><strong>异步回调：</strong><code>getTrackingInfoAsync</code>，返回 <code>code / data / message</code> 结构。</p>
+          </div>
+          <div class="callout fact">
+            <p><strong>期望字段：</strong><code>s_oneid</code>、<code>c_oneid</code>、<code>device_id</code>、<code>cpsid</code>、<code>channel</code>、<code>os_type</code>、<code>app_version</code> 等。</p>
+          </div>
+
+          <h3>5. 客户端接入要求</h3>
+          <ul>
+            <li>stepId 必须为数字字符串，且按业务真实流程递增。</li>
+            <li>stepName 必须是可读文本，供验收和问题排查使用。</li>
+            <li>自定义事件 event 必须是数字字符串，且大于 10000。</li>
+            <li>支付链和激励视频链必须带步骤版本。</li>
+            <li>失败步骤不能丢，建议保留失败原因。</li>
+          </ul>
+        </section>
+
+        <section class="section" id="server">
+          <h2>四、服务端接入规范</h2>
+          <h3>1. 服务端不是补充说明，而是正式链路一部分</h3>
+          <p>
+            当前项目的埋点体系不是“客户端把所有数据都打完”，而是客户端和服务端共同完成闭环。特别是支付链、资源链、角色链、自定义玩法链，大量关键字段必须由服务端产出。
+          </p>
+
+          <h3>2. 服务端基础事件</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件</th>
+                  <th>职责</th>
+                  <th>关键字段</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>201 GameLogin</td><td>账号登录完成</td><td>event_id, start_time</td></tr>
+                <tr><td>203 RoleLogin</td><td>角色登录</td><td>role_id, user_lev, server, realserver</td></tr>
+                <tr><td>204 RoleLogout</td><td>角色登出</td><td>duration</td></tr>
+                <tr><td>205 Pay</td><td>支付成功 / 发货完成</td><td>order_id, recharge_channel, currency, amount</td></tr>
+                <tr><td>206 LevelUp</td><td>角色升级</td><td>pre_lev, pre_vip_lev</td></tr>
+                <tr><td>207 CCU</td><td>在线人数</td><td>user_count</td></tr>
+                <tr><td>208 Prop</td><td>资源产销</td><td>item_consumetype, scene, item_id, item_num</td></tr>
+                <tr><td>215 GameLoginSign</td><td>账号验签</td><td>result</td></tr>
+                <tr><td>221 PayFlow</td><td>支付流程后端步骤</td><td>step_id, order_id, pay_channel, recharge_channel</td></tr>
+                <tr><td>223 AdVideo</td><td>激励视频后端步骤</td><td>step_id, ad_sid, reward_target</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>3. 服务端事件产出要求</h3>
+          <ul>
+            <li>统一携带公共头：<code>game_uuid</code>、<code>app_id</code>、<code>ip</code>、<code>role_id</code>、<code>server</code>、<code>realserver</code>。</li>
+            <li>统一使用 13 位毫秒时间戳作为 <code>start_time</code>。</li>
+            <li>字段定义与实际发送不一致时，必须在事件说明中保留该差异。</li>
+            <li>支付链必须明确哪些字段来自发货通知，哪些字段来自中台订单，哪些字段来自客户端透传。</li>
+          </ul>
+
+          <div class="callout risk">
+            <p><strong>关键事实：</strong>当前资料没有给出项目组服务端直接调用的 REST/POST 网关。因此本文只定义“服务端事件契约”，不伪造不存在的 HTTP API 细节。</p>
+          </div>
+        </section>
+
+        <section class="section" id="timeline">
+          <h2>五、关键事件生命周期与时序</h2>
+          <h3>1. 登录前置链</h3>
+          <ol>
+            <li>SDK 初始化 / 登录开始</li>
+            <li>设备信息获取</li>
+            <li>请求服务器列表</li>
+            <li>加载配置文件</li>
+            <li>获取网关地址</li>
+            <li>连接网络服务器</li>
+            <li>客户端角色登录</li>
+          </ol>
+          <p class="muted">该链路受 step_version 影响极大，必须区分 20250122 与 20250724。</p>
+
+          <h3>2. 支付闭环链</h3>
+          <ol>
+            <li>客户端支付流程事件 `106` 记录用户侧步骤和结果</li>
+            <li>服务端支付流程事件 `221` 记录后端关键步骤和补充字段</li>
+            <li>支付成功 / 发货事件 `205` 作为最终闭环结果</li>
+          </ol>
+          <div class="callout fact">
+            <p><strong>通过标准：</strong>必须能够从订单相关标识把 `106 -> 221 -> 205` 串起来。</p>
+          </div>
+
+          <h3>3. 新手链</h3>
+          <ol>
+            <li>前端 `108 - TutorialStep` 记录引导步骤级行为</li>
+            <li>后端 `20001 - Tutorial` 记录引导状态</li>
+          </ol>
+        </section>
+
+        <section class="section" id="catalog">
+          <h2>六、事件目录</h2>
+          <h3>1. 核心事件</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件 ID</th>
+                  <th>名称</th>
+                  <th>端</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>111 / 114 / 102 / 104 / 105</td><td>SDK 初始化、登录、进入游戏、升级</td><td>客户端/SDK</td><td>基础账号行为</td></tr>
+                <tr><td>106</td><td>支付流程 PayFlow</td><td>客户端/SDK</td><td>支付前端步骤链</td></tr>
+                <tr><td>107</td><td>前置事件 PreEvent</td><td>客户端/SDK</td><td>启动到进入游戏前步骤链</td></tr>
+                <tr><td>108</td><td>新手引导 TutorialStep</td><td>客户端/SDK</td><td>引导步骤链</td></tr>
+                <tr><td>110</td><td>激励视频 AdVideo</td><td>客户端/SDK</td><td>激励视频前端步骤链</td></tr>
+                <tr><td>201 / 203 / 204 / 205 / 206 / 207 / 208 / 215 / 221 / 223</td><td>后端基础与支付事件</td><td>服务端</td><td>基础业务和闭环链</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>2. 自定义事件</h3>
+          <p>完整索引见附录。当前覆盖新手、成长、解锁、货币、库存、种植、花艺、经营订单、场景事件、剧情、任务、分档奖励、玩家换装、场景布置、社交、交易、排行、公会、公会竞赛、内嵌游戏、入口检测、平台特性、商品购买、扭蛋抽奖、活动展示、运营活动。</p>
+        </section>
+
+        <section class="section" id="dictionary">
+          <h2>七、字段字典与类型要求</h2>
+          <h3>1. 类型约定</h3>
+          <ul>
+            <li>时间：13 位毫秒时间戳</li>
+            <li>步骤 ID / 事件 ID：数字字符串或整型，项目内保持一致</li>
+            <li>金额：必须注明单位；支付链资料中存在“法币单位 ×100”的约定</li>
+            <li>map 类型字段：必须说明 key/value 语义</li>
+            <li>枚举字段：必须可回溯到枚举字典</li>
+          </ul>
+
+          <h3>2. 高价值字段</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>字段</th>
+                  <th>用途</th>
+                  <th>问题点</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>order_id</td><td>支付中台订单号</td><td>部分步骤未获取</td></tr>
+                <tr><td>channel_order_id</td><td>商户/渠道订单号</td><td>部分步骤未获取</td></tr>
+                <tr><td>pay_channel</td><td>充值渠道</td><td>定义关键但存在未发送</td></tr>
+                <tr><td>recharge_channel</td><td>支付方式</td><td>定义关键但存在未发送</td></tr>
+                <tr><td>step_version</td><td>步骤版本</td><td>跨版本分析不可缺</td></tr>
+                <tr><td>s_oneid / c_oneid / device_id / cpsid</td><td>透传</td><td>服务端使用完整性待验证</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="validation">
+          <h2>八、校验规则与验收标准</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>客户端验收</h3>
+              <ul>
+                <li>SDK 调用参数结构正确</li>
+                <li>stepId / stepName / type / event 合法</li>
+                <li>失败事件可观测</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>服务端验收</h3>
+              <ul>
+                <li>公共头齐全</li>
+                <li>关键业务字段不缺</li>
+                <li>支付链与资源链字段可解释</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>链路验收</h3>
+              <ul>
+                <li>106 -> 221 -> 205 可串查</li>
+                <li>107 按 step_version 可重建前置漏斗</li>
+                <li>108 + 20001 可解释新手链</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>灰区验收</h3>
+              <ul>
+                <li>所有“不发送 / 未获取”字段单列缺口</li>
+                <li>不因 demo 省略冲突说明</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="change">
+          <h2>九、变更管理与兼容策略</h2>
+          <ul>
+            <li>步骤链变更必须更新 step_version，不得静默改 step_id。</li>
+            <li>自定义事件迁移必须保留新旧事件映射，例如 `20001 -> 原 10001`。</li>
+            <li>字段重命名或来源变更时，必须同步更新字段映射表和验收规则。</li>
+            <li>新增事件可以先接 demo 级字段，但必须显式标出“字段待补完”，不能假装完整。</li>
+          </ul>
+        </section>
+
+        <section class="section" id="faq">
+          <h2>十、常见问题</h2>
+          <h3>1. 这是不是 HTTP POST 接口文档？</h3>
+          <p>客户端不是。当前资料只证明客户端通过 SDK analytics 模块调用，不应伪造 POST 地址。</p>
+
+          <h3>2. 为什么还保留“不发送 / 未获取”？</h3>
+          <p>因为这正是开发和验收最关键的信息。正式接入文档不能把冲突抹掉。</p>
+
+          <h3>3. 这份文档是生产级还是 demo？</h3>
+          <p>这是 demo，但写法按生产级开发者文档组织。它仍缺少真实网关、环境地址、鉴权策略等生产细节，因为源资料本身没有给出。</p>
+          <div class="callout ok">
+            <p><strong>配套文档：</strong><a href="./huahua-ai-structured-spec.html">AI 结构化规格总册</a>、<a href="./appendix-events-fields.html">事件与字段索引</a>、<a href="./appendix-steps-enums.html">步骤与枚举映射</a>。</p>
+          </div>
+        </section>
+
+        <div class="footer">文档地址：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\huahua-human-integration-manual.html</div>
+      </main>
+    </div>
+  </body>
+</html>

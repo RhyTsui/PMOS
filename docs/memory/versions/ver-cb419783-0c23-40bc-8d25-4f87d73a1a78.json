@@ -1,0 +1,34 @@
+{
+  "id": "ver-cb419783-0c23-40bc-8d25-4f87d73a1a78",
+  "subprojectId": null,
+  "entityType": "requirement",
+  "entityId": "req-05269e58-05ec-49e8-b9a2-a4c8682e8480",
+  "changeType": "extract",
+  "summary": "Extracted requirement from docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-05269e58-05ec-49e8-b9a2-a4c8682e8480"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "| 项目 | 需求方 | 本周工作 | 汇报人 | 进度 | 备注 | 下周计划 | 进度 |",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Extracted requirement needs operator review before implementation planning."
+  },
+  "createdAt": "2026-05-09T06:12:57.921Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

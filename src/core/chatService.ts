@@ -19,6 +19,7 @@ import type {
 } from '../shared/schemas.js';
 import { MultimodalRouter } from '../multimodal_engine/router.js';
 import { ConversationGovernanceService } from './conversationGovernanceService.js';
+import { RequirementService } from './requirementService.js';
 
 type SessionScopeInput = {
   title?: string;
@@ -37,6 +38,7 @@ export class ChatService {
     private readonly llmRouter = new LlmRouter(store),
     private readonly multimodalRouter = new MultimodalRouter(store),
     private readonly conversationGovernanceService = new ConversationGovernanceService(store, memoryService),
+    private readonly requirementService = new RequirementService(memoryService),
   ) {}
 
   async listSessions(subprojectId?: string | null) {
@@ -246,6 +248,23 @@ export class ChatService {
         error: providerResult.resolution.error,
       },
     });
+    if (providerResult.resolution.status === 'error') {
+      await this.requirementService.ingestFromAutoCapture({
+        title: `Auto capture: provider failure in ${session.title}`,
+        content: [
+          `P1 warning: provider_failed event triggered fallback reply.`,
+          '',
+          `Session: ${session.id}`,
+          `Run: ${run.id}`,
+          `Provider: ${providerResult.resolution.providerName} / ${providerResult.resolution.model}`,
+          `Error: ${providerResult.resolution.error ?? 'unknown provider error'}`,
+          `Trigger message: ${triggerMessage.content}`,
+        ].join('\n'),
+        subprojectId: effectiveSubprojectId,
+        runId: run.id,
+        eventKind: 'provider_failed',
+      });
+    }
 
     const assistantMessage: ChatMessage = {
       id: `msg-${randomUUID()}`,

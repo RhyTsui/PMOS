@@ -33,7 +33,8 @@ flowchart TB
 
 ### Interface Layer
 - `src/frontend/`
-- `.claude/commands/`
+- `skills/`
+- `~/.codex/skills/`（本机安装层）
 - 提供 dashboard 与命令入口
 
 ### Workflow Layer

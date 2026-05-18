@@ -19,7 +19,7 @@ const SkillDefinitionSchema = z.object({
       status: z.enum(['integrated', 'installed', 'configured', 'manual', 'unavailable']).default('manual'),
       command: z.string().nullable().default(null),
       statusPath: z.string().nullable().default(null),
-      integration: z.enum(['workflow', 'product-chief', 'cli', 'external-tool', 'manual']).default('manual'),
+      integration: z.enum(['workflow', 'product-chief', 'cli', 'external-tool', 'repo-skill', 'manual']).default('manual'),
       notes: z.string().nullable().default(null),
     })
     .default({

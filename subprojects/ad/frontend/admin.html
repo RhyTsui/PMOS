@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小乔智投管理页</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #edf3ff;
+        --bg-accent: #f9fbff;
+        --panel: rgba(255, 255, 255, 0.96);
+        --panel-soft: #f6f9ff;
+        --panel-strong: #ffffff;
+        --line: #d6e2fb;
+        --line-strong: #bccff6;
+        --text: #10213b;
+        --text-soft: #4f6488;
+        --text-muted: #7384a2;
+        --brand: #1554d1;
+        --brand-soft: rgba(21, 84, 209, 0.1);
+        --success: #11815b;
+        --warn: #b77718;
+        --danger: #c63e39;
+        --shadow: 0 24px 64px rgba(13, 34, 78, 0.12);
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at left top, rgba(64, 121, 255, 0.18), transparent 30%),
+          radial-gradient(circle at 90% 10%, rgba(21, 84, 209, 0.12), transparent 22%),
+          linear-gradient(180deg, var(--bg-accent) 0%, var(--bg) 100%);
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .shell {
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .frame {
+        max-width: 1600px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr) 420px;
+        gap: 20px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(188, 207, 246, 0.72);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .sidebar,
+      .center,
+      .detail {
+        min-height: calc(100vh - 48px);
+      }
+
+      .sidebar,
+      .center,
+      .detail {
+        padding: 18px;
+      }
+
+      .brand-card,
+      .section-card,
+      .hero-card,
+      .list-card,
+      .detail-card,
+      .binding-card {
+        border-radius: 24px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(188, 207, 246, 0.64);
+      }
+
+      .brand-card {
+        padding: 22px;
+        color: #fff;
+        background:
+          linear-gradient(145deg, rgba(13, 58, 152, 0.98), rgba(43, 108, 234, 0.96));
+        overflow: hidden;
+        position: relative;
+      }
+
+      .brand-card::after {
+        content: "";
+        position: absolute;
+        inset: auto -40px -50px auto;
+        width: 160px;
+        height: 160px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.24), transparent 68%);
+      }
+
+      .brand-card h1,
+      .hero-card h1 {
+        margin: 0 0 8px;
+      }
+
+      .brand-card p,
+      .hero-card p,
+      .section-head p,
+      .section-meta,
+      .meta,
+      .item-text,
+      .field-note,
+      .foot-note {
+        color: var(--text-soft);
+        line-height: 1.65;
+      }
+
+      .brand-card p {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 13px;
+        max-width: 220px;
+      }
+
+      .pill-row,
+      .chip-row,
+      .toolbar,
+      .switch-row,
+      .tag-row,
+      .top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill,
+      .chip,
+      .status-pill,
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      .pill {
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+      }
+
+      .section-card {
+        margin-top: 16px;
+        padding: 18px;
+      }
+
+      .section-head,
+      .row,
+      .hero-top,
+      .detail-top,
+      .field-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .section-head h2,
+      .section-head h3,
+      .list-card h2,
+      .detail-card h2,
+      .binding-card h2 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text-soft);
+      }
+
+      .nav-list,
+      .check-list,
+      .history-list,
+      .binding-list,
+      .switch-list,
+      .detail-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-item,
+      .prompt-item,
+      .check-item,
+      .history-item,
+      .binding-item,
+      .switch-item {
+        width: 100%;
+        padding: 15px 16px;
+        text-align: left;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 255, 0.98));
+      }
+
+      .nav-item.active,
+      .prompt-item.active {
+        border-color: rgba(21, 84, 209, 0.6);
+        background: linear-gradient(180deg, rgba(234, 242, 255, 0.98), rgba(246, 249, 255, 0.98));
+      }
+
+      .nav-item strong,
+      .prompt-item strong,
+      .check-item strong,
+      .history-item strong,
+      .binding-item strong,
+      .switch-item strong,
+      .field-block strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .status-pill {
+        background: var(--brand-soft);
+        color: var(--brand);
+      }
+
+      .status-pill.success {
+        background: rgba(17, 129, 91, 0.12);
+        color: var(--success);
+      }
+
+      .status-pill.warn {
+        background: rgba(183, 119, 24, 0.12);
+        color: var(--warn);
+      }
+
+      .status-pill.danger {
+        background: rgba(198, 62, 57, 0.12);
+        color: var(--danger);
+      }
+
+      .center,
+      .detail {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hero-card,
+      .list-card,
+      .detail-card,
+      .binding-card {
+        padding: 20px;
+      }
+
+      .hero-card h1 {
+        font-size: 32px;
+        letter-spacing: -0.03em;
+      }
+
+      .hero-card p {
+        margin: 0;
+        max-width: 740px;
+      }
+
+      .button {
+        border: 1px solid transparent;
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .button-primary {
+        background: linear-gradient(135deg, var(--brand), #3174f4);
+        color: #fff;
+      }
+
+      .button-secondary {
+        background: #fff;
+        color: var(--brand);
+        border-color: var(--line-strong);
+      }
+
+      .summary-grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .summary-card {
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid rgba(188, 207, 246, 0.56);
+        background: var(--panel-soft);
+      }
+
+      .summary-card span {
+        display: block;
+      }
+
+      .summary-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+
+      .summary-value {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .toolbar {
+        margin-top: 14px;
+      }
+
+      .search-row {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 160px 140px;
+        gap: 10px;
+      }
+
+      .input,
+      .select,
+      .textarea {
+        width: 100%;
+        border: 1px solid rgba(188, 207, 246, 0.74);
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: #fff;
+        color: var(--text);
+      }
+
+      .textarea {
+        min-height: 180px;
+        resize: vertical;
+      }
+
+      .prompt-list {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .prompt-item-top,
+      .switch-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .detail-grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .field-block {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(188, 207, 246, 0.56);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(247, 250, 255, 1));
+      }
+
+      .field-note {
+        margin: 0;
+        font-size: 13px;
+      }
+
+      .version-list,
+      .binding-list,
+      .switch-list,
+      .check-list {
+        margin-top: 14px;
+      }
+
+      .history-item,
+      .binding-item,
+      .switch-item,
+      .check-item {
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .toggle {
+        width: 48px;
+        height: 28px;
+        border-radius: 999px;
+        border: none;
+        background: rgba(188, 207, 246, 0.92);
+        position: relative;
+      }
+
+      .toggle::after {
+        content: "";
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.2s ease;
+      }
+
+      .toggle.on {
+        background: linear-gradient(135deg, var(--brand), #3174f4);
+      }
+
+      .toggle.on::after {
+        transform: translateX(20px);
+      }
+
+      .foot-note {
+        font-size: 12px;
+      }
+
+      @media (max-width: 1380px) {
+        .frame {
+          grid-template-columns: 260px minmax(0, 1fr);
+        }
+
+        .detail {
+          grid-column: 1 / -1;
+          min-height: auto;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .detail-card:first-child {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 1120px) {
+        .shell {
+          padding: 16px;
+        }
+
+        .frame {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar,
+        .center,
+        .detail {
+          min-height: auto;
+        }
+
+        .search-row,
+        .summary-grid,
+        .detail-grid,
+        .detail {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-top,
+        .section-head,
+        .detail-top,
+        .field-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="frame">
+        <aside class="sidebar panel">
+          <section class="brand-card">
+            <h1>小乔智投</h1>
+            <p>这里承接日常配置、提示词治理和结果模板维护。首页负责推进任务，管理页负责把能力管稳。</p>
+            <div class="pill-row">
+              <span class="pill">管理页</span>
+              <span class="pill">同一套登录</span>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>管理分区</h2>
+                <p>先补最核心的一层：提示词治理。</p>
+              </div>
+            </div>
+            <div class="nav-list" id="nav-list"></div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>当前提醒</h2>
+                <p>优先看会影响上线结果和回答质量的配置变动。</p>
+              </div>
+            </div>
+            <div class="check-list" id="check-list"></div>
+          </section>
+        </aside>
+
+        <main class="center panel">
+          <section class="hero-card">
+            <div class="hero-top">
+              <div>
+                <h1>提示词管理</h1>
+                <p>把分散在各处的提问规则、回复风格和适用范围收回到统一管理页。当前先覆盖列表、详情、版本和开关四类核心动作。</p>
+              </div>
+              <div class="top-actions">
+                <a class="button button-secondary" href="./index.html">返回工作台</a>
+                <button class="button button-primary" type="button">新建提示词</button>
+              </div>
+            </div>
+            <div class="summary-grid" id="summary-grid"></div>
+          </section>
+
+          <section class="list-card">
+            <div class="section-head">
+              <div>
+                <h2>提示词列表</h2>
+                <p>先找到要调整的规则，再进入右侧查看详情、版本和适用范围。</p>
+              </div>
+              <span class="status-pill success">4 条已生效</span>
+            </div>
+            <div class="toolbar">
+              <span class="chip">全部</span>
+              <span class="chip">需求沟通</span>
+              <span class="chip">问题排查</span>
+              <span class="chip">联调复核</span>
+            </div>
+            <div class="search-row">
+              <input class="input" type="text" value="搜索名称、分类或适用范围" aria-label="搜索提示词" />
+              <select class="select" aria-label="状态筛选">
+                <option>全部状态</option>
+                <option>已生效</option>
+                <option>待发布</option>
+                <option>已停用</option>
+              </select>
+              <select class="select" aria-label="排序方式">
+                <option>最近更新</option>
+                <option>名称排序</option>
+                <option>使用范围</option>
+              </select>
+            </div>
+            <div class="prompt-list" id="prompt-list"></div>
+          </section>
+        </main>
+
+        <aside class="detail panel">
+          <section class="detail-card">
+            <div class="detail-top">
+              <div>
+                <h2 id="detail-title">详情</h2>
+                <p class="section-meta" id="detail-summary"></p>
+              </div>
+              <span class="status-pill" id="detail-status"></span>
+            </div>
+            <div class="detail-grid">
+              <article class="field-block">
+                <strong>提示词正文</strong>
+                <textarea class="textarea" id="detail-content"></textarea>
+              </article>
+              <article class="field-block">
+                <strong>变量说明</strong>
+                <div class="detail-list" id="variable-list"></div>
+              </article>
+              <article class="field-block">
+                <strong>适用范围</strong>
+                <div class="binding-list" id="scope-list"></div>
+              </article>
+              <article class="field-block">
+                <strong>发布动作</strong>
+                <div class="switch-row">
+                  <button class="button button-primary" type="button">发布当前版本</button>
+                  <button class="button button-secondary" type="button">保存草稿</button>
+                </div>
+                <p class="field-note">先看影响范围，再做发布或回退。避免把未验证内容直接推到全部场景。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="binding-card">
+            <div class="detail-top">
+              <div>
+                <h2>版本记录</h2>
+                <p class="section-meta">保留可回看、可发布、可回退的版本轨迹。</p>
+              </div>
+            </div>
+            <div class="history-list" id="version-list"></div>
+          </section>
+
+          <section class="binding-card">
+            <div class="detail-top">
+              <div>
+                <h2>绑定与开关</h2>
+                <p class="section-meta">看清楚它作用在哪些业务流、谁在用、是否允许即时停用。</p>
+              </div>
+            </div>
+            <div class="binding-list" id="binding-list"></div>
+            <div class="switch-list" id="switch-list"></div>
+            <p class="foot-note">当前页只先做提示词治理，不把其他管理模块混进来抢主视线。</p>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const state = {
+        activeGroup: "prompts",
+        activePromptId: "req-clarify",
+        navGroups: [
+          {
+            id: "prompts",
+            title: "提示词治理",
+            text: "管理需求沟通、问题排查和联调复核的核心提示词。"
+          },
+          {
+            id: "routing",
+            title: "路由规则",
+            text: "后续承接不同问题进入哪条处理路径。"
+          },
+          {
+            id: "templates",
+            title: "结果模板",
+            text: "后续承接结构化结果的展示规则。"
+          },
+          {
+            id: "switches",
+            title: "通知与开关",
+            text: "后续承接提醒方式和启停控制。"
+          }
+        ],
+        checks: [
+          { title: "今晚前需复核 2 条规则", text: "联调复核和问题排查各有 1 条待发布版本。" },
+          { title: "需求沟通词条使用频率最高", text: "近 7 天触发 318 次，需要重点保证稳定性。" },
+          { title: "停用动作要可回退", text: "所有停用都应保留版本记录和影响说明。" }
+        ],
+        summaries: [
+          { label: "已生效", value: "4", helper: "当前真实在用的提示词" },
+          { label: "待发布", value: "2", helper: "已编辑但还没推到线上" },
+          { label: "已绑定场景", value: "6", helper: "覆盖四类主业务流和两个补充流程" },
+          { label: "可即时停用", value: "5", helper: "支持发现问题后立刻止损" }
+        ],
+        prompts: [
+          {
+            id: "req-clarify",
+            title: "需求沟通首轮澄清",
+            category: "需求沟通",
+            businessFlow: "需求确认",
+            version: "v1.8",
+            status: "已生效",
+            statusTone: "success",
+            summary: "用于首轮收集目标、时间、资源边界和验收方式，避免业务只给模糊需求。",
+            content:
+              "你现在帮助同学快速澄清广告需求。先确认目标、时间、对象、资源、验收方式，再决定要不要继续追问。输出时先给结论，再列缺失信息和下一步动作。",
+            variables: [
+              { title: "目标", text: "曝光、留资、首购等真实目标。" },
+              { title: "时间节点", text: "什么时候上线、何时需要结果。" },
+              { title: "资源边界", text: "是否有素材、人力或渠道限制。" }
+            ],
+            scopes: [
+              { title: "适用业务流", text: "需求沟通、需求补录" },
+              { title: "适用角色", text: "业务增长、广告支撑、产品经理" },
+              { title: "适用模型", text: "标准对话模型、增强澄清模型" }
+            ],
+            versions: [
+              { title: "v1.8 当前版本", text: "补了资源边界追问，今天上午发布。" },
+              { title: "v1.7 上一版本", text: "只看目标和节点，缺少资源约束。" },
+              { title: "v1.6 历史版本", text: "输出偏长，不利于短会拍板。" }
+            ],
+            bindings: [
+              { title: "需求确认流程", text: "默认开启，优先级最高。" },
+              { title: "补录场景", text: "只在信息缺口明显时触发。" }
+            ],
+            switches: [
+              { title: "即时追问", text: "允许在首轮消息内继续追问缺失信息。", enabled: true },
+              { title: "短会提纲模式", text: "自动把问题压缩成 3 条提纲。", enabled: true }
+            ]
+          },
+          {
+            id: "issue-diagnosis",
+            title: "问题排查结果归并",
+            category: "问题排查",
+            businessFlow: "异常定位",
+            version: "v2.1",
+            status: "待发布",
+            statusTone: "warn",
+            summary: "把异常现象、证据链、影响范围和补救动作收成统一结果，避免只给零散日志。",
+            content:
+              "你现在帮助同学归并排查结果。先判断异常范围，再列证据链、受影响对象、风险等级和下一步动作。不要只复述日志，要把能执行的动作排在前面。",
+            variables: [
+              { title: "异常范围", text: "影响的是单条计划、单类素材，还是多组投放。" },
+              { title: "证据链", text: "截图、日志、对照数据和时间节点。" },
+              { title: "补救动作", text: "先止损还是继续确认原因。" }
+            ],
+            scopes: [
+              { title: "适用业务流", text: "问题排查、联调前自查" },
+              { title: "适用角色", text: "广告支撑、投放执行" },
+              { title: "适用模型", text: "标准对话模型" }
+            ],
+            versions: [
+              { title: "v2.1 待发布", text: "新增影响范围判断，待今晚验证后发布。" },
+              { title: "v2.0 已生效", text: "能输出结论，但对补救动作约束不够强。" },
+              { title: "v1.9 历史版本", text: "证据链不完整，容易只给现象。" }
+            ],
+            bindings: [
+              { title: "异常定位流程", text: "默认开启。" },
+              { title: "素材驳回专项", text: "高峰期可提升优先级。" }
+            ],
+            switches: [
+              { title: "风险等级提示", text: "在结果中强制给出风险等级。", enabled: true },
+              { title: "自动建议补救动作", text: "先给出短动作，再补展开说明。", enabled: false }
+            ]
+          },
+          {
+            id: "debug-ready",
+            title: "联调复核上线前确认",
+            category: "联调复核",
+            businessFlow: "上线前检查",
+            version: "v1.4",
+            status: "已生效",
+            statusTone: "success",
+            summary: "把联调结果压成上线能不能发、剩什么风险、谁来盯三件事。",
+            content:
+              "你现在帮助同学完成上线前确认。先回答能不能上，再列剩余风险、证据和最后要看的清单。任何不影响上线的小问题，不要挤占首屏。",
+            variables: [
+              { title: "上线结论", text: "能上线、条件上线或不能上线。" },
+              { title: "剩余风险", text: "只保留必须盯住的风险。" },
+              { title: "最后清单", text: "上线前还要过的 2 到 3 项动作。" }
+            ],
+            scopes: [
+              { title: "适用业务流", text: "联调复核、上线前复签" },
+              { title: "适用角色", text: "联调负责人、投放执行、客服协作" },
+              { title: "适用模型", text: "标准对话模型、结果压缩模型" }
+            ],
+            versions: [
+              { title: "v1.4 当前版本", text: "已支持上线结论 + 风险 + 最后清单三段式输出。" },
+              { title: "v1.3 上一版本", text: "证据展示太长，不利于快速复签。" }
+            ],
+            bindings: [
+              { title: "上线复核流程", text: "默认开启。" },
+              { title: "弱网复查场景", text: "只在需要时补充触发。" }
+            ],
+            switches: [
+              { title: "上线结论优先展示", text: "把能不能上放在最前。", enabled: true },
+              { title: "展开全部证据", text: "默认关闭，避免首屏过长。", enabled: false }
+            ]
+          }
+        ]
+      };
+
+      const refs = {
+        navList: document.getElementById("nav-list"),
+        checkList: document.getElementById("check-list"),
+        summaryGrid: document.getElementById("summary-grid"),
+        promptList: document.getElementById("prompt-list"),
+        detailTitle: document.getElementById("detail-title"),
+        detailSummary: document.getElementById("detail-summary"),
+        detailStatus: document.getElementById("detail-status"),
+        detailContent: document.getElementById("detail-content"),
+        variableList: document.getElementById("variable-list"),
+        scopeList: document.getElementById("scope-list"),
+        versionList: document.getElementById("version-list"),
+        bindingList: document.getElementById("binding-list"),
+        switchList: document.getElementById("switch-list")
+      };
+
+      function toneClass(tone) {
+        if (tone === "success") return "success";
+        if (tone === "warn") return "warn";
+        if (tone === "danger") return "danger";
+        return "";
+      }
+
+      function renderSimpleList(items, className) {
+        return items
+          .map(
+            (item) => `
+              <article class="${className}">
+                <strong>${item.title}</strong>
+                <div class="item-text">${item.text}</div>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
+      function renderNav() {
+        refs.navList.innerHTML = state.navGroups
+          .map(
+            (item) => `
+              <button class="nav-item ${item.id === state.activeGroup ? "active" : ""}" type="button" data-nav-id="${item.id}">
+                <strong>${item.title}</strong>
+                <div class="item-text">${item.text}</div>
+              </button>
+            `,
+          )
+          .join("");
+      }
+
+      function renderChecks() {
+        refs.checkList.innerHTML = renderSimpleList(state.checks, "check-item");
+      }
+
+      function renderSummaries() {
+        refs.summaryGrid.innerHTML = state.summaries
+          .map(
+            (item) => `
+              <article class="summary-card">
+                <span class="summary-label">${item.label}</span>
+                <span class="summary-value">${item.value}</span>
+                <span class="meta">${item.helper}</span>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
+      function renderPromptList() {
+        refs.promptList.innerHTML = state.prompts
+          .map(
+            (item) => `
+              <button class="prompt-item ${item.id === state.activePromptId ? "active" : ""}" type="button" data-prompt-id="${item.id}">
+                <div class="prompt-item-top">
+                  <span class="status-pill ${toneClass(item.statusTone)}">${item.status}</span>
+                  <span class="chip">${item.version}</span>
+                </div>
+                <strong>${item.title}</strong>
+                <div class="item-text">${item.summary}</div>
+                <div class="tag-row" style="margin-top: 10px;">
+                  <span class="tag chip">${item.category}</span>
+                  <span class="tag chip">${item.businessFlow}</span>
+                </div>
+              </button>
+            `,
+          )
+          .join("");
+
+        refs.promptList.querySelectorAll("[data-prompt-id]").forEach((element) => {
+          element.addEventListener("click", () => {
+            state.activePromptId = element.getAttribute("data-prompt-id");
+            renderPromptList();
+            renderDetail();
+          });
+        });
+      }
+
+      function renderDetail() {
+        const prompt = state.prompts.find((item) => item.id === state.activePromptId) ?? state.prompts[0];
+        refs.detailTitle.textContent = prompt.title;
+        refs.detailSummary.textContent = prompt.summary;
+        refs.detailStatus.textContent = `${prompt.status} · ${prompt.version}`;
+        refs.detailStatus.className = `status-pill ${toneClass(prompt.statusTone)}`;
+        refs.detailContent.value = prompt.content;
+        refs.variableList.innerHTML = renderSimpleList(prompt.variables, "check-item");
+        refs.scopeList.innerHTML = renderSimpleList(prompt.scopes, "binding-item");
+        refs.versionList.innerHTML = renderSimpleList(prompt.versions, "history-item");
+        refs.bindingList.innerHTML = renderSimpleList(prompt.bindings, "binding-item");
+        refs.switchList.innerHTML = prompt.switches
+          .map(
+            (item) => `
+              <article class="switch-item">
+                <div class="switch-head">
+                  <div>
+                    <strong>${item.title}</strong>
+                    <div class="item-text">${item.text}</div>
+                  </div>
+                  <button class="toggle ${item.enabled ? "on" : ""}" type="button" aria-label="${item.title}"></button>
+                </div>
+              </article>
+            `,
+          )
+          .join("");
+      }
+
+      function render() {
+        renderNav();
+        renderChecks();
+        renderSummaries();
+        renderPromptList();
+        renderDetail();
+      }
+
+      render();
+    </script>
+  </body>
+</html>

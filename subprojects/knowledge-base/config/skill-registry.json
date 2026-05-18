@@ -1,0 +1,165 @@
+{
+  "version": "0.1.0",
+  "skills": [
+    {
+      "id": "repo-bootstrap-skill",
+      "name": "Repo Bootstrap Skill",
+      "category": "planning",
+      "description": "Builds the pre-start checklist for WeKnora secondary development, including environment, entry assets, runbook, and governance boundaries.",
+      "ownerRole": "Knowledge Base Delivery Agent",
+      "promptPath": "subprojects/knowledge-base/docs/WeKnora开工条件检查清单.md",
+      "stageIds": ["core-definition-baseline", "tasks", "operations-surface"],
+      "outputs": ["pre-start checklist", "environment baseline", "runbook notes", "blocked items"],
+      "triggerKeywords": ["repo bootstrap", "开工条件", "环境基线", "准备工作"],
+      "enabled": true,
+      "tool": "manual-subproject-skill",
+      "deployment": {
+        "status": "configured",
+        "command": "node subprojects/knowledge-base/tools/weknora-prep-scan.mjs",
+        "statusPath": "subprojects/knowledge-base/docs/WeKnora开工条件检查清单.md",
+        "integration": "workflow",
+        "notes": "Knowledge-base specific preparation entry for WeKnora secondary development."
+      }
+    },
+    {
+      "id": "code-graph-skill",
+      "name": "Code Graph Skill",
+      "category": "architecture",
+      "description": "Scans WeKnora source structure, routes, and module distribution before business-module changes.",
+      "ownerRole": "Architecture Agent",
+      "promptPath": "subprojects/knowledge-base/tools/weknora-prep-scan.mjs",
+      "stageIds": ["architecture", "tasks", "review"],
+      "outputs": ["file tree summary", "route map", "module summary", "scan report"],
+      "triggerKeywords": ["code graph", "代码扫描", "import graph", "api map", "call graph"],
+      "enabled": true,
+      "tool": "manual-subproject-skill",
+      "deployment": {
+        "status": "configured",
+        "command": "node subprojects/knowledge-base/tools/weknora-prep-scan.mjs",
+        "statusPath": "subprojects/knowledge-base/docs/scan/weknora-prep-scan-report.md",
+        "integration": "workflow",
+        "notes": "Current implementation focuses on module summary and route/API mapping."
+      }
+    },
+    {
+      "id": "design-review-skill",
+      "name": "Design Review Skill",
+      "category": "design",
+      "description": "Reviews whether WeKnora UI/product-shell reuse would conflict with the planned knowledge asset platform structure.",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "subprojects/knowledge-base/docs/知识资产平台二开计划-v1.1.md",
+      "stageIds": ["architecture", "review", "operations-surface"],
+      "outputs": ["shell conflict review", "information architecture risks", "temporary reuse recommendation"],
+      "triggerKeywords": ["design review", "产品壳", "信息架构", "前端复用"],
+      "enabled": true,
+      "tool": "manual-subproject-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "subprojects/knowledge-base/docs/知识资产平台二开计划-v1.1.md",
+        "integration": "manual",
+        "notes": "Human-reviewed design boundary assessment before frontend secondary development."
+      }
+    },
+    {
+      "id": "component-library-alignment-skill",
+      "name": "Component Library Alignment Skill",
+      "category": "design",
+      "description": "Aligns Dataki frontend design and implementation with the reachable Storybook component library and local YKUI index.",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "subprojects/knowledge-base/docs/Dataki-v1.1组件库与小闪登录对齐说明.md",
+      "stageIds": ["operations-surface", "review", "schema-contract-upgrade"],
+      "outputs": ["component mapping", "design constraints", "page-level reuse guidance"],
+      "triggerKeywords": ["组件库", "storybook", "ykui", "component library", "设计对齐"],
+      "enabled": true,
+      "tool": "manual-subproject-skill",
+      "deployment": {
+        "status": "configured",
+        "command": null,
+        "statusPath": "subprojects/knowledge-base/docs/design-review/ykui-index.json",
+        "integration": "manual",
+        "notes": "Uses the reachable Storybook plus the local YKUI index mirror as the primary reference for Dataki UI reuse."
+      }
+    },
+    {
+      "id": "xiaoshan-login-alignment-skill",
+      "name": "Xiaoshan Login Alignment Skill",
+      "category": "design",
+      "description": "Prevents Dataki login designs from collapsing into scan-code and phone-only flows, and keeps Xiaoshan quick-login and enterprise SSO extension points explicit.",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "subprojects/knowledge-base/docs/Dataki-v1.1组件库与小闪登录对齐说明.md",
+      "stageIds": ["prd", "operations-surface", "review"],
+      "outputs": ["login guardrails", "state checklist", "enterprise auth expansion slots"],
+      "triggerKeywords": ["小闪登录", "登录快", "login", "sso", "扫码", "手机号"],
+      "enabled": true,
+      "tool": "manual-subproject-skill",
+      "deployment": {
+        "status": "configured",
+        "command": null,
+        "statusPath": "subprojects/knowledge-base/docs/Dataki-v1.1组件库与小闪登录对齐说明.md",
+        "integration": "manual",
+        "notes": "Use this before producing login wireframes, mocks, or frontend implementation for Dataki."
+      }
+    },
+    {
+      "id": "task-decompose-skill",
+      "name": "Task Decompose Skill",
+      "category": "planning",
+      "description": "Turns WeKnora v1.1 planning into ordered preparation, PoC, and productization tasks.",
+      "ownerRole": "Task Planning Agent",
+      "promptPath": "subprojects/knowledge-base/docs/知识资产平台v1.1研发任务单.md",
+      "stageIds": ["tasks"],
+      "outputs": ["task breakdown", "priority split", "dependency map", "acceptance checks"],
+      "triggerKeywords": ["task decompose", "任务拆解", "优先级", "依赖"],
+      "enabled": true,
+      "tool": "workflow-engine",
+      "deployment": {
+        "status": "integrated",
+        "command": "npm run cli -- run advance",
+        "statusPath": "subprojects/knowledge-base/docs/知识资产平台v1.1研发任务单.md",
+        "integration": "workflow",
+        "notes": "Subproject-specific task breakdown should follow the knowledge-base execution flow."
+      }
+    },
+    {
+      "id": "test-regression-skill",
+      "name": "Test Regression Skill",
+      "category": "review",
+      "description": "Checks whether environment, route, and integration changes have corresponding validation, diff, and fallback plans.",
+      "ownerRole": "Review Committee",
+      "promptPath": "subprojects/knowledge-base/docs/WeKnora开工条件检查清单.md",
+      "stageIds": ["review", "regression-acceptance"],
+      "outputs": ["validation checklist", "regression notes", "missing rollback items", "release blockers"],
+      "triggerKeywords": ["test regression", "回归", "验证", "diff", "rollback"],
+      "enabled": true,
+      "tool": "review-committee",
+      "deployment": {
+        "status": "configured",
+        "command": "node subprojects/knowledge-base/tools/weknora-prep-scan.mjs",
+        "statusPath": "subprojects/knowledge-base/docs/WeKnora开工条件检查清单.md",
+        "integration": "workflow",
+        "notes": "Used as the pre-business-change validation layer for this subproject."
+      }
+    },
+    {
+      "id": "release-gate-skill",
+      "name": "Release Gate Skill",
+      "category": "delivery",
+      "description": "Guards the transition from preparation into actual WeKnora business secondary development.",
+      "ownerRole": "Delivery Manager Agent",
+      "promptPath": "subprojects/knowledge-base/docs/WeKnora二开准备与PMAIOS-v0.5收敛方案.md",
+      "stageIds": ["review", "regression-acceptance", "operations-surface"],
+      "outputs": ["go/no-go decision", "blocked dependencies", "release gate notes", "rollback prerequisites"],
+      "triggerKeywords": ["release gate", "go no-go", "发版门禁", "开工门禁"],
+      "enabled": true,
+      "tool": "manual-subproject-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "subprojects/knowledge-base/docs/WeKnora二开准备与PMAIOS-v0.5收敛方案.md",
+        "integration": "manual",
+        "notes": "The project cannot enter business-module secondary development until this gate is green."
+      }
+    }
+  ]
+}

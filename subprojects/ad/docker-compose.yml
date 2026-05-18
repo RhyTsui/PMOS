@@ -11,14 +11,13 @@ services:
       - "8020:8020"
 
   frontend:
-    image: node:20-alpine
-    working_dir: /app/frontend
-    volumes:
-      - ./:/app
+    build:
+      context: ./frontend/src
+      dockerfile: Dockerfile
+    working_dir: /app
     environment:
-      VITE_API_PROXY_TARGET: http://backend:8020
-    command: sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 5180"
+      PORT: 8002
     ports:
-      - "5180:5180"
+      - "8002:8002"
     depends_on:
       - backend

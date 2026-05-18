@@ -1,0 +1,52 @@
+{
+  "id": "product-output-9971d04b-27c3-40fa-87f8-97679c3796f4",
+  "reportId": "product-chief-0389c075-621c-4931-b1b0-592676bbcadb",
+  "subprojectId": null,
+  "type": "design-image2-prompt-pack",
+  "title": "Page-by-page image2 prompt pack",
+  "status": "ready-for-review",
+  "artifactPath": "docs/product-office/outputs/product-output-9971d04b-27c3-40fa-87f8-97679c3796f4.md",
+  "generatedAt": "2026-04-27T11:19:11.965Z",
+  "specialistAgentIds": [
+    "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+    "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+  ],
+  "specialistTaskIds": [
+    "product-chief-task-15060299-78f5-4868-a3c8-25b6a8bd6868",
+    "product-chief-task-23f547f6-1c96-4c40-9386-f85d1e9cbe7a"
+  ],
+  "specialistTaskArtifactPaths": [
+    "docs/product-office/specialist-tasks/product-chief-task-15060299-78f5-4868-a3c8-25b6a8bd6868.md",
+    "docs/product-office/specialist-tasks/product-chief-task-23f547f6-1c96-4c40-9386-f85d1e9cbe7a.md"
+  ],
+  "multiAgentReviewId": "product-chief-review-22e667c7-f45f-4696-b8aa-2ebbcbeecfd5",
+  "multiAgentReviewStatus": "needs-human-decision",
+  "multiAgentReviewArtifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-22e667c7-f45f-4696-b8aa-2ebbcbeecfd5.md",
+  "requirementIds": [
+    "req-3873558b-1591-4fbc-b608-87e872ddadd0"
+  ],
+  "versionEntryId": "ver-01eea36f-b06d-48ef-8425-f294fc03372c",
+  "templatePath": "docs/templates/design_image2_prompt_pack_template.md",
+  "summary": "Page-by-page image2 prompt pack generated from Product Chief report product-chief-0389c075-621c-4931-b1b0-592676bbcadb; image generation was not completed.",
+  "metadata": {
+    "priority": "P0",
+    "reason": "Visual design delivery must first produce a page-by-page image2 prompt pack before final design images are generated.",
+    "outputRecordPath": "docs/memory/product-chief/outputs/product-output-9971d04b-27c3-40fa-87f8-97679c3796f4.json",
+    "recommendedSkillIds": [
+      "five-w-two-h",
+      "persona",
+      "requirement-pool-operations",
+      "system-boundary",
+      "version-repository-operations",
+      "competitive-analysis",
+      "delivery-coordination",
+      "product-management-governance"
+    ],
+    "generatedImagePaths": [],
+    "generatedImagePageCount": 0,
+    "imageGenerationWarnings": [
+      "- page goal:: Provider gemini is not ready; configure GOOGLE_AI_STUDIO_API_KEY.",
+      "- page goal:: Provider gemini is not ready; configure GOOGLE_AI_STUDIO_API_KEY."
+    ]
+  }
+}

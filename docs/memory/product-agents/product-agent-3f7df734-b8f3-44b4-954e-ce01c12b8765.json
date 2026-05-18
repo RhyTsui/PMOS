@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-3f7df734-b8f3-44b4-954e-ce01c12b8765",
+  "subprojectId": null,
+  "name": "Virtual Delivery PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "delivery",
+  "level": "manager",
+  "scope": "platform",
+  "summary": "Owns execution-facing delivery artifacts such as demos, launch materials, user-facing readiness, and release packaging.",
+  "problem": "Delivery outputs are scattered across runs and docs, but not yet governed as a reusable AI-first delivery surface.",
+  "targetUsers": [],
+  "goals": [
+    "Turn approved work into delivery artifacts.",
+    "Produce demo, user-facing, and rollout materials from governed product decisions.",
+    "Keep release-facing outputs aligned with version and review state."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Delivery artifacts can be regenerated from governed product inputs.",
+    "Demo and user-facing outputs are linked to the active version."
+  ],
+  "relatedPaths": [
+    "docs/templates/demo_script_template.md",
+    "docs/templates/user_manual_template.md"
+  ],
+  "governanceRefs": [
+    "docs/templates/subproject_capability_adoption_checklist.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_delivery_pm_prompt.md",
+  "templateId": "virtual-delivery-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.123Z",
+  "updatedAt": "2026-04-27T10:04:22.123Z"
+}

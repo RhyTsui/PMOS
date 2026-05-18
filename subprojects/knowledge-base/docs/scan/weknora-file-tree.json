@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-04-23T14:36:29.071Z",
+  "root": "WeKnora",
+  "totalFiles": 1070,
+  "extensions": {
+    ".go": 534,
+    ".vue": 88,
+    ".md": 87,
+    ".sql": 77,
+    ".py": 49,
+    ".ts": 48,
+    ".svg": 35,
+    ".yaml": 27,
+    ".png": 19,
+    "<no-ext>": 18,
+    ".sh": 15,
+    ".json": 10,
+    ".yml": 9,
+    ".parquet": 5,
+    ".ico": 4,
+    ".less": 4,
+    ".txt": 4,
+    ".js": 3,
+    ".toml": 3,
+    ".conf": 2,
+    ".css": 2,
+    ".example": 2,
+    ".gif": 2,
+    ".html": 2,
+    ".mod": 2,
+    ".sum": 2,
+    ".app": 1,
+    ".docreader": 1,
+    ".in": 1,
+    ".jpeg": 1,
+    ".jpg": 1,
+    ".lock": 1,
+    ".md5": 1,
+    ".plist": 1,
+    ".proto": 1,
+    ".pyi": 1,
+    ".rb": 1,
+    ".sandbox": 1,
+    ".service": 1,
+    ".tgz": 1,
+    ".tpl": 1,
+    ".ttf": 1,
+    ".wav": 1
+  },
+  "topLevelSummary": [
+    {
+      "name": "internal",
+      "fileCount": 504
+    },
+    {
+      "name": "frontend",
+      "fileCount": 205
+    },
+    {
+      "name": "migrations",
+      "fileCount": 77
+    },
+    {
+      "name": "docs",
+      "fileCount": 76
+    },
+    {
+      "name": "docreader",
+      "fileCount": 51
+    },
+    {
+      "name": "client",
+      "fileCount": 24
+    },
+    {
+      "name": "mcp-server",
+      "fileCount": 19
+    },
+    {
+      "name": "helm",
+      "fileCount": 16
+    },
+    {
+      "name": "cmd",
+      "fileCount": 13
+    },
+    {
+      "name": "config",
+      "fileCount": 13
+    },
+    {
+      "name": "scripts",
+      "fileCount": 12
+    },
+    {
+      "name": "dataset",
+      "fileCount": 8
+    },
+    {
+      "name": ".github",
+      "fileCount": 7
+    },
+    {
+      "name": "skills",
+      "fileCount": 7
+    },
+    {
+      "name": "examples",
+      "fileCount": 5
+    },
+    {
+      "name": "docker",
+      "fileCount": 4
+    },
+    {
+      "name": "deploy",
+      "fileCount": 1
+    },
+    {
+      "name": "Formula",
+      "fileCount": 1
+    },
+    {
+      "name": "misc",
+      "fileCount": 1
+    },
+    {
+      "name": "packages",
+      "fileCount": 1
+    },
+    {
+      "name": "testdata",
+      "fileCount": 1
+    }
+  ]
+}

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔方问数AI助手 - UI设计规范 v2.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            /* 品牌色 */
+            --brand: #4A7CFF;
+            --brand-hover: #3D6AE8;
+            --brand-light: #EBF2FE;
+            
+            /* 侧边栏 */
+            --sidebar-bg: #F8F9FB;
+            --sidebar-border: #E8EAED;
+            --sidebar-text: #1A1A2E;
+            --sidebar-text-sec: #6B7280;
+            --sidebar-hover: #F1F3F5;
+            --sidebar-active: #EBF2FE;
+            
+            /* 中性色 */
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            /* 功能色 */
+            --green: #10B981;
+            --pink: #EC4899;
+            
+            /* 字体 */
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            
+            /* 间距 */
+            --s4: 4px;
+            --s8: 8px;
+            --s12: 12px;
+            --s16: 16px;
+            --s20: 20px;
+            --s24: 24px;
+            --s32: 32px;
+            
+            /* 圆角 */
+            --r6: 6px;
+            --r8: 8px;
+            --r12: 12px;
+            --r16: 16px;
+            --rfull: 9999px;
+        }
+
+        body {
+            font-family: var(--font);
+            font-size: 14px;
+            color: var(--gray-800);
+            background: #F3F4F6;
+            line-height: 1.5;
+        }
+
+        .page { max-width: 1200px; margin: 0 auto; padding: 40px 24px 60px; }
+
+        h1 { font-size: 28px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+        h2 { font-size: 22px; font-weight: 600; color: var(--gray-900); margin: 40px 0 20px; padding-bottom: 12px; border-bottom: 3px solid var(--brand); }
+        h3 { font-size: 17px; font-weight: 600; color: var(--gray-800); margin: 28px 0 14px; }
+        h4 { font-size: 15px; font-weight: 600; color: var(--gray-700); margin: 20px 0 10px; }
+        
+        p { margin: 10px 0; line-height: 1.7; color: var(--gray-600); }
+        .subtitle { font-size: 15px; color: var(--gray-500); margin-bottom: 30px; }
+
+        /* Color swatch */
+        .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin: 18px 0; }
+        .cs { background: #fff; border-radius: var(--r8); overflow: hidden; border: 1px solid var(--gray-200); }
+        .cp { height: 72px; }
+        .ci { padding: 12px 14px; }
+        .cn { font-weight: 600; font-size: 13px; color: var(--gray-800); }
+        .cv { font-size: 11px; color: var(--gray-500); font-family: "SF Mono", Monaco, monospace; margin-top: 3px; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; background: #fff; border-radius: var(--r8); overflow: hidden; }
+        th { background: var(--gray-50); padding: 12px 16px; text-align: left; font-weight: 600; color: var(--gray-700); border-bottom: 1px solid var(--gray-200); }
+        td { padding: 11px 16px; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        code { background: var(--gray-100); padding: 1px 5px; border-radius: 3px; font-family: "SF Mono", Monaco, monospace; font-size: 12px; color: var(--brand); }
+
+        /* Preview box */
+        .pbox { background: #fff; border-radius: var(--r12); padding: 28px; margin: 18px 0; border: 1px solid var(--gray-200); }
+        .plabel { font-size: 11px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; font-weight: 500; }
+
+        /* Icon preview styles */
+        .icon-preview {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .icon-svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        /* Code block */
+        .ph { background: var(--gray-800); color: #E9ECEF; padding: 12px 16px; border-radius: var(--r8) var(--r8) 0 0; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .pc { background: #1A1B1E; color: #C1C2C3; padding: 18px; border-radius: 0 0 var(--r8) var(--r8); overflow-x: auto; font-size: 12.5px; line-height: 1.8; font-family: "SF Mono", Monaco, monospace; }
+        .pc .c { color: #6C757D; }
+        .pc .k { color: #DA77F2; }
+        .pc .s { color: #66DB75; }
+
+        /* TOC */
+        .toc { background: #fff; border-radius: var(--r12); padding: 26px; margin-bottom: 32px; border: 1px solid var(--gray-200); }
+        .toc h3 { margin: 0 0 16px; }
+        .toc ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .toc a { display: block; padding: 9px 14px; border-radius: var(--r6); color: var(--gray-600); text-decoration: none; font-size: 13px; }
+        .toc a:hover { background: var(--gray-50); color: var(--brand); }
+
+        /* Highlight */
+        .hl { background: var(--brand-light); border-left: 4px solid var(--brand); padding: 14px 18px; border-radius: 0 var(--r8) var(--r8) 0; margin: 18px 0; }
+        .hl p { margin: 0; color: var(--gray-700); font-size: 13.5px; }
+
+        .footer { text-align: center; padding: 40px 0 0; color: var(--gray-500); font-size: 13px; }
+
+        /* Icon grid */
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+        .icon-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: #fff; border-radius: var(--r8); border: 1px solid var(--gray-200); }
+        .icon-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--gray-50); border-radius: var(--r6); }
+        .icon-box svg { width: 18px; height: 18px; }
+        .icon-info { flex: 1; }
+        .icon-name { font-weight: 600; font-size: 13px; color: var(--gray-800); }
+        .icon-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1>🎨 魔方问数AI助手 - UI设计规范</h1>
+        <p class="subtitle">版本 2.0 | 2026年5月 | 严格依据设计稿 | 含完整图标规范</p>
+
+        <div class="toc">
+            <h3>📋 目录</h3>
+            <ul>
+                <li><a href="#s1">01 色彩系统</a></li>
+                <li><a href="#s2">02 字体规范</a></li>
+                <li><a href="#s3">03 图标规范</a></li>
+                <li><a href="#s4">04 组件规范</a></li>
+                <li><a href="#s5">05 布局结构</a></li>
+                <li><a href="#s6">06 CSS变量表</a></li>
+                <li><a href="#s7">07 AI Coding Prompt</a></li>
+                <li><a href="#s8">08 图标资源清单</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1 -->
+        <section id="s1">
+            <h2>01 色彩系统</h2>
+            <p>严格依据设计稿提取的颜色值。</p>
+
+            <h3>品牌色</h3>
+            <div class="cgrid">
+                <div class="cs"><div class="cp" style="background:#4A7CFF;"></div><div class="ci"><div class="cn">品牌主色</div><div class="cv">#4A7CFF</div></div></div>
+                <div class="cs"><div class="cp" style="background:#3D6AE8;"></div><div class="ci"><div class="cn">品牌悬停色</div><div class="cv">#3D6AE8</div></div></div>
+                <div class="cs"><div class="cp" style="background:#EBF2FE;"></div><div class="ci"><div class="cn">品牌浅色背景</div><div class="cv">#EBF2FE</div></div></div>
+            </div>
+
+            <h3>侧边栏色系</h3>
+            <div class="cgrid">
+                <div class="cs"><div class="cp" style="background:#F8F9FB; border:1px solid #E8EAED;"></div><div class="ci"><div class="cn">侧边栏背景</div><div class="cv">#F8F9FB</div></div></div>
+                <div class="cs"><div class="cp" style="background:#E8EAED;"></div><div class="ci"><div class="cn">侧边栏边框</div><div class="cv">#E8EAED</div></div></div>
+                <div class="cs"><div class="cp" style="background:#F1F3F5;"></div><div class="ci"><div class="cn">hover背景</div><div class="cv">#F1F3F5</div></div></div>
+            </div>
+
+            <h3>文字色</h3>
+            <div class="cgrid">
+                <div class="cs"><div class="cp" style="background:#1A1A2E;"></div><div class="ci"><div class="cn">主文字</div><div class="cv">#1A1A2E</div></div></div>
+                <div class="cs"><div class="cp" style="background:#6B7280;"></div><div class="ci"><div class="cn">次要文字</div><div class="cv">#6B7280</div></div></div>
+                <div class="cs"><div class="cp" style="background:#9CA3AF;"></div><div class="ci"><div class="cn">辅助文字</div><div class="cv">#9CA3AF</div></div></div>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="s2">
+            <h2>02 字体规范</h2>
+            <table>
+                <tr><th>级别</th><th>字号</th><th>字重</th><th>行高</th><th>适用场景</th></tr>
+                <tr><td>H1</td><td>24px</td><td>600</td><td>1.4</td><td>欢迎区大标题</td></tr>
+                <tr><td>H2</td><td>17px</td><td>700</td><td>1.4</td><td>Logo文字</td></tr>
+                <tr><td>正文</td><td>14px</td><td>400</td><td>1.5</td><td>主要内容</td></tr>
+                <tr><td>辅助</td><td>13px</td><td>400</td><td>1.5</td><td>快捷卡片、Tab</td></tr>
+                <tr><td>小字</td><td>12px</td><td>400</td><td>1.4</td><td>时间戳、版本号</td></tr>
+            </table>
+        </section>
+
+        <!-- Section 3 - Icons -->
+        <section id="s3">
+            <h2>03 图标规范</h2>
+            <p>所有图标使用 SVG 图标（如 Ant Design Icons、Heroicons 等），<strong>禁止使用 Emoji</strong>。</p>
+
+            <div class="hl">
+                <p><strong>图标规范原则：</strong>所有图标使用 SVG 格式，通过图标库（如 Ant Design Icons、Lucide、Heroicons）引入，或使用自定义 SVG。禁止直接使用 Emoji 字符。</p>
+            </div>
+
+            <h3>图标清单</h3>
+            <div class="icon-grid">
+                <div class="icon-item">
+                    <div class="icon-box" style="background:#4A7CFF;">
+                        <svg viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">Logo图标</div>
+                        <div class="icon-desc">28×28px，蓝色背景，数据/魔方风格</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">消息图标</div>
+                        <div class="icon-desc">Tab"问题"、历史会话项使用</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">图表图标</div>
+                        <div class="icon-desc">Tab"报表"使用</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">通知铃铛</div>
+                        <div class="icon-desc">右上角通知图标，20px</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">帮助问号</div>
+                        <div class="icon-desc">右上角帮助图标，20px</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">设置齿轮</div>
+                        <div class="icon-desc">右上角设置图标，20px</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">技能闪电</div>
+                        <div class="icon-desc">输入区"技能"按钮，13px</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box" style="background:#4A7CFF;">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M2 12l20-9-9 20-2-9-9-2z"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">发送纸飞机</div>
+                        <div class="icon-desc">发送按钮图标，白色，13px</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">加号图标</div>
+                        <div class="icon-desc">"+ 分析项目"标签使用</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="icon-info">
+                        <div class="icon-name">下拉箭头</div>
+                        <div class="icon-desc">筛选标签下拉指示，8px</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>图标尺寸规范</h3>
+            <table>
+                <tr><th>位置</th><th>图标</th><th>尺寸</th><th>颜色</th></tr>
+                <tr><td>Logo</td><td>数据/魔方图标</td><td>28×28px</td><td>白色（蓝色背景）</td></tr>
+                <tr><td>Tab-问题</td><td>消息气泡</td><td>14px</td><td>选中#4A7CFF，未选中#6B7280</td></tr>
+                <tr><td>Tab-报表</td><td>柱状图</td><td>14px</td><td>选中#4A7CFF，未选中#6B7280</td></tr>
+                <tr><td>历史会话</td><td>消息气泡</td><td>14px</td><td>#6B7280</td></tr>
+                <tr><td>右上角</td><td>铃铛/问号/齿轮</td><td>20px</td><td>#6B7280</td></tr>
+                <tr><td>技能按钮</td><td>闪电</td><td>14px</td><td>#6B7280</td></tr>
+                <tr><td>发送按钮</td><td>纸飞机</td><td>14px</td><td>白色</td></tr>
+                <tr><td>下拉箭头</td><td>向下三角</td><td>8px</td><td>#9CA3AF</td></tr>
+            </table>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="s4">
+            <h2>04 组件规范</h2>
+
+            <h3>1. Logo区域</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>图标</td><td>28×28px，蓝色背景（#4A7CFF），圆角6px，白色SVG图标</td></tr>
+                <tr><td>文字</td><td>"魔方问数"，17px，font-weight:700，#1A1A2E</td></tr>
+                <tr><td>间距</td><td>图标与文字间距 10px</td></tr>
+            </table>
+
+            <h3>2. Tab切换器</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>容器</td><td>background:#F3F4F6，border-radius:8px，padding:3px</td></tr>
+                <tr><td>选项</td><td>padding:7px 18px，border-radius:6px</td></tr>
+                <tr><td>选中态</td><td>background:#fff，color:#4A7CFF，box-shadow:0 1px 3px rgba(0,0,0,0.08)</td></tr>
+                <tr><td>图标</td><td>14px SVG（消息气泡/柱状图），与文字间距6px</td></tr>
+            </table>
+
+            <h3>3. 开启新会话按钮</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>尺寸</td><td>width:100%，height:38px</td></tr>
+                <tr><td>背景</td><td>#4A7CFF，hover:#3D6AE8</td></tr>
+                <tr><td>圆角</td><td>8px</td></tr>
+                <tr><td>文字</td><td>"+ 开启新会话"，14px，#fff</td></tr>
+            </table>
+
+            <h3>4. 历史会话项</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>图标</td><td>14px 消息气泡 SVG，color:#6B7280</td></tr>
+                <tr><td>标题</td><td>14px，#1A1A2E，单行截断（max-width:140px）</td></tr>
+                <tr><td>时间</td><td>12px，#9CA3AF，右对齐</td></tr>
+                <tr><td>hover</td><td>background:#F1F3F5</td></tr>
+            </table>
+
+            <h3>5. 筛选标签</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>运营标签</td><td>文字+下拉箭头（8px▼），选中态背景#EBF2FE，边框#4A7CFF</td></tr>
+                <tr><td>分析项目</td><td>加号图标（+）+ 文字</td></tr>
+                <tr><td>指间山海</td><td>粉色圆点（#EC4899，8px）+ 文字 + 下拉箭头</td></tr>
+            </table>
+
+            <h3>6. 输入区域</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>输入框</td><td>min-height:52px，border:1px solid #D1D5DB，border-radius:12px</td></tr>
+                <tr><td>技能按钮</td><td>闪电图标 + "技能" + 下拉箭头，13px，#6B7280</td></tr>
+                <tr><td>发送按钮</td><td>纸飞机图标 + "发送"，胶囊形（radius:9999px），背景#4A7CFF</td></tr>
+            </table>
+
+            <h3>7. 快捷问题卡片</h3>
+            <table>
+                <tr><th>属性</th><th>值</th></tr>
+                <tr><td>布局</td><td>2列网格，gap:12px</td></tr>
+                <tr><td>样式</td><td>padding:13px 16px，background:#fff，border:1px solid #E8EAED，border-radius:8px</td></tr>
+                <tr><td>文字</td><td>13px，#6B7280</td></tr>
+                <tr><td>hover</td><td>border-color:#4A7CFF</td></tr>
+            </table>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="s5">
+            <h2>05 布局结构</h2>
+            <table>
+                <tr><th>区域</th><th>属性</th><th>值</th></tr>
+                <tr><td rowspan="4">侧边栏</td><td>宽度</td><td>260px（固定）</td></tr>
+                <tr><td>背景</td><td>#F8F9FB</td></tr>
+                <tr><td>右边框</td><td>1px solid #E8EAED</td></tr>
+                <tr><td>内padding</td><td>20px 16px</td></tr>
+                <tr><td rowspan="2">顶栏</td><td>高度</td><td>56px</td></tr>
+                <tr><td>水平padding</td><td>24px</td></tr>
+                <tr><td>主内容区</td><td>padding</td><td>32px</td></tr>
+            </table>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="s6">
+            <h2>06 CSS变量表</h2>
+            <div class="ph"><span>📋</span> CSS Variables（复制到 :root）</div>
+            <div class="pc">
+<span class="c">/* 品牌色 */</span>
+<span class="k">--brand</span>: <span class="s">#4A7CFF</span>;
+<span class="k">--brand-hover</span>: <span class="s">#3D6AE8</span>;
+<span class="k">--brand-light</span>: <span class="s">#EBF2FE</span>;
+
+<span class="c">/* 侧边栏 */</span>
+<span class="k">--sidebar-bg</span>: <span class="s">#F8F9FB</span>;
+<span class="k">--sidebar-border</span>: <span class="s">#E8EAED</span>;
+<span class="k">--sidebar-text</span>: <span class="s">#1A1A2E</span>;
+
+<span class="c">/* 文字 */</span>
+<span class="k">--text-primary</span>: <span class="s">#1A1A2E</span>;
+<span class="k">--text-secondary</span>: <span class="s">#6B7280</span>;
+<span class="k">--text-tertiary</span>: <span class="s">#9CA3AF</span>;
+
+<span class="c">/* 间距 */</span>
+<span class="k">--s4</span>: <span class="s">4px</span>;
+<span class="k">--s8</span>: <span class="s">8px</span>;
+<span class="k">--s12</span>: <span class="s">12px</span>;
+<span class="k">--s16</span>: <span class="s">16px</span>;
+<span class="k">--s20</span>: <span class="s">20px</span>;
+<span class="k">--s24</span>: <span class="s">24px</span>;
+<span class="k">--s32</span>: <span class="s">32px</span>;
+
+<span class="c">/* 圆角 */</span>
+<span class="k">--r6</span>: <span class="s">6px</span>;
+<span class="k">--r8</span>: <span class="s">8px</span>;
+<span class="k">--r12</span>: <span class="s">12px</span>;
+<span class="k">--rfull</span>: <span class="s">9999px</span>;
+</div>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="s7">
+            <h2>07 AI Coding Prompt</h2>
+            <div class="hl">
+                <p><strong>重要：</strong>所有图标必须使用 SVG，禁止使用 Emoji。使用图标库如 Ant Design Icons (@ant-design/icons)、Lucide (lucide-react) 或 Heroicons。</p>
+            </div>
+
+            <div class="ph"><span>🤖</span> System Prompt（复制到 AI Coding 工具）</div>
+            <div class="pc">
+<span class="c"># 魔方问数 AI助手界面生成约束</span>
+<span class="c"># 版本: 2.0 | 日期: 2026-05-11</span>
+
+<span class="c">## 1. 图标规范（重要！）</span>
+<span class="c">### 禁止使用 Emoji，必须使用 SVG 图标</span>
+
+使用图标库（推荐 Ant Design Icons 或 Lucide）：
+- Logo: 自定义 SVG，28×28px，蓝色背景，白色图标
+- 消息图标: &lt;MessageOutlined /&gt; 或 MessageCircle
+- 图表图标: &lt;BarChartOutlined /&gt; 或 BarChart3
+- 通知: &lt;BellOutlined /&gt; 或 Bell
+- 帮助: &lt;QuestionCircleOutlined /&gt; 或 HelpCircle
+- 设置: &lt;SettingOutlined /&gt; 或 Settings
+- 技能: &lt;ThunderboltOutlined /&gt; 或 Zap
+- 发送: &lt;SendOutlined /&gt; 或 Send
+- 加号: &lt;PlusOutlined /&gt; 或 Plus
+- 下拉: &lt;DownOutlined /&gt; 或 ChevronDown
+
+<span class="c">## 2. 色彩</span>
+--brand: <span class="s">#4A7CFF</span>
+--sidebar-bg: <span class="s">#F8F9FB</span>  <span class="c">// 浅色！</span>
+--text-primary: <span class="s">#1A1A2E</span>
+
+<span class="c">## 3. 组件关键样式</span>
+
+<span class="c">### Logo</span>
+图标: 28×28px, background:#4A7CFF, border-radius:6px
+文字: "魔方问数", 17px, font-weight:700
+
+<span class="c">### Tab切换器</span>
+容器: background:#F3F4F6, border-radius:8px, padding:3px
+选项: padding:7px 18px
+选中: background:#fff, color:#4A7CFF, box-shadow
+图标: 14px SVG（消息气泡/柱状图）
+
+<span class="c">### 历史会话</span>
+图标: 14px 消息气泡 SVG
+标题: 14px, 单行截断
+时间: 12px, #9CA3AF, margin-left:auto
+
+<span class="c">### 筛选标签</span>
+运营: 文字 + 下拉箭头（8px）
+分析项目: 加号图标 + 文字
+指间山海: 粉色圆点（#EC4899, 8px）+ 文字 + 下拉箭头
+
+<span class="c">### 发送按钮</span>
+胶囊形: border-radius:9999px
+图标: 纸飞机 SVG（白色）
+文字: "发送", 13px
+
+<span class="c">## 4. 布局</span>
+侧边栏: 260px, background:#F8F9FB（浅色！）
+主内容: flex:1, background:#fff
+
+<span class="c">## 5. 输出要求</span>
+1. 使用 CSS 变量（--brand 等）
+2. 所有图标用 SVG，禁止 Emoji
+3. 侧边栏必须是浅色 #F8F9FB
+4. 代码注释清晰
+</div>
+        </section>
+
+        <!-- Section 8 -->
+        <section id="s8">
+            <h2>08 图标资源清单</h2>
+            <p>推荐使用以下图标库：</p>
+            <table>
+                <tr><th>图标库</th><th>安装命令</th><th>适用框架</th></tr>
+                <tr><td>Ant Design Icons</td><td><code>npm install @ant-design/icons</code></td><td>React</td></tr>
+                <tr><td>Lucide React</td><td><code>npm install lucide-react</code></td><td>React</td></tr>
+                <tr><td>Lucide Vue</td><td><code>npm install lucide-vue-next</code></td><td>Vue</td></tr>
+                <tr><td>Heroicons</td><td><code>npm install @heroicons/react</code></td><td>React</td></tr>
+            </table>
+
+            <h3>图标对应表</h3>
+            <table>
+                <tr><th>位置</th><th>Ant Design</th><th>Lucide</th></tr>
+                <tr><td>消息</td><td><code>&lt;MessageOutlined /&gt;</code></td><td><code>&lt;MessageCircle /&gt;</code></td></tr>
+                <tr><td>图表</td><td><code>&lt;BarChartOutlined /&gt;</code></td><td><code>&lt;BarChart3 /&gt;</code></td></tr>
+                <tr><td>通知</td><td><code>&lt;BellOutlined /&gt;</code></td><td><code>&lt;Bell /&gt;</code></td></tr>
+                <tr><td>帮助</td><td><code>&lt;QuestionCircleOutlined /&gt;</code></td><td><code>&lt;HelpCircle /&gt;</code></td></tr>
+                <tr><td>设置</td><td><code>&lt;SettingOutlined /&gt;</code></td><td><code>&lt;Settings /&gt;</code></td></tr>
+                <tr><td>技能</td><td><code>&lt;ThunderboltOutlined /&gt;</code></td><td><code>&lt;Zap /&gt;</code></td></tr>
+                <tr><td>发送</td><td><code>&lt;SendOutlined /&gt;</code></td><td><code>&lt;Send /&gt;</code></td></tr>
+                <tr><td>加号</td><td><code>&lt;PlusOutlined /&gt;</code></td><td><code>&lt;Plus /&gt;</code></td></tr>
+                <tr><td>下拉</td><td><code>&lt;DownOutlined /&gt;</code></td><td><code>&lt;ChevronDown /&gt;</code></td></tr>
+            </table>
+
+            <div class="hl">
+                <p><strong>Logo图标：</strong>需要自定义 SVG，设计为蓝色背景上的数据/魔方风格图标。</p>
+            </div>
+        </section>
+
+        <div class="footer">
+            <p>魔方问数AI助手 UI设计规范 v2.0 | 含完整SVG图标规范 | 2026.05.11</p>
+        </div>
+    </div>
+</body>
+</html>

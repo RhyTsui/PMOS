@@ -1,0 +1,55 @@
+{
+  "id": "ver-f9c4979b-4975-4e4c-b02d-2adede070e68",
+  "subprojectId": null,
+  "entityType": "product-output",
+  "entityId": "product-output-9eb3bbc4-3181-4a23-85e2-d2a9f8ce30eb",
+  "changeType": "generate",
+  "summary": "Generated governed Product Chief output: Implementation handoff package",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-88278cf8-5d57-4eaa-9e29-63d1069905bd"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/product-office/outputs/product-output-9eb3bbc4-3181-4a23-85e2-d2a9f8ce30eb.md",
+    "docs/memory/product-chief/outputs/product-output-9eb3bbc4-3181-4a23-85e2-d2a9f8ce30eb.json",
+    "docs/memory/product-chief/reports/product-chief-e96a58e5-78e8-4724-937a-2657867c0f07.json",
+    "docs/product-office/specialist-tasks/product-chief-task-bd9273b7-0b0c-46f0-91ee-3b5f3054a33a.md",
+    "docs/product-office/specialist-tasks/product-chief-task-07d3fb6f-7ae5-4959-8c28-5737f8cf3932.md",
+    "docs/product-office/specialist-tasks/product-chief-task-65161943-efe7-4213-b066-8eb7e51eb15c.md",
+    "docs/memory/product-chief/specialist-tasks/product-chief-task-bd9273b7-0b0c-46f0-91ee-3b5f3054a33a.json",
+    "docs/memory/product-chief/specialist-tasks/product-chief-task-07d3fb6f-7ae5-4959-8c28-5737f8cf3932.json",
+    "docs/memory/product-chief/specialist-tasks/product-chief-task-65161943-efe7-4213-b066-8eb7e51eb15c.json",
+    "docs/product-office/multi-agent-reviews/product-chief-review-9c6289d5-270d-40b3-bcbe-6db3137f13a1.md",
+    "docs/memory/product-chief/multi-agent-reviews/product-chief-review-9c6289d5-270d-40b3-bcbe-6db3137f13a1.json"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Generated implementation-handoff from Product Chief report product-chief-e96a58e5-78e8-4724-937a-2657867c0f07.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Generated output is ready for human/specialist review."
+  },
+  "createdAt": "2026-04-28T01:40:26.470Z",
+  "metadata": {
+    "reportId": "product-chief-e96a58e5-78e8-4724-937a-2657867c0f07",
+    "outputType": "implementation-handoff",
+    "priority": "P1",
+    "specialistAgentIds": [
+      "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+      "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+      "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+    ],
+    "specialistTaskIds": [
+      "product-chief-task-bd9273b7-0b0c-46f0-91ee-3b5f3054a33a",
+      "product-chief-task-07d3fb6f-7ae5-4959-8c28-5737f8cf3932",
+      "product-chief-task-65161943-efe7-4213-b066-8eb7e51eb15c"
+    ],
+    "multiAgentReviewId": "product-chief-review-9c6289d5-270d-40b3-bcbe-6db3137f13a1",
+    "multiAgentReviewStatus": "needs-human-decision"
+  }
+}

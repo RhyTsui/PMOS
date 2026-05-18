@@ -51,6 +51,11 @@ export class RequirementService {
       updatedAt: now,
       metadata: input.metadata ?? {},
     };
+    requirement.metadata = {
+      poolScope: requirement.subprojectId ? 'subproject' : 'platform',
+      lifecycle: 'normalized',
+      ...requirement.metadata,
+    };
 
     await this.memoryService.saveRequirement(requirement);
     return requirement;
@@ -160,6 +165,133 @@ export class RequirementService {
       linkedRunIds: sourceMessage.runId ? [sourceMessage.runId] : [],
       metadata: {
         ingestedFrom: 'chat',
+      },
+    });
+  }
+
+  async ingestFromAcceptanceReview(input: {
+    title?: string | null;
+    content: string;
+    subprojectId?: string | null;
+    runId?: string | null;
+    artifactPath?: string | null;
+  }) {
+    const content = input.content.trim();
+    if (!content) {
+      throw new Error('acceptance review content is required');
+    }
+
+    const category = this.classifyRequirement(content);
+    const title = input.title?.trim() || this.buildTitle(content, category);
+
+    return this.createRequirement({
+      subprojectId: input.subprojectId ?? null,
+      title,
+      description: content,
+      category,
+      priority: this.inferPriority(content),
+      source: {
+        kind: 'acceptance-review',
+        sessionId: null,
+        messageId: null,
+        runId: input.runId ?? null,
+        sourceRef: {
+          entityType: 'acceptance-review',
+          entityId: input.runId ?? null,
+          path: input.artifactPath ?? null,
+          label: title,
+        },
+      },
+      linkedRunIds: input.runId ? [input.runId] : [],
+      artifactPaths: input.artifactPath ? [input.artifactPath] : [],
+      metadata: {
+        ingestedFrom: 'acceptance-review',
+      },
+    });
+  }
+
+  async ingestFromRuntimeGateEvent(input: {
+    title?: string | null;
+    content: string;
+    subprojectId?: string | null;
+    runId?: string | null;
+    gateId?: string | null;
+    artifactPath?: string | null;
+  }) {
+    const content = input.content.trim();
+    if (!content) {
+      throw new Error('runtime gate event content is required');
+    }
+
+    const category = this.classifyRequirement(content);
+    const title = input.title?.trim() || this.buildTitle(content, category);
+
+    return this.createRequirement({
+      subprojectId: input.subprojectId ?? null,
+      title,
+      description: content,
+      category,
+      priority: this.inferPriority(content),
+      source: {
+        kind: 'runtime-gate-event',
+        sessionId: null,
+        messageId: null,
+        runId: input.runId ?? null,
+        sourceRef: {
+          entityType: 'runtime-gate-event',
+          entityId: input.gateId ?? input.runId ?? null,
+          path: input.artifactPath ?? null,
+          label: input.gateId ?? title,
+        },
+      },
+      linkedRunIds: input.runId ? [input.runId] : [],
+      artifactPaths: input.artifactPath ? [input.artifactPath] : [],
+      metadata: {
+        ingestedFrom: 'runtime-gate-event',
+        linkedGateIds: input.gateId ? [input.gateId] : [],
+      },
+    });
+  }
+
+  async ingestFromAutoCapture(input: {
+    title?: string | null;
+    content: string;
+    subprojectId?: string | null;
+    runId?: string | null;
+    artifactPath?: string | null;
+    eventKind?: string | null;
+  }) {
+    const content = input.content.trim();
+    if (!content) {
+      throw new Error('auto capture content is required');
+    }
+
+    const category = this.classifyRequirement(content);
+    const title = input.title?.trim() || this.buildTitle(content, category);
+
+    return this.createRequirement({
+      subprojectId: input.subprojectId ?? null,
+      title,
+      description: content,
+      category,
+      priority: this.inferPriority(content),
+      source: {
+        kind: 'auto-capture',
+        sessionId: null,
+        messageId: null,
+        runId: input.runId ?? null,
+        sourceRef: {
+          entityType: 'auto-capture',
+          entityId: input.runId ?? null,
+          path: input.artifactPath ?? null,
+          label: input.eventKind ?? title,
+        },
+      },
+      linkedRunIds: input.runId ? [input.runId] : [],
+      artifactPaths: input.artifactPath ? [input.artifactPath] : [],
+      metadata: {
+        ingestedFrom: 'auto-capture',
+        autoCaptureEventKind: input.eventKind ?? undefined,
       },
     });
   }

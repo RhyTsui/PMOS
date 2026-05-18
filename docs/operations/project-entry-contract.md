@@ -34,11 +34,24 @@
 
 ### AI / Governance Entry
 
+- requirement pool
 - requirement trace
 - version trace
 - linked artifacts
 
 ## Purpose Of Each File
+
+### `requirement-pool.md` or equivalent
+
+回答：
+- 这个项目最近收到了哪些反馈或纠偏
+- 哪些反馈已经被升级成正式需求
+- 哪些反馈被暂缓、拒绝或待补依赖
+- 当前反馈是如何进入 plan / backlog / 真源的
+
+硬规则：
+- 活跃项目不能只有会议纪要或聊天结论，而没有需求池入口
+- 如果项目正在持续接收反馈，但没有需求池文档，则项目入口合同视为不完整
 
 ### `project-board.svg`
 

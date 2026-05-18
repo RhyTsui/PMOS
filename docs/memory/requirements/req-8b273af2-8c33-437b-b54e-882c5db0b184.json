@@ -1,0 +1,42 @@
+{
+  "id": "req-8b273af2-8c33-437b-b54e-882c5db0b184",
+  "subprojectId": null,
+  "title": "Extracted source requirement: | 连弩 | 测试 | 测试平台项目跟进 | 徐韵 | 0.35 | 解决需求和工程卡点",
+  "description": "| 连弩 | 测试 | 测试平台项目跟进 | 徐韵 | 0.35 | 解决需求和工程卡点\n\nExtracted from: docs/sources/inbox/周报-产品组-徐韵-0509.xlsx\nNormalization artifact: docs/product-office/document-normalization/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md\nBackground digest: docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P1",
+  "source": {
+    "kind": "document",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "source-document",
+      "entityId": null,
+      "path": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "label": "documentation-requirement-extraction"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-5a76375c-6dac-4b66-9d52-b0e24c4bcf20"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "docs/product-office/document-normalization/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+      "docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md"
+    ]
+  },
+  "createdAt": "2026-05-09T06:02:09.246Z",
+  "updatedAt": "2026-05-09T06:02:09.249Z",
+  "metadata": {
+    "poolScope": "platform",
+    "lifecycle": "normalized",
+    "source": "documentation-requirement-extraction",
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

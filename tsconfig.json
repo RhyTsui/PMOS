@@ -16,5 +16,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/frontend", "src/shared", "tests", "vite.config.ts"]
+  "include": ["src/frontend", "src/shared", "src/ui-schema", "scripts/**/*.ts", "tests", "vite.config.ts"]
 }

@@ -54,10 +54,10 @@ describe('ProviderRegistry', () => {
 
     expect(providers.length).toBeGreaterThan(0);
     expect(providers[0]).toHaveProperty('name');
-    expect(providers.some((provider) => provider.name === 'claude')).toBe(true);
+    expect(providers.some((provider) => provider.name === 'anthropic')).toBe(true);
     expect(gpt?.scope).toBe('codex-only');
     expect(gpt?.runtimeReady).toBe(false);
-    expect(minimax?.model).toBe('MiniMaxM2.5');
+    expect(minimax?.model).toBe('glm-5');
     expect(minimax?.priority).toBeGreaterThan(0);
   });
 
@@ -89,13 +89,13 @@ describe('ProviderRegistry', () => {
     expect(provider?.activeEnvKey).toBe('AI_STUDIO_API_KEY');
   });
 
-  it('falls back to claude legacy env key with migration warning', async () => {
+  it('falls back to anthropic legacy env key with migration warning', async () => {
     delete process.env.ANTHROPIC_API_KEY;
     process.env.ANTHROPIC_AUTH_TOKEN = 'legacy-anthropic-key';
 
     const store = new FileStore(path.resolve(process.cwd()));
     const registry = new ProviderRegistry(store);
-    const provider = await registry.resolveProviderByName('claude');
+    const provider = await registry.resolveProviderByName('anthropic');
 
     expect(provider?.configured).toBe(true);
     expect(provider?.runtimeReady).toBe(true);

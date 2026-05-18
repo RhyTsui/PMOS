@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1.0",
+  "screenId": "xiaoqiao-debug-automation",
+  "screenType": "debug-automation-workbench",
+  "workflowStage": "integration",
+  "title": "小乔智投自动联调工作台",
+  "layout": {
+    "desktop": "chat-first",
+    "mobile": "stacked-decision-flow",
+    "density": "high",
+    "stickyActions": true
+  },
+  "regions": {
+    "main": [
+      {
+        "type": "ConversationPanel",
+        "id": "debug-chat-flow",
+        "title": "联调会话",
+        "aiAssistanceMode": "automation",
+        "summary": "在会话中承接需求路由、资料确认、发起联调、过程观测和结果沉淀。",
+        "evidenceRefs": ["debug-flow-pdf"],
+        "sourceRefs": ["docs/sources/inbox/小乔智投-架构与联调流程-2026-05-13.pdf"]
+      },
+      {
+        "type": "WorkflowStatusPanel",
+        "id": "debug-execution-status",
+        "title": "执行进展",
+        "workflowStage": "integration",
+        "status": "running",
+        "currentStep": "Web 准备、移动端扫码、查找广告、拉起应用、成功轮询按状态机推进。"
+      },
+      {
+        "type": "AIRecommendationCard",
+        "id": "debug-next-step",
+        "title": "下一步建议",
+        "summary": "资料完整时建议发起自动联调；执行异常时建议查看截图和日志后选择重试或人工接管。",
+        "aiAssistanceMode": "automation",
+        "evidenceRefs": ["debug-step-trace"],
+        "recommendedActions": [
+          {
+            "id": "start-debug-task",
+            "label": "发起联调",
+            "actionType": "advance_workflow",
+            "riskLevel": "medium",
+            "approvalPolicy": "human-review",
+            "auditRequired": true,
+            "targetObject": "DebugAutomationTask"
+          },
+          {
+            "id": "takeover-debug-task",
+            "label": "人工接管",
+            "actionType": "request_review",
+            "riskLevel": "high",
+            "approvalPolicy": "human-review",
+            "requiresApproval": true,
+            "auditRequired": true,
+            "targetObject": "DebugAutomationTask",
+            "rollbackPlan": "保留当前步骤、截图和日志，人工处理后继续或结束任务。"
+          }
+        ]
+      }
+    ],
+    "sidePanel": [
+      {
+        "type": "DynamicSurfaceCard",
+        "id": "debug-live-observation",
+        "title": "联调观测面板",
+        "surfaceKind": "side-sheet",
+        "sourceRefs": ["docs/sources/inbox/小乔智投-架构与联调流程-2026-05-13.pdf"],
+        "evidenceRefs": ["debug-step-trace"]
+      }
+    ],
+    "evidencePanel": [
+      {
+        "type": "EvidencePanel",
+        "id": "debug-evidence",
+        "title": "截图、日志与结果依据",
+        "evidenceRefs": ["debug-step-trace", "debug-result-report"],
+        "sourceRefs": [
+          "docs/sources/inbox/小乔智投-架构与联调流程-2026-05-13.pdf",
+          "docs/sources/inbox/小乔智投/v1.1-0509/小乔智投-自动联调设计-2026-05-08.md"
+        ],
+        "lastUpdatedAt": "2026-05-13T18:01:00+08:00"
+      }
+    ],
+    "approvalPanel": [
+      {
+        "type": "ApprovalPanel",
+        "id": "debug-approval",
+        "title": "高风险动作确认",
+        "approvalPolicy": "human-review",
+        "actions": [
+          {
+            "id": "approve-debug-start",
+            "label": "确认发起联调",
+            "actionType": "approve_change",
+            "riskLevel": "high",
+            "approvalPolicy": "human-review",
+            "requiresApproval": true,
+            "auditRequired": true,
+            "targetObject": "DebugAutomationTask",
+            "rollbackPlan": "可暂停任务并保留已产生的截图与日志。"
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceRefs": ["debug-flow-pdf", "debug-step-trace", "debug-result-report"],
+  "sourceRefs": [
+    "docs/sources/inbox/小乔智投-架构与联调流程-2026-05-13.pdf",
+    "docs/sources/inbox/小乔智投/v1.1-0509/小乔智投-自动联调设计-2026-05-08.md"
+  ],
+  "lastUpdatedAt": "2026-05-13T18:01:00+08:00",
+  "decisionPolicy": "approve",
+  "approvalPolicy": "human-review",
+  "riskLevel": "medium",
+  "auditRequired": true,
+  "aiAssistanceMode": "automation"
+}

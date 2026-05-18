@@ -1,0 +1,66 @@
+{
+  "id": "req-33bc689a-e332-468b-b929-b4f8fd864079",
+  "subprojectId": null,
+  "title": "Normalize historical document: 周报-产品组-徐韵-0509.xlsx",
+  "description": "Normalize inbox source into governed PMAIOS taxonomy and background knowledge.\n\nSource: docs/sources/inbox/周报-产品组-徐韵-0509.xlsx\nSuggested target: docs/sources/version-planning/周报-产品组-徐韵-0509.xlsx\nDocument type: version-planning\nProject hints: ad, tracking-acceptance, testing-platform, knowledge-base, platform",
+  "category": "architecture",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "document-normalization",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "document-normalization",
+      "entityId": "docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1",
+      "path": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "label": "version-planning"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-208507c1-b5e5-4537-b8dc-4d5a33596b9a"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "docs/product-office/document-normalization/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/ad/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/tracking-acceptance/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/testing-platform/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/knowledge-base/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/platform/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md"
+    ]
+  },
+  "createdAt": "2026-05-09T06:12:57.914Z",
+  "updatedAt": "2026-05-09T06:12:57.917Z",
+  "metadata": {
+    "poolScope": "platform",
+    "lifecycle": "normalized",
+    "source": "documentation-normalization",
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/sources/version-planning/周报-产品组-徐韵-0509.xlsx",
+    "documentType": "version-planning",
+    "projectHints": [
+      "ad",
+      "tracking-acceptance",
+      "testing-platform",
+      "knowledge-base",
+      "platform"
+    ],
+    "backgroundContextPath": "docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+    "projectContextPaths": [
+      "docs/context/project/by-tag/ad/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/tracking-acceptance/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/testing-platform/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/knowledge-base/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "docs/context/project/by-tag/platform/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md"
+    ],
+    "notionPageId": "35bd53f7-155c-8198-90dd-f9f68b18e9ab",
+    "notionPageUrl": "https://www.notion.so/Inbox-Knowledge-Digest-0509-xlsx-35bd53f7155c819890ddf9f68b18e9ab"
+  }
+}

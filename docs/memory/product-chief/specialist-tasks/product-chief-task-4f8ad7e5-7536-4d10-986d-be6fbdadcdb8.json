@@ -1,0 +1,23 @@
+{
+  "id": "product-chief-task-4f8ad7e5-7536-4d10-986d-be6fbdadcdb8",
+  "reportId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+  "outputId": "product-output-f4c96a07-e5f4-4e5e-9499-07948c530049",
+  "subprojectId": null,
+  "agentId": "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389",
+  "agentName": "Virtual Documentation PM",
+  "role": "documentation",
+  "status": "completed",
+  "assignedAt": "2026-04-28T01:41:33.141Z",
+  "completedAt": "2026-04-28T01:41:33.141Z",
+  "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-4f8ad7e5-7536-4d10-986d-be6fbdadcdb8.md",
+  "outputType": "product-definition-baseline",
+  "outputTitle": "Product definition baseline",
+  "summary": "Reviewed product-definition-baseline from the documentation specialist perspective.",
+  "requirementIds": [
+    "req-0cdb4808-1d76-4dbd-b9f6-0d52aa574f5e"
+  ],
+  "metadata": {
+    "executionMode": "deterministic-specialist-runtime",
+    "reportGeneratedAt": "2026-04-28T01:41:24.968Z"
+  }
+}

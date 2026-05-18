@@ -99,7 +99,7 @@ Implemented for this correction:
 - Frontend Product Chief panel is reframed as `Project PM Outputs` and displays review status/artifacts.
 - API: `GET /api/skills` exposes product/design/documentation-output skills.
 - Frontend `Product Skills` panel shows product skill, design skill, documentation-output skill counts and prompt paths.
-- Design skill visibility includes installed `claude-design-system` tooling through `design-system.cmd`.
+- Historical note only: design skill visibility once included `claude-design-system` tooling through `design-system.cmd`; this is no longer part of the active PMOS default chain.
 - External connector surface added for Notion, Figma, web fetch, and DingTalk meeting-note import.
 - Web fetch writes source markdown into `docs/sources/inbox/`.
 - DingTalk meeting note import writes source markdown into `docs/sources/inbox/` and triggers documentation normalization.
@@ -184,11 +184,11 @@ Completed after correcting the plan scope:
   - run id: `docnorm-3372fdba-685a-487e-8897-8c479ebe3f88`
   - normalized `docs/sources/inbox/README.md`
   - normalized `docs/sources/inbox/周报-产品组-徐韵-0417.xlsx`
-- Installed and recorded Claude design tooling:
+- Installed and recorded Claude design tooling during the historical Claude-era pass:
   - `claude-design` npm package does not exist
   - installed `claude-design-system@1.0.7`
   - working command is `design-system.cmd`
-  - detailed status is recorded in `docs/operations/claude-design-tooling-status.md`
+  - archived status is recorded in `docs/archive/claude-design-tooling-status-2026-04-19.md`
 
 Verification:
 
@@ -328,7 +328,7 @@ Governance and memory updates:
 
 Local environment check result:
 
-- `Claude Code` is installed globally
+- `Claude Code` was installed globally during that historical pass
 - detected package: `@anthropic-ai/claude-code@2.1.89`
 - command shims were present in the global npm bin path
 - no npm package named `claude-design` exists in the public npm registry

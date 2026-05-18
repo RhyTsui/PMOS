@@ -1,0 +1,131 @@
+<svg width="1600" height="980" viewBox="0 0 1600 980" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="980" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FAFC"/>
+      <stop offset="1" stop-color="#EEF3F8"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 30px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #0F172A; }
+      .h1 { font: 700 20px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #0F172A; }
+      .h2 { font: 700 16px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #E2E8F0; }
+      .card-title { font: 700 16px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #0F172A; }
+      .body { font: 500 13px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #475569; }
+      .light { font: 500 13px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #CBD5E1; }
+      .pill { font: 600 12px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #1D4ED8; }
+      .metric { font: 700 24px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #FFFFFF; }
+      .metric-label { font: 600 12px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #BFDBFE; }
+      .small { font: 500 11px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #64748B; }
+      .link { stroke: #93C5FD; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 8 8; }
+      .soft-link { stroke: #CBD5E1; stroke-width: 1.6; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="980" rx="28" fill="url(#bg)"/>
+
+  <rect x="48" y="38" width="1504" height="178" rx="28" fill="url(#hero)"/>
+  <text x="84" y="92" class="title" fill="#FFFFFF">AI埋点平台 v2 概念图</text>
+  <text x="84" y="126" class="light">企业级数据平台风格 / 角色作用域优先 / 中高信息密度 / 7 模块结构</text>
+
+  <rect x="84" y="152" width="176" height="40" rx="20" fill="#DBEAFE"/>
+  <text x="112" y="177" class="pill">默认：只看自己相关范围</text>
+  <rect x="278" y="152" width="158" height="40" rx="20" fill="#DBEAFE"/>
+  <text x="308" y="177" class="pill">概览中密 / 列表中高密</text>
+  <rect x="454" y="152" width="140" height="40" rx="20" fill="#DBEAFE"/>
+  <text x="487" y="177" class="pill">日志表紧凑优先</text>
+
+  <text x="1018" y="92" class="metric-label">主模块</text>
+  <text x="1018" y="126" class="metric">7</text>
+  <text x="1158" y="92" class="metric-label">核心角色</text>
+  <text x="1158" y="126" class="metric">8</text>
+  <text x="1298" y="92" class="metric-label">核心规则</text>
+  <text x="1298" y="126" class="metric">Scope First</text>
+
+  <rect x="64" y="258" width="222" height="300" rx="24" fill="#FFFFFF" stroke="#DCE7F2"/>
+  <text x="88" y="292" class="card-title">角色作用域层</text>
+  <text x="88" y="322" class="body">系统默认先按角色限定事件域、规则域、日志域、报告域，再决定页面显示内容。</text>
+  <rect x="88" y="350" width="174" height="36" rx="18" fill="#EFF6FF"/>
+  <text x="111" y="373" class="pill">游戏客户端 → 客户端事件</text>
+  <rect x="88" y="398" width="174" height="36" rx="18" fill="#EFF6FF"/>
+  <text x="111" y="421" class="pill">游戏服务端 → 服务端事件</text>
+  <rect x="88" y="446" width="174" height="36" rx="18" fill="#EFF6FF"/>
+  <text x="129" y="469" class="pill">QA → 执行 / 复验</text>
+  <rect x="88" y="494" width="174" height="36" rx="18" fill="#EFF6FF"/>
+  <text x="126" y="517" class="pill">项管 → 全局阻塞</text>
+  <text x="88" y="548" class="small">允许穿透：查看全部 / 上下游依赖 / 跨角色关联问题</text>
+
+  <rect x="324" y="258" width="1212" height="300" rx="24" fill="#FFFFFF" stroke="#DCE7F2"/>
+  <text x="354" y="292" class="card-title">7 模块结构</text>
+  <text x="354" y="322" class="body">模块按“发起需求 → 承接字典 → 执行规则 → 查证日志 → 输出报告”的业务闭环组织，AI 助手作为跨模块入口存在。</text>
+
+  <rect x="354" y="358" width="150" height="156" rx="20" fill="#F8FAFC" stroke="#DBE6F1"/>
+  <text x="380" y="390" class="card-title">概览</text>
+  <text x="380" y="416" class="body">角色化 Dashboard</text>
+  <text x="380" y="438" class="small">版本卡 / 统计卡 / 最近动态 / 趋势 / 关键问题</text>
+
+  <rect x="524" y="358" width="150" height="156" rx="20" fill="#F8FAFC" stroke="#DBE6F1"/>
+  <text x="548" y="390" class="card-title">埋点需求</text>
+  <text x="548" y="416" class="body">事件 + 参数 + 版本差异</text>
+  <text x="548" y="438" class="small">导入导出 / 参数详情 / 角色默认事件域</text>
+
+  <rect x="694" y="358" width="150" height="156" rx="20" fill="#F8FAFC" stroke="#DBE6F1"/>
+  <text x="720" y="390" class="card-title">数据字典</text>
+  <text x="720" y="416" class="body">主数据 / 中文映射</text>
+  <text x="720" y="438" class="small">版本号 / 更新时间 / 摘要 / 字典项</text>
+
+  <rect x="864" y="358" width="150" height="156" rx="20" fill="#F8FAFC" stroke="#DBE6F1"/>
+  <text x="890" y="390" class="card-title">校验规则</text>
+  <text x="890" y="416" class="body">AI 生成 + 人工修正</text>
+  <text x="890" y="438" class="small">规则版本 / 关联事件 / 批量暂停</text>
+
+  <rect x="1034" y="358" width="150" height="156" rx="20" fill="#F8FAFC" stroke="#DBE6F1"/>
+  <text x="1060" y="390" class="card-title">日志查询</text>
+  <text x="1060" y="416" class="body">中文搜索 / 核心参数优先</text>
+  <text x="1060" y="438" class="small">我的设备 / 我的账号 / 完整参数展开</text>
+
+  <rect x="1204" y="358" width="150" height="156" rx="20" fill="#F8FAFC" stroke="#DBE6F1"/>
+  <text x="1230" y="390" class="card-title">验收报告</text>
+  <text x="1230" y="416" class="body">发起批次 / 报告输出</text>
+  <text x="1230" y="438" class="small">通过率 / 问题明细 / 分享到小闪</text>
+
+  <rect x="1374" y="358" width="136" height="156" rx="20" fill="#E0F2FE" stroke="#BAE6FD"/>
+  <text x="1401" y="390" class="card-title">AI助手</text>
+  <text x="1401" y="416" class="body">MCP + 知识库</text>
+  <text x="1401" y="438" class="small">继承当前页面与角色上下文</text>
+
+  <line x1="286" y1="410" x2="324" y2="410" class="link"/>
+
+  <rect x="64" y="594" width="1472" height="162" rx="24" fill="#FFFFFF" stroke="#DCE7F2"/>
+  <text x="92" y="628" class="card-title">业务闭环</text>
+  <text x="92" y="656" class="body">不再围绕“AI 能做什么”堆页面，而是围绕“角色怎样最快完成自己的埋点验收任务”组织闭环。</text>
+
+  <rect x="92" y="684" width="176" height="46" rx="23" fill="#0F172A"/>
+  <text x="133" y="712" class="h2">1. 录入版本需求</text>
+  <rect x="304" y="684" width="176" height="46" rx="23" fill="#0F172A"/>
+  <text x="345" y="712" class="h2">2. 结构化事件参数</text>
+  <rect x="516" y="684" width="176" height="46" rx="23" fill="#0F172A"/>
+  <text x="570" y="712" class="h2">3. 维护数据字典</text>
+  <rect x="728" y="684" width="176" height="46" rx="23" fill="#0F172A"/>
+  <text x="781" y="712" class="h2">4. 生成执行规则</text>
+  <rect x="940" y="684" width="176" height="46" rx="23" fill="#0F172A"/>
+  <text x="996" y="712" class="h2">5. 查询真实日志</text>
+  <rect x="1152" y="684" width="176" height="46" rx="23" fill="#0F172A"/>
+  <text x="1212" y="712" class="h2">6. 发起验收批次</text>
+  <rect x="1364" y="684" width="144" height="46" rx="23" fill="#0F172A"/>
+  <text x="1401" y="712" class="h2">7. 输出报告</text>
+
+  <line x1="268" y1="707" x2="304" y2="707" class="soft-link"/>
+  <line x1="480" y1="707" x2="516" y2="707" class="soft-link"/>
+  <line x1="692" y1="707" x2="728" y2="707" class="soft-link"/>
+  <line x1="904" y1="707" x2="940" y2="707" class="soft-link"/>
+  <line x1="1116" y1="707" x2="1152" y2="707" class="soft-link"/>
+  <line x1="1328" y1="707" x2="1364" y2="707" class="soft-link"/>
+
+  <rect x="64" y="796" width="1472" height="132" rx="24" fill="#0F172A"/>
+  <text x="92" y="832" class="h2">设计基线</text>
+  <text x="92" y="864" class="light">企业级数据平台 / 中高信息密度 / 表格优先 / 默认只显示角色相关范围 / 允许受控穿透全局</text>
+  <text x="92" y="892" class="light">概览中密；列表中高密；规则、日志、报告表默认紧凑优先；详情面板中密；不做杂志风、报纸风、营销风。</text>
+</svg>

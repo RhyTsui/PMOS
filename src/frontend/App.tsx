@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
+  AutoAcceptanceRunReport,
   CapabilityDefinition,
   ChatMessage,
   ChatSession,
@@ -13,8 +14,11 @@ import type {
   ExecutionEvent,
   ExecutionObservability,
   ExecutionRun,
+  FinalStateValidationReport,
+  ProofOfWorkBundle,
   HermesPolicyReport,
   MultimodalArtifact,
+  MultiPmGroupSession,
   ProductChiefMultiAgentReview,
   ProductChiefOutput,
   ProductChiefReport,
@@ -22,12 +26,19 @@ import type {
   ProviderRoutingSnapshot,
   Requirement,
   RetrievalGovernance,
+  SchedulerRun,
   Subproject,
+  TaskSsotState,
+  TaskSsotSyncEnvelope,
+  UISchemaContract,
+  V07RuntimeGovernanceSnapshot,
   VersionEntry,
   WorkflowMetrics,
   WorkflowRun,
 } from '../shared/schemas';
 import { ReviewPanel } from './components/ReviewPanel';
+import { V07RuntimeGovernancePanel } from './components/V07RuntimeGovernancePanel';
+import { PmosXFramework } from './components/PmosXFramework';
 
 const FRONTEND_PORT = '5174';
 const BACKEND_PORT = '4312';
@@ -51,6 +62,336 @@ type RetrievalSearchResponse = {
   items: RetrievalSearchItem[];
   gate: RetrievalGate;
 };
+
+type ProductChiefImageBatch = {
+  version: 1;
+  outputId: string;
+  subprojectId: string | null;
+  generatedAt: string;
+  versionTag: string;
+  batchFolder: string;
+  generatedImageGeneratedAt: string;
+  pageCount: number;
+  warningCount: number;
+  items: Array<{
+    pageNumber: number;
+    pageName: string;
+    pageKey: string;
+    variantId: string;
+    variantLabel: string;
+    designLanguage: string;
+    styleDirection: string;
+    informationDensity: 'low' | 'medium' | 'high';
+    prompt: string;
+    assetPath: string;
+  }>;
+  warnings: string[];
+  manifestPath: string;
+};
+
+type MultiPmGroupSessionsResponse = {
+  items: MultiPmGroupSession[];
+};
+
+type TaskSsotStateResponse = TaskSsotState & {
+  total: number;
+  active: number;
+  blocked: number;
+  completed: number;
+};
+
+type SchedulerRunsResponse = {
+  items: SchedulerRun[];
+  total: number;
+  running: number;
+  paused: number;
+  blocked: number;
+  completed: number;
+};
+
+type OutboxResponse = {
+  items: TaskSsotSyncEnvelope[];
+};
+
+type SchedulerRuntimeSummary = {
+  total: number;
+  dueNow: number;
+  autoRetry: number;
+  autoRework: number;
+  scheduled: number;
+  manualOnly: number;
+  budgetExhausted: number;
+  blocked: number;
+  completed: number;
+};
+
+type OutboxRuntimeSummary = {
+  total: number;
+  pending: number;
+  completed: number;
+  failed: number;
+  dropped: number;
+  byTargetSystem: Record<string, number>;
+  byCategory: Record<string, number>;
+};
+
+type V10TrackStatus = 'landed' | 'partial' | 'missing';
+
+type V10AcceptanceTrackItem = {
+  id: string;
+  title: string;
+  status: V10TrackStatus;
+  detail: string;
+  userBackcheck: 'solved' | 'partial' | 'unsolved';
+};
+
+type WorkflowChainStageItem = {
+  id: string;
+  label: string;
+  status: 'completed' | 'active' | 'queued';
+  detail: string;
+};
+
+const V10_WORKFLOW_CHAIN = [
+  { id: 'research-document', label: '调研' },
+  { id: 'planning-document', label: '规划' },
+  { id: 'requirements-document', label: '需求' },
+  { id: 'functional-specification', label: '功能' },
+  { id: 'design-document', label: '设计' },
+  { id: 'frontend-page', label: '前端页面' },
+  { id: 'database-schema', label: '数据表' },
+  { id: 'backend-api', label: '后端接口' },
+  { id: 'frontend-backend-integration', label: '联调与验收' },
+] as const;
+
+const SPECIALIST_REVIEW_BASELINE = [
+  'Solution-Optimality Review',
+  'Development Review',
+  'Design Review',
+  'Research Review',
+  'Delivery Review',
+  'Hermes Governance',
+] as const;
+
+function getTrackTone(status: V10TrackStatus) {
+  if (status === 'landed') {
+    return 'trace-event trace-event--ok';
+  }
+  if (status === 'partial') {
+    return 'trace-event trace-event--warn';
+  }
+  return 'trace-event trace-event--error';
+}
+
+function getWorkflowStageTone(status: WorkflowChainStageItem['status']) {
+  if (status === 'completed') {
+    return 'trace-event trace-event--ok runtime-feature-card runtime-feature-card--pipeline';
+  }
+  if (status === 'active') {
+    return 'trace-event trace-event--warn runtime-feature-card runtime-feature-card--pipeline';
+  }
+  return 'trace-event runtime-feature-card runtime-feature-card--pipeline';
+}
+
+async function loadProofOfWorkBundle(subprojectId: string | null) {
+  return fetchJson<ProofOfWorkBundle>(buildScopedUrl('/api/proof-of-work/bundle', subprojectId));
+}
+
+async function closeHermesLoop(runId: string, subprojectId: string | null) {
+  return fetchJson<{ closedWritebackTaskCount: number; closedWatchTaskCount: number }>(
+    buildScopedUrl(`/api/runs/${runId}/hermes/close-loop`, subprojectId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ subprojectId }),
+    },
+  );
+}
+
+async function executeHermesWriteback(runId: string, subprojectId: string | null) {
+  return fetchJson<{
+    executedWritebackTargetCount: number;
+    skippedWritebackTargetCount: number;
+    closedWritebackTaskCount: number;
+    closedWatchTaskCount: number;
+  }>(
+    buildScopedUrl(`/api/runs/${runId}/hermes/execute-writeback`, subprojectId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ subprojectId }),
+    },
+  );
+}
+
+function resolveOperatorEntryActions(input: {
+  entries: NonNullable<TaskSsotState['tasks'][number]['continuation']['currentAttention']>['operatorEntries'];
+  schedulerRuns: SchedulerRunsResponse | null;
+  schedulerBusy: boolean;
+  workflowBusy: boolean;
+  onRefresh: () => void;
+  onTickDue: () => void;
+  onTickRun: (workflowRunId: string) => void;
+  onScheduleResumeCurrent: (workflowRunId: string) => void;
+  onScheduleResumeRework: (workflowRunId: string) => void;
+  onApproveGate: () => void;
+  onSendToRework: () => void;
+  onExecuteHermesWriteback: (workflowRunId: string) => void;
+  onCloseHermesLoop: (workflowRunId: string) => void;
+}) {
+  return input.entries.map((entry) => {
+    const key = `${entry.targetTaskId}-${entry.actionId}`;
+    if (entry.actionId === 'refresh-proof') {
+      return { key, label: entry.label, onClick: input.onRefresh, disabled: input.workflowBusy || input.schedulerBusy };
+    }
+    if (entry.actionId === 'tick-due') {
+      return { key, label: entry.label, onClick: input.onTickDue, disabled: input.schedulerBusy };
+    }
+    if (entry.actionId === 'approve-gate') {
+      return { key, label: entry.label, onClick: input.onApproveGate, disabled: input.workflowBusy };
+    }
+    if (entry.actionId === 'send-to-rework') {
+      return { key, label: entry.label, onClick: input.onSendToRework, disabled: input.workflowBusy };
+    }
+    if (entry.actionId === 'close-hermes-loop') {
+      if (!entry.targetWorkflowRunId) {
+        return { key, label: entry.label, onClick: () => undefined, disabled: true };
+      }
+      return {
+        key,
+        label: entry.label,
+        onClick: () => input.onCloseHermesLoop(entry.targetWorkflowRunId as string),
+        disabled: input.workflowBusy || input.schedulerBusy,
+      };
+    }
+    if (entry.actionId === 'execute-hermes-writeback') {
+      if (!entry.targetWorkflowRunId) {
+        return { key, label: entry.label, onClick: () => undefined, disabled: true };
+      }
+      return {
+        key,
+        label: entry.label,
+        onClick: () => input.onExecuteHermesWriteback(entry.targetWorkflowRunId as string),
+        disabled: input.workflowBusy || input.schedulerBusy,
+      };
+    }
+    const linkedWorkflowRunId = entry.targetWorkflowRunId;
+    const linkedSchedulerRun =
+      linkedWorkflowRunId && input.schedulerRuns
+        ? input.schedulerRuns.items.find((item) => item.workflowRunId === linkedWorkflowRunId) ?? null
+        : null;
+    if (!linkedSchedulerRun) {
+      return { key, label: entry.label, onClick: () => undefined, disabled: true };
+    }
+    if (entry.actionId === 'tick-run') {
+      return {
+        key,
+        label: entry.label,
+        onClick: () => input.onTickRun(linkedSchedulerRun.workflowRunId),
+        disabled: input.schedulerBusy,
+      };
+    }
+    if (entry.actionId === 'resume-current-stage') {
+      return {
+        key,
+        label: entry.label,
+        onClick: () => input.onScheduleResumeCurrent(linkedSchedulerRun.workflowRunId),
+        disabled: input.schedulerBusy,
+      };
+    }
+    return {
+      key,
+      label: entry.label,
+      onClick: () => input.onScheduleResumeRework(linkedSchedulerRun.workflowRunId),
+      disabled: input.schedulerBusy,
+    };
+  });
+}
+
+function findLinkedTaskForWorkflowRun(state: TaskSsotStateResponse | null, workflowRunId: string) {
+  if (!state) {
+    return null;
+  }
+  return state.tasks.find((task) => task.sourceType === 'workflow-run-task' && task.sourceRef === workflowRunId) ?? null;
+}
+
+function isProjectScopedDesignOutput(type: string | null | undefined) {
+  return type === 'concept-design-pack' || type === 'design-image2-prompt-pack';
+}
+
+function getGovernedOutputLabel(type: string | null | undefined) {
+  switch (type) {
+    case 'plan-prd':
+      return 'Planning PRD';
+    case 'functional-spec-pack':
+      return '功能说明包';
+    case 'concept-design-pack':
+      return '概念设计包（image2 概念板）';
+    case 'html-direction-pack':
+      return '交付级 HTML 页面';
+    case 'delivery-design-pack':
+      return '交付设计包（Figma / JSON schema / 页面结构 DSL）';
+    case 'implementation-handoff':
+      return '开发交接包';
+    case 'product-definition-baseline':
+      return '产品定义基线';
+    case 'requirement-baseline':
+      return '需求基线';
+    case 'original-demand-review':
+      return '原始需求回查';
+    case 'ui-schema-spec':
+      return '结构化页面规范';
+    default:
+      return type ?? '未知产出';
+  }
+}
+
+function getGovernedOutputLayer(type: string | null | undefined) {
+  switch (type) {
+    case 'product-definition-baseline':
+    case 'requirement-baseline':
+    case 'original-demand-review':
+    case 'plan-prd':
+    case 'functional-spec-pack':
+      return 'definition';
+    case 'concept-design-pack':
+    case 'html-direction-pack':
+    case 'delivery-design-pack':
+    case 'ui-schema-spec':
+      return 'design';
+    case 'implementation-handoff':
+    case 'version-plan':
+    case 'roadmap':
+    case 'demo-script':
+    case 'user-manual':
+      return 'delivery';
+    default:
+      return 'delivery';
+  }
+}
+
+function getGovernedOutputLayerLabel(layer: 'definition' | 'design' | 'delivery') {
+  switch (layer) {
+    case 'definition':
+      return '定义层';
+    case 'design':
+      return '设计层';
+    case 'delivery':
+      return '交付层';
+  }
+}
+
+function buildGovernedOutputHint(input: {
+  type: string;
+  layer: 'definition' | 'design' | 'delivery';
+  dependsOn: string[];
+  unlocks: string[];
+}) {
+  const parts = [
+    `层级: ${getGovernedOutputLayerLabel(input.layer)}`,
+    `依赖: ${input.dependsOn.length > 0 ? input.dependsOn.map((type) => getGovernedOutputLabel(type)).join(' / ') : '无'}`,
+    `解锁: ${input.unlocks.length > 0 ? input.unlocks.map((type) => getGovernedOutputLabel(type)).join(' / ') : '无直接下游'}`,
+  ];
+  return parts.join('\n');
+}
 
 interface BrowserSpeechRecognitionAlternative {
   transcript: string;
@@ -252,6 +593,7 @@ type ExternalConnectorStatus = {
     configured: boolean;
     connected: boolean | null;
     missing: string[];
+    targetMode: 'database' | 'page' | 'unconfigured';
   };
   figma: {
     configured: boolean;
@@ -268,6 +610,48 @@ type ExternalConnectorStatus = {
     inboxPath: string;
     localCandidateRoots: string[];
   };
+  dataki: {
+    configured: boolean;
+    connected: boolean | null;
+    missing: string[];
+    baseUrl: string | null;
+    userId: string | null;
+    agentId: string | null;
+    defaultKnowledgeBaseId: string | null;
+    defaultKnowledgeBaseIds: string[];
+  };
+};
+
+type DatakiKnowledgeBaseSummary = {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  knowledgeCount: number;
+  chunkCount: number;
+  processingCount: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+type DatakiKnowledgeFileSummary = {
+  id: string;
+  title: string;
+  fileType: string | null;
+  status: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+type DatakiKnowledgeSearchItem = {
+  id: string;
+  content: string;
+  knowledgeId: string;
+  knowledgeTitle: string;
+  knowledgeFilename: string | null;
+  knowledgeSource: string | null;
+  chunkType: string | null;
+  score: number | null;
 };
 
 type CollaborationModeName = 'default' | 'plan' | 'deep' | 'do';
@@ -379,11 +763,11 @@ type RuleExecutionItem = {
   detail: string;
 };
 
-const SUBPROJECT_WORKFLOW_ADOPTION: Record<string, 'partial' | 'not_adopted' | 'unknown'> = {
+const SUBPROJECT_WORKFLOW_ADOPTION: Record<string, 'adopted' | 'partial' | 'not_adopted' | 'unknown'> = {
   'knowledge-base': 'partial',
   ad: 'partial',
   chokonu: 'partial',
-  'tracking-acceptance': 'partial',
+  'tracking-acceptance': 'adopted',
   server: 'partial',
   'data-service': 'not_adopted',
   'ad-intelligence': 'unknown',
@@ -440,6 +824,10 @@ function buildScopedUrl(path: string, subprojectId: string | null) {
   return `${path}${separator}subprojectId=${encodeURIComponent(subprojectId)}`;
 }
 
+function buildFileApiUrl(filePath: string) {
+  return `/api/files/${filePath.split('/').map((segment) => encodeURIComponent(segment)).join('/')}`;
+}
+
 async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const response = await fetch(input, {
     headers: {
@@ -474,9 +862,21 @@ function RuleExecutionStatusPanel({
 }) {
   const adoptionState = selectedSubproject?.id ? SUBPROJECT_WORKFLOW_ADOPTION[selectedSubproject.id] ?? 'unknown' : 'partial';
   const workflowAdoptionLabel =
-    adoptionState === 'partial' ? '已部分接入' : adoptionState === 'not_adopted' ? '未接入' : '待确认';
+    adoptionState === 'adopted'
+      ? '已接入'
+      : adoptionState === 'partial'
+        ? '已部分接入'
+        : adoptionState === 'not_adopted'
+          ? '未接入'
+          : '待确认';
   const workflowAdoptionStatus: RuleExecutionItem['status'] =
-    adoptionState === 'partial' ? 'ok' : adoptionState === 'not_adopted' ? 'warning' : 'pending';
+    adoptionState === 'adopted'
+      ? 'ok'
+      : adoptionState === 'partial'
+        ? 'ok'
+        : adoptionState === 'not_adopted'
+          ? 'warning'
+          : 'pending';
 
   const items: RuleExecutionItem[] = [
     {
@@ -571,11 +971,11 @@ function ArtifactHubPanel({
       </div>
       <div className="artifact-hub-list">
         {items.map((item) => (
-          <button key={item.id} type="button" className="artifact-hub-card" onClick={item.onClick}>
-            <span className="artifact-hub-card__label">{item.label}</span>
+          <button key={item.id} type="button" className="action-tile" onClick={item.onClick}>
+            <span className="action-tile__label">{item.label}</span>
             <strong>{item.count}</strong>
-            <span className="artifact-hub-card__latest">{item.latestLabel}</span>
-            <span className="artifact-hub-card__hint">点击查看</span>
+            <span className="action-tile__latest">{item.latestLabel}</span>
+            <span className="action-tile__hint">点击查看</span>
           </button>
         ))}
       </div>
@@ -684,13 +1084,13 @@ function ModeRuntimePanel({
               <button
                 key={mode}
                 type="button"
-                className="artifact-hub-card"
+                className="action-tile"
                 onClick={() => onSwitchMode(mode)}
                 disabled={busy || modeState.currentMode === mode}
               >
-                <span className="artifact-hub-card__label">{mode}</span>
+                <span className="action-tile__label">{mode}</span>
                 <strong>{modeState.currentMode === mode ? '当前' : '切换'}</strong>
-                <span className="artifact-hub-card__hint">{busy ? '处理中' : '更新共享模式'}</span>
+                <span className="action-tile__hint">{busy ? '处理中' : '更新共享模式'}</span>
               </button>
             ))}
           </div>
@@ -764,6 +1164,844 @@ function SharedContextPanel({
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+function TaskContinuationPanel({
+  state,
+  workflowBusy,
+  schedulerBusy,
+  schedulerRuns,
+  onRefreshWorkflow,
+  onRunUntilBlocked,
+  onResumeWorkflow,
+  onApproveReviewGate,
+  onSendToRework,
+  onExecuteHermesWriteback,
+  onCloseHermesLoop,
+}: {
+  state: TaskSsotStateResponse | null;
+  workflowBusy: boolean;
+  schedulerBusy: boolean;
+  schedulerRuns: SchedulerRunsResponse | null;
+  onRefreshWorkflow: () => void;
+  onRunUntilBlocked: () => void;
+  onResumeWorkflow: () => void;
+  onApproveReviewGate: () => void;
+  onSendToRework: () => void;
+  onExecuteHermesWriteback: (workflowRunId: string) => void;
+  onCloseHermesLoop: (workflowRunId: string) => void;
+}) {
+  if (!state) {
+    return (
+      <section className="sidebar-section">
+        <div className="section-header">
+          <h2>项目续跑</h2>
+        </div>
+        <div className="inspector-empty">当前还没有 Task SSOT continuation 状态。</div>
+      </section>
+    );
+  }
+
+  const activeMainlineTask = state.continuation.activeMainlineTaskId
+    ? state.tasks.find((task) => task.taskId === state.continuation.activeMainlineTaskId) ?? null
+    : null;
+  const parkedTasks = state.tasks.filter((task) => state.continuation.parkedTaskIds.includes(task.taskId)).slice(0, 3);
+  const blockedTasks = state.tasks.filter((task) => state.continuation.blockedTaskIds.includes(task.taskId)).slice(0, 3);
+  const gateChecks = state.tasks.flatMap((task) => task.gateChecks.map((gate) => ({ taskTitle: task.title, gate })));
+  const gatePassCount = gateChecks.filter((item) => item.gate.status === 'pass').length;
+  const gateWarnCount = gateChecks.filter((item) => item.gate.status === 'warn').length;
+  const gateBlockCount = gateChecks.filter((item) => item.gate.status === 'block').length;
+  const attentionTasks = state.tasks
+    .filter((task) => task.continuation.currentAttention && task.continuation.currentAttention.status !== 'pass')
+    .slice(0, 4);
+  const activeMainlineAttention = state.continuation.activeMainlineAttention ?? activeMainlineTask?.continuation.currentAttention ?? null;
+  const activeMainlineActions = activeMainlineAttention
+    ? resolveOperatorEntryActions({
+        entries: activeMainlineAttention.operatorEntries,
+        schedulerRuns,
+        schedulerBusy,
+        workflowBusy,
+        onRefresh: onRefreshWorkflow,
+        onTickDue: onRunUntilBlocked,
+        onTickRun: onRunUntilBlocked,
+        onScheduleResumeCurrent: onResumeWorkflow,
+        onScheduleResumeRework: onResumeWorkflow,
+        onApproveGate: onApproveReviewGate,
+        onSendToRework,
+        onExecuteHermesWriteback,
+        onCloseHermesLoop,
+      })
+    : [];
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>项目续跑</h2>
+        <div className="capability-inline-actions">
+          <button type="button" className="secondary-button" onClick={onRefreshWorkflow} disabled={workflowBusy}>
+            Refresh
+          </button>
+          <button type="button" className="secondary-button" onClick={onRunUntilBlocked} disabled={workflowBusy}>
+            Run
+          </button>
+        </div>
+      </div>
+      <div className="trace-list">
+        <article className={`trace-event trace-event--${activeMainlineTask ? 'ok' : 'warning'}`}>
+          <div className="trace-event__kind">active mainline</div>
+          <div className="trace-event__detail">{activeMainlineTask?.continuation.mainlineLabel ?? '当前还没有激活主线'}</div>
+          <div className="trace-event__meta">
+            {activeMainlineTask?.taskId ?? '-'} / next: {activeMainlineTask?.continuation.nextSafeStep ?? '-'}
+          </div>
+          {activeMainlineAttention ? (
+            <div className="trace-event__artifact">
+              attention: {activeMainlineAttention.gateId ?? '-'} / {activeMainlineAttention.status ?? '-'}
+            </div>
+          ) : null}
+          {activeMainlineTask?.continuation.resumeAnchor ? (
+            <div className="trace-event__artifact">{activeMainlineTask.continuation.resumeAnchor}</div>
+          ) : null}
+          {activeMainlineActions.length > 0 ? (
+            <div className="capability-inline-actions" style={{ marginTop: 8 }}>
+              {activeMainlineActions.map((action) => (
+                <button
+                  key={action.key}
+                  type="button"
+                  className="secondary-button"
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </article>
+        <article className="trace-event trace-event--ok">
+          <div className="trace-event__kind">summary</div>
+          <div className="trace-event__detail">
+            total {state.total} / active {state.active} / blocked {state.blocked} / completed {state.completed}
+          </div>
+          <div className="trace-event__meta">
+            parked {state.continuation.parkedTaskIds.length} / blocked {state.continuation.blockedTaskIds.length}
+          </div>
+        </article>
+        <article className={`trace-event trace-event--${gateBlockCount > 0 ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">gate runtime</div>
+          <div className="trace-event__detail">
+            pass {gatePassCount} / warn {gateWarnCount} / block {gateBlockCount}
+          </div>
+          <div className="trace-event__meta">当前最小实现：project truth / review convergence / asset backwrite</div>
+        </article>
+      </div>
+      <div className="trace-list">
+        {parkedTasks.length === 0 ? (
+          <div className="inspector-empty">当前没有 parked side lines。</div>
+        ) : (
+          parkedTasks.map((task) => (
+            <article key={task.taskId} className="trace-event trace-event--ok">
+              <div className="trace-event__kind">parked</div>
+              <div className="trace-event__detail">{task.continuation.mainlineLabel}</div>
+              <div className="trace-event__meta">{task.continuation.nextSafeStep ?? 'waiting for mainline return'}</div>
+            </article>
+          ))
+        )}
+      </div>
+      <div className="trace-list">
+        {blockedTasks.map((task) => (
+          <article key={task.taskId} className="trace-event trace-event--warning">
+            <div className="trace-event__kind">blocked / {task.continuation.blockerType ?? 'unknown'}</div>
+            <div className="trace-event__detail">{task.continuation.mainlineLabel}</div>
+            <div className="trace-event__meta">{task.continuation.nextSafeStep ?? task.summary ?? '-'}</div>
+          </article>
+        ))}
+      </div>
+      <div className="trace-list">
+        {attentionTasks.length === 0 ? (
+          <div className="inspector-empty">当前最小 gate runtime 没有 warn / block 项。</div>
+        ) : (
+          attentionTasks.map((task) => {
+            const attention = task.continuation.currentAttention;
+            if (!attention) {
+              return null;
+            }
+            const actions = resolveOperatorEntryActions({
+              entries: attention.operatorEntries,
+              schedulerRuns,
+              schedulerBusy,
+              workflowBusy,
+              onRefresh: onRefreshWorkflow,
+              onTickDue: onRunUntilBlocked,
+              onTickRun: onRunUntilBlocked,
+              onScheduleResumeCurrent: onResumeWorkflow,
+              onScheduleResumeRework: onResumeWorkflow,
+              onApproveGate: onApproveReviewGate,
+              onSendToRework,
+              onExecuteHermesWriteback,
+              onCloseHermesLoop,
+            });
+            return (
+              <article key={`${task.taskId}-${attention.gateId ?? 'attention'}`} className={`trace-event trace-event--${attention.status === 'block' ? 'warning' : 'pending'}`}>
+                <div className="trace-event__kind">
+                  {attention.status} / {attention.gateId ?? '-'}
+                </div>
+                <div className="trace-event__detail">{task.continuation.mainlineLabel}</div>
+                <div className="trace-event__meta">{attention.reason ?? task.summary ?? '-'}</div>
+                <div className="trace-event__artifact">
+                  next: {attention.nextSafeStep ?? '-'} / stage: {attention.stageId ?? '-'}
+                </div>
+                {actions.length > 0 ? (
+                  <div className="capability-inline-actions">
+                    {actions.map((action) => (
+                      <button type="button" className="secondary-button" key={action.key} onClick={action.onClick} disabled={action.disabled}>
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+            );
+          })
+        )}
+      </div>
+    </section>
+  );
+}
+
+function SchedulerRunPanel({
+  data,
+  taskSsotState,
+  busy,
+  onRefresh,
+  onTickDue,
+  onTickRun,
+  onScheduleResumeCurrent,
+  onScheduleResumeRework,
+  onExecuteHermesWriteback,
+  onCloseHermesLoop,
+}: {
+  data: SchedulerRunsResponse | null;
+  taskSsotState: TaskSsotStateResponse | null;
+  busy: boolean;
+  onRefresh: () => void;
+  onTickDue: () => void;
+  onTickRun: (workflowRunId: string) => void;
+  onScheduleResumeCurrent: (workflowRunId: string) => void;
+  onScheduleResumeRework: (workflowRunId: string) => void;
+  onExecuteHermesWriteback: (workflowRunId: string) => void;
+  onCloseHermesLoop: (workflowRunId: string) => void;
+}) {
+  if (!data) {
+    return (
+      <section className="sidebar-section">
+        <div className="section-header">
+          <h2>调度运行</h2>
+        </div>
+        <div className="inspector-empty">当前还没有 SchedulerRun 视图。</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>调度运行</h2>
+        <div className="capability-inline-actions">
+          <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
+            Refresh
+          </button>
+          <button type="button" className="secondary-button" onClick={onTickDue} disabled={busy}>
+            Tick Due
+          </button>
+        </div>
+      </div>
+      <div className="trace-list">
+        <article className={`trace-event trace-event--${data.blocked > 0 ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">scheduler summary</div>
+          <div className="trace-event__detail">
+            total {data.total} / running {data.running} / paused {data.paused} / blocked {data.blocked} / completed {data.completed}
+          </div>
+          <div className="trace-event__meta">
+            due now {data.items.filter((run) => run.dueNow).length} / budget exhausted {data.items.filter((run) => run.budgetExhausted).length} / 最小实现：schedule / tick / auto resume / retry / next run / blocked reason
+          </div>
+        </article>
+      </div>
+      <div className="trace-list">
+        {data.items.length === 0 ? (
+          <div className="inspector-empty">当前还没有 workflow-derived scheduler run。</div>
+        ) : (
+          data.items.slice(0, 4).map((run) => {
+            const linkedTask = findLinkedTaskForWorkflowRun(taskSsotState, run.workflowRunId);
+            const linkedAttention = linkedTask?.continuation.currentAttention ?? null;
+            const linkedActions = linkedAttention
+              ? resolveOperatorEntryActions({
+                  entries: linkedAttention.operatorEntries,
+                  schedulerRuns: data,
+                  schedulerBusy: busy,
+                  workflowBusy: busy,
+                  onRefresh,
+                  onTickDue,
+                  onTickRun,
+                  onScheduleResumeCurrent,
+                  onScheduleResumeRework,
+                  onApproveGate: () => undefined,
+                  onSendToRework: () => undefined,
+                  onExecuteHermesWriteback,
+                  onCloseHermesLoop,
+                }).filter((action) => action.label !== 'Approve Gate' && action.label !== 'Send To Rework')
+              : [];
+
+            return (
+              <article key={run.id} className={`trace-event trace-event--${run.status === 'blocked' ? 'warning' : run.status === 'paused' ? 'pending' : 'ok'}`}>
+                <div className="trace-event__kind">{run.status}</div>
+                <div className="trace-event__detail">
+                  {run.projectName} / stage {run.currentStageId ?? '-'}
+                </div>
+                <div className="trace-event__meta">
+                  retry {run.retryCount} / next {run.nextRunAt ? new Date(run.nextRunAt).toLocaleString('zh-CN') : '-'}
+                </div>
+                <div className="trace-event__artifact">
+                  mode {run.schedulerMode} / auto recovery {run.autoRecoveryEligible ? 'eligible' : 'manual'}
+                </div>
+                <div className="trace-event__artifact">
+                  budget {run.consumedBudget}/{run.sessionBudget} / remaining {run.remainingBudget} / policy {run.budgetPolicy}
+                </div>
+                {run.plannedAction ? (
+                  <div className="trace-event__artifact">
+                    plan {run.plannedAction} / due {run.dueNow ? 'now' : 'waiting'}
+                  </div>
+                ) : null}
+                {linkedTask ? (
+                  <div className="trace-event__artifact">
+                    task {linkedTask.continuation.mainlineLabel} / attention {linkedAttention?.gateId ?? '-'} / {linkedAttention?.status ?? '-'}
+                  </div>
+                ) : null}
+                {run.operatorActionHint ? <div className="trace-event__artifact">{run.operatorActionHint}</div> : null}
+                {run.schedulerReason ? <div className="trace-event__artifact">{run.schedulerReason}</div> : null}
+                {run.blockedReason ? <div className="trace-event__artifact">{run.blockedReason}</div> : null}
+                <div className="capability-inline-actions">
+                  <button type="button" className="secondary-button" onClick={() => onTickRun(run.workflowRunId)} disabled={busy}>
+                    Tick
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => onScheduleResumeCurrent(run.workflowRunId)}
+                    disabled={busy || run.status === 'completed'}
+                  >
+                    Resume Current
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => onScheduleResumeRework(run.workflowRunId)}
+                    disabled={busy || run.status === 'completed'}
+                  >
+                    Resume Rework
+                  </button>
+                  {linkedActions.map((action) => (
+                    <button type="button" className="secondary-button" key={action.key} onClick={action.onClick} disabled={action.disabled}>
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+    </section>
+  );
+}
+
+function FinalStateValidationPanel({
+  report,
+  autoAcceptanceBusy,
+  autoAcceptanceResult,
+  browserRunResult,
+  onRunAutoAcceptance,
+}: {
+  report: FinalStateValidationReport | null;
+  autoAcceptanceBusy: boolean;
+  autoAcceptanceResult: LiveAutoAcceptanceRun | null;
+  browserRunResult: LiveBrowserVerificationRun | null;
+  onRunAutoAcceptance: (() => void) | null;
+}) {
+  if (!report) {
+    return (
+      <section className="sidebar-section">
+        <div className="section-header">
+          <h2>最终态校验</h2>
+        </div>
+        <div className="inspector-empty">当前还没有 final-state validation 结果。</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>最终态校验</h2>
+        {onRunAutoAcceptance ? (
+          <button type="button" className="secondary-button" onClick={onRunAutoAcceptance} disabled={autoAcceptanceBusy}>
+            {autoAcceptanceBusy ? '自动验收中...' : '运行自动验收'}
+          </button>
+        ) : null}
+      </div>
+      <div className="trace-list">
+        <article className={`trace-event trace-event--${report.status === 'ready' ? 'ok' : 'warning'}`}>
+          <div className="trace-event__kind">{report.status}</div>
+          <div className="trace-event__detail">{report.summary}</div>
+          <div className="trace-event__meta">任务：{report.taskId}</div>
+        </article>
+        {report.checks.map((check) => (
+          <article key={check.id} className={`trace-event trace-event--${check.status === 'pass' ? 'ok' : 'warning'}`}>
+            <div className="trace-event__kind">{check.label}</div>
+            <div className="trace-event__detail">{check.status}</div>
+            <div className="trace-event__meta">{check.detail}</div>
+          </article>
+        ))}
+        {report.browserVerification ? (
+          <article className={`trace-event trace-event--${report.browserVerification.status === 'pass' ? 'ok' : 'warning'}`}>
+            <div className="trace-event__kind">浏览器级验证</div>
+            <div className="trace-event__detail">{report.browserVerification.status}</div>
+            <div className="trace-event__meta">{report.browserVerification.summary}</div>
+          </article>
+        ) : null}
+        {report.browserVerification?.checks.map((check) => (
+          <article key={`browser-${check.id}`} className={`trace-event trace-event--${check.status === 'pass' ? 'ok' : 'warning'}`}>
+            <div className="trace-event__kind">{check.label}</div>
+            <div className="trace-event__detail">{check.status}</div>
+            <div className="trace-event__meta">{check.detail}</div>
+          </article>
+        ))}
+        {browserRunResult ? (
+          <article className={`trace-event trace-event--${browserRunResult.report.status === 'ok' ? 'ok' : 'warning'}`}>
+            <div className="trace-event__kind">Playwright 实跑</div>
+            <div className="trace-event__detail">
+              {browserRunResult.report.status} / {browserRunResult.report.title || 'untitled'}
+            </div>
+            <div className="trace-event__meta">{browserRunResult.report.target}</div>
+            <div className="trace-event__artifact">report: {browserRunResult.outputPath}</div>
+            <div className="trace-event__artifact">screenshot: {browserRunResult.report.screenshotPath}</div>
+            {browserRunResult.report.navigationError ? (
+              <div className="trace-event__artifact">error: {browserRunResult.report.navigationError}</div>
+            ) : null}
+          </article>
+        ) : null}
+        {autoAcceptanceResult ? (
+          <article className={`trace-event trace-event--${autoAcceptanceResult.userVisible ? 'ok' : 'warning'}`}>
+            <div className="trace-event__kind">自动验收</div>
+            <div className="trace-event__detail">
+              {autoAcceptanceResult.finalState.status} / user visible: {autoAcceptanceResult.userVisible ? 'yes' : 'no'}
+            </div>
+            <div className="trace-event__meta">{autoAcceptanceResult.summary}</div>
+          </article>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function OutboxPanel({ items, runtime }: { items: TaskSsotSyncEnvelope[]; runtime: OutboxRuntimeSummary | null }) {
+  const pending = items.filter((item) => item.status === 'pending').length;
+  const failed = items.filter((item) => item.status === 'failed').length;
+  const completed = items.filter((item) => item.status === 'completed').length;
+  const runtimeCategories = runtime ? Object.entries(runtime.byCategory).slice(0, 4) : [];
+  const runtimeTargets = runtime ? Object.entries(runtime.byTargetSystem).slice(0, 4) : [];
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>外部同步</h2>
+      </div>
+      <div className="trace-list">
+        <article className={`trace-event trace-event--${failed > 0 ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">同步信封</div>
+          <div className="trace-event__detail">
+            total {items.length} / pending {pending} / failed {failed} / completed {completed}
+          </div>
+          <div className="trace-event__meta">先写本地真源，再排外部同步。</div>
+        </article>
+        {runtime ? (
+          <article className={`trace-event trace-event--${runtime.failed > 0 || runtime.dropped > 0 ? 'warning' : 'ok'}`}>
+            <div className="trace-event__kind">runtime summary</div>
+            <div className="trace-event__detail">
+              total {runtime.total} / pending {runtime.pending} / completed {runtime.completed}
+            </div>
+            <div className="trace-event__meta">
+              failed {runtime.failed} / dropped {runtime.dropped}
+            </div>
+          </article>
+        ) : null}
+        {runtimeCategories.length > 0 ? (
+          <article className="trace-event trace-event--ok">
+            <div className="trace-event__kind">target categories</div>
+            <div className="trace-event__detail">
+              {runtimeCategories.map(([key, value]) => `${key} ${value}`).join(' / ')}
+            </div>
+            <div className="trace-event__meta">按同步语义聚合，而不是只看具体系统名。</div>
+          </article>
+        ) : null}
+        {runtimeTargets.length > 0 ? (
+          <article className="trace-event trace-event--ok">
+            <div className="trace-event__kind">target systems</div>
+            <div className="trace-event__detail">
+              {runtimeTargets.map(([key, value]) => `${key} ${value}`).join(' / ')}
+            </div>
+            <div className="trace-event__meta">当前最活跃的外部写回目标。</div>
+          </article>
+        ) : null}
+        {items.slice(0, 4).map((item) => (
+          <article key={item.syncId} className={`trace-event trace-event--${item.status === 'failed' || item.status === 'dropped' ? 'warning' : 'ok'}`}>
+            <div className="trace-event__kind">{item.status}</div>
+            <div className="trace-event__detail">
+              {item.targetSystem} / {item.action}
+            </div>
+            <div className="trace-event__meta">
+              task {item.taskId} / retry {item.retryCount}/{item.maxRetries}
+            </div>
+            <div className="trace-event__artifact">
+              category {item.targetCategory} / topic {item.topicKey ?? '-'}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProofOfWorkPanel({
+  bundle,
+  schedulerRuns,
+  schedulerRuntime,
+  schedulerBusy,
+  workflowBusy,
+  pipelineBusy,
+  onRefresh,
+  onTriggerPipeline,
+  onTickDue,
+  onTickRun,
+  onScheduleResumeCurrent,
+  onScheduleResumeRework,
+  onApproveGate,
+  onSendToRework,
+  onExecuteHermesWriteback,
+  onCloseHermesLoop,
+}: {
+  bundle: ProofOfWorkBundle | null;
+  schedulerRuns: SchedulerRunsResponse | null;
+  schedulerRuntime: SchedulerRuntimeSummary | null;
+  schedulerBusy: boolean;
+  workflowBusy: boolean;
+  pipelineBusy: boolean;
+  onRefresh: () => void;
+  onTriggerPipeline: (taskId: string, planId: string) => void;
+  onTickDue: () => void;
+  onTickRun: (workflowRunId: string) => void;
+  onScheduleResumeCurrent: (workflowRunId: string) => void;
+  onScheduleResumeRework: (workflowRunId: string) => void;
+  onApproveGate: () => void;
+  onSendToRework: () => void;
+  onExecuteHermesWriteback: (workflowRunId: string) => void;
+  onCloseHermesLoop: (workflowRunId: string) => void;
+}) {
+  if (!bundle) {
+    return (
+      <section className="sidebar-section">
+        <div className="section-header">
+          <h2>交付证据包</h2>
+        </div>
+        <div className="inspector-empty">当前还没有交付证据包。</div>
+      </section>
+    );
+  }
+
+  const attentionActions = resolveOperatorEntryActions({
+    entries: bundle.gateHistory.currentAttention.operatorEntries,
+    schedulerRuns,
+    schedulerBusy,
+    workflowBusy,
+    onRefresh,
+    onTickDue,
+    onTickRun,
+    onScheduleResumeCurrent,
+    onScheduleResumeRework,
+    onApproveGate,
+    onSendToRework,
+    onExecuteHermesWriteback,
+    onCloseHermesLoop,
+  });
+
+  return (
+    <section className="sidebar-section">
+      <div className="section-header">
+        <h2>交付证据包</h2>
+      </div>
+      <div className="trace-list">
+        <article className={`trace-event trace-event--${bundle.status === 'ready' ? 'ok' : 'warning'}`}>
+          <div className="trace-event__kind">{bundle.status}</div>
+          <div className="trace-event__detail">{bundle.summary}</div>
+          <div className="trace-event__meta">
+            task {bundle.taskId} / run {bundle.workflowRunId ?? '-'}
+          </div>
+        </article>
+        <article className={`trace-event trace-event--${bundle.gateSummary.block > 0 ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">关卡摘要</div>
+          <div className="trace-event__detail">
+            pass {bundle.gateSummary.pass} / warn {bundle.gateSummary.warn} / block {bundle.gateSummary.block}
+          </div>
+          <div className="trace-event__meta">{bundle.finalState.summary}</div>
+        </article>
+        <article className={`trace-event trace-event--${bundle.contextBundle.blockedGateIds.length > 0 ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">context bundle</div>
+          <div className="trace-event__detail">
+            {bundle.contextBundle.projectLabel} / {bundle.contextBundle.collaborationLevel} / {bundle.contextBundle.currentStage ?? '-'}
+          </div>
+          <div className="trace-event__meta">
+            active {bundle.contextBundle.activeGateIds.length} / blocked {bundle.contextBundle.blockedGateIds.length}
+          </div>
+          {bundle.contextBundle.nextSafeStep ? (
+            <div className="trace-event__artifact">next: {bundle.contextBundle.nextSafeStep}</div>
+          ) : null}
+          {bundle.contextBundle.resumeAnchor ? (
+            <div className="trace-event__artifact">{bundle.contextBundle.resumeAnchor}</div>
+          ) : null}
+          {bundle.contextBundle.redlines.slice(0, 3).map((item) => (
+            <div key={item} className="trace-event__artifact">
+              redline: {item}
+            </div>
+          ))}
+        </article>
+        {bundle.pipelineLauncher.length > 0 ? (
+          <article className={`trace-event trace-event--${bundle.pipelineLauncher.some((plan) => plan.status === 'blocked') ? 'warning' : bundle.pipelineLauncher.some((plan) => plan.status === 'needs-input') ? 'pending' : 'ok'}`}>
+            <div className="trace-event__kind">pipeline launcher</div>
+            <div className="trace-event__detail">
+              {bundle.pipelineLauncher.map((plan) => `${plan.label}: ${plan.status}`).join(' / ')}
+            </div>
+            <div className="trace-event__meta">把下游 readiness plan 直接并入 proof-of-work。</div>
+            {bundle.pipelineLauncher.slice(0, 3).map((plan) => (
+              <div key={plan.id} className="trace-event__artifact">
+                {plan.label} {'->'} {plan.targetStages.join(' -> ') || '-'} / next {plan.nextAction ?? '-'}
+                {plan.status === 'ready' ? (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    style={{ marginLeft: 8 }}
+                    disabled={pipelineBusy || workflowBusy}
+                    onClick={() => onTriggerPipeline(bundle.taskId, plan.id)}
+                  >
+                    触发
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </article>
+        ) : null}
+        <article className={`trace-event trace-event--${bundle.gateHistory.blockedGates.length > 0 ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">关卡历史</div>
+          <div className="trace-event__detail">
+            total {bundle.gateHistory.total} / blocked gates {bundle.gateHistory.blockedGates.length}
+          </div>
+          <div className="trace-event__meta">
+            最近 gate 动作和当前阻塞 gate 已并入 proof-of-work。
+          </div>
+        </article>
+        {bundle.gateHistory.latestDecisionEvent ? (
+          <article
+            className={`trace-event trace-event--${bundle.gateHistory.latestDecisionEvent.toStatus === 'block' ? 'warning' : 'ok'}`}
+          >
+            <div className="trace-event__kind">最新判定</div>
+            <div className="trace-event__detail">
+              {bundle.gateHistory.latestDecisionEvent.gateId} / {bundle.gateHistory.latestDecisionEvent.toStatus}
+            </div>
+            <div className="trace-event__meta">{bundle.gateHistory.latestDecisionEvent.summary}</div>
+            <div className="trace-event__artifact">
+              actor: {bundle.gateHistory.latestDecisionEvent.actorRole} / recorded: {bundle.gateHistory.latestDecisionEvent.recordedAt}
+            </div>
+          </article>
+        ) : null}
+        {bundle.gateHistory.currentAttention.gateId ? (
+          <article
+            className={`trace-event trace-event--${bundle.gateHistory.currentAttention.status === 'block' ? 'warning' : bundle.gateHistory.currentAttention.status === 'warn' ? 'warning' : 'ok'}`}
+          >
+            <div className="trace-event__kind">当前关注点</div>
+            <div className="trace-event__detail">
+              {bundle.gateHistory.currentAttention.gateId} / {bundle.gateHistory.currentAttention.status ?? '-'}
+            </div>
+            <div className="trace-event__meta">{bundle.gateHistory.currentAttention.reason ?? '-'}</div>
+            <div className="trace-event__artifact">
+              actor: {bundle.gateHistory.currentAttention.actorRole ?? '-'} / next: {bundle.gateHistory.currentAttention.nextSafeStep ?? '-'}
+            </div>
+            <div className="trace-event__artifact">
+              任务：{bundle.gateHistory.currentAttention.mainlineLabel ?? bundle.gateHistory.currentAttention.taskId} / 阶段：{bundle.gateHistory.currentAttention.stageId ?? '-'}
+            </div>
+            {bundle.gateHistory.currentAttention.resumeAnchor ? (
+              <div className="trace-event__artifact">{bundle.gateHistory.currentAttention.resumeAnchor}</div>
+            ) : null}
+            {bundle.gateHistory.currentAttention.suggestedActions.map((action) => (
+              <div key={`${bundle.gateHistory.currentAttention.gateId}-${action}`} className="trace-event__artifact">
+                action: {action}
+              </div>
+            ))}
+            {attentionActions.length > 0 ? (
+              <div className="capability-inline-actions" style={{ marginTop: 8 }}>
+                {attentionActions.map((action) => (
+                  <button
+                    key={action.key}
+                    type="button"
+                    className="secondary-button"
+                    onClick={action.onClick}
+                    disabled={action.disabled}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </article>
+        ) : null}
+        <article className={`trace-event trace-event--${bundle.review.decision === 'reject' ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">review / {bundle.review.decision}</div>
+          <div className="trace-event__detail">{bundle.review.summary}</div>
+          <div className="trace-event__meta">
+            outbox total {bundle.outbox.total} / pending {bundle.outbox.pending} / failed {bundle.outbox.failed} / completed {bundle.outbox.completed}
+          </div>
+        </article>
+        {schedulerRuntime ? (
+          <article className={`trace-event trace-event--${schedulerRuntime.blocked > 0 ? 'warning' : 'ok'}`}>
+            <div className="trace-event__kind">scheduler runtime</div>
+            <div className="trace-event__detail">
+              total {schedulerRuntime.total} / dueNow {schedulerRuntime.dueNow} / blocked {schedulerRuntime.blocked}
+            </div>
+            <div className="trace-event__meta">
+              scheduled {schedulerRuntime.scheduled} / autoRetry {schedulerRuntime.autoRetry} / autoRework {schedulerRuntime.autoRework} / manualOnly {schedulerRuntime.manualOnly}
+            </div>
+          </article>
+        ) : null}
+        <article
+          className={`trace-event trace-event--${
+            bundle.acceptancePackage.verdict === 'accepted'
+              ? 'ok'
+              : bundle.acceptancePackage.verdict === 'conditional'
+                ? 'pending'
+                : 'warning'
+          }`}
+        >
+          <div className="trace-event__kind">acceptance package / {bundle.acceptancePackage.verdict}</div>
+          <div className="trace-event__detail">{bundle.acceptancePackage.summary}</div>
+          <div className="trace-event__meta">
+            handoff {bundle.acceptancePackage.handoff.mainlineLabel ?? '-'} / {bundle.acceptancePackage.handoff.currentStage ?? '-'}
+          </div>
+          {bundle.acceptancePackage.handoff.resumeAnchor ? (
+            <div className="trace-event__artifact">{bundle.acceptancePackage.handoff.resumeAnchor}</div>
+          ) : null}
+          {bundle.acceptancePackage.handoff.nextSafeStep ? (
+            <div className="trace-event__artifact">next: {bundle.acceptancePackage.handoff.nextSafeStep}</div>
+          ) : null}
+          {bundle.acceptancePackage.missingEvidence.map((item) => (
+            <div key={`missing-${item}`} className="trace-event__artifact">
+              missing: {item}
+            </div>
+          ))}
+        </article>
+        <article className={`trace-event trace-event--${bundle.ownership.approvalStatus === 'rejected' ? 'warning' : 'ok'}`}>
+          <div className="trace-event__kind">责任归属</div>
+          <div className="trace-event__detail">
+            owner {bundle.ownership.ownerAgentId ?? '-'} / reviewers {bundle.ownership.reviewerAgentIds.length > 0 ? bundle.ownership.reviewerAgentIds.join(', ') : '-'}
+          </div>
+          <div className="trace-event__meta">
+            approval {bundle.ownership.approvalStatus} / approver {bundle.ownership.approver ?? '-'}
+          </div>
+        </article>
+      </div>
+      <div className="trace-list">
+        {bundle.acceptancePackage.requiredEvidence.map((evidence) => (
+          <article
+            key={evidence.id}
+            className={`trace-event trace-event--${evidence.status === 'pass' ? 'ok' : evidence.status === 'warn' ? 'pending' : 'warning'}`}
+          >
+            <div className="trace-event__kind">acceptance evidence / {evidence.label}</div>
+            <div className="trace-event__detail">{evidence.status}</div>
+            <div className="trace-event__meta">{evidence.detail}</div>
+            {evidence.evidencePaths.slice(0, 2).map((evidencePath) => (
+              <div key={`${evidence.id}-${evidencePath}`} className="trace-event__artifact">
+                {evidencePath}
+              </div>
+            ))}
+          </article>
+        ))}
+      </div>
+      <div className="trace-list">
+        {bundle.artifactPaths.slice(0, 6).map((artifactPath) => (
+          <article key={artifactPath} className="trace-event trace-event--ok">
+            <div className="trace-event__kind">artifact</div>
+            <div className="trace-event__artifact">
+              <a href={buildFileApiUrl(artifactPath)} target="_blank" rel="noreferrer">
+                open artifact
+              </a>
+              {' / '}
+              {artifactPath}
+            </div>
+          </article>
+        ))}
+      </div>
+      {bundle.gateHistory.recentEvents.length > 0 ? (
+        <div className="trace-list">
+          {bundle.gateHistory.recentEvents.map((event) => (
+            <article
+              key={event.id}
+              className={`trace-event trace-event--${event.toStatus === 'block' ? 'warning' : 'ok'}`}
+            >
+              <div className="trace-event__kind">{event.gateId}</div>
+              <div className="trace-event__detail">
+                {event.action}
+                {event.stageId ? ` / ${event.stageId}` : ''}
+              </div>
+              <div className="trace-event__meta">
+                {event.summary}
+                {' / '}
+                {event.fromStatus ?? '-'} -&gt; {event.toStatus ?? '-'}
+              </div>
+              <div className="trace-event__artifact">
+                actor: {event.actorRole} / recorded: {event.recordedAt}
+              </div>
+              {event.artifactRefs.slice(0, 2).map((artifactRef) => (
+                <div key={`${event.id}-artifact-${artifactRef}`} className="trace-event__artifact">
+                  artifact: {artifactRef}
+                </div>
+              ))}
+              {event.evidenceRefs.slice(0, 2).map((evidenceRef) => (
+                <div key={`${event.id}-evidence-${evidenceRef}`} className="trace-event__artifact">
+                  evidence: {evidenceRef}
+                </div>
+              ))}
+            </article>
+          ))}
+        </div>
+      ) : null}
+      {bundle.gateHistory.blockedGates.length > 0 ? (
+        <div className="trace-list">
+          {bundle.gateHistory.blockedGates.map((gate) => (
+            <article key={`${gate.taskId}-${gate.gateId}`} className="trace-event trace-event--warning">
+              <div className="trace-event__kind">阻塞关卡</div>
+              <div className="trace-event__detail">{gate.gateId}</div>
+              <div className="trace-event__meta">{gate.reason}</div>
+            </article>
+          ))}
+        </div>
+      ) : null}
+      {bundle.outbox.receiptRefs.length > 0 ? (
+        <div className="trace-list">
+          {bundle.outbox.receiptRefs.slice(0, 4).map((receiptRef) => (
+            <article key={receiptRef} className="trace-event trace-event--ok">
+              <div className="trace-event__kind">receipt</div>
+              <div className="trace-event__artifact">{receiptRef}</div>
+            </article>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -983,8 +2221,8 @@ function MonitoringOverviewPanel({
       </div>
       <div className="workspace-summary-grid workspace-summary-grid--compact">
         {cards.map((card) => (
-          <article key={card.id} className="summary-card">
-            <span className="summary-card__label">{card.label}</span>
+          <article key={card.id} className="metric-tile">
+            <span className="metric-tile__label">{card.label}</span>
             <strong>{card.value}</strong>
             <span>{card.detail}</span>
           </article>
@@ -1106,6 +2344,42 @@ async function importDingTalkMeetingConnector(input: { subprojectId?: string | n
   });
 }
 
+async function listDatakiKnowledgeBases(input: { subprojectId?: string | null; baseUrl?: string; apiKey?: string; userId?: string; agentId?: string }) {
+  return fetchJson<{ items: DatakiKnowledgeBaseSummary[] }>('/api/connectors/dataki/knowledge-bases/list', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+async function listDatakiKnowledgeFiles(input: {
+  knowledgeBaseId: string;
+  subprojectId?: string | null;
+  baseUrl?: string;
+  apiKey?: string;
+  keyword?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  return fetchJson<{ items: DatakiKnowledgeFileSummary[] }>(`/api/connectors/dataki/knowledge-bases/${encodeURIComponent(input.knowledgeBaseId)}/knowledge/list`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+async function searchDatakiKnowledge(input: {
+  query: string;
+  knowledgeBaseId?: string;
+  knowledgeBaseIds?: string[];
+  subprojectId?: string | null;
+  baseUrl?: string;
+  apiKey?: string;
+}) {
+  return fetchJson<{ items: DatakiKnowledgeSearchItem[] }>('/api/connectors/dataki/knowledge-search', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
 async function bootstrapProductAgentHierarchy(subprojectId: string | null) {
   return fetchJson<{ items: ProductAgent[] }>('/api/product-agent-blueprints/bootstrap', {
     method: 'POST',
@@ -1121,8 +2395,16 @@ async function listProductChiefOutputs(subprojectId: string | null) {
   return fetchJson<{ items: ProductChiefOutput[] }>(buildScopedUrl('/api/product-chief/outputs', subprojectId));
 }
 
+async function listProductChiefImageBatches(subprojectId: string | null) {
+  return fetchJson<{ items: ProductChiefImageBatch[] }>(buildScopedUrl('/api/product-chief/image-batches', subprojectId));
+}
+
 async function listProductChiefMultiAgentReviews(subprojectId: string | null) {
   return fetchJson<{ items: ProductChiefMultiAgentReview[] }>(buildScopedUrl('/api/product-chief/multi-agent-reviews', subprojectId));
+}
+
+async function listMultiPmGroupSessions(subprojectId: string | null) {
+  return fetchJson<MultiPmGroupSessionsResponse>(buildScopedUrl('/api/product-chief/group-sessions', subprojectId));
 }
 
 async function analyzeProductChief(input: { subprojectId?: string | null; brief: string }) {
@@ -1312,6 +2594,102 @@ async function loadMcpContextEvents() {
   return fetchJson<{ items: SharedEvent[] }>('/api/mcp-context/events?count=12');
 }
 
+async function loadTaskSsotState(subprojectId: string | null) {
+  return fetchJson<TaskSsotStateResponse>(buildScopedUrl('/api/task-ssot/state', subprojectId));
+}
+
+async function loadSchedulerRuns(subprojectId: string | null) {
+  return fetchJson<SchedulerRunsResponse>(buildScopedUrl('/api/scheduler/runs', subprojectId));
+}
+
+async function loadSchedulerRuntime(subprojectId: string | null) {
+  return fetchJson<SchedulerRuntimeSummary>(buildScopedUrl('/api/scheduler/runtime', subprojectId));
+}
+
+async function tickDueSchedulerRuns(subprojectId: string | null) {
+  return fetchJson<{ items: SchedulerRun[]; total: number }>(buildScopedUrl('/api/scheduler/runs/tick-due', subprojectId), {
+    method: 'POST',
+    body: JSON.stringify({ subprojectId }),
+  });
+}
+
+async function tickSchedulerRun(workflowRunId: string, subprojectId: string | null) {
+  return fetchJson<SchedulerRun>(buildScopedUrl(`/api/scheduler/runs/${workflowRunId}/tick`, subprojectId), {
+    method: 'POST',
+    body: JSON.stringify({ subprojectId }),
+  });
+}
+
+async function scheduleSchedulerRun(
+  workflowRunId: string,
+  input: {
+    subprojectId: string | null;
+    action: 'advance' | 'resume-current-stage' | 'resume-rework-stage';
+    cooldownUntil?: string | null;
+    reason?: string | null;
+  },
+) {
+  return fetchJson<SchedulerRun>(buildScopedUrl(`/api/scheduler/runs/${workflowRunId}/schedule`, input.subprojectId), {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+async function loadOutboxEnvelopes(subprojectId: string | null) {
+  return fetchJson<OutboxResponse>(buildScopedUrl('/api/outbox/envelopes', subprojectId));
+}
+
+async function loadOutboxRuntime(subprojectId: string | null) {
+  return fetchJson<OutboxRuntimeSummary>(buildScopedUrl('/api/outbox/runtime', subprojectId));
+}
+
+async function triggerPipelineLauncher(taskId: string, planId: string, subprojectId: string | null) {
+  return fetchJson<{ taskId: string; plan: { id: string }; targetStageId: string; workflowRun: WorkflowRun }>(
+    buildScopedUrl(`/api/task-ssot/tasks/${taskId}/pipeline-launcher/${planId}/trigger`, subprojectId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ subprojectId }),
+    },
+  );
+}
+
+async function loadFinalStateValidation(taskId: string, subprojectId: string | null) {
+  return fetchJson<FinalStateValidationReport>(buildScopedUrl(`/api/task-ssot/tasks/${taskId}/final-state-validation`, subprojectId));
+}
+
+type LiveBrowserVerificationRun = {
+  taskId?: string;
+  outputPath: string;
+  stdout: string | null;
+  stderr: string | null;
+  report: {
+    kind: string;
+    target: string;
+    startedAt: string;
+    finishedAt: string;
+    status: string;
+    navigationError: string | null;
+    title: string;
+    screenshotPath: string;
+    metrics: Record<string, number>;
+    evidence: {
+      visibleTextSample: string;
+    };
+  };
+};
+
+type LiveAutoAcceptanceRun = AutoAcceptanceRunReport;
+
+async function runTaskAutoAcceptance(taskId: string, subprojectId: string | null) {
+  return fetchJson<LiveAutoAcceptanceRun>(
+    buildScopedUrl(`/api/task-ssot/tasks/${taskId}/auto-acceptance/run`, subprojectId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ subprojectId }),
+    },
+  );
+}
+
 async function loadExecutionChecklistSummary() {
   return fetchJson<ExecutionChecklistSummary>('/api/ops/execution-checklist-summary');
 }
@@ -1395,6 +2773,17 @@ async function loadWorkflowReview(subprojectId: string | null) {
 
 async function loadHermesPolicy(runId: string, subprojectId: string | null) {
   return fetchJson<HermesPolicyReport>(buildScopedUrl(`/api/runs/${runId}/hermes-policy`, subprojectId));
+}
+
+async function loadV07RuntimeGovernance(subprojectId: string | null) {
+  return fetchJson<V07RuntimeGovernanceSnapshot>(buildScopedUrl('/api/v0.7/runtime-governance', subprojectId));
+}
+
+async function promoteRepeatCorrectionCandidate(candidateId: string, subprojectId: string | null) {
+  return fetchJson<Requirement>(`/api/v0.7/runtime-governance/repeat-corrections/${encodeURIComponent(candidateId)}/promote`, {
+    method: 'POST',
+    body: JSON.stringify({ subprojectId }),
+  });
 }
 
 async function advanceWorkflowRun(runId: string, subprojectId: string | null) {
@@ -1915,7 +3304,7 @@ function ProviderRoutingPanel({
   if (snapshots.length === 0) {
     return (
       <section className="inspector-panel">
-        <h3>Provider Routing</h3>
+        <h3>模型路由</h3>
         <div className="inspector-empty">Provider routing has not been loaded yet.</div>
       </section>
     );
@@ -1924,28 +3313,28 @@ function ProviderRoutingPanel({
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>Provider Routing</h3>
+        <h3>模型路由</h3>
         <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
           Refresh
         </button>
       </div>
       <div className="provider-routing-summary">
         <div className="provider-routing-summary__card">
-          <span>Configured Primary Text</span>
+          <span>当前主文本模型</span>
           <strong>{primaryText ? `${primaryText.name} / ${primaryText.model ?? 'default-model'}` : '-'}</strong>
         </div>
         <div className="provider-routing-summary__card">
-          <span>Configured Backup Text</span>
+          <span>当前备用文本模型</span>
           <strong>{backupText ? `${backupText.name} / ${backupText.model ?? 'default-model'}` : '-'}</strong>
         </div>
         <div className="provider-routing-summary__card">
-          <span>Configured Preferred Provider</span>
+          <span>当前优先模型</span>
           <strong>{textSnapshot?.preferredProvider ?? textSnapshot?.defaultProvider ?? '-'}</strong>
         </div>
       </div>
-      <div className="trace-event__meta">This panel shows routing candidates from config, not the exact model used by the latest reply.</div>
+      <div className="trace-event__meta">这里展示的是配置层路由候选，不等于最近一次回复实际使用的模型。</div>
       <div className="inspector-field">
-        <span>Scope</span>
+        <span>范围</span>
         <strong>{scopeLabel}</strong>
       </div>
       <div className="trace-list">
@@ -1959,7 +3348,7 @@ function ProviderRoutingPanel({
                 {snapshot.preferredProvider ? ` / preferred: ${snapshot.preferredProvider}` : ''}
               </div>
               {snapshot.providers.length === 0 ? (
-                <div className="trace-event__meta">No providers available for this capability.</div>
+                <div className="trace-event__meta">当前能力还没有可用模型。</div>
               ) : (
                 <div className="provider-routing-list">
                   {snapshot.providers.map((provider) => (
@@ -1969,13 +3358,13 @@ function ProviderRoutingPanel({
                     >
                       <div className="provider-route-chip__title">
                         <strong>#{provider.order + 1} {provider.name}</strong>
-                        <span>{provider.model ?? 'default-model'}</span>
+                        <span>{provider.model ?? '默认模型'}</span>
                       </div>
                       <div className="provider-route-chip__meta">
-                        routed as {provider.routedCapability} / priority {provider.priority} / score {provider.score}
+                        路由能力 {provider.routedCapability} / 优先级 {provider.priority} / 分数 {provider.score}
                       </div>
                       <div className="provider-route-chip__meta">
-                        ready: {provider.runtimeReady ? 'yes' : 'no'} / configured: {provider.configured ? 'yes' : 'no'}
+                        就绪：{provider.runtimeReady ? '是' : '否'} / 已配置：{provider.configured ? '是' : '否'}
                       </div>
                       <div className="provider-route-chip__actions">
                         <button
@@ -1984,7 +3373,7 @@ function ProviderRoutingPanel({
                           onClick={() => onSetPrimary(provider.name)}
                           disabled={busy}
                         >
-                          Set Primary
+                          设为主模型
                         </button>
                         <button
                           type="button"
@@ -1992,7 +3381,7 @@ function ProviderRoutingPanel({
                           onClick={() => onAdjustPriority(provider.name, 10)}
                           disabled={busy}
                         >
-                          Priority +
+                          优先级 +
                         </button>
                         <button
                           type="button"
@@ -2000,12 +3389,12 @@ function ProviderRoutingPanel({
                           onClick={() => onAdjustPriority(provider.name, -10)}
                           disabled={busy}
                         >
-                          Priority -
+                          优先级 -
                         </button>
                       </div>
                       {provider.coolingDown ? (
                         <div className="provider-route-chip__cooldown">
-                          cooling until {provider.cooldownUntil ? new Date(provider.cooldownUntil).toLocaleString('zh-CN') : '-'}
+                          冷却至 {provider.cooldownUntil ? new Date(provider.cooldownUntil).toLocaleString('zh-CN') : '-'}
                         </div>
                       ) : null}
                     </div>
@@ -2047,44 +3436,44 @@ function WorkflowOpsPanel({
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>Workflow Ops</h3>
+        <h3>流程操作</h3>
         <div className="capability-inline-actions">
           <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
-            Refresh
+            刷新
           </button>
         </div>
       </div>
       {!run ? (
-        <div className="inspector-empty">No workflow run is available for the current scope.</div>
+        <div className="inspector-empty">当前范围还没有可用的 workflow run。</div>
       ) : (
         <>
           <div className="inspector-field">
-            <span>Run ID</span>
+            <span>运行 ID</span>
             <strong>{run.id}</strong>
           </div>
           <div className="inspector-field">
-            <span>Status</span>
+            <span>状态</span>
             <strong>{run.status}</strong>
           </div>
           <div className="inspector-field">
-            <span>Active Stage</span>
+            <span>当前阶段</span>
             <strong>{activeStage?.label ?? run.currentStageId ?? '-'}</strong>
           </div>
           <div className="inspector-field">
-            <span>Provider / MCP</span>
+            <span>模型 / MCP</span>
             <strong>{run.providerCount} / {run.mcpServerCount}</strong>
           </div>
           <div className="inspector-field">
-            <span>Artifacts / Rework</span>
+            <span>产出 / 返工</span>
             <strong>{metrics?.artifactCount ?? 0} / {run.reworkCount}</strong>
           </div>
           <div className="inspector-field">
-            <span>Review Gate</span>
+            <span>评审门</span>
             <strong>{review?.gate.decision ?? '-'}</strong>
           </div>
           <div className="capability-actions">
             <button type="button" className="secondary-button" onClick={onAdvance} disabled={busy || run.status !== 'running'}>
-              Advance
+              推进一步
             </button>
             <button
               type="button"
@@ -2092,7 +3481,7 @@ function WorkflowOpsPanel({
               onClick={onRunUntilBlocked}
               disabled={busy || run.status !== 'running'}
             >
-              Run Until Blocked
+              运行到阻塞
             </button>
             <button
               type="button"
@@ -2100,7 +3489,7 @@ function WorkflowOpsPanel({
               onClick={onResume}
               disabled={busy || (run.status !== 'blocked' && run.status !== 'needs-rework')}
             >
-              Resume
+              恢复
             </button>
             <button
               type="button"
@@ -2108,7 +3497,7 @@ function WorkflowOpsPanel({
               onClick={onApproveGate}
               disabled={busy || !review || !review.gate.blocked}
             >
-              Approve Gate
+              通过评审门
             </button>
             <button
               type="button"
@@ -2116,7 +3505,7 @@ function WorkflowOpsPanel({
               onClick={onSendToRework}
               disabled={busy || !review || !review.reworkRequired}
             >
-              Send To Rework
+              打回返工
             </button>
           </div>
           {metrics ? (
@@ -2124,10 +3513,10 @@ function WorkflowOpsPanel({
               <article className="trace-event">
                 <div className="trace-event__kind">Metrics</div>
                 <div className="trace-event__detail">
-                  completed: {metrics.completedStages}/{metrics.totalStages} / blocked: {metrics.blockedStages}
+                  已完成：{metrics.completedStages}/{metrics.totalStages} / 阻塞：{metrics.blockedStages}
                 </div>
                 <div className="trace-event__meta">
-                  review issues: {metrics.reviewIssueCount} / completion: {(metrics.completionRate * 100).toFixed(0)}%
+                  评审问题：{metrics.reviewIssueCount} / 完成度：{(metrics.completionRate * 100).toFixed(0)}%
                 </div>
               </article>
             </div>
@@ -2138,7 +3527,7 @@ function WorkflowOpsPanel({
                 <div className="trace-event__kind">{stage.label}</div>
                 <div className="trace-event__detail">{stage.status}</div>
                 <div className="trace-event__meta">
-                  outputs: {stage.outputPaths.length}/{stage.requiredOutputs.length} / attempts: {stage.attemptCount}
+                  产出：{stage.outputPaths.length}/{stage.requiredOutputs.length} / 尝试：{stage.attemptCount}
                 </div>
                 {stage.blockedReason ? <div className="trace-event__artifact">{stage.blockedReason}</div> : null}
                 {stage.summary ? <div className="trace-event__artifact">{stage.summary}</div> : null}
@@ -2163,24 +3552,24 @@ function HermesPolicyPanel({
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>Hermes Policy</h3>
+        <h3>Hermes 治理</h3>
         <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
-          Refresh
+          刷新
         </button>
       </div>
       {!report ? (
-        <div className="inspector-empty">No Hermes policy report for the current workflow run.</div>
+        <div className="inspector-empty">当前 workflow run 还没有 Hermes 治理报告。</div>
       ) : (
         <>
           <div className="inspector-field">
-            <span>Status / Mode</span>
+            <span>状态 / 模式</span>
             <strong>
               {report.status} / {report.mode}
             </strong>
           </div>
           <div className="inspector-field">
-            <span>Guardrails</span>
-            <strong>no route / no plan / no DAG writes / no blocking</strong>
+            <span>护栏</span>
+            <strong>不改路由 / 不改计划 / 不写 DAG / 不直接阻塞</strong>
           </div>
           <div className="trace-list">
             {report.checks.map((check) => (
@@ -2200,6 +3589,178 @@ function HermesPolicyPanel({
                   </div>
                   <div className="trace-event__detail">{enhancement.summary}</div>
                   <div className="trace-event__meta">{enhancement.rationale}</div>
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {report.comparisons.length > 0 ? (
+            <div className="trace-list">
+              {report.comparisons.map((comparison) => (
+                <article
+                  key={comparison.id}
+                  className={`trace-event trace-event--${
+                    comparison.decision === 'promote' || comparison.decision === 'keep'
+                      ? 'ok'
+                      : comparison.decision === 'park'
+                        ? 'pending'
+                        : 'warning'
+                  }`}
+                >
+                  <div className="trace-event__kind">
+                    compare / {comparison.domain} / {comparison.decision}
+                  </div>
+                  <div className="trace-event__detail">{comparison.summary}</div>
+                  <div className="trace-event__meta">current baseline: {comparison.currentLabel}</div>
+                  {comparison.candidates
+                    .filter((candidate) => candidate.classification !== 'current')
+                    .map((candidate) => (
+                      <div key={`${comparison.id}-${candidate.label}`} className="trace-event__artifact">
+                        {candidate.classification}: {candidate.label}
+                      </div>
+                    ))}
+                  {comparison.promoteTargetPath ? (
+                    <div className="trace-event__artifact">promote target: {comparison.promoteTargetPath}</div>
+                  ) : null}
+                  {comparison.nextStep ? (
+                    <div className="trace-event__artifact">next: {comparison.nextStep}</div>
+                  ) : null}
+                  {comparison.evidencePaths.slice(0, 3).map((evidencePath) => (
+                    <div key={`${comparison.id}-${evidencePath}`} className="trace-event__artifact">
+                      evidence: {evidencePath}
+                    </div>
+                  ))}
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {report.promotions.length > 0 ? (
+            <div className="trace-list">
+              {report.promotions.map((promotion) => (
+                <article
+                  key={promotion.id}
+                  className={`trace-event trace-event--${
+                    promotion.action === 'promote' || promotion.action === 'keep'
+                      ? 'ok'
+                      : promotion.action === 'park'
+                        ? 'pending'
+                        : 'warning'
+                  }`}
+                >
+                  <div className="trace-event__kind">
+                    promote / {promotion.action}
+                  </div>
+                  <div className="trace-event__detail">{promotion.summary}</div>
+                  <div className="trace-event__meta">{promotion.rationale}</div>
+                  {promotion.targetPath ? (
+                    <div className="trace-event__artifact">{promotion.targetPath}</div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {report.researchFindings.length > 0 ? (
+            <div className="trace-list">
+              {report.researchFindings.map((finding) => (
+                <article
+                  key={finding.id}
+                  className={`trace-event trace-event--${finding.status === 'promoted' ? 'ok' : finding.status === 'parked' ? 'pending' : 'warning'}`}
+                >
+                  <div className="trace-event__kind">research / {finding.topic} / {finding.status}</div>
+                  <div className="trace-event__detail">{finding.summary}</div>
+                  <div className="trace-event__meta">{finding.suggestedAction}</div>
+                  {finding.query ? (
+                    <div className="trace-event__artifact">query: {finding.query}</div>
+                  ) : null}
+                  {finding.resultCount > 0 ? (
+                    <div className="trace-event__artifact">result count: {finding.resultCount}</div>
+                  ) : null}
+                  {finding.excerpts.slice(0, 2).map((excerpt, index) => (
+                    <div key={`${finding.id}-excerpt-${index}`} className="trace-event__artifact">
+                      {excerpt.knowledgeTitle}: {excerpt.snippet}
+                    </div>
+                  ))}
+                  {finding.evidencePaths.slice(0, 3).map((evidencePath) => (
+                    <div key={`${finding.id}-${evidencePath}`} className="trace-event__artifact">
+                      evidence: {evidencePath}
+                    </div>
+                  ))}
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {report.autoPromotions.length > 0 ? (
+            <div className="trace-list">
+              {report.autoPromotions.map((promotion) => (
+                <article
+                  key={promotion.id}
+                  className={`trace-event trace-event--${promotion.status === 'created' || promotion.status === 'existing' ? 'ok' : 'pending'}`}
+                >
+                  <div className="trace-event__kind">auto promotion / {promotion.status}</div>
+                  <div className="trace-event__detail">{promotion.summary}</div>
+                  <div className="trace-event__meta">
+                    compare {promotion.comparisonId}
+                    {promotion.requirementId ? ` / requirement ${promotion.requirementId}` : ''}
+                  </div>
+                  {promotion.targetPath ? (
+                    <div className="trace-event__artifact">target: {promotion.targetPath}</div>
+                  ) : null}
+                  {promotion.writebackTargets.map((target) => (
+                    <div key={`${promotion.id}-${target.targetPath}`} className="trace-event__artifact">
+                      writeback: {target.targetPath} / {target.status}
+                      {target.taskRequirementId ? ` / task ${target.taskRequirementId}` : ''}
+                    </div>
+                  ))}
+                  {promotion.artifactPaths.slice(0, 3).map((artifactPath) => (
+                    <div key={`${promotion.id}-${artifactPath}`} className="trace-event__artifact">
+                      artifact: {artifactPath}
+                    </div>
+                  ))}
+                </article>
+              ))}
+            </div>
+          ) : null}
+          {report.watchFindings.length > 0 ? (
+            <div className="trace-list">
+              {report.watchFindings.map((finding) => (
+                <article
+                  key={finding.id}
+                  className={`trace-event trace-event--${finding.status === 'resolved' ? 'ok' : finding.status === 'parked' ? 'pending' : 'warning'}`}
+                >
+                  <div className="trace-event__kind">watch / {finding.title} / {finding.status}</div>
+                  <div className="trace-event__detail">{finding.summary}</div>
+                  <div className="trace-event__meta">{finding.detail}</div>
+                  <div className="trace-event__artifact">
+                    recurrence: {finding.recurrenceCount} / stable runs: {finding.stableRunCount}
+                  </div>
+                  {finding.firstSeenAt || finding.lastSeenAt ? (
+                    <div className="trace-event__artifact">
+                      seen: {finding.firstSeenAt ?? '-'} {'->'} {finding.lastSeenAt ?? '-'}
+                    </div>
+                  ) : null}
+                  {finding.noiseSuppressed && finding.noiseReason ? (
+                    <div className="trace-event__artifact">noise: {finding.noiseReason}</div>
+                  ) : null}
+                  {finding.carriedFromReportId ? (
+                    <div className="trace-event__artifact">carried from: {finding.carriedFromReportId}</div>
+                  ) : null}
+                  {finding.taskRequirementId ? (
+                    <div className="trace-event__artifact">task: {finding.taskRequirementId}</div>
+                  ) : null}
+                  {finding.trackedRequirementIds.slice(0, 3).map((requirementId) => (
+                    <div key={`${finding.id}-${requirementId}`} className="trace-event__artifact">
+                      tracked: {requirementId}
+                    </div>
+                  ))}
+                  {finding.evidencePaths.slice(0, 3).map((evidencePath) => (
+                    <div key={`${finding.id}-${evidencePath}`} className="trace-event__artifact">
+                      evidence: {evidencePath}
+                    </div>
+                  ))}
+                  {finding.closureEvidencePaths.slice(0, 3).map((evidencePath) => (
+                    <div key={`${finding.id}-closure-${evidencePath}`} className="trace-event__artifact">
+                      closure: {evidencePath}
+                    </div>
+                  ))}
                 </article>
               ))}
             </div>
@@ -2224,16 +3785,16 @@ function PortfolioPanel({
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>Portfolio</h3>
+        <h3>项目视图</h3>
         <div className="capability-inline-actions">
           <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
-            Refresh
+            刷新
           </button>
         </div>
       </div>
       <div className="trace-list">
         {entries.length === 0 ? (
-          <div className="inspector-empty">No portfolio entries available.</div>
+          <div className="inspector-empty">当前还没有项目视图数据。</div>
         ) : (
           entries.map((entry) => (
             <button
@@ -2244,13 +3805,13 @@ function PortfolioPanel({
             >
               <div className="trace-event__kind">{entry.label}</div>
               <div className="trace-event__detail">
-                runs: {entry.runCount} / current: {entry.currentRun?.status ?? 'none'}
+                运行：{entry.runCount} / 当前：{entry.currentRun?.status ?? 'none'}
               </div>
               <div className="trace-event__meta">
-                stage: {entry.currentRun?.currentStageId ?? '-'} / completion:{' '}
+                阶段：{entry.currentRun?.currentStageId ?? '-'} / 完成度：
                 {entry.metrics ? `${(entry.metrics.completionRate * 100).toFixed(0)}%` : '-'}
               </div>
-              <div className="trace-event__artifact">scope: {entry.subprojectId ?? 'platform'}</div>
+              <div className="trace-event__artifact">范围：{entry.subprojectId ?? 'platform'}</div>
             </button>
           ))
         )}
@@ -2278,22 +3839,22 @@ function ProductAgentPanel({
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>Product Agents</h3>
+        <h3>产品 Agent</h3>
         <div className="capability-inline-actions">
           <button type="button" className="secondary-button" onClick={onBootstrap} disabled={busy}>
-            Bootstrap
+            补齐默认 Agent
           </button>
           <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
-            Refresh
+            刷新
           </button>
         </div>
       </div>
       <div className="inspector-field">
-        <span>Blueprints / Agents</span>
+        <span>蓝图 / Agent</span>
         <strong>{blueprints.length} / {agents.length}</strong>
       </div>
       <div className="inspector-field">
-        <span>Missing Blueprints</span>
+        <span>缺失蓝图</span>
         <strong>{missingBlueprints.length}</strong>
       </div>
       {missingBlueprints.length > 0 ? (
@@ -2305,7 +3866,7 @@ function ProductAgentPanel({
       ) : null}
       <div className="trace-list">
         {agents.length === 0 ? (
-          <div className="inspector-empty">No product agents available for the current scope.</div>
+          <div className="inspector-empty">当前范围还没有产品 Agent。</div>
         ) : (
           agents.slice(0, 10).map((agent) => (
             <article key={agent.id} className="trace-event">
@@ -2314,7 +3875,7 @@ function ProductAgentPanel({
                 {agent.level} / {agent.role} / {agent.scope}
               </div>
               <div className="trace-event__meta">
-                managed agents: {agent.managedAgentIds.length} / status: {agent.status}
+                管理下级：{agent.managedAgentIds.length} / 状态：{agent.status}
               </div>
               <div className="trace-event__artifact">{agent.summary}</div>
             </article>
@@ -2345,33 +3906,33 @@ function ProductSkillPanel({
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>Product Skills</h3>
+        <h3>产品技能</h3>
         <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
-          Refresh
+          刷新
         </button>
       </div>
       {!surface ? (
-        <div className="inspector-empty">No skill registry loaded.</div>
+        <div className="inspector-empty">当前还没有加载技能注册表。</div>
       ) : (
         <>
           <div className="inspector-field">
-            <span>Total / Product / Design / Docs</span>
+            <span>总量 / 产品 / 设计 / 文档</span>
             <strong>
               {surface.summary.total} / {surface.summary.product} / {surface.summary.design} / {surface.summary.documentation}
             </strong>
           </div>
           <div className="inspector-field">
-            <span>Design Tooling</span>
+            <span>设计工具链</span>
             <strong>
               {surface.designTooling.command} / {surface.designTooling.status}
             </strong>
           </div>
           <div className="inspector-field">
-            <span>Codex Local Sync</span>
+            <span>Codex 本地同步</span>
             <strong>
               {codexLocalState
                 ? `${codexLocalState.diff.localVisibleAndRegisteredSkills.length} 已同步 / ${codexLocalState.diff.localOnlySkills.length} 本地待注册 / ${codexLocalState.diff.runtimeVisibleOnlySkills.length} 运行时待治理 / ${codexLocalState.diff.enabledPluginsNotTrackedByPmaios.length} 待治理插件`
-                : 'Not loaded'}
+                : '未加载'}
             </strong>
           </div>
           {codexLocalState ? (
@@ -2479,53 +4040,98 @@ function ProductSkillPanel({
 }
 
 function ExternalConnectorsPanel({
+  selectedSubprojectId,
   status,
   latestWebFetch,
   latestFigmaInspection,
   latestDingTalkImport,
+  latestDatakiKnowledgeBases,
+  latestDatakiKnowledgeFiles,
+  latestDatakiSearch,
   busy,
   onRefresh,
   onWebFetch,
   onInspectFigma,
   onImportDingTalk,
+  onListDatakiKnowledgeBases,
+  onListDatakiKnowledgeFiles,
+  onSearchDatakiKnowledge,
 }: {
+  selectedSubprojectId: string | null;
   status: ExternalConnectorStatus | null;
   latestWebFetch: WebFetchArtifact | null;
   latestFigmaInspection: FigmaInspection | null;
   latestDingTalkImport: DingTalkMeetingImportResult | null;
+  latestDatakiKnowledgeBases: DatakiKnowledgeBaseSummary[];
+  latestDatakiKnowledgeFiles: DatakiKnowledgeFileSummary[];
+  latestDatakiSearch: DatakiKnowledgeSearchItem[];
   busy: boolean;
   onRefresh: () => void;
   onWebFetch: (url: string) => void;
   onInspectFigma: (fileKey: string) => void;
   onImportDingTalk: (title: string, content: string) => void;
+  onListDatakiKnowledgeBases: (input: { subprojectId?: string | null; baseUrl: string; apiKey: string; userId: string; agentId: string }) => void;
+  onListDatakiKnowledgeFiles: (input: { subprojectId?: string | null; knowledgeBaseId: string; baseUrl: string; apiKey: string; keyword: string }) => void;
+  onSearchDatakiKnowledge: (input: { subprojectId?: string | null; query: string; knowledgeBaseId: string; baseUrl: string; apiKey: string }) => void;
 }) {
   const [webUrl, setWebUrl] = useState('');
   const [figmaFileKey, setFigmaFileKey] = useState('');
   const [meetingTitle, setMeetingTitle] = useState('');
   const [meetingContent, setMeetingContent] = useState('');
+  const [datakiBaseUrl, setDatakiBaseUrl] = useState('');
+  const [datakiApiKey, setDatakiApiKey] = useState('');
+  const [datakiUserId, setDatakiUserId] = useState('');
+  const [datakiAgentId, setDatakiAgentId] = useState('');
+  const [datakiSelectedKbId, setDatakiSelectedKbId] = useState('');
+  const [datakiSearchQuery, setDatakiSearchQuery] = useState('');
+  const [datakiFileKeyword, setDatakiFileKeyword] = useState('');
+
+  useEffect(() => {
+    if (status?.dataki.baseUrl && !datakiBaseUrl.trim()) {
+      setDatakiBaseUrl(status.dataki.baseUrl);
+    }
+  }, [datakiBaseUrl, status?.dataki.baseUrl]);
+
+  useEffect(() => {
+    if (status?.dataki.userId && !datakiUserId.trim()) {
+      setDatakiUserId(status.dataki.userId);
+    }
+  }, [datakiUserId, status?.dataki.userId]);
+
+  useEffect(() => {
+    if (status?.dataki.agentId && !datakiAgentId.trim()) {
+      setDatakiAgentId(status.dataki.agentId);
+    }
+  }, [datakiAgentId, status?.dataki.agentId]);
+
+  useEffect(() => {
+    if (status?.dataki.defaultKnowledgeBaseId && !datakiSelectedKbId.trim()) {
+      setDatakiSelectedKbId(status.dataki.defaultKnowledgeBaseId);
+    }
+  }, [datakiSelectedKbId, status?.dataki.defaultKnowledgeBaseId]);
 
   return (
     <section className="inspector-panel">
       <div className="section-header">
-        <h3>External Connectors</h3>
+        <h3>外部连接器</h3>
         <button type="button" className="secondary-button" onClick={onRefresh} disabled={busy}>
-          Refresh
+          刷新
         </button>
       </div>
       {!status ? (
-        <div className="inspector-empty">No connector status loaded.</div>
+        <div className="inspector-empty">当前还没有加载连接器状态。</div>
       ) : (
         <>
           <div className="inspector-field">
-            <span>Notion / Figma / Web / DingTalk</span>
+            <span>Notion / Figma / Web / DingTalk / Dataki</span>
             <strong>
-              {status.notion.configured ? 'ready' : 'missing'} / {status.figma.configured ? 'ready' : 'missing'} / ready / manual import
+              {status.notion.configured ? 'ready' : 'missing'} / {status.figma.configured ? 'ready' : 'missing'} / ready / manual import / {status.dataki.configured ? 'ready' : 'missing'}
             </strong>
           </div>
           <div className="trace-list">
             <article className={`trace-event trace-event--${status.notion.configured ? 'ok' : 'warning'}`}>
               <div className="trace-event__kind">Notion</div>
-              <div className="trace-event__detail">configured: {String(status.notion.configured)} / connected: {String(status.notion.connected)}</div>
+              <div className="trace-event__detail">configured: {String(status.notion.configured)} / connected: {String(status.notion.connected)} / target: {status.notion.targetMode}</div>
               <div className="trace-event__meta">missing: {status.notion.missing.join(', ') || '-'}</div>
             </article>
             <article className={`trace-event trace-event--${status.figma.configured ? 'ok' : 'warning'}`}>
@@ -2537,6 +4143,14 @@ function ExternalConnectorsPanel({
               <div className="trace-event__kind">DingTalk meeting notes</div>
               <div className="trace-event__detail">import mode: {status.dingtalk.importMode}</div>
               <div className="trace-event__meta">inbox: {status.dingtalk.inboxPath}</div>
+            </article>
+            <article className={`trace-event trace-event--${status.dataki.configured ? 'ok' : 'warning'}`}>
+              <div className="trace-event__kind">Dataki / WeKnora KB</div>
+              <div className="trace-event__detail">configured: {String(status.dataki.configured)} / connected: {String(status.dataki.connected)}</div>
+              <div className="trace-event__meta">
+                base: {status.dataki.baseUrl ?? '-'} / user: {status.dataki.userId ?? '-'} / default kb: {status.dataki.defaultKnowledgeBaseId ?? '-'}
+              </div>
+              <div className="trace-event__meta">missing: {status.dataki.missing.join(', ') || '-'}</div>
             </article>
           </div>
 
@@ -2603,6 +4217,120 @@ function ExternalConnectorsPanel({
               </div>
             ) : null}
           </div>
+
+          <div className="capability-form">
+            <label>
+              Dataki base URL
+              <input value={datakiBaseUrl} onChange={(event) => setDatakiBaseUrl(event.target.value)} placeholder="http://dataki.dobest.com/api/v1" />
+            </label>
+            <label>
+              Dataki API key
+              <input value={datakiApiKey} onChange={(event) => setDatakiApiKey(event.target.value)} placeholder="X-API-Key" type="password" />
+            </label>
+            <label>
+              User ID
+              <input value={datakiUserId} onChange={(event) => setDatakiUserId(event.target.value)} placeholder="user id" />
+            </label>
+            <label>
+              Optional agent ID
+              <input value={datakiAgentId} onChange={(event) => setDatakiAgentId(event.target.value)} placeholder="agent id" />
+            </label>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => onListDatakiKnowledgeBases({ subprojectId: selectedSubprojectId, baseUrl: datakiBaseUrl, apiKey: datakiApiKey, userId: datakiUserId, agentId: datakiAgentId })}
+              disabled={busy || !datakiBaseUrl.trim() || !datakiApiKey.trim()}
+            >
+              List Dataki KBs
+            </button>
+            {latestDatakiKnowledgeBases.length > 0 ? (
+              <div className="trace-list">
+                {latestDatakiKnowledgeBases.slice(0, 5).map((item) => (
+                  <article
+                    key={item.id}
+                    className={`trace-event trace-event--${datakiSelectedKbId === item.id ? 'ok' : 'neutral'}`}
+                    onClick={() => setDatakiSelectedKbId(item.id)}
+                  >
+                    <div className="trace-event__kind">{item.name}</div>
+                    <div className="trace-event__detail">{item.type} / files: {item.knowledgeCount} / chunks: {item.chunkCount}</div>
+                    <div className="trace-event__meta">{item.id}</div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="capability-form">
+            <label>
+              Selected KB id
+              <input value={datakiSelectedKbId} onChange={(event) => setDatakiSelectedKbId(event.target.value)} placeholder="knowledge base id" />
+            </label>
+            <label>
+              File keyword
+              <input value={datakiFileKeyword} onChange={(event) => setDatakiFileKeyword(event.target.value)} placeholder="optional file keyword" />
+            </label>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() =>
+                onListDatakiKnowledgeFiles({
+                  subprojectId: selectedSubprojectId,
+                  knowledgeBaseId: datakiSelectedKbId,
+                  baseUrl: datakiBaseUrl,
+                  apiKey: datakiApiKey,
+                  keyword: datakiFileKeyword,
+                })
+              }
+              disabled={busy || !datakiBaseUrl.trim() || !datakiApiKey.trim() || !datakiSelectedKbId.trim()}
+            >
+              List KB Files
+            </button>
+            {latestDatakiKnowledgeFiles.length > 0 ? (
+              <div className="trace-list">
+                {latestDatakiKnowledgeFiles.slice(0, 5).map((item) => (
+                  <article key={item.id} className="trace-event trace-event--neutral">
+                    <div className="trace-event__kind">{item.title}</div>
+                    <div className="trace-event__detail">{item.fileType ?? 'unknown'} / {item.status ?? 'unknown'}</div>
+                    <div className="trace-event__meta">{item.id}</div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="capability-form">
+            <label>
+              Dataki search query
+              <input value={datakiSearchQuery} onChange={(event) => setDatakiSearchQuery(event.target.value)} placeholder="search query" />
+            </label>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() =>
+                onSearchDatakiKnowledge({
+                  subprojectId: selectedSubprojectId,
+                  query: datakiSearchQuery,
+                  knowledgeBaseId: datakiSelectedKbId,
+                  baseUrl: datakiBaseUrl,
+                  apiKey: datakiApiKey,
+                })
+              }
+              disabled={busy || !datakiBaseUrl.trim() || !datakiApiKey.trim() || !datakiSearchQuery.trim()}
+            >
+              Search Dataki KB
+            </button>
+            {latestDatakiSearch.length > 0 ? (
+              <div className="trace-list">
+                {latestDatakiSearch.slice(0, 5).map((item) => (
+                  <article key={item.id} className="trace-event trace-event--ok">
+                    <div className="trace-event__kind">{item.knowledgeTitle || item.knowledgeFilename || item.id}</div>
+                    <div className="trace-event__detail">score: {item.score ?? '-'} / {item.chunkType ?? 'chunk'}</div>
+                    <div className="trace-event__meta">{item.content.slice(0, 220)}</div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </>
       )}
     </section>
@@ -2612,24 +4340,228 @@ function ExternalConnectorsPanel({
 function ProductChiefPanel({
   reports,
   outputs,
+  latestUiSchemaContract,
+  imageBatches,
   reviews,
+  groupSessions,
   busy,
+  selectedSubprojectId,
   onAnalyze,
   onGenerateOutput,
+  onGenerateAllOutputs,
   onRefresh,
 }: {
   reports: ProductChiefReport[];
   outputs: ProductChiefOutput[];
+  latestUiSchemaContract: UISchemaContract | null;
+  imageBatches: ProductChiefImageBatch[];
   reviews: ProductChiefMultiAgentReview[];
+  groupSessions: MultiPmGroupSession[];
   busy: boolean;
+  selectedSubprojectId: string | null;
   onAnalyze: (brief: string) => void;
   onGenerateOutput: (reportId: string, type: string) => void;
+  onGenerateAllOutputs: (report: ProductChiefReport) => void;
   onRefresh: () => void;
 }) {
   const [brief, setBrief] = useState('Generate project PM product outputs for the current PMAIOS demo project');
+  const [compareFilter, setCompareFilter] = useState<'changed-only' | 'all'>('changed-only');
+  const [compareReasonFilter, setCompareReasonFilter] = useState<'all' | 'mixed' | 'prompt-changed' | 'warning-up' | 'warning-down'>('all');
   const latest = reports[0] ?? null;
   const nextOutput = latest?.requiredGovernedOutputs[0] ?? null;
   const usableOutputCount = outputs.filter((output) => output.multiAgentReviewStatus !== 'blocked').length;
+  const generatedOutputTypes = new Set(outputs.map((output) => output.type));
+  const pendingOutputs = latest?.requiredGovernedOutputs.filter((output) => !generatedOutputTypes.has(output.type)) ?? [];
+  const nextOutputRequiresSubproject = isProjectScopedDesignOutput(nextOutput?.type);
+  const pendingImage2Output = pendingOutputs.some((output) => isProjectScopedDesignOutput(output.type));
+  const image2BlockedByProjectScope = !selectedSubprojectId && pendingImage2Output;
+  const groupedRequiredOutputs = useMemo(() => {
+    const groups: Record<'definition' | 'design' | 'delivery', Array<{
+      type: string;
+      title: string;
+      done: boolean;
+      layer: 'definition' | 'design' | 'delivery';
+      dependsOn: string[];
+      unlocks: string[];
+    }>> = {
+      definition: [],
+      design: [],
+      delivery: [],
+    };
+    const allOutputs = latest?.requiredGovernedOutputs ?? [];
+    for (const output of allOutputs) {
+      const layer = getGovernedOutputLayer(output.type);
+      groups[layer].push({
+        type: output.type,
+        title: output.title,
+        done: generatedOutputTypes.has(output.type),
+        layer,
+        dependsOn: output.dependsOn ?? [],
+        unlocks: allOutputs.filter((candidate) => (candidate.dependsOn ?? []).includes(output.type)).map((candidate) => candidate.type),
+      });
+    }
+    return groups;
+  }, [generatedOutputTypes, latest]);
+  const currentLayerStatus = useMemo(() => {
+    const order: Array<'definition' | 'design' | 'delivery'> = ['definition', 'design', 'delivery'];
+    for (const layer of order) {
+      const items = groupedRequiredOutputs[layer];
+      if (items.length === 0) {
+        continue;
+      }
+      const pending = items.filter((item) => !item.done);
+      if (pending.length > 0) {
+        const suggestedType =
+          nextOutput && getGovernedOutputLayer(nextOutput.type) === layer
+            ? nextOutput.type
+            : pending[0]?.type ?? null;
+        return {
+          layer,
+          label: getGovernedOutputLayerLabel(layer),
+          status: 'blocked' as const,
+          summary: `当前主要堵点在${getGovernedOutputLayerLabel(layer)}，还有 ${pending.length} 个待生成项。`,
+          pendingLabels: pending.map((item) => getGovernedOutputLabel(item.type)),
+          suggestedType,
+          suggestedLabel: getGovernedOutputLabel(suggestedType),
+        };
+      }
+    }
+    return {
+      layer: 'delivery' as const,
+      label: getGovernedOutputLayerLabel('delivery'),
+      status: 'ready' as const,
+      summary: '定义层、设计层、交付层当前都没有待生成项。',
+      pendingLabels: [] as string[],
+      suggestedType: null,
+      suggestedLabel: null,
+    };
+  }, [groupedRequiredOutputs, nextOutput]);
+  const suggestedNextOutputRequiresSubproject = isProjectScopedDesignOutput(currentLayerStatus.suggestedType);
+  const canGenerateOutputType = useCallback(
+    (type: string) => !busy && !(!selectedSubprojectId && isProjectScopedDesignOutput(type)),
+    [busy, selectedSubprojectId],
+  );
+  const pageComparisonEntries = useMemo(() => {
+    const grouped = new Map<string, {
+      pageKey: string;
+      pageName: string;
+      variantLabel: string;
+      summary: {
+        latestVersionTag: string | null;
+        previousVersionTag: string | null;
+        latestGeneratedAt: string | null;
+        previousGeneratedAt: string | null;
+        warningDelta: number | null;
+        promptChanged: boolean | null;
+        changeReason: 'mixed' | 'prompt-changed' | 'warning-up' | 'warning-down' | 'unchanged';
+      };
+      items: Array<{
+        batchFolder: string;
+        versionTag: string;
+        generatedAt: string;
+        warningCount: number;
+        manifestPath: string;
+        assetPath: string;
+        prompt: string;
+        variantLabel: string;
+        designLanguage: string;
+        styleDirection: string;
+        informationDensity: 'low' | 'medium' | 'high';
+      }>;
+    }>();
+
+    for (const batch of imageBatches) {
+      for (const item of batch.items) {
+        if (!item?.pageKey || !item.assetPath) {
+          continue;
+        }
+        const existing = grouped.get(item.pageKey) ?? {
+          pageKey: item.pageKey,
+          pageName: item.pageName || item.pageKey,
+          variantLabel: item.variantLabel || 'default',
+          summary: {
+            latestVersionTag: null,
+            previousVersionTag: null,
+            latestGeneratedAt: null,
+            previousGeneratedAt: null,
+            warningDelta: null,
+            promptChanged: null,
+            changeReason: 'unchanged',
+          },
+          items: [],
+        };
+        existing.items.push({
+          batchFolder: batch.batchFolder,
+          versionTag: batch.versionTag,
+          generatedAt: batch.generatedImageGeneratedAt,
+          warningCount: batch.warningCount,
+          manifestPath: batch.manifestPath,
+          assetPath: item.assetPath,
+          prompt: item.prompt,
+          variantLabel: item.variantLabel || 'default',
+          designLanguage: item.designLanguage || '-',
+          styleDirection: item.styleDirection || '-',
+          informationDensity: item.informationDensity || 'medium',
+        });
+        grouped.set(item.pageKey, existing);
+      }
+    }
+
+    return [...grouped.values()]
+      .map((entry) => {
+        const items = entry.items
+          .sort((left, right) => Date.parse(right.generatedAt) - Date.parse(left.generatedAt))
+          .slice(0, 3);
+        const latestItem = items[0] ?? null;
+        const previousItem = items[1] ?? null;
+        const warningDelta = latestItem && previousItem ? latestItem.warningCount - previousItem.warningCount : null;
+        const promptChanged = latestItem && previousItem ? latestItem.prompt.trim() !== previousItem.prompt.trim() : null;
+        const changeReason =
+          promptChanged === true && typeof warningDelta === 'number' && warningDelta !== 0
+            ? 'mixed'
+            : promptChanged === true
+              ? 'prompt-changed'
+              : typeof warningDelta === 'number' && warningDelta > 0
+                ? 'warning-up'
+                : typeof warningDelta === 'number' && warningDelta < 0
+                  ? 'warning-down'
+                  : 'unchanged';
+        return {
+          ...entry,
+          items,
+          summary: {
+            latestVersionTag: latestItem?.versionTag ?? null,
+            previousVersionTag: previousItem?.versionTag ?? null,
+            latestGeneratedAt: latestItem?.generatedAt ?? null,
+            previousGeneratedAt: previousItem?.generatedAt ?? null,
+            warningDelta,
+            promptChanged,
+            changeReason,
+          },
+        };
+      })
+      .filter((entry) => entry.items.length > 1)
+      .sort((left, right) => {
+        const leftTime = Date.parse(left.items[0]?.generatedAt ?? '');
+        const rightTime = Date.parse(right.items[0]?.generatedAt ?? '');
+        return rightTime - leftTime;
+      });
+  }, [imageBatches]);
+  const changedPageComparisonEntries = useMemo(
+    () =>
+      pageComparisonEntries.filter(
+        (entry) => entry.summary.promptChanged === true || (typeof entry.summary.warningDelta === 'number' && entry.summary.warningDelta !== 0),
+      ),
+    [pageComparisonEntries],
+  );
+  const reasonFilteredPageComparisonEntries = useMemo(() => {
+    const baseEntries = compareFilter === 'changed-only' ? changedPageComparisonEntries : pageComparisonEntries;
+    if (compareReasonFilter === 'all') {
+      return baseEntries;
+    }
+    return baseEntries.filter((entry) => entry.summary.changeReason === compareReasonFilter);
+  }, [changedPageComparisonEntries, compareFilter, compareReasonFilter, pageComparisonEntries]);
+  const visiblePageComparisonEntries = reasonFilteredPageComparisonEntries.slice(0, 3);
 
   return (
     <section className="inspector-panel">
@@ -2656,20 +4588,241 @@ function ProductChiefPanel({
             </strong>
           </div>
           <div className="inspector-field">
+            <span>Pending Outputs</span>
+            <strong>{pendingOutputs.length}</strong>
+          </div>
+          {image2BlockedByProjectScope ? (
+            <div className="trace-event trace-event--warning">
+              <div className="trace-event__kind">image2 project scope required</div>
+              <div className="trace-event__detail">
+                Select a target subproject before generating outputs that include `concept-design-pack` or `design-image2-prompt-pack`.
+              </div>
+              <div className="trace-event__meta">
+                Generated images must be written into a project directory, so platform-root generation is blocked.
+              </div>
+            </div>
+          ) : null}
+          <div className="trace-event trace-event--warning">
+            <div className="trace-event__kind">frontend consistency rule</div>
+            <div className="trace-event__detail">
+              会话里新增或修正的需求必须回写到 `functional-spec-pack` / `ui-schema-spec` / handoff；设计图本身不是最终实现契约。
+            </div>
+            <div className="trace-event__meta">
+              前端实现应以需求真源、设计文档和 UI schema 为主，图片只做视觉校对，不应靠看图猜交互。
+            </div>
+          </div>
+          <div className="inspector-field">
             <span>Multi-Agent Reviews</span>
             <strong>{reviews.length}</strong>
           </div>
-          {nextOutput ? (
+          <div className="inspector-field">
+            <span>Multi-PM Group Sessions</span>
+            <strong>{groupSessions.length}</strong>
+          </div>
+          <div className="inspector-field">
+            <span>Image Batches</span>
+            <strong>{imageBatches.length}</strong>
+          </div>
+          <div className="trace-list">
+            {groupSessions.length === 0 ? (
+              <div className="inspector-empty">当前还没有交付驱动的多 PM 群会话。</div>
+            ) : (
+              groupSessions.slice(0, 2).map((session) => (
+                <article key={session.id} className="trace-event trace-event--ok">
+                  <div className="trace-event__kind">{session.status}</div>
+                  <div className="trace-event__detail">{session.deliveryTarget}</div>
+                  <div className="trace-event__meta">goal: {session.sessionGoal}</div>
+                  <div className="trace-event__meta">gap: {session.currentGap}</div>
+                  <div className="trace-event__meta">
+                    chair: {session.chair.agentName} / task: {session.taskId ?? '-'} / next: {session.nextSafeStep ?? '-'}
+                  </div>
+                  <div className="trace-event__artifact">
+                    participants: {[session.chair, ...session.participants].map((item) => `${item.agentName}(${item.role})`).join(' / ')}
+                  </div>
+                  <div className="trace-list">
+                    {session.messages.slice(0, 4).map((message) => (
+                      <article key={message.messageId} className="trace-event">
+                        <div className="trace-event__kind">{message.speakerRole}</div>
+                        <div className="trace-event__detail">{message.speakerName}: {message.summary}</div>
+                        <div className="trace-event__meta">
+                          replyTo: {message.replyToMessageId ?? 'root'} / {message.intent} / {message.stance}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                  <div className="trace-event__meta">
+                    backwrite: {session.backwriteTargets.map((item) => `${item.targetType} -> ${item.targetPath}`).join(' | ')}
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+          <div className="inspector-field">
+            <span>Changed Compare Pages</span>
+            <strong>{changedPageComparisonEntries.length}</strong>
+          </div>
+          <div className="trace-event trace-event--ok">
+            <div className="trace-event__kind">two-step PRD and design chain</div>
+            <div className="trace-event__detail">
+              plan-prd → functional-spec-pack → delivery-html → schema-delivery → delivery-design-pack (Figma / JSON schema / page-structure DSL) → implementation-handoff
+            </div>
+            <div className="trace-event__meta">
+              UI design stage = HTML first; image2 stays only for optional architecture / flow / explainer boards
+            </div>
+          </div>
+          <div className={`trace-event ${currentLayerStatus.status === 'blocked' ? 'trace-event--warning' : 'trace-event--ok'}`}>
+            <div className="trace-event__kind">current gated layer</div>
+            <div className="trace-event__detail">{currentLayerStatus.summary}</div>
+            <div className="trace-event__meta">current layer: {currentLayerStatus.label}</div>
+            {currentLayerStatus.pendingLabels.length > 0 ? (
+              <div className="trace-event__meta">pending: {currentLayerStatus.pendingLabels.join(' / ')}</div>
+            ) : null}
+            {currentLayerStatus.suggestedLabel ? (
+              <div className="trace-event__meta">suggested next output: {currentLayerStatus.suggestedLabel}</div>
+            ) : null}
+            {currentLayerStatus.suggestedType && latest ? (
+              <div className="capability-actions">
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => onGenerateOutput(latest.id, currentLayerStatus.suggestedType)}
+                  disabled={busy || (!selectedSubprojectId && suggestedNextOutputRequiresSubproject)}
+                >
+                  Generate Suggested Next Output
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <div className="trace-list">
+            {(['definition', 'design', 'delivery'] as const).map((layer) => (
+              <article key={layer} className="trace-event trace-event--ok">
+                <div className="trace-event__kind">{getGovernedOutputLayerLabel(layer)}</div>
+                {groupedRequiredOutputs[layer].length > 0 ? (
+                  <div className="trace-event__output-grid">
+                    {groupedRequiredOutputs[layer].map((output) =>
+                      output.done ? (
+                        <div
+                          key={output.type}
+                          className="trace-event__output-chip trace-event__output-chip--done"
+                          title={buildGovernedOutputHint({
+                            type: output.type,
+                            layer: output.layer,
+                            dependsOn: output.dependsOn,
+                            unlocks: output.unlocks,
+                          })}
+                        >
+                          ✓ {getGovernedOutputLabel(output.type)}
+                        </div>
+                      ) : (
+                        <button
+                          key={output.type}
+                          type="button"
+                          className="trace-event__output-chip trace-event__output-chip--pending"
+                          onClick={() => latest ? onGenerateOutput(latest.id, output.type) : undefined}
+                          disabled={!latest || !canGenerateOutputType(output.type)}
+                          title={buildGovernedOutputHint({
+                            type: output.type,
+                            layer: output.layer,
+                            dependsOn: output.dependsOn,
+                            unlocks: output.unlocks,
+                          })}
+                        >
+                          ○ {getGovernedOutputLabel(output.type)}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                ) : (
+                  <div className="trace-event__detail">No governed outputs in this layer.</div>
+                )}
+              </article>
+            ))}
+          </div>
+          {latest ? (
             <div className="capability-actions">
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => onGenerateAllOutputs(latest)}
+                disabled={busy || pendingOutputs.length === 0 || image2BlockedByProjectScope}
+              >
+                Generate Full Package
+              </button>
+              {nextOutput ? (
               <button
                 type="button"
                 className="secondary-button"
                 onClick={() => onGenerateOutput(latest.id, nextOutput.type)}
-                disabled={busy}
+                disabled={busy || (!selectedSubprojectId && nextOutputRequiresSubproject)}
               >
-                Generate {nextOutput.type}
+                Generate {getGovernedOutputLabel(nextOutput.type)}
               </button>
+              ) : null}
             </div>
+          ) : null}
+          {pageComparisonEntries.length > 0 ? (
+            <>
+              <div className="capability-actions">
+                <button
+                  type="button"
+                  className={compareFilter === 'changed-only' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareFilter('changed-only')}
+                  disabled={busy}
+                >
+                  Show Changed Compare Pages
+                </button>
+                <button
+                  type="button"
+                  className={compareFilter === 'all' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareFilter('all')}
+                  disabled={busy}
+                >
+                  Show All Compare Pages
+                </button>
+              </div>
+              <div className="capability-actions">
+                <button
+                  type="button"
+                  className={compareReasonFilter === 'all' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareReasonFilter('all')}
+                  disabled={busy}
+                >
+                  All Reasons
+                </button>
+                <button
+                  type="button"
+                  className={compareReasonFilter === 'mixed' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareReasonFilter('mixed')}
+                  disabled={busy}
+                >
+                  Mixed
+                </button>
+                <button
+                  type="button"
+                  className={compareReasonFilter === 'prompt-changed' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareReasonFilter('prompt-changed')}
+                  disabled={busy}
+                >
+                  Prompt Changed
+                </button>
+                <button
+                  type="button"
+                  className={compareReasonFilter === 'warning-up' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareReasonFilter('warning-up')}
+                  disabled={busy}
+                >
+                  Warning Up
+                </button>
+                <button
+                  type="button"
+                  className={compareReasonFilter === 'warning-down' ? 'primary-button' : 'secondary-button'}
+                  onClick={() => setCompareReasonFilter('warning-down')}
+                  disabled={busy}
+                >
+                  Warning Down
+                </button>
+              </div>
+            </>
           ) : null}
           <div className="trace-list">
             {latest.missingQuestions.slice(0, 4).map((question) => (
@@ -2686,15 +4839,336 @@ function ProductChiefPanel({
                 <div className="trace-event__meta">{guidance.whyNow}</div>
               </article>
             ))}
+            {imageBatches.slice(0, 3).map((batch) => (
+              <article key={batch.manifestPath} className="trace-event trace-event--ok">
+                <div className="trace-event__kind">image batch</div>
+                <div className="trace-event__detail">{batch.batchFolder}</div>
+                <div className="trace-event__meta">
+                  version: {batch.versionTag} / pages: {batch.pageCount} / warnings: {batch.warningCount}
+                </div>
+                <div className="trace-event__meta">generated at: {batch.generatedImageGeneratedAt}</div>
+                <div className="trace-event__artifact">
+                  <a href={buildFileApiUrl(batch.manifestPath)} target="_blank" rel="noreferrer">
+                    open batch manifest
+                  </a>
+                  {' / '}
+                  {batch.manifestPath}
+                </div>
+              </article>
+            ))}
+            {visiblePageComparisonEntries.map((entry) => (
+              <article key={entry.pageKey} className="trace-event trace-event--ok">
+                <div className="trace-event__kind">cross-batch page compare</div>
+                <div className="trace-event__detail">{entry.pageName} / {entry.variantLabel}</div>
+                <div className="trace-event__meta">
+                  page key: {entry.pageKey} / recent batches: {entry.items.length}
+                </div>
+                <div className="trace-event__compare-summary">
+                  <span className={`trace-event__compare-tag trace-event__compare-tag--${entry.summary.changeReason}`}>
+                    {entry.summary.changeReason}
+                  </span>
+                  <span>
+                    latest vs previous: {entry.summary.latestVersionTag ?? 'unknown'} / {entry.summary.previousVersionTag ?? 'unknown'}
+                  </span>
+                  {typeof entry.summary.warningDelta === 'number' ? (
+                    <span>
+                      warning delta: {entry.summary.warningDelta > 0 ? `+${entry.summary.warningDelta}` : entry.summary.warningDelta}
+                    </span>
+                  ) : null}
+                  {typeof entry.summary.promptChanged === 'boolean' ? (
+                    <span>prompt: {entry.summary.promptChanged ? 'changed' : 'same'}</span>
+                  ) : null}
+                </div>
+                {entry.summary.latestGeneratedAt && entry.summary.previousGeneratedAt ? (
+                  <div className="trace-event__meta">
+                    compare window: {entry.summary.latestGeneratedAt} {'->'} {entry.summary.previousGeneratedAt}
+                  </div>
+                ) : null}
+                <div className="trace-event__gallery">
+                  {entry.items.map((item) => (
+                    <details key={`${entry.pageKey}-${item.batchFolder}`} className="trace-event__thumbnail-card">
+                      <summary className="trace-event__thumbnail-link" title={`${entry.pageName} / ${item.batchFolder}`}>
+                        <img
+                          src={buildFileApiUrl(item.assetPath)}
+                          alt={`${entry.pageName} / ${item.batchFolder}`}
+                          className="trace-event__thumbnail"
+                        />
+                        <span className="trace-event__thumbnail-label">{item.versionTag} / {item.variantLabel}</span>
+                        <span className="trace-event__thumbnail-meta">
+                          {item.batchFolder.length > 52 ? `${item.batchFolder.slice(0, 52)}...` : item.batchFolder}
+                        </span>
+                      </summary>
+                      <div className="trace-event__thumbnail-detail">
+                        <div className="trace-event__thumbnail-actions">
+                          <a href={buildFileApiUrl(item.assetPath)} target="_blank" rel="noreferrer">
+                            open image
+                          </a>
+                          <a href={buildFileApiUrl(item.manifestPath)} target="_blank" rel="noreferrer">
+                            open batch manifest
+                          </a>
+                        </div>
+                        <div className="trace-event__thumbnail-path">generated at: {item.generatedAt}</div>
+                        <div className="trace-event__thumbnail-path">warnings: {item.warningCount}</div>
+                        <div className="trace-event__thumbnail-path">{item.assetPath}</div>
+                        <div className="trace-event__meta">
+                          language: {item.designLanguage} / style: {item.styleDirection} / density: {item.informationDensity}
+                        </div>
+                        {item.prompt.trim() ? (
+                          <pre className="trace-event__thumbnail-prompt">{item.prompt}</pre>
+                        ) : null}
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </article>
+            ))}
+            {pageComparisonEntries.length > 0 && visiblePageComparisonEntries.length === 0 ? (
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">cross-batch page compare</div>
+                <div className="trace-event__detail">No compare pages match the current compare filter and reason filter.</div>
+                <div className="trace-event__meta">Switch compare mode or reason filter to inspect other same-page histories.</div>
+              </article>
+            ) : null}
+            {latestUiSchemaContract ? (
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">UI schema contract</div>
+                <div className="trace-event__detail">
+                  pages {latestUiSchemaContract.pageContracts.length} / linked requirements {latestUiSchemaContract.linkedRequirementIds.length}
+                </div>
+                <div className="trace-event__meta">
+                  linked outputs: {latestUiSchemaContract.linkedOutputTypes.map((type) => getGovernedOutputLabel(type)).join(' / ')}
+                </div>
+                <div className="trace-event__artifact">
+                  brief: {latestUiSchemaContract.sourceBrief.length > 140 ? `${latestUiSchemaContract.sourceBrief.slice(0, 140)}...` : latestUiSchemaContract.sourceBrief}
+                </div>
+                {latestUiSchemaContract.pageContracts.slice(0, 2).map((page) => (
+                  <div key={page.pageId} className="trace-event__artifact">
+                    {page.pageName} / blocks {page.blocks.length} / states {page.states.length} / actions {page.actions.length}
+                  </div>
+                ))}
+                {latestUiSchemaContract.implementationRules.slice(0, 2).map((rule, index) => (
+                  <div key={`ui-schema-rule-${index + 1}`} className="trace-event__artifact">
+                    rule: {rule}
+                  </div>
+                ))}
+              </article>
+            ) : null}
             {outputs.slice(0, 2).map((output) => (
               <article key={output.id} className="trace-event trace-event--ok">
-                <div className="trace-event__kind">{output.type}</div>
+                <div className="trace-event__kind">{getGovernedOutputLabel(output.type)}</div>
                 <div className="trace-event__detail">{output.title}</div>
+                <div className="trace-event__meta">type: {output.type}</div>
                 <div className="trace-event__meta">
-                  {output.artifactPath} / review: {output.multiAgentReviewStatus ?? 'pending'}
+                  review: {output.multiAgentReviewStatus ?? 'pending'}
                 </div>
+                <div className="trace-event__artifact">
+                  <a href={buildFileApiUrl(output.artifactPath)} target="_blank" rel="noreferrer">
+                    open output doc
+                  </a>
+                  {' / '}
+                  {output.artifactPath}
+                </div>
+                {typeof output.metadata.generatedUiSchemaPath === 'string' ? (
+                  <div className="trace-event__artifact">
+                    <a href={buildFileApiUrl(output.metadata.generatedUiSchemaPath)} target="_blank" rel="noreferrer">
+                      open ui schema
+                    </a>
+                    {' / '}
+                    {output.metadata.generatedUiSchemaPath}
+                  </div>
+                ) : null}
+                {typeof output.metadata.generatedUiSchemaPageCount === 'number' ? (
+                  <div className="trace-event__meta">ui schema pages: {output.metadata.generatedUiSchemaPageCount}</div>
+                ) : null}
+                {typeof output.metadata.designChangeSetPath === 'string' ? (
+                  <div className="trace-event__artifact">
+                    <a href={buildFileApiUrl(output.metadata.designChangeSetPath)} target="_blank" rel="noreferrer">
+                      open design change set
+                    </a>
+                    {' / '}
+                    {output.metadata.designChangeSetPath}
+                  </div>
+                ) : null}
+                {typeof output.metadata.designDiffAuditPath === 'string' ? (
+                  <div className="trace-event__artifact">
+                    <a href={buildFileApiUrl(output.metadata.designDiffAuditPath)} target="_blank" rel="noreferrer">
+                      open design diff audit
+                    </a>
+                    {' / '}
+                    {output.metadata.designDiffAuditPath}
+                  </div>
+                ) : null}
+                {typeof output.metadata.requestedChangeCount === 'number' ? (
+                  <div className="trace-event__meta">
+                    requested changes: {output.metadata.requestedChangeCount} / applied: {typeof output.metadata.appliedChangeCount === 'number' ? output.metadata.appliedChangeCount : 0} / missed:{' '}
+                    {typeof output.metadata.missedChangeCount === 'number' ? output.metadata.missedChangeCount : 0} / unintended:{' '}
+                    {typeof output.metadata.unintendedChangeCount === 'number' ? output.metadata.unintendedChangeCount : 0}
+                  </div>
+                ) : null}
+                {Array.isArray(output.metadata.generatedHtmlCandidates) && output.metadata.generatedHtmlCandidates.length > 0 ? (
+                  <div className="trace-event__artifact">
+                    <div>html design directions:</div>
+                    <div className="trace-event__gallery">
+                      {output.metadata.generatedHtmlCandidates.map((candidate, index) =>
+                        candidate && typeof candidate === 'object' && typeof candidate.assetPath === 'string' ? (
+                          <article key={candidate.assetPath} className="trace-event__thumbnail-card">
+                            <div className="trace-event__thumbnail-detail">
+                              <div className="trace-event__thumbnail-label">
+                                {typeof candidate.styleLabel === 'string' ? candidate.styleLabel : `Direction ${index + 1}`}
+                                {candidate.recommended === true ? ' / recommended' : ''}
+                              </div>
+                              {typeof candidate.direction === 'string' ? (
+                                <div className="trace-event__thumbnail-meta">{candidate.direction}</div>
+                              ) : null}
+                              <div className="trace-event__thumbnail-actions">
+                                <a href={buildFileApiUrl(candidate.assetPath)} target="_blank" rel="noreferrer">
+                                  open html direction
+                                </a>
+                              </div>
+                              <div className="trace-event__thumbnail-path">{candidate.assetPath}</div>
+                            </div>
+                          </article>
+                        ) : null,
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+                {output.metadata.designChangeSet && typeof output.metadata.designChangeSet === 'object' && Array.isArray((output.metadata.designChangeSet as { items?: unknown[] }).items) ? (
+                  <details className="trace-event__thumbnail-card">
+                    <summary className="trace-event__thumbnail-link">design change set summary</summary>
+                    <div className="trace-event__thumbnail-detail">
+                      {((output.metadata.designChangeSet as { items: Array<Record<string, unknown>> }).items).map((item, index) => (
+                        <div key={typeof item.changeId === 'string' ? item.changeId : `change-${index}`} className="trace-event__thumbnail-path">
+                          {typeof item.changeId === 'string' ? item.changeId : `change-${index + 1}`} / {typeof item.targetPageName === 'string' ? item.targetPageName : typeof item.targetPageKey === 'string' ? item.targetPageKey : 'global'} /{' '}
+                          {typeof item.status === 'string' ? item.status : 'requested'} / {typeof item.request === 'string' ? item.request : ''}
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ) : null}
+                {typeof output.metadata.generatedImageVersionTag === 'string' ? (
+                  <div className="trace-event__meta">image version: {output.metadata.generatedImageVersionTag}</div>
+                ) : null}
+                {typeof output.metadata.generatedImageGeneratedAt === 'string' ? (
+                  <div className="trace-event__meta">image generated at: {output.metadata.generatedImageGeneratedAt}</div>
+                ) : null}
+                {typeof output.metadata.generatedImageBatchFolder === 'string' ? (
+                  <div className="trace-event__artifact">image batch: {output.metadata.generatedImageBatchFolder}</div>
+                ) : null}
+                {typeof output.metadata.generatedImageWarningCount === 'number' ? (
+                  <div className="trace-event__meta">image warnings: {output.metadata.generatedImageWarningCount}</div>
+                ) : null}
+                {typeof output.metadata.generatedImageManifestPath === 'string' ? (
+                  <div className="trace-event__artifact">
+                    <a href={buildFileApiUrl(output.metadata.generatedImageManifestPath)} target="_blank" rel="noreferrer">
+                      open batch manifest
+                    </a>
+                    {' / '}
+                    {output.metadata.generatedImageManifestPath}
+                  </div>
+                ) : null}
+                {Array.isArray(output.metadata.generatedImagePaths) && typeof output.metadata.generatedImagePaths[0] === 'string' ? (
+                  <div className="trace-event__artifact">
+                    <a href={buildFileApiUrl(output.metadata.generatedImagePaths[0])} target="_blank" rel="noreferrer">
+                      open first image
+                    </a>
+                    {' / '}
+                    {output.metadata.generatedImagePaths[0]}
+                  </div>
+                ) : null}
+                {Array.isArray(output.metadata.generatedImageItems) && output.metadata.generatedImageItems.length > 0 ? (
+                  <div className="trace-event__artifact">
+                    <div>batch gallery:</div>
+                    <div className="trace-event__gallery">
+                      {output.metadata.generatedImageItems.map((item, index) =>
+                        item && typeof item === 'object' && typeof item.assetPath === 'string' ? (
+                          <details key={item.assetPath} className="trace-event__thumbnail-card">
+                            <summary className="trace-event__thumbnail-link" title={typeof item.pageName === 'string' ? item.pageName : `open image ${index + 1}`}>
+                              <img
+                                src={buildFileApiUrl(item.assetPath)}
+                                alt={typeof item.pageName === 'string' ? item.pageName : `${output.title} image ${index + 1}`}
+                                className="trace-event__thumbnail"
+                              />
+                              <span className="trace-event__thumbnail-label">
+                                {typeof item.pageNumber === 'number'
+                                  ? `Page ${item.pageNumber} / ${typeof item.pageName === 'string' ? item.pageName : `image ${index + 1}`} / ${typeof item.variantLabel === 'string' ? item.variantLabel : 'default'}`
+                                  : typeof item.pageName === 'string'
+                                    ? item.pageName
+                                    : `image ${index + 1}`}
+                              </span>
+                              {typeof item.prompt === 'string' && item.prompt.trim() ? (
+                                <span className="trace-event__thumbnail-meta">
+                                  {item.prompt.length > 88 ? `${item.prompt.slice(0, 88)}...` : item.prompt}
+                                </span>
+                              ) : null}
+                            </summary>
+                            <div className="trace-event__thumbnail-detail">
+                              <div className="trace-event__thumbnail-actions">
+                                <a href={buildFileApiUrl(item.assetPath)} target="_blank" rel="noreferrer">
+                                  open image
+                                </a>
+                                <a href={buildFileApiUrl(output.artifactPath)} target="_blank" rel="noreferrer">
+                                  open output doc
+                                </a>
+                                {typeof output.metadata.generatedImageManifestPath === 'string' ? (
+                                  <a href={buildFileApiUrl(output.metadata.generatedImageManifestPath)} target="_blank" rel="noreferrer">
+                                    open batch manifest
+                                  </a>
+                                ) : null}
+                              </div>
+                              {typeof item.pageKey === 'string' && item.pageKey.trim() ? (
+                                <div className="trace-event__thumbnail-path">page key: {item.pageKey}</div>
+                              ) : null}
+                              <div className="trace-event__thumbnail-path">{item.assetPath}</div>
+                              <div className="trace-event__meta">
+                                language: {typeof item.designLanguage === 'string' ? item.designLanguage : '-'} / style:{' '}
+                                {typeof item.styleDirection === 'string' ? item.styleDirection : '-'} / density:{' '}
+                                {typeof item.informationDensity === 'string' ? item.informationDensity : '-'}
+                              </div>
+                              {typeof item.prompt === 'string' && item.prompt.trim() ? (
+                                <pre className="trace-event__thumbnail-prompt">{item.prompt}</pre>
+                              ) : null}
+                            </div>
+                          </details>
+                        ) : null,
+                      )}
+                    </div>
+                    <div className="trace-event__meta">open output doc to inspect the full page-by-page prompt pack source.</div>
+                  </div>
+                ) : Array.isArray(output.metadata.generatedImagePaths) && output.metadata.generatedImagePaths.length > 0 ? (
+                  <div className="trace-event__artifact">
+                    <div>batch gallery:</div>
+                    <div className="trace-event__gallery">
+                      {output.metadata.generatedImagePaths.map((imagePath, index) =>
+                        typeof imagePath === 'string' ? (
+                          <a
+                            key={imagePath}
+                            href={buildFileApiUrl(imagePath)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="trace-event__thumbnail-link"
+                            title={`open image ${index + 1}`}
+                          >
+                            <img
+                              src={buildFileApiUrl(imagePath)}
+                              alt={`${output.title} image ${index + 1}`}
+                              className="trace-event__thumbnail"
+                            />
+                            <span className="trace-event__thumbnail-label">image {index + 1}</span>
+                          </a>
+                        ) : null,
+                      )}
+                    </div>
+                  </div>
+                ) : null}
                 {output.multiAgentReviewArtifactPath ? (
-                  <div className="trace-event__artifact">{output.multiAgentReviewArtifactPath}</div>
+                  <div className="trace-event__artifact">
+                    <a href={buildFileApiUrl(output.multiAgentReviewArtifactPath)} target="_blank" rel="noreferrer">
+                      open review artifact
+                    </a>
+                    {' / '}
+                    {output.multiAgentReviewArtifactPath}
+                  </div>
                 ) : null}
               </article>
             ))}
@@ -3318,6 +5792,7 @@ function RequirementVersionPanel({
   onIngestCurrentChat,
   onCreateManualRequirement,
   onRollbackVersion,
+  requirementPoolWorkbookPath,
 }: {
   requirements: Requirement[];
   versions: VersionEntry[];
@@ -3340,6 +5815,7 @@ function RequirementVersionPanel({
   onIngestCurrentChat: () => void;
   onCreateManualRequirement: () => void;
   onRollbackVersion: (entry: VersionEntry) => void;
+  requirementPoolWorkbookPath: string;
 }) {
   const selectedRequirement = requirements.find((requirement) => requirement.id === selectedRequirementId) ?? null;
   const relatedVersions = selectedRequirement
@@ -3357,6 +5833,46 @@ function RequirementVersionPanel({
     ),
   ];
   const relatedRuns = runs.filter((run) => relatedRunIds.includes(run.id));
+  const [poolFilter, setPoolFilter] = useState<'all' | 'platform' | 'subproject'>('all');
+  const [lifecycleFilter, setLifecycleFilter] = useState<'all' | string>('all');
+  const [sourceKindFilter, setSourceKindFilter] = useState<'all' | Requirement['source']['kind']>('all');
+  const [queueFilter, setQueueFilter] = useState<'all' | 'remediation' | 'standard'>('all');
+  const lifecycleOptions = [...new Set(requirements.map((requirement) => readRequirementLifecycle(requirement)).filter(Boolean))];
+  const sourceKindOptions = [...new Set(requirements.map((requirement) => requirement.source.kind).filter(Boolean))];
+  const remediationRequirements = requirements.filter((requirement) => readRequirementRemediationQueue(requirement));
+  const filteredRequirements = requirements.filter((requirement) => {
+    const poolScope = readRequirementPoolScope(requirement);
+    const lifecycle = readRequirementLifecycle(requirement);
+    const isRemediationQueue = readRequirementRemediationQueue(requirement);
+    if (poolFilter !== 'all' && poolScope !== poolFilter) {
+      return false;
+    }
+    if (lifecycleFilter !== 'all' && lifecycle !== lifecycleFilter) {
+      return false;
+    }
+    if (sourceKindFilter !== 'all' && requirement.source.kind !== sourceKindFilter) {
+      return false;
+    }
+    if (queueFilter === 'remediation' && !isRemediationQueue) {
+      return false;
+    }
+    if (queueFilter === 'standard' && isRemediationQueue) {
+      return false;
+    }
+    return true;
+  });
+  const filteredRemediationRequirements = filteredRequirements.filter((requirement) => readRequirementRemediationQueue(requirement));
+  const roadmapBacklogRequirements = requirements.filter((requirement) => readRequirementBacklogTarget(requirement) === 'roadmap');
+  const requirementLifecycleSummary = lifecycleOptions.map((lifecycle) => ({
+    lifecycle,
+    count: requirements.filter((requirement) => readRequirementLifecycle(requirement) === lifecycle).length,
+  }));
+  const groupedRequirements = lifecycleOptions
+    .map((lifecycle) => ({
+      lifecycle,
+      items: filteredRequirements.filter((requirement) => readRequirementLifecycle(requirement) === lifecycle),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <section className="inspector-panel">
@@ -3392,42 +5908,176 @@ function RequirementVersionPanel({
         <strong>{requirements.length}</strong>
       </div>
       <div className="inspector-field">
+        <span>Visible After Filter</span>
+        <strong>{filteredRequirements.length}</strong>
+      </div>
+      <div className="inspector-field">
         <span>Batch Selection</span>
         <strong>{selectedBatchRequirementIds.length}</strong>
       </div>
+      <div className="inspector-field">
+        <span>Remediation Queue</span>
+        <strong>{remediationRequirements.length}</strong>
+      </div>
+      <div className="inspector-field">
+        <span>Roadmap Debt Backlog</span>
+        <strong>{roadmapBacklogRequirements.length}</strong>
+      </div>
+      <article className="trace-event trace-event--ok" style={{ marginBottom: 10 }}>
+        <div className="trace-event__kind">excel pool</div>
+        <div className="trace-event__detail">
+          <a href={buildFileApiUrl(requirementPoolWorkbookPath)} target="_blank" rel="noreferrer">
+            open workbook
+          </a>
+        </div>
+        <div className="trace-event__meta">{requirementPoolWorkbookPath}</div>
+      </article>
+      <div className="capability-form">
+        <div className="capability-form-grid">
+          <label className="sidebar-label">
+            Pool
+            <select value={poolFilter} onChange={(event) => setPoolFilter(event.target.value as 'all' | 'platform' | 'subproject')}>
+              <option value="all">all</option>
+              <option value="platform">platform</option>
+              <option value="subproject">subproject</option>
+            </select>
+          </label>
+          <label className="sidebar-label">
+            Lifecycle
+            <select value={lifecycleFilter} onChange={(event) => setLifecycleFilter(event.target.value)}>
+              <option value="all">all</option>
+              {lifecycleOptions.map((lifecycle) => (
+                <option key={lifecycle} value={lifecycle}>
+                  {lifecycle}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="sidebar-label">
+            Source
+            <select value={sourceKindFilter} onChange={(event) => setSourceKindFilter(event.target.value as 'all' | Requirement['source']['kind'])}>
+              <option value="all">all</option>
+              {sourceKindOptions.map((sourceKind) => (
+                <option key={sourceKind} value={sourceKind}>
+                  {sourceKind}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="sidebar-label">
+            Queue
+            <select value={queueFilter} onChange={(event) => setQueueFilter(event.target.value as 'all' | 'remediation' | 'standard')}>
+              <option value="all">all</option>
+              <option value="remediation">remediation</option>
+              <option value="standard">standard</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div className="trace-list" style={{ marginBottom: 10 }}>
+        {requirementLifecycleSummary.map((item) => (
+          <article key={item.lifecycle} className="trace-event trace-event--ok">
+            <div className="trace-event__kind">lifecycle</div>
+            <div className="trace-event__detail">{item.lifecycle}</div>
+            <div className="trace-event__meta">{item.count} requirements</div>
+          </article>
+        ))}
+        <article className="trace-event trace-event--ok">
+          <div className="trace-event__kind">remediation</div>
+          <div className="trace-event__detail">historical review queue</div>
+          <div className="trace-event__meta">
+            {filteredRemediationRequirements.length} visible / {remediationRequirements.length} total
+          </div>
+        </article>
+      </div>
+      {remediationRequirements.length > 0 ? (
+        <>
+          <div className="inspector-field">
+            <span>Remediation Queue View</span>
+            <strong>{filteredRemediationRequirements.length} visible items</strong>
+          </div>
+          <div className="trace-list" style={{ marginBottom: 10 }}>
+            {filteredRemediationRequirements.slice(0, 8).map((requirement) => (
+              <button
+                key={requirement.id}
+                type="button"
+                className={
+                  requirement.id === selectedRequirement?.id
+                    ? 'trace-event trace-event-button trace-event--active'
+                    : 'trace-event trace-event-button'
+                }
+                onClick={() => {
+                  onSelectRequirement(requirement.id === selectedRequirement?.id ? null : requirement.id);
+                  onSelectVersion(null);
+                }}
+              >
+                <div className="trace-event__kind">remediation</div>
+                <div className="trace-event__detail">{requirement.title}</div>
+                <div className="trace-event__meta">
+                  {requirement.priority} / {requirement.status} / backlog: {readRequirementBacklogTarget(requirement)}
+                </div>
+                <div className="trace-event__meta">
+                  source: {requirement.source.kind} / lifecycle: {readRequirementLifecycle(requirement)}
+                </div>
+                <div className="trace-event__meta">
+                  related: {requirement.trace.relatedRequirementIds.length} / artifacts: {requirement.trace.artifactPaths.length}
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : null}
       <div className="trace-list">
-        {requirements.length === 0 ? (
+        {filteredRequirements.length === 0 ? (
           <div className="inspector-empty">暂无 requirement。</div>
         ) : (
-          requirements.slice(0, 5).map((requirement) => (
-            <button
-              key={requirement.id}
-              type="button"
-              className={
-                requirement.id === selectedRequirement?.id
-                  ? 'trace-event trace-event-button trace-event--active'
-                  : 'trace-event trace-event-button'
-              }
-              onClick={() => {
-                onSelectRequirement(requirement.id === selectedRequirement?.id ? null : requirement.id);
-                onSelectVersion(null);
-              }}
-            >
-              <div className="trace-event__kind">{requirement.category}</div>
-              <div className="trace-event__detail">{requirement.title}</div>
-              <div className="trace-event__meta">
-                {requirement.priority} / {requirement.status} / source: {requirement.source.kind}
-              </div>
-              <div className="trace-event__meta">
-                versions: {requirement.trace.linkedVersionIds.length} / runs: {requirement.trace.linkedRunIds.length} / related: {requirement.trace.relatedRequirementIds.length}
-              </div>
-              <div className="trace-event__meta">
-                batch: {selectedBatchRequirementIds.includes(requirement.id) ? 'selected' : 'not selected'}
-              </div>
-              {requirement.trace.linkedRunIds.length > 0 ? (
-                <div className="trace-event__artifact">runs: {requirement.trace.linkedRunIds.join(', ')}</div>
-              ) : null}
-            </button>
+          groupedRequirements.map((group) => (
+            <div key={group.lifecycle} style={{ display: 'contents' }}>
+              <article className="trace-event trace-event--ok">
+                <div className="trace-event__kind">group</div>
+                <div className="trace-event__detail">{group.lifecycle}</div>
+                <div className="trace-event__meta">{group.items.length} visible requirements</div>
+              </article>
+              {group.items.slice(0, 6).map((requirement) => (
+                <button
+                  key={requirement.id}
+                  type="button"
+                  className={
+                    requirement.id === selectedRequirement?.id
+                      ? 'trace-event trace-event-button trace-event--active'
+                      : 'trace-event trace-event-button'
+                  }
+                  onClick={() => {
+                    onSelectRequirement(requirement.id === selectedRequirement?.id ? null : requirement.id);
+                    onSelectVersion(null);
+                  }}
+                >
+                  <div className="trace-event__kind">{requirement.category}</div>
+                  <div className="trace-event__detail">{requirement.title}</div>
+                  <div className="trace-event__meta">
+                    {requirement.priority} / {requirement.status} / source: {requirement.source.kind}
+                  </div>
+                  <div className="trace-event__meta">
+                    pool: {readRequirementPoolScope(requirement)} / lifecycle: {readRequirementLifecycle(requirement)}
+                  </div>
+                  {readRequirementRemediationQueue(requirement) ? (
+                    <div className="trace-event__meta">
+                      remediation queue / backlog: {readRequirementBacklogTarget(requirement)}
+                    </div>
+                  ) : null}
+                  <div className="trace-event__meta">
+                    versions: {requirement.trace.linkedVersionIds.length} / runs: {requirement.trace.linkedRunIds.length} / related:{' '}
+                    {requirement.trace.relatedRequirementIds.length}
+                  </div>
+                  <div className="trace-event__meta">
+                    batch: {selectedBatchRequirementIds.includes(requirement.id) ? 'selected' : 'not selected'}
+                  </div>
+                  {requirement.trace.linkedRunIds.length > 0 ? (
+                    <div className="trace-event__artifact">runs: {requirement.trace.linkedRunIds.join(', ')}</div>
+                  ) : null}
+                </button>
+              ))}
+            </div>
           ))
         )}
       </div>
@@ -3558,6 +6208,18 @@ function RequirementVersionPanel({
       ) : null}
       {selectedRequirement ? (
         <>
+          {readRequirementRemediationQueue(selectedRequirement) ? (
+            <>
+              <div className="inspector-field">
+                <span>Remediation Queue</span>
+                <strong>yes</strong>
+              </div>
+              <div className="inspector-field">
+                <span>Backlog Target</span>
+                <strong>{readRequirementBacklogTarget(selectedRequirement)}</strong>
+              </div>
+            </>
+          ) : null}
           <div className="inspector-field">
             <span>Related Capabilities</span>
             <strong>{relatedCapabilities.length}</strong>
@@ -3608,6 +6270,22 @@ function RequirementVersionPanel({
   );
 }
 
+function readRequirementPoolScope(requirement: Requirement) {
+  return typeof requirement.metadata.poolScope === 'string' ? requirement.metadata.poolScope : 'unknown';
+}
+
+function readRequirementLifecycle(requirement: Requirement) {
+  return typeof requirement.metadata.lifecycle === 'string' ? requirement.metadata.lifecycle : 'unknown';
+}
+
+function readRequirementBacklogTarget(requirement: Requirement) {
+  return typeof requirement.metadata.backlogTarget === 'string' ? requirement.metadata.backlogTarget : 'none';
+}
+
+function readRequirementRemediationQueue(requirement: Requirement) {
+  return requirement.metadata.remediationQueue === true || readRequirementBacklogTarget(requirement) === 'roadmap';
+}
+
 export default function App() {
   const [inspectorView, setInspectorView] = useState<'outputs' | 'monitoring' | 'assets'>('outputs');
   const [subprojects, setSubprojects] = useState<Subproject[]>([]);
@@ -3633,9 +6311,15 @@ export default function App() {
   const [latestWebFetch, setLatestWebFetch] = useState<WebFetchArtifact | null>(null);
   const [latestFigmaInspection, setLatestFigmaInspection] = useState<FigmaInspection | null>(null);
   const [latestDingTalkImport, setLatestDingTalkImport] = useState<DingTalkMeetingImportResult | null>(null);
+  const [latestDatakiKnowledgeBases, setLatestDatakiKnowledgeBases] = useState<DatakiKnowledgeBaseSummary[]>([]);
+  const [latestDatakiKnowledgeFiles, setLatestDatakiKnowledgeFiles] = useState<DatakiKnowledgeFileSummary[]>([]);
+  const [latestDatakiSearch, setLatestDatakiSearch] = useState<DatakiKnowledgeSearchItem[]>([]);
   const [productChiefReports, setProductChiefReports] = useState<ProductChiefReport[]>([]);
   const [productChiefOutputs, setProductChiefOutputs] = useState<ProductChiefOutput[]>([]);
+  const [latestUiSchemaContract, setLatestUiSchemaContract] = useState<UISchemaContract | null>(null);
+  const [productChiefImageBatches, setProductChiefImageBatches] = useState<ProductChiefImageBatch[]>([]);
   const [productChiefReviews, setProductChiefReviews] = useState<ProductChiefMultiAgentReview[]>([]);
+  const [multiPmGroupSessions, setMultiPmGroupSessions] = useState<MultiPmGroupSession[]>([]);
   const [dagGraph, setDagGraph] = useState<DAGGraph | null>(null);
   const [dagRuns, setDagRuns] = useState<DAGRun[]>([]);
   const [dagChanges, setDagChanges] = useState<DAGChangeEvent[]>([]);
@@ -3652,6 +6336,17 @@ export default function App() {
   const [mcpTasks, setMcpTasks] = useState<SharedTask[]>([]);
   const [mcpCheckpoints, setMcpCheckpoints] = useState<SharedCheckpoint[]>([]);
   const [mcpEvents, setMcpEvents] = useState<SharedEvent[]>([]);
+  const [taskSsotState, setTaskSsotState] = useState<TaskSsotStateResponse | null>(null);
+  const [schedulerRuns, setSchedulerRuns] = useState<SchedulerRunsResponse | null>(null);
+  const [schedulerRuntime, setSchedulerRuntime] = useState<SchedulerRuntimeSummary | null>(null);
+  const [pipelineBusy, setPipelineBusy] = useState(false);
+  const [finalStateValidation, setFinalStateValidation] = useState<FinalStateValidationReport | null>(null);
+  const [liveAutoAcceptanceRun, setLiveAutoAcceptanceRun] = useState<LiveAutoAcceptanceRun | null>(null);
+  const [autoAcceptanceBusy, setAutoAcceptanceBusy] = useState(false);
+  const [liveBrowserVerificationRun, setLiveBrowserVerificationRun] = useState<LiveBrowserVerificationRun | null>(null);
+  const [outboxEnvelopes, setOutboxEnvelopes] = useState<TaskSsotSyncEnvelope[]>([]);
+  const [outboxRuntime, setOutboxRuntime] = useState<OutboxRuntimeSummary | null>(null);
+  const [proofOfWorkBundle, setProofOfWorkBundle] = useState<ProofOfWorkBundle | null>(null);
   const [executionChecklistSummary, setExecutionChecklistSummary] = useState<ExecutionChecklistSummary | null>(null);
   const [dailyDigests, setDailyDigests] = useState<DailyDigestEntry[]>([]);
   const [projectEntries, setProjectEntries] = useState<ProjectEntrySummary[]>([]);
@@ -3659,6 +6354,8 @@ export default function App() {
   const [workflowMetrics, setWorkflowMetrics] = useState<WorkflowMetrics | null>(null);
   const [workflowReview, setWorkflowReview] = useState<CommitteeReport | null>(null);
   const [hermesPolicy, setHermesPolicy] = useState<HermesPolicyReport | null>(null);
+  const [v07RuntimeGovernance, setV07RuntimeGovernance] = useState<V07RuntimeGovernanceSnapshot | null>(null);
+  const autoAcceptanceTriggeredRef = useRef<Set<string>>(new Set());
   const [selectedRequirementIds, setSelectedRequirementIds] = useState<string[]>([]);
   const [selectedBatchRequirementIds, setSelectedBatchRequirementIds] = useState<string[]>([]);
   const [selectedTraceRequirementId, setSelectedTraceRequirementId] = useState<string | null>(null);
@@ -3695,6 +6392,7 @@ export default function App() {
   const [traceBusy, setTraceBusy] = useState(false);
   const [providerRoutingBusy, setProviderRoutingBusy] = useState(false);
   const [workflowBusy, setWorkflowBusy] = useState(false);
+  const [schedulerBusy, setSchedulerBusy] = useState(false);
   const [portfolioBusy, setPortfolioBusy] = useState(false);
   const [productAgentBusy, setProductAgentBusy] = useState(false);
   const [externalConnectorBusy, setExternalConnectorBusy] = useState(false);
@@ -3702,6 +6400,7 @@ export default function App() {
   const [dagBusy, setDagBusy] = useState(false);
   const [retrievalBusy, setRetrievalBusy] = useState(false);
   const [hermesBusy, setHermesBusy] = useState(false);
+  const [v07RuntimeBusy, setV07RuntimeBusy] = useState(false);
   const [mcpContextBusy, setMcpContextBusy] = useState(false);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const productOutputsSectionRef = useRef<HTMLDivElement | null>(null);
@@ -3906,21 +6605,43 @@ export default function App() {
   }, []);
 
   const loadSharedContextData = useCallback(async () => {
-    const [taskResult, checkpointResult, eventResult, checklistSummary, dailyDigestResult, projectEntryResult] = await Promise.all([
+    const [taskResult, checkpointResult, eventResult, checklistSummary, dailyDigestResult, projectEntryResult, taskSsotStateResult, schedulerRunsResult, schedulerRuntimeResult, outboxResult, outboxRuntimeResult] = await Promise.all([
       loadMcpContextTasks(),
       loadMcpContextCheckpoints(),
       loadMcpContextEvents(),
       loadExecutionChecklistSummary(),
       loadDailyDigests(),
       loadProjectEntries(),
+      loadTaskSsotState(selectedSubprojectId),
+      loadSchedulerRuns(selectedSubprojectId),
+      loadSchedulerRuntime(selectedSubprojectId),
+      loadOutboxEnvelopes(selectedSubprojectId),
+      loadOutboxRuntime(selectedSubprojectId),
     ]);
+    const validationResult = taskSsotStateResult.continuation.activeMainlineTaskId
+      ? await loadFinalStateValidation(taskSsotStateResult.continuation.activeMainlineTaskId, selectedSubprojectId)
+      : null;
+    let proofOfWorkResult: ProofOfWorkBundle | null = null;
+    try {
+      proofOfWorkResult = await loadProofOfWorkBundle(selectedSubprojectId);
+    } catch {
+      proofOfWorkResult = null;
+    }
     setMcpTasks(taskResult.tasks);
     setMcpCheckpoints(checkpointResult.items);
     setMcpEvents(eventResult.items);
     setExecutionChecklistSummary(checklistSummary);
     setDailyDigests(dailyDigestResult.items);
     setProjectEntries(projectEntryResult.items);
-  }, []);
+    setTaskSsotState(taskSsotStateResult);
+    setSchedulerRuns(schedulerRunsResult);
+    setSchedulerRuntime(schedulerRuntimeResult);
+    setOutboxEnvelopes(outboxResult.items);
+    setOutboxRuntime(outboxRuntimeResult);
+    setFinalStateValidation(validationResult);
+    setProofOfWorkBundle(proofOfWorkResult);
+  }, [selectedSubprojectId]);
+
 
   const loadWorkflowSurface = useCallback(async (subprojectId: string | null) => {
     const [run, metrics, review] = await Promise.all([
@@ -3935,6 +6656,10 @@ export default function App() {
     setHermesPolicy(hermes);
   }, []);
 
+  const loadV07RuntimeGovernanceData = useCallback(async (subprojectId: string | null) => {
+    setV07RuntimeGovernance(await loadV07RuntimeGovernance(subprojectId));
+  }, []);
+
   const loadProviderRoutingData = useCallback(async (subprojectId: string | null) => {
     const routingResult = await listProviderRouting(subprojectId);
     setProviderRouting(routingResult.items);
@@ -3944,6 +6669,59 @@ export default function App() {
     const portfolio = await listPortfolio();
     setPortfolioEntries(portfolio);
   }, []);
+
+  const refreshSchedulerSurface = useCallback(async () => {
+    await Promise.all([
+      loadSharedContextData(),
+      loadWorkflowSurface(selectedSubprojectId),
+      loadPortfolioData(),
+    ]);
+  }, [loadPortfolioData, loadSharedContextData, loadWorkflowSurface, selectedSubprojectId]);
+
+  const handleRunAutoAcceptance = useCallback(async () => {
+    const activeTaskId = taskSsotState?.continuation.activeMainlineTaskId ?? finalStateValidation?.taskId ?? null;
+    if (!activeTaskId) {
+      return;
+    }
+    setAutoAcceptanceBusy(true);
+    try {
+      const result = await runTaskAutoAcceptance(activeTaskId, selectedSubprojectId);
+      setLiveAutoAcceptanceRun(result);
+      if (result.browserRun) {
+        setLiveBrowserVerificationRun(result.browserRun);
+      }
+      setFinalStateValidation(result.finalState);
+      autoAcceptanceTriggeredRef.current.add(activeTaskId);
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Run auto acceptance failed: ${cause.message}` : 'Run auto acceptance failed.');
+    } finally {
+      setAutoAcceptanceBusy(false);
+    }
+  }, [finalStateValidation?.taskId, selectedSubprojectId, taskSsotState?.continuation.activeMainlineTaskId]);
+
+  useEffect(() => {
+    const activeTaskId = taskSsotState?.continuation.activeMainlineTaskId ?? finalStateValidation?.taskId ?? null;
+    if (!activeTaskId || !finalStateValidation || autoAcceptanceBusy) {
+      return;
+    }
+    if (!finalStateValidation.browserVerification?.applicable) {
+      return;
+    }
+    const needsAutomatedAcceptance = finalStateValidation.checks.some(
+      (check) => check.id === 'automated-acceptance-gate' && check.status !== 'pass',
+    );
+    if (!needsAutomatedAcceptance || autoAcceptanceTriggeredRef.current.has(activeTaskId)) {
+      return;
+    }
+    autoAcceptanceTriggeredRef.current.add(activeTaskId);
+    void handleRunAutoAcceptance();
+  }, [
+    autoAcceptanceBusy,
+    finalStateValidation,
+    handleRunAutoAcceptance,
+    taskSsotState?.continuation.activeMainlineTaskId,
+  ]);
 
   const loadProductAgentData = useCallback(async (subprojectId: string | null) => {
     const [agentResult, blueprintResult, skillSurface, localState] = await Promise.all([
@@ -3959,14 +6737,26 @@ export default function App() {
   }, []);
 
   const loadProductChiefData = useCallback(async (subprojectId: string | null) => {
-    const [reports, outputs, reviews] = await Promise.all([
+    const [reports, outputs, imageBatches, reviews, groupSessions] = await Promise.all([
       listProductChiefReports(subprojectId),
       listProductChiefOutputs(subprojectId),
+      listProductChiefImageBatches(subprojectId),
       listProductChiefMultiAgentReviews(subprojectId),
+      listMultiPmGroupSessions(subprojectId),
     ]);
     setProductChiefReports(reports.items);
     setProductChiefOutputs(outputs.items);
+    setProductChiefImageBatches(imageBatches.items);
     setProductChiefReviews(reviews.items);
+    setMultiPmGroupSessions(groupSessions.items);
+    const latestUiSchemaPath = outputs.items.find(
+      (output) => typeof output.metadata.generatedUiSchemaPath === 'string' && output.metadata.generatedUiSchemaPath.trim(),
+    )?.metadata.generatedUiSchemaPath;
+    if (typeof latestUiSchemaPath === 'string' && latestUiSchemaPath.trim()) {
+      setLatestUiSchemaContract(await loadJsonFile<UISchemaContract>(latestUiSchemaPath));
+    } else {
+      setLatestUiSchemaContract(null);
+    }
   }, []);
 
   const loadExternalConnectorData = useCallback(async (subprojectId: string | null) => {
@@ -4029,7 +6819,7 @@ export default function App() {
   const bootstrap = useCallback(async () => {
     setLoading(true);
     try {
-      const [subprojectItems, chatResult, modeState, modeHistoryResult, taskResult, checkpointResult, eventResult, checklistSummary, dailyDigestResult, projectEntryResult] = await Promise.all([
+      const [subprojectItems, chatResult, modeState, modeHistoryResult, taskResult, checkpointResult, eventResult, checklistSummary, dailyDigestResult, projectEntryResult, taskSsotStateResult, schedulerRunsResult, schedulerRuntimeResult, outboxResult, outboxRuntimeResult] = await Promise.all([
         listSubprojects(),
         listChats(selectedSubprojectId),
         loadMcpContextMode(),
@@ -4040,7 +6830,21 @@ export default function App() {
         loadExecutionChecklistSummary(),
         loadDailyDigests(),
         loadProjectEntries(),
+        loadTaskSsotState(selectedSubprojectId),
+        loadSchedulerRuns(selectedSubprojectId),
+        loadSchedulerRuntime(selectedSubprojectId),
+        loadOutboxEnvelopes(selectedSubprojectId),
+        loadOutboxRuntime(selectedSubprojectId),
       ]);
+      const validationResult = taskSsotStateResult.continuation.activeMainlineTaskId
+        ? await loadFinalStateValidation(taskSsotStateResult.continuation.activeMainlineTaskId, selectedSubprojectId)
+        : null;
+      let proofOfWorkResult: ProofOfWorkBundle | null = null;
+      try {
+        proofOfWorkResult = await loadProofOfWorkBundle(selectedSubprojectId);
+      } catch {
+        proofOfWorkResult = null;
+      }
       setSubprojects(subprojectItems);
       setMcpModeState(modeState);
       setMcpModeHistory(modeHistoryResult.items);
@@ -4050,6 +6854,13 @@ export default function App() {
       setExecutionChecklistSummary(checklistSummary);
       setDailyDigests(dailyDigestResult.items);
       setProjectEntries(projectEntryResult.items);
+      setTaskSsotState(taskSsotStateResult);
+      setSchedulerRuns(schedulerRunsResult);
+      setSchedulerRuntime(schedulerRuntimeResult);
+      setOutboxEnvelopes(outboxResult.items);
+      setOutboxRuntime(outboxRuntimeResult);
+      setFinalStateValidation(validationResult);
+      setProofOfWorkBundle(proofOfWorkResult);
 
       if (chatResult.items.length > 0) {
         setSessions(chatResult.items);
@@ -4193,6 +7004,20 @@ export default function App() {
       }
     })();
   }, [loadDagData, loadRetrievalData, selectedSubprojectId]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await loadV07RuntimeGovernanceData(selectedSubprojectId);
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? `v0.7 runtime governance load failed: ${cause.message}`
+            : 'v0.7 runtime governance load failed.',
+        );
+      }
+    })();
+  }, [loadV07RuntimeGovernanceData, selectedSubprojectId]);
 
   useEffect(() => {
     if (!activeSessionId) {
@@ -4738,6 +7563,20 @@ export default function App() {
     }
   }, [loadPortfolioData, loadWorkflowSurface, selectedSubprojectId]);
 
+  const handleTriggerPipeline = useCallback(async (taskId: string, planId: string) => {
+    setPipelineBusy(true);
+    try {
+      const result = await triggerPipelineLauncher(taskId, planId, selectedSubprojectId);
+      setWorkflowRun(result.workflowRun);
+      await Promise.all([loadWorkflowSurface(selectedSubprojectId), loadPortfolioData()]);
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `pipeline launcher trigger failed: ${cause.message}` : 'pipeline launcher trigger failed.');
+    } finally {
+      setPipelineBusy(false);
+    }
+  }, [loadPortfolioData, loadWorkflowSurface, selectedSubprojectId]);
+
   const handleWorkflowAdvance = useCallback(async () => {
     if (!workflowRun) {
       return;
@@ -4793,6 +7632,89 @@ export default function App() {
     }
   }, [loadPortfolioData, loadWorkflowSurface, selectedSubprojectId, workflowReview?.recommendedReworkStageId, workflowRun]);
 
+  const handleRefreshScheduler = useCallback(async () => {
+    setSchedulerBusy(true);
+    try {
+      await refreshSchedulerSurface();
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Scheduler refresh failed: ${cause.message}` : 'Scheduler refresh failed.');
+    } finally {
+      setSchedulerBusy(false);
+    }
+  }, [refreshSchedulerSurface]);
+
+  const handleTickDueSchedulerRuns = useCallback(async () => {
+    setSchedulerBusy(true);
+    try {
+      await tickDueSchedulerRuns(selectedSubprojectId);
+      await refreshSchedulerSurface();
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Scheduler tick-due failed: ${cause.message}` : 'Scheduler tick-due failed.');
+    } finally {
+      setSchedulerBusy(false);
+    }
+  }, [refreshSchedulerSurface, selectedSubprojectId]);
+
+  const handleTickSchedulerRun = useCallback(
+    async (workflowRunId: string) => {
+      setSchedulerBusy(true);
+      try {
+        await tickSchedulerRun(workflowRunId, selectedSubprojectId);
+        await refreshSchedulerSurface();
+        setError(null);
+      } catch (cause) {
+        setError(cause instanceof Error ? `Scheduler tick failed: ${cause.message}` : 'Scheduler tick failed.');
+      } finally {
+        setSchedulerBusy(false);
+      }
+    },
+    [refreshSchedulerSurface, selectedSubprojectId],
+  );
+
+  const handleScheduleResumeCurrent = useCallback(
+    async (workflowRunId: string) => {
+      setSchedulerBusy(true);
+      try {
+        await scheduleSchedulerRun(workflowRunId, {
+          subprojectId: selectedSubprojectId,
+          action: 'resume-current-stage',
+          cooldownUntil: new Date().toISOString(),
+          reason: 'workspace scheduler resume current-stage',
+        });
+        await refreshSchedulerSurface();
+        setError(null);
+      } catch (cause) {
+        setError(cause instanceof Error ? `Schedule current-stage resume failed: ${cause.message}` : 'Schedule current-stage resume failed.');
+      } finally {
+        setSchedulerBusy(false);
+      }
+    },
+    [refreshSchedulerSurface, selectedSubprojectId],
+  );
+
+  const handleScheduleResumeRework = useCallback(
+    async (workflowRunId: string) => {
+      setSchedulerBusy(true);
+      try {
+        await scheduleSchedulerRun(workflowRunId, {
+          subprojectId: selectedSubprojectId,
+          action: 'resume-rework-stage',
+          cooldownUntil: new Date().toISOString(),
+          reason: 'workspace scheduler resume rework-stage',
+        });
+        await refreshSchedulerSurface();
+        setError(null);
+      } catch (cause) {
+        setError(cause instanceof Error ? `Schedule rework resume failed: ${cause.message}` : 'Schedule rework resume failed.');
+      } finally {
+        setSchedulerBusy(false);
+      }
+    },
+    [refreshSchedulerSurface, selectedSubprojectId],
+  );
+
   const handleWorkflowApproveGate = useCallback(async () => {
     if (!workflowRun) {
       return;
@@ -4835,6 +7757,46 @@ export default function App() {
       setWorkflowBusy(false);
     }
   }, [loadPortfolioData, loadWorkflowSurface, selectedSubprojectId, workflowReview?.recommendedReworkStageId, workflowRun]);
+
+  const handleCloseHermesLoop = useCallback(
+    async (workflowRunId: string) => {
+      setWorkflowBusy(true);
+      try {
+        await closeHermesLoop(workflowRunId, selectedSubprojectId);
+        await Promise.all([
+          loadWorkflowSurface(selectedSubprojectId),
+          refreshSchedulerSurface(),
+          loadPortfolioData(),
+        ]);
+        setError(null);
+      } catch (cause) {
+        setError(cause instanceof Error ? `Hermes close-loop failed: ${cause.message}` : 'Hermes close-loop failed.');
+      } finally {
+        setWorkflowBusy(false);
+      }
+    },
+    [loadPortfolioData, loadWorkflowSurface, refreshSchedulerSurface, selectedSubprojectId],
+  );
+
+  const handleExecuteHermesWriteback = useCallback(
+    async (workflowRunId: string) => {
+      setWorkflowBusy(true);
+      try {
+        await executeHermesWriteback(workflowRunId, selectedSubprojectId);
+        await Promise.all([
+          loadWorkflowSurface(selectedSubprojectId),
+          refreshSchedulerSurface(),
+          loadPortfolioData(),
+        ]);
+        setError(null);
+      } catch (cause) {
+        setError(cause instanceof Error ? `Hermes writeback execution failed: ${cause.message}` : 'Hermes writeback execution failed.');
+      } finally {
+        setWorkflowBusy(false);
+      }
+    },
+    [loadPortfolioData, loadWorkflowSurface, refreshSchedulerSurface, selectedSubprojectId],
+  );
 
   const handlePortfolioRefresh = useCallback(async () => {
     setPortfolioBusy(true);
@@ -4932,6 +7894,59 @@ export default function App() {
     }
   }, [loadExternalConnectorData, loadTraceabilityData, selectedSubprojectId]);
 
+  const handleListDatakiKnowledgeBases = useCallback(async (input: { subprojectId?: string | null; baseUrl: string; apiKey: string; userId: string; agentId: string }) => {
+    setExternalConnectorBusy(true);
+    try {
+      const result = await listDatakiKnowledgeBases(input);
+      setLatestDatakiKnowledgeBases(result.items);
+      setLatestDatakiKnowledgeFiles([]);
+      setLatestDatakiSearch([]);
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Dataki knowledge base list failed: ${cause.message}` : 'Dataki knowledge base list failed.');
+    } finally {
+      setExternalConnectorBusy(false);
+    }
+  }, []);
+
+  const handleListDatakiKnowledgeFiles = useCallback(async (input: {
+    subprojectId?: string | null;
+    knowledgeBaseId: string;
+    baseUrl: string;
+    apiKey: string;
+    keyword: string;
+  }) => {
+    setExternalConnectorBusy(true);
+    try {
+      const result = await listDatakiKnowledgeFiles(input);
+      setLatestDatakiKnowledgeFiles(result.items);
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Dataki knowledge file list failed: ${cause.message}` : 'Dataki knowledge file list failed.');
+    } finally {
+      setExternalConnectorBusy(false);
+    }
+  }, []);
+
+  const handleSearchDatakiKnowledge = useCallback(async (input: {
+    subprojectId?: string | null;
+    query: string;
+    knowledgeBaseId: string;
+    baseUrl: string;
+    apiKey: string;
+  }) => {
+    setExternalConnectorBusy(true);
+    try {
+      const result = await searchDatakiKnowledge(input);
+      setLatestDatakiSearch(result.items);
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Dataki knowledge search failed: ${cause.message}` : 'Dataki knowledge search failed.');
+    } finally {
+      setExternalConnectorBusy(false);
+    }
+  }, []);
+
   const handleProductChiefRefresh = useCallback(async () => {
     setProductChiefBusy(true);
     try {
@@ -4962,6 +7977,10 @@ export default function App() {
   }, [loadProductAgentData, loadProductChiefData, selectedSubprojectId]);
 
   const handleProductChiefGenerateOutput = useCallback(async (reportId: string, type: string) => {
+    if (!selectedSubprojectId && isProjectScopedDesignOutput(type)) {
+      setError('Product Chief output failed: Select a target subproject before generating concept-design-pack or design-image2-prompt-pack.');
+      return;
+    }
     setProductChiefBusy(true);
     try {
       await generateProductChiefOutput(reportId, { subprojectId: selectedSubprojectId, type });
@@ -4973,6 +7992,34 @@ export default function App() {
       setProductChiefBusy(false);
     }
   }, [loadProductChiefData, selectedSubprojectId]);
+
+  const handleProductChiefGenerateAllOutputs = useCallback(async (report: ProductChiefReport) => {
+    const generatedOutputTypes = new Set(productChiefOutputs.map((output) => output.type));
+    const pendingOutputs = report.requiredGovernedOutputs.filter((output) => !generatedOutputTypes.has(output.type));
+    if (pendingOutputs.length === 0) {
+      return;
+    }
+    if (!selectedSubprojectId && pendingOutputs.some((output) => isProjectScopedDesignOutput(output.type))) {
+      setError('Product Chief full package failed: Select a target subproject before generating outputs that include concept-design-pack or design-image2-prompt-pack.');
+      return;
+    }
+
+    setProductChiefBusy(true);
+    try {
+      for (const output of pendingOutputs) {
+        await generateProductChiefOutput(report.id, {
+          subprojectId: selectedSubprojectId,
+          type: output.type,
+        });
+      }
+      await loadProductChiefData(selectedSubprojectId);
+      setError(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? `Product Chief full package failed: ${cause.message}` : 'Product Chief full package failed.');
+    } finally {
+      setProductChiefBusy(false);
+    }
+  }, [loadProductChiefData, productChiefOutputs, selectedSubprojectId]);
 
   const handleDagRefresh = useCallback(async () => {
     setDagBusy(true);
@@ -5103,6 +8150,45 @@ export default function App() {
     }
   }, [selectedSubprojectId, workflowRun]);
 
+  const handleRefreshV07RuntimeGovernance = useCallback(async () => {
+    setV07RuntimeBusy(true);
+    try {
+      await loadV07RuntimeGovernanceData(selectedSubprojectId);
+      setError(null);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? `v0.7 runtime governance refresh failed: ${cause.message}`
+          : 'v0.7 runtime governance refresh failed.',
+      );
+    } finally {
+      setV07RuntimeBusy(false);
+    }
+  }, [loadV07RuntimeGovernanceData, selectedSubprojectId]);
+
+  const handlePromoteRepeatCorrection = useCallback(
+    async (candidateId: string) => {
+      setV07RuntimeBusy(true);
+      try {
+        await promoteRepeatCorrectionCandidate(candidateId, selectedSubprojectId);
+        await Promise.all([
+          loadV07RuntimeGovernanceData(selectedSubprojectId),
+          loadTraceabilityData(selectedSubprojectId),
+        ]);
+        setError(null);
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? `repeat correction promote failed: ${cause.message}`
+            : 'repeat correction promote failed.',
+        );
+      } finally {
+        setV07RuntimeBusy(false);
+      }
+    },
+    [loadTraceabilityData, loadV07RuntimeGovernanceData, selectedSubprojectId],
+  );
+
   const handleSwitchMode = useCallback(async (mode: CollaborationModeName) => {
     setMcpContextBusy(true);
     try {
@@ -5118,253 +8204,567 @@ export default function App() {
     }
   }, [loadMcpModeData, loadSharedContextData]);
 
+  const activeScopeLabel = selectedSubproject?.name ?? 'PMAIOS Platform';
+  const activeScopeDescription =
+    selectedSubproject?.description ?? '平台级运行总控，承接 workflow、trace、agent、artifact 与版本闭环。';
+  const activeScopeId = selectedSubprojectId ?? 'platform-root';
+  const workflowProgressLabel = workflowMetrics
+    ? `${workflowMetrics.completedStages}/${workflowMetrics.totalStages} stages complete`
+    : 'workflow metrics unavailable';
+  const outputTotal = productChiefOutputs.length + requirements.length + versionEntries.length;
+  const runtimeHeroCards = [
+    {
+      label: 'Active Scope',
+      value: activeScopeLabel,
+      detail: activeScopeId,
+    },
+    {
+      label: 'Conversation State',
+      value: activeSession?.title ?? 'No session',
+      detail: sending ? 'assistant is responding' : 'ready for next prompt',
+    },
+    {
+      label: 'Workflow Signals',
+      value: workflowRun?.status ?? 'no active workflow',
+      detail: workflowProgressLabel,
+    },
+    {
+      label: '实时产出',
+      value: String(outputTotal),
+      detail: `${productChiefOutputs.length} PM产出 / ${requirements.length} 需求 / ${versionEntries.length} 版本`,
+    },
+  ];
+  const orchestrationCards = [
+    {
+      title: 'Chief / Review Layer',
+      status: productChiefReports.length ? 'active' : 'standby',
+      detail: `${productChiefReports.length} reports / ${productChiefReviews.length} reviews`,
+      summary: '负责汇总判断、评审意见和最终收敛。',
+    },
+    {
+      title: 'Product Agent Layer',
+      status: productAgents.length ? 'active' : 'standby',
+      detail: `${productAgents.length} agents / ${productAgentBlueprints.length} blueprints`,
+      summary: '负责分工执行、子任务推进与多 agent 协作链路。',
+    },
+    {
+      title: 'Execution / Trace Layer',
+      status: workflowRun?.status ?? 'idle',
+      detail: `${mcpTasks.length} tasks / ${mcpEvents.length} events / ${mcpCheckpoints.length} checkpoints`,
+      summary: '把 workflow、trace、共享上下文和版本收口到同一运行面。',
+    },
+  ];
+  const modalityCards = [
+    {
+      title: 'Conversation',
+      value: `${messages.length} messages`,
+      detail: '对话、语音输入与运行态上下文。',
+    },
+    {
+      title: 'Knowledge / Retrieval',
+      value: retrievalGovernance ? retrievalGovernance.mode : 'unconfigured',
+      detail: '知识检索、索引治理与证据回流。',
+    },
+    {
+      title: 'External Connectors',
+      value: externalConnectorStatus
+        ? `${Number(externalConnectorStatus.notion.configured) + Number(externalConnectorStatus.figma.configured) + Number(externalConnectorStatus.webFetch.configured) + Number(externalConnectorStatus.dataki.configured)} configured`
+        : 'pending',
+      detail: 'Notion / Figma / Web / DingTalk / Dataki 接入位。',
+    },
+    {
+      title: 'Artifacts',
+      value: `${outputTotal} assets`,
+      detail: '需求、版本、PM 产出和能力资产沉淀。',
+    },
+  ];
+  const wikiCards = [
+    {
+      label: 'Human Wiki',
+      title: '人读工作层',
+      detail: '面向团队成员的业务入口、工作区、状态卡片与模块导航。',
+      items: [activeScopeLabel, activeSession?.title ?? '暂无会话', latestProductOutputTitle],
+    },
+    {
+      label: 'AI Archive',
+      title: 'AI 归档层',
+      detail: '面向系统的 trace、checkpoint、task、version 与 capability 归档。',
+      items: [latestRequirementTitle, latestVersionSummary, latestCapabilityName],
+    },
+  ];
+  const skillCards = [
+    {
+      title: 'Product Skills',
+      status: productSkillSurface ? `${productSkillSurface.summary.total} registered` : 'pending',
+      items: productSkillSurface
+        ? [
+            `${productSkillSurface.summary.product} product`,
+            `${productSkillSurface.summary.design} design`,
+            `${productSkillSurface.summary.documentation} documentation`,
+          ]
+        : ['waiting skill surface', 'waiting registry sync', 'waiting categorization'],
+    },
+    {
+      title: 'Runtime Skills',
+      status: codexLocalState ? `${codexLocalState.diff.localVisibleAndRegisteredSkills.length} synced` : 'pending',
+      items: codexLocalState
+        ? [
+            `${codexLocalState.localSkills.length} local skills`,
+            `${codexLocalState.governedRuntimeCapabilities.length} governed builtin`,
+            `${codexLocalState.localPlugins.length} plugins`,
+          ]
+        : ['waiting local sync', 'waiting plugin scan', 'waiting builtin mapping'],
+    },
+    {
+      title: 'Business Modules',
+      status: `${subprojects.length} modules`,
+      items: subprojects.slice(0, 3).map((item) => item.name).concat(subprojects.length > 3 ? ['...'] : []),
+    },
+  ];
+  const designPipelineCards = [
+    {
+      stage: 'Design Review',
+      owner: 'gpt-5.4',
+      detail: '读取截图、草图、需求与上下文，输出结构化改造建议与问题清单。',
+      evidence: `${messages.length} messages / ${mcpEvents.length} events`,
+    },
+    {
+      stage: 'Image Direction',
+      owner: 'gpt-image-1.5',
+      detail: '生成首页方向稿、全景图、模块插画与透明视觉资产。',
+      evidence: `${outputTotal} governed assets`,
+    },
+    {
+      stage: 'Revision Loop',
+      owner: 'Responses API',
+      detail: '把图片、文字指令与上一轮结论保留在同一上下文里，连续压稿。',
+      evidence: workflowRun ? `workflow: ${workflowRun.status}` : 'workflow: pending',
+    },
+    {
+      stage: 'Frontend Landing',
+      owner: 'Codex',
+      detail: '把确定后的视觉与结构直接落到 src/frontend，形成真实页面。',
+      evidence: `${subprojects.length} modules / ${productAgents.length} agents`,
+    },
+  ];
+  const moduleEntryCards = [
+    { title: '运行监控', detail: '对话、工作流与调度执行面', onClick: () => setInspectorView('monitoring') },
+    { title: '需求与版本', detail: '需求、版本、回滚与交付产出面', onClick: () => setInspectorView('outputs') },
+    { title: '能力与资产', detail: '能力、评测、知识与外部连接器', onClick: () => setInspectorView('assets') },
+  ];
+
   if (loading) {
-    return <div className="app-loading">Loading chat workspace...</div>;
+    return <div className="app-loading">正在加载 PMChat 页面...</div>;
   }
 
   return (
-    <div className="workspace-shell">
+    <div className="pmchat-shell">
+      <PmosXFramework
+        selectedSubprojectId={selectedSubprojectId}
+        activeSessionId={activeSessionId}
+        sessions={sessions}
+        messages={messages}
+        requirements={requirements}
+        productChiefOutputs={productChiefOutputs}
+        runs={runs}
+        reviews={productChiefReviews}
+      />
+      {false ? (
+        <>
       <header className="workspace-topbar">
-        <div>
-          <p className="eyebrow">PMAIOS Workspace</p>
-          <h1 className="workspace-topbar__title">Platform Chat And Operating Console</h1>
+        <div className="workspace-topbar__copy">
+          <p className="eyebrow">PMAIOS</p>
+          <h1 className="workspace-topbar__title">产品经理 Agent 统一入口</h1>
+          <p className="workspace-topbar__summary">
+            这里是 PMAIOS 平台本体。首页默认是一个统一主 chat，再由 agent 按需展开状态、动作、证据、交付位置和业务模块入口。
+          </p>
         </div>
         <div className="workspace-topbar__meta">
-          <span className="workspace-chip">scope: {selectedSubprojectId ?? 'platform'}</span>
-          <span className="workspace-chip">sessions: {sessions.length}</span>
-          <span className="workspace-chip">runs: {runs.length}</span>
-          <span className="workspace-chip">messages: {messages.length}</span>
+          <span className="workspace-chip">范围：{selectedSubprojectId ?? 'platform'}</span>
+          <span className="workspace-chip">会话：{sessions.length}</span>
+          <span className="workspace-chip">运行：{runs.length}</span>
+          <span className="workspace-chip">消息：{messages.length}</span>
         </div>
       </header>
 
-      <div className="chat-layout">
-      <aside className="chat-sidebar">
-        <div className="sidebar-section">
-          <p className="eyebrow">PMAIOS v0.4</p>
-          <h1>Chat Workspace</h1>
-          <div className="sidebar-highlight">
-            <strong>{selectedSubproject?.name ?? 'PMAIOS Platform'}</strong>
-            <span>{selectedSubproject?.description ?? 'Global operating scope for platform-level product workflow and runtime inspection.'}</span>
+      <section className="runtime-command-deck">
+        <div className="runtime-command-deck__intro">
+          <p className="eyebrow">统一入口</p>
+          <h2>PMAIOS 平台总控</h2>
+          <p className="runtime-command-deck__lead">
+            先暴露当前范围、运行状态、下一步动作和产出入口，整页保持企业产品风格，不再走介绍型首屏。
+          </p>
+          <div className="sidebar-highlight runtime-command-deck__highlight">
+            <strong>{activeScopeLabel}</strong>
+            <span>{activeScopeDescription}</span>
           </div>
         </div>
-
-        <div className="sidebar-section">
-          <label className="sidebar-label" htmlFor="subproject-select">
-            Project Scope
-          </label>
-          <select
-            id="subproject-select"
-            value={selectedSubprojectId ?? ''}
-            onChange={(event) => setSelectedSubprojectId(event.target.value || null)}
-          >
-            <option value="">PMAIOS Platform</option>
-            {subprojects.map((subproject) => (
-              <option key={subproject.id} value={subproject.id}>
-                {subproject.name} ({subproject.id})
-              </option>
-            ))}
-          </select>
-          <div className="context-pill">{selectedSubproject?.description ?? 'platform scope'}</div>
+        <div className="runtime-command-deck__rail">
+          {runtimeHeroCards.map((card) => (
+            <article key={card.label} className="metric-tile metric-tile--command">
+              <span className="metric-tile__label">{card.label}</span>
+              <strong>{card.value}</strong>
+              <span>{card.detail}</span>
+            </article>
+          ))}
         </div>
+      </section>
 
-        <RuleExecutionStatusPanel
-          selectedSubproject={selectedSubproject}
-          sessionsCount={sessions.length}
-          messagesCount={messages.length}
-          workflowRun={workflowRun}
-        />
-
-        <ModeRuntimePanel
-          modeState={mcpModeState}
-          modeHistory={mcpModeHistory}
-          busy={mcpContextBusy}
-          onSwitchMode={handleSwitchMode}
-        />
-
-        <ExecutionChecklistPanel summary={executionChecklistSummary} />
-
-        <DailyDigestPanel items={dailyDigests} />
-
-        <ProjectEntryPanel items={projectEntries} />
-
-        <SharedContextPanel tasks={mcpTasks} checkpoints={mcpCheckpoints} events={mcpEvents} />
-
-        <ArtifactHubPanel
-          counts={{
-            requirements: requirements.length,
-            versions: versionEntries.length,
-            capabilities: capabilities.length,
-            datasets: evaluationDatasets.length,
-            productOutputs: productChiefOutputs.length,
-          }}
-          latest={{
-            requirement: latestRequirementTitle,
-            version: latestVersionSummary,
-            capability: latestCapabilityName,
-            dataset: latestDatasetName,
-            productOutput: latestProductOutputTitle,
-          }}
-          onOpenRequirements={() => {
-            setInspectorView('outputs');
-            setTimeout(() => scrollToSection(requirementSectionRef), 0);
-          }}
-          onOpenVersions={() => {
-            setInspectorView('outputs');
-            setTimeout(() => scrollToSection(requirementSectionRef), 0);
-          }}
-          onOpenCapabilities={() => {
-            setInspectorView('assets');
-            setTimeout(() => scrollToSection(capabilitySectionRef), 0);
-          }}
-          onOpenDatasets={() => {
-            setInspectorView('assets');
-            setTimeout(() => scrollToSection(capabilitySectionRef), 0);
-          }}
-          onOpenProductOutputs={() => {
-            setInspectorView('outputs');
-            setTimeout(() => scrollToSection(productOutputsSectionRef), 0);
-          }}
-        />
-
-        <div className="sidebar-section sidebar-section--grow">
+      <section className="runtime-overview-grid">
+        <section className="runtime-overview-panel">
           <div className="section-header">
-            <h2>Chats</h2>
-            <button type="button" className="secondary-button" onClick={() => void handleCreateSession()}>
-              New Chat
-            </button>
+            <div>
+              <p className="eyebrow">多 Agent 编排</p>
+              <h2>多 Agent 协作</h2>
+            </div>
           </div>
-          <div className="session-list">
-            {sessions.map((session) => (
-              <button
-                key={session.id}
-                type="button"
-                className={session.id === activeSessionId ? 'session-card session-card--active' : 'session-card'}
-                onClick={() => setActiveSessionId(session.id)}
-              >
-                <strong>{session.title}</strong>
-                <span>{session.defaultSubprojectId ?? 'platform'}</span>
-                <time>{new Date(session.updatedAt).toLocaleString('zh-CN')}</time>
+          <div className="runtime-card-grid runtime-card-grid--triple">
+            {orchestrationCards.map((card) => (
+              <article key={card.title} className="trace-event trace-event--ok runtime-feature-card">
+                <div className="trace-event__kind">{card.status}</div>
+                <div className="trace-event__detail">{card.title}</div>
+                <div className="trace-event__meta">{card.detail}</div>
+                <div className="trace-event__artifact">{card.summary}</div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="runtime-overview-panel">
+          <div className="section-header">
+            <div>
+              <p className="eyebrow">多模态输入</p>
+              <h2>多模态输入面</h2>
+            </div>
+          </div>
+          <div className="runtime-card-grid runtime-card-grid--quad">
+            {modalityCards.map((card) => (
+              <article key={card.title} className="metric-tile runtime-mini-card">
+                <span className="metric-tile__label">{card.title}</span>
+                <strong>{card.value}</strong>
+                <span>{card.detail}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="runtime-overview-panel runtime-overview-panel--split">
+          <div className="runtime-split">
+            <div>
+              <p className="eyebrow">双层 wiki</p>
+              <h2>双层 wiki</h2>
+              <div className="runtime-card-grid runtime-card-grid--double">
+                {wikiCards.map((card) => (
+                  <article key={card.label} className="trace-event trace-event--ok runtime-feature-card">
+                    <div className="trace-event__kind">{card.label}</div>
+                    <div className="trace-event__detail">{card.title}</div>
+                    <div className="trace-event__artifact">{card.detail}</div>
+                    <div className="trace-event__meta">{card.items.join(' / ')}</div>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="eyebrow">Agent 技能</p>
+              <h2>技能矩阵</h2>
+              <div className="runtime-card-grid runtime-card-grid--triple">
+                {skillCards.map((card) => (
+                  <article key={card.title} className="trace-event trace-event--ok runtime-feature-card">
+                    <div className="trace-event__kind">{card.status}</div>
+                    <div className="trace-event__detail">{card.title}</div>
+                    <div className="trace-event__meta">{card.items.join(' / ') || 'None'}</div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="runtime-overview-panel">
+          <div className="section-header">
+            <div>
+              <p className="eyebrow">设计执行链</p>
+              <h2>设计执行链</h2>
+            </div>
+          </div>
+          <div className="runtime-card-grid runtime-card-grid--quad">
+            {designPipelineCards.map((card) => (
+              <article key={card.stage} className="trace-event trace-event--ok runtime-feature-card runtime-feature-card--pipeline">
+                <div className="trace-event__kind">{card.owner}</div>
+                <div className="trace-event__detail">{card.stage}</div>
+                <div className="trace-event__artifact">{card.detail}</div>
+                <div className="trace-event__meta">{card.evidence}</div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="runtime-overview-panel">
+          <div className="section-header">
+            <div>
+              <p className="eyebrow">模块入口</p>
+              <h2>平台入口</h2>
+            </div>
+          </div>
+          <div className="artifact-hub-list">
+            {moduleEntryCards.map((entry) => (
+              <button key={entry.title} type="button" className="action-tile" onClick={entry.onClick}>
+                <span className="action-tile__label">{entry.title}</span>
+                <strong>{entry.detail}</strong>
+                <span className="action-tile__hint">Open</span>
               </button>
             ))}
           </div>
-        </div>
-      </aside>
-
-      <main className="chat-main">
-        <header className="chat-header">
-          <div>
-            <p className="eyebrow">Current Session</p>
-            <h2>{activeSession?.title ?? 'Chat'}</h2>
-          </div>
-          <div className="chat-header__meta">
-            <span>{activeSession?.defaultSubprojectId ?? selectedSubprojectId ?? 'platform'}</span>
-            <span>{runs.length} runs</span>
-            <span>{messages.length} messages</span>
-          </div>
-        </header>
-
-        <section className="workspace-summary-grid">
-          <article className="summary-card">
-            <span className="summary-card__label">Active Scope</span>
-            <strong>{selectedSubproject?.name ?? 'PMAIOS Platform'}</strong>
-            <span>{selectedSubprojectId ?? 'platform-root'}</span>
-          </article>
-          <article className="summary-card">
-            <span className="summary-card__label">Conversation State</span>
-            <strong>{activeSession?.title ?? 'No session'}</strong>
-            <span>{sending ? 'assistant is responding' : 'ready for next prompt'}</span>
-          </article>
-          <article className="summary-card">
-            <span className="summary-card__label">Workflow Signals</span>
-            <strong>{workflowRun?.status ?? 'no active workflow'}</strong>
-            <span>{workflowMetrics ? `${workflowMetrics.completedStages}/${workflowMetrics.totalStages} stages complete` : 'workflow metrics unavailable'}</span>
-          </article>
-          <article className="summary-card">
-            <span className="summary-card__label">实时产出</span>
-            <strong>{productChiefOutputs.length + requirements.length + versionEntries.length}</strong>
-            <span>{productChiefOutputs.length} PM产出 / {requirements.length} 需求 / {versionEntries.length} 版本</span>
-          </article>
         </section>
+      </section>
 
-        {error ? <section className="chat-error">{error}</section> : null}
-
-        <section className="chat-transcript">
-          {messages.length === 0 ? (
-            <div className="chat-empty">还没有消息，先发一句。</div>
-          ) : (
-            messages.map((message) => (
-              <button
-                key={message.id}
-                type="button"
-                className={
-                  message.id === activeMessageId
-                    ? `chat-message chat-message--${message.role} chat-message--active`
-                    : `chat-message chat-message--${message.role}`
-                }
-                onClick={() => void handleSelectMessage(message)}
-              >
-                <div className="chat-message__meta">
-                  <span>{message.role}</span>
-                  <span>{new Date(message.createdAt).toLocaleString('zh-CN')}</span>
+      <section className="platform-runtime-grid">
+        <section className="platform-runtime-main">
+          <section className="platform-command-board">
+            <div className="platform-command-board__header">
+              <div className="platform-command-board__scope">
+                <p className="eyebrow">当前范围</p>
+                <h2>PMAIOS 控制台入口</h2>
+                <p className="platform-command-board__summary">
+                  统一入口先回答范围、阻塞、动作、证据和当前交付位置；对话只是执行区能力，不再定义首页身份。
+                </p>
+                <div className="sidebar-highlight">
+                  <strong>{activeScopeLabel}</strong>
+                  <span>{activeScopeDescription}</span>
                 </div>
-                <div className="chat-message__content">{message.content}</div>
-                <div className="chat-message__footer">
-                  <span>run: {message.runId ?? '-'}</span>
-                  <span>snapshot: {message.contextSnapshotId ?? '-'}</span>
+              </div>
+              <div className="platform-command-board__picker inspector-panel">
+                <label className="sidebar-label" htmlFor="subproject-select">
+                  项目范围
+                </label>
+                <select
+                  id="subproject-select"
+                  value={selectedSubprojectId ?? ''}
+                  onChange={(event) => setSelectedSubprojectId(event.target.value || null)}
+                >
+                  <option value="">PMAIOS 平台</option>
+                  {subprojects.map((subproject) => (
+                    <option key={subproject.id} value={subproject.id}>
+                      {subproject.name} ({subproject.id})
+                    </option>
+                  ))}
+                </select>
+                <div className="context-pill">{selectedSubproject?.description ?? '平台范围'}</div>
+                <div className="platform-command-board__chips">
+                  <span className="workspace-chip">会话：{sessions.length}</span>
+                  <span className="workspace-chip">运行：{runs.length}</span>
+                  <span className="workspace-chip">消息：{messages.length}</span>
                 </div>
-              </button>
-            ))
-          )}
-        </section>
+              </div>
+            </div>
 
-        <section className="chat-composer">
-          <textarea
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder="Ask a question or use voice input..."
-            rows={4}
-          />
-          <div className="chat-composer__status">
-            {voiceStatus || 'Type directly or talk to the workspace.'}
-          </div>
-          <div className="chat-composer__actions">
-            <button
-              type="button"
-              className={isListening ? 'voice-button voice-button--active' : 'voice-button'}
-              onClick={() => (isListening ? stopListening() : startListening())}
-              disabled={!voiceSupported || sending}
-            >
-              {isListening ? 'Stop Listening' : 'Voice Input'}
-            </button>
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={() => setAutoSpeak((current) => !current)}
-              disabled={!speechOutputSupported}
-            >
-              {autoSpeak ? 'Disable Auto Speak' : 'Enable Auto Speak'}
-            </button>
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={() => (isSpeaking ? stopSpeaking() : playableMessage ? speakText(playableMessage.content) : null)}
-              disabled={!speechOutputSupported || (!isSpeaking && !playableMessage)}
-            >
-              {isSpeaking ? 'Stop Playback' : 'Play Reply'}
-            </button>
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => void handleSubmit()}
-              disabled={!draft.trim() || sending || !activeSessionId}
-            >
-              {sending ? 'Sending...' : 'Send'}
-            </button>
-          </div>
-        </section>
-      </main>
+            <div className="platform-command-board__grid">
+              <RuleExecutionStatusPanel
+                selectedSubproject={selectedSubproject}
+                sessionsCount={sessions.length}
+                messagesCount={messages.length}
+                workflowRun={workflowRun}
+              />
 
-      <aside className="chat-inspector">
+              <TaskContinuationPanel
+                state={taskSsotState}
+                workflowBusy={workflowBusy}
+                schedulerBusy={schedulerBusy}
+                schedulerRuns={schedulerRuns}
+                onRefreshWorkflow={handleWorkflowRefresh}
+                onRunUntilBlocked={handleWorkflowRunUntilBlocked}
+                onResumeWorkflow={handleWorkflowResume}
+                onApproveReviewGate={handleWorkflowApproveGate}
+                onSendToRework={handleWorkflowSendToRework}
+                onExecuteHermesWriteback={handleExecuteHermesWriteback}
+                onCloseHermesLoop={handleCloseHermesLoop}
+              />
+
+              <SchedulerRunPanel
+                data={schedulerRuns}
+                taskSsotState={taskSsotState}
+                busy={schedulerBusy}
+                onRefresh={handleRefreshScheduler}
+                onTickDue={handleTickDueSchedulerRuns}
+                onTickRun={handleTickSchedulerRun}
+                onScheduleResumeCurrent={handleScheduleResumeCurrent}
+                onScheduleResumeRework={handleScheduleResumeRework}
+                onExecuteHermesWriteback={handleExecuteHermesWriteback}
+                onCloseHermesLoop={handleCloseHermesLoop}
+              />
+
+              <ProofOfWorkPanel
+                bundle={proofOfWorkBundle}
+                schedulerRuns={schedulerRuns}
+                schedulerRuntime={schedulerRuntime}
+                schedulerBusy={schedulerBusy}
+                workflowBusy={workflowBusy}
+                pipelineBusy={pipelineBusy}
+                onRefresh={handleWorkflowRefresh}
+                onTriggerPipeline={handleTriggerPipeline}
+                onTickDue={handleTickDueSchedulerRuns}
+                onTickRun={handleTickSchedulerRun}
+                onScheduleResumeCurrent={handleScheduleResumeCurrent}
+                onScheduleResumeRework={handleScheduleResumeRework}
+                onApproveGate={handleWorkflowApproveGate}
+                onSendToRework={handleWorkflowSendToRework}
+                onExecuteHermesWriteback={handleExecuteHermesWriteback}
+                onCloseHermesLoop={handleCloseHermesLoop}
+              />
+
+              <FinalStateValidationPanel
+                report={finalStateValidation}
+                autoAcceptanceBusy={autoAcceptanceBusy}
+                autoAcceptanceResult={liveAutoAcceptanceRun}
+                browserRunResult={liveBrowserVerificationRun}
+                onRunAutoAcceptance={finalStateValidation ? handleRunAutoAcceptance : null}
+              />
+              <OutboxPanel items={outboxEnvelopes} runtime={outboxRuntime} />
+            </div>
+          </section>
+
+          <section className="platform-delivery-grid">
+            <section className="execution-deck runtime-workbench-shell">
+              <header className="execution-deck__header">
+                <div>
+                  <p className="eyebrow">执行区</p>
+                  <h2>{activeSession?.title ?? '运行执行区 / 对话、工作流与回流'}</h2>
+                  <p className="execution-deck__summary">
+                    这里承接对话、workflow 推进、语音交互和产出回流，但它只是统一入口中的执行区，不再代表整个首页身份。
+                  </p>
+                </div>
+                <div className="execution-deck__meta">
+                  <span>{activeSession?.defaultSubprojectId ?? selectedSubprojectId ?? 'platform'}</span>
+                  <span>{runs.length} 个运行</span>
+                  <span>{messages.length} 条消息</span>
+                </div>
+              </header>
+
+              <section className="workspace-summary-grid">
+                {runtimeHeroCards.map((card) => (
+                  <article key={card.label} className="metric-tile">
+                    <span className="metric-tile__label">{card.label}</span>
+                    <strong>{card.value}</strong>
+                    <span>{card.detail}</span>
+                  </article>
+                ))}
+              </section>
+
+              {error ? <section className="chat-error">{error}</section> : null}
+
+              <section className="workbench-grid">
+                <section className="workbench-panel workbench-panel--sessions">
+                  <div className="section-header">
+                    <div>
+                      <p className="eyebrow">会话层</p>
+                      <h3>会话编排</h3>
+                    </div>
+                    <button type="button" className="secondary-button" onClick={() => void handleCreateSession()}>
+                      新建会话
+                    </button>
+                  </div>
+                  <div className="session-list">
+                    {sessions.map((session) => (
+                      <button
+                        key={session.id}
+                        type="button"
+                        className={session.id === activeSessionId ? 'session-card session-card--active' : 'session-card'}
+                        onClick={() => setActiveSessionId(session.id)}
+                      >
+                        <strong>{session.title}</strong>
+                        <span>{session.defaultSubprojectId ?? 'platform'}</span>
+                        <time>{new Date(session.updatedAt).toLocaleString('zh-CN')}</time>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="workbench-panel workbench-panel--transcript">
+                  <div className="section-header">
+                    <div>
+                      <p className="eyebrow">对话轨迹</p>
+                      <h3>对话与回流</h3>
+                    </div>
+                  </div>
+                  <section className="chat-transcript">
+                    {messages.length === 0 ? (
+                      <div className="chat-empty">还没有消息，先发一句。</div>
+                    ) : (
+                      messages.map((message) => (
+                        <button
+                          key={message.id}
+                          type="button"
+                          className={
+                            message.id === activeMessageId
+                              ? `chat-message chat-message--${message.role} chat-message--active`
+                              : `chat-message chat-message--${message.role}`
+                          }
+                          onClick={() => void handleSelectMessage(message)}
+                        >
+                          <div className="chat-message__meta">
+                            <span>{message.role}</span>
+                            <span>{new Date(message.createdAt).toLocaleString('zh-CN')}</span>
+                          </div>
+                          <div className="chat-message__content">{message.content}</div>
+                          <div className="chat-message__footer">
+                            <span>run: {message.runId ?? '-'}</span>
+                            <span>snapshot: {message.contextSnapshotId ?? '-'}</span>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </section>
+                </section>
+              </section>
+
+              <section className="chat-composer">
+                <textarea
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  placeholder="Ask a question or use voice input..."
+                  rows={4}
+                />
+                <div className="chat-composer__status">
+                  {voiceStatus || 'Type directly or talk to the workspace.'}
+                </div>
+                <div className="chat-composer__actions">
+                  <button
+                    type="button"
+                    className={isListening ? 'voice-button voice-button--active' : 'voice-button'}
+                    onClick={() => (isListening ? stopListening() : startListening())}
+                    disabled={!voiceSupported || sending}
+                  >
+                    {isListening ? 'Stop Listening' : 'Voice Input'}
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setAutoSpeak((current) => !current)}
+                    disabled={!speechOutputSupported}
+                  >
+                    {autoSpeak ? 'Disable Auto Speak' : 'Enable Auto Speak'}
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => (isSpeaking ? stopSpeaking() : playableMessage ? speakText(playableMessage.content) : null)}
+                    disabled={!speechOutputSupported || (!isSpeaking && !playableMessage)}
+                  >
+                    {isSpeaking ? 'Stop Playback' : 'Play Reply'}
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={() => void handleSubmit()}
+                    disabled={!draft.trim() || sending || !activeSessionId}
+                  >
+                    {sending ? '发送中...' : '发送'}
+                  </button>
+                </div>
+              </section>
+            </section>
+
+            <aside className="evidence-rail">
         <section className="inspector-tabs">
           <button
             type="button"
@@ -5400,11 +8800,16 @@ export default function App() {
               <ProductChiefPanel
                 reports={productChiefReports}
                 outputs={productChiefOutputs}
+                latestUiSchemaContract={latestUiSchemaContract}
+                imageBatches={productChiefImageBatches}
                 reviews={productChiefReviews}
+                groupSessions={multiPmGroupSessions}
                 busy={productChiefBusy}
+                selectedSubprojectId={selectedSubprojectId}
                 onRefresh={() => void handleProductChiefRefresh()}
                 onAnalyze={(brief) => void handleProductChiefAnalyze(brief)}
                 onGenerateOutput={(reportId, type) => void handleProductChiefGenerateOutput(reportId, type)}
+                onGenerateAllOutputs={(report) => void handleProductChiefGenerateAllOutputs(report)}
               />
             </div>
             <div ref={requirementSectionRef}>
@@ -5430,6 +8835,11 @@ export default function App() {
                 onIngestCurrentChat={() => void handleIngestCurrentChat()}
                 onCreateManualRequirement={() => void handleCreateManualRequirement()}
                 onRollbackVersion={(entry) => void handleRollbackVersion(entry)}
+                requirementPoolWorkbookPath={
+                  selectedSubprojectId
+                    ? `subprojects/${selectedSubprojectId}/docs/operations/requirement-pool.xlsx`
+                    : 'docs/operations/requirement-pool.xlsx'
+                }
               />
             </div>
           </>
@@ -5460,6 +8870,12 @@ export default function App() {
               onSendToRework={() => void handleWorkflowSendToRework()}
             />
             <HermesPolicyPanel report={hermesPolicy} busy={hermesBusy} onRefresh={() => void handleHermesRefresh()} />
+            <V07RuntimeGovernancePanel
+              snapshot={v07RuntimeGovernance}
+              busy={v07RuntimeBusy}
+              onRefresh={() => void handleRefreshV07RuntimeGovernance()}
+              onPromote={(candidateId) => void handlePromoteRepeatCorrection(candidateId)}
+            />
             <DagPanel
               graph={dagGraph}
               runs={dagRuns}
@@ -5511,6 +8927,24 @@ export default function App() {
               busy={productAgentBusy}
               onRefresh={() => void loadProductAgentData(selectedSubprojectId)}
             />
+            <ExternalConnectorsPanel
+              selectedSubprojectId={selectedSubprojectId}
+              status={externalConnectorStatus}
+              latestWebFetch={latestWebFetch}
+              latestFigmaInspection={latestFigmaInspection}
+              latestDingTalkImport={latestDingTalkImport}
+              latestDatakiKnowledgeBases={latestDatakiKnowledgeBases}
+              latestDatakiKnowledgeFiles={latestDatakiKnowledgeFiles}
+              latestDatakiSearch={latestDatakiSearch}
+              busy={externalConnectorBusy}
+              onRefresh={() => void handleExternalConnectorRefresh()}
+              onWebFetch={(url) => void handleWebFetch(url)}
+              onInspectFigma={(fileKey) => void handleInspectFigma(fileKey)}
+              onImportDingTalk={(title, content) => void handleImportDingTalk(title, content)}
+              onListDatakiKnowledgeBases={(input) => void handleListDatakiKnowledgeBases(input)}
+              onListDatakiKnowledgeFiles={(input) => void handleListDatakiKnowledgeFiles(input)}
+              onSearchDatakiKnowledge={(input) => void handleSearchDatakiKnowledge(input)}
+            />
             <RetrievalGovernancePanel
               settings={retrievalGovernance}
               searchResult={retrievalSearchResult}
@@ -5522,8 +8956,64 @@ export default function App() {
             />
           </>
         ) : null}
-      </aside>
-      </div>
+            </aside>
+          </section>
+        </section>
+
+        <aside className="platform-runtime-side">
+          <ModeRuntimePanel
+            modeState={mcpModeState}
+            modeHistory={mcpModeHistory}
+            busy={mcpContextBusy}
+            onSwitchMode={handleSwitchMode}
+          />
+
+          <ExecutionChecklistPanel summary={executionChecklistSummary} />
+
+          <ArtifactHubPanel
+            counts={{
+              requirements: requirements.length,
+              versions: versionEntries.length,
+              capabilities: capabilities.length,
+              datasets: evaluationDatasets.length,
+              productOutputs: productChiefOutputs.length,
+            }}
+            latest={{
+              requirement: latestRequirementTitle,
+              version: latestVersionSummary,
+              capability: latestCapabilityName,
+              dataset: latestDatasetName,
+              productOutput: latestProductOutputTitle,
+            }}
+            onOpenRequirements={() => {
+              setInspectorView('outputs');
+              setTimeout(() => scrollToSection(requirementSectionRef), 0);
+            }}
+            onOpenVersions={() => {
+              setInspectorView('outputs');
+              setTimeout(() => scrollToSection(requirementSectionRef), 0);
+            }}
+            onOpenCapabilities={() => {
+              setInspectorView('assets');
+              setTimeout(() => scrollToSection(capabilitySectionRef), 0);
+            }}
+            onOpenDatasets={() => {
+              setInspectorView('assets');
+              setTimeout(() => scrollToSection(capabilitySectionRef), 0);
+            }}
+            onOpenProductOutputs={() => {
+              setInspectorView('outputs');
+              setTimeout(() => scrollToSection(productOutputsSectionRef), 0);
+            }}
+          />
+
+          <DailyDigestPanel items={dailyDigests} />
+          <ProjectEntryPanel items={projectEntries} />
+          <SharedContextPanel tasks={mcpTasks} checkpoints={mcpCheckpoints} events={mcpEvents} />
+        </aside>
+      </section>
+        </>
+      ) : null}
     </div>
   );
 }

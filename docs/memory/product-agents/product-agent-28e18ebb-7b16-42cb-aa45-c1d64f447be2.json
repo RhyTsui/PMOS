@@ -1,0 +1,40 @@
+{
+  "id": "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+  "subprojectId": null,
+  "name": "Virtual Requirements PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "requirements",
+  "level": "manager",
+  "scope": "platform",
+  "summary": "Owns requirement intake, requirement cards, requirement evaluation feedback, and requirement traceability.",
+  "problem": "Requirements are collected from chats, notes, and historical material, but they are not yet normalized into one governed requirement pool with strong traceability.",
+  "targetUsers": [],
+  "goals": [
+    "Turn incoming conversation and research into governed requirements.",
+    "Produce requirement evaluation feedback before work enters delivery.",
+    "Maintain source traceability from chat, reports, and historical documents."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Every accepted requirement has title, description, category, priority, source, and trace links.",
+    "Requirement evaluation feedback is explicit and reviewable.",
+    "Requirement status changes can be audited."
+  ],
+  "relatedPaths": [
+    "docs/templates/requirement_card_template.md",
+    "docs/templates/requirement_evaluation_feedback_template.md"
+  ],
+  "governanceRefs": [
+    "docs/templates/requirement_card_template.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_requirements_pm_prompt.md",
+  "templateId": "virtual-requirements-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.126Z",
+  "updatedAt": "2026-04-27T10:04:22.126Z"
+}

@@ -1,152 +1,110 @@
-﻿# Product Management Workflow
+# Product Management Workflow
 
 ## Purpose
 
-This workflow defines the mandatory product-management stage gates for platform and subproject work.
-It exists to prevent premature product solution output before research and architecture decisions are complete.
+This workflow defines the built-in delivery chain for platform and subproject product work.
+
+It prevents teams from:
+
+- jumping straight to UI or code
+- producing low-fidelity page placeholders as if they were delivery outputs
+- inventing data/API semantics only after pages are already drawn
 
 ## Mandatory Stages
 
-1. Problem Definition
-2. Research Analysis
-3. Architecture Confirmation
-4. Product Solution
-5. PRD And Prototype
-6. Delivery Planning
+1. research document
+2. planning document
+3. requirement document
+4. functional specification
+5. design document
+6. frontend page
+7. data schema
+8. backend API
+9. integration and acceptance
 
 ## Stage Contract
 
-### 1. Problem Definition
-- objective: define the actual problem before discussing solution shape
-- required_inputs:
-  - raw source materials
-  - operator request
-  - current project context
-- required_outputs:
-  - problem definition note
-  - user and scenario summary
-  - initial scope and risks
-  - open questions list
-- owner: Virtual Product Chief or assigned requirements PM
+### 1. research document
+
+- objective: collect facts before proposing product structure or implementation
 - gate_to_next:
   - problem is clearly defined
-  - missing research topics are explicitly listed
-
-### 2. Research Analysis
-- objective: collect facts before proposing product structure
-- required_inputs:
-  - problem definition outputs
-  - open-source candidates
-  - competitor set
-  - internal capability context
-- required_outputs:
-  - research report
-  - competitive comparison
-  - internal capability inventory
-  - candidate directions with tradeoffs
-  - issues requiring chief confirmation
-- owner: assigned specialist PMs under Virtual Product Chief
-- gate_to_next:
   - at least one research round is completed
-  - open-source / buy-before-build analysis is recorded
-  - unresolved platform questions are escalated
+  - build-vs-buy evidence is recorded
 
-### 3. Architecture Confirmation
-- objective: confirm service boundaries before solution design
-- required_inputs:
-  - research outputs
-  - dependency list
-  - platform capability assumptions
-- required_outputs:
-  - architecture confirmation note or architecture diagram
-  - module ownership and scope table
-  - in-scope / out-of-scope list
-  - chief or architect decisions
-- owner: Real Product Chief with Virtual Product Chief support
-- gate_to_next:
-  - architecture boundary is confirmed in writing
-  - platform vs subproject responsibilities are clear
-  - blocking ownership questions are resolved or explicitly deferred
+### 2. planning document
 
-### 4. Product Solution
-- objective: define product shape within confirmed architecture boundaries
-- required_inputs:
-  - architecture confirmation outputs
-  - approved scope
-- required_outputs:
-  - product positioning
-  - information architecture
-  - module plan
-  - version path
-  - major risks and dependencies
-- owner: assigned PMs
+- objective: turn research into version scope, milestones, and dependency order
 - gate_to_next:
-  - no critical assumptions remain unacknowledged
-  - solution stays within confirmed architecture boundaries
+  - scope and milestone path are explicit
+  - delivery chain order is visible
 
-### 5. PRD And Prototype
-- objective: convert product solution into executable product definition
-- required_inputs:
-  - approved product solution
-- required_outputs:
-  - PRD
-  - key user flows
-  - page list
-  - prototype or prototype scope
-  - acceptance criteria
-- owner: assigned PMs
-- gate_to_next:
-  - acceptance criteria are explicit
-  - upstream decisions are traceable
+### 3. requirement document
 
-### 6. Delivery Planning
-- objective: convert approved product definition into execution plan
-- required_inputs:
-  - PRD and prototype outputs
-- required_outputs:
-  - delivery plan
-  - dependency plan
-  - review and launch checklist
-  - risk mitigation plan
-- owner: delivery PM / chief
+- objective: convert planning into governed user and product requirements
 - gate_to_next:
-  - scope, dependencies, and review gates are visible
+  - key requirements are traceable
+  - every important requirement is decomposed to function-level granularity
+
+### 4. functional specification
+
+- objective: define modules, flows, states, and capability boundaries
+- gate_to_next:
+  - downstream design and engineering can use the same contract
+  - each core function is decomposed to executable interface actions
+
+### 5. design document
+
+- objective: define page inventory, information architecture, user flow, interaction flow, state design, and component constraints before frontend delivery
+- gate_to_next:
+  - core user path is represented
+  - downstream frontend work can implement from this package without re-guessing page meaning
+
+### 6. frontend page
+
+- objective: produce delivery-grade, user-facing, interactive frontend output instead of low-fidelity placeholder pages
+- gate_to_next:
+  - requirement, route, target role, and source/evidence refs are explicit
+  - every governed block is bound to the `x.ant.design / Ant Design X` ecosystem or approved custom semantics
+  - the page is implementable and integration-ready, not a document-like static layout
+
+### 7. data schema
+
+- objective: convert product and page state into durable data structures
+
+### 8. backend API
+
+- objective: define API contracts against functionality and data schema
+
+### 9. integration and acceptance
+
+- objective: close the loop with integration verification and acceptance review
 
 ## Hard Rules
 
-### Research Gate
-The workflow must not enter Product Solution directly when any of the following apply:
-- open-source base selection is involved
-- competitor route comparison is involved
-- platform capability or control-plane boundary is unclear
-- multiple systems share responsibility for the final product
-- permissions, prompts, knowledge, evaluation, runtime, or gateway capability boundaries are still assumptions
+### PMOS UI Guardrail Rule
 
-### Architecture Gate
-The workflow must not enter Product Solution until written architecture confirmation exists when:
-- the subproject depends on platform capabilities
-- menu structure or module ownership is affected by platform architecture
-- the project reuses shared permissions, prompt, knowledge, MCP, evaluation, gateway, or release capability
+The workflow must treat anti-demo UI governance as a first-class delivery rule.
 
-### Output Downgrade Rule
-If Research Analysis or Architecture Confirmation is incomplete, product agents may only output:
-- candidate directions
-- risks
-- missing information
-- research recommendations
-They may not present:
-- final product architecture
-- fixed first-level menu decisions
-- final PRD
-- final version commitments
+Minimum rule:
 
-## Required Templates
-- docs/templates/business_confirmation_template.md
-- docs/templates/architecture_confirmation_template.md
-- docs/templates/workflow_gate_review_template.md
-- docs/templates/workflow_handoff_template.md
+- frontend work must define UISchema before React implementation
+- governed pages must declare `screenType`, `layout`, `regions`, and block semantics
+- conclusion blocks must include `evidenceRefs` or `sourceRefs`
+- risky actions must include `riskLevel`, `approvalPolicy` or `requiresApproval`, and `auditRequired`
+- `Ant Design Pro` templates must not be used as default PMOS workbench output
 
-## Applies To
-- platform-level product work
-- subproject product work that depends on platform capability
-- any work routed by the Virtual Product Chief
+### Frontend Delivery Gate
+
+The frontend page stage must be judged as a user-facing delivery output, not as a design placeholder.
+
+Minimum rule:
+
+- it must expose layout correctness
+- it must expose module responsibility
+- it must expose user flow
+- it must expose dynamic interaction
+- it must expose loading / empty / error / success feedback
+- it must expose route / layout shell / target roles / source / evidence refs when applicable
+- it must expose governed component bindings
+- it must carry an acceptance matrix and repeated real-browser regression evidence

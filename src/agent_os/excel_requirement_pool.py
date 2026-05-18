@@ -15,6 +15,14 @@ from dataclasses import dataclass, asdict, field
 from enum import Enum
 import hashlib
 
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+
+def create_anthropic_client():
+    import anthropic
+    return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else anthropic.Anthropic()
+
 
 # ============================================================
 # 数据模型
@@ -290,8 +298,7 @@ class ExcelRequirementPool:
 
     def extract_from_meeting(self, meeting_notes: str, product_line: str, meeting_id: str = "") -> List[Requirement]:
         """从会议纪要提取需求"""
-        import anthropic
-        client = anthropic.Anthropic()
+        client = create_anthropic_client()
 
         if not meeting_id:
             meeting_id = self._generate_id("mtg_")
@@ -306,7 +313,7 @@ class ExcelRequirementPool:
 返回 JSON 列表，每个需求包含：title, description, priority(P0/P1/P2/P3), tags(数组), acceptance_criteria(数组), confidence(0-1)
 """
         response = client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model=ANTHROPIC_MODEL,
             max_tokens=2000,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -347,8 +354,7 @@ class ExcelRequirementPool:
 
     def extract_from_daily_report(self, report_content: str, author: str, product_line: str, report_id: str = "") -> List[Requirement]:
         """从日报提取需求"""
-        import anthropic
-        client = anthropic.Anthropic()
+        client = create_anthropic_client()
 
         if not report_id:
             report_id = self._generate_id("daily_")
@@ -364,7 +370,7 @@ class ExcelRequirementPool:
 返回 JSON 列表，每个需求包含：title, description, priority(P1/P2/P3), tags(数组), confidence(0-1)
 """
         response = client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model=ANTHROPIC_MODEL,
             max_tokens=1500,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -405,8 +411,7 @@ class ExcelRequirementPool:
 
     def extract_from_okr(self, okr_data: Dict[str, Any], product_line: str, okr_id: str = "") -> List[Requirement]:
         """从 OKR 提取需求"""
-        import anthropic
-        client = anthropic.Anthropic()
+        client = create_anthropic_client()
 
         if not okr_id:
             okr_id = self._generate_id("okr_")
@@ -421,7 +426,7 @@ OKR 数据：
 返回 JSON 列表，每个需求包含：title, description(关联到哪个 O 或 KR), priority(P0/P1/P2), tags(数组), acceptance_criteria(数组), confidence(0-1)
 """
         response = client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model=ANTHROPIC_MODEL,
             max_tokens=2000,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -462,8 +467,7 @@ OKR 数据：
 
     def converge_requirements(self, project_docs: List[Dict[str, Any]]) -> List[Requirement]:
         """根据项目文档收敛需求"""
-        import anthropic
-        client = anthropic.Anthropic()
+        client = create_anthropic_client()
 
         # 读取现有需求
         rows = self._read_excel()
@@ -497,7 +501,7 @@ OKR 数据：
 }}
 """
         response = client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model=ANTHROPIC_MODEL,
             max_tokens=3000,
             messages=[{"role": "user", "content": prompt}]
         )

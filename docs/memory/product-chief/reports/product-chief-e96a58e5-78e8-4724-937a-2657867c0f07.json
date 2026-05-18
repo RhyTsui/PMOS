@@ -1,0 +1,422 @@
+{
+  "id": "product-chief-e96a58e5-78e8-4724-937a-2657867c0f07",
+  "subprojectId": null,
+  "brief": "请为一个 AI 埋点平台同时准备页面设计图和前端实现交付包，重点覆盖首页、需求中心、事件字典。先要设计图，但最终还要给前端落地。",
+  "generatedAt": "2026-04-28T01:40:14.915Z",
+  "status": "ready-for-review",
+  "missingQuestions": [
+    {
+      "id": "question-1",
+      "topic": "target-users",
+      "question": "Who are the exact users or stakeholders affected by this work?",
+      "reason": "The brief does not name the real-world user group.",
+      "requiredFor": [
+        "requirement evaluation",
+        "roadmap priority"
+      ]
+    },
+    {
+      "id": "question-2",
+      "topic": "success-metrics",
+      "question": "What measurable outcome proves this work succeeded?",
+      "reason": "No success metric or OKR is stated.",
+      "requiredFor": [
+        "review gate",
+        "version planning"
+      ]
+    },
+    {
+      "id": "question-3",
+      "topic": "timeline",
+      "question": "Is there a real deadline, launch window, or external dependency?",
+      "reason": "No timing constraint is visible.",
+      "requiredFor": [
+        "release planning",
+        "delivery risk"
+      ]
+    },
+    {
+      "id": "question-4",
+      "topic": "ownership",
+      "question": "Who owns the final decision, and which teams must coordinate?",
+      "reason": "Decision rights and coordination load are missing.",
+      "requiredFor": [
+        "human approval",
+        "delivery planning"
+      ]
+    }
+  ],
+  "engagedSpecialists": [
+    {
+      "agentId": "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+      "name": "Virtual Workflow PM",
+      "role": "workflow",
+      "level": "manager",
+      "reason": "Selected for brief coverage: Owns workflow handoff quality, stage contracts, and delivery sequencing for product work."
+    },
+    {
+      "agentId": "product-agent-24dfe554-4341-4435-a794-3bd957d42041",
+      "name": "Virtual Version PM",
+      "role": "versioning",
+      "level": "manager",
+      "reason": "Selected for brief coverage: Owns release-facing version records, version planning documents, and change tracking."
+    },
+    {
+      "agentId": "product-agent-d4171896-8c66-4d49-8239-f969c335371d",
+      "name": "Virtual User Research PM",
+      "role": "user-research",
+      "level": "specialist",
+      "reason": "Selected for brief coverage: Owns user analysis, persona updates, problem framing, and user evidence synthesis."
+    },
+    {
+      "agentId": "product-agent-8244294d-d0da-40ea-96bd-8acd9f933dd5",
+      "name": "Virtual Roadmap PM",
+      "role": "roadmap-planning",
+      "level": "specialist",
+      "reason": "Selected for brief coverage: Owns roadmap outputs, milestone framing, and version planning synthesis."
+    },
+    {
+      "agentId": "product-agent-f06f59a7-e5c1-4a0d-b584-74216fab9c18",
+      "name": "Virtual Review PM",
+      "role": "review",
+      "level": "manager",
+      "reason": "Selected for brief coverage: Owns product review gates, issue framing, and product-facing quality decisions."
+    },
+    {
+      "agentId": "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+      "name": "Virtual Requirements PM",
+      "role": "requirements",
+      "level": "manager",
+      "reason": "Selected for brief coverage: Owns requirement intake, requirement cards, requirement evaluation feedback, and requirement traceability."
+    },
+    {
+      "agentId": "product-agent-c0b2e0dc-d30d-4e7c-a6fb-e35ede7a9487",
+      "name": "Virtual Industry Research PM",
+      "role": "industry-research",
+      "level": "specialist",
+      "reason": "Selected for brief coverage: Builds long-cycle industry understanding through daily reports, weekly briefs, and special research reports."
+    },
+    {
+      "agentId": "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389",
+      "name": "Virtual Documentation PM",
+      "role": "documentation",
+      "level": "specialist",
+      "reason": "Selected for brief coverage: Owns AI-generated manuals, demo scripts, sync documents, and structured product communication outputs."
+    }
+  ],
+  "recommendedSkills": [
+    {
+      "skillId": "five-w-two-h",
+      "name": "5W2H",
+      "category": "product",
+      "ownerRole": "Product Manager Agent",
+      "promptPath": "prompts/prd_prompt.md",
+      "score": 12,
+      "reasons": [
+        "keyword:ai",
+        "integrated"
+      ],
+      "deploymentStatus": "integrated",
+      "tool": "workflow-engine"
+    },
+    {
+      "skillId": "persona",
+      "name": "Persona",
+      "category": "product",
+      "ownerRole": "Product Manager Agent",
+      "promptPath": "prompts/prd_prompt.md",
+      "score": 12,
+      "reasons": [
+        "keyword:ai",
+        "integrated"
+      ],
+      "deploymentStatus": "integrated",
+      "tool": "workflow-engine"
+    },
+    {
+      "skillId": "requirement-pool-operations",
+      "name": "Requirement Pool Operations",
+      "category": "management",
+      "ownerRole": "Requirements Manager Agent",
+      "promptPath": "prompts/product-management/virtual_requirements_pm_prompt.md",
+      "score": 12,
+      "reasons": [
+        "keyword:ai",
+        "integrated"
+      ],
+      "deploymentStatus": "integrated",
+      "tool": "requirement-service"
+    },
+    {
+      "skillId": "system-boundary",
+      "name": "System Boundary",
+      "category": "architecture",
+      "ownerRole": "Architecture Agent",
+      "promptPath": "prompts/architecture_prompt.md",
+      "score": 12,
+      "reasons": [
+        "keyword:ai",
+        "integrated"
+      ],
+      "deploymentStatus": "integrated",
+      "tool": "workflow-engine"
+    },
+    {
+      "skillId": "version-repository-operations",
+      "name": "Version Repository Operations",
+      "category": "management",
+      "ownerRole": "Version Manager Agent",
+      "promptPath": "prompts/product-management/virtual_version_pm_prompt.md",
+      "score": 12,
+      "reasons": [
+        "keyword:ai",
+        "integrated"
+      ],
+      "deploymentStatus": "integrated",
+      "tool": "version-registry"
+    },
+    {
+      "skillId": "claude-design-system",
+      "name": "Claude Design System",
+      "category": "design",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "DESIGN-SYSTEM.md",
+      "score": 9,
+      "reasons": [
+        "keyword:ai",
+        "installed"
+      ],
+      "deploymentStatus": "installed",
+      "tool": "claude-design-system"
+    },
+    {
+      "skillId": "follow-builders",
+      "name": "Follow Builders",
+      "category": "research",
+      "ownerRole": "Industry Research Agent",
+      "promptPath": "~/.codex/skills/follow-builders/SKILL.md",
+      "score": 9,
+      "reasons": [
+        "keyword:ai",
+        "installed"
+      ],
+      "deploymentStatus": "installed",
+      "tool": "codex-skill"
+    },
+    {
+      "skillId": "committee-gate",
+      "name": "Committee Gate",
+      "category": "review",
+      "ownerRole": "Review Committee",
+      "promptPath": "workflows/execution.md",
+      "score": 6,
+      "reasons": [
+        "integrated"
+      ],
+      "deploymentStatus": "integrated",
+      "tool": "review-committee"
+    }
+  ],
+  "learningGuidance": [
+    {
+      "id": "learning-1",
+      "title": "Separate solution complexity from coordination complexity",
+      "recommendation": "Estimate the work using AI-first effort, coordination load, external dependency, and confidence.",
+      "whyNow": "The version plan requires AI-speed estimation rather than historical human-only pacing.",
+      "templatePath": "docs/operations/ai-product-office-roadmap.md"
+    },
+    {
+      "id": "learning-2",
+      "title": "Apply build-vs-buy before custom implementation",
+      "recommendation": "Run open-source and external-pattern scouting before approving strategic build work.",
+      "whyNow": "The review gate and v0.5 plan require external pattern scouting for strategic proposals.",
+      "templatePath": "docs/templates/ecosystem_landscape_scan_template.md"
+    },
+    {
+      "id": "learning-3",
+      "title": "Use schema-first UI thinking",
+      "recommendation": "Define business blocks, state contracts, and interaction rules before screen-level implementation.",
+      "whyNow": "The brief appears to affect operator surfaces or reusable UI capability.",
+      "templatePath": "docs/templates/ui_schema_spec_template.md"
+    }
+  ],
+  "requiredGovernedOutputs": [
+    {
+      "type": "physical-world-profile",
+      "title": "Physical-world profile update",
+      "templatePath": "docs/templates/physical_world_profile_template.md",
+      "priority": "P0",
+      "reason": "Missing organizational context should be captured before committing scope.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "product-definition-baseline",
+      "title": "Product definition baseline",
+      "templatePath": "docs/templates/product_definition_baseline_template.md",
+      "priority": "P0",
+      "reason": "Any downstream design, schema, or implementation work must trace back to an explicit product definition baseline.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "requirement-baseline",
+      "title": "Requirement baseline package",
+      "templatePath": "docs/templates/requirement_baseline_template.md",
+      "priority": "P0",
+      "reason": "Requirement truth-sources must exist before design, schema, or implementation outputs are allowed to drift into execution.",
+      "dependsOn": [
+        "product-definition-baseline"
+      ],
+      "autoBackfillOnSkip": true
+    },
+    {
+      "type": "design-image2-prompt-pack",
+      "title": "Page-by-page image2 prompt pack",
+      "templatePath": "docs/templates/design_image2_prompt_pack_template.md",
+      "priority": "P0",
+      "reason": "Visual design delivery must first produce a page-by-page image2 prompt pack before final design images are generated.",
+      "dependsOn": [
+        "product-definition-baseline",
+        "requirement-baseline"
+      ],
+      "autoBackfillOnSkip": true
+    },
+    {
+      "type": "ecosystem-scan",
+      "title": "External pattern and open-source scouting",
+      "templatePath": "docs/templates/ecosystem_landscape_scan_template.md",
+      "priority": "P0",
+      "reason": "Strategic proposals must check reusable external patterns before custom build work.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "strategic-radar",
+      "title": "Strategic radar",
+      "templatePath": "docs/templates/special_research_report_template.md",
+      "priority": "P1",
+      "reason": "Agent patterns, frameworks, and skill ecosystems should be watched before platform investment decisions.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "version-plan",
+      "title": "Version planning document",
+      "templatePath": "docs/templates/version_planning_template.md",
+      "priority": "P1",
+      "reason": "The work must map into version scope, acceptance, and rollout sequence.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "roadmap",
+      "title": "Roadmap planning document",
+      "templatePath": "docs/templates/roadmap_template.md",
+      "priority": "P1",
+      "reason": "Roadmap planning should be generated from active requirements and version traces.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "daily-intelligence-report",
+      "title": "Daily intelligence report",
+      "templatePath": "docs/templates/daily_intelligence_report_template.md",
+      "priority": "P1",
+      "reason": "Daily intelligence should summarize active requirement/version movement and new evidence gaps.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "weekly-product-brief",
+      "title": "Weekly product brief",
+      "templatePath": "docs/templates/weekly_product_brief_template.md",
+      "priority": "P1",
+      "reason": "Weekly briefs should roll up product progress, risks, and next decisions from governed context.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "learning-upgrade-memo",
+      "title": "Learning and cognitive upgrade memo",
+      "templatePath": "docs/templates/requirement_evaluation_feedback_template.md",
+      "priority": "P1",
+      "reason": "Recurring operator blind spots should be converted into explicit learning guidance.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "demo-script",
+      "title": "Demo script",
+      "templatePath": "docs/templates/demo_script_template.md",
+      "priority": "P1",
+      "reason": "Demo scripts should be generated from accepted capabilities, operator flows, and version state.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "user-manual",
+      "title": "User manual",
+      "templatePath": "docs/templates/user_manual_template.md",
+      "priority": "P1",
+      "reason": "User manuals should be generated from governed capability/version state rather than ad-hoc notes.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "external-capability-evaluation",
+      "title": "External skill/plugin/framework evaluation",
+      "templatePath": "docs/templates/subproject_capability_adoption_checklist.md",
+      "priority": "P2",
+      "reason": "External skills, plugins, and frameworks need governed adopt/adapt/watch/reject/build evaluation before adoption.",
+      "dependsOn": [],
+      "autoBackfillOnSkip": false
+    },
+    {
+      "type": "ui-schema-spec",
+      "title": "Schema-driven UI and business-block spec",
+      "templatePath": "docs/templates/ui_schema_spec_template.md",
+      "priority": "P0",
+      "reason": "UI work should start from reusable business blocks and interaction contracts.",
+      "dependsOn": [
+        "product-definition-baseline",
+        "requirement-baseline"
+      ],
+      "autoBackfillOnSkip": true
+    },
+    {
+      "type": "implementation-handoff",
+      "title": "Implementation handoff package",
+      "templatePath": "docs/templates/workflow_handoff_template.md",
+      "priority": "P1",
+      "reason": "Frontend or implementation work must receive a governed handoff package instead of depending on conversational design drift.",
+      "dependsOn": [
+        "product-definition-baseline",
+        "requirement-baseline",
+        "ui-schema-spec"
+      ],
+      "autoBackfillOnSkip": true
+    }
+  ],
+  "nextActions": [
+    "Answer or explicitly waive the missing physical-world questions.",
+    "Assign engaged specialist agents to generate governed outputs.",
+    "Run ecosystem/open-source scouting before approving strategic build work.",
+    "Create UI schema/business-block specs before frontend implementation when the work changes operator surfaces."
+  ],
+  "evidencePaths": [
+    "workflows/main.md",
+    "workflows/execution.md",
+    "docs/implementation/PMAIOS愿景.md",
+    "docs/tasks/PMAIOS_v0.6_升级任务清单.md",
+    "docs/implementation/PMAIOS_v0.6_核心定义.md",
+    "docs/decisions/adr-0003-document-taxonomy.md",
+    "docs/decisions/adr-0004-v0.6-baseline-adoption.md",
+    "docs/memory/global-rules.md"
+  ],
+  "metadata": {
+    "agentCount": 15,
+    "engagedSpecialistCount": 8,
+    "recommendedSkillCount": 8
+  }
+}

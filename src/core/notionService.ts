@@ -4,6 +4,7 @@ import type { FileStore } from '../core/fileStore.js';
 export type NotionConfig = {
   apiKey: string;
   databaseId?: string;
+  pageId?: string;
   prdDatabaseId?: string;
   meetingNotesDatabaseId?: string;
 };
@@ -38,6 +39,18 @@ export type MeetingNoteRecord = {
   actionItems: Array<{ task: string; owner?: string; done: boolean }>;
 };
 
+export type InboxKnowledgeDigestRecord = {
+  title: string;
+  project: string;
+  sourcePath: string;
+  documentType: string;
+  summary: string;
+  facts: string[];
+  judgments: string[];
+  unknowns: string[];
+  nextActions: string[];
+};
+
 type NotionSdkPage = {
   id: string;
   url: string;
@@ -61,6 +74,7 @@ export class NotionService {
     this.config = config || {
       apiKey: process.env.NOTION_API_KEY || '',
       databaseId: process.env.NOTION_DATABASE_ID,
+      pageId: process.env.NOTION_PAGE_ID,
       prdDatabaseId: process.env.NOTION_PRD_DATABASE_ID,
       meetingNotesDatabaseId: process.env.NOTION_MEETING_NOTES_DATABASE_ID,
     };
@@ -79,6 +93,10 @@ export class NotionService {
       if (this.config.databaseId) {
         await this.client.databases.retrieve({
           database_id: this.config.databaseId,
+        });
+      } else if (this.config.pageId) {
+        await this.client.pages.retrieve({
+          page_id: this.config.pageId,
         });
       } else {
         const me = (this.client.users as unknown as { me?: NotionUsersMe }).me;
@@ -253,6 +271,26 @@ export class NotionService {
       .map((page) => this.toNotionPage(page as unknown as NotionSdkPage));
   }
 
+  async syncInboxKnowledgeDigest(record: InboxKnowledgeDigestRecord): Promise<NotionPage> {
+    const page = await this.createInboxDigestPage(record);
+
+    const blocks: Array<Record<string, unknown>> = [
+      this.heading('摘要'),
+      this.paragraph(record.summary),
+      this.heading('来源'),
+      this.bullet(`sourcePath: ${record.sourcePath}`),
+      this.bullet(`documentType: ${record.documentType}`),
+    ];
+
+    this.pushListSection(blocks, '事实', record.facts);
+    this.pushListSection(blocks, '判断', record.judgments);
+    this.pushListSection(blocks, '待确认', record.unknowns);
+    this.pushListSection(blocks, '后续动作', record.nextActions);
+
+    await this.appendBlocks(page.id, blocks);
+    return this.toNotionPage(page as NotionSdkPage);
+  }
+
   private buildPRDBlocks(prd: PRDRecord): Array<Record<string, unknown>> {
     const blocks: Array<Record<string, unknown>> = [];
 
@@ -300,6 +338,15 @@ export class NotionService {
 
     blocks.push(this.heading(title));
     blocks.push(this.paragraph(content));
+  }
+
+  private pushListSection(blocks: Array<Record<string, unknown>>, title: string, items: string[]) {
+    if (items.length === 0) {
+      return;
+    }
+
+    blocks.push(this.heading(title));
+    blocks.push(...items.map((item) => this.bullet(item)));
   }
 
   private heading(content: string): Record<string, unknown> {
@@ -384,6 +431,46 @@ export class NotionService {
 
     return 'Untitled';
   }
+
+  private async createInboxDigestPage(record: InboxKnowledgeDigestRecord): Promise<NotionSdkPage> {
+    if (this.config.databaseId) {
+      return this.client.pages.create({
+        parent: { database_id: this.config.databaseId },
+        properties: {
+          Name: {
+            title: [{ text: { content: record.title.slice(0, 100) } }],
+          },
+          Project: {
+            rich_text: [{ text: { content: record.project } }],
+          },
+          'Decision Type': {
+            select: { name: 'Inbox Knowledge Digest' },
+          },
+          Date: {
+            date: { start: new Date().toISOString() },
+          },
+        },
+      } as Record<string, unknown>) as unknown as NotionSdkPage;
+    }
+
+    if (this.config.pageId) {
+      return this.client.pages.create({
+        parent: { page_id: this.config.pageId },
+        properties: {
+          title: {
+            title: [{ text: { content: record.title.slice(0, 100) } }],
+          },
+        },
+        children: [
+          this.paragraph(`project: ${record.project}`),
+          this.paragraph(`documentType: ${record.documentType}`),
+          this.paragraph(`sourcePath: ${record.sourcePath}`),
+        ],
+      } as Record<string, unknown>) as unknown as NotionSdkPage;
+    }
+
+    throw new Error('Missing Notion database id or page id');
+  }
 }
 
 export function checkNotionConfig(): {
@@ -396,8 +483,8 @@ export function checkNotionConfig(): {
     missing.push('NOTION_API_KEY');
   }
 
-  if (!process.env.NOTION_DATABASE_ID) {
-    missing.push('NOTION_DATABASE_ID');
+  if (!process.env.NOTION_DATABASE_ID && !process.env.NOTION_PAGE_ID) {
+    missing.push('NOTION_DATABASE_ID or NOTION_PAGE_ID');
   }
 
   return {

@@ -1,0 +1,14 @@
+,rank_id.$id,*详见内容ID字典,= RankReward.id
+avatar_type,,装扮类型,= PlayerAvatar.type
+,avatar_type.0,身体(肤色),“skin”
+,avatar_type.1,发型,“hair”
+,avatar_type.2,服饰,“suit”
+,avatar_type.3,手持,“grasp”
+,avatar_type.4,背饰,“back”
+,avatar_type.5,面饰,"""face"""
+,avatar_type.6,手饰,"""hand"""
+,avatar_type.7,五官,"""head"""
+,avatar_type.8,头饰,"""hat"""
+,avatar_type.9,美瞳,"""eyes"""
+avatar_id,,装扮ID,
+,avatar_id.$id,*详见内容ID字典,= PlayerAvatar.id

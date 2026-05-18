@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 820" width="1280" height="820">
+  <style>
+    text { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #182233; }
+    .title { font-size: 30px; font-weight: 700; }
+    .sub { font-size: 14px; fill: #5f6c82; }
+    .card { fill: #fff; stroke: #d7dfeb; stroke-width: 1.5; rx: 18; }
+    .h { font-size: 18px; font-weight: 700; }
+    .b { font-size: 14px; }
+    .wait { fill: #b45309; }
+    .done { fill: #047857; }
+    .link { font-size: 14px; fill: #2563eb; font-weight: 600; }
+  </style>
+  <rect width="1280" height="820" fill="#f7f9fc"/>
+  <text x="64" y="66" class="title">知识库项目 / decision-board</text>
+  <text x="64" y="96" class="sub">核心方向已收敛，当前最重要的是打通容器启动并按已定边界接管前台。</text>
+
+  <rect x="64" y="146" width="548" height="260" class="card"/>
+  <text x="92" y="186" class="h done">已收敛</text>
+  <text x="92" y="226" class="b">1. WeKnora 不能在当前阶段直接被当成 PMAIOS 最终产品方案。</text>
+  <text x="92" y="252" class="b">2. 继续走容器路线，不切回源码编译路线。</text>
+  <text x="92" y="278" class="b">3. 短期沿用 WeKnora 前台壳，作为知识库子项目阶段性工作台。</text>
+  <text x="92" y="304" class="b">4. 二开准备先落文档、扫描、环境和门禁，再进业务改造。</text>
+
+  <rect x="668" y="146" width="548" height="260" class="card"/>
+  <text x="696" y="186" class="h wait">待继续解决</text>
+  <text x="696" y="226" class="b">1. Docker 外网链路：代理、镜像源或离线导入方案。</text>
+  <text x="696" y="252" class="b">2. 平台归属：Prompt / Chat / Runtime / 权限控制面谁拥有。</text>
+  <text x="696" y="278" class="b">3. 前台接管节奏：先菜单收敛，还是先知识资产入口改名。</text>
+
+  <rect x="64" y="448" width="1152" height="248" class="card"/>
+  <text x="92" y="488" class="h">决策原则</text>
+  <text x="92" y="528" class="b">- 先保证底座可理解、可验证、可回滚，再谈业务功能。</text>
+  <text x="92" y="554" class="b">- 优先外挂式扩展，不优先侵入式改 WeKnora 内核。</text>
+  <text x="92" y="580" class="b">- 所有前台复用都要先看是否冲突平台控制面。</text>
+  <a href="docs/WeKnora二开准备与PMAIOS-v0.5收敛方案.md"><text x="92" y="636" class="link">查看完整准备方案</text></a>
+  <a href="change-log.md"><text x="322" y="636" class="link">查看 change-log</text></a>
+</svg>

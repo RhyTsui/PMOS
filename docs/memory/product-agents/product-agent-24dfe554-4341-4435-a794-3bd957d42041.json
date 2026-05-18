@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-24dfe554-4341-4435-a794-3bd957d42041",
+  "subprojectId": null,
+  "name": "Virtual Version PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "versioning",
+  "level": "manager",
+  "scope": "platform",
+  "summary": "Owns release-facing version records, version planning documents, and change tracking.",
+  "problem": "Version information exists, but the release loop is not yet expressed as one governed planning and traceability system.",
+  "targetUsers": [],
+  "goals": [
+    "Produce structured version plans and release records.",
+    "Connect requirements and runs to version decisions.",
+    "Keep release notes and rollback reasoning reviewable."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Every publishable version has a corresponding version plan or version record.",
+    "Release and rollback reasoning can be traced to requirements and runs."
+  ],
+  "relatedPaths": [
+    "docs/templates/version_record_template.md",
+    "docs/templates/version_planning_template.md"
+  ],
+  "governanceRefs": [
+    "docs/templates/version_record_template.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_version_pm_prompt.md",
+  "templateId": "virtual-version-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.131Z",
+  "updatedAt": "2026-04-27T10:04:22.131Z"
+}

@@ -19,6 +19,7 @@ export type ExternalConnectorStatus = {
     configured: boolean;
     connected: boolean | null;
     missing: string[];
+    targetMode: 'database' | 'page' | 'unconfigured';
   };
   figma: {
     configured: boolean;
@@ -36,6 +37,12 @@ export type ExternalConnectorStatus = {
     importMode: 'manual-export-or-paste';
     inboxPath: string;
     localCandidateRoots: string[];
+  };
+  dataki: {
+    configured: boolean;
+    connected: boolean | null;
+    missing: string[];
+    baseUrl: string | null;
   };
 };
 
@@ -78,7 +85,12 @@ export class ExternalConnectorService {
   ) {}
 
   async getStatus(subprojectId?: string | null, options?: { checkRemote?: boolean }): Promise<ExternalConnectorStatus> {
-    const notionConfigured = Boolean(process.env.NOTION_API_KEY);
+    const notionTargetMode = process.env.NOTION_DATABASE_ID
+      ? 'database'
+      : process.env.NOTION_PAGE_ID
+        ? 'page'
+        : 'unconfigured';
+    const notionConfigured = Boolean(process.env.NOTION_API_KEY && notionTargetMode !== 'unconfigured');
     const figmaConfigured = Boolean(process.env.FIGMA_API_KEY);
     const notionConnected = options?.checkRemote && notionConfigured ? await this.safeNotionConnection() : null;
     const figmaTeamId = process.env.FIGMA_TEAM_ID?.trim() || null;
@@ -93,8 +105,9 @@ export class ExternalConnectorService {
         connected: notionConnected,
         missing: [
           ...(!process.env.NOTION_API_KEY ? ['NOTION_API_KEY'] : []),
-          ...(!process.env.NOTION_DATABASE_ID ? ['NOTION_DATABASE_ID'] : []),
+          ...(!process.env.NOTION_DATABASE_ID && !process.env.NOTION_PAGE_ID ? ['NOTION_DATABASE_ID or NOTION_PAGE_ID'] : []),
         ],
+        targetMode: notionTargetMode,
       },
       figma: {
         configured: figmaConfigured,
@@ -115,6 +128,12 @@ export class ExternalConnectorService {
         importMode: 'manual-export-or-paste',
         inboxPath: getInputInboxPath(subprojectId),
         localCandidateRoots: this.getDingTalkCandidateRoots(),
+      },
+      dataki: {
+        configured: false,
+        connected: null,
+        missing: ['DATAKI_BASE_URL', 'DATAKI_API_KEY'],
+        baseUrl: process.env.DATAKI_BASE_URL?.trim() || process.env.WEKNORA_BASE_URL?.trim() || null,
       },
     };
   }

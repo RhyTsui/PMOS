@@ -1,0 +1,61 @@
+{
+  "id": "docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01",
+  "subprojectId": null,
+  "status": "completed",
+  "sourceRoot": "docs/sources/inbox",
+  "startedAt": "2026-05-09T06:02:06.532Z",
+  "completedAt": "2026-05-09T06:02:09.259Z",
+  "normalizedSources": [
+    {
+      "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "artifactPath": "docs/product-office/document-normalization/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+      "backgroundContextPath": "docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+      "notionPageId": "35bd53f7-155c-81a6-a406-e80e3ca45d10",
+      "notionPageUrl": "https://www.notion.so/Inbox-Knowledge-Digest-0509-xlsx-35bd53f7155c81a6a406e80e3ca45d10",
+      "requirementId": "req-4760df59-3cea-4602-a0ed-1df0c1eaff3d",
+      "versionEntryId": "ver-1ab44069-ad59-4b63-904e-6cdc2ef48fcf",
+      "extractedRequirementIds": [
+        "req-e6a2ae4f-5140-4481-8f10-d5d900773bd4",
+        "req-8b273af2-8c33-437b-b54e-882c5db0b184",
+        "req-302c700e-b003-4dc2-bd0f-7e42882447b8",
+        "req-b4ff7461-577f-4aa8-9cd9-125e5304be82",
+        "req-cfda1102-6ee8-469d-9bbc-8e83c91b93e9"
+      ],
+      "documentType": "product-intelligence",
+      "suggestedTarget": "docs/context/weekly/周报-产品组-徐韵-0509.xlsx",
+      "extractedSignals": [
+        "contains:requirements",
+        "contains:version-planning",
+        "contains:ui-scope"
+      ],
+      "projectHints": [
+        "ad",
+        "tracking-acceptance",
+        "testing-platform",
+        "knowledge-base",
+        "platform"
+      ],
+      "sourceFingerprint": "eac9476aab38fb39f72ca68e253cf3f77e952934"
+    }
+  ],
+  "requirementIds": [
+    "req-4760df59-3cea-4602-a0ed-1df0c1eaff3d"
+  ],
+  "versionEntryIds": [
+    "ver-1ab44069-ad59-4b63-904e-6cdc2ef48fcf"
+  ],
+  "summary": "Normalized 1 document source(s) from docs/sources/inbox.",
+  "metadata": {
+    "mode": "full",
+    "sourcePathCount": 1,
+    "sourceFingerprints": {
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx": "eac9476aab38fb39f72ca68e253cf3f77e952934"
+    },
+    "backgroundContextPaths": [
+      "docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md"
+    ],
+    "notionPageIds": [
+      "35bd53f7-155c-81a6-a406-e80e3ca45d10"
+    ]
+  }
+}

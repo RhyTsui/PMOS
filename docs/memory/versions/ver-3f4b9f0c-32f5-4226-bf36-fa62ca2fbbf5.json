@@ -1,0 +1,34 @@
+{
+  "id": "ver-3f4b9f0c-32f5-4226-bf36-fa62ca2fbbf5",
+  "subprojectId": null,
+  "entityType": "requirement",
+  "entityId": "req-0bc3fb92-a12d-4c46-8344-8552ebfa9eee",
+  "changeType": "extract",
+  "summary": "Extracted requirement from docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-0bc3fb92-a12d-4c46-8344-8552ebfa9eee"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "| 埋点 | 数分 | 埋点验收需求沟通 | 徐韵 | 0.55 | 1.杭州数分和上海数分的工作模式不同，验收标准不同",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Extracted requirement needs operator review before implementation planning."
+  },
+  "createdAt": "2026-05-09T05:50:38.614Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

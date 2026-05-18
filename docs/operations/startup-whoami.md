@@ -1,21 +1,20 @@
 # Startup Whoami
 
-- version: v0.2
-- date: 2026-04-21
+- version: v0.4
+- date: 2026-05-09
 - status: active
-- purpose: restart bootstrap and anti-amnesia source of truth
+- purpose: restart bootstrap and active-platform-truth recovery
 
 ## What This File Is
 
 This document is the mandatory startup identity sheet for PMAIOS work after restart, tool switch, or context loss.
 
-It exists so Codex or Claude can recover:
+It exists so Codex can recover the current active operating identity:
 
 - who we are in this repository
-- what rules are currently active
-- what the platform is prioritizing
-- which documents are authoritative
-- what not to redo from scratch
+- what platform version is actually active
+- which documents are authoritative for platform work
+- what not to redo from stale version memory
 
 ## Operating Identity
 
@@ -26,12 +25,12 @@ PMAIOS is currently a file-driven local AI operating system centered on:
 - shared memory and traceability
 - platform and subproject coordination
 
-Current operating stance:
+Current platform stance:
 
-- product work is document-first
-- subprojects should be able to run in parallel
-- the chief provides top-level support and convergence
-- workflow quality comes before uncontrolled business drafting
+- the active product version is `v1.0`
+- the landed runtime baseline is `v0.7`
+- the current task is to turn the landed runtime into a deployable, collaborative, product-grade PM Agent system
+- do not reopen `v0.8 / v0.9` intermediate version branches
 
 ## Mandatory Startup Reads
 
@@ -41,6 +40,7 @@ Before substantive work, always read in this order:
 2. `npm run cli -- mcp-context events 20`
 3. `npm run cli -- mcp-context tasks --status in_progress`
 4. this file
+5. `docs/operations/platform-truth-source-index.md`
 
 Then continue into the authoritative working documents below as needed.
 
@@ -50,13 +50,9 @@ Then continue into the authoritative working documents below as needed.
 
 `docs/sources/inbox/` is the only raw manual input source.
 
-New meeting notes, research docs, interview notes, requirement drafts, and external materials must enter `inbox` first before they are treated as governed input.
-
 ### 2. Product Work Must Follow This Chain
 
 `information input -> research/interviews -> brainstorming -> cognition integration -> key point extraction -> decision -> output -> proactive sync`
-
-Do not jump from raw input directly to PRD or final solution.
 
 ### 3. Product Outputs Must Preserve Uncertainty
 
@@ -67,84 +63,41 @@ Early-stage outputs must explicitly distinguish:
 - candidate
 - unknown
 
-If research or architecture is incomplete, output only:
-
-- candidate directions
-- risks
-- missing information
-- research recommendations
-
 ### 4. Work Must Be Visible
 
 Undocumented or unsynced work does not count as submitted work.
-
-Project PMs must proactively sync:
-
-- what has been produced
-- what is still missing
-- current blockers
-- what decision is needed next
 
 ### 5. Documents Are The Source Of Truth
 
 Terminal replies are summaries only.
 
-Authoritative results must be recorded in repository documents under governed paths such as:
+Authoritative results must be recorded in repository documents.
 
-- `docs/operations/`
-- `docs/memory/`
-- `docs/templates/`
-- `docs/research/`
-- `subprojects/*/docs/`
+For platform work, the active entry chain is:
 
-For planning, research, architecture, and confirmation work:
-
-- SVG is now the default chief-facing artifact
-- Markdown is the detailed appendix layer
-- visual entry point should start from `boards/index.svg` and subproject root `project-board.svg` files when they exist
-- AI product manager outputs should default to SVG boards first unless a stricter downstream format overrides that default
-- default working language is Chinese for dialogue and SVG copy, with English kept only for proper nouns, file names, and unavoidable technical terms
+1. `docs/operations/platform-truth-source-index.md`
+2. `docs/operations/current-version-progress.md`
+3. `docs/operations/pmaios-v1.0-direction.md`
+4. `docs/operations/pmaios-introduction.md`
+5. `docs/architecture/PMAIOS_product_management_agent_operating_model.md`
+6. `docs/boards/pmaios-runtime-panorama-v0.7.svg`
+7. `docs/operations/v0.7-minimum-loop-summary.md`
+8. `docs/operations/v0.7-p0-execution-definition-stage-agent-ui-spec-repeat-correction.md`
+9. `docs/operations/module-roadmap.md`
+10. `docs/operations/v1.0-product-version-program.md`
+11. `docs/operations/v1.0-acceptance-standard.md`
 
 ### 6. User Ideas Must Be Refined Before Execution
 
 Raw user ideas are not implementation instructions by default.
 
-Before execution, PMAIOS should first strengthen the idea through:
-
-- domain-driven refinement
-- industry best-practice comparison
-- relevance and impact assessment
-- boundary and dependency clarification
-
-Then sync the refined understanding and proposed implementation path back to the user.
-
-If the user does not correct it, continue on that basis.  
-If the user corrects it, switch promptly.
-
 ### 7. Stage Updates Must Not Stop Work
-
-Stage updates are for sync, not for accidental pause.
 
 If the next safe step is already known, PMAIOS should keep moving while syncing.
 
-Only stop after a stage update when:
-
-- there is a real blocker
-- there is a high-risk fork
-- a required permission gate blocks continuation
-- continuing would likely drift away from user intent
-
 ### 8. Interim Summaries Must Not Trigger False Finish
 
-An interim summary is not a completion signal.
-
-If there are still obvious next safe steps, PMAIOS should continue after the summary instead of sliding into end-of-work behavior.
-
-Only enter real wrap-up mode when:
-
-- the requested scope is actually complete
-- the user explicitly pauses
-- the user explicitly redirects
+If there are still obvious next safe steps, PMAIOS should continue after the summary.
 
 ### 9. User Requirements And Product Requirements Must Stay Linked
 
@@ -153,155 +106,74 @@ Important work must be tracked at two linked layers:
 - user requirement
 - product requirement
 
-Product requirements are not enough by themselves.
-
-After a mechanism, plan item, template, or capability is added, PMAIOS must still:
-
-- map it back to the original user requirement
-- walk the original user-demand scenario
-- judge the result as `solved`, `partial`, or `unsolved`
-
 ### 10. Progress Must Be Tracked Against A Denominator
 
-Long-running progress should not default to “what was finished today”.
-
-It should default to a longer-goal denominator such as:
-
-- total tracked items
-- solved items
-- promoted-to-plan items
-- parked/rejected items with reason
-- still-unplaced items
-
-This is especially important after convergence, regrouping, or version-scope compression.
+Long-running progress should not default only to "what was finished today".
 
 ### 11. Convergence Must Not Hide Dropped Requirements
 
-If several ideas are merged into a capability block, that convergence is not automatically success.
-
-PMAIOS must still check:
-
-- which original user requirements were preserved
-- which were weakened
-- which were dropped
-- whether the converged solution actually solved the original problem
+Convergence is not automatically success.
 
 ## Current Authoritative Workflow Documents
 
-Platform-level truth:
+Platform-level workflow truth:
 
 - `docs/memory/global-rules.md`
 - `workflows/product-management.md`
 - `docs/operations/product-workflow-total-design.md`
-- `docs/operations/subproject-product-workflow-adoption-checklist.md`
-- `docs/operations/hermes-skill-candidate-policy.md`
-- `docs/operations/svg-first-artifact-policy.md`
-- `docs/operations/project-entry-contract.md`
 - `docs/operations/ai-product-development-collaboration-loop.md`
 - `docs/operations/cognition-ladder-and-intent-amplifier.md`
 - `docs/operations/sidecar-deep-research-mechanism.md`
-- `docs/operations/do-mode-execution-protocol.md`
-- `docs/operations/do-mode-task-start-contract.md`
 - `docs/operations/requirement-change-control.md`
 - `docs/operations/requirement-promotion-and-loss-prevention.md`
-- `docs/research/human-machine-collaboration-research.md`
 
-Operational status:
+Operational status truth:
 
+- `docs/operations/platform-truth-source-index.md`
 - `docs/operations/current-version-progress.md`
 - `docs/operations/pmaios-version-plan.md`
-- `docs/operations/v0.5-implementation-index.md`
+- `docs/operations/pmaios-v1.0-direction.md`
+- `docs/operations/v1.0-product-version-program.md`
+- `docs/operations/v1.0-acceptance-standard.md`
+- `docs/operations/v0.7-minimum-loop-summary.md`
+- `docs/operations/module-roadmap.md`
 - `docs/operations/local-runbook.md`
-- `docs/operations/pmaios-v0.5-checklist.md`
 
 ## Current Product Workflow Priority
 
 The current top-level priority is:
 
-`make the product workflow reliable enough that subordinate product managers can work in parallel, while the chief gives top-level support and final convergence`
+`build a v1.0 product-manager Agent product on top of the landed v0.7 runtime baseline`
 
 This means:
 
-- do not swallow all project work centrally
-- do not let projects run without workflow and review
-- fix workflow gaps before pretending execution is aligned
+- do not regress into stale `v0.5` or `v0.6` identity
+- do not let business subprojects override platform product-version truth
+- finish the active v1.0 acceptance tracks before opening unrelated new platform branches
+- keep the local unified entry as a chat-first homepage, with control-plane and runtime surfaces invoked on demand
 
 ## Current Sample Project
 
-`knowledge-base` is the current workflow sample subproject.
-
-Use this project as the current reference when extending project-level PM workflow.
-
-## Current Adoption Reality
-
-Do not assume all subprojects are already aligned.
-
-As of this snapshot:
-
-- `knowledge-base`: partial adoption
-- `ad`: partial adoption
-- `chokonu`: partial adoption
-- `server`: partial adoption
-- `data-service`: not adopted
-- `ad-intelligence`: unknown
-- `mcp`: unknown
-
-For details, read:
-
-- `docs/operations/subproject-product-workflow-adoption-checklist.md`
+`knowledge-base` remains a useful sample subproject for workflow adoption, but it is not the source of platform version identity.
 
 ## What To Do After Restart
 
-When resuming work after restart:
+When resuming platform work after restart:
 
 1. recover mcp-context state
 2. read this file
-3. identify the current authoritative workflow doc for the task
-4. identify whether the target subproject is adopted, partial, or not adopted
-5. continue from repo truth, not from memory reconstruction or hidden chat context
-
-If the work involves Codex local skills, plugins, or Codex runtime-visible capabilities, also run:
-
-6. `npm run cli -- codex-state sync`
-
-This is the standard CLI-to-codex.exe alignment action. It rewrites the local-state snapshot and reports whether PMAIOS and local Codex are still aligned.
+3. read `docs/operations/platform-truth-source-index.md`
+4. identify the active platform version from `current-version-progress.md`
+5. continue from active repo truth, not from stale version memory or hidden chat context
 
 ## What Not To Do
 
 Do not:
 
 - assume conversation memory is sufficient
-- rebuild understanding only from chat history
-- treat scattered drafts as final truth
-- skip research because there are already some documents
-- assume all subprojects already follow the platform workflow
-
-## Experimental Mode Routing
-
-PMAIOS may support explicit execution modes when the user wants a different collaboration contract.
-
-Current experimental candidates:
-
-- `default`
-- `plan`
-- `deep`
-- `do`
-
-Suggested example:
-
-`{do} 今天干完这个 plan`
-
-Reference:
-
-- `docs/architecture/mode-architecture.md`
-- `docs/operations/do-mode-execution-protocol.md`
-- `docs/operations/v0.5-implementation-index.md`
-- `docs/operations/do-mode-task-start-contract.md`
-
-Current sample:
-
-- `task-60d32fc4-4bea-466a-adc7-443a4869dc72`
+- treat old `v0.5` or `v0.6` snapshots as current platform identity
+- let subproject active tasks redefine PMAIOS platform scope by accident
 
 ## Update Rule
 
-If platform identity, top-level workflow, or subproject adoption reality changes materially, update this file in the same work cycle.
+If platform version identity, active truth documents, or top-level priority changes materially, update this file in the same work cycle.

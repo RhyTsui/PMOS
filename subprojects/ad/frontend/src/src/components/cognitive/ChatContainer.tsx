@@ -1,0 +1,3400 @@
+﻿'use client';
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ThoughtChain } from '@ant-design/x';
+import { Dropdown, Input, Modal, Tag, Tooltip, message as antMessage, type MenuProps } from 'antd';
+import {
+  BulbOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CodeOutlined,
+  CopyOutlined,
+  CloseCircleOutlined,
+  DislikeOutlined,
+  DownOutlined,
+  EyeOutlined,
+  InfoCircleOutlined,
+  LikeOutlined,
+  LoadingOutlined,
+  MoreOutlined,
+  PauseCircleOutlined,
+  EditOutlined,
+  ReloadOutlined,
+  SoundOutlined,
+  ThunderboltOutlined,
+  UpOutlined,
+} from '@ant-design/icons';
+import type { AgentType, Message, MissingField, WorkflowResult } from '@/types';
+import { thinkingStepFromProcessEvent, toolCallFromProcessEvent } from '@/lib/agent-runtime';
+import { useThemeColors } from '@/hooks/useTheme';
+import { AGENT_MAP } from '@/lib/constants';
+import FancyCodeBlock, { type CodeStyle } from '@/components/ui/FancyCodeBlock';
+import type { useChatSettings } from '@/hooks/useChatSettings';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useSpeech } from '@/hooks/useSpeech';
+import { IconAsset } from '@/components/ui/IconAsset';
+import {
+  MetricExplainerRenderer,
+  isMetricExplainerUISchema,
+  type MetricAction,
+  type MetricExplainerUISchema,
+} from '@/features/metric-explainer';
+
+interface ChatContainerProps {
+  messages: Message[];
+  isTyping: boolean;
+  onFollowUpClick?: (text: string) => void;
+  isStreaming?: boolean;
+  devMode?: boolean;
+  onViewCallChain?: () => void;
+  onOpenSourcePanel?: (payload: SourcePanelPayload) => void;
+  onEditUserMessage?: (content: string) => void;
+  onSubmitFollowUp?: (content: string) => void;
+  contextThinkingSteps?: Array<{ title: string; description?: string }>;
+  currentResult?: WorkflowResult | Record<string, unknown> | null;
+  chatSettings: ReturnType<typeof useChatSettings>;
+  systemPrompt?: string;
+  showSystemPrompt?: boolean;
+  onToggleSystemPrompt?: () => void;
+  onOpenAgentPanel?: (agent: AgentType) => void;
+}
+
+type BubbleKind = 'user' | 'assistant' | 'system' | 'clarification' | 'summary';
+
+interface BubbleItem {
+  key: string;
+  role: 'ai' | 'user';
+  kind: BubbleKind;
+  content: string;
+  thinkingSteps: NonNullable<Message['thinking_steps']>;
+  toolCalls: NonNullable<Message['tool_calls']>;
+  missingFields: MissingField[];
+  messageId: string;
+  agent?: string;
+  rawMessage: Message;
+}
+
+interface SourceRefView {
+  title: string;
+  source?: string;
+  url?: string;
+  sourceType?: 'knowledge_base' | 'report_mcp' | 'mcp' | 'skill' | 'web_search' | 'other';
+  reportName?: string;
+  prompt?: string;
+  detail?: string;
+}
+
+interface CapabilityRefView {
+  key: string;
+  name: string;
+  kind: string;
+  prompt?: string;
+  providerUrl?: string;
+  arguments?: string;
+  result?: string;
+  status?: string;
+}
+
+export interface SourcePanelPayload {
+  message: Message;
+  source?: SourceRefView;
+  capability?: CapabilityRefView;
+}
+
+function CapabilityIcon({ kind, size = 13 }: { kind?: string; size?: number }) {
+  const normalized = String(kind || '').toLowerCase();
+  const InlineBadge = ({ label, background, color }: { label: string; background: string; color: string }) => (
+    <span
+      aria-hidden="true"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 3,
+        background,
+        color,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: Math.max(8, size - 5),
+        fontWeight: 700,
+        lineHeight: 1,
+      }}
+    >
+      {label}
+    </span>
+  );
+  if (normalized.includes('knowledge')) {
+    return <InlineBadge label="K" background="#eaf3ff" color="#1d4ed8" />;
+  }
+  if (normalized.includes('mcp') || normalized.includes('report')) {
+    return <InlineBadge label="M" background="#ecfdf3" color="#15803d" />;
+  }
+  if (normalized.includes('web')) {
+    return <InlineBadge label="G" background="#fff7ed" color="#c2410c" />;
+  }
+  if (normalized.includes('skill')) {
+    return <InlineBadge label="S" background="#f5f3ff" color="#6d28d9" />;
+  }
+  return <InfoCircleOutlined style={{ fontSize: size }} />;
+}
+
+function normalizeToolKind(value?: string): string {
+  const text = String(value || '').toLowerCase();
+  if (text.includes('knowledge')) return 'knowledge';
+  if (text.includes('report')) return 'report_mcp';
+  if (text.includes('mcp')) return 'mcp';
+  if (text.includes('web')) return 'web_search';
+  if (text.includes('skill')) return 'skill';
+  return text || 'tool';
+}
+
+function safeJsonText(value?: string) {
+  if (!value) return '';
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+}
+
+function stripInlineSourceSection(content: string): string {
+  const lines = content.split('\n');
+  const sourceHeadingIndex = lines.findIndex((line) => {
+    const normalized = line.replace(/\*/g, '').replace(/^#+\s*/, '').trim();
+    return /^(关键信息来源|信息来源|来源|参考来源|数据来源)[:：]?$/.test(normalized);
+  });
+  if (sourceHeadingIndex < 0) return content;
+  const before = lines.slice(0, sourceHeadingIndex).join('\n').trimEnd();
+  const after = lines.slice(sourceHeadingIndex + 1);
+  const nextHeadingIndex = after.findIndex((line) => /^#{1,3}\s+/.test(line.trim()));
+  if (nextHeadingIndex < 0) return before;
+  return `${before}\n\n${after.slice(nextHeadingIndex).join('\n')}`.trim();
+}
+
+function getResultForMessage(
+  item: BubbleItem,
+  currentResult?: WorkflowResult | Record<string, unknown> | null,
+) {
+  if (item.role !== 'ai') return null;
+  const embeddedResult = item.rawMessage.metadata?.workflow_result as WorkflowResult | Record<string, unknown> | undefined;
+  const result = embeddedResult || currentResult;
+  if (!result) return null;
+  const taskId = typeof result.task_id === 'string' ? result.task_id : undefined;
+  if (taskId && item.rawMessage.task_id && taskId !== item.rawMessage.task_id) return null;
+  return result;
+}
+
+interface WorkflowCardData {
+  type?: string;
+  status?: string;
+  title?: string;
+  sourceText?: string;
+  media?: string;
+  terminal?: string;
+  metric?: string;
+  threshold?: string;
+  projectContext?: string;
+  notifyTarget?: string;
+  inspectionItems?: Array<{ label: string; status: string; detail: string }>;
+  debugChecks?: Array<{ label: string; status: string; detail: string }>;
+  debugTask?: {
+    id?: string;
+    status?: string;
+    current_stage?: string;
+    mcp_result?: Record<string, unknown>;
+  };
+  accountShared?: boolean;
+  intakeModes?: string[];
+  template?: {
+    name?: string;
+    metrics?: string[];
+    dimensions?: string[];
+    timeRange?: string;
+    frequency?: string;
+    deliveryTime?: string;
+    deliveryTargets?: string[];
+  };
+  metricCatalog?: string[];
+  metricIssues?: string[];
+  dataPreview?: {
+    columns?: string[];
+    rows?: Array<Record<string, string>>;
+  };
+}
+
+interface DebugObservationStep {
+  id: string;
+  order: number;
+  step_no?: string;
+  title: string;
+  stage?: string;
+  status: string;
+  status_label?: string;
+  time?: string;
+  log?: string;
+  sub_steps?: Array<{ id: string; order: number; title: string; status: string }>;
+  screenshots?: string[];
+}
+
+interface DebugObservationData {
+  ok?: boolean;
+  task_id?: string;
+  status?: string;
+  status_label?: string;
+  current_step?: string;
+  phase?: string;
+  error_message?: string;
+  updated_at?: string;
+  steps?: DebugObservationStep[];
+  screenshots?: string[];
+  result?: unknown;
+  raw?: unknown;
+  observation_errors?: string[];
+}
+
+function DebugStepStreamPanel({
+  steps,
+  status,
+  latestStep,
+}: {
+  steps: DebugObservationStep[];
+  status: string;
+  latestStep?: DebugObservationStep;
+}) {
+  const c = useThemeColors();
+  const finalStatus = status.toUpperCase();
+  const [open, setOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const latestItemRef = useRef<HTMLDivElement | null>(null);
+  const groupedSteps = useMemo(() => {
+    const groups: Array<DebugObservationStep & { ids: string[] }> = [];
+    steps.forEach((step) => {
+      const key = `${step.step_no || step.title}-${step.title}`;
+      const existing = groups.find(item => `${item.step_no || item.title}-${item.title}` === key);
+      if (!existing) {
+        groups.push({ ...step, ids: [step.id], screenshots: [...(step.screenshots || [])], sub_steps: [...(step.sub_steps || [])] });
+        return;
+      }
+      existing.ids.push(step.id);
+      existing.status = step.status;
+      existing.status_label = step.status_label || existing.status_label;
+      existing.log = [existing.log, step.log].filter(Boolean).join('\n');
+      existing.screenshots = Array.from(new Set([...(existing.screenshots || []), ...(step.screenshots || [])]));
+      const mergedSubSteps = [...(existing.sub_steps || []), ...(step.sub_steps || [])]
+        .reduce<Array<{ id: string; order: number; title: string; status: string }>>((acc, item) => {
+          const existingSubStep = acc.find(other => other.title === item.title);
+          if (!existingSubStep) {
+            acc.push(item);
+            return acc;
+          }
+          if (/FAIL|ERROR|失败|异常/i.test(item.status)) existingSubStep.status = item.status;
+          else if (/SUCCESS|DONE|OK|COMPLETED|成功/i.test(item.status) || /RUN|PENDING|WAIT/i.test(existingSubStep.status)) existingSubStep.status = item.status;
+          return acc;
+        }, []);
+      existing.sub_steps = mergedSubSteps;
+    });
+    return groups.map((step, index) => ({ ...step, order: index + 1 }));
+  }, [steps]);
+  const latestGroup = latestStep
+    ? groupedSteps.find(step => step.ids?.includes(latestStep.id)) || groupedSteps[groupedSteps.length - 1]
+    : groupedSteps[groupedSteps.length - 1];
+  const completedCount = groupedSteps.filter(step => /SUCCESS|DONE|OK|COMPLETED|成功/i.test(`${step.status} ${step.status_label || ''}`)).length;
+  const failedCount = groupedSteps.filter(step => /FAIL|ERROR|失败|异常/i.test(`${step.status} ${step.status_label || ''}`)).length;
+  useEffect(() => {
+    if (!open) return;
+    latestItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [open, latestGroup?.id, latestGroup?.status]);
+
+  const stepColor = (stepStatus: string) => {
+    const normalized = stepStatus.toUpperCase();
+    if (/SUCCESS|DONE|OK|COMPLETED|成功/.test(normalized)) return '#16a34a';
+    if (/FAIL|ERROR|失败|异常/.test(normalized)) return '#dc2626';
+    if (/INCOMPLETE|UNFINISHED|未完成/.test(normalized)) return '#b45309';
+    if (/RUN|DISPATCH|PENDING|WAIT|执行|等待/.test(normalized)) return '#2563eb';
+    return c.textMuted;
+  };
+  const stepIcon = (stepStatus: string) => {
+    const normalized = stepStatus.toUpperCase();
+    if (/SUCCESS|DONE|OK|COMPLETED|成功/.test(normalized)) return <CheckCircleOutlined />;
+    if (/FAIL|ERROR|失败|异常/.test(normalized)) return <CloseCircleOutlined />;
+    if (/INCOMPLETE|UNFINISHED|未完成/.test(normalized)) return <ClockCircleOutlined />;
+    if (/RUN|DISPATCH|PENDING|WAIT|执行|等待/.test(normalized)) return <LoadingOutlined spin />;
+    return <ClockCircleOutlined />;
+  };
+  const latestSubStep = latestGroup?.sub_steps?.find(step => /RUN|PENDING|WAIT/i.test(step.status))
+    || latestGroup?.sub_steps?.[latestGroup.sub_steps.length - 1];
+  const latestText = latestSubStep?.title || latestGroup?.title || '等待联调步骤回传';
+
+  return (
+    <section style={{ marginBottom: 8, borderRadius: 14, border: `1px solid ${c.borderFaint}`, background: c.bgSection, overflow: 'hidden' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(prev => !prev)}
+        style={{
+          width: '100%',
+          border: 0,
+          background: 'transparent',
+          padding: '8px 12px',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) auto auto',
+          gap: 10,
+          alignItems: 'center',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+          <ThunderboltOutlined style={{ color: c.accent, fontSize: 10, flexShrink: 0 }} />
+          <span style={{ color: c.textSecondary, fontSize: 10, fontWeight: 400, flexShrink: 0 }}>联调</span>
+          {!/SUCCESS|FINISHED|COMPLETED|FAILED|ERROR/.test(finalStatus) && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+              {[0, 1, 2].map(dot => (
+                <span key={dot} className="typing-dot" style={{ width: 4, height: 4, borderRadius: 4, background: c.accent, display: 'inline-block', animation: `typing-dot 1.2s ease-in-out ${dot * 0.16}s infinite` }} />
+              ))}
+            </span>
+          )}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: c.textPrimary, fontSize: 10, fontWeight: 650, flexShrink: 0 }}>
+            <span style={{ color: c.textMuted, fontSize: 10, fontWeight: 400 }}>{completedCount}/{groupedSteps.length || 0}</span>
+          </span>
+          <span style={{ color: c.textMuted, fontSize: 10, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {latestText}
+          </span>
+          {failedCount > 0 && <span style={{ color: '#dc2626', fontSize: 10, fontWeight: 500, flexShrink: 0 }}>异常 {failedCount}</span>}
+        </span>
+        <span style={{ color: c.textMuted, fontSize: 10, whiteSpace: 'nowrap' }}>{open ? '收起' : '展开'}</span>
+        <span style={{ color: c.textMuted, fontSize: 10, lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>
+          {open ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
+        </span>
+      </button>
+
+      {open && (
+        <div style={{ borderTop: `1px solid ${c.borderFaint}`, padding: '10px 12px 12px', background: '#fff' }}>
+          {groupedSteps.length > 0 ? (
+            <div style={{ maxHeight: 460, overflowY: 'auto', display: 'grid', gap: 10, paddingRight: 4 }}>
+              {groupedSteps.map((step, index) => {
+                const isLatest = latestGroup?.ids?.includes(step.id) || latestGroup?.id === step.id;
+                const isRunningStep = /RUN|DISPATCH|PENDING|WAIT|执行|等待/i.test(`${step.status} ${step.status_label || ''}`);
+                return (
+                  <div ref={isLatest ? latestItemRef : undefined} key={step.id || `${step.order}-${step.title}`} style={{ display: 'grid', gridTemplateColumns: '26px minmax(0, 1fr)', gap: 9 }}>
+                    <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                      <span style={{ width: 22, height: 22, borderRadius: 11, background: '#f3f6fb', color: stepColor(step.status), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>
+                        {stepIcon(step.status)}
+                      </span>
+                      {index < groupedSteps.length - 1 && <span style={{ position: 'absolute', top: 24, bottom: -10, width: 1, background: c.borderFaint }} />}
+                    </div>
+                    <div style={{ minWidth: 0, padding: isLatest ? '8px 10px' : '0 0 2px', borderRadius: 10, background: isLatest ? '#f8fbff' : 'transparent' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ color: c.textMuted, fontSize: 10 }}>{step.order}</span>
+                        <span style={{ color: c.textPrimary, fontSize: 10, fontWeight: 650 }}>{step.title}</span>
+                        {isLatest && !/SUCCESS|FAILED|ERROR/.test(`${step.status}`.toUpperCase()) && (
+                          <span style={{ width: 6, height: 6, borderRadius: 3, background: '#2563eb', boxShadow: '0 0 0 4px rgba(37,99,235,.12)' }} />
+                        )}
+                      </div>
+                      {step.sub_steps && step.sub_steps.length > 0 && (
+                        <div style={{ marginTop: 7, display: 'grid', gap: 5 }}>
+                          {step.sub_steps.map((subStep, subIndex) => {
+                            const subStatus = isLatest && subIndex === step.sub_steps!.length - 1 && isRunningStep
+                              ? 'running'
+                              : /RUN|PENDING|WAIT/i.test(subStep.status) ? 'success' : subStep.status;
+                            return (
+                            <div key={`${step.id}-${subStep.id}-${subStep.title}`} style={{ display: 'grid', gridTemplateColumns: '18px minmax(0, 1fr)', gap: 6, alignItems: 'center', color: c.textSecondary, fontSize: 10 }}>
+                              <span style={{ color: stepColor(subStatus), display: 'inline-flex', justifyContent: 'center' }}>{stepIcon(subStatus)}</span>
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subStep.title}</span>
+                            </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {step.screenshots && step.screenshots.length > 0 && (
+                        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          {step.screenshots.map((url) => (
+                            <button
+                              key={url}
+                              type="button"
+                              onClick={() => setPreviewImage(url)}
+                              style={{ border: 0, padding: 0, background: 'transparent', cursor: 'zoom-in' }}
+                            >
+                              <img src={url} alt="联调步骤截图" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, border: `1px solid ${c.borderFaint}`, background: '#f8fafc', display: 'block' }} />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ color: c.textMuted, fontSize: 10, lineHeight: 1.6 }}>
+              已创建联调任务，正在等待执行步骤回传。
+            </div>
+          )}
+        </div>
+      )}
+      <Modal open={Boolean(previewImage)} footer={null} onCancel={() => setPreviewImage('')} width="min(920px, 92vw)" centered>
+        {previewImage && <img src={previewImage} alt="联调步骤截图" style={{ width: '100%', maxHeight: '78vh', objectFit: 'contain', display: 'block' }} />}
+      </Modal>
+    </section>
+  );
+}
+
+function getWorkflowCard(message: Message): WorkflowCardData | null {
+  const raw = message.metadata?.workflow_card;
+  if (!raw || typeof raw !== 'object') return null;
+  return raw as WorkflowCardData;
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const c = useThemeColors();
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      antMessage.success('已复制');
+      setTimeout(() => setCopied(false), 1600);
+    });
+  }, [text]);
+
+  return (
+    <Tooltip title={copied ? '已复制' : '复制'}>
+      <button
+        type="button"
+        onClick={handleCopy}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: copied ? c.success : c.textMuted,
+          fontSize: 13,
+          width: 28,
+          height: 28,
+          padding: 0,
+          borderRadius: 10,
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = c.accentBgFaint;
+          e.currentTarget.style.color = copied ? c.success : c.accent;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'none';
+          e.currentTarget.style.color = copied ? c.success : c.textMuted;
+        }}
+      >
+        <CopyOutlined />
+      </button>
+    </Tooltip>
+  );
+}
+
+function MessageActionButton({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  const c = useThemeColors();
+
+  return (
+    <Tooltip title={label}>
+      <button
+        type="button"
+        onClick={onClick}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: c.textMuted,
+          fontSize: 13,
+          width: 28,
+          height: 28,
+          padding: 0,
+          borderRadius: 10,
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = c.accentBgFaint;
+          e.currentTarget.style.color = c.accent;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'none';
+          e.currentTarget.style.color = c.textMuted;
+        }}
+      >
+        {icon}
+      </button>
+    </Tooltip>
+  );
+}
+
+function ThinkingChain({
+  steps,
+  toolCalls,
+  codeStyle,
+  showLineNumbers,
+  title = '思维链',
+  defaultExpanded = false,
+}: {
+  steps: NonNullable<Message['thinking_steps']>;
+  toolCalls?: NonNullable<Message['tool_calls']>;
+  codeStyle: CodeStyle;
+  showLineNumbers: boolean;
+  title?: string;
+  defaultExpanded?: boolean;
+}) {
+  const c = useThemeColors();
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const displayTitle = title && !/[鎬濈淮閾]/.test(title) ? title : '思考过程';
+  const [now, setNow] = useState(Date.now());
+  const [expandedStepKeys, setExpandedStepKeys] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!steps.some((step) => step.status === 'loading')) return undefined;
+    const timer = window.setInterval(() => setNow(Date.now()), 500);
+    return () => window.clearInterval(timer);
+  }, [steps]);
+  const toggleStep = (key: string) => {
+    setExpandedStepKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+  const totalDuration = steps.reduce((sum, step) => sum + (step.duration_ms || 0), 0);
+  const running = steps.some((step) => step.status === 'loading');
+  const items = steps.map((step, index) => {
+    const itemKey = step.key || `${step.label}-${index}`;
+    const relatedTool = toolCalls?.find((tool) =>
+      tool.step_key === step.key ||
+      tool.name === step.key ||
+      tool.name === step.label ||
+      tool.display_name === step.label);
+    const details = [
+      step.input ? `请求：${JSON.stringify(step.input).slice(0, 220)}` : '',
+      step.output ? `返回：${JSON.stringify(step.output).slice(0, 220)}` : '',
+      relatedTool?.arguments ? `参数：${relatedTool.arguments.slice(0, 220)}` : '',
+      relatedTool?.result ? `结果：${relatedTool.result.slice(0, 220)}` : '',
+    ].filter(Boolean);
+    const requestText = step.input
+      ? JSON.stringify(step.input, null, 2)
+      : safeJsonText(relatedTool?.arguments);
+    const responseText = step.output
+      ? JSON.stringify(step.output, null, 2)
+      : safeJsonText(relatedTool?.result);
+    const toolTitle = relatedTool?.display_name || relatedTool?.name || step.label;
+    const hasStepDetail = Boolean(requestText || responseText);
+    const stepExpanded = expandedStepKeys.has(itemKey);
+    const durationSeconds = Math.max(
+      0.1,
+      ((step.status === 'loading' ? now - (step.started_at || Date.now()) : step.duration_ms || 0)) / 1000,
+    ).toFixed(1);
+
+    return {
+      key: itemKey,
+      title: (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <span>{index + 1}. {step.label}</span>
+          <span style={{ color: c.textMuted, fontSize: 10, fontWeight: 400 }}>{durationSeconds} 秒</span>
+          {hasStepDetail && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleStep(itemKey);
+              }}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                color: c.textMuted,
+                cursor: 'pointer',
+                fontSize: 10,
+                lineHeight: 1,
+              }}
+            >
+              {stepExpanded ? '收起' : '展开'}
+            </button>
+          )}
+        </span>
+      ),
+      description: step.content,
+      status: step.status === 'completed' ? 'success' as const : step.status,
+      content: hasStepDetail && stepExpanded ? (
+        <div style={{ display: 'grid', gap: 8, width: '100%', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: c.textSecondary, fontSize: 10, fontWeight: 650 }}>
+            <CapabilityIcon kind={relatedTool?.kind || step.key} size={10} />
+            <span>{toolTitle}</span>
+          </div>
+          {requestText && (
+            <div style={{ width: '100%', minWidth: 0 }}>
+              <div style={{ marginBottom: 4, color: c.textMuted, fontSize: 10 }}>请求</div>
+              <FancyCodeBlock language="json" codeStyle={codeStyle} showLineNumbers={showLineNumbers}>{requestText}</FancyCodeBlock>
+            </div>
+          )}
+          {responseText && (
+            <div style={{ width: '100%', minWidth: 0 }}>
+              <div style={{ marginBottom: 4, color: c.textMuted, fontSize: 10 }}>返回</div>
+              <FancyCodeBlock language="json" codeStyle={codeStyle} showLineNumbers={showLineNumbers}>{responseText}</FancyCodeBlock>
+            </div>
+          )}
+        </div>
+      ) : undefined,
+    };
+  });
+
+  return (
+    <div
+      style={{
+        marginBottom: 8,
+        borderRadius: 14,
+        border: `1px solid ${c.borderFaint}`,
+        background: c.bgSection,
+        overflow: 'visible',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 12px',
+          position: expanded ? 'sticky' : 'static',
+          top: 0,
+          zIndex: 8,
+          background: expanded ? '#fff' : 'transparent',
+          border: 'none',
+          borderBottom: expanded ? `1px solid ${c.borderFaint}` : 'none',
+          cursor: 'pointer',
+          fontSize: 10,
+          color: c.textSecondary,
+        }}
+      >
+        <BulbOutlined style={{ fontSize: 10, color: c.accent }} />
+        <span>{displayTitle}</span>
+        {running && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            {[0, 1, 2].map((dot) => (
+              <span
+                key={dot}
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: '50%',
+                  background: c.accent,
+                  animation: `typing-dot 1.2s ease-in-out ${dot * 0.16}s infinite`,
+                }}
+              />
+            ))}
+          </span>
+        )}
+        <span style={{ color: c.textMuted }}>{running ? '正在思考' : `完成 ${steps.length} 步`}</span>
+        {totalDuration > 0 && <span style={{ color: c.textMuted }}>{(totalDuration / 1000).toFixed(1)} 秒</span>}
+        <span style={{ marginLeft: 'auto', color: c.textMuted, fontSize: 10 }}>
+          {expanded ? '收起' : '展开'}
+        </span>
+        <span style={{ color: c.textMuted, fontSize: 10 }}>
+          {expanded ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
+        </span>
+      </button>
+      {expanded && (
+        <div style={{ padding: '0 12px 12px' }}>
+          <ThoughtChain
+            items={items}
+            line="dashed"
+            styles={{
+              item: { fontSize: 10 },
+              itemContent: { fontSize: 10 },
+              itemFooter: { color: c.textMuted, fontSize: 10 },
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MarkdownRenderer({
+  content,
+  codeStyle,
+  showLineNumbers,
+}: {
+  content: string;
+  codeStyle: CodeStyle;
+  showLineNumbers: boolean;
+}) {
+  const c = useThemeColors();
+
+  const segments = useMemo(() => {
+    const parts: Array<{ type: 'text' | 'code'; content: string; language?: string }> = [];
+    const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push({ type: 'text', content: content.slice(lastIndex, match.index) });
+      }
+      parts.push({ type: 'code', content: match[2], language: match[1] || 'text' });
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < content.length) {
+      parts.push({ type: 'text', content: content.slice(lastIndex) });
+    }
+
+    return parts;
+  }, [content]);
+
+  const renderText = (text: string) => {
+    const lines = text.split('\n');
+    return lines.map((line, index) => {
+      const normalizedLine = line.replace(/\*\*([^*]+)\*\*/g, '$1');
+      const trimmedLine = normalizedLine.trim();
+      const rawTrimmedLine = line.trim();
+    const hasPreviousContent = lines.slice(0, index).some((item) => item.trim());
+    const sectionDivider = hasPreviousContent ? (
+      <div style={{ height: 1, background: c.borderFaint, margin: '14px 0 12px' }} />
+    ) : null;
+    const wrapSection = (node: React.ReactElement) => sectionDivider ? (
+      <React.Fragment key={index}>
+        {sectionDivider}
+        {node}
+      </React.Fragment>
+    ) : node;
+    const boldHeadingMatch = trimmedLine.match(/^\*\*([^*]+)\*\*$/);
+    if (boldHeadingMatch) {
+      return wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{boldHeadingMatch[1]}</h2>);
+    }
+
+    const boldLabelMatch = trimmedLine.match(/^\*\*([^*]+)\*\*[:：]\s*(.*)$/);
+    if (boldLabelMatch) {
+      return wrapSection(
+        <div key={index} style={{ margin: '0 0 8px' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{boldLabelMatch[1]}</div>
+          {boldLabelMatch[2] && <div style={{ marginTop: 4, color: c.textSecondary }}>{boldLabelMatch[2]}</div>}
+        </div>,
+      );
+    }
+
+    if (trimmedLine.startsWith('### ')) {
+      return wrapSection(<h3 key={index} style={{ fontSize: 15, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 4 }}>{trimmedLine.slice(4)}</h3>);
+    }
+    if (trimmedLine.startsWith('## ')) {
+      return wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{trimmedLine.slice(3)}</h2>);
+    }
+    if (trimmedLine.startsWith('# ')) {
+      return wrapSection(<h1 key={index} style={{ fontSize: 18, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 8 }}>{trimmedLine.slice(2)}</h1>);
+    }
+
+    const listMatch = trimmedLine.match(/^(\d+)[.、)]\s*(.*)/);
+    if (listMatch) {
+      return (
+        <div key={index} style={{ display: 'grid', gridTemplateColumns: '22px minmax(0, 1fr)', gap: 8, alignItems: 'start', margin: '3px 0' }}>
+          <span
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: 999,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: c.accentBgFaint,
+              color: c.accent,
+              fontSize: 11,
+              fontWeight: 650,
+              lineHeight: 1,
+            }}
+          >
+            {listMatch[1]}
+          </span>
+          <span style={{ color: c.textBody }}>{listMatch[2]}</span>
+        </div>
+      );
+    }
+
+    if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ') || trimmedLine.startsWith('•')) {
+      const content = trimmedLine.startsWith('•') ? trimmedLine.slice(1).trim() : trimmedLine.slice(2);
+      return (
+        <div key={index} style={{ display: 'flex', gap: 8 }}>
+          <span style={{ color: c.accent }}>•</span>
+          <span>{content}</span>
+        </div>
+      );
+    }
+
+    if (!trimmedLine) return <div key={index} style={{ height: 8 }} />;
+    return <p key={index} style={{ margin: '2px 0' }}>{normalizedLine}</p>;
+    });
+  };
+
+  return (
+    <div style={{ fontSize: 14, lineHeight: 1.82, color: c.textBody }}>
+      {segments.map((segment, index) => {
+        if (segment.type === 'code') {
+          if (segment.language?.toLowerCase() === 'mermaid') {
+            return <MermaidDiagram key={index} chart={segment.content} />;
+          }
+          return (
+            <FancyCodeBlock
+              key={index}
+              language={segment.language}
+              codeStyle={codeStyle}
+              showLineNumbers={showLineNumbers}
+            >
+              {segment.content}
+            </FancyCodeBlock>
+          );
+        }
+
+        return <React.Fragment key={index}>{renderText(segment.content)}</React.Fragment>;
+      })}
+    </div>
+  );
+}
+
+function MermaidDiagram({ chart }: { chart: string }) {
+  const c = useThemeColors();
+  const [open, setOpen] = useState(false);
+  const nodes = useMemo(() => {
+    const cleaned = chart
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !/^flowchart|^graph/i.test(line));
+    const labels: string[] = [];
+    for (const line of cleaned) {
+      const parts = line.split(/-->|---|==>|-.->/).map(part => part.trim());
+      for (const part of parts) {
+        const label = part
+          .replace(/^[A-Za-z0-9_]+\[/, '')
+          .replace(/^[A-Za-z0-9_]+\(/, '')
+          .replace(/[\]\)]$/, '')
+          .replace(/^["']|["']$/g, '')
+          .trim();
+        if (label && !labels.includes(label)) labels.push(label);
+      }
+    }
+    return labels.slice(0, 8);
+  }, [chart]);
+
+  const renderDiagram = (large = false) => (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: large ? 'center' : 'flex-start',
+        gap: large ? 12 : 8,
+        flexWrap: 'wrap',
+        padding: large ? 16 : 0,
+      }}
+    >
+      {nodes.map((node, index) => (
+        <React.Fragment key={`${node}-${index}-${large ? 'large' : 'preview'}`}>
+          <div
+            style={{
+              borderRadius: large ? 14 : 12,
+              border: `1px solid ${c.borderFaint}`,
+              background: c.bgSection,
+              padding: large ? '12px 14px' : '8px 10px',
+              color: c.textSecondary,
+              fontSize: large ? 14 : 12,
+              lineHeight: 1.5,
+              maxWidth: large ? 220 : 160,
+              wordBreak: 'break-word',
+            }}
+          >
+            {node}
+          </div>
+          {index < nodes.length - 1 && (
+            <span style={{ color: c.textMuted, fontSize: large ? 18 : 14 }}>→</span>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
+  return (
+    <div style={{ margin: '10px 0', borderRadius: 14, border: `1px solid ${c.borderFaint}`, background: '#fff', padding: 12 }}>
+      <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: c.textSecondary }}>流程图</div>
+        {nodes.length > 0 && <div style={{ fontSize: 11, color: c.textMuted }}>点击查看大图</div>}
+      </div>
+      {nodes.length > 0 ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            style={{
+              width: '100%',
+              border: 'none',
+              background: '#fff',
+              padding: 0,
+              textAlign: 'left',
+              cursor: 'zoom-in',
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 12,
+                border: `1px solid ${c.borderFaint}`,
+                background: '#fbfdff',
+                padding: 10,
+                overflow: 'hidden',
+              }}
+            >
+              {renderDiagram(false)}
+            </div>
+          </button>
+          <Modal
+            title="流程图"
+            open={open}
+            onCancel={() => setOpen(false)}
+            footer={null}
+            width={860}
+            centered
+          >
+            <div style={{ borderRadius: 14, border: `1px solid ${c.borderFaint}`, background: '#fff', minHeight: 220 }}>
+              {renderDiagram(true)}
+            </div>
+          </Modal>
+        </>
+      ) : (
+        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', color: c.textMuted, fontSize: 12 }}>{chart}</pre>
+      )}
+    </div>
+  );
+}
+
+function SystemPromptDisplay({ prompt }: { prompt: string }) {
+  const c = useThemeColors();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div
+      style={{
+        margin: '8px 0',
+        borderRadius: 14,
+        border: `1px solid ${c.borderFaint}`,
+        overflow: 'hidden',
+        background: c.bgSection,
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 12px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: 12,
+          color: c.textSecondary,
+        }}
+      >
+        <EyeOutlined style={{ fontSize: 12, color: c.accent }} />
+        <span>系统提示词</span>
+        <span style={{ marginLeft: 'auto', color: c.textMuted }}>{expanded ? <UpOutlined /> : <DownOutlined />}</span>
+      </button>
+      {expanded && (
+        <div
+          style={{
+            padding: 12,
+            fontSize: 12,
+            color: c.textSecondary,
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'var(--font-mono)',
+            maxHeight: 300,
+            overflow: 'auto',
+          }}
+        >
+          {prompt}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MissingFieldPanel({
+  fields,
+  onClick,
+}: {
+  fields: MissingField[];
+  onClick?: (field: MissingField, value?: string) => void;
+}) {
+  const c = useThemeColors();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+
+  if (fields.length === 0) return null;
+
+  const getOptions = (field: MissingField) => {
+    if (field.field_key === 'compare_source') {
+      return ['媒体后台原始账单', '智投平台报表', 'BI 报表', '其他报表'];
+    }
+    return [];
+  };
+  const hasRequiredMissing = fields.some((field) => field.priority === 'required' && !drafts[field.field_key]?.trim());
+
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        padding: 12,
+        border: `1px solid ${c.borderFaint}`,
+        borderRadius: 14,
+        background: '#fff',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, color: c.textPrimary, fontSize: 13, fontWeight: 600 }}>
+        <InfoCircleOutlined style={{ color: c.accent }} />
+        <span>补充排查条件</span>
+      </div>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {fields.slice(0, 6).map((field) => {
+          const options = getOptions(field);
+          return (
+          <label
+            key={field.field_key}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '88px minmax(0, 1fr)',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Tooltip title={`${field.why_required} ${field.suggested_question}`}>
+              <span style={{ color: c.textSecondary, fontSize: 12, fontWeight: 600, cursor: 'help' }}>
+                {field.field_label}
+                {field.priority === 'required' ? <span style={{ color: c.danger }}> *</span> : null}
+              </span>
+            </Tooltip>
+            {options.length > 0 ? (
+              <select
+                value={drafts[field.field_key] || ''}
+                onChange={(event) => setDrafts((prev) => ({ ...prev, [field.field_key]: event.target.value }))}
+                style={{
+                  height: 34,
+                  borderRadius: 10,
+                  border: `1px solid ${c.borderFaint}`,
+                  background: '#fff',
+                  padding: '0 10px',
+                  color: drafts[field.field_key] ? c.textPrimary : c.textMuted,
+                  fontSize: 12,
+                  outline: 'none',
+                }}
+              >
+                <option value="">请选择</option>
+                {options.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={drafts[field.field_key] || ''}
+                onChange={(event) => setDrafts((prev) => ({ ...prev, [field.field_key]: event.target.value }))}
+                placeholder={`填写${field.field_label}`}
+                style={{
+                  height: 32,
+                  borderRadius: 10,
+                  border: `1px solid ${c.borderFaint}`,
+                  background: '#fff',
+                  padding: '0 10px',
+                  color: c.textSecondary,
+                  fontSize: 12,
+                  outline: 'none',
+                }}
+              />
+            )}
+          </label>
+        );
+        })}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+          <button
+            type="button"
+            disabled={hasRequiredMissing}
+            onClick={() => {
+              const completed = fields
+                .filter((field) => drafts[field.field_key]?.trim())
+                .map((field) => `${field.field_label}=${drafts[field.field_key].trim()}`);
+              if (completed.length === 0) return;
+              onClick?.(fields[0], completed.join('；'));
+            }}
+            style={{
+              border: 'none',
+              background: hasRequiredMissing ? c.bgSection : c.accent,
+              color: hasRequiredMissing ? c.textMuted : '#fff',
+              borderRadius: 999,
+              padding: '8px 14px',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: hasRequiredMissing ? 'not-allowed' : 'pointer',
+            }}
+          >
+            确认并继续
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function collectSourceRefs(message: Message): SourceRefView[] {
+  const meta = message.metadata || {};
+  const raw = [
+    meta.source_refs,
+    meta.sourceRefs,
+    meta.sources,
+    meta.citations,
+    message.evidence_ids,
+  ].find((value) => Array.isArray(value)) as unknown[] | undefined;
+
+  if (!raw || raw.length === 0) return [];
+
+  return raw
+    .reduce<SourceRefView[]>((acc, item) => {
+      if (typeof item === 'string') {
+        acc.push({ title: item, sourceType: 'other' });
+        return acc;
+      }
+      if (item && typeof item === 'object') {
+        const obj = item as Record<string, unknown>;
+        const title = String(obj.report_name || obj.title || obj.name || obj.source || obj.id || '');
+        if (!title) return acc;
+        const rawType = String(obj.source_type || obj.type || '');
+        const sourceType = rawType === 'knowledge_base' || rawType === 'report_mcp' || rawType === 'mcp' || rawType === 'skill' || rawType === 'web_search'
+          ? rawType
+          : 'other';
+        acc.push({
+          title: sourceType === 'report_mcp' ? String(obj.report_name || title) : title,
+          source: obj.source ? String(obj.source) : undefined,
+          url: obj.url ? String(obj.url) : undefined,
+          sourceType,
+          reportName: obj.report_name ? String(obj.report_name) : undefined,
+          prompt: obj.prompt ? String(obj.prompt) : undefined,
+          detail: obj.detail || obj.content || obj.snippet ? String(obj.detail || obj.content || obj.snippet) : undefined,
+        });
+      }
+      return acc;
+    }, [])
+    .slice(0, 5);
+}
+
+function collectCapabilities(message: Message): CapabilityRefView[] {
+  const calls = message.tool_calls || [];
+  const capabilities = calls
+    .map((call, index) => {
+      const kind = normalizeToolKind(call.kind || call.type || call.name);
+      return {
+        key: `${call.step_key || call.name}-${index}`,
+        name: call.display_name || call.name || `Tool ${index + 1}`,
+        kind,
+        prompt: call.prompt,
+        providerUrl: call.provider_url,
+        arguments: call.arguments,
+        result: call.result,
+        status: call.status,
+      };
+    })
+    .filter((item, index, array) => array.findIndex(other => other.name === item.name && other.kind === item.kind) === index)
+    .slice(0, 8);
+  const workflowCard = getWorkflowCard(message);
+  const debugTaskId = workflowCard?.type === 'legacy_media_debug' ? workflowCard.debugTask?.id : '';
+  if (!debugTaskId) return capabilities;
+  return [
+    ...capabilities.filter(item => item.kind !== 'debug_log').slice(0, 7),
+    {
+      key: `debug-log-${debugTaskId}`,
+      name: '联调日志',
+      kind: 'debug_log',
+      providerUrl: `/api/xiaoqiao/debug-automation/mcp-observe/${encodeURIComponent(debugTaskId)}`,
+      status: workflowCard?.debugTask?.status || workflowCard?.status,
+    },
+  ].slice(0, 8);
+}
+
+function UnifiedEvidenceStrip({
+  capabilities,
+  refs,
+  onOpenCapability,
+  onOpenSource,
+}: {
+  capabilities: CapabilityRefView[];
+  refs: SourceRefView[];
+  onOpenCapability?: (capability: CapabilityRefView) => void;
+  onOpenSource?: (ref: SourceRefView) => void;
+}) {
+  const c = useThemeColors();
+  const [expanded, setExpanded] = useState(false);
+  const items: Array<
+    | { type: 'capability'; key: string; label: string; detail: string; kind: string; payload: CapabilityRefView }
+    | { type: 'source'; key: string; label: string; detail: string; kind: string; payload: SourceRefView }
+  > = [
+    ...capabilities.map((capability) => ({
+      type: 'capability' as const,
+      key: `cap-${capability.key}`,
+      label: capability.kind === 'debug_log' ? '联调日志' : capability.kind === 'skill' ? 'Skill' : capability.kind === 'report_mcp' ? '报表 MCP' : capability.kind === 'knowledge' ? '知识库' : capability.kind === 'web_search' ? '网页查询' : 'MCP',
+      detail: capability.name,
+      kind: capability.kind,
+      payload: capability,
+    })),
+    ...refs.map((ref, index) => ({
+      type: 'source' as const,
+      key: `src-${ref.sourceType || 'source'}-${ref.title}-${index}`,
+      label: ref.sourceType === 'report_mcp' ? '报表来源' : ref.sourceType === 'knowledge_base' ? '知识库来源' : ref.sourceType === 'web_search' ? '网页来源' : '来源',
+      detail: ref.sourceType === 'report_mcp' ? `${ref.reportName || ref.title}` : ref.title,
+      kind: ref.sourceType || 'other',
+      payload: ref,
+    })),
+  ].filter((item, index, array) =>
+    array.findIndex(other => other.kind === item.kind && other.detail === item.detail) === index,
+  ).slice(0, 10);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        margin: '0 0 8px',
+        borderRadius: 14,
+        border: `1px solid ${c.borderFaint}`,
+        background: c.bgSection,
+        overflow: 'hidden',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 12px',
+          border: 'none',
+          background: 'transparent',
+          color: c.textSecondary,
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <InfoCircleOutlined style={{ color: c.accent, fontSize: 10 }} />
+        <span style={{ fontSize: 10, fontWeight: 400 }}>调用与来源</span>
+        <span style={{ fontSize: 10, color: c.textMuted }}>
+          {capabilities.length} 个调用 / {refs.length} 个来源
+        </span>
+        <span style={{ marginLeft: 'auto', color: c.textMuted, fontSize: 10 }}>
+          {expanded ? '收起' : '展开'}
+        </span>
+        {expanded ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
+      </button>
+
+      {expanded && (
+        <div
+          style={{
+            borderTop: `1px solid ${c.borderFaint}`,
+            padding: '10px 12px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 6,
+            alignItems: 'center',
+          }}
+        >
+          {items.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => item.type === 'capability' ? onOpenCapability?.(item.payload) : onOpenSource?.(item.payload)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                maxWidth: 340,
+                border: `1px solid ${c.borderFaint}`,
+                background: '#fff',
+                color: c.textSecondary,
+                borderRadius: 999,
+                padding: '4px 8px',
+                fontSize: 10,
+                cursor: 'pointer',
+              }}
+              title={item.detail}
+            >
+              <CapabilityIcon kind={item.kind} size={10} />
+              <span style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>{item.label}</span>
+              <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: c.textMuted }}>
+                {item.detail}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SourceReferenceStrip({
+  refs,
+  onOpen,
+}: {
+  refs: SourceRefView[];
+  onOpen?: (ref: SourceRefView) => void;
+}) {
+  const c = useThemeColors();
+  if (refs.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        marginTop: 8,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        borderRadius: 14,
+        border: `1px solid ${c.borderFaint}`,
+        background: c.bgSection,
+        padding: '8px 10px',
+        color: c.textSecondary,
+        textAlign: 'left',
+      }}
+    >
+      <InfoCircleOutlined style={{ color: c.accent, fontSize: 13 }} />
+      <span style={{ fontSize: 12, fontWeight: 560, flexShrink: 0 }}>来源</span>
+      <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap', minWidth: 0 }}>
+        {refs.map((ref) => {
+          const label = ref.sourceType === 'report_mcp'
+            ? `${ref.title} · 取自智投报表MCP`
+            : ref.sourceType === 'knowledge_base'
+              ? `${ref.title} · 知识库`
+              : ref.title;
+          return (
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen?.(ref)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') onOpen?.(ref);
+            }}
+            key={`${ref.sourceType || 'source'}-${ref.title}`}
+            style={{
+              maxWidth: 260,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              borderRadius: 999,
+              border: `1px solid ${c.borderFaint}`,
+              background: '#fff',
+              padding: '3px 8px',
+              fontSize: 11,
+              color: c.textMuted,
+              cursor: onOpen ? 'pointer' : 'default',
+            }}
+            title={label}
+          >
+            <CapabilityIcon kind={ref.sourceType} size={11} />
+            {label}
+          </span>
+        );
+        })}
+      </span>
+    </div>
+  );
+}
+
+function CapabilityStrip({
+  capabilities,
+  onOpen,
+}: {
+  capabilities: CapabilityRefView[];
+  onOpen?: (capability: CapabilityRefView) => void;
+}) {
+  const c = useThemeColors();
+  if (capabilities.length === 0) return null;
+
+  const labelMap: Record<string, string> = {
+    skill: 'Skill',
+    mcp: 'MCP',
+    report_mcp: '报表 MCP',
+    knowledge: '知识库',
+    web_search: '网页搜索',
+    model: '模型',
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '0 0 6px' }}>
+      {capabilities.map((capability) => (
+        <button
+          key={capability.key}
+          type="button"
+          onClick={() => onOpen?.(capability)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 5,
+            border: `1px solid ${c.borderFaint}`,
+            background: '#fff',
+            color: c.textSecondary,
+            borderRadius: 999,
+            padding: '4px 8px',
+            fontSize: 11,
+            cursor: onOpen ? 'pointer' : 'default',
+          }}
+          title={capability.prompt || capability.name}
+        >
+          <CapabilityIcon kind={capability.kind} size={12} />
+          <span>{labelMap[capability.kind] || '能力'}</span>
+          <span style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: c.textMuted }}>
+            {capability.name}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ReportComposerCard({ data }: { data: WorkflowCardData }) {
+  const c = useThemeColors();
+  const template = data.template || {};
+  const [templateConfirmed, setTemplateConfirmed] = useState(false);
+  const [querying, setQuerying] = useState(false);
+  const [dataColumns, setDataColumns] = useState<string[]>(data.dataPreview?.columns || []);
+  const [dataRows, setDataRows] = useState<Array<Record<string, string>>>(data.dataPreview?.rows || []);
+  const [taskCreated, setTaskCreated] = useState(false);
+
+  const metrics = template.metrics || [];
+  const dimensions = template.dimensions || [];
+  const deliveryTargets = template.deliveryTargets || [];
+
+  const runDataQuery = async () => {
+    setQuerying(true);
+    try {
+      const response = await fetch('/api/xiaoqiao/report-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: data.sourceText || '生成广告消耗日报',
+          reportDate: new Date().toISOString().slice(0, 10),
+        }),
+      });
+      const payload = await response.json();
+      const draft = payload?.draft;
+      if (draft?.columns?.length && draft?.rows?.length) {
+        setDataColumns(draft.columns.map(String));
+        setDataRows(draft.rows.slice(0, 8).map((row: Record<string, unknown>) => {
+          const next: Record<string, string> = {};
+          Object.entries(row).forEach(([key, value]) => {
+            next[key] = String(value ?? '');
+          });
+          return next;
+        }));
+        antMessage.success('已生成报表预览');
+      } else {
+        setDataColumns(['日期', '媒体', '账户', '消耗', '数据来源', '状态']);
+        setDataRows([
+          {
+            日期: '待确认查询范围',
+            媒体: '全部',
+            账户: '全部',
+            消耗: '等待智投报表返回',
+            数据来源: '智投报表',
+            状态: '模板已确认',
+          },
+        ]);
+        antMessage.warning('未返回真实报表数据，请确认报表 MCP 是否可用');
+      }
+    } catch {
+      antMessage.error('报表查询失败，请检查报表服务');
+    } finally {
+      setQuerying(false);
+    }
+  };
+
+  const createSchedule = async () => {
+    try {
+      await fetch('/api/xiaoqiao/scheduled-tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: template.name || '广告消耗日报',
+          description: '每天 10:00 自动生成并发送广告消耗日报',
+          task_type: 'report',
+          cron_expression: '0 10 * * *',
+          frequency: template.frequency || 'daily',
+          monitor_metrics: metrics,
+          alert_channels: deliveryTargets.length > 0 ? deliveryTargets : ['小闪'],
+          alert_targets: deliveryTargets.length > 0 ? deliveryTargets : ['小闪'],
+          custom_params: {
+            delivery_time: template.deliveryTime || '10:00',
+            dimensions,
+            delivery_targets: deliveryTargets.length > 0 ? deliveryTargets : ['小闪'],
+            metrics,
+            source_text: data.sourceText,
+          },
+          status: 'active',
+        }),
+      });
+      setTaskCreated(true);
+      antMessage.success('已创建每天 10:00 的广告消耗日报任务');
+    } catch {
+      antMessage.error('定时任务创建失败');
+    }
+  };
+
+  const templateRows = [
+    ['报表名称', template.name || '广告消耗日报', '待确认'],
+    ['指标', metrics.join('、') || '消耗', metrics.length > 0 ? '已识别' : '待补充'],
+    ['维度', dimensions.join('、') || '日期、媒体、账户', dimensions.length > 0 ? '已识别' : '待补充'],
+    ['时间范围', template.timeRange || '每天生成前一日数据', '已识别'],
+    ['发送时间', `${template.frequency || '每天'} ${template.deliveryTime || '10:00'}`, '已识别'],
+    ['发送位置', deliveryTargets.join('、') || '小闪', '待确认'],
+  ];
+
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        borderRadius: 14,
+        border: `1px solid ${c.borderFaint}`,
+        background: '#fff',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '报表模板确认'}</div>
+            <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>
+              先确认指标和维度，再获取数据、保存模板或创建定时任务。
+            </div>
+          </div>
+          <Tag color={taskCreated ? 'green' : templateConfirmed ? 'blue' : 'default'} style={{ borderRadius: 999, margin: 0 }}>
+            {taskCreated ? '已定时' : templateConfirmed ? '模板已确认' : '待确认'}
+          </Tag>
+        </div>
+      </div>
+
+      <div style={{ padding: 14, display: 'grid', gap: 14 }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>可接收的模板来源</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {(data.intakeModes || ['截图提取模板', '上传 Excel 模板', '手动输入模板', '指定系统页面']).map((mode) => (
+              <span
+                key={mode}
+                style={{
+                  borderRadius: 999,
+                  border: `1px solid ${c.borderFaint}`,
+                  padding: '5px 9px',
+                  fontSize: 12,
+                  color: c.textSecondary,
+                  background: '#fff',
+                }}
+              >
+                {mode}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>报表模板</div>
+          <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead>
+                <tr style={{ color: c.textMuted, textAlign: 'left' }}>
+                  <th style={{ padding: '8px 6px', fontWeight: 600 }}>项目</th>
+                  <th style={{ padding: '8px 6px', fontWeight: 600 }}>当前值</th>
+                  <th style={{ padding: '8px 6px', fontWeight: 600 }}>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                {templateRows.map(([label, value, status]) => (
+                  <tr key={label} style={{ borderTop: `1px solid ${c.borderFaint}` }}>
+                    <td style={{ padding: '8px 6px', color: c.textSecondary, whiteSpace: 'nowrap' }}>{label}</td>
+                    <td style={{ padding: '8px 6px', color: c.textPrimary }}>{value}</td>
+                    <td style={{ padding: '8px 6px', color: status === '待确认' ? c.warning : c.success, whiteSpace: 'nowrap' }}>{status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>指标校验</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {metrics.map((metric) => (
+              <Tag key={metric} color="green" style={{ borderRadius: 999, margin: 0 }}>{metric} 已存在</Tag>
+            ))}
+            {(data.metricCatalog || []).slice(0, 8).map((metric) => (
+              <Tag key={metric} style={{ borderRadius: 999, margin: 0 }}>{metric}</Tag>
+            ))}
+          </div>
+        </div>
+
+        {dataColumns.length > 0 && (
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>数据预览</div>
+            <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr style={{ color: c.textMuted, textAlign: 'left' }}>
+                    {dataColumns.map((column) => (
+                      <th key={column} style={{ padding: '8px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{column}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataRows.map((row, rowIndex) => (
+                    <tr key={rowIndex} style={{ borderTop: `1px solid ${c.borderFaint}` }}>
+                      {dataColumns.map((column) => (
+                        <td key={column} style={{ padding: '8px 6px', color: c.textPrimary, whiteSpace: 'nowrap' }}>{row[column] || '-'}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => {
+              setTemplateConfirmed(true);
+              antMessage.success('模板已确认');
+            }}
+            style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
+          >
+            确认模板
+          </button>
+          <button
+            type="button"
+            disabled={!templateConfirmed || querying}
+            onClick={runDataQuery}
+            style={{ border: `1px solid ${templateConfirmed ? c.accentBorder : c.borderFaint}`, background: '#fff', color: templateConfirmed ? c.accent : c.textMuted, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: templateConfirmed ? 'pointer' : 'not-allowed' }}
+          >
+            {querying ? '获取中' : '立即获取数据'}
+          </button>
+          <button
+            type="button"
+            disabled={!templateConfirmed}
+            onClick={createSchedule}
+            style={{ border: `1px solid ${templateConfirmed ? c.accentBorder : c.borderFaint}`, background: '#fff', color: templateConfirmed ? c.accent : c.textMuted, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: templateConfirmed ? 'pointer' : 'not-allowed' }}
+          >
+            创建定时任务
+          </button>
+          <button type="button" onClick={() => antMessage.success('已分享到小闪')} style={{ border: `1px solid ${c.borderFaint}`, background: '#fff', color: c.textSecondary, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}>
+            分享到小闪
+          </button>
+          <button type="button" onClick={() => antMessage.success('已保存到个人知识库')} style={{ border: `1px solid ${c.borderFaint}`, background: '#fff', color: c.textSecondary, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}>
+            保存到知识库
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReportComposerFlowCard({ data }: { data: WorkflowCardData }) {
+  const c = useThemeColors();
+  const template = data.template || {};
+  const metrics = template.metrics || ['消耗'];
+  const dimensions = template.dimensions || ['日期', '媒体', '账户'];
+  const deliveryTargets = template.deliveryTargets || ['小闪'];
+  const metricIssues = data.metricIssues || [];
+  const templateColumns = [...dimensions, ...metrics];
+  const [templateConfirmed, setTemplateConfirmed] = useState(false);
+  const [querying, setQuerying] = useState(false);
+  const [dataReady, setDataReady] = useState(false);
+  const [taskCreated, setTaskCreated] = useState(false);
+  const [dataColumns, setDataColumns] = useState<string[]>([]);
+  const [dataRows, setDataRows] = useState<Array<Record<string, string>>>([]);
+
+  const queryData = async () => {
+    setQuerying(true);
+    try {
+      const response = await fetch('/api/xiaoqiao/report-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: data.sourceText || '生成广告消耗日报',
+          reportDate: new Date().toISOString().slice(0, 10),
+        }),
+      });
+      const payload = await response.json();
+      const draft = payload?.draft;
+      if (draft?.columns?.length && draft?.rows?.length) {
+        setDataColumns(draft.columns.map(String));
+        setDataRows(draft.rows.slice(0, 8).map((row: Record<string, unknown>) => {
+          const next: Record<string, string> = {};
+          Object.entries(row).forEach(([key, value]) => {
+            next[key] = String(value ?? '');
+          });
+          return next;
+        }));
+      } else {
+        setDataColumns(templateColumns);
+        setDataRows([{ 日期: '前一日', 媒体: '全部', 账户: '全部', 消耗: '等待智投报表返回' }]);
+        antMessage.warning('未返回真实报表数据，请确认报表 MCP 是否可用');
+      }
+      setDataReady(true);
+    } catch {
+      antMessage.error('报表查询失败，请检查报表服务');
+    } finally {
+      setQuerying(false);
+    }
+  };
+
+  const createSchedule = async () => {
+    try {
+      await fetch('/api/xiaoqiao/scheduled-tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: template.name || '广告消耗日报',
+          description: '每天 10:00 自动生成并发送广告消耗日报',
+          task_type: 'report_generate',
+          cron_expression: '0 10 * * *',
+          frequency: 'daily',
+          monitor_metrics: metrics,
+          alert_channels: deliveryTargets,
+          alert_targets: deliveryTargets,
+          custom_params: {
+            delivery_time: template.deliveryTime || '10:00',
+            dimensions,
+            metrics,
+            delivery_targets: deliveryTargets,
+            source_text: data.sourceText,
+          },
+          status: 'active',
+        }),
+      });
+      setTaskCreated(true);
+      antMessage.success('已创建每天 10:00 的广告消耗日报');
+    } catch {
+      antMessage.error('定时报表创建失败');
+    }
+  };
+
+  const stageItems = [
+    { label: '确认模板', active: templateConfirmed },
+    { label: '查询数据', active: dataReady },
+    { label: '创建定时报表', active: taskCreated },
+  ];
+
+  return (
+    <div style={{ marginTop: 10, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '广告消耗日报'}</div>
+        <Tag color={taskCreated ? 'green' : dataReady ? 'blue' : 'default'} style={{ borderRadius: 999, margin: 0 }}>
+          {taskCreated ? '已创建' : dataReady ? '数据待确认' : templateConfirmed ? '查询中' : '模板待确认'}
+        </Tag>
+      </div>
+
+      <div style={{ padding: 14, display: 'grid', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+          {stageItems.map((stage, index) => (
+            <div
+              key={stage.label}
+              style={{
+                borderRadius: 10,
+                border: `1px solid ${stage.active ? c.accentBorder : c.borderFaint}`,
+                background: stage.active ? c.accentBgFaint : '#fff',
+                color: stage.active ? c.accent : c.textMuted,
+                padding: '8px 10px',
+                fontSize: 12,
+                fontWeight: 620,
+              }}
+            >
+              {index + 1}. {stage.label}
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>模板预览</div>
+          <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead>
+                <tr style={{ color: c.textMuted, textAlign: 'left' }}>
+                  {templateColumns.map((column) => (
+                    <th key={column} style={{ padding: '8px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{column}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderTop: `1px solid ${c.borderFaint}` }}>
+                  {templateColumns.map((column) => (
+                    <td key={column} style={{ padding: '8px 6px', color: c.textMuted, whiteSpace: 'nowrap' }}>
+                      {metrics.includes(column) ? '待查询' : column === '日期' ? '前一日' : '全部'}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, color: metricIssues.length > 0 ? c.warning : c.success }}>
+          {metricIssues.length > 0 ? `指标需要确认：${metricIssues.join('、')}` : '指标校验无误'}
+        </div>
+
+        {dataReady && (
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>查询结果</div>
+            <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr style={{ color: c.textMuted, textAlign: 'left' }}>
+                    {dataColumns.map((column) => (
+                      <th key={column} style={{ padding: '8px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{column}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataRows.map((row, rowIndex) => (
+                    <tr key={rowIndex} style={{ borderTop: `1px solid ${c.borderFaint}` }}>
+                      {dataColumns.map((column) => (
+                        <td key={column} style={{ padding: '8px 6px', color: c.textPrimary, whiteSpace: 'nowrap' }}>{row[column] || '-'}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+          {!templateConfirmed && (
+            <button
+              type="button"
+              onClick={() => {
+                setTemplateConfirmed(true);
+                void queryData();
+              }}
+              style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
+            >
+              确认模板并查询数据
+            </button>
+          )}
+          {templateConfirmed && !dataReady && (
+            <span style={{ fontSize: 12, color: c.textMuted }}>{querying ? '正在查询智投报表数据...' : '等待查询结果'}</span>
+          )}
+          {dataReady && !taskCreated && (
+            <>
+              <span style={{ fontSize: 12, color: c.textSecondary }}>请检查数据。无误后可创建每天 10:00 的定时报表。</span>
+              <button
+                type="button"
+                onClick={createSchedule}
+                style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
+              >
+                数据无误，创建定时报表
+              </button>
+            </>
+          )}
+          {taskCreated && (
+            <span style={{ fontSize: 12, color: c.success }}>已创建每天 10:00 发送到{deliveryTargets.join('、') || '小闪'}的广告消耗日报。</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MonitorTaskFlowCard({ data }: { data: WorkflowCardData }) {
+  const c = useThemeColors();
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState(false);
+  const conditions = [
+    { label: '项目范围', value: data.projectContext || '顶部项目选择器当前范围' },
+    { label: '媒体', value: data.media || '巨量' },
+    { label: '指标', value: data.metric || '回传延迟' },
+    { label: '阈值', value: data.threshold || '30 分钟' },
+    { label: '通知', value: data.notifyTarget || '站内告警' },
+  ];
+
+  const createTask = async () => {
+    if (creating || created) return;
+    setCreating(true);
+    try {
+      const res = await fetch('/api/xiaoqiao/scheduled-tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.title || '回传延迟监控',
+          task_type: 'alert_check',
+          status: 'active',
+          frequency: '每 5 分钟',
+          monitor_metrics: ['回传延迟'],
+          alert_conditions: [
+            {
+              metric: 'callback_latency',
+              operator: 'gt',
+              threshold_minutes: Number(String(data.threshold || '30').match(/\d+/)?.[0] || 30),
+            },
+          ],
+          alert_channels: ['站内告警'],
+          custom_params: {
+            project_context: data.projectContext,
+            media: data.media || '巨量',
+            auto_diagnosis: true,
+          },
+        }),
+      });
+      if (!res.ok) throw new Error(`create task failed: ${res.status}`);
+      setCreated(true);
+      antMessage.success('已创建监控任务');
+    } catch {
+      antMessage.error('创建失败，请稍后重试');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: 10, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '回传延迟监控'}</div>
+        <Tag color={created ? 'green' : 'blue'} style={{ margin: 0, borderRadius: 999 }}>
+          {created ? '已创建' : '待确认'}
+        </Tag>
+      </div>
+      <div style={{ padding: 14, display: 'grid', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+          {['识别监控意图', '确认监控条件', '触发后自动排查'].map((step, index) => (
+            <div
+              key={step}
+              style={{
+                borderRadius: 10,
+                border: `1px solid ${index === 1 && !created ? c.accentBorder : c.borderFaint}`,
+                background: index === 1 && !created ? c.accentBgFaint : '#fff',
+                color: index === 1 && !created ? c.accent : c.textSecondary,
+                padding: '8px 10px',
+                fontSize: 12,
+                fontWeight: 620,
+              }}
+            >
+              {index + 1}. {step}
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop: `1px solid ${c.borderFaint}` }}>
+          {conditions.map((item) => (
+            <div
+              key={item.label}
+              style={{ display: 'grid', gridTemplateColumns: '92px minmax(0, 1fr)', gap: 10, padding: '9px 0', borderBottom: `1px solid ${c.borderFaint}`, fontSize: 13 }}
+            >
+              <span style={{ color: c.textMuted }}>{item.label}</span>
+              <span style={{ color: c.textPrimary, fontWeight: 560, wordBreak: 'break-word' }}>{item.value}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: c.textSecondary, lineHeight: 1.7 }}>
+          告警触发后会自动创建排查上下文，并携带项目、媒体、指标和阈值，不再要求用户重复补充。
+        </div>
+        <div>
+          <button
+            type="button"
+            disabled={creating || created}
+            onClick={createTask}
+            style={{
+              border: 'none',
+              background: created ? c.success : c.accent,
+              color: '#fff',
+              borderRadius: 999,
+              padding: '8px 14px',
+              fontSize: 12,
+              cursor: creating || created ? 'default' : 'pointer',
+            }}
+          >
+            {created ? '监控任务已创建' : creating ? '正在创建...' : '确认并创建监控任务'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MonitorInspectionFlowCard({ data }: { data: WorkflowCardData }) {
+  const c = useThemeColors();
+  const items = data.inspectionItems?.length ? data.inspectionItems : [
+    { label: '消耗与预算', status: '待接入', detail: '等待智投报表 MCP 返回昨日投放概览。' },
+    { label: '转化与回传', status: '待接入', detail: '等待回传链路 MCP 返回激活、注册、付费健康度。' },
+    { label: '报表调度', status: '待接入', detail: '等待调度状态工具返回昨日报表完成情况。' },
+  ];
+
+  return (
+    <div style={{ marginTop: 10, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '投放异常巡检'}</div>
+        <Tag color="blue" style={{ margin: 0, borderRadius: 999 }}>监控巡检</Tag>
+      </div>
+      <div style={{ padding: 14, display: 'grid', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+          {['识别宽泛诉求', '执行监控检查', '异常后转排查'].map((step, index) => (
+            <div
+              key={step}
+              style={{
+                borderRadius: 10,
+                border: `1px solid ${index === 1 ? c.accentBorder : c.borderFaint}`,
+                background: index === 1 ? c.accentBgFaint : '#fff',
+                color: index === 1 ? c.accent : c.textSecondary,
+                padding: '8px 10px',
+                fontSize: 12,
+                fontWeight: 620,
+              }}
+            >
+              {index + 1}. {step}
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {items.map((item) => (
+            <div
+              key={item.label}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '120px 76px minmax(0, 1fr)',
+                gap: 10,
+                alignItems: 'center',
+                padding: '9px 0',
+                borderBottom: `1px solid ${c.borderFaint}`,
+                fontSize: 13,
+              }}
+            >
+              <span style={{ color: c.textPrimary, fontWeight: 600 }}>{item.label}</span>
+              <span style={{ color: item.status === '正常' ? c.success : c.textMuted, fontSize: 12 }}>{item.status}</span>
+              <span style={{ color: c.textSecondary, wordBreak: 'break-word' }}>{item.detail}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: c.textSecondary, lineHeight: 1.7 }}>
+          这是项目级巡检，不要求先填写具体异常指标。若巡检发现异常，会携带项目、时间、指标和来源自动进入排查；未发现异常时只返回监控结果。
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WorkflowProcessCard({
+  data,
+  onFollowUpClick,
+  onSubmitFollowUp,
+}: {
+  data: WorkflowCardData;
+  onFollowUpClick?: (text: string) => void;
+  onSubmitFollowUp?: (content: string) => void;
+}) {
+  const c = useThemeColors();
+  if (data.type === 'report_composer') {
+    return <ReportComposerFlowCard data={data} />;
+  }
+  if (data.type === 'monitor_task') {
+    return <MonitorTaskFlowCard data={data} />;
+  }
+  if (data.type === 'monitor_inspection') {
+    return <MonitorInspectionFlowCard data={data} />;
+  }
+  const isDebug = data.type === 'legacy_media_debug';
+  const [formOpen, setFormOpen] = useState(isDebug);
+  const [submitted, setSubmitted] = useState(false);
+  const [drafts, setDrafts] = useState<Record<string, string>>({
+    media: data.media || '',
+    account: data.accountShared ? '已共享到 wuyanlan@dobest.com' : '',
+  });
+  const autoDebugChecks = Array.isArray(data.debugChecks) ? data.debugChecks : [];
+  const debugTaskId = isDebug ? data.debugTask?.id || '' : '';
+  const [debugObservation, setDebugObservation] = useState<DebugObservationData | null>(null);
+  useEffect(() => {
+    if (!debugTaskId || !(data.status === 'running' || data.status === 'started')) return;
+    let stopped = false;
+    let timer: number | undefined;
+    const load = async () => {
+      try {
+        const response = await fetch(`/api/xiaoqiao/debug-automation/mcp-observe/${encodeURIComponent(debugTaskId)}`);
+        if (!response.ok) return;
+        const payload = await response.json() as DebugObservationData;
+        if (stopped) return;
+        setDebugObservation(payload);
+        timer = window.setTimeout(load, 2500);
+      } catch {
+        if (!stopped) timer = window.setTimeout(load, 4000);
+      }
+    };
+    void load();
+    return () => {
+      stopped = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [debugTaskId, data.status]);
+
+  if (isDebug && (data.status === 'running' || data.status === 'started')) {
+    const observedSteps = debugObservation?.steps || [];
+    const latestStep = observedSteps[observedSteps.length - 1];
+    return (
+      <DebugStepStreamPanel
+        steps={observedSteps}
+        status={debugObservation?.status || data.status || ''}
+        latestStep={latestStep}
+      />
+    );
+  }
+  if (isDebug && data.status === 'auto_checked') {
+    const checks = autoDebugChecks.length ? autoDebugChecks : [
+      { label: '项目与媒体', status: '已确认', detail: `${data.projectContext || '当前项目'} / ${data.media || '巨量引擎'}` },
+      { label: '应用共享', status: data.accountShared ? '通过' : '未通过', detail: data.accountShared ? '已共享到 wuyanlan@dobest.com' : '未检测到默认账号共享记录' },
+      { label: '验收状态', status: '通过', detail: '联调配置满足当前媒体验收条件' },
+      { label: '数据上报', status: '通过', detail: '数据上报 MCP 已查询到激活/注册记录' },
+    ];
+    const allPassed = checks.every((item) => item.status === '通过' || item.status === '已确认');
+    const failedChecks = checks.filter((item) => item.status !== '通过' && item.status !== '已确认');
+    return (
+      <div style={{ marginTop: 10, borderRadius: 16, border: `1px solid ${c.borderFaint}`, background: c.bgCard, overflow: 'hidden' }}>
+        <div style={{ padding: '12px 14px' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>自动联调校验结果</div>
+          <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
+            {allPassed ? '前置条件通过，可以发起自动联调。' : '前置条件未通过，只展示需要处理的阻塞项。'}
+          </div>
+          {!allPassed && (
+            <div style={{ marginTop: 10, display: 'grid', gap: 8 }}>
+              {failedChecks.map((item) => (
+              <div key={item.label} style={{ display: 'grid', gridTemplateColumns: '94px 56px 1fr', gap: 8, alignItems: 'center', minHeight: 34, fontSize: 12 }}>
+                <span style={{ color: c.textPrimary, fontWeight: 650 }}>{item.label}</span>
+                <span style={{ color: '#b45309', fontWeight: 700 }}>{item.status}</span>
+                <span style={{ color: c.textSecondary, lineHeight: 1.5 }}>{item.detail}</span>
+              </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  const requiredFields = isDebug
+    ? ['媒体平台', '账号共享状态', '验证事件', '回传查看位置', '测试设备']
+    : ['媒体名称', '对接文档', '监测链接参数', '回传事件', '验收方式'];
+  const debugFieldKeys = ['media', 'account', 'event', 'resultView', 'device'];
+  const hasMissingDebugField = isDebug && debugFieldKeys.some((key) => !drafts[key]?.trim());
+  const submitDebug = () => {
+    const summary = debugFieldKeys
+      .map((key, index) => `${requiredFields[index]}=${drafts[key] || ''}`)
+      .join('；');
+    const prompt = `发起联调：${summary}`;
+    if (onSubmitFollowUp) {
+      onSubmitFollowUp(prompt);
+      return;
+    }
+    onFollowUpClick?.(prompt);
+  };
+
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        borderRadius: 16,
+        border: `1px solid ${c.accentBorder}`,
+        background: c.bgCard,
+        boxShadow: '0 10px 28px rgba(15, 23, 42, 0.05)',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}` }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>
+          {isDebug ? '媒体联调准备' : '新增媒体对接流程'}
+        </div>
+        <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
+          {isDebug
+            ? '确认联调意图、联调能力、联调信息和联调条件后，再发起执行。'
+            : '新增媒体必须先补齐依赖并通过表单校验，再进入创建链接或需求池流程。'}
+        </div>
+      </div>
+
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+          {[
+            { label: '收集依赖', active: true },
+            { label: isDebug ? '确认联调信息' : '表单校验', active: submitted || !hasMissingDebugField },
+            { label: isDebug ? '发起联调' : '创建链接/入池', active: submitted },
+          ].map((step, index) => (
+            <div
+              key={step.label}
+              style={{
+                borderRadius: 12,
+                border: `1px solid ${step.active ? c.accentBorder : c.borderFaint}`,
+                background: step.active ? c.accentBgFaint : c.bgSection,
+                padding: '9px 10px',
+                color: step.active ? c.accent : c.textMuted,
+                fontSize: 12,
+                fontWeight: 620,
+              }}
+            >
+              {index + 1}. {step.label}
+            </div>
+          ))}
+        </div>
+
+        {formOpen && (
+          <div style={{ marginTop: 12, borderRadius: 14, background: '#fff', padding: 12, border: `1px solid ${c.borderFaint}` }}>
+            <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>
+              {isDebug ? '联调确认表单' : '结构化表单'}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+              {requiredFields.map((field, index) => {
+                const key = isDebug ? debugFieldKeys[index] : field;
+                return (
+                <label key={field} style={{ display: 'grid', gap: 4, fontSize: 12, color: c.textSecondary }}>
+                  {field}
+                  <input
+                    value={drafts[key] || ''}
+                    onChange={(event) => setDrafts((prev) => ({ ...prev, [key]: event.target.value }))}
+                    placeholder={isDebug && key === 'event' ? '如：激活、注册、付费' : `填写${field}`}
+                    style={{
+                      height: 34,
+                      borderRadius: 10,
+                      border: `1px solid ${c.borderFaint}`,
+                      background: '#fff',
+                      padding: '0 10px',
+                      outline: 'none',
+                    }}
+                  />
+                </label>
+              );})}
+            </div>
+            {submitted && !isDebug && (
+              <div style={{ marginTop: 10, fontSize: 12, color: c.accent, lineHeight: 1.6 }}>
+                表单已校验：当前资料满足基础创建监测链接条件；若后续发现特殊回传规则，会自动生成需求并记录到需求池。
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => setFormOpen((prev) => !prev)}
+            style={{ border: `1px solid ${c.accentBorder}`, background: c.accentBgFaint, color: c.accent, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
+          >
+            {formOpen ? '收起表单' : '打开结构化表单'}
+          </button>
+          {!isDebug && (
+            <>
+              <button
+                type="button"
+                onClick={() => setSubmitted(true)}
+                style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
+              >
+                提交并校验
+              </button>
+              <button
+                type="button"
+                onClick={() => onFollowUpClick?.('记录新增媒体对接为代办，并在右侧继续补齐资料')}
+                style={{ border: `1px solid ${c.borderFaint}`, background: '#fff', color: c.textSecondary, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
+              >
+                记录到代办
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            disabled={isDebug && hasMissingDebugField}
+            onClick={() => {
+              if (isDebug) {
+                setSubmitted(true);
+                submitDebug();
+                return;
+              }
+              onFollowUpClick?.('资料已补齐，继续创建监测链接');
+            }}
+            style={{
+              border: `1px solid ${isDebug && hasMissingDebugField ? c.borderFaint : c.accentBorder}`,
+              background: isDebug && hasMissingDebugField ? c.bgSection : c.accent,
+              color: isDebug && hasMissingDebugField ? c.textMuted : '#fff',
+              borderRadius: 999,
+              padding: '7px 12px',
+              fontSize: 12,
+              cursor: isDebug && hasMissingDebugField ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {isDebug ? '发起联调' : '创建监测链接'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MessageSurface({
+  item,
+  codeStyle,
+  showLineNumbers,
+}: {
+  item: BubbleItem;
+  codeStyle: CodeStyle;
+  showLineNumbers: boolean;
+}) {
+  const c = useThemeColors();
+  const isAi = item.role === 'ai';
+  const [expanded, setExpanded] = useState(false);
+  const displayContent = isAi ? stripInlineSourceSection(item.content) : item.content;
+  const isLongMessage = displayContent.length > 760 || displayContent.split('\n').length > 12;
+  const shouldFold = isLongMessage && !expanded;
+  const foldedStyle = shouldFold
+    ? {
+        maxHeight: isAi ? 260 : 220,
+        overflow: 'hidden' as const,
+        WebkitMaskImage: 'linear-gradient(180deg, #000 72%, transparent 100%)',
+        maskImage: 'linear-gradient(180deg, #000 72%, transparent 100%)',
+      }
+    : undefined;
+  const foldButton = isLongMessage ? (
+    <button
+      type="button"
+      onClick={() => setExpanded((prev) => !prev)}
+      style={{
+        marginTop: 8,
+        border: `1px solid ${c.borderFaint}`,
+        background: '#fff',
+        color: c.textSecondary,
+        borderRadius: 999,
+        padding: '5px 10px',
+        fontSize: 12,
+        cursor: 'pointer',
+      }}
+    >
+      {expanded ? '收起内容' : '展开全部'}
+    </button>
+  ) : null;
+
+  if (item.kind === 'system') {
+    return (
+      <div>
+        <div
+          style={{
+            padding: '12px 14px',
+            borderRadius: 16,
+            background: c.bgSection,
+            border: `1px solid ${c.borderFaint}`,
+            color: c.textSecondary,
+            fontSize: 13,
+            lineHeight: 1.75,
+            whiteSpace: 'pre-wrap',
+            ...foldedStyle,
+          }}
+        >
+          {displayContent}
+        </div>
+        {foldButton}
+      </div>
+    );
+  }
+
+  if (item.kind === 'clarification') {
+    return (
+      <div>
+        <div
+          style={{
+            padding: '2px 0',
+            background: 'transparent',
+            border: 'none',
+            wordBreak: 'break-word',
+            ...foldedStyle,
+          }}
+        >
+          <MarkdownRenderer
+            content={displayContent}
+            codeStyle={codeStyle}
+            showLineNumbers={showLineNumbers}
+          />
+        </div>
+        {foldButton}
+      </div>
+    );
+  }
+
+  if (item.kind === 'summary') {
+    return (
+      <div>
+        <div
+          style={{
+            padding: '12px 14px',
+            borderRadius: 16,
+            background: c.bgSection,
+            border: `1px solid ${c.borderFaint}`,
+            color: c.textSecondary,
+            fontSize: 13,
+            lineHeight: 1.75,
+            whiteSpace: 'pre-wrap',
+            ...foldedStyle,
+          }}
+        >
+          {displayContent}
+        </div>
+        {foldButton}
+      </div>
+    );
+  }
+
+  if (isAi) {
+    return (
+      <div>
+        <div
+          style={{
+            padding: '2px 0',
+            background: 'transparent',
+            border: 'none',
+            wordBreak: 'break-word',
+            ...foldedStyle,
+          }}
+        >
+          <MarkdownRenderer
+            content={displayContent}
+            codeStyle={codeStyle}
+            showLineNumbers={showLineNumbers}
+          />
+        </div>
+        {foldButton}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div
+        style={{
+          padding: '10px 16px',
+          borderRadius: '18px 8px 18px 18px',
+          background: `linear-gradient(135deg, ${c.accentBgFaint}, ${c.accentSoft})`,
+          border: `1px solid ${c.accentBorder}`,
+          wordBreak: 'break-word',
+          ...foldedStyle,
+        }}
+      >
+        <div style={{ fontSize: 14, lineHeight: 1.8, color: c.textPrimary, whiteSpace: 'pre-wrap' }}>
+          {displayContent}
+        </div>
+      </div>
+      {foldButton}
+    </div>
+  );
+}
+
+function shouldShowMetricExplanationCard(item: BubbleItem): boolean {
+  if (item.role !== 'ai') return false;
+  const text = item.content;
+  return /(激活数|注册数|付费数|注册设备数|注册账号数|activation|register|payment)/i.test(text)
+    && (item.rawMessage.intent_type === 'help' || item.agent === 'help');
+}
+
+function getMetricExplainerSchema(message: Message): MetricExplainerUISchema | null {
+  const meta = message.metadata || {};
+  const direct = meta.metric_explainer_schema;
+  if (isMetricExplainerUISchema(direct)) return direct;
+
+  const workflowResult = meta.workflow_result;
+  if (workflowResult && typeof workflowResult === 'object') {
+    const payload = (workflowResult as Record<string, unknown>).structured_payload;
+    if (payload && typeof payload === 'object') {
+      const schema = (payload as Record<string, unknown>).metric_explainer;
+      if (isMetricExplainerUISchema(schema)) return schema;
+    }
+  }
+
+  const resultPayload = meta.structured_payload;
+  if (resultPayload && typeof resultPayload === 'object') {
+    const schema = (resultPayload as Record<string, unknown>).metric_explainer;
+    if (isMetricExplainerUISchema(schema)) return schema;
+  }
+
+  return null;
+}
+
+function getAgentDisplayName(agent?: string) {
+  const names: Record<string, string> = {
+    help: '使用帮助',
+    diagnosis: '数据排查',
+    demand: '需求跟踪',
+    debugging: '自动联调',
+    monitoring: '监控任务',
+    material: '素材分析',
+    prediction: '预测分析',
+    hub: '智投chat',
+  };
+  return agent ? names[agent] || AGENT_MAP[agent]?.name || agent : '';
+}
+
+function MetricExplanationCard() {
+  const c = useThemeColors();
+  const rows = [
+    ['激活数', '用户首次打开或激活应用后产生的归因结果', '激活事件、设备标识、媒体点击标识、归因时间'],
+    ['注册数', '完成账号注册动作的用户数，通常按账号或用户 ID 去重', '注册事件、用户 ID、设备 ID、渠道、注册时间'],
+    ['付费数', '完成支付事件的用户数，通常按订单或用户维度统计', '支付事件、订单 ID、金额、币种、用户 ID、支付时间'],
+  ];
+
+  return (
+    <div style={{ margin: '0 0 10px', border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
+      <div style={{ padding: '10px 12px', borderBottom: `1px solid ${c.borderFaint}` }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>指标解释器</div>
+        <div style={{ marginTop: 3, fontSize: 12, color: c.textMuted }}>按“采集位置、上报事件、字段、计算过程、歧义和报表差异”解释。</div>
+      </div>
+      <div style={{ display: 'grid' }}>
+        {rows.map(([name, meaning, fields]) => (
+          <div key={name} style={{ display: 'grid', gridTemplateColumns: '88px minmax(0, 1fr)', gap: 10, padding: '10px 12px', borderBottom: `1px solid ${c.borderFaint}` }}>
+            <div style={{ fontSize: 13, fontWeight: 650, color: c.textPrimary }}>{name}</div>
+            <div>
+              <div style={{ fontSize: 12, color: c.textSecondary, lineHeight: 1.6 }}>{meaning}</div>
+              <div style={{ marginTop: 4, fontSize: 11, color: c.textMuted, lineHeight: 1.6 }}>关键字段：{fields}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ResultMessageCard({
+  result,
+}: {
+  result: WorkflowResult | Record<string, unknown>;
+}) {
+  const c = useThemeColors();
+  const summary = typeof result.summary === 'string' ? result.summary : '已生成结果';
+  const resultType = typeof result.result_type === 'string' ? result.result_type : '';
+  const nextActions = Array.isArray(result.next_actions) ? result.next_actions.slice(0, 4) : [];
+  const pendingChecks = Array.isArray(result.pending_checks) ? result.pending_checks.slice(0, 4) : [];
+
+  if (resultType === 'debugging_report') {
+    const stages = ['需求识别', '资料确认', '发起联调', '过程观测', '结果沉淀'];
+    const checks = pendingChecks.length > 0 ? pendingChecks : ['媒体账号', '应用包名', '测试设备', '联调地址'];
+    const actions = nextActions.length > 0 ? nextActions : ['发起联调', '补充资料', '人工接管'];
+
+    return (
+      <div
+        style={{
+          borderRadius: 18,
+          border: `1px solid ${c.borderFaint}`,
+          background: c.bgSection,
+          padding: '14px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 10,
+              background: c.accentBg,
+              color: c.accent,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <ThunderboltOutlined />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>自动联调流程</div>
+            <div style={{ fontSize: 12, color: c.textMuted }}>已进入联调任务承接，右侧可查看执行面板</div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 14, lineHeight: 1.75, color: c.textBody }}>{summary}</div>
+
+        <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 6 }}>
+          {stages.map((stage, index) => (
+            <div
+              key={stage}
+              style={{
+                borderRadius: 10,
+                border: `1px solid ${index < 2 ? c.accentBorder : c.borderFaint}`,
+                background: index < 2 ? c.accentBgFaint : '#fff',
+                color: index < 2 ? c.accent : c.textMuted,
+                padding: '8px 6px',
+                textAlign: 'center',
+                fontSize: 11,
+                lineHeight: 1.3,
+              }}
+            >
+              {stage}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>待确认资料</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {checks.slice(0, 4).map((item, idx) => (
+              <span
+                key={`${String(item)}-${idx}`}
+                style={{
+                  borderRadius: 999,
+                  padding: '6px 10px',
+                  background: '#fff',
+                  border: `1px solid ${c.borderFaint}`,
+                  color: c.textSecondary,
+                  fontSize: 12,
+                }}
+              >
+                {String(item)}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {actions.slice(0, 3).map((action, idx) => (
+            <button
+              key={`${String(action)}-${idx}`}
+              type="button"
+              style={{
+                border: `1px solid ${idx === 0 ? c.accentBorder : c.borderFaint}`,
+                background: idx === 0 ? c.accentBg : '#fff',
+                color: idx === 0 ? c.accent : c.textSecondary,
+                borderRadius: 999,
+                padding: '6px 10px',
+                fontSize: 12,
+                cursor: 'pointer',
+              }}
+            >
+              {String(action)}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const resultTypeLabelMap: Record<string, string> = {
+    help_answer: '帮助说明',
+    demand_form: '需求单',
+    diagnosis_report: '问题排查',
+    debugging_report: '自动联调',
+  };
+
+  return (
+    <div
+      style={{
+        borderRadius: 18,
+        border: `1px solid ${c.borderFaint}`,
+        background: c.bgSection,
+        padding: '14px 14px 12px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 10,
+            background: c.accentBg,
+            color: c.accent,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <BulbOutlined />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>结果摘要</div>
+          <div style={{ fontSize: 12, color: c.textMuted }}>
+            {resultTypeLabelMap[resultType] || '结构化结果'}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 14, lineHeight: 1.75, color: c.textBody }}>{summary}</div>
+
+      {nextActions.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>建议动作</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {nextActions.map((action, idx) => (
+              <div
+                key={`${String(action)}-${idx}`}
+                style={{
+                  borderRadius: 999,
+                  padding: '6px 10px',
+                  background: '#fff',
+                  border: `1px solid ${c.borderFaint}`,
+                  color: c.textSecondary,
+                  fontSize: 12,
+                }}
+              >
+                {String(action)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pendingChecks.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>待确认</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {pendingChecks.map((item, idx) => (
+              <div
+                key={`${String(item)}-${idx}`}
+                style={{
+                  borderRadius: 12,
+                  padding: '8px 10px',
+                  background: '#fff',
+                  border: `1px solid ${c.borderFaint}`,
+                  color: c.textSecondary,
+                  fontSize: 12,
+                  lineHeight: 1.6,
+                }}
+              >
+                {String(item)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ChatContainer({
+  messages,
+  isTyping,
+  onFollowUpClick,
+  devMode = false,
+  onViewCallChain,
+  onOpenSourcePanel,
+  onEditUserMessage,
+  onSubmitFollowUp,
+  contextThinkingSteps,
+  currentResult,
+  chatSettings,
+  systemPrompt,
+  onOpenAgentPanel,
+}: ChatContainerProps) {
+  const c = useThemeColors();
+  const isMobile = useIsMobile();
+  const { speak, stopSpeaking, synthesisSupported, speaking } = useSpeech();
+  const { settings } = chatSettings;
+  const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<BubbleItem | null>(null);
+  const [editingDraft, setEditingDraft] = useState('');
+  const [messageVersions, setMessageVersions] = useState<Record<string, { items: string[]; active: number }>>({});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length, isTyping]);
+
+  const handleScroll = useCallback(() => {
+    const node = scrollContainerRef.current;
+    if (!node) return;
+    const distanceToBottom = node.scrollHeight - node.scrollTop - node.clientHeight;
+    setShowScrollBottom(distanceToBottom > 220);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const handleQuoteMessage = useCallback((content: string) => {
+    if (!onFollowUpClick) return;
+    onFollowUpClick(`引用这条消息继续处理：\n${content}`);
+  }, [onFollowUpClick]);
+
+  const handleRegenerateMessage = useCallback((content: string, isAi: boolean) => {
+    if (!onFollowUpClick) return;
+    onFollowUpClick(
+      isAi
+        ? `请基于上一条回复重新生成一个更好的版本：\n${content}`
+        : `请基于这条输入重新生成回复：\n${content}`,
+    );
+  }, [onFollowUpClick]);
+
+  const handleSaveToKnowledge = useCallback((message: Message) => {
+    const preview = (message.content || '').replace(/\s+/g, ' ').slice(0, 28);
+    antMessage.success(`已保存到个人知识库待整理区：${preview}${message.content.length > 28 ? '...' : ''}`);
+  }, []);
+
+  const openUserMessageEditor = useCallback((item: BubbleItem) => {
+    setEditingMessage(item);
+    setEditingDraft(item.content);
+  }, []);
+
+  const submitEditedUserMessage = useCallback(() => {
+    const nextContent = editingDraft.trim();
+    if (!editingMessage || !nextContent || !onEditUserMessage) return;
+
+    const messageId = editingMessage.messageId || editingMessage.key;
+    setMessageVersions((prev) => {
+      const current = prev[messageId] || { items: [editingMessage.content], active: 0 };
+      const nextItems = [...current.items, nextContent];
+      return {
+        ...prev,
+        [messageId]: {
+          items: nextItems,
+          active: nextItems.length - 1,
+        },
+      };
+    });
+    setEditingMessage(null);
+    setEditingDraft('');
+    onEditUserMessage(nextContent);
+  }, [editingDraft, editingMessage, onEditUserMessage]);
+
+  const shiftMessageVersion = useCallback((messageId: string, delta: number) => {
+    setMessageVersions((prev) => {
+      const current = prev[messageId];
+      if (!current) return prev;
+      const nextActive = Math.min(Math.max(current.active + delta, 0), current.items.length - 1);
+      return {
+        ...prev,
+        [messageId]: { ...current, active: nextActive },
+      };
+    });
+  }, []);
+
+  const buildSpeechText = useCallback((raw: string) => raw
+    .replace(/```[\s\S]*?```/g, '代码片段已省略。')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#+\s/g, '')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/\n{2,}/g, '。')
+    .replace(/\n/g, '，')
+    .trim(), []);
+
+  const handleSpeakMessage = useCallback((messageId: string, content: string) => {
+    if (!synthesisSupported) {
+      antMessage.warning('当前浏览器暂不支持语音播报');
+      return;
+    }
+
+    if (playingMessageId === messageId && speaking) {
+      stopSpeaking();
+      setPlayingMessageId(null);
+      return;
+    }
+
+    const started = speak(buildSpeechText(content), {
+      onEnd: () => setPlayingMessageId(null),
+    });
+
+    if (started) {
+      setPlayingMessageId(messageId);
+    }
+  }, [buildSpeechText, playingMessageId, speak, speaking, stopSpeaking, synthesisSupported]);
+
+  const bubbleItems = useMemo<BubbleItem[]>(() => messages.map((msg, index) => {
+    const workflowType = typeof msg.metadata?.workflow_card === 'object'
+      ? (msg.metadata.workflow_card as { type?: string }).type
+      : undefined;
+    const suppressContextThinking = workflowType === 'legacy_media_debug';
+    const processEvents = Array.isArray(msg.process_events)
+      ? msg.process_events
+      : Array.isArray(msg.metadata?.process_events)
+        ? msg.metadata.process_events as NonNullable<Message['process_events']>
+        : [];
+    const processThinkingSteps = processEvents
+      .filter((event) => event.visibility !== 'debug')
+      .map((event) => thinkingStepFromProcessEvent(event));
+    const processToolCalls = processEvents
+      .map((event) => toolCallFromProcessEvent(event))
+      .filter((event): event is NonNullable<ReturnType<typeof toolCallFromProcessEvent>> => Boolean(event));
+    const ownThinkingSteps = Array.isArray(msg.thinking_steps) && msg.thinking_steps.length > 0
+      ? msg.thinking_steps
+      : processThinkingSteps.length > 0
+        ? processThinkingSteps
+      : msg.thinking
+        ? [{ label: '模型思考', content: String(msg.thinking), status: 'completed' as const }]
+        : [];
+    const thinkingSteps = ownThinkingSteps.length > 0
+      ? ownThinkingSteps
+      : msg.role === 'assistant' && index === messages.length - 1 && !suppressContextThinking
+        ? (contextThinkingSteps ?? []).map((step, stepIndex) => ({
+          key: `context-${stepIndex}`,
+          label: step.title,
+          content: step.description || '',
+          status: 'loading' as const,
+        }))
+        : [];
+
+    let kind: BubbleKind = msg.role === 'user' ? 'user' : 'assistant';
+    if (msg.role === 'system' || msg.message_type === 'system_notice') kind = 'system';
+    if (msg.message_type === 'clarification') kind = 'clarification';
+    if (msg.message_type === 'workflow_summary') kind = 'summary';
+
+    const messageKey = msg.message_id || msg.id || `msg-${index}`;
+    const versionState = msg.role === 'user' ? messageVersions[messageKey] : undefined;
+    const displayContent = versionState ? versionState.items[versionState.active] : (msg.content || '');
+
+    return {
+      key: messageKey,
+      role: msg.role === 'assistant' ? 'ai' : 'user',
+      kind,
+      content: displayContent,
+      thinkingSteps,
+      toolCalls: msg.tool_calls || processToolCalls,
+      missingFields: msg.missing_fields || [],
+      messageId: messageKey,
+      agent: msg.agent || (msg.routing_decision?.intent_type as string | undefined),
+      rawMessage: msg,
+    };
+  }), [contextThinkingSteps, messageVersions, messages]);
+
+  if (messages.length === 0 && !isTyping) {
+    const starterGroups = [
+      {
+        title: '能做什么',
+        items: [
+          { label: '解答', prompt: '帮我解答一个广告投放问题', agent: 'help' as AgentType },
+          { label: '排查', prompt: '帮我排查媒体回传数据不一致的问题', agent: 'diagnosis' as AgentType },
+          { label: '对接', prompt: '帮我整理一个新增媒体对接需求', agent: 'demand' as AgentType },
+          { label: '联调', prompt: '帮我查看联调记录并准备发起联调', agent: 'debugging' as AgentType },
+          { label: '报表', prompt: '帮我创建一个报表定时任务', agent: 'help' as AgentType },
+          { label: '分析', prompt: '帮我分析投放素材和转化表现', agent: 'material' as AgentType },
+          { label: '监控', prompt: '帮我查看监控任务告警', agent: 'monitoring' as AgentType },
+        ],
+      },
+    ];
+    const starterItems: Array<{ label: string; prompt: string; agent: AgentType; disabled?: boolean }> = [
+      { label: '解答', prompt: '请解释注册数、注册设备数和注册账号数的区别', agent: 'help' },
+      { label: '排查', prompt: '请帮我排查媒体消耗异常：媒体ID、账户ID、日期、指标和预期值如下：', agent: 'diagnosis' },
+      { label: '对接', prompt: '请帮我整理一个新增媒体对接需求，需要接入的媒体、数据范围和期望上线时间如下：', agent: 'demand' },
+      { label: '联调', prompt: '请帮我发起自动联调，媒体、应用、事件和联调地址如下：', agent: 'debugging' },
+      { label: '报表', prompt: '请帮我创建一个广告日报定时任务，项目、指标、发送时间和接收人如下：', agent: 'help' },
+      { label: '分析', prompt: '请帮我分析投放素材和转化表现，时间范围、媒体和分析目标如下：', agent: 'material' },
+      { label: '监控', prompt: '请帮我创建一个监控任务，监控对象、指标、阈值和通知方式如下：', agent: 'monitoring' },
+    ];
+
+    return (
+      <div
+        id="chat-container"
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+          padding: isMobile ? '18px 20px 120px' : '28px 36px 140px',
+        }}
+      >
+        <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginTop: isMobile ? 12 : 6, textAlign: 'center' }}>
+            <img
+              src="/zt-chat-logo-clean.png"
+              alt="智投chat"
+              style={{
+                width: isMobile ? 96 : 118,
+                height: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+            <p style={{ margin: 0, maxWidth: 620, fontSize: 14, color: c.textSecondary, lineHeight: 1.75, fontWeight: 400 }}>
+              欢迎使用智投chat，输入问题、需求或联调目标，我会按对话方式继续推进。
+            </p>
+          </div>
+
+          <div style={{ display: 'none' }}>我可以帮你：</div>
+
+          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
+            <section style={{ borderRadius: 16, background: '#f6f7f9', padding: 18, minHeight: 160 }}>
+              <div style={{ fontSize: 16, fontWeight: 680, color: c.textPrimary }}>核心功能</div>
+              <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {starterItems.map((item) => {
+                  const button = (
+                    <button
+                      key={item.label}
+                      type="button"
+                      disabled={item.disabled}
+                      onClick={() => {
+                        if (item.disabled) return;
+                        onOpenAgentPanel?.(item.agent);
+                        onFollowUpClick?.(item.prompt);
+                      }}
+                      style={{
+                        border: `1px solid ${c.borderFaint}`,
+                        background: item.disabled ? '#f1f3f5' : '#fff',
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        color: item.disabled ? c.textMuted : c.textSecondary,
+                        cursor: item.disabled ? 'not-allowed' : 'pointer',
+                        fontSize: 13,
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                  return item.disabled ? <Tooltip key={item.label} title="规划中">{button}</Tooltip> : button;
+                })}
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+    <div
+      id="chat-container"
+      className="conversation-scroll-area"
+      ref={scrollContainerRef}
+      onScroll={handleScroll}
+      style={{
+        position: 'relative',
+        flex: 1,
+        overflow: 'auto',
+        padding: isMobile ? '4px 12px 12px' : '4px 20px 20px',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: isMobile ? '100%' : 920,
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}
+      >
+        {settings.showSystemPrompt && systemPrompt && (
+          <SystemPromptDisplay prompt={systemPrompt} />
+        )}
+
+        {bubbleItems.map((item, itemIndex) => {
+          const isAi = item.role === 'ai';
+          const showAgentTag = isAi && item.agent && item.kind !== 'system';
+          const showActions = item.kind !== 'system';
+          const sourceRefs = isAi ? collectSourceRefs(item.rawMessage) : [];
+          const capabilities = isAi ? collectCapabilities(item.rawMessage) : [];
+          const workflowCard = isAi ? getWorkflowCard(item.rawMessage) : null;
+          const metricExplainerSchema = isAi
+            ? getMetricExplainerSchema(item.rawMessage)
+            : null;
+          const handleMetricAction = (action: MetricAction) => {
+            onFollowUpClick?.(`请继续处理：${action.label}`);
+          };
+          const moreActions: MenuProps['items'] = [
+            onFollowUpClick ? {
+              key: 'quote',
+              label: '引用',
+              icon: <CopyOutlined />,
+              onClick: () => handleQuoteMessage(item.content),
+            } : null,
+            {
+              key: 'source',
+              label: '来源',
+              icon: <InfoCircleOutlined />,
+              onClick: () => onOpenSourcePanel?.({ message: item.rawMessage }),
+            },
+            {
+              key: 'save-kb',
+              label: '保存到个人知识库',
+              icon: <IconAsset name="share-plane" size={14} />,
+              onClick: () => handleSaveToKnowledge(item.rawMessage),
+            },
+            {
+              key: 'share-xiaoshan',
+              label: '分享到小闪',
+              icon: <IconAsset name="share-plane" size={14} />,
+              onClick: () => antMessage.success('已分享到小闪'),
+            },
+            {
+              key: 'collapse',
+              label: '收起',
+              icon: <UpOutlined />,
+              onClick: () => undefined,
+            },
+          ].filter(Boolean) as MenuProps['items'];
+
+          return (
+            <div key={item.key} data-message-surface={item.messageId || item.key} style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', gap: isMobile ? 8 : 10, justifyContent: isAi ? 'flex-start' : 'flex-end' }}>
+                <div style={{ maxWidth: isMobile ? '88%' : 760, minWidth: 60 }}>
+                  {showAgentTag && (
+                    <div style={{ marginBottom: 4 }}>
+                      <Tag
+                        color={AGENT_MAP[item.agent!]?.color || 'default'}
+                        style={{ fontSize: 11, borderRadius: 999, margin: 0 }}
+                      >
+                        {workflowCard?.type === 'report_composer' ? '报表任务' : getAgentDisplayName(item.agent)}
+                      </Tag>
+                    </div>
+                  )}
+
+                  {isAi && item.thinkingSteps.length > 0 && (
+                    <ThinkingChain
+                      steps={item.thinkingSteps}
+                      toolCalls={item.toolCalls}
+                      codeStyle={settings.codeStyle}
+                      showLineNumbers={settings.codeLineNumbers}
+                      title="思维链"
+                      defaultExpanded={!settings.autoCollapseThinking}
+                    />
+                  )}
+
+                  {isAi && workflowCard && !(workflowCard.type === 'legacy_media_debug' && workflowCard.status === 'auto_checked') && (
+                    <WorkflowProcessCard
+                      data={workflowCard}
+                      onFollowUpClick={onFollowUpClick}
+                      onSubmitFollowUp={onSubmitFollowUp}
+                    />
+                  )}
+
+                  {isAi && item.kind === 'assistant' && (capabilities.length > 0 || sourceRefs.length > 0) && (
+                    <UnifiedEvidenceStrip
+                      capabilities={capabilities}
+                      refs={sourceRefs}
+                      onOpenCapability={(capability) => onOpenSourcePanel?.({ message: item.rawMessage, capability })}
+                      onOpenSource={(source) => onOpenSourcePanel?.({ message: item.rawMessage, source })}
+                    />
+                  )}
+
+                  {isAi && metricExplainerSchema && (
+                    <MetricExplainerRenderer
+                      schema={metricExplainerSchema}
+                      onAction={handleMetricAction}
+                    />
+                  )}
+
+                  {!(isAi && workflowCard?.type === 'legacy_media_debug' && (workflowCard.status === 'running' || workflowCard.status === 'started')) && (
+                    <MessageSurface
+                      item={item}
+                      codeStyle={settings.codeStyle}
+                      showLineNumbers={settings.codeLineNumbers}
+                    />
+                  )}
+
+                  {false && isAi && item.kind === 'assistant' && (
+                    <SourceReferenceStrip
+                      refs={sourceRefs}
+                      onOpen={(source) => onOpenSourcePanel?.({ message: item.rawMessage, source })}
+                    />
+                  )}
+
+                  <MissingFieldPanel
+                    fields={item.missingFields}
+                    onClick={(field, value) => {
+                      if (!value) {
+                        onFollowUpClick?.(field.suggested_question);
+                        return;
+                      }
+                      const payload = value.includes('=') ? value : `${field.field_label}=${value}`;
+                      const previousUserMessage = [...bubbleItems.slice(0, itemIndex)]
+                        .reverse()
+                        .find((candidate) => candidate.role === 'user')?.content;
+                      const nextQuestion = [
+                        previousUserMessage || '请继续排查当前问题',
+                        `已补充排查条件：${payload}`,
+                        '请结合原问题和已补充条件继续排查。',
+                      ].join('\n\n');
+                      if (onSubmitFollowUp) {
+                        onSubmitFollowUp(nextQuestion);
+                        return;
+                      }
+                      onFollowUpClick?.(nextQuestion);
+                    }}
+                  />
+
+                  {showActions && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 4,
+                        flexWrap: 'wrap',
+                        marginTop: 8,
+                        justifyContent: isAi ? 'flex-start' : 'flex-end',
+                        opacity: 0.94,
+                      }}
+                    >
+                      <CopyButton text={item.content} />
+                      {!isAi ? (
+                        onEditUserMessage && (
+                          <MessageActionButton
+                            icon={<EditOutlined />}
+                            label="编辑"
+                            onClick={() => openUserMessageEditor(item)}
+                          />
+                        )
+                      ) : (
+                        <>
+                          {onFollowUpClick && (
+                            <MessageActionButton
+                              icon={<ReloadOutlined />}
+                              label="重新生成"
+                              onClick={() => handleRegenerateMessage(item.content, true)}
+                            />
+                          )}
+                          <MessageActionButton
+                            icon={<LikeOutlined />}
+                            label="喜欢"
+                            onClick={() => antMessage.success('已记录喜欢反馈')}
+                          />
+                          <MessageActionButton
+                            icon={<DislikeOutlined />}
+                            label="不喜欢"
+                            onClick={() => antMessage.info('已记录不喜欢反馈')}
+                          />
+                          <MessageActionButton
+                            icon={playingMessageId === item.messageId ? <PauseCircleOutlined /> : <SoundOutlined />}
+                            label={playingMessageId === item.messageId ? '停止播报' : '语音播报'}
+                            onClick={() => handleSpeakMessage(item.messageId, item.content)}
+                          />
+                          <Dropdown
+                            trigger={['click']}
+                            placement="bottomRight"
+                            menu={{ items: moreActions }}
+                          >
+                            <span>
+                              <MessageActionButton
+                                icon={<MoreOutlined />}
+                                label="更多"
+                                onClick={() => undefined}
+                              />
+                            </span>
+                          </Dropdown>
+                          {devMode && onViewCallChain && (
+                            <MessageActionButton
+                              icon={<CodeOutlined />}
+                              label="调用链"
+                              onClick={onViewCallChain}
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {!isAi && messageVersions[item.messageId || item.key]?.items.length > 1 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginTop: 6,
+                        color: c.textMuted,
+                        fontSize: 12,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        aria-label="上一版"
+                        onClick={() => shiftMessageVersion(item.messageId || item.key, -1)}
+                        style={{ border: 'none', background: 'transparent', color: c.textMuted, cursor: 'pointer', padding: 2 }}
+                      >
+                        ‹
+                      </button>
+                      <span>
+                        {(messageVersions[item.messageId || item.key]?.active ?? 0) + 1}
+                        /
+                        {messageVersions[item.messageId || item.key]?.items.length ?? 1}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label="下一版"
+                        onClick={() => shiftMessageVersion(item.messageId || item.key, 1)}
+                        style={{ border: 'none', background: 'transparent', color: c.textMuted, cursor: 'pointer', padding: 2 }}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {isTyping && (
+          <div style={{ display: 'flex', gap: isMobile ? 8 : 10, alignItems: 'flex-end' }}>
+            <div
+              style={{
+                padding: '10px 16px',
+                borderRadius: '8px 18px 18px 18px',
+                background: c.bgCard,
+                border: `1px solid ${c.borderFaint}`,
+              }}
+            >
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                <span className="thinking-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent, animation: 'thinking-bounce 1.4s ease-in-out infinite' }} />
+                <span className="thinking-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent, animation: 'thinking-bounce 1.4s ease-in-out 0.2s infinite' }} />
+                <span className="thinking-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent, animation: 'thinking-bounce 1.4s ease-in-out 0.4s infinite' }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div ref={chatEndRef} />
+      </div>
+      {showScrollBottom && (
+        <button
+          type="button"
+          onClick={scrollToBottom}
+          aria-label="返回底部"
+          style={{
+            position: 'sticky',
+            left: '50%',
+            bottom: 14,
+            transform: 'translateX(-50%)',
+            zIndex: 6,
+            width: 34,
+            height: 34,
+            borderRadius: 999,
+            border: `1px solid ${c.borderFaint}`,
+            background: '#fff',
+            color: c.textSecondary,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)',
+            cursor: 'pointer',
+          }}
+        >
+          <DownOutlined style={{ fontSize: 13 }} />
+        </button>
+      )}
+    </div>
+    <Modal
+      open={!!editingMessage}
+      title="编辑消息"
+      okText="重新发送"
+      cancelText="取消"
+      onOk={submitEditedUserMessage}
+      onCancel={() => {
+        setEditingMessage(null);
+        setEditingDraft('');
+      }}
+      destroyOnHidden
+    >
+      <Input.TextArea
+        value={editingDraft}
+        onChange={(event) => setEditingDraft(event.target.value)}
+        autoSize={{ minRows: 4, maxRows: 10 }}
+        autoFocus
+      />
+    </Modal>
+    </>
+  );
+}
+

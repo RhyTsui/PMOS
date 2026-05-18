@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">PMAIOS Runtime Panorama v0.7</title>
+  <desc id="desc">PMAIOS v0.7 平台总控、多角色工作流、Hermes 治理、知识底座与交付闭环全景图。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#f6f8fb"/>
+      <stop offset="100%" stop-color="#eef3f8"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f7fafc"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" x2="100%" y1="0%" y2="0%">
+      <stop offset="0%" stop-color="#175cd3"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#102a43" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .title { font: 700 30px 'Segoe UI', 'PingFang SC', sans-serif; fill: #102a43; }
+      .subtitle { font: 500 14px 'Segoe UI', 'PingFang SC', sans-serif; fill: #52606d; }
+      .section { font: 700 18px 'Segoe UI', 'PingFang SC', sans-serif; fill: #102a43; }
+      .label { font: 700 12px 'Segoe UI', 'PingFang SC', sans-serif; fill: #175cd3; letter-spacing: 1px; }
+      .body { font: 500 13px 'Segoe UI', 'PingFang SC', sans-serif; fill: #334e68; }
+      .small { font: 500 12px 'Segoe UI', 'PingFang SC', sans-serif; fill: #52606d; }
+      .card { fill: url(#panel); stroke: #d9e2ec; stroke-width: 1.2; filter: url(#shadow); }
+      .pill { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 1; }
+      .line { stroke: #175cd3; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#175cd3"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="980" fill="url(#bg)"/>
+  <rect x="48" y="42" width="1504" height="82" rx="24" fill="url(#panel)" stroke="#d9e2ec" filter="url(#shadow)"/>
+  <text x="82" y="88" class="title">PMAIOS Runtime Panorama v0.7</text>
+  <text x="82" y="112" class="subtitle">platform control plane · product workflow mainline · Hermes governance · Dataki knowledge grounding · proof-of-work closure</text>
+
+  <rect x="60" y="160" width="280" height="268" rx="24" class="card"/>
+  <text x="84" y="196" class="section">1. Platform Control Plane</text>
+  <text x="84" y="226" class="label">WHO / STATE / ACTION</text>
+  <text x="84" y="252" class="body">PMAIOS 首页优先展示：</text>
+  <text x="102" y="278" class="body">• 当前 scope 与 subproject</text>
+  <text x="102" y="302" class="body">• runs / gates / blocked items</text>
+  <text x="102" y="326" class="body">• operator actions 与资产入口</text>
+  <text x="102" y="350" class="body">• 最新 governed outputs</text>
+  <text x="84" y="390" class="small">禁止：hero first-screen / summary-card dashboard / explanation-first layout</text>
+
+  <rect x="380" y="160" width="430" height="268" rx="24" class="card"/>
+  <text x="404" y="196" class="section">2. Default Product Mainline</text>
+  <text x="404" y="226" class="label">DELIVERY CHAIN</text>
+  <text x="404" y="252" class="body">调研文档 → 规划文档 → 需求文档 → 功能文档 → 设计文档</text>
+  <text x="404" y="278" class="body">→ 前端页面（简单版） → 前端页面（UI/UX版）</text>
+  <text x="404" y="304" class="body">→ 数据表 → 后端接口 → 前后端联调与验收</text>
+  <text x="404" y="344" class="small">需求必须拆到 function，功能必须拆到 API；数据语义与接口语义前置暴露、后置定稿。</text>
+  <rect x="404" y="366" width="168" height="36" rx="18" class="pill"/>
+  <text x="422" y="389" class="small">requirement-to-function</text>
+  <rect x="586" y="366" width="156" height="36" rx="18" class="pill"/>
+  <text x="612" y="389" class="small">function-to-api</text>
+
+  <rect x="850" y="160" width="328" height="268" rx="24" class="card"/>
+  <text x="874" y="196" class="section">3. Review Committee</text>
+  <text x="874" y="226" class="label">MULTI-ROLE REVIEW</text>
+  <text x="874" y="252" class="body">• Solution-Optimality Review</text>
+  <text x="874" y="278" class="body">• Development Review</text>
+  <text x="874" y="304" class="body">• Design Review</text>
+  <text x="874" y="330" class="body">• Research Review</text>
+  <text x="874" y="356" class="body">• Delivery Review</text>
+  <text x="874" y="392" class="small">评审对象不是空文档，而是结合系统现状后的业务对象、流程、接口、异常、权限、指标与开发 task。</text>
+
+  <rect x="1212" y="160" width="328" height="268" rx="24" class="card"/>
+  <text x="1236" y="196" class="section">4. Human Final Approval</text>
+  <text x="1236" y="226" class="label">FINAL JUDGMENT</text>
+  <text x="1236" y="252" class="body">• 接受风险</text>
+  <text x="1236" y="278" class="body">• 修正方向</text>
+  <text x="1236" y="304" class="body">• 决定放行 / 返工 / park</text>
+  <text x="1236" y="352" class="small">人不做“肉身 lint”，而是只看多角色评审结果、Hermes 汇总判断和关键证据。</text>
+
+  <rect x="60" y="474" width="480" height="440" rx="24" class="card"/>
+  <text x="84" y="510" class="section">5. Hermes Governance Loop</text>
+  <text x="84" y="540" class="label">RESEARCH → COMMITTEE → WATCH → PROMOTE → WRITEBACK → CLOSURE</text>
+  <text x="84" y="572" class="body">Research</text>
+  <text x="180" y="572" class="small">系统现状检索、Dataki grounding、repo truth-source backcheck</text>
+  <text x="84" y="602" class="body">Committee</text>
+  <text x="180" y="602" class="small">把 research findings 注入多角色评审</text>
+  <text x="84" y="632" class="body">Watch</text>
+  <text x="180" y="632" class="small">recurrence / stableRun / noise suppression / closure tracking</text>
+  <text x="84" y="662" class="body">Promote</text>
+  <text x="180" y="662" class="small">把共享问题升格成 requirement / prompt / workflow / template writeback</text>
+  <text x="84" y="692" class="body">Writeback</text>
+  <text x="180" y="692" class="small">对受管 markdown 真源执行 governed writeback</text>
+  <text x="84" y="722" class="body">Closure</text>
+  <text x="180" y="722" class="small">把 task lifecycle、closure evidence 回收到 proof-of-work 和 operator entries</text>
+  <rect x="84" y="766" width="182" height="34" rx="17" class="pill"/>
+  <text x="106" y="788" class="small">keep / revise / block / promote</text>
+  <rect x="278" y="766" width="214" height="34" rx="17" class="pill"/>
+  <text x="298" y="788" class="small">execute-writeback / close-loop</text>
+
+  <rect x="580" y="474" width="360" height="212" rx="24" class="card"/>
+  <text x="604" y="510" class="section">6. Knowledge Grounding</text>
+  <text x="604" y="540" class="label">REPO + DATAKI</text>
+  <text x="604" y="568" class="body">• repo 真源直接判定</text>
+  <text x="604" y="594" class="body">• Dataki 默认知识库补足系统现状、历史需求与版本背景</text>
+  <text x="604" y="620" class="body">• findings 默认进入 review packet 与 proof bundle</text>
+  <text x="604" y="654" class="small">目标：AI 先理解系统现状，再做方案、拆解、评审和开发任务判断。</text>
+
+  <rect x="980" y="474" width="560" height="212" rx="24" class="card"/>
+  <text x="1004" y="510" class="section">7. Frontend Execution Discipline</text>
+  <text x="1004" y="540" class="label">NO DEFAULT AI SHELL</text>
+  <text x="1004" y="568" class="body">• 聊天工作区默认采用 Ant Design X</text>
+  <text x="1004" y="594" class="body">• 企业系统 shell / density / token 走统一 UI spec</text>
+  <text x="1004" y="620" class="body">• 先组件映射，再页面实现</text>
+  <text x="1004" y="646" class="body">• 自动审计禁止 hero / summary-card / explanation-first</text>
+  <text x="1004" y="672" class="small">页面首屏必须优先暴露 scope、state、actions、outputs、monitoring 与 asset access。</text>
+
+  <rect x="580" y="718" width="960" height="196" rx="24" class="card"/>
+  <text x="604" y="754" class="section">8. Delivery Closure</text>
+  <text x="604" y="784" class="label">PROOF-OF-WORK / TASK SSOT / OPERATOR ACTIONS</text>
+  <text x="604" y="812" class="body">• committee report + Hermes knowledge grounding + watch/writeback closure</text>
+  <text x="604" y="838" class="body">• proof-of-work 输出 acceptance package、missing evidence、handoff</text>
+  <text x="604" y="864" class="body">• Task SSOT 保留 active mainline、blocked items、continuation next step</text>
+  <text x="604" y="890" class="body">• operator entries 提供 execute writeback、close loop、resume、approve gate 等动作</text>
+
+  <path d="M340 294 H380" class="line"/>
+  <path d="M810 294 H850" class="line"/>
+  <path d="M1178 294 H1212" class="line"/>
+  <path d="M300 428 V474" class="line"/>
+  <path d="M760 428 V474" class="line"/>
+  <path d="M1180 428 V474" class="line"/>
+  <path d="M540 694 H580" class="line"/>
+  <path d="M940 580 H980" class="line"/>
+  <path d="M1060 686 V718" class="line"/>
+</svg>

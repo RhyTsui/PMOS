@@ -1,52 +1,68 @@
 # ad
 
-Local Android integration PoC workbench for the first-round `巨量 × 指间山海` path.
+`ad` 是 PMAIOS `v0.7` 新交付链在子项目上的首个 rollout 测试项目，当前承载对象为 `小乔智投`。
 
-## Stack
+当前默认目标不是继续维护旧的 Android integration PoC，而是把小乔智投收口成一套可直接进入 `aiocoding` 的交付级产品真源与工程骨架。
 
-- Backend: FastAPI
-- Frontend: React + Vite
-- Data: mock PoC data only
+## 当前有效范围
+
+- 产品对象：`小乔智投`
+- 业务域：广告支持 / 投放协同 / 数据排查 / 联调执行
+- 前端形态：面向用户的交付级动态页面，不接受示意页、平铺说明页、静态文档页
+- 后端形态：本地仓内 runtime + 正式 mock contract 承接，后续可切测试/生产数据源
+
+## 当前有效交付链
+
+`调研文档 -> 规划文档 -> 需求文档 -> 功能文档 -> 设计文档 -> 前端页面 -> 数据表 -> 后端接口 -> 联调与验收`
+
+补充要求：
+
+- 不再使用 `前端页面（简单版） -> 前端页面（UI/UX版）` 双阶段口径
+- `前端页面` 必须一次性按交付标准产出
+- 评审时必须检查布局正确性、功能模块合理性、用户体验流程、动态交互承接
+
+## 当前有效真源入口
+
+优先阅读以下文档：
+
+1. [小乔智投-交付总控-2026-05-08.md](./docs/小乔智投-交付总控-2026-05-08.md)
+2. [小乔智投-前置文档评审委员会清单-2026-05-08.md](./docs/小乔智投-前置文档评审委员会清单-2026-05-08.md)
+3. [小乔智投-开发任务拆解与技术评审-2026-05-08.md](./docs/小乔智投-开发任务拆解与技术评审-2026-05-08.md)
+4. [小乔智投-v0.7-rollout-to-aiocoding-2026-05-09.md](./docs/小乔智投-v0.7-rollout-to-aiocoding-2026-05-09.md)
+
+5. [灏忎箶鏅烘姇-autonomous-delivery-run-娴嬭瘯鏂规-2026-05-09.md](./docs/灏忎箶鏅烘姇-autonomous-delivery-run-娴嬭瘯鏂规-2026-05-09.md)
 
 ## Backend
 
-From `ad/`:
+在 `subprojects/ad/` 下：
 
 ```bash
 pip install -e .
 ad
 ```
 
-Backend runs at `http://127.0.0.1:8021`.
-
-Useful endpoints:
-
-- `GET /api/v1/health`
-- `GET /api/v1/integration-poc`
+后端默认运行在 `http://127.0.0.1:8021`。
 
 ## Frontend
 
-From `ad/frontend/`:
+在 `subprojects/ad/frontend/` 下：
 
 ```bash
 npm install
 npm run dev
 ```
 
-Frontend runs at `http://127.0.0.1:5180`.
+前端默认运行在 `http://127.0.0.1:5180`。
 
-The Vite dev server proxies `/api` requests to the backend at `http://127.0.0.1:8021`.
+## 当前前端要求
 
-## Docker Compose
+- 企业系统基础组件：`Ant Design`
+- 会话/Chat 组件：`Ant Design X`
+- 禁用默认 `hero + summary-card + explanation-first` 工作台骨架
+- 必须围绕真实业务对象、真实任务状态、真实结果结构建页面
 
-From `ad/`:
+## 文档治理说明
 
-```bash
-docker compose up
-```
-
-## Notes
-
-- The repo/package name stays `ad`.
-- The current default UI is the first-round Android integration workbench.
-- The default scope is fixed to `巨量 × 指间山海 × 安卓已安装路径 × 启动+登录`.
+- 原有旧口径、乱码口径、示意性交付文档不得继续作为新开发真源
+- 旧文档如仍需保留，按 `superseded / archived` 视角看待
+- 后续修改优先回写原真源，不再新增同义补丁文档

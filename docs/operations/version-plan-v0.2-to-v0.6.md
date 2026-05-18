@@ -114,7 +114,7 @@ Implement by version and priority:
   - generated runs persist under `docs/memory/document-normalization/runs/`
   - normalized artifacts persist under `docs/product-office/document-normalization/`
   - generated requirements and version records link every normalized source back to traceable repository state
-- Claude design tooling status is recorded in `docs/operations/claude-design-tooling-status.md`.
+- Historical Claude design tooling status is preserved in `docs/archive/claude-design-tooling-status-2026-04-19.md`.
 - Product Chief can now generate roadmap/version planning, daily intelligence, weekly brief, demo script, user manual, strategic radar, and external capability evaluation outputs through the same governed output pipeline.
 - Product Chief can now generate learning and cognitive upgrade memos for recurring operator blind spots.
 

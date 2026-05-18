@@ -1,5 +1,17 @@
 # Release Summary
 
+## Status
+
+- status: reference-only
+- role: release snapshot
+
+This document records a specific local-runtime delivery snapshot.
+
+Do not use it as the primary source for current platform version identity. For active platform truth, read:
+
+- `docs/operations/platform-truth-source-index.md`
+- `docs/operations/current-version-progress.md`
+
 ## Scope
 
 This delivery closes the PMAIOS local runtime loop across frontend, backend, CLI, workflow runtime, memory persistence, capabilities, and release-facing documentation.

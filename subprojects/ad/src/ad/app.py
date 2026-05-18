@@ -5,7 +5,9 @@ from ad.api.routes.flow import router as flow_router
 from ad.api.routes.full_design import router as full_design_router
 from ad.api.routes.health import router as health_router
 from ad.api.routes.integration import router as integration_router
+from ad.api.routes.mcp import router as mcp_router
 from ad.api.routes.users import router as users_router
+from ad.api.routes.xiaoqiao import router as xiaoqiao_router
 
 app = FastAPI(title="Android Integration POC Workbench")
 
@@ -26,4 +28,6 @@ app.include_router(health_router, prefix="/api/v1")
 app.include_router(flow_router, prefix="/api/v1")
 app.include_router(integration_router, prefix="/api/v1")
 app.include_router(full_design_router, prefix="/api/v1")
+app.include_router(mcp_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
+app.include_router(xiaoqiao_router, prefix="/api/v1")

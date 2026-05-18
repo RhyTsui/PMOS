@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>流程、验收与排障 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Validation</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">流程、验收与排障</h1>
+        <p>链路时序、验收检查项和常见问题处理。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="#flows">关键流程</a>
+          <a href="#acceptance">验收检查项</a>
+          <a href="#troubleshooting">排障</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Flows & Acceptance</span>
+          <h1>不要按页面验收，要按链路验收</h1>
+          <p>花花世界埋点的验收对象不是单个事件，而是多条端到端链路。</p>
+        </section>
+        <section class="section" id="flows">
+          <h2>关键流程</h2>
+          <h3>前置链</h3>
+          <ol>
+            <li>启动</li>
+            <li>版本获取 / 资源下载</li>
+            <li>SDK 登录</li>
+            <li>设备信息获取</li>
+            <li>请求服务器列表</li>
+            <li>配置文件加载</li>
+            <li>网关地址获取 / 网络连接</li>
+            <li>客户端角色登录</li>
+          </ol>
+          <h3>支付链</h3>
+          <ol>
+            <li>106 记录前端支付流程</li>
+            <li>221 记录后端支付流程</li>
+            <li>205 记录支付成功 / 发货成功</li>
+          </ol>
+          <h3>新手链</h3>
+          <ol>
+            <li>108 记录前端新手步骤</li>
+            <li>20001 记录后端新手状态</li>
+          </ol>
+        </section>
+        <section class="section" id="acceptance">
+          <h2>验收检查项</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>检查项</th><th>通过标准</th></tr></thead>
+              <tbody>
+                <tr><td>客户端 SDK 调用</td><td>track / getTrackingInfo 调用结构正确</td></tr>
+                <tr><td>步骤版本</td><td>step_version 明确且未混淆</td></tr>
+                <tr><td>支付闭环</td><td>106 -> 221 -> 205 可串查</td></tr>
+                <tr><td>透传字段</td><td>device_id / c_oneid / s_oneid / cpsid 可对齐</td></tr>
+                <tr><td>新手链</td><td>108 + 20001 同时可解释</td></tr>
+                <tr><td>灰区留痕</td><td>所有未获取 / 不发送字段都体现在验收报告中</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="troubleshooting">
+          <h2>常见排障</h2>
+          <div class="callout risk"><p><strong>症状：</strong>支付最终成功，但 106 / 221 中关键字段缺失。<br /><strong>处理：</strong>不要只补 205，要回到 106 / 221 查字段来源和步骤时序。</p></div>
+          <div class="callout risk"><p><strong>症状：</strong>前置漏斗数据断层。<br /><strong>处理：</strong>先确认是不是不同 <code>step_version</code> 被合并统计。</p></div>
+          <div class="callout risk"><p><strong>症状：</strong>服务端无法关联渠道或设备。<br /><strong>处理：</strong>优先检查 <code>getTrackingInfo</code> 回调消费和透传路径。</p></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

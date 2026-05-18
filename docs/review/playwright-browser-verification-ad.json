@@ -1,0 +1,22 @@
+{
+  "kind": "playwright-browser-verification",
+  "target": "http://127.0.0.1:58100/index.html",
+  "startedAt": "2026-05-09T09:05:27.360Z",
+  "finishedAt": "2026-05-09T09:05:28.270Z",
+  "status": "ok",
+  "navigationError": null,
+  "title": "Ads Flow Insight",
+  "screenshotPath": "docs/review/playwright-browser-verification-ad.png",
+  "metrics": {
+    "headings": 3,
+    "buttons": 2,
+    "inputs": 0,
+    "tables": 0,
+    "sections": 3,
+    "links": 0,
+    "textLength": 124
+  },
+  "evidence": {
+    "visibleTextSample": "小乔智投\n广告问题排查与投放协同工作台\n面向广告投放、联调排查、需求澄清和协同推进的企业产品页面。页面先承接状态、会话、任务和结构化结果，再把持续执行验证直接挂到同一条运行链上。\n新建会话\n刷新数据\n会话数\n0\n任务数\n0\n当前模式\n暂无\n快捷模式"
+  }
+}

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI埋点平台 - 埋点需求页 - 企业交付版 v1</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --panel: #ffffff;
+        --panel-soft: #f8fbff;
+        --line: #dbe5f0;
+        --text: #0f172a;
+        --muted: #64748b;
+        --brand: #2563eb;
+        --brand-soft: #eaf2ff;
+        --ok-bg: rgba(34, 197, 94, 0.14);
+        --ok-text: #15803d;
+        --warn-bg: rgba(245, 158, 11, 0.16);
+        --warn-text: #b45309;
+        --error-bg: rgba(239, 68, 68, 0.14);
+        --error-text: #b91c1c;
+        --shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+          linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+        color: var(--text);
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      button, input { font: inherit; }
+      .app { min-height: 100vh; }
+      .topbar {
+        height: 76px;
+        display: grid;
+        grid-template-columns: auto auto 1fr auto auto;
+        align-items: center;
+        gap: 16px;
+        padding: 0 24px;
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+      }
+      .brand {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        color: #fff;
+      }
+      .brand-name { font-size: 20px; font-weight: 700; }
+      .search {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        color: var(--muted);
+      }
+      .pill, .ghost-btn, .primary-btn, .toolbar-chip {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+      .pill { padding: 8px 12px; color: var(--muted); font-size: 13px; }
+      .layout {
+        display: grid;
+        grid-template-columns: 208px minmax(0, 1fr) 380px;
+        min-height: calc(100vh - 76px);
+      }
+      .sidebar {
+        padding: 16px 12px;
+        border-right: 1px solid var(--line);
+        background: rgba(255,255,255,0.88);
+        display: grid;
+        align-content: start;
+        gap: 10px;
+      }
+      .nav-item {
+        height: 44px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: #1e3a8a;
+        cursor: pointer;
+      }
+      .nav-item.active {
+        background: var(--brand-soft);
+        border-color: #bfd3ff;
+        font-weight: 700;
+      }
+      .main {
+        padding: 18px 20px 24px;
+        display: grid;
+        gap: 16px;
+      }
+      .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .page-title { margin: 0; font-size: 24px; }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .toolbar-chip { padding: 10px 12px; color: var(--muted); }
+      .toolbar-chip.active {
+        background: var(--brand-soft);
+        border-color: #bfd3ff;
+        color: var(--brand);
+        font-weight: 700;
+      }
+      .ghost-btn, .primary-btn {
+        height: 42px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .primary-btn {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .metric-card {
+        padding: 16px;
+        display: grid;
+        gap: 6px;
+      }
+      .metric-card strong { font-size: 28px; }
+      .metric-card span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+      .filters {
+        padding: 16px;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .field {
+        height: 42px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        color: var(--muted);
+      }
+      .field.search-wide { grid-column: span 2; }
+      .list-panel {
+        display: grid;
+      }
+      .list-head {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .table {
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      .row {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        display: grid;
+        grid-template-columns: 100px minmax(0, 1.6fr) 100px 100px 120px 120px 44px;
+        gap: 10px;
+        align-items: center;
+        text-align: left;
+        cursor: pointer;
+      }
+      .row.active {
+        background: #f4f8ff;
+        border-color: #bfd3ff;
+      }
+      .mono { font-family: Consolas, monospace; font-size: 12px; color: var(--muted); }
+      .status {
+        justify-self: start;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .status.ok { background: var(--ok-bg); color: var(--ok-text); }
+      .status.warn { background: var(--warn-bg); color: var(--warn-text); }
+      .status.error { background: var(--error-bg); color: var(--error-text); }
+      .side {
+        padding: 18px;
+        border-left: 1px solid var(--line);
+        background: rgba(255,255,255,0.92);
+        display: grid;
+        gap: 14px;
+      }
+      .side-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .detail-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        overflow: hidden;
+      }
+      .detail-card h3 {
+        margin: 0;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        font-size: 16px;
+      }
+      .detail-grid {
+        display: grid;
+        gap: 0;
+      }
+      .detail-row {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid #eef3f9;
+      }
+      .detail-row:last-child { border-bottom: none; }
+      .detail-row span:first-child { color: var(--muted); font-size: 13px; }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .svg-icon { width: 18px; height: 18px; display: inline-grid; place-items: center; }
+      @media (max-width: 1280px) {
+        .layout { grid-template-columns: 208px 1fr; }
+        .side { grid-column: 1 / -1; border-left: none; border-top: 1px solid var(--line); }
+        .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .field.search-wide { grid-column: span 2; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m12 12 8-4.5"/><path d="M12 12v9"/><path d="M12 12 4 7.5"/></svg>
+        </div>
+        <div class="brand-name">AI埋点平台</div>
+        <div class="search">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></svg>
+          <span>搜索事件 ID / 名称 / 参数 / 负责人</span>
+        </div>
+        <div class="pill">v2.4.0 正式包</div>
+        <div class="pill">当前角色：游戏客户端开发</div>
+      </header>
+      <div class="layout">
+        <aside class="sidebar">
+          <button class="nav-item"><span class="svg-icon">🏠</span><span>概览</span></button>
+          <button class="nav-item active"><span class="svg-icon">📘</span><span>埋点需求</span></button>
+          <button class="nav-item"><span class="svg-icon">🧩</span><span>数据字典</span></button>
+          <button class="nav-item"><span class="svg-icon">🛡️</span><span>校验规则</span></button>
+          <button class="nav-item"><span class="svg-icon">📊</span><span>验收报告</span></button>
+        </aside>
+        <main class="main">
+          <section class="page-head">
+            <div>
+              <h1 class="page-title">埋点需求（Requirements &amp; Schema）</h1>
+              <p>交付级交互页面：列表、筛选、状态和详情侧栏均用真实 DOM 表达，前端可直接承接。</p>
+            </div>
+            <div class="toolbar">
+              <div class="toolbar-chip active">批量操作</div>
+              <div class="toolbar-chip">解析预览</div>
+              <button class="ghost-btn">导入导出</button>
+              <button class="primary-btn">上传 Excel</button>
+            </div>
+          </section>
+          <section class="metric-grid">
+            <article class="panel metric-card"><span>新增事件数</span><strong>128</strong><p>较 v2.3.0 增加 12</p></article>
+            <article class="panel metric-card"><span>新增字段数</span><strong>236</strong><p>较 v2.3.0 增加 18</p></article>
+            <article class="panel metric-card"><span>字段变更数</span><strong>112</strong><p>需重点校对</p></article>
+            <article class="panel metric-card"><span>待确认项</span><strong>9</strong><p>关联事件可反查</p></article>
+          </section>
+          <section class="panel filters">
+            <div class="field"><span>角色</span><span>游戏客户端开发</span></div>
+            <div class="field"><span>事件域</span><span>全部事件域</span></div>
+            <div class="field"><span>来源</span><span>全部</span></div>
+            <div class="field"><span>应用类型</span><span>全部</span></div>
+            <div class="field"><span>优先级</span><span>全部</span></div>
+            <div class="field search-wide"><span>搜索参数（支持反查关联事件）</span><span>⌕</span></div>
+          </section>
+          <section class="panel list-panel">
+            <div class="list-head">
+              <strong>事件列表</strong>
+              <span class="pill">主列表 + 点击后右侧详情分离</span>
+            </div>
+            <div class="table">
+              <button class="row active" type="button">
+                <span class="mono">EVT_1001001</span>
+                <span>角色登录</span>
+                <span>客户端</span>
+                <span>登录</span>
+                <span class="status ok">通过</span>
+                <span>9 个核心参数</span>
+                <span>→</span>
+              </button>
+              <button class="row" type="button">
+                <span class="mono">EVT_1001002</span>
+                <span>进入游戏</span>
+                <span>客户端</span>
+                <span>会话</span>
+                <span class="status ok">通过</span>
+                <span>8 个核心参数</span>
+                <span>→</span>
+              </button>
+              <button class="row" type="button">
+                <span class="mono">EVT_1001003</span>
+                <span>任务领取</span>
+                <span>客户端</span>
+                <span>任务</span>
+                <span class="status warn">告警</span>
+                <span>6 个核心参数</span>
+                <span>→</span>
+              </button>
+              <button class="row" type="button">
+                <span class="mono">EVT_1001005</span>
+                <span>充值下单</span>
+                <span>客户端</span>
+                <span>付费</span>
+                <span class="status error">失败</span>
+                <span>10 个核心参数</span>
+                <span>→</span>
+              </button>
+            </div>
+          </section>
+        </main>
+        <aside class="side">
+          <div class="side-head">
+            <strong>事件详情</strong>
+            <span class="pill">点击后态 / 独立二级表面</span>
+          </div>
+          <div class="detail-card">
+            <h3>EVT_1001001 / 角色登录</h3>
+            <div class="detail-grid">
+              <div class="detail-row"><span>状态</span><strong class="status ok">通过</strong></div>
+              <div class="detail-row"><span>参数级别</span><strong>L1 / L2</strong></div>
+              <div class="detail-row"><span>关联事件</span><strong>9 个</strong></div>
+              <div class="detail-row"><span>更新时间</span><strong>2024-05-18 10:30</strong></div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <h3>L1 参数</h3>
+            <div class="detail-grid">
+              <div class="detail-row"><span>role_id</span><strong>10001</strong></div>
+              <div class="detail-row"><span>role_level</span><strong>35</strong></div>
+              <div class="detail-row"><span>role_type</span><strong>warrior</strong></div>
+              <div class="detail-row"><span>create_time</span><strong>1715932800</strong></div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <h3>上报示例</h3>
+            <div class="detail-grid">
+              <div class="detail-row"><span>payload</span><strong>{"role_id":10001,"role_level":35,"platform":"iOS"}</strong></div>
+              <div class="detail-row"><span>触发时机</span><strong>用户首次登录成功时触发</strong></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="ghost-btn">复制 JSON</button>
+            <button class="ghost-btn">查看关联</button>
+            <button class="primary-btn">确认状态</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>

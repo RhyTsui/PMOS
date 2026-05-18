@@ -1,0 +1,40 @@
+{
+  "id": "product-agent-c0b2e0dc-d30d-4e7c-a6fb-e35ede7a9487",
+  "subprojectId": null,
+  "name": "Virtual Industry Research PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "industry-research",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Builds long-cycle industry understanding through daily reports, weekly briefs, and special research reports.",
+  "problem": "Industry awareness is currently ad hoc and does not compound into a reusable product knowledge advantage.",
+  "targetUsers": [],
+  "goals": [
+    "Produce AI-industry daily reports and weekly intelligence briefs.",
+    "Track major vendors, models, frameworks, and market shifts.",
+    "Recommend what should enter the product backlog, watchlist, or rejection log."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Daily and weekly intelligence outputs can be generated from governed inputs.",
+    "Industry findings clearly explain product impact and recommended actions."
+  ],
+  "relatedPaths": [
+    "docs/templates/daily_intelligence_report_template.md",
+    "docs/templates/weekly_product_brief_template.md",
+    "docs/templates/special_research_report_template.md"
+  ],
+  "governanceRefs": [
+    "docs/industry_analysis"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_industry_research_pm_prompt.md",
+  "templateId": "virtual-industry-research-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.125Z",
+  "updatedAt": "2026-04-27T10:04:22.125Z"
+}

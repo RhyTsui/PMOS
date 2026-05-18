@@ -211,6 +211,82 @@
       }
     },
     {
+      "id": "jobs-to-be-done",
+      "name": "Jobs To Be Done",
+      "category": "product",
+      "description": "Clarifies the user progress behind a request, including trigger, current alternative, desired outcome, and true job-to-be-done.",
+      "ownerRole": "Product Manager Agent",
+      "promptPath": "docs/product-methods/jobs-to-be-done.md",
+      "stageIds": ["prd", "core-definition-baseline"],
+      "outputs": ["job statement", "trigger", "desired outcome", "solution-fit judgment"],
+      "triggerKeywords": ["jtbd", "job", "job-to-be-done", "job story", "progress", "outcome"],
+      "tool": "product-chief",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "config/product-management/product-method-registry.json",
+        "integration": "manual",
+        "notes": "First-batch method card is governed, but Product Chief routing and dedicated prompt execution are not yet integrated."
+      }
+    },
+    {
+      "id": "kano-model",
+      "name": "Kano Model",
+      "category": "product",
+      "description": "Classifies candidate requirements into basic, performance, and delighter layers before version scope is finalized.",
+      "ownerRole": "Requirements Manager Agent",
+      "promptPath": "docs/product-methods/kano-model.md",
+      "stageIds": ["prd", "review-metrics-telemetry", "tasks"],
+      "outputs": ["kano classification", "must-have baseline", "delighter candidates", "scope warning"],
+      "triggerKeywords": ["kano", "must-have", "delighter", "expectation", "requirement layer"],
+      "tool": "product-chief",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "config/product-management/product-method-registry.json",
+        "integration": "manual",
+        "notes": "Governed as a method card first; not yet routed as an execution-native Product Chief method."
+      }
+    },
+    {
+      "id": "rice",
+      "name": "RICE",
+      "category": "planning",
+      "description": "Ranks candidate scope using reach, impact, confidence, and effort so prioritization rationale is explicit and reviewable.",
+      "ownerRole": "Requirements Manager Agent",
+      "promptPath": "docs/product-methods/rice.md",
+      "stageIds": ["tasks", "prd", "versioning"],
+      "outputs": ["RICE score", "ranking table", "priority rationale", "confidence caveat"],
+      "triggerKeywords": ["rice", "prioritization", "reach", "impact", "confidence", "effort", "rank"],
+      "tool": "product-chief",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "config/product-management/product-method-registry.json",
+        "integration": "manual",
+        "notes": "Governed in the first-batch method registry but not yet enforced through stage-native prompts."
+      }
+    },
+    {
+      "id": "north-star-metric",
+      "name": "North Star Metric",
+      "category": "product",
+      "description": "Defines one governing value metric and supporting guardrails so the product has a measurable success direction.",
+      "ownerRole": "Strategy Manager Agent",
+      "promptPath": "docs/product-methods/north-star-metric.md",
+      "stageIds": ["core-definition-baseline", "prd", "versioning"],
+      "outputs": ["north star metric", "guardrail metrics", "metric rationale", "measurement risks"],
+      "triggerKeywords": ["north star", "metric", "value metric", "success metric", "guardrail"],
+      "tool": "product-chief",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "config/product-management/product-method-registry.json",
+        "integration": "manual",
+        "notes": "Method card is governed first; runtime output templates and routing remain to be integrated."
+      }
+    },
+    {
       "id": "system-boundary",
       "name": "System Boundary",
       "category": "architecture",
@@ -249,22 +325,155 @@
       }
     },
     {
-      "id": "claude-design-system",
-      "name": "Claude Design System",
+      "id": "design-language-md",
+      "name": "Design Language MD",
       "category": "design",
-      "description": "Uses the installed claude-design-system tool for design-system inspection and UI guidance.",
+      "description": "Builds or updates a project-level DESIGN.md so visual language, interaction language, component semantics, and design anti-patterns become a stable upstream truth before html-direction, ui-schema, static HTML, or implementation handoff continues.",
       "ownerRole": "Experience Design Agent",
-      "promptPath": "DESIGN-SYSTEM.md",
-      "stageIds": ["operations-surface", "multimodal", "schema-contract-upgrade"],
-      "outputs": ["design-system guidance", "component conventions", "UI review checklist", "prototype guardrails"],
-      "triggerKeywords": ["claude-design", "design-system", "component", "prototype", "ui", "visual"],
-      "tool": "claude-design-system",
+      "promptPath": "skills/design-language-md/SKILL.md",
+      "stageIds": ["prd", "schema-contract-upgrade", "operations-surface"],
+      "outputs": ["DESIGN.md", "design language baseline", "component preference notes", "design anti-pattern list"],
+      "triggerKeywords": ["design.md", "design language", "visual language", "component semantics", "design system", "design rules"],
+      "tool": "codex-skill",
       "deployment": {
-        "status": "installed",
-        "command": "design-system.cmd",
-        "statusPath": "docs/operations/claude-design-tooling-status.md",
-        "integration": "external-tool",
-        "notes": "Installed tool is visible to skill routing; execution remains a CLI/tooling boundary."
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/design-language-object-and-skill.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local PMAIOS skill skeleton for generating or updating DESIGN.md before downstream design handoff work."
+      }
+    },
+    {
+      "id": "ant-design-family-frontend",
+      "name": "Ant Design Family Frontend",
+      "category": "design",
+      "description": "Applies the governed PMOS Ant Design family baseline, including Ant Design X host rules, Ant Design foundational bindings, A2UI rules, and the isolated Ant Design Pro adapter boundary.",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "skills/ant-design-family-frontend/SKILL.md",
+      "stageIds": ["schema-contract-upgrade", "operations-surface", "multimodal", "frontend-page"],
+      "outputs": ["frontend design baseline", "ui-schema-spec", "component-family decision", "Pro adapter judgment", "delivery checklist"],
+      "triggerKeywords": ["ant design", "ant design x", "x.ant.design", "pro components", "design system", "frontend baseline"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/pmaios-ant-design-family-frontend-design.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local skill that fixes the PMOS Ant Design family baseline and keeps Ant Design Pro behind an isolated adapter boundary."
+      }
+    },
+    {
+      "id": "pmos-ui",
+      "name": "PMOS UI",
+      "category": "design",
+      "description": "Establishes schema-first PMOS UI guardrails for command-center, requirement, PRD, decision, workflow, and approval surfaces while blocking demo-style output patterns.",
+      "ownerRole": "Experience Design Agent",
+      "promptPath": "skills/pmos-ui/SKILL.md",
+      "stageIds": ["schema-contract-upgrade", "operations-surface", "frontend-page"],
+      "outputs": ["PMOS UI contract", "PMOS UI schema", "PMOS component registry", "PMOS golden schema", "demo-pattern lint rules"],
+      "triggerKeywords": ["pmos ui", "ui schema", "command center", "requirement page", "prd", "decision review", "approval panel", "ant design x"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/ui-pmos-copilot-contract.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local PMOS UI skill for schema-first workbench output. Use it to block hero/poster/demo drift and enforce PMOS workbench semantics."
+      }
+    },
+    {
+      "id": "pmos-fullstack-builder",
+      "name": "PMOS Fullstack Builder",
+      "category": "delivery",
+      "description": "Builds real PMOS implementation packages from governed outputs, including frontend mother-repos, CRUD feature packages, api-client/config/mock seams, and delivery scripts.",
+      "ownerRole": "Fullstack Builder Agent",
+      "promptPath": "skills/pmos-fullstack-builder/SKILL.md",
+      "stageIds": ["frontend-page", "data-schema", "backend-api", "tasks", "operations-surface"],
+      "outputs": ["runnable implementation package", "CRUD feature package", "repo scaffold", "delivery scripts", "CI-ready codebase"],
+      "triggerKeywords": ["fullstack", "frontend mother repo", "crud", "api client", "service config", "mock", "implementation", "gitlab ci"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/pmos-fullstack-and-testing-agent-baseline.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local implementation lane skill for turning governed PMOS outputs into runnable code rather than stopping at design or handoff."
+      }
+    },
+    {
+      "id": "pmos-architecture-designer",
+      "name": "PMOS Architecture Designer",
+      "category": "architecture",
+      "description": "Makes architecture a governed pre-implementation lane for boundaries, irreversible choices, integration seams, and ADR-ready tradeoffs before builder execution.",
+      "ownerRole": "Architecture Designer Agent",
+      "promptPath": "skills/pmos-architecture-designer/SKILL.md",
+      "stageIds": ["architecture", "schema-contract-upgrade", "data-schema", "backend-api", "operations-surface"],
+      "outputs": ["architecture decision", "boundary contract", "integration seam plan", "ADR-ready tradeoff summary"],
+      "triggerKeywords": ["architecture prerequisite", "boundary", "adr", "integration seam", "module split", "data ownership", "system design"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/pmos-fullstack-and-testing-agent-baseline.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local architecture lane skill for pre-implementation decisions before fullstack execution starts."
+      }
+    },
+    {
+      "id": "pmos-code-review",
+      "name": "PMOS Code Review",
+      "category": "review",
+      "description": "Runs governed incremental code review between implementation and testing acceptance, focusing on correctness, regressions, architecture conformance, and requirement traceability.",
+      "ownerRole": "Code Review Agent",
+      "promptPath": "skills/pmos-code-review/SKILL.md",
+      "stageIds": ["review", "frontend-page", "backend-api", "regression-acceptance", "operations-surface"],
+      "outputs": ["review findings", "blocker list", "rework recommendation", "review pass summary"],
+      "triggerKeywords": ["code review", "review diff", "review findings", "regression review", "architecture drift", "traceability review"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/pmos-fullstack-and-testing-agent-baseline.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local incremental code review skill for current-scope review before testing acceptance."
+      }
+    },
+    {
+      "id": "pmos-historical-code-review",
+      "name": "PMOS Historical Code Review",
+      "category": "review",
+      "description": "Runs governed historical code review for legacy hotspots, repeated fragility, old-code drift, and remediation queues without replacing current diff review.",
+      "ownerRole": "Historical Code Review Agent",
+      "promptPath": "skills/pmos-historical-code-review/SKILL.md",
+      "stageIds": ["review", "iteration", "regression-acceptance", "operations-surface"],
+      "outputs": ["historical hotspot findings", "legacy risk summary", "remediation queue", "non-blocking debt review"],
+      "triggerKeywords": ["historical code review", "legacy review", "hotspot review", "old code debt", "fragile module", "remediation queue"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/pmos-fullstack-and-testing-agent-baseline.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local historical code review skill for hotspot-first legacy audits that should not be confused with current diff review."
+      }
+    },
+    {
+      "id": "pmos-testing-acceptance",
+      "name": "PMOS Testing Acceptance",
+      "category": "review",
+      "description": "Runs strict PMOS acceptance gates, including lint, typecheck, tests, browser regression, anti-demo checks, and release-readiness blocking before user review.",
+      "ownerRole": "Testing Acceptance Agent",
+      "promptPath": "skills/pmos-testing-acceptance/SKILL.md",
+      "stageIds": ["review", "regression-acceptance", "frontend-page", "operations-surface"],
+      "outputs": ["acceptance result", "regression evidence", "blocked delivery report", "release readiness summary"],
+      "triggerKeywords": ["testing", "acceptance", "qa", "regression", "browser verification", "lint", "typecheck", "build verification"],
+      "tool": "codex-skill",
+      "deployment": {
+        "status": "manual",
+        "command": null,
+        "statusPath": "docs/operations/pmos-fullstack-and-testing-agent-baseline.md",
+        "integration": "repo-skill",
+        "notes": "Repo-local testing lane skill for strict acceptance and automated gating before user review."
       }
     },
     {

@@ -1,0 +1,84 @@
+{
+  "id": "product-chief-review-40a2b9ad-c631-4a52-8bcc-7e8275c8d271",
+  "reportId": "product-chief-e96a58e5-78e8-4724-937a-2657867c0f07",
+  "outputId": "product-output-3b564395-a43d-4fc7-8235-5bcff56425c9",
+  "subprojectId": null,
+  "mode": "deterministic-multi-agent-review",
+  "status": "needs-human-decision",
+  "startedAt": "2026-04-28T01:40:26.442Z",
+  "completedAt": "2026-04-28T01:40:26.442Z",
+  "participantTaskIds": [
+    "product-chief-task-6c89ce80-29f6-456b-9f8c-03fd42016cf5",
+    "product-chief-task-e16ad48e-8e4b-46ad-872a-33ac4a4fe802"
+  ],
+  "artifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-40a2b9ad-c631-4a52-8bcc-7e8275c8d271.md",
+  "consensus": "Project PM output \"Product definition baseline\" is usable as a draft, with explicit human decisions required before final approval.",
+  "turns": [
+    {
+      "agentId": "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+      "agentName": "Virtual Requirements PM",
+      "role": "requirements",
+      "position": "concern",
+      "summary": "Virtual Requirements PM supports drafting, but requires human confirmation for unresolved product context.",
+      "evidenceTaskId": "product-chief-task-6c89ce80-29f6-456b-9f8c-03fd42016cf5",
+      "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-6c89ce80-29f6-456b-9f8c-03fd42016cf5.md"
+    },
+    {
+      "agentId": "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389",
+      "agentName": "Virtual Documentation PM",
+      "role": "documentation",
+      "position": "support",
+      "summary": "Virtual Documentation PM supports the project PM output and links it to auditable evidence.",
+      "evidenceTaskId": "product-chief-task-e16ad48e-8e4b-46ad-872a-33ac4a4fe802",
+      "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-e16ad48e-8e4b-46ad-872a-33ac4a4fe802.md"
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "physical-world-context",
+      "positions": [
+        "target-users: Who are the exact users or stakeholders affected by this work?",
+        "success-metrics: What measurable outcome proves this work succeeded?",
+        "timeline: Is there a real deadline, launch window, or external dependency?",
+        "ownership: Who owns the final decision, and which teams must coordinate?"
+      ],
+      "resolution": "Project PM can use the draft, but final approval needs explicit human answers or waiver.",
+      "status": "needs-human-decision"
+    }
+  ],
+  "stopConditions": [
+    {
+      "condition": "At least two product agents participated",
+      "satisfied": true,
+      "detail": "2 specialist task(s) completed."
+    },
+    {
+      "condition": "Project output has requirement trace",
+      "satisfied": true,
+      "detail": "req-a1709293-c9fc-4ca2-a025-d9dcda04023f"
+    },
+    {
+      "condition": "Project output has artifact trace",
+      "satisfied": true,
+      "detail": "docs/product-office/outputs/product-output-3b564395-a43d-4fc7-8235-5bcff56425c9.md; docs/memory/product-chief/outputs/product-output-3b564395-a43d-4fc7-8235-5bcff56425c9.json"
+    },
+    {
+      "condition": "No agent raised a blocker",
+      "satisfied": true,
+      "detail": "0 blocker turn(s)."
+    },
+    {
+      "condition": "Human-decision context is explicit",
+      "satisfied": true,
+      "detail": "Missing physical-world questions remain visible before final approval."
+    }
+  ],
+  "requirementIds": [
+    "req-a1709293-c9fc-4ca2-a025-d9dcda04023f"
+  ],
+  "metadata": {
+    "outputType": "product-definition-baseline",
+    "outputTitle": "Product definition baseline",
+    "projectPmUsable": true
+  }
+}

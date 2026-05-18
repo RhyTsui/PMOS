@@ -1,0 +1,42 @@
+{
+  "id": "req-b7a8d103-c128-4770-a594-ada59204806f",
+  "subprojectId": null,
+  "title": "Extracted source requirement: |  **版本**  |  **产出需求和验收标准** $\\color{#0089FF}{@许晴}$   |  **开发完成（以评审结果为准）*",
+  "description": "|  **版本**  |  **产出需求和验收标准** $\\color{#0089FF}{@许晴}$   |  **开发完成（以评审结果为准）**  |  运营  |\n\nExtracted from: docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md\nNormalization artifact: docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md\nBackground digest: docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+  "category": "architecture",
+  "status": "draft",
+  "priority": "P1",
+  "source": {
+    "kind": "document",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "source-document",
+      "entityId": null,
+      "path": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+      "label": "documentation-requirement-extraction"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-d08abb2f-d9f2-412f-af50-46ea35b897c5"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+      "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+      "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md"
+    ]
+  },
+  "createdAt": "2026-05-09T05:50:38.589Z",
+  "updatedAt": "2026-05-09T05:50:38.591Z",
+  "metadata": {
+    "poolScope": "platform",
+    "lifecycle": "normalized",
+    "source": "documentation-requirement-extraction",
+    "sourcePath": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

@@ -1,13 +1,19 @@
-import type { Artifact, CommitteeReport, WorkflowRun, WorkflowStageRun } from '../shared/schemas.js';
+﻿import type { Artifact, CommitteeReport, TaskSsotTask, WorkflowRun, WorkflowStageRun } from '../shared/schemas.js';
 import type { ProviderExecutionBundle } from './modelProvider.js';
+import { ContextInjectionService } from './contextInjectionService.js';
 import { FileStore } from './fileStore.js';
+import { FrontendBrowserVerificationService } from './frontendBrowserVerificationService.js';
 import { MemoryService } from './memoryService.js';
+import { PipelineLauncherService } from './pipelineLauncherService.js';
 import { ProviderRouter } from './providerRouter.js';
 import { SkillRegistry, type SkillDefinition } from './skillRegistry.js';
 
 export class StageRunners {
   private readonly skillRegistry: SkillRegistry;
   private readonly providerRouter: ProviderRouter;
+  private readonly contextInjectionService: ContextInjectionService;
+  private readonly pipelineLauncherService: PipelineLauncherService;
+  private readonly frontendBrowserVerificationService: FrontendBrowserVerificationService;
   private readonly executionCache = new Map<string, ProviderExecutionBundle>();
 
   constructor(
@@ -16,6 +22,9 @@ export class StageRunners {
   ) {
     this.skillRegistry = new SkillRegistry(store);
     this.providerRouter = new ProviderRouter(store);
+    this.contextInjectionService = new ContextInjectionService();
+    this.pipelineLauncherService = new PipelineLauncherService();
+    this.frontendBrowserVerificationService = new FrontendBrowserVerificationService(store.resolve('.'));
   }
 
   async buildArtifactContent(input: {
@@ -24,9 +33,14 @@ export class StageRunners {
     artifactPath: string;
     artifactKind: Artifact['type'];
     reviewReport: CommitteeReport | null;
+    existingOutputPaths?: string[];
   }): Promise<string> {
     const { run, stage, artifactPath, artifactKind, reviewReport } = input;
     const skills = await this.listSkillsForStage(stage.id, run.subprojectId);
+
+    if (artifactKind === 'json' && /frontend-browser-verification/iu.test(artifactPath)) {
+      return this.buildFrontendBrowserVerificationArtifact(run, stage, artifactPath, input.existingOutputPaths ?? []);
+    }
 
     if (stage.capability === 'multimodal') {
       const execution = await this.getOrCreateMultimodalExecution(run, stage);
@@ -60,6 +74,7 @@ export class StageRunners {
     const projectDescription = run.subprojectId
       ? `这是业务子项目 ${run.projectName} 的阶段产物。`
       : '这是 AI OS 母体平台的阶段产物。';
+    const runtimeContext = this.buildStageRuntimeContext(run, stage);
 
     const execution = await this.providerRouter.execute(
       {
@@ -73,6 +88,14 @@ export class StageRunners {
           `工作流名称: ${run.name}`,
           `项目根目录: ${run.projectRoot || '.'}`,
           projectDescription,
+          `协作等级: ${runtimeContext.contextBundle.collaborationLevel}`,
+          `项目标签: ${runtimeContext.contextBundle.projectLabel}`,
+          `当前阶段: ${runtimeContext.contextBundle.currentStage ?? stage.id}`,
+          `激活 gate: ${runtimeContext.contextBundle.activeGateIds.join(', ') || '-'}`,
+          `阻塞 gate: ${runtimeContext.contextBundle.blockedGateIds.join(', ') || '-'}`,
+          `恢复锚点: ${runtimeContext.contextBundle.resumeAnchor ?? '-'}`,
+          `下一安全步: ${runtimeContext.contextBundle.nextSafeStep ?? '-'}`,
+          `下游 readiness: ${runtimeContext.pipelineLauncher.map((plan) => `${plan.label}:${plan.status}`).join(' / ') || '-'}`,
           `请输出一份中文多模态交付说明，至少包含：展示脚本、视觉说明、交互重点、适合 dashboard 展示的总结。`,
         ].join('\n'),
       },
@@ -101,12 +124,16 @@ export class StageRunners {
   }
 
   private async listSkillsForStage(stageId: string, subprojectId?: string | null) {
-    const direct = await this.skillRegistry.listSkillsForStage(stageId, subprojectId);
-    const aliases = this.getLegacyStageAliases(stageId);
-    const resolved = await Promise.all(aliases.map((alias) => this.skillRegistry.listSkillsForStage(alias, subprojectId)));
-    return [...direct, ...resolved.flat()].filter(
-      (skill, index, items) => items.findIndex((candidate) => candidate.id === skill.id) === index,
-    );
+    try {
+      const direct = await this.skillRegistry.listSkillsForStage(stageId, subprojectId);
+      const aliases = this.getLegacyStageAliases(stageId);
+      const resolved = await Promise.all(aliases.map((alias) => this.skillRegistry.listSkillsForStage(alias, subprojectId)));
+      return [...direct, ...resolved.flat()].filter(
+        (skill, index, items) => items.findIndex((candidate) => candidate.id === skill.id) === index,
+      );
+    } catch {
+      return [];
+    }
   }
 
   private buildMarkdownArtifact(
@@ -117,6 +144,7 @@ export class StageRunners {
     projectMemory: string[],
   ) {
     const sections = this.getStageSections(run, stage.id, skills);
+    const runtimeContext = this.buildStageRuntimeContext(run, stage);
 
     return [
       `# ${stage.label}`,
@@ -133,7 +161,32 @@ export class StageRunners {
       `- artifactPath: ${artifactPath}`,
       `- currentStage: ${run.currentStageId ?? 'completed'}`,
       '',
-      '## 方法论 Skills',
+      '## Context Injection Bundle',
+      `- collaborationLevel: ${runtimeContext.contextBundle.collaborationLevel}`,
+      `- projectLabel: ${runtimeContext.contextBundle.projectLabel}`,
+      `- currentStage: ${runtimeContext.contextBundle.currentStage ?? stage.id}`,
+      `- activeGateIds: ${runtimeContext.contextBundle.activeGateIds.join(' / ') || '-'}`,
+      `- blockedGateIds: ${runtimeContext.contextBundle.blockedGateIds.join(' / ') || '-'}`,
+      `- truthRefs: ${runtimeContext.contextBundle.truthRefs.join(' / ') || '-'}`,
+      `- reviewEvidenceRefs: ${runtimeContext.contextBundle.reviewEvidenceRefs.join(' / ') || '-'}`,
+      `- syncTargets: ${runtimeContext.contextBundle.syncTargets.join(' / ') || '-'}`,
+      `- resumeAnchor: ${runtimeContext.contextBundle.resumeAnchor ?? '-'}`,
+      `- nextSafeStep: ${runtimeContext.contextBundle.nextSafeStep ?? '-'}`,
+      `- redlines: ${runtimeContext.contextBundle.redlines.join(' / ') || '-'}`,
+      '',
+      '## Pipeline Launcher',
+      ...(runtimeContext.pipelineLauncher.length > 0
+        ? runtimeContext.pipelineLauncher.flatMap((plan) => [
+            `### ${plan.label}`,
+            `- status: ${plan.status}`,
+            `- trigger: ${plan.trigger}`,
+            `- targetStages: ${plan.targetStages.join(' / ') || '-'}`,
+            `- missingInputs: ${plan.missingInputs.join(' / ') || '-'}`,
+            `- nextAction: ${plan.nextAction ?? '-'}`,
+            '',
+          ])
+        : ['- 当前没有下游启动计划。', '']),
+      '## 方法参考 Skills',
       ...(skills.length > 0
         ? skills.flatMap((skill) => [
             `### ${skill.name}`,
@@ -170,6 +223,7 @@ export class StageRunners {
     execution: ProviderExecutionBundle,
   ) {
     const { result } = execution;
+    const runtimeContext = this.buildStageRuntimeContext(run, stage);
 
     return [
       `# ${stage.label}`,
@@ -185,6 +239,20 @@ export class StageRunners {
       `- capability: ${result.capability}`,
       `- model: ${result.model}`,
       `- status: ${result.status}`,
+      '',
+      '## Context Injection Bundle',
+      `- collaborationLevel: ${runtimeContext.contextBundle.collaborationLevel}`,
+      `- projectLabel: ${runtimeContext.contextBundle.projectLabel}`,
+      `- currentStage: ${runtimeContext.contextBundle.currentStage ?? stage.id}`,
+      `- activeGateIds: ${runtimeContext.contextBundle.activeGateIds.join(' / ') || '-'}`,
+      `- blockedGateIds: ${runtimeContext.contextBundle.blockedGateIds.join(' / ') || '-'}`,
+      `- resumeAnchor: ${runtimeContext.contextBundle.resumeAnchor ?? '-'}`,
+      `- nextSafeStep: ${runtimeContext.contextBundle.nextSafeStep ?? '-'}`,
+      '',
+      '## Pipeline Launcher',
+      ...(runtimeContext.pipelineLauncher.length > 0
+        ? runtimeContext.pipelineLauncher.map((plan) => `- ${plan.label}: ${plan.status} / ${plan.nextAction ?? '-'}`)
+        : ['- 当前没有下游启动计划。']),
       '',
       '## Provider 执行摘要',
       result.outputText ?? '当前没有生成可展示的文本内容。',
@@ -202,10 +270,90 @@ export class StageRunners {
     ].join('\n');
   }
 
+  private buildStageRuntimeContext(run: WorkflowRun, stage: WorkflowStageRun) {
+    const syntheticTask = this.buildSyntheticTask(run, stage);
+    return {
+      contextBundle: this.contextInjectionService.buildBundle(syntheticTask, run),
+      pipelineLauncher: this.pipelineLauncherService.buildPlans(syntheticTask, run),
+    };
+  }
+
+  private buildSyntheticTask(run: WorkflowRun, stage: WorkflowStageRun): TaskSsotTask {
+    const workflowTask = run.tasks.find((item) => item.stageId === stage.id) ?? null;
+    const artifactLinks = [...new Set([...(workflowTask?.artifactPaths ?? []), ...stage.outputPaths])].map((artifactPath, index) => ({
+      taskId: workflowTask?.id ?? `${run.id}-${stage.id}`,
+      artifactType: 'workflow-artifact',
+      artifactId: `${stage.id}-artifact-${index + 1}`,
+      artifactPath,
+      roleInTask: 'working-output' as const,
+    }));
+    return {
+      taskId: workflowTask?.id ?? `${run.id}-${stage.id}`,
+      sourceType: 'workflow-run-task',
+      sourceRef: run.id,
+      originalDemandRefs: [],
+      subprojectId: run.subprojectId ?? null,
+      title: workflowTask?.title ?? stage.label,
+      summary: workflowTask?.summary ?? stage.summary ?? null,
+      collaborationLevel: stage.gate.reviewRequired ? 'L2' : 'L1',
+      status: workflowTask?.status === 'completed' ? 'completed' : workflowTask?.status === 'blocked' ? 'blocked' : 'ready_for_delivery',
+      currentStage: stage.id,
+      currentOwnerAgentId: `workflow-role:${stage.ownerRole}`,
+      createdAt: run.generatedAt,
+      updatedAt: run.updatedAt,
+      stages: [],
+      gateChecks: [],
+      gateHistory: [],
+      artifactLinks,
+      agentAssignments: [],
+      syncEnvelopes: [],
+      continuation: {
+        mainlineLabel: run.projectName,
+        nextSafeStep: null,
+        parkedLines: [],
+        blockerType: null,
+        resumeAnchor: run.memory.runStatePath,
+        lastMeaningfulAdvanceAt: run.updatedAt,
+        currentAttention: null,
+      },
+    };
+  }
+
+  private buildFrontendBrowserVerificationArtifact(
+    run: WorkflowRun,
+    stage: WorkflowStageRun,
+    artifactPath: string,
+    existingOutputPaths: string[],
+  ) {
+    const syntheticTask = this.buildSyntheticTask(run, {
+      ...stage,
+      outputPaths: [...new Set([...stage.outputPaths, ...existingOutputPaths])],
+    });
+    const report = {
+      ...this.frontendBrowserVerificationService.evaluateTask(syntheticTask, run),
+      artifactPath,
+    };
+    return JSON.stringify(report, null, 2);
+  }
+
   private getStageSections(run: WorkflowRun, stageId: string, skills: SkillDefinition[]) {
     const skillLines = skills.map((skill) => `- ${skill.name}: ${skill.outputs.join('、')}`);
 
     switch (stageId) {
+      case 'research-document':
+        return [
+          '## Competitive Analysis',
+          '- 对目标问题做竞品、替代方案与开源能力扫描，先判断是否值得自研。',
+          '- 输出 build-vs-buy 结论、关键差异点与版本适配风险。',
+          '',
+          '## 调研范围',
+          '- 用户问题、目标角色、当前流程、竞品方案、开源方案、约束条件。',
+          '- 只记录与本轮产品决策直接相关的事实、风险与待确认项。',
+          '',
+          '## 结论摘要',
+          '- 先完成事实调研与方案比较，再进入需求与设计阶段。',
+          ...skillLines,
+        ];
       case 'core-definition-baseline':
         return [
           '## 基线目标',
@@ -346,25 +494,87 @@ export class StageRunners {
   }
 
   private buildFallbackReview(run: WorkflowRun, stage: WorkflowStageRun, skills: SkillDefinition[]): CommitteeReport {
+    const reviewRequired = stage.gate.reviewRequired;
+    const blocked = reviewRequired;
+    const fallbackIssue = {
+      title: '缺少真实 committee report',
+      description: '当前评审产物仍是 fallback review，未生成真实委员会评审报告。',
+      impact: 'review-required 阶段会失去机制约束，无法作为可交付的正式评审结论。',
+      recommendation: '补跑真实 committee review，并回写正式的角色评审与 gate 结果。',
+      expectedAnswer: '提供真实 committee report artifact，并明确各角色结论与 gate 决策。',
+      decision: 'Conditional' as const,
+    };
+
     return {
       overallConclusion: `${stage.label} 已形成结构化评审输出。`,
-      nextStage: true,
-      reworkRequired: false,
+      nextStage: !blocked,
+      reworkRequired: blocked,
       gate: {
-        decision: 'pass',
-        blocked: false,
-        issueCount: 0,
-        blockingStageId: null,
+        decision: blocked ? 'conditional' : 'pass',
+        blocked,
+        issueCount: blocked ? 1 : 0,
+        blockingStageId: blocked ? stage.id : null,
       },
       roles: [
         {
           role: stage.ownerRole,
           summary: `${stage.label} 使用 ${skills.map((skill) => skill.name).join(' / ') || 'execution rules'} 完成评审。`,
-          issues: [],
+          issues: blocked ? [fallbackIssue] : [],
         },
       ],
-      summary: `${run.projectName} 已通过 ${stage.label} 的默认评审。`,
-      recommendedReworkStageId: null,
+      hermes: {
+        overallDecision: blocked ? 'block' : 'keep',
+        summary: blocked
+          ? 'Fallback review detected that a review-required stage is missing a real committee report.'
+          : 'Default fallback review keeps the current stage package as baseline.',
+        actions: [
+          {
+            action: blocked ? 'block' : 'keep',
+            target: stage.id,
+            reason: blocked
+              ? 'Review-required stage cannot pass with fallback review only.'
+              : 'Fallback review found no blocking issue in the default path.',
+          },
+        ],
+        knowledgeGrounding: {
+          configured: false,
+          query: null,
+          resultCount: 0,
+          summary: null,
+        },
+        writebackClosure: {
+          totalTargets: 0,
+          completedTargets: 0,
+          openTargets: 0,
+          activeTaskCount: 0,
+          summary: null,
+        },
+        watchClosure: {
+          activeFindings: 0,
+          resolvedFindings: 0,
+          recurringFindings: 0,
+          suppressedFindings: 0,
+          openTaskCount: 0,
+          closureEvidenceCount: 0,
+          summary: null,
+        },
+      },
+      activationTrace: blocked
+        ? [
+            {
+              role: 'Solution-Optimality Review',
+              required: true,
+              activated: false,
+              source: 'missing-stage-specialist',
+              status: 'missing',
+            },
+          ]
+        : [],
+      summary: blocked
+        ? `${run.projectName} 的 ${stage.label} 缺少真实评审报告，已回退到阻断态。`
+        : `${run.projectName} 已通过 ${stage.label} 的默认评审。`,
+      recommendedReworkStageId: blocked ? stage.id : null,
     };
   }
 }
+

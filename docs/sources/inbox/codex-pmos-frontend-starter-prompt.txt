@@ -1,0 +1,258 @@
+你现在是一个资深前端工程代理。请在当前空目录中，从零创建一个可运行、可构建、可测试、可扩展的 PMOS 前端母仓库。
+
+不要只写方案，不要只写 README，不要停在脚手架说明。你必须真实创建代码、配置、测试、生成器、GitLab CI 文件，并尽量运行验证命令。遇到不确定项时，不要反问，直接采用下面的默认约束。
+
+本次任务默认采用两条 PMOS agent lane：
+
+- 当前执行身份 = `Fullstack Builder Agent`
+- 最终验收身份 = `Testing Acceptance Agent`
+
+也就是说：
+
+- 先把真实工程搭出来
+- 再跑自动验收
+- 没通过就继续修，不要把未验收结果直接交付
+
+一、任务目标
+
+创建一个 `pmos-frontend-kit` 级别的前端母仓库，用于后续稳定生成 PMOS 风格的 CRUD 功能包。
+
+本轮重点不是视觉稿，而是工程底座：
+
+1. React + TypeScript + Vite 前端应用
+2. Ant Design 负责 CRUD 和业务页基础组件
+3. Ant Design X 负责 PMOS chat-first / copilot / assistant 交互外壳
+4. pnpm workspace 多包结构
+5. API Client 抽象层
+6. Service Config 抽象层
+7. MSW mock 兜底层
+8. CRUD 功能包生成器
+9. GitLab CI 质量门禁
+10. 一个真实可运行的 `用户管理 CRUD 功能包`
+
+必须避免把仓库做成：
+
+- landing page
+- hero section
+- feature grid
+- showcase shell
+- Claude 风格平铺卡片墙
+- 泛 AI SaaS 首页
+- 只有一张演示页、没有工程生成能力的 demo 项目
+
+二、默认技术栈
+
+必须使用：
+
+- pnpm workspace
+- React + TypeScript + Vite
+- react-router-dom
+- @tanstack/react-query
+- antd
+- @ant-design/x
+- vitest + @testing-library/react + @testing-library/user-event + jsdom
+- msw
+- eslint + prettier
+- GitLab CI
+
+重要约束：
+
+- CRUD 主体页面优先使用 antd
+- PMOS 助手、chat、建议、欢迎、对话外壳优先使用 Ant Design X
+- 不要引入新的 UI 框架
+- 不要生成 Ant Design Pro dashboard 套壳
+- 不要把首页做成控制台面板墙
+- 首页/默认入口必须体现 `chat-first + agent-controlled frontend`
+
+三、仓库结构要求
+
+必须包含：
+
+- apps/web
+- packages/service-config
+- packages/api-client
+- packages/mock
+- packages/ui
+- generators/create-crud.mjs
+- specs/features/user-management.yaml
+- scripts/verify.mjs
+- .gitlab-ci.yml
+- README.md
+
+四、前端应用要求
+
+至少实现：
+
+- `/` 重定向到 `/users`
+- `/users` 用户管理 CRUD 页面
+- `/assistant` PMOS 助手页面或区域
+
+UsersPage 必须支持：
+
+- 搜索
+- 分页
+- 新增
+- 编辑
+- 删除
+- 启用/禁用
+- loading / error / empty
+- 成功和失败反馈
+
+当前数据源要求：
+
+- 页面通过 `packages/api-client` 访问 `/api`
+- 本轮不接真实后端，因此由 MSW 拦截
+- 组件层不能直接依赖 mock 数据
+
+五、PMOS Assistant 要求
+
+`PmosAssistantPanel.tsx` 用 `@ant-design/x` 搭一个可运行的 PMOS 助手交互壳。
+
+至少包含：
+
+- Welcome
+- Prompt 建议
+- 对话消息展示
+- 输入框
+
+它先不接真实 LLM，但要为未来接入真实对话服务保留扩展点。
+
+六、Service Config 要求
+
+`packages/service-config/src/index.ts` 至少导出：
+
+- RuntimeEnv
+- ServiceConfig
+- getRuntimeEnv()
+- getServiceConfig()
+- isMockEnabled()
+
+默认 local 配置：
+
+- apiBaseUrl = '/api'
+- enableMock = true
+
+七、API Client 要求
+
+必须提供：
+
+- request<T>()
+- ApiError
+- listUsers
+- getUser
+- createUser
+- updateUser
+- deleteUser
+- toggleUserStatus
+
+用户类型至少包含：
+
+- id
+- name
+- email
+- role
+- status
+- createdAt
+- updatedAt
+
+八、Mock 要求
+
+`packages/mock` 基于 MSW 提供完整用户 CRUD mock：
+
+- 至少 8 条用户数据
+- 覆盖 active / disabled / admin / member / viewer
+- 支持搜索、分页、编辑、删除、状态切换
+
+九、CRUD 生成功能
+
+实现：
+
+`pnpm pmos:create-crud specs/features/user-management.yaml`
+
+第一版至少做到：
+
+1. 读取 yaml 规格
+2. 根据 feature code / route / entity / fields / actions 生成前端 CRUD 功能目录骨架
+3. 生成 page / constants / hooks / components / test
+4. 尽量支持重复执行不破坏现有代码
+
+十、测试要求
+
+至少覆盖：
+
+1. UsersPage 标题可见
+2. 列表加载成功
+3. 搜索 Alice 可筛选
+4. 新增用户成功
+5. 删除用户成功
+6. 状态切换成功
+
+还要验证 `create-crud.mjs` 不是空壳。
+
+十一、GitLab CI 要求
+
+创建 `.gitlab-ci.yml`，至少包含：
+
+- install
+- validate
+- test
+- build
+
+并执行：
+
+- lint
+- typecheck
+- test
+- build
+
+十二、根脚本要求
+
+根 `package.json` 至少包含：
+
+- dev
+- build
+- lint
+- typecheck
+- test
+- pmos:create-crud
+- pmos:verify
+
+十三、README 要求
+
+必须说明：
+
+1. PMOS 前端母仓库定位
+2. 技术栈
+3. 目录结构
+4. 本地安装与启动
+5. Mock 机制
+6. API Client / Service Config 机制
+7. CRUD 生成器用法
+8. GitLab CI 说明
+9. 后续如何升级为真实后端联调
+
+十四、运行验证
+
+完成后尽量运行：
+
+- pnpm install
+- pnpm lint
+- pnpm typecheck
+- pnpm test
+- pnpm build
+- pnpm pmos:verify
+
+如果环境限制导致不能安装依赖或执行命令，也必须先把完整文件创建好，并在最后明确说明哪些命令没法跑、为什么没法跑。
+
+十五、最后输出格式
+
+完成后请用中文输出：
+
+1. 创建了哪些核心文件
+2. 运行了哪些命令并通过
+3. 哪些命令没有运行或未通过，以及原因
+4. 如何启动本地工程
+5. 如何生成新的 CRUD 功能包
+6. 后续升级到真实后端时的扩展点，不超过 5 条
+
+现在开始执行。

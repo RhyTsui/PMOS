@@ -1,0 +1,184 @@
+<svg width="1600" height="1180" viewBox="0 0 1600 1180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1480" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7F1E6"/>
+      <stop offset="0.45" stop-color="#EEF4EF"/>
+      <stop offset="1" stop-color="#E5EEF8"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="150" y1="120" x2="1290" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#183A37"/>
+      <stop offset="1" stop-color="#2C5C55"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFDF9"/>
+      <stop offset="1" stop-color="#F4F7F9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#193B39" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      text { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+      .eyebrow { font-size: 16px; font-weight: 700; letter-spacing: 2px; fill: #2D5957; }
+      .title { font-size: 48px; font-weight: 800; fill: #F9F6EF; }
+      .subtitle { font-size: 19px; font-weight: 500; fill: #D8E6E2; }
+      .section { font-size: 24px; font-weight: 800; fill: #163835; }
+      .label { font-size: 17px; font-weight: 700; fill: #1B3E3B; }
+      .body { font-size: 15px; font-weight: 500; fill: #536C69; }
+      .small { font-size: 13px; font-weight: 600; fill: #657E7B; }
+      .chip { font-size: 13px; font-weight: 700; fill: #173A37; }
+      .white { fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1180" fill="url(#bg)"/>
+  <circle cx="1320" cy="150" r="180" fill="#F5D59B" fill-opacity="0.35"/>
+  <circle cx="1360" cy="1040" r="160" fill="#C7D9F0" fill-opacity="0.34"/>
+  <circle cx="190" cy="1010" r="220" fill="#CFE3DB" fill-opacity="0.28"/>
+
+  <text x="110" y="76" class="eyebrow">TRACKING COLLABORATION DASHBOARD</text>
+  <text x="110" y="108" class="body">埋点需求协同看板 v1.0 设计图，先收敛一条“需求上传 - 差异识别 - 验证回看 - 进度跟踪 - 群推送”闭环。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="90" y="140" width="1420" height="930" rx="34" fill="#FCFBF8"/>
+    <rect x="90" y="140" width="1420" height="124" rx="34" fill="url(#hero)"/>
+    <rect x="90" y="230" width="1420" height="34" fill="url(#hero)"/>
+  </g>
+
+  <circle cx="138" cy="191" r="8" fill="#F2B6A7"/>
+  <circle cx="166" cy="191" r="8" fill="#F5D59B"/>
+  <circle cx="194" cy="191" r="8" fill="#99D0C1"/>
+  <text x="232" y="196" class="label white">数据后台 / 埋点需求协同工作台</text>
+  <text x="1160" y="196" class="small white">需求池</text>
+  <text x="1228" y="196" class="small white">验证中心</text>
+  <text x="1320" y="196" class="small white">进度治理</text>
+  <text x="1410" y="196" class="small white">消息推送</text>
+
+  <text x="126" y="324" class="eyebrow">V1.0 FOCUS</text>
+  <text x="126" y="378" class="title">把埋点管理做成一屏闭环</text>
+  <text x="126" y="418" class="subtitle">数分上传需求后系统自动展示版本与差异，研发按批次验证上报，管理侧实时看燃尽、问题优先级和群同步。</text>
+
+  <rect x="126" y="452" width="126" height="42" rx="21" fill="#F5D59B"/>
+  <text x="158" y="478" class="chip">版本识别</text>
+  <rect x="264" y="452" width="126" height="42" rx="21" fill="#D8ECE8"/>
+  <text x="296" y="478" class="chip">实时回看</text>
+  <rect x="402" y="452" width="126" height="42" rx="21" fill="#DFEAF7"/>
+  <text x="434" y="478" class="chip">燃尽治理</text>
+  <rect x="540" y="452" width="126" height="42" rx="21" fill="#F5DAD5"/>
+  <text x="572" y="478" class="chip">群推送</text>
+
+  <rect x="760" y="302" width="212" height="148" rx="24" fill="#F8F4EA"/>
+  <text x="788" y="340" class="small">活跃需求</text>
+  <text x="788" y="394" class="section">48</text>
+  <text x="788" y="424" class="body">按人 / 端 / 模块 / 优先级筛选</text>
+
+  <rect x="990" y="302" width="212" height="148" rx="24" fill="#ECF4EE"/>
+  <text x="1018" y="340" class="small">今日验证批次</text>
+  <text x="1018" y="394" class="section">12</text>
+  <text x="1018" y="424" class="body">成功 9，失败 3，可直接下钻报告</text>
+
+  <rect x="1220" y="302" width="250" height="148" rx="24" fill="#E8F0FA"/>
+  <text x="1248" y="340" class="small">本周燃尽</text>
+  <text x="1248" y="394" class="section">74%</text>
+  <text x="1248" y="424" class="body">剩余 11 个高优先级问题待解</text>
+
+  <g filter="url(#shadow)">
+    <rect x="126" y="536" width="420" height="486" rx="28" fill="url(#panel)"/>
+  </g>
+  <text x="156" y="582" class="section">01 需求池与版本记录</text>
+  <rect x="156" y="604" width="72" height="30" rx="15" fill="#F7E7C9"/>
+  <text x="177" y="624" class="chip">按人</text>
+  <rect x="236" y="604" width="72" height="30" rx="15" fill="#E6F2E8"/>
+  <text x="257" y="624" class="chip">按端</text>
+  <rect x="316" y="604" width="82" height="30" rx="15" fill="#DFEAF7"/>
+  <text x="337" y="624" class="chip">按模块</text>
+  <rect x="406" y="604" width="104" height="30" rx="15" fill="#F5DAD5"/>
+  <text x="432" y="624" class="chip">按优先级</text>
+
+  <rect x="156" y="654" width="360" height="104" rx="22" fill="#183A37"/>
+  <text x="182" y="690" class="label white">需求 #A-2404 首页曝光埋点补录</text>
+  <text x="182" y="718" class="small white">责任人：李青 / 开发：张帆 / 端：iOS / 模块：首页 / P0</text>
+  <text x="182" y="744" class="body" fill="#D8E6E2">v1.3 由数分覆盖上传。系统检测到字段新增 2 项、事件名变更 1 项，自动标记“待研发确认”。</text>
+
+  <rect x="156" y="774" width="360" height="82" rx="20" fill="#FFFFFF"/>
+  <text x="182" y="806" class="label">需求 #A-2405 直播间点击链路</text>
+  <text x="182" y="832" class="body">v1.0 已分配安卓研发，待上传测试批次</text>
+
+  <rect x="156" y="868" width="360" height="82" rx="20" fill="#FFFFFF"/>
+  <text x="182" y="900" class="label">需求 #A-2406 商品详情页转化</text>
+  <text x="182" y="926" class="body">v2.1 本周二更新，含 4 条字段废弃提醒</text>
+
+  <rect x="156" y="962" width="170" height="36" rx="18" fill="#E6F2E8"/>
+  <text x="188" y="986" class="chip">更新记录 24 条</text>
+  <rect x="338" y="962" width="178" height="36" rx="18" fill="#F7E7C9"/>
+  <text x="368" y="986" class="chip">版本冲突 3 条</text>
+
+  <g filter="url(#shadow)">
+    <rect x="570" y="536" width="470" height="486" rx="28" fill="url(#panel)"/>
+  </g>
+  <text x="600" y="582" class="section">02 差异识别与批次验证</text>
+  <rect x="600" y="610" width="194" height="78" rx="20" fill="#F8F4EA"/>
+  <text x="624" y="642" class="label">差异识别卡</text>
+  <text x="624" y="668" class="body">新增字段：2，删除字段：1，命名变更：1</text>
+  <rect x="812" y="610" width="198" height="78" rx="20" fill="#ECF4EE"/>
+  <text x="836" y="642" class="label">开发映射卡</text>
+  <text x="836" y="668" class="body">自动带出责任开发，可手动补充协作人</text>
+
+  <rect x="600" y="710" width="410" height="138" rx="22" fill="#FFFFFF"/>
+  <text x="626" y="744" class="label">版本差异面板</text>
+  <text x="626" y="774" class="body">v1.2 → v1.3</text>
+  <text x="626" y="804" class="body">+ exposure_source</text>
+  <text x="626" y="830" class="body">+ recommendation_bucket</text>
+  <text x="626" y="856" class="body">~ event_name: home_banner_click → home_feed_click</text>
+
+  <rect x="600" y="868" width="190" height="120" rx="22" fill="#DFEAF7"/>
+  <text x="624" y="902" class="label">批次运行</text>
+  <text x="624" y="930" class="body">批次 2026-04-24-03</text>
+  <text x="624" y="956" class="body">一键执行 / 查看结果</text>
+
+  <rect x="808" y="868" width="202" height="120" rx="22" fill="#F5DAD5"/>
+  <text x="832" y="902" class="label">验证报告</text>
+  <text x="832" y="930" class="body">上报成功率 92%</text>
+  <text x="832" y="956" class="body">失败明细可按端、模块筛查</text>
+
+  <g filter="url(#shadow)">
+    <rect x="1064" y="536" width="406" height="250" rx="28" fill="url(#panel)"/>
+  </g>
+  <text x="1094" y="582" class="section">03 实时上报概览</text>
+  <rect x="1094" y="608" width="346" height="54" rx="18" fill="#FFFFFF"/>
+  <text x="1120" y="642" class="body">时间 10:00 - 11:00  |  iOS 4,832  |  Android 5,204  |  Web 2,214</text>
+  <polyline points="1114,736 1166,716 1210,728 1262,676 1314,692 1360,640 1412,618" fill="none" stroke="#226A60" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="1114" cy="736" r="6" fill="#226A60"/>
+  <circle cx="1166" cy="716" r="6" fill="#226A60"/>
+  <circle cx="1210" cy="728" r="6" fill="#226A60"/>
+  <circle cx="1262" cy="676" r="6" fill="#226A60"/>
+  <circle cx="1314" cy="692" r="6" fill="#226A60"/>
+  <circle cx="1360" cy="640" r="6" fill="#226A60"/>
+  <circle cx="1412" cy="618" r="6" fill="#226A60"/>
+  <line x1="1110" y1="736" x2="1420" y2="736" stroke="#D7E2E7"/>
+  <line x1="1110" y1="696" x2="1420" y2="696" stroke="#E8EFF2"/>
+  <line x1="1110" y1="656" x2="1420" y2="656" stroke="#E8EFF2"/>
+  <text x="1098" y="760" class="small">实时查看研发上传后的数据上报状态，并支持切换历史批次。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="1064" y="804" width="406" height="218" rx="28" fill="url(#panel)"/>
+  </g>
+  <text x="1094" y="850" class="section">04 燃尽与问题优先级</text>
+  <line x1="1112" y1="962" x2="1418" y2="962" stroke="#D7E2E7"/>
+  <line x1="1112" y1="916" x2="1418" y2="916" stroke="#E8EFF2"/>
+  <polyline points="1120,930 1170,920 1220,902 1270,882 1320,866 1370,846 1410,826" fill="none" stroke="#C6762A" stroke-width="4" stroke-linecap="round"/>
+  <polyline points="1120,944 1170,938 1220,934 1270,930 1320,928 1370,926 1410,924" fill="none" stroke="#8096B1" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 8"/>
+  <rect x="1096" y="974" width="110" height="28" rx="14" fill="#F5D59B"/>
+  <text x="1126" y="993" class="chip">P0 问题 3</text>
+  <rect x="1218" y="974" width="110" height="28" rx="14" fill="#F5DAD5"/>
+  <text x="1248" y="993" class="chip">P1 问题 8</text>
+  <rect x="1340" y="974" width="112" height="28" rx="14" fill="#DFEAF7"/>
+  <text x="1370" y="993" class="chip">待确认 5</text>
+
+  <g filter="url(#shadow)">
+    <rect x="90" y="1092" width="1420" height="64" rx="24" fill="#FCFBF8"/>
+  </g>
+  <text x="120" y="1132" class="label">v1.0 判断</text>
+  <text x="220" y="1132" class="body">这版先解决“埋点需求协同是否可闭环”，不在 v1.0 追求复杂自动化。优先做上传覆盖、版本差异、批次验证、燃尽图、问题优先级、手动推送到小闪群。</text>
+  <rect x="1286" y="1108" width="182" height="32" rx="16" fill="#183A37"/>
+  <text x="1322" y="1130" class="small white">手动推送到小闪沟通群</text>
+</svg>

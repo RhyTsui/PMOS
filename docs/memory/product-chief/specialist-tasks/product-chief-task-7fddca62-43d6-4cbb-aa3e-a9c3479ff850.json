@@ -1,0 +1,23 @@
+{
+  "id": "product-chief-task-7fddca62-43d6-4cbb-aa3e-a9c3479ff850",
+  "reportId": "product-chief-1f53725c-2e40-4ffd-b4f9-89a2b5de7b13",
+  "outputId": "product-output-10fdfc0b-82f6-4234-8984-3de6a2c6fb60",
+  "subprojectId": null,
+  "agentId": "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+  "agentName": "Virtual Workflow PM",
+  "role": "workflow",
+  "status": "completed",
+  "assignedAt": "2026-04-27T11:22:06.274Z",
+  "completedAt": "2026-04-27T11:22:06.274Z",
+  "artifactPath": "docs/product-office/specialist-tasks/product-chief-task-7fddca62-43d6-4cbb-aa3e-a9c3479ff850.md",
+  "outputType": "design-image2-prompt-pack",
+  "outputTitle": "Page-by-page image2 prompt pack",
+  "summary": "Reviewed design-image2-prompt-pack for operator workflow, UI contract, and delivery risk.",
+  "requirementIds": [
+    "req-c62fe91b-2018-4b2e-ad56-416f906c6661"
+  ],
+  "metadata": {
+    "executionMode": "deterministic-specialist-runtime",
+    "reportGeneratedAt": "2026-04-27T11:22:06.266Z"
+  }
+}

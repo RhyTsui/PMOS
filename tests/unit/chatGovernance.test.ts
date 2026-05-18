@@ -32,4 +32,47 @@ describe('Chat governance capture', () => {
     expect(rules).toContain('全局规则');
     expect(requirements.some((requirement) => requirement.source.messageId === message.id)).toBe(true);
   });
+  it('auto-captures provider failures into requirement pool during respond', async () => {
+    const store = createStore();
+    await store.write('docs/memory/project-memory.md', '# Project Memory\n- governance fixture\n');
+    const memoryService = new MemoryService(store);
+    const requirementService = new RequirementService(memoryService);
+    const llmRouter = {
+      execute: async () => ({
+        result: {
+          providerName: 'mock-provider',
+          providerType: 'mock',
+          model: 'mock-model',
+          status: 'error',
+          outputText: null,
+          warning: null,
+          error: 'quota exceeded',
+        },
+        events: [
+          {
+            kind: 'provider_failed',
+            status: 'warning',
+            detail: 'mock-provider quota exceeded',
+            artifactPath: null,
+          },
+        ],
+      }),
+    };
+    const chatService = new ChatService(store, memoryService, undefined, llmRouter as never);
+
+    const session = await chatService.createSession({});
+    await chatService.createUserMessage(session.id, {
+      content: '帮我总结当前平台状态',
+      parentMessageId: null,
+    });
+    await chatService.respond(session.id);
+
+    const requirements = await requirementService.listRequirements();
+    expect(
+      requirements.some(
+        (requirement) =>
+          requirement.source.kind === 'auto-capture' && requirement.metadata.autoCaptureEventKind === 'provider_failed',
+      ),
+    ).toBe(true);
+  });
 });

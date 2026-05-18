@@ -1,12 +1,1461 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ads Flow Insight</title>
+    <title>小乔智投首页</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f7fb;
+        --bg-strong: #eef3fb;
+        --panel: rgba(255, 255, 255, 0.94);
+        --panel-strong: #ffffff;
+        --panel-soft: #f7f9fd;
+        --line: #d9e2ef;
+        --line-strong: #c7d4e8;
+        --text: #14243d;
+        --text-soft: #586b86;
+        --text-muted: #7e8ea6;
+        --brand: #1677ff;
+        --brand-strong: #0f56c6;
+        --brand-soft: rgba(22, 119, 255, 0.12);
+        --success: #0e8a64;
+        --warn: #b67918;
+        --danger: #cf4c44;
+        --shadow-main: 0 24px 72px rgba(15, 36, 76, 0.12);
+        --shadow-card: 0 14px 36px rgba(16, 36, 73, 0.08);
+        --radius-xxl: 32px;
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(22, 119, 255, 0.12), transparent 30%),
+          radial-gradient(circle at 85% 10%, rgba(20, 36, 61, 0.08), transparent 24%),
+          linear-gradient(180deg, #fbfcfe 0%, var(--bg) 100%);
+      }
+
+      button,
+      textarea,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button,
+      a {
+        cursor: pointer;
+      }
+
+      .shell {
+        min-height: 100vh;
+        padding: 22px;
+      }
+
+      .layout {
+        max-width: 1600px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 286px minmax(0, 1fr) 360px;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .panel {
+        min-height: calc(100vh - 44px);
+        border: 1px solid rgba(199, 212, 232, 0.72);
+        border-radius: var(--radius-xxl);
+        background: var(--panel);
+        box-shadow: var(--shadow-main);
+        backdrop-filter: blur(18px);
+      }
+
+      .sidebar,
+      .workspace,
+      .inspector {
+        padding: 18px;
+      }
+
+      .sidebar,
+      .inspector {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .brand-card,
+      .card,
+      .bubble,
+      .message-composer,
+      .insight-card,
+      .strategy-card {
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(199, 212, 232, 0.66);
+        background: var(--panel-strong);
+      }
+
+      .brand-card {
+        position: relative;
+        overflow: hidden;
+        padding: 22px;
+        color: #fff;
+        background:
+          linear-gradient(145deg, #0b2c68 0%, #1358c8 48%, #2782ff 100%);
+      }
+
+      .brand-card::after {
+        content: "";
+        position: absolute;
+        inset: auto -46px -52px auto;
+        width: 182px;
+        height: 182px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.26), transparent 70%);
+      }
+
+      .brand-card h1,
+      .hero-copy h2,
+      .section-head h3,
+      .insight-card h3,
+      .message-composer h3 {
+        margin: 0;
+      }
+
+      .brand-card p,
+      .hero-copy p,
+      .section-head p,
+      .muted,
+      .meta,
+      .insight-card p,
+      .bullet-list li,
+      .bubble p,
+      .strategy-card p {
+        margin: 0;
+        line-height: 1.68;
+      }
+
+      .brand-card p {
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 13px;
+      }
+
+      .eyebrow,
+      .meta,
+      .tag,
+      .badge,
+      .pill,
+      .thread-state,
+      .quick-chip {
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-weight: 700;
+      }
+
+      .brand-card .eyebrow {
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .badge-row,
+      .thread-head,
+      .section-head,
+      .hero-top,
+      .hero-meta,
+      .score-row,
+      .benefit-grid,
+      .chip-row,
+      .composer-row,
+      .cta-row,
+      .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .badge,
+      .pill,
+      .tag,
+      .thread-state,
+      .quick-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-weight: 600;
+      }
+
+      .badge {
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+      }
+
+      .pill {
+        background: var(--brand-soft);
+        color: var(--brand);
+      }
+
+      .pill.success {
+        background: rgba(14, 138, 100, 0.12);
+        color: var(--success);
+      }
+
+      .pill.warn {
+        background: rgba(182, 121, 24, 0.12);
+        color: var(--warn);
+      }
+
+      .tag {
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text-soft);
+      }
+
+      .thread-list,
+      .check-list,
+      .timeline,
+      .bullet-list,
+      .strategy-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .card {
+        padding: 18px;
+        box-shadow: var(--shadow-card);
+      }
+
+      .section-head {
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 14px;
+      }
+
+      .section-head h3 {
+        font-size: 16px;
+      }
+
+      .section-head p,
+      .muted {
+        color: var(--text-soft);
+        font-size: 13px;
+      }
+
+      .thread-button {
+        width: 100%;
+        text-align: left;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .thread-button:hover,
+      .thread-button:focus-visible {
+        outline: none;
+        transform: translateY(-1px);
+        border-color: rgba(22, 119, 255, 0.36);
+        box-shadow: 0 14px 28px rgba(16, 36, 73, 0.08);
+      }
+
+      .thread-button.active {
+        border-color: rgba(22, 119, 255, 0.45);
+        background: linear-gradient(180deg, rgba(22, 119, 255, 0.12), rgba(255, 255, 255, 0.98));
+      }
+
+      .thread-title {
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .thread-summary,
+      .thread-meta {
+        margin-top: 8px;
+        color: var(--text-soft);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .thread-head {
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .thread-state {
+        background: rgba(20, 36, 61, 0.08);
+        color: var(--text-soft);
+      }
+
+      .workspace {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hero {
+        padding: 24px;
+        border-radius: 28px;
+        border: 1px solid rgba(199, 212, 232, 0.72);
+        background:
+          linear-gradient(140deg, rgba(255, 255, 255, 0.92), rgba(244, 248, 255, 0.98)),
+          linear-gradient(180deg, #ffffff, #f4f7fc);
+        box-shadow: var(--shadow-card);
+      }
+
+      .hero-top {
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .hero-copy {
+        max-width: 68%;
+      }
+
+      .hero-copy h2 {
+        margin-top: 10px;
+        font-size: 32px;
+        line-height: 1.2;
+      }
+
+      .hero-copy p {
+        margin-top: 10px;
+        color: var(--text-soft);
+        font-size: 14px;
+      }
+
+      .hero-score {
+        min-width: 250px;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+        border: 1px solid rgba(199, 212, 232, 0.82);
+      }
+
+      .hero-score strong {
+        display: block;
+        font-size: 34px;
+        margin-top: 10px;
+      }
+
+      .score-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .score-grid article {
+        border-radius: 18px;
+        background: var(--panel-soft);
+        padding: 14px;
+        border: 1px solid rgba(217, 226, 239, 0.9);
+      }
+
+      .score-grid strong {
+        font-size: 20px;
+      }
+
+      .dialog-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 16px;
+      }
+
+      .conversation-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .conversation-surface {
+        padding: 18px;
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.96));
+        border: 1px solid rgba(199, 212, 232, 0.72);
+        box-shadow: var(--shadow-card);
+      }
+
+      .conversation-toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .conversation-title {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .conversation-title h3 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .conversation-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-weight: 700;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      .btn:hover,
+      .btn:focus-visible {
+        outline: none;
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--brand) 0%, #3f90ff 100%);
+        color: #fff;
+        box-shadow: 0 14px 28px rgba(22, 119, 255, 0.24);
+      }
+
+      .btn-secondary {
+        background: #fff;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .bubble-stream {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-height: 520px;
+      }
+
+      .bubble {
+        padding: 16px 18px;
+        box-shadow: var(--shadow-card);
+      }
+
+      .bubble.user {
+        align-self: flex-end;
+        max-width: 74%;
+        border-color: rgba(22, 119, 255, 0.28);
+        background: linear-gradient(180deg, rgba(22, 119, 255, 0.14), rgba(255, 255, 255, 0.98));
+      }
+
+      .bubble.assistant {
+        max-width: 92%;
+      }
+
+      .bubble-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .bubble-role {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-weight: 800;
+      }
+
+      .avatar.user {
+        background: rgba(20, 36, 61, 0.1);
+        color: var(--text);
+      }
+
+      .bubble-time {
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      .bubble p + p,
+      .bubble ul + p,
+      .bubble p + ul {
+        margin-top: 10px;
+      }
+
+      .bubble ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--text-soft);
+      }
+
+      .references {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .reference-chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+        color: var(--text-soft);
+        font-size: 12px;
+      }
+
+      .message-composer {
+        padding: 18px;
+        box-shadow: var(--shadow-card);
+      }
+
+      .message-composer textarea {
+        width: 100%;
+        min-height: 112px;
+        resize: vertical;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text);
+        padding: 14px 16px;
+        outline: none;
+      }
+
+      .message-composer textarea:focus {
+        border-color: rgba(22, 119, 255, 0.38);
+        box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.08);
+      }
+
+      .quick-chip {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--text-soft);
+      }
+
+      .quick-chip.active {
+        border-color: rgba(22, 119, 255, 0.34);
+        background: var(--brand-soft);
+        color: var(--brand);
+      }
+
+      .conversation-side {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .strategy-card,
+      .insight-card {
+        padding: 16px;
+        box-shadow: var(--shadow-card);
+      }
+
+      .strategy-card strong,
+      .insight-stat strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 22px;
+      }
+
+      .strategy-card p,
+      .insight-card p {
+        margin-top: 8px;
+        color: var(--text-soft);
+        font-size: 13px;
+      }
+
+      .strategy-foot {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+        color: var(--text-soft);
+        font-size: 12px;
+      }
+
+      .inspector-header {
+        padding: 18px;
+        border-radius: 24px;
+        background:
+          linear-gradient(160deg, rgba(18, 36, 68, 0.96), rgba(28, 77, 170, 0.94));
+        color: #fff;
+      }
+
+      .inspector-header p {
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 13px;
+      }
+
+      .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .profile-grid article {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .profile-grid strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 18px;
+      }
+
+      .bullet-list {
+        margin: 12px 0 0;
+        padding-left: 18px;
+        color: var(--text-soft);
+      }
+
+      .timeline-item,
+      .check-item {
+        padding: 14px;
+        border-radius: 18px;
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+      }
+
+      .timeline-item strong,
+      .check-item strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .insight-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .insight-stat {
+        padding: 12px;
+        border-radius: 16px;
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+      }
+
+      .link-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .text-link {
+        color: var(--brand);
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      .text-link:hover,
+      .text-link:focus-visible {
+        text-decoration: underline;
+        outline: none;
+      }
+
+      @media (max-width: 1320px) {
+        .layout {
+          grid-template-columns: 260px minmax(0, 1fr);
+        }
+
+        .inspector {
+          grid-column: 1 / -1;
+          min-height: auto;
+        }
+
+        .dialog-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-copy {
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 980px) {
+        .shell {
+          padding: 14px;
+        }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .panel {
+          min-height: auto;
+        }
+
+        .hero-top,
+        .conversation-toolbar {
+          flex-direction: column;
+        }
+
+        .hero-score {
+          min-width: 0;
+          width: 100%;
+        }
+
+        .score-grid,
+        .insight-stat-row,
+        .profile-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .sidebar,
+        .workspace,
+        .inspector {
+          padding: 14px;
+        }
+
+        .hero,
+        .conversation-surface,
+        .message-composer {
+          padding: 16px;
+        }
+
+        .hero-copy h2 {
+          font-size: 26px;
+        }
+
+        .score-grid,
+        .insight-stat-row,
+        .profile-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .bubble.user,
+        .bubble.assistant {
+          max-width: 100%;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div class="shell">
+      <div class="layout">
+        <aside class="panel sidebar">
+          <section class="brand-card">
+            <div class="eyebrow">Premium Advisory</div>
+            <h1>小乔智投</h1>
+            <p>面向高质量付费用户的多轮投顾首页。首页只做一件事：围绕客户画像、风险偏好和资金动作，持续推进顾问对话。</p>
+            <div class="badge-row">
+              <span class="badge">AUM ¥2,480 万</span>
+              <span class="badge">续费率 83%</span>
+              <span class="badge">高净值专属</span>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <div>
+                <h3>服务分组</h3>
+                <p>按客户价值和风险关注点切换。</p>
+              </div>
+              <span class="pill success">3 个活跃</span>
+            </div>
+            <div class="thread-list" id="thread-list"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <div>
+                <h3>今日目标</h3>
+                <p>首页只承接高价值动作。</p>
+              </div>
+            </div>
+            <div class="check-list">
+              <article class="check-item">
+                <strong>完成资产再平衡确认</strong>
+                <p class="muted">让顾问在同一轮对话里拿到风险解释、执行建议和追踪节点。</p>
+              </article>
+              <article class="check-item">
+                <strong>沉淀可复用话术</strong>
+                <p class="muted">把本轮高转化问答回写到提示词管理页，形成下轮默认建议。</p>
+              </article>
+            </div>
+          </section>
+        </aside>
+
+        <main class="panel workspace">
+          <section class="hero">
+            <div class="hero-top">
+              <div class="hero-copy">
+                <div class="eyebrow">Ant Design X Style</div>
+                <h2 id="hero-title">为高净值客户做连续、可信、可执行的多轮投顾</h2>
+                <p id="hero-summary">首页不是静态概览板，而是顾问对话工作台。每轮问答都带上客户背景、持仓上下文、策略证据和下一步动作。</p>
+                <div class="hero-meta" id="hero-tags"></div>
+              </div>
+
+              <div class="hero-score">
+                <div class="eyebrow">本轮会话评分</div>
+                <strong id="hero-score">92 / 100</strong>
+                <p class="muted" id="hero-score-copy">本轮更接近高质量付费用户期望：少模板化解释，多可执行策略和风险提示。</p>
+                <div class="score-grid">
+                  <article>
+                    <span class="meta">上下文贴合</span>
+                    <strong id="score-fit">96%</strong>
+                  </article>
+                  <article>
+                    <span class="meta">执行清晰度</span>
+                    <strong id="score-action">91%</strong>
+                  </article>
+                  <article>
+                    <span class="meta">追问深度</span>
+                    <strong id="score-depth">4 轮</strong>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="dialog-layout">
+            <div class="conversation-panel">
+              <section class="conversation-surface">
+                <div class="conversation-toolbar">
+                  <div class="conversation-title">
+                    <div class="eyebrow">Multi-turn Conversation</div>
+                    <h3 id="conversation-title">顾问主对话</h3>
+                    <span class="muted" id="conversation-subtitle">以 Ant Design X 风格承接欢迎语、Bubble、Prompt 建议和多轮追问。</span>
+                  </div>
+                  <div class="conversation-actions">
+                    <button type="button" class="btn btn-secondary" id="history-button">查看历史</button>
+                    <button type="button" class="btn btn-primary" id="action-button">继续推进</button>
+                  </div>
+                </div>
+
+                <div class="bubble-stream" id="bubble-stream"></div>
+              </section>
+
+              <section class="message-composer">
+                <div class="section-head">
+                  <div>
+                    <h3>顾问输入区</h3>
+                    <p>保留 Ant Design X 常见的 Prompt、Sender 和建议动作体验。</p>
+                  </div>
+                  <span class="pill">Coze-like</span>
+                </div>
+                <div class="chip-row" id="quick-chip-row"></div>
+                <div class="composer-row" style="margin-top: 14px;">
+                  <textarea id="composer-input">请基于客户当前持仓、风险偏好和最近一次赎回动作，给出下一轮建议，并突出为什么现在不适合追高新能源。</textarea>
+                </div>
+                <div class="cta-row" style="margin-top: 14px; justify-content: space-between; align-items: center;">
+                  <div class="tag">来源：客户画像 + 资产诊断 + 顾问话术库</div>
+                  <div class="header-actions">
+                    <button type="button" class="btn btn-secondary" id="sync-button">同步到管理页</button>
+                    <button type="button" class="btn btn-primary" id="send-button">发送并生成下一轮</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="conversation-side">
+              <article class="strategy-card">
+                <div class="eyebrow">Strategy Card</div>
+                <strong id="strategy-title">本轮核心建议</strong>
+                <p id="strategy-copy">先稳住组合波动，再引导客户接受渐进式加仓，而不是一次性重仓切换赛道。</p>
+                <div class="strategy-foot" id="strategy-foot">输出形态：对话摘要 / 风险解释 / 行动清单 / 回访节点</div>
+              </article>
+
+              <article class="strategy-card">
+                <div class="eyebrow">Prompt Suggestions</div>
+                <div class="strategy-list" id="prompt-suggestion-list"></div>
+              </article>
+
+              <article class="strategy-card">
+                <div class="eyebrow">Sources</div>
+                <div class="references" id="source-list"></div>
+              </article>
+            </aside>
+          </section>
+        </main>
+
+        <aside class="panel inspector">
+          <section class="inspector-header">
+            <div class="eyebrow">客户视图</div>
+            <h3 id="profile-name">林女士 · 家族资产账户</h3>
+            <p id="profile-summary">55 岁，偏保守，关注波动回撤和税务效率，最近一周连续追问“减仓后该不该再上车”。</p>
+            <div class="profile-grid">
+              <article>
+                <span class="meta">本年净入金</span>
+                <strong id="profile-inflow">¥420 万</strong>
+              </article>
+              <article>
+                <span class="meta">风险等级</span>
+                <strong id="profile-risk">R3 稳健</strong>
+              </article>
+              <article>
+                <span class="meta">服务等级</span>
+                <strong id="profile-tier">黑金顾问</strong>
+              </article>
+              <article>
+                <span class="meta">近期意图</span>
+                <strong id="profile-intent">再平衡</strong>
+              </article>
+            </div>
+          </section>
+
+          <section class="insight-card">
+            <div class="section-head">
+              <div>
+                <h3>组合洞察</h3>
+                <p>在右侧持续承接风险、权益和执行状态。</p>
+              </div>
+              <span class="pill warn">需解释</span>
+            </div>
+            <div class="insight-stat-row">
+              <article class="insight-stat">
+                <span class="meta">权益仓位</span>
+                <strong id="insight-equity">38%</strong>
+              </article>
+              <article class="insight-stat">
+                <span class="meta">回撤压力</span>
+                <strong id="insight-drawdown">中</strong>
+              </article>
+              <article class="insight-stat">
+                <span class="meta">现金占比</span>
+                <strong id="insight-cash">26%</strong>
+              </article>
+            </div>
+            <ul class="bullet-list" id="insight-list"></ul>
+          </section>
+
+          <section class="insight-card">
+            <div class="section-head">
+              <div>
+                <h3>服务权益</h3>
+                <p>体现付费用户为什么愿意长期续费。</p>
+              </div>
+            </div>
+            <div class="timeline" id="benefit-list"></div>
+          </section>
+
+          <section class="insight-card">
+            <div class="section-head">
+              <div>
+                <h3>下一步动作</h3>
+                <p>让顾问在结束本轮前知道该做什么。</p>
+              </div>
+            </div>
+            <div class="check-list" id="action-list"></div>
+            <div class="link-row">
+              <a class="text-link" href="/admin.html">进入管理页</a>
+              <a class="text-link" href="#" id="report-link">查看本轮纪要</a>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const conversations = [
+        {
+          id: "rebalance",
+          title: "林女士 · 再平衡咨询",
+          state: "进行中",
+          summary: "客户担心新能源回调后错过反弹，希望在降低波动的前提下找回进场节奏。",
+          meta: "近 7 天 4 轮追问 / 客户价值 A+ / 顾问负责人：周昕",
+          heroTitle: "把再平衡解释成稳态升级，而不是简单减仓",
+          heroSummary: "这一类高净值客户不缺信息，缺的是一套能持续追问、能解释风险、又能落到资金动作的多轮顾问体验。",
+          heroTags: ["高净值付费用户", "再平衡", "风险解释", "顾问跟进"],
+          score: "92 / 100",
+          scoreCopy: "本轮优势在于话术克制、动作明确，已经能把“为什么现在不追高”说到客户愿意继续听。",
+          scoreFit: "96%",
+          scoreAction: "91%",
+          scoreDepth: "4 轮",
+          profile: {
+            name: "林女士 · 家族资产账户",
+            summary: "55 岁，偏保守，关注波动回撤和税务效率，最近一周连续追问“减仓后该不该再上车”。",
+            inflow: "¥420 万",
+            risk: "R3 稳健",
+            tier: "黑金顾问",
+            intent: "再平衡",
+          },
+          strategy: {
+            title: "先做 15% 渐进加仓，而不是一次性调仓",
+            copy: "主建议是分两周把现金的一部分回补到宽基和红利防守仓，保留观察位给新能源，不在单轮波动中做追涨。",
+            foot: "交付形态：顾问解释话术 + 两周调仓节奏 + 下次回访触发条件",
+          },
+          suggestions: [
+            "请把“现在不追高”的理由换成客户听得懂的三句话。",
+            "补一个分两周执行的资金节奏，避免一次性下单带来的心理压力。",
+            "附上如果市场继续回撤 5%，下一轮动作怎么变。"
+          ],
+          sources: ["资产诊断 v2.1", "近 30 天顾问纪要", "红利策略说明", "回撤阈值规则"],
+          insightStats: {
+            equity: "38%",
+            drawdown: "中",
+            cash: "26%",
+          },
+          insights: [
+            "客户目前最大的疑虑不是收益率，而是进场后再次下跌会不会被动承受回撤。",
+            "现有组合里红利仓位偏低，导致顾问很难用稳定现金流资产做情绪缓冲。",
+            "如果直接推荐新能源加仓，会和客户过去两轮的风格表达发生冲突。"
+          ],
+          benefits: [
+            "专属顾问 1 对 1 连续跟进，话术和动作不会在多轮里断层。",
+            "每轮建议自动生成纪要和下一次回访触发条件，避免顾问只做即时应答。",
+            "策略解释、组合动作和客户反馈会沉淀到提示词管理，持续提升后续转化。"
+          ],
+          nextActions: [
+            "用更克制的语言重写第一段解释，先安抚客户对回撤的担心。",
+            "把两周分批回补的比例写成明确数字，减少含糊建议。",
+            "在本轮结束后同步顾问纪要到管理页，进入话术复盘。"
+          ],
+          quickPrompts: ["补一个更保守版本", "把话术缩短成 120 字", "增加税务效率说明", "生成回访短信"],
+          messages: [
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "09:42",
+              text: [
+                "林女士这类客户更需要“被陪伴地做决定”，而不是一次性给满仓建议。",
+                "我建议先把这轮对话拆成三步：先解释为什么不追高，再给一个两周分批方案，最后明确下一次回访触发条件。"
+              ],
+              refs: ["客户画像", "波动偏好", "再平衡规则"]
+            },
+            {
+              role: "user",
+              name: "顾问周昕",
+              time: "09:44",
+              text: [
+                "她最担心的是新能源已经跌了不少，会不会现在不买就错过反弹。",
+                "但她之前经历过一次高位接回后继续下跌，现在对单次大额调仓比较敏感。"
+              ]
+            },
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "09:46",
+              text: [
+                "那就不要把建议写成“判断对错”，而是写成“控制节奏”。",
+                "可以直接告诉她：现在不是完全不上车，而是先用 15% 资金分两周回补宽基和红利资产，让组合先稳住，再保留观察位给新能源。",
+                "这样既回应了她怕错过，也避免她再次经历一次性接回后的大波动。"
+              ],
+              refs: ["红利仓配置", "回撤阈值", "顾问话术库"]
+            },
+            {
+              role: "user",
+              name: "顾问周昕",
+              time: "09:49",
+              text: [
+                "可以，再帮我把下一轮应该怎么问她写出来，最好能顺着她的风险顾虑继续往下聊。"
+              ]
+            },
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "09:51",
+              text: [
+                "你可以这样追问：如果我们把加仓动作拆成两周，您更在意的是收益机会，还是先把组合波动压下来？",
+                "这个问法会把她拉回风险偏好，而不是继续陷在“今天要不要买”的短线判断里。"
+              ],
+              refs: ["多轮追问模板", "高净值客户异议库"]
+            }
+          ]
+        },
+        {
+          id: "fixed-income",
+          title: "陈总 · 固收增强续费",
+          state: "待收口",
+          summary: "客户想比较银行私行方案和现有账户收益，重点关注稳态现金流和服务响应速度。",
+          meta: "近 3 天 3 轮追问 / 客户价值 A / 顾问负责人：丁禾",
+          heroTitle: "把固收增强讲成“可持续陪伴”，而不只是收益率比较",
+          heroSummary: "高质量付费用户不会只为收益率付费，更会为反应速度、解释深度和执行确定性付费。",
+          heroTags: ["固收增强", "续费沟通", "服务体验", "现金流"],
+          score: "88 / 100",
+          scoreCopy: "本轮已经有收益解释，但还需要更突出专属服务边界和响应速度。",
+          scoreFit: "90%",
+          scoreAction: "86%",
+          scoreDepth: "3 轮",
+          profile: {
+            name: "陈总 · 企业主账户",
+            summary: "49 岁，稳健偏保守，关心年度现金流安排，希望比较不同机构服务后的综合体验。",
+            inflow: "¥610 万",
+            risk: "R2 保守",
+            tier: "铂金顾问",
+            intent: "续费评估",
+          },
+          strategy: {
+            title: "先强调服务稳定性，再补收益解释",
+            copy: "这类客户要先看到响应机制、专属顾问和持续跟踪，再用收益增强逻辑做补强，而不是反过来。",
+            foot: "交付形态：续费说明 / 服务承诺 / 现金流安排建议",
+          },
+          suggestions: [
+            "把收益率比较收短，先突出专属顾问的响应节奏。",
+            "补一段为什么银行方案看起来稳，但跟进颗粒度不够。",
+            "增加一条季度现金流安排示例。"
+          ],
+          sources: ["续费异议库", "服务 SLA", "固收增强模板", "客户历史问答"],
+          insightStats: {
+            equity: "12%",
+            drawdown: "低",
+            cash: "34%",
+          },
+          insights: [
+            "客户对收益率不是没感觉，而是把收益率放在服务确定性之后。",
+            "目前最大的缺口是没有把顾问价值讲透，只是在列产品收益。",
+            "如果补上季度现金流安排，会明显提升续费说服力。"
+          ],
+          benefits: [
+            "专属顾问和投后回访节奏写入服务承诺，不是口头保证。",
+            "组合波动和资金使用计划按季度回顾，减少临时性决策压力。",
+            "客户问题进入管理页后，会同步到高净值续费话术模板。"
+          ],
+          nextActions: [
+            "把服务响应时间和专属回访机制写到第一屏。",
+            "补一个季度现金流计划示例。",
+            "把银行方案比较压缩到一张策略卡。"
+          ],
+          quickPrompts: ["突出服务对比", "生成续费摘要", "补季度现金流表述", "输出顾问话术"],
+          messages: [
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "10:10",
+              text: [
+                "续费对话不能只拿收益率说话，要先讲“持续有人管”。",
+                "陈总更在意的是现金流安排和响应确定性，所以第一段建议先放服务节奏。"
+              ],
+              refs: ["服务 SLA", "续费异议库"]
+            },
+            {
+              role: "user",
+              name: "顾问丁禾",
+              time: "10:13",
+              text: [
+                "他今天反复拿银行私行给的方案来比较，说那边也能做稳健配置。"
+              ]
+            },
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "10:15",
+              text: [
+                "那就先不比收益率，先比“谁会在资金安排变化时第一时间重做方案”。",
+                "你可以直接讲：我们的差异不只是产品，而是专属顾问会跟着您的现金流计划同步调仓。"
+              ],
+              refs: ["高净值续费话术", "现金流安排模板"]
+            }
+          ]
+        },
+        {
+          id: "family-trust",
+          title: "赵先生 · 家族信托前置沟通",
+          state: "新建",
+          summary: "客户准备配置家族信托，当前处在需求探索期，重点是资产隔离、传承安排和长期顾问关系。",
+          meta: "今日新建 / 客户价值 S / 顾问负责人：王颂",
+          heroTitle: "把复杂传承议题拆成可持续沟通的长链顾问会话",
+          heroSummary: "首页需要支持的不只是交易建议，还要支撑长期关系型对话，帮助顾问逐轮完成需求澄清。",
+          heroTags: ["家族信托", "需求探索", "关系经营", "长期顾问"],
+          score: "85 / 100",
+          scoreCopy: "这类会话还在探索阶段，重点不是立刻成交，而是让客户愿意继续展开下一轮。",
+          scoreFit: "87%",
+          scoreAction: "81%",
+          scoreDepth: "2 轮",
+          profile: {
+            name: "赵先生 · 家族办公室线索",
+            summary: "52 岁，重视传承安排与资产隔离，希望先通过顾问对话确认边界，再决定是否进入正式方案设计。",
+            inflow: "待确认",
+            risk: "传承规划",
+            tier: "私享预备",
+            intent: "需求澄清",
+          },
+          strategy: {
+            title: "先聚焦需求边界，不急着给产品答案",
+            copy: "这种对话要先问清楚传承对象、管理周期和约束条件，再决定要不要进入具体产品层。",
+            foot: "交付形态：问题清单 / 下一轮会前材料 / 顾问分工",
+          },
+          suggestions: [
+            "把第一轮问题聚焦成 3 个，不要一次把结构讲太满。",
+            "强调顾问会先做需求澄清，不急着推产品。",
+            "给一个下一次沟通需要客户准备的材料列表。"
+          ],
+          sources: ["传承需求模板", "家族办公室访谈提纲", "前置沟通清单"],
+          insightStats: {
+            equity: "未披露",
+            drawdown: "未知",
+            cash: "未知",
+          },
+          insights: [
+            "当前目标不是销售，而是建立信任感和专业边界。",
+            "客户需要感受到顾问愿意长期陪同，而不是急着推进产品。",
+            "下一轮最好准备结构化问题清单，而不是完整方案。"
+          ],
+          benefits: [
+            "专属顾问会把探索期问题和后续正式方案拆成连续服务链。",
+            "每轮问题都能沉淀为下一轮沟通材料，避免重复解释。",
+            "复杂议题可以联动法税与投顾角色，不靠单人硬扛。"
+          ],
+          nextActions: [
+            "输出一版下一轮会前问题清单。",
+            "整理客户需要提前准备的材料。",
+            "预约法税顾问共同参与第二轮。"
+          ],
+          quickPrompts: ["生成问题清单", "写会前材料说明", "补法税联动话术", "形成下一轮纪要"],
+          messages: [
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "11:08",
+              text: [
+                "这类首页对话不要一开始就讲信托结构，先把需求边界问清楚。",
+                "你可以把第一轮目标设成：确认客户最在意的是资产隔离、税务安排还是代际传承。"
+              ],
+              refs: ["传承需求模板", "访谈提纲"]
+            },
+            {
+              role: "user",
+              name: "顾问王颂",
+              time: "11:10",
+              text: [
+                "客户还没有完全确认意图，但已经表示想找一个能长期陪同的团队。"
+              ]
+            },
+            {
+              role: "assistant",
+              name: "小乔智投",
+              time: "11:12",
+              text: [
+                "那就先把“长期陪同”的服务框架讲清楚，再给他一个下一轮问题清单。",
+                "这样更像专业顾问，而不是马上推进某个具体产品。"
+              ],
+              refs: ["长期顾问服务说明"]
+            }
+          ]
+        }
+      ];
+
+      const state = {
+        activeId: "rebalance"
+      };
+
+      const threadList = document.getElementById("thread-list");
+      const bubbleStream = document.getElementById("bubble-stream");
+      const heroTitle = document.getElementById("hero-title");
+      const heroSummary = document.getElementById("hero-summary");
+      const heroTags = document.getElementById("hero-tags");
+      const heroScore = document.getElementById("hero-score");
+      const heroScoreCopy = document.getElementById("hero-score-copy");
+      const scoreFit = document.getElementById("score-fit");
+      const scoreAction = document.getElementById("score-action");
+      const scoreDepth = document.getElementById("score-depth");
+      const conversationTitle = document.getElementById("conversation-title");
+      const conversationSubtitle = document.getElementById("conversation-subtitle");
+      const strategyTitle = document.getElementById("strategy-title");
+      const strategyCopy = document.getElementById("strategy-copy");
+      const strategyFoot = document.getElementById("strategy-foot");
+      const promptSuggestionList = document.getElementById("prompt-suggestion-list");
+      const sourceList = document.getElementById("source-list");
+      const profileName = document.getElementById("profile-name");
+      const profileSummary = document.getElementById("profile-summary");
+      const profileInflow = document.getElementById("profile-inflow");
+      const profileRisk = document.getElementById("profile-risk");
+      const profileTier = document.getElementById("profile-tier");
+      const profileIntent = document.getElementById("profile-intent");
+      const insightEquity = document.getElementById("insight-equity");
+      const insightDrawdown = document.getElementById("insight-drawdown");
+      const insightCash = document.getElementById("insight-cash");
+      const insightList = document.getElementById("insight-list");
+      const benefitList = document.getElementById("benefit-list");
+      const actionList = document.getElementById("action-list");
+      const quickChipRow = document.getElementById("quick-chip-row");
+      const composerInput = document.getElementById("composer-input");
+      const historyButton = document.getElementById("history-button");
+      const actionButton = document.getElementById("action-button");
+      const sendButton = document.getElementById("send-button");
+      const syncButton = document.getElementById("sync-button");
+      const reportLink = document.getElementById("report-link");
+
+      function getActiveConversation() {
+        return conversations.find((item) => item.id === state.activeId) || conversations[0];
+      }
+
+      function renderThreads() {
+        threadList.innerHTML = "";
+        conversations.forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `thread-button${item.id === state.activeId ? " active" : ""}`;
+          button.innerHTML = `
+            <div class="thread-head">
+              <span class="thread-title">${item.title}</span>
+              <span class="thread-state">${item.state}</span>
+            </div>
+            <div class="thread-summary">${item.summary}</div>
+            <div class="thread-meta">${item.meta}</div>
+          `;
+          button.addEventListener("click", () => {
+            state.activeId = item.id;
+            render();
+          });
+          threadList.appendChild(button);
+        });
+      }
+
+      function renderHero(active) {
+        heroTitle.textContent = active.heroTitle;
+        heroSummary.textContent = active.heroSummary;
+        heroTags.innerHTML = active.heroTags.map((tag) => `<span class="tag">${tag}</span>`).join("");
+        heroScore.textContent = active.score;
+        heroScoreCopy.textContent = active.scoreCopy;
+        scoreFit.textContent = active.scoreFit;
+        scoreAction.textContent = active.scoreAction;
+        scoreDepth.textContent = active.scoreDepth;
+        conversationTitle.textContent = active.title;
+        conversationSubtitle.textContent = active.summary;
+      }
+
+      function renderBubbles(active) {
+        bubbleStream.innerHTML = "";
+        active.messages.forEach((message) => {
+          const article = document.createElement("article");
+          article.className = `bubble ${message.role}`;
+          const paragraphs = message.text.map((line) => `<p>${line}</p>`).join("");
+          const refs = message.refs
+            ? `<div class="references">${message.refs.map((ref) => `<span class="reference-chip">${ref}</span>`).join("")}</div>`
+            : "";
+          article.innerHTML = `
+            <div class="bubble-head">
+              <div class="bubble-role">
+                <span class="avatar ${message.role === "user" ? "user" : ""}">${message.role === "user" ? "顾" : "智"}</span>
+                <span>${message.name}</span>
+              </div>
+              <span class="bubble-time">${message.time}</span>
+            </div>
+            ${paragraphs}
+            ${refs}
+          `;
+          bubbleStream.appendChild(article);
+        });
+      }
+
+      function renderSide(active) {
+        strategyTitle.textContent = active.strategy.title;
+        strategyCopy.textContent = active.strategy.copy;
+        strategyFoot.textContent = active.strategy.foot;
+        promptSuggestionList.innerHTML = active.suggestions
+          .map((item) => `<div class="check-item"><strong>建议</strong><p class="muted">${item}</p></div>`)
+          .join("");
+        sourceList.innerHTML = active.sources.map((item) => `<span class="reference-chip">${item}</span>`).join("");
+
+        profileName.textContent = active.profile.name;
+        profileSummary.textContent = active.profile.summary;
+        profileInflow.textContent = active.profile.inflow;
+        profileRisk.textContent = active.profile.risk;
+        profileTier.textContent = active.profile.tier;
+        profileIntent.textContent = active.profile.intent;
+
+        insightEquity.textContent = active.insightStats.equity;
+        insightDrawdown.textContent = active.insightStats.drawdown;
+        insightCash.textContent = active.insightStats.cash;
+        insightList.innerHTML = active.insights.map((item) => `<li>${item}</li>`).join("");
+        benefitList.innerHTML = active.benefits
+          .map((item) => `<article class="timeline-item"><strong>付费价值</strong><p class="muted">${item}</p></article>`)
+          .join("");
+        actionList.innerHTML = active.nextActions
+          .map((item) => `<article class="check-item"><strong>下一步</strong><p class="muted">${item}</p></article>`)
+          .join("");
+      }
+
+      function renderQuickPrompts(active) {
+        quickChipRow.innerHTML = "";
+        active.quickPrompts.forEach((prompt, index) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = `quick-chip${index === 0 ? " active" : ""}`;
+          chip.textContent = prompt;
+          chip.addEventListener("click", () => {
+            composerInput.value = `${prompt}：请结合当前客户画像和上一轮对话，输出高质量顾问回复。`;
+            document.querySelectorAll(".quick-chip").forEach((node) => node.classList.remove("active"));
+            chip.classList.add("active");
+          });
+          quickChipRow.appendChild(chip);
+        });
+      }
+
+      function attachActions() {
+        historyButton.onclick = () => {
+          const active = getActiveConversation();
+          alert(`已打开 ${active.title} 的历史对话，最近 ${active.messages.length} 条消息可追溯。`);
+        };
+
+        actionButton.onclick = () => {
+          const active = getActiveConversation();
+          alert(`继续推进：${active.nextActions[0]}`);
+        };
+
+        sendButton.onclick = () => {
+          const active = getActiveConversation();
+          alert(`已为 ${active.title} 生成下一轮顾问回复草稿。`);
+        };
+
+        syncButton.onclick = () => {
+          const active = getActiveConversation();
+          alert(`已把 ${active.title} 的高转化话术同步到管理页。`);
+        };
+
+        reportLink.onclick = (event) => {
+          event.preventDefault();
+          const active = getActiveConversation();
+          alert(`已打开 ${active.title} 的本轮会话纪要。`);
+        };
+      }
+
+      function render() {
+        const active = getActiveConversation();
+        renderThreads();
+        renderHero(active);
+        renderBubbles(active);
+        renderSide(active);
+        renderQuickPrompts(active);
+        attachActions();
+      }
+
+      render();
+    </script>
   </body>
 </html>

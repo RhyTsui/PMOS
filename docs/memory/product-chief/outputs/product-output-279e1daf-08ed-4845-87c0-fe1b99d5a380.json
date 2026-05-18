@@ -1,0 +1,52 @@
+{
+  "id": "product-output-279e1daf-08ed-4845-87c0-fe1b99d5a380",
+  "reportId": "product-chief-e96a58e5-78e8-4724-937a-2657867c0f07",
+  "subprojectId": null,
+  "type": "requirement-baseline",
+  "title": "Requirement baseline package",
+  "status": "ready-for-review",
+  "artifactPath": "docs/product-office/outputs/product-output-279e1daf-08ed-4845-87c0-fe1b99d5a380.md",
+  "generatedAt": "2026-04-28T01:40:26.449Z",
+  "specialistAgentIds": [
+    "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+    "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+  ],
+  "specialistTaskIds": [
+    "product-chief-task-a5387f6f-0514-444d-a483-1315e3e5df2e",
+    "product-chief-task-0f4a5434-06ea-44af-8dec-39912c03c83e"
+  ],
+  "specialistTaskArtifactPaths": [
+    "docs/product-office/specialist-tasks/product-chief-task-a5387f6f-0514-444d-a483-1315e3e5df2e.md",
+    "docs/product-office/specialist-tasks/product-chief-task-0f4a5434-06ea-44af-8dec-39912c03c83e.md"
+  ],
+  "multiAgentReviewId": "product-chief-review-8e95236c-1fa8-42ba-a21a-655f956806b9",
+  "multiAgentReviewStatus": "needs-human-decision",
+  "multiAgentReviewArtifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-8e95236c-1fa8-42ba-a21a-655f956806b9.md",
+  "requirementIds": [
+    "req-367e30f6-f60b-43fe-ba04-46c7d2c8d0fa"
+  ],
+  "versionEntryId": "ver-51edb8f4-682f-43ba-8579-53f5304ed7ed",
+  "templatePath": "docs/templates/requirement_baseline_template.md",
+  "summary": "Requirement baseline package generated from Product Chief report product-chief-e96a58e5-78e8-4724-937a-2657867c0f07.",
+  "metadata": {
+    "priority": "P0",
+    "reason": "Requirement truth-sources must exist before design, schema, or implementation outputs are allowed to drift into execution.",
+    "dependsOn": [
+      "product-definition-baseline"
+    ],
+    "autoBackfillOnSkip": true,
+    "autoBackfilledOutputIds": [],
+    "autoBackfilledOutputTypes": [],
+    "outputRecordPath": "docs/memory/product-chief/outputs/product-output-279e1daf-08ed-4845-87c0-fe1b99d5a380.json",
+    "recommendedSkillIds": [
+      "five-w-two-h",
+      "persona",
+      "requirement-pool-operations",
+      "system-boundary",
+      "version-repository-operations",
+      "claude-design-system",
+      "follow-builders",
+      "committee-gate"
+    ]
+  }
+}

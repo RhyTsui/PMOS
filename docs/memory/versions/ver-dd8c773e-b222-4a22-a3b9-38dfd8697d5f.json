@@ -1,0 +1,34 @@
+{
+  "id": "ver-dd8c773e-b222-4a22-a3b9-38dfd8697d5f",
+  "subprojectId": null,
+  "entityType": "requirement",
+  "entityId": "req-693439fa-e594-422e-8859-9e299345501b",
+  "changeType": "extract",
+  "summary": "Extracted requirement from docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-693439fa-e594-422e-8859-9e299345501b"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+    "docs/product-office/document-normalization/docnorm-b272e85f-e872-4768-a1a1-4dc079cd4ae8-docs-sources-inbox-5.md",
+    "docs/context/project/inbox-background/docnorm-b272e85f-e872-4768-a1a1-4dc079cd4ae8-docs-sources-inbox-5.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "|  **版本**  |  **产出需求和验收标准** $\\color{#0089FF}{@许晴}$   |  **开发完成（以评审结果为准）**  |  运营  |",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Extracted requirement needs operator review before implementation planning."
+  },
+  "createdAt": "2026-05-09T06:01:54.825Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+    "sourceRoot": "docs/sources/inbox"
+  }
+}

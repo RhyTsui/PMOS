@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>客户端 SDK 接入 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Client SDK</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">客户端 SDK 接入</h1>
+        <p>客户端研发和 SDK 接入主要看这一页。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="#entry">接入入口</a>
+          <a href="#types">事件类型</a>
+          <a href="#examples">示例</a>
+          <a href="#tracking-info">设备透传</a>
+          <a href="#requirements">接入要求</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero" id="entry">
+          <span class="eyebrow">SDK Contract</span>
+          <h1>客户端通过 SDK analytics 模块上报</h1>
+          <p>当前源资料能证明的客户端接入面是 GSSDK 调用，而不是项目组直连 REST API。</p>
+          <div class="callout fact"><p><strong>统一入口：</strong><code>GSSDK.getInstance().call("analytics", "track", info)</code></p></div>
+        </section>
+        <section class="section" id="types">
+          <h2>事件类型</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>类型</th><th>type</th><th>适用事件</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>前置事件</td><td>1</td><td>107</td><td>启动到进入游戏前的步骤链</td></tr>
+                <tr><td>新手引导</td><td>2</td><td>108</td><td>新手引导步骤链</td></tr>
+                <tr><td>客户端自定义事件</td><td>0</td><td>20011 / 20022 / 20023 / 20026 等</td><td>玩法或平台特性级上报</td></tr>
+                <tr><td>支付/激励视频流程</td><td>9</td><td>106 / 110</td><td>支付式流程链</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="examples">
+          <h2>请求示例</h2>
+          <h3>前置事件</h3>
+          <div class="callout fact"><p><code>{ "type": "1", "extra": { "stepId": "100", "stepName": "开始播放CG" } }</code></p></div>
+          <h3>新手引导</h3>
+          <div class="callout fact"><p><code>{ "type": "2", "extra": { "stepId": "101", "stepName": "点击进入游戏按钮" } }</code></p></div>
+          <h3>客户端自定义事件</h3>
+          <div class="callout fact"><p><code>{ "type": "0", "event": "20011", "eventName": "GameStory", "extra": { "story_id": "123", "operation_type": "skip" } }</code></p></div>
+          <h3>支付流程</h3>
+          <div class="callout fact"><p><code>{ "type": "9", "event": "106", "extra": { "step_version": "20250724", "step_id": "501", "step_name": "支付成功", "result": "0" } }</code></p></div>
+        </section>
+        <section class="section" id="tracking-info">
+          <h2>设备透传</h2>
+          <div class="callout fact"><p><strong>同步读取：</strong><code>GSSDK.getInstance().callString("analytics", "getTrackingInfo", new HashMap())</code></p></div>
+          <div class="callout fact"><p><strong>异步读取：</strong><code>getTrackingInfoAsync</code> 回调返回 <code>code / data / message</code></p></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>字段</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>c_oneid</td><td>客户端设备标识</td></tr>
+                <tr><td>s_oneid</td><td>服务端设备标识</td></tr>
+                <tr><td>device_id</td><td>设备 ID</td></tr>
+                <tr><td>cpsid</td><td>渠道分包 ID</td></tr>
+                <tr><td>channel</td><td>用户渠道</td></tr>
+                <tr><td>app_version / app_package_name / os_type</td><td>环境字段</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="requirements">
+          <h2>接入要求</h2>
+          <ul>
+            <li><code>stepId</code> / <code>step_id</code> 必须为数字字符串或整型，项目内保持一致。</li>
+            <li><code>stepName</code> / <code>step_name</code> 必须为可读文本。</li>
+            <li>自定义事件 <code>event</code> 必须大于 10000。</li>
+            <li>支付链和激励视频链必须带 <code>step_version</code>。</li>
+            <li>失败步骤建议带上错误信息，不要只保留成功路径。</li>
+          </ul>
+          <div class="callout risk"><p><strong>注意：</strong>当前资料同时存在 20250122 与 20250724 两套前置步骤版本，客户端不得把它们混成一套漏斗。</p></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

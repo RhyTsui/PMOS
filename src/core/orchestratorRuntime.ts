@@ -10,17 +10,23 @@ import type {
 import type { ProviderEventRecord } from './modelProvider.js';
 import { FileStore } from './fileStore.js';
 import { MemoryService } from './memoryService.js';
+import { RequirementService } from './requirementService.js';
 import { StageRunners } from './stageRunners.js';
+import { SpecialistActivationService } from './specialistActivationService.js';
 import type { ProjectContext } from './projectPaths.js';
 
 export class OrchestratorRuntime {
   private readonly stageRunners: StageRunners;
+  private readonly requirementService: RequirementService;
+  private readonly specialistActivationService: SpecialistActivationService;
 
   constructor(
     private readonly store: FileStore,
     private readonly memoryService: MemoryService,
   ) {
     this.stageRunners = new StageRunners(store, memoryService);
+    this.requirementService = new RequirementService(memoryService);
+    this.specialistActivationService = new SpecialistActivationService();
   }
 
   async initRun(input: {
@@ -87,6 +93,9 @@ export class OrchestratorRuntime {
           activeCapability: stages[0]?.capability ?? null,
           providerCount: input.providerCount,
           mcpServerCount: input.mcpServerCount,
+          taskAssignmentRoles: stages[0]
+            ? this.specialistActivationService.resolveAssignedRolesForStage(stages[0].id)
+            : [],
         },
       },
       run.subprojectId,
@@ -108,6 +117,7 @@ export class OrchestratorRuntime {
             capability: stages[0].capability,
             priority: stages[0].priority,
             dependsOn: stages[0].dependsOn,
+            taskAssignmentRoles: this.specialistActivationService.resolveAssignedRolesForStage(stages[0].id),
           },
         },
         run.subprojectId,
@@ -184,6 +194,7 @@ export class OrchestratorRuntime {
             metadata: {
               resumedFromStageId: run.rework.sourceStageId,
               reworkReason: run.rework.reason,
+              taskAssignmentRoles: this.specialistActivationService.resolveAssignedRolesForStage(run.stages[reworkIndex].id),
             },
           },
           run.subprojectId,
@@ -197,7 +208,7 @@ export class OrchestratorRuntime {
 
     const activeStage = run.stages[activeIndex];
     const now = new Date().toISOString();
-    const reviewReport = activeStage.capability === 'review' ? options?.reviewReport ?? null : null;
+    const reviewReport = activeStage.gate.reviewRequired ? options?.reviewReport ?? null : null;
     const materialized = await this.materializeStageOutputs(run, activeStage, reviewReport);
 
     for (const artifact of materialized.artifacts) {
@@ -309,6 +320,7 @@ export class OrchestratorRuntime {
       },
     });
 
+    const requiredActivationTrace = (reviewReport?.activationTrace ?? []).filter((item) => item.required);
     if (reviewReport) {
       run.lastReview = reviewReport.summary ?? reviewReport.overallConclusion;
       await this.memoryService.appendEvent(
@@ -326,6 +338,9 @@ export class OrchestratorRuntime {
             decision: reviewReport.gate.decision,
             blocked: reviewReport.gate.blocked,
             recommendedReworkStageId: reviewReport.recommendedReworkStageId,
+            activatedSpecialistRoles: requiredActivationTrace.filter((item) => item.activated).map((item) => item.role),
+            assumedSpecialistRoles: requiredActivationTrace.filter((item) => item.status === 'assumed').map((item) => item.role),
+            missingSpecialistRoles: requiredActivationTrace.filter((item) => item.status === 'missing').map((item) => item.role),
           },
         },
         run.subprojectId,
@@ -356,6 +371,37 @@ export class OrchestratorRuntime {
       const reworkIndex = run.stages.findIndex((stage) => stage.id === reworkStageId);
       if (reworkIndex !== -1) {
         const reason = reviewReport.summary ?? reviewReport.overallConclusion;
+        const reviewArtifactPath = completedStage.outputPaths.find((path) => path.endsWith('.json')) ?? completedStage.outputPaths[0] ?? null;
+        await this.requirementService.ingestFromAcceptanceReview({
+          title: `Acceptance review blocked: ${run.projectName}`,
+          content: [
+            `P0 blocker: review gate blocked and workflow entered needs-rework.`,
+            '',
+            `Run: ${run.id}`,
+            `Source stage: ${activeStage.id}`,
+            `Target stage: ${reworkStageId}`,
+            `Decision: ${reviewReport.gate.decision}`,
+            `Summary: ${reason}`,
+          ].join('\n'),
+          subprojectId: run.subprojectId,
+          runId: run.id,
+          artifactPath: reviewArtifactPath,
+        });
+        await this.requirementService.ingestFromRuntimeGateEvent({
+          title: `Runtime gate blocked: ${reworkStageId}`,
+          content: [
+            `P0 blocker: runtime gate event marked stage as blocked after review.`,
+            '',
+            `Run: ${run.id}`,
+            `Gate decision: ${reviewReport.gate.decision}`,
+            `Blocked stage: ${reworkStageId}`,
+            `Reason: ${reason}`,
+          ].join('\n'),
+          subprojectId: run.subprojectId,
+          runId: run.id,
+          gateId: 'review-gate-blocked',
+          artifactPath: reviewArtifactPath,
+        });
         run.stages[reworkIndex] = {
           ...run.stages[reworkIndex],
           status: 'blocked',
@@ -398,6 +444,9 @@ export class OrchestratorRuntime {
             metadata: {
               sourceStageId: activeStage.id,
               reviewDecision: reviewReport.gate.decision,
+              activatedSpecialistRoles: requiredActivationTrace.filter((item) => item.activated).map((item) => item.role),
+              assumedSpecialistRoles: requiredActivationTrace.filter((item) => item.status === 'assumed').map((item) => item.role),
+              missingSpecialistRoles: requiredActivationTrace.filter((item) => item.status === 'missing').map((item) => item.role),
             },
           },
           run.subprojectId,
@@ -441,6 +490,7 @@ export class OrchestratorRuntime {
           capability: nextStage.capability,
           priority: nextStage.priority,
           dependsOn: nextStage.dependsOn,
+          taskAssignmentRoles: this.specialistActivationService.resolveAssignedRolesForStage(nextStage.id),
         },
       },
       run.subprojectId,
@@ -454,7 +504,7 @@ export class OrchestratorRuntime {
     let run = await this.memoryService.loadRunSnapshot(runId);
     while (run.status === 'running' && run.currentStageId) {
       const activeStage = run.stages.find((stage) => stage.id === run.currentStageId) ?? null;
-      const reviewReport = activeStage?.capability === 'review' ? options?.reviewReport ?? null : null;
+      const reviewReport = activeStage?.gate.reviewRequired ? options?.reviewReport ?? null : null;
       run = await this.advanceRun(runId, { reviewReport });
     }
     return run;
@@ -524,6 +574,7 @@ export class OrchestratorRuntime {
         artifactPath: null,
         metadata: {
           reason: options?.reason ?? null,
+          taskAssignmentRoles: this.specialistActivationService.resolveAssignedRolesForStage(targetStageId),
         },
       },
       run.subprojectId,
@@ -732,6 +783,7 @@ export class OrchestratorRuntime {
         artifactPath,
         artifactKind: output.kind,
         reviewReport,
+        existingOutputPaths: outputPaths,
       });
       await this.store.write(artifactPath, content);
       if (!outputPaths.includes(artifactPath)) {
@@ -767,7 +819,7 @@ export class OrchestratorRuntime {
   }
 
   private buildStageSummary(stage: WorkflowStageRun, outputPaths: string[], reviewReport: CommitteeReport | null) {
-    if (stage.capability === 'review' && reviewReport) {
+    if (reviewReport) {
       return reviewReport.summary ?? reviewReport.overallConclusion;
     }
 

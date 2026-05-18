@@ -45,18 +45,21 @@ async function seedRuntimeFixture(store: FileStore) {
 }
 
 describe('WorkflowEngine', () => {
-  it('loads a typed workflow definition aligned to 8 stages', async () => {
+  it('loads a typed workflow definition aligned to the 9-stage delivery chain', async () => {
     const store = createStore();
     const engine = new WorkflowEngine(store);
 
     const definition = await engine.loadDefinition();
 
     expect(definition.defaultLocale).toBe('zh-CN');
-    expect(definition.stages).toHaveLength(8);
-    expect(definition.name).toBe('PMAIOS v0.6 主工作流');
-    expect(definition.stages[0]?.id).toBe('core-definition-baseline');
+    expect(definition.stages).toHaveLength(9);
+    expect(definition.name).toBe('PMAIOS v0.7 产品交付主链');
+    expect(definition.stages[0]?.id).toBe('research-document');
     expect(definition.stages[0]?.priority).toBe('P0');
-    expect(definition.stages[6]?.capability).toBe('review');
+    expect(definition.stages[4]?.id).toBe('design-document');
+    expect(definition.stages[5]?.id).toBe('frontend-page');
+    expect(definition.stages[5]?.capability).toBe('multimodal');
+    expect(definition.stages[8]?.capability).toBe('review');
     expect(definition.stages.every((stage) => stage.requiredOutputs.length > 0)).toBe(true);
   });
 
@@ -78,11 +81,11 @@ describe('WorkflowEngine', () => {
       mcpServerCount: 1,
     });
 
-    expect(run.currentStageId).toBe('core-definition-baseline');
+    expect(run.currentStageId).toBe('research-document');
     expect(run.stages[0]?.status).toBe('active');
     expect(run.stages[0]?.attemptCount).toBe(1);
     expect(run.tasks[0]?.status).toBe('active');
-    expect(run.activeCapability).toBe('system');
+    expect(run.activeCapability).toBe('text');
 
     const nextRun = await runtime.advanceRun(run.id);
     expect(nextRun.stages[0]?.status).toBe('completed');
@@ -120,12 +123,12 @@ describe('WorkflowEngine', () => {
     const nextRun = await runtime.advanceRun(run.id);
     const artifactPath = nextRun.stages[0]?.outputPaths[0];
     expect(artifactPath).toBeTruthy();
-    expect(artifactPath).toBe(`docs/implementation/baseline/${run.id}.md`);
+    expect(artifactPath).toBe(`docs/research/${run.id}.md`);
 
     const content = await store.read(artifactPath!);
-    expect(content).toContain('## 方法论 Skills');
+    expect(content).toContain('## 方法参考 Skills');
     expect(content).toContain('Competitive Analysis');
-    expect(content).toContain('## 基线目标');
+    expect(content).toContain('## 调研范围');
     expect(content).toContain('projectName: PMAIOS Platform');
   });
 
@@ -239,15 +242,15 @@ describe('WorkflowEngine', () => {
 
     const registry = new SkillRegistry(store);
     const matches = await registry.findSkills({
-      query: 'Build a schema-driven UI workflow with Claude Design and manager agent review',
-      stageId: 'operations-surface',
+      query: 'Build a schema-driven UI workflow with Ant Design X and manager agent review',
+      stageId: 'frontend-page',
       outputType: 'ui-schema-spec',
       limit: 5,
     });
     const readiness = await registry.describeReadiness();
 
     expect(matches.map((match) => match.skill.id)).toContain('schema-driven-ui-design');
-    expect(matches.map((match) => match.skill.id)).toContain('claude-design-system');
+    expect(matches.map((match) => match.skill.id)).toContain('ant-design-family-frontend');
     expect(matches.map((match) => match.skill.id)).toContain('product-chief-manager-agent');
     expect(matches[0]?.score).toBeGreaterThan(0);
     expect(readiness.autoTriggerable).toBeGreaterThan(0);
@@ -276,7 +279,7 @@ describe('WorkflowEngine', () => {
     const progressed = await runtime.runUntilBlocked(run.id, {
       reviewReport: reviewCommittee.buildReportForRun({ runId: run.id, artifactCount: 6 }),
     });
-    const multimodalStage = progressed.stages.find((stage) => stage.id === 'operations-surface');
+    const multimodalStage = progressed.stages.find((stage) => stage.id === 'frontend-page');
     const events = await engine.loadEvents(run.id);
     const multimodalArtifacts = multimodalStage?.outputPaths ?? [];
 
@@ -314,7 +317,7 @@ describe('WorkflowEngine', () => {
 
     expect(run.subprojectId).toBe('crm');
     expect(run.projectRoot).toBe('subprojects/crm');
-    expect(artifactPath).toContain('subprojects/crm/docs/implementation/baseline/');
+    expect(artifactPath).toContain('subprojects/crm/docs/research/');
     expect(await store.exists(`subprojects/crm/docs/memory/runs/${run.id}.json`)).toBe(true);
     expect(await store.exists(`subprojects/crm/docs/memory/events/${run.id}.jsonl`)).toBe(true);
   });
@@ -343,14 +346,17 @@ describe('WorkflowEngine', () => {
     });
 
     expect(progressed.status).toBe('needs-rework');
-    expect(progressed.currentStageId).toBe('operations-surface');
-    expect(progressed.rework?.targetStageId).toBe('operations-surface');
+    expect(progressed.currentStageId).toBe('backend-api');
+    expect(progressed.rework?.targetStageId).toBe('backend-api');
     expect(progressed.lastReview).toContain('评审');
 
-    const reviewStage = progressed.stages.find((stage) => stage.id === 'review-metrics-telemetry');
-    const targetStage = progressed.stages.find((stage) => stage.id === 'operations-surface');
-    expect(reviewStage?.status).toBe('completed');
+    const reviewStage = progressed.stages.find((stage) => stage.id === 'frontend-backend-integration');
+    const targetStage = progressed.stages.find((stage) => stage.id === 'backend-api');
+    const requirements = await memoryService.listRequirements();
+    expect(reviewStage?.status).toBe('pending');
     expect(targetStage?.status).toBe('blocked');
+    expect(requirements.some((requirement) => requirement.source.kind === 'acceptance-review')).toBe(true);
+    expect(requirements.some((requirement) => requirement.source.kind === 'runtime-gate-event')).toBe(true);
   });
 
   it('supports manual gate decisions and blocked run resume', async () => {
@@ -376,21 +382,21 @@ describe('WorkflowEngine', () => {
 
     const reworked = await runtime.applyManualGateDecision(completed.id, {
       decision: 'rework',
-      summary: 'Need operator rework on operations surface',
-      targetStageId: 'operations-surface',
+      summary: 'Need operator rework on backend api',
+      targetStageId: 'backend-api',
     });
     expect(reworked.status).toBe('needs-rework');
-    expect(reworked.rework?.targetStageId).toBe('operations-surface');
+    expect(reworked.rework?.targetStageId).toBe('backend-api');
 
     const resumed = await runtime.resumeRun(reworked.id, {
-      targetStageId: 'operations-surface',
-      reason: 'Operator fixed provider config offline',
+      targetStageId: 'backend-api',
+      reason: 'Operator fixed contract drift offline',
     });
-    const resumedStage = resumed.stages.find((stage) => stage.id === 'operations-surface');
+    const resumedStage = resumed.stages.find((stage) => stage.id === 'backend-api');
     const events = await engine.loadEvents(resumed.id);
 
     expect(resumed.status).toBe('running');
-    expect(resumed.currentStageId).toBe('operations-surface');
+    expect(resumed.currentStageId).toBe('backend-api');
     expect(resumedStage?.status).toBe('active');
     expect(events.some((event) => event.kind === 'stage_resumed')).toBe(true);
   });

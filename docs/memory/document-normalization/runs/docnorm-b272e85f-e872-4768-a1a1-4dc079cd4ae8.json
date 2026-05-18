@@ -1,0 +1,55 @@
+{
+  "id": "docnorm-b272e85f-e872-4768-a1a1-4dc079cd4ae8",
+  "subprojectId": null,
+  "status": "completed",
+  "sourceRoot": "docs/sources/inbox",
+  "startedAt": "2026-05-09T06:01:52.989Z",
+  "completedAt": "2026-05-09T06:01:54.826Z",
+  "normalizedSources": [
+    {
+      "sourcePath": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+      "artifactPath": "docs/product-office/document-normalization/docnorm-b272e85f-e872-4768-a1a1-4dc079cd4ae8-docs-sources-inbox-5.md",
+      "backgroundContextPath": "docs/context/project/inbox-background/docnorm-b272e85f-e872-4768-a1a1-4dc079cd4ae8-docs-sources-inbox-5.md",
+      "notionPageId": "35bd53f7-155c-81c1-ab52-e05aaeab3fdf",
+      "notionPageUrl": "https://www.notion.so/Inbox-Knowledge-Digest-5-md-35bd53f7155c81c1ab52e05aaeab3fdf",
+      "requirementId": "req-489c297b-ff8a-4248-97b8-a8cc4fb32aac",
+      "versionEntryId": "ver-0fdcd3e7-2b58-4830-84a1-9a57320ecda3",
+      "extractedRequirementIds": [
+        "req-693439fa-e594-422e-8859-9e299345501b"
+      ],
+      "documentType": "version-planning",
+      "suggestedTarget": "docs/sources/version-planning/连弩测试平台5月版本计划.md",
+      "extractedSignals": [
+        "contains:requirements",
+        "contains:version-planning"
+      ],
+      "projectHints": [
+        "ad",
+        "tracking-acceptance",
+        "testing-platform",
+        "platform"
+      ],
+      "sourceFingerprint": "6fe20b55fefd2ebb9baa9ff5050d9cc4e57ecefd"
+    }
+  ],
+  "requirementIds": [
+    "req-489c297b-ff8a-4248-97b8-a8cc4fb32aac"
+  ],
+  "versionEntryIds": [
+    "ver-0fdcd3e7-2b58-4830-84a1-9a57320ecda3"
+  ],
+  "summary": "Normalized 1 document source(s) from docs/sources/inbox.",
+  "metadata": {
+    "mode": "full",
+    "sourcePathCount": 1,
+    "sourceFingerprints": {
+      "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md": "6fe20b55fefd2ebb9baa9ff5050d9cc4e57ecefd"
+    },
+    "backgroundContextPaths": [
+      "docs/context/project/inbox-background/docnorm-b272e85f-e872-4768-a1a1-4dc079cd4ae8-docs-sources-inbox-5.md"
+    ],
+    "notionPageIds": [
+      "35bd53f7-155c-81c1-ab52-e05aaeab3fdf"
+    ]
+  }
+}

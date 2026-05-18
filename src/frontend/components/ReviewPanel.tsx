@@ -16,6 +16,7 @@ function toIssueTone(decision: 'Pass' | 'Conditional' | 'Reject') {
 }
 
 export function ReviewPanel({ report }: Props) {
+  const activationTrace = report?.activationTrace ?? [];
   if (!report) {
     return (
       <section className="inspector-panel">
@@ -38,6 +39,58 @@ export function ReviewPanel({ report }: Props) {
           blocking stage: {report.gate.blockingStageId ?? '-'} / issue count: {report.gate.issueCount}
         </div>
         {report.summary ? <div className="trace-event__artifact">{report.summary}</div> : null}
+      </article>
+
+      <article className={`trace-event trace-event--${report.hermes.overallDecision === 'block' ? 'error' : report.hermes.overallDecision === 'revise' ? 'warning' : 'ok'}`}>
+        <div className="trace-event__kind">Hermes {report.hermes.overallDecision}</div>
+        <div className="trace-event__detail">{report.hermes.summary}</div>
+        {report.hermes.knowledgeGrounding.summary ? (
+          <div className="trace-event__meta">
+            knowledge grounding: {report.hermes.knowledgeGrounding.summary}
+          </div>
+        ) : null}
+        {report.hermes.knowledgeGrounding.query ? (
+          <div className="trace-event__artifact">
+            query: {report.hermes.knowledgeGrounding.query} / hits: {report.hermes.knowledgeGrounding.resultCount}
+          </div>
+        ) : null}
+        {report.hermes.writebackClosure.summary ? (
+          <div className="trace-event__artifact">
+            writeback: {report.hermes.writebackClosure.summary}
+          </div>
+        ) : null}
+        {report.hermes.watchClosure.summary ? (
+          <div className="trace-event__artifact">
+            watch: {report.hermes.watchClosure.summary}
+          </div>
+        ) : null}
+        {report.hermes.watchClosure.recurringFindings > 0 || report.hermes.watchClosure.suppressedFindings > 0 ? (
+          <div className="trace-event__artifact">
+            recurring: {report.hermes.watchClosure.recurringFindings} / suppressed:{' '}
+            {report.hermes.watchClosure.suppressedFindings}
+          </div>
+        ) : null}
+        {report.hermes.actions.map((action) => (
+          <div key={`${action.action}-${action.target}`} className="trace-event__artifact">
+            {action.action} {'->'} {action.target}: {action.reason}
+          </div>
+        ))}
+      </article>
+
+      <article
+        className={`trace-event trace-event--${
+          activationTrace.some((item) => item.required && (!item.activated || item.status === 'assumed')) ? 'warning' : 'ok'
+        }`}
+      >
+        <div className="trace-event__kind">Specialist Activation</div>
+        <div className="trace-event__detail">
+          required {activationTrace.filter((item) => item.required).length} / active {activationTrace.filter((item) => item.activated).length}
+        </div>
+        {activationTrace.map((item) => (
+          <div key={`${item.role}-${item.source}`} className="trace-event__artifact">
+            {item.role}: {item.status} / source: {item.source}
+          </div>
+        ))}
       </article>
 
       <div className="trace-list">

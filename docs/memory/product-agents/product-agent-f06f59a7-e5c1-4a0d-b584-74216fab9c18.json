@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-f06f59a7-e5c1-4a0d-b584-74216fab9c18",
+  "subprojectId": null,
+  "name": "Virtual Review PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "review",
+  "level": "manager",
+  "scope": "platform",
+  "summary": "Owns product review gates, issue framing, and product-facing quality decisions.",
+  "problem": "Review gates exist, but product-facing review criteria and remediation reasoning still need stronger structure and visibility.",
+  "targetUsers": [],
+  "goals": [
+    "Translate review results into product decisions and rework guidance.",
+    "Make review blockers explicit to product and delivery stakeholders.",
+    "Ensure review outputs remain linked to release and requirement decisions."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Every blocked review explains impact, recommendation, and target rework stage.",
+    "Product review issues are visible to operators and capability owners."
+  ],
+  "relatedPaths": [
+    "docs/templates/workflow_handoff_template.md",
+    "docs/review"
+  ],
+  "governanceRefs": [
+    "workflows/execution.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_review_pm_prompt.md",
+  "templateId": "virtual-review-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.127Z",
+  "updatedAt": "2026-04-27T10:04:22.127Z"
+}

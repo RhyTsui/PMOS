@@ -33,7 +33,8 @@ pip install -r requirements.txt
 设置环境变量：
 
 ```bash
-export CLAUDE_API_KEY=your_api_key
+export ANTHROPIC_API_KEY=your_api_key
+export ANTHROPIC_MODEL=claude-sonnet-4-6
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 export WORKER_POOL_SIZE=20

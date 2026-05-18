@@ -49,9 +49,9 @@ describe('LlmRouter', () => {
     await store.write(
       'config/providers.json',
       JSON.stringify({
-        defaultProvider: 'claude',
+        defaultProvider: 'anthropic',
         providers: [
-          { name: 'claude', type: 'anthropic', envKey: 'ANTHROPIC_API_KEY', capabilities: ['text', 'code', 'review'], model: 'claude-sonnet-4-6', priority: 100 },
+          { name: 'anthropic', type: 'anthropic', envKey: 'ANTHROPIC_API_KEY', capabilities: ['text', 'code', 'review'], model: 'claude-sonnet-4-6', priority: 100 },
           { name: 'gemini', type: 'ai-studio', envKey: 'GOOGLE_AI_STUDIO_API_KEY', capabilities: ['text', 'code', 'review', 'text-multimodal'], model: 'gemini-2.5-flash', priority: 80 },
           { name: 'mock', type: 'mock', envKey: 'DEFAULT_PROVIDER', capabilities: ['text', 'code', 'review'], priority: 0 },
         ],
@@ -100,9 +100,9 @@ describe('LlmRouter', () => {
     await store.write(
       'config/providers.json',
       JSON.stringify({
-        defaultProvider: 'claude',
+        defaultProvider: 'anthropic',
         providers: [
-          { name: 'claude', type: 'anthropic', envKey: 'ANTHROPIC_API_KEY', capabilities: ['text', 'code', 'review'], model: 'claude-sonnet-4-6', priority: 100 },
+          { name: 'anthropic', type: 'anthropic', envKey: 'ANTHROPIC_API_KEY', capabilities: ['text', 'code', 'review'], model: 'claude-sonnet-4-6', priority: 100 },
           { name: 'gemini', type: 'ai-studio', envKey: 'GOOGLE_AI_STUDIO_API_KEY', capabilities: ['text', 'code', 'review', 'text-multimodal'], model: 'gemini-2.5-flash', priority: 80 },
         ],
       }),
@@ -139,7 +139,7 @@ describe('LlmRouter', () => {
       'config/providers.json',
       JSON.stringify(
         {
-          defaultProvider: 'claude',
+          defaultProvider: 'anthropic',
           providers: [
             {
               name: 'minimax',

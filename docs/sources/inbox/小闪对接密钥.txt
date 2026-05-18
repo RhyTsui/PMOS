@@ -1,0 +1,25 @@
+
+取微应用token的，用这个token可以请求集团下的用户API https://wapi.zhimagame.net:6543/robot/work/message/groupAsyncsend
+数据中心专用
+AppKey：  
+1694636088246669312
+AppSecret：  
+5sJM2CKNvOXp4AQ6oGqi4RchL064G38E
+
+
+
+应用校验类型  
+0
+App_id  
+8217
+app_secret  
+uRFc0oJUL9HEuBjzSpjAqzMFGdb8amCJSejmycQTR6pfoYKv1C6ERAM3HlGCoY9G
+app_key  
+fQKNAJv1cBDHIPW9kBBYWR4gzMOdhcjt
+
+
+
+
+短信
+单独ops流程申请中
+https://dasheng.dobest.com/docs/%E6%95%B0%E5%AD%97%E5%AE%89%E5%85%A8/business-safe/%E7%9F%AD%E4%BF%A1%E9%AA%8C%E8%AF%81%E7%A0%81/%E5%BC%80%E5%8F%91%E6%8C%87%E5%BC%95/sms/

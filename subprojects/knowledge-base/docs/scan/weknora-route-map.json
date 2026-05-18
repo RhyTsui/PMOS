@@ -1,0 +1,1177 @@
+{
+  "generatedAt": "2026-04-23T14:36:29.071Z",
+  "backend": {
+    "source": "WeKnora/internal/router/router.go",
+    "count": 183,
+    "items": [
+      {
+        "line": 92,
+        "group": "r",
+        "method": "GET",
+        "path": "/health"
+      },
+      {
+        "line": 99,
+        "group": "r",
+        "method": "GET",
+        "path": "/swagger/*any"
+      },
+      {
+        "line": 162,
+        "group": "chunks",
+        "method": "GET",
+        "path": "/:knowledge_id"
+      },
+      {
+        "line": 164,
+        "group": "chunks",
+        "method": "GET",
+        "path": "/by-id/:id"
+      },
+      {
+        "line": 166,
+        "group": "chunks",
+        "method": "DELETE",
+        "path": "/:knowledge_id/:id"
+      },
+      {
+        "line": 168,
+        "group": "chunks",
+        "method": "DELETE",
+        "path": "/:knowledge_id"
+      },
+      {
+        "line": 170,
+        "group": "chunks",
+        "method": "PUT",
+        "path": "/:knowledge_id/:id"
+      },
+      {
+        "line": 172,
+        "group": "chunks",
+        "method": "DELETE",
+        "path": "/by-id/:id/questions"
+      },
+      {
+        "line": 182,
+        "group": "kb",
+        "method": "POST",
+        "path": "/file"
+      },
+      {
+        "line": 184,
+        "group": "kb",
+        "method": "POST",
+        "path": "/url"
+      },
+      {
+        "line": 186,
+        "group": "kb",
+        "method": "POST",
+        "path": "/manual"
+      },
+      {
+        "line": 197,
+        "group": "k",
+        "method": "GET",
+        "path": "/batch"
+      },
+      {
+        "line": 199,
+        "group": "k",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 201,
+        "group": "k",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 203,
+        "group": "k",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 205,
+        "group": "k",
+        "method": "PUT",
+        "path": "/manual/:id"
+      },
+      {
+        "line": 207,
+        "group": "k",
+        "method": "POST",
+        "path": "/:id/reparse"
+      },
+      {
+        "line": 209,
+        "group": "k",
+        "method": "GET",
+        "path": "/:id/download"
+      },
+      {
+        "line": 211,
+        "group": "k",
+        "method": "GET",
+        "path": "/:id/preview"
+      },
+      {
+        "line": 213,
+        "group": "k",
+        "method": "PUT",
+        "path": "/image/:id/:chunk_id"
+      },
+      {
+        "line": 215,
+        "group": "k",
+        "method": "PUT",
+        "path": "/tags"
+      },
+      {
+        "line": 217,
+        "group": "k",
+        "method": "GET",
+        "path": "/search"
+      },
+      {
+        "line": 219,
+        "group": "k",
+        "method": "POST",
+        "path": "/move"
+      },
+      {
+        "line": 221,
+        "group": "k",
+        "method": "GET",
+        "path": "/move/progress/:task_id"
+      },
+      {
+        "line": 232,
+        "group": "faq",
+        "method": "GET",
+        "path": "/entries"
+      },
+      {
+        "line": 233,
+        "group": "faq",
+        "method": "GET",
+        "path": "/entries/export"
+      },
+      {
+        "line": 234,
+        "group": "faq",
+        "method": "GET",
+        "path": "/entries/:entry_id"
+      },
+      {
+        "line": 235,
+        "group": "faq",
+        "method": "POST",
+        "path": "/entries"
+      },
+      {
+        "line": 236,
+        "group": "faq",
+        "method": "POST",
+        "path": "/entry"
+      },
+      {
+        "line": 237,
+        "group": "faq",
+        "method": "PUT",
+        "path": "/entries/:entry_id"
+      },
+      {
+        "line": 238,
+        "group": "faq",
+        "method": "POST",
+        "path": "/entries/:entry_id/similar-questions"
+      },
+      {
+        "line": 240,
+        "group": "faq",
+        "method": "PUT",
+        "path": "/entries/fields"
+      },
+      {
+        "line": 241,
+        "group": "faq",
+        "method": "PUT",
+        "path": "/entries/tags"
+      },
+      {
+        "line": 242,
+        "group": "faq",
+        "method": "DELETE",
+        "path": "/entries"
+      },
+      {
+        "line": 243,
+        "group": "faq",
+        "method": "POST",
+        "path": "/search"
+      },
+      {
+        "line": 245,
+        "group": "faq",
+        "method": "PUT",
+        "path": "/import/last-result/display"
+      },
+      {
+        "line": 250,
+        "group": "faqImport",
+        "method": "GET",
+        "path": "/progress/:task_id"
+      },
+      {
+        "line": 264,
+        "group": "kb",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 266,
+        "group": "kb",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 268,
+        "group": "kb",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 270,
+        "group": "kb",
+        "method": "PUT",
+        "path": "/:id/pin"
+      },
+      {
+        "line": 272,
+        "group": "kb",
+        "method": "GET",
+        "path": "/:id/hybrid-search"
+      },
+      {
+        "line": 274,
+        "group": "kb",
+        "method": "POST",
+        "path": "/copy"
+      },
+      {
+        "line": 276,
+        "group": "kb",
+        "method": "GET",
+        "path": "/copy/progress/:task_id"
+      },
+      {
+        "line": 278,
+        "group": "kb",
+        "method": "GET",
+        "path": "/:id/move-targets"
+      },
+      {
+        "line": 291,
+        "group": "kbTags",
+        "method": "PUT",
+        "path": "/:tag_id"
+      },
+      {
+        "line": 292,
+        "group": "kbTags",
+        "method": "DELETE",
+        "path": "/:tag_id"
+      },
+      {
+        "line": 302,
+        "group": "messages",
+        "method": "POST",
+        "path": "/search"
+      },
+      {
+        "line": 304,
+        "group": "messages",
+        "method": "GET",
+        "path": "/chat-history-stats"
+      },
+      {
+        "line": 306,
+        "group": "messages",
+        "method": "GET",
+        "path": "/:session_id/load"
+      },
+      {
+        "line": 308,
+        "group": "messages",
+        "method": "DELETE",
+        "path": "/:session_id/:id"
+      },
+      {
+        "line": 317,
+        "group": "sessions",
+        "method": "DELETE",
+        "path": "/batch"
+      },
+      {
+        "line": 318,
+        "group": "sessions",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 320,
+        "group": "sessions",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 321,
+        "group": "sessions",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 322,
+        "group": "sessions",
+        "method": "DELETE",
+        "path": "/:id/messages"
+      },
+      {
+        "line": 323,
+        "group": "sessions",
+        "method": "POST",
+        "path": "/:session_id/generate_title"
+      },
+      {
+        "line": 324,
+        "group": "sessions",
+        "method": "POST",
+        "path": "/:session_id/stop"
+      },
+      {
+        "line": 326,
+        "group": "sessions",
+        "method": "GET",
+        "path": "/continue-stream/:session_id"
+      },
+      {
+        "line": 334,
+        "group": "knowledgeChat",
+        "method": "POST",
+        "path": "/:session_id"
+      },
+      {
+        "line": 340,
+        "group": "agentChat",
+        "method": "POST",
+        "path": "/:session_id"
+      },
+      {
+        "line": 353,
+        "group": "r",
+        "method": "GET",
+        "path": "/tenants/all"
+      },
+      {
+        "line": 355,
+        "group": "r",
+        "method": "GET",
+        "path": "/tenants/search"
+      },
+      {
+        "line": 360,
+        "group": "tenantRoutes",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 361,
+        "group": "tenantRoutes",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 362,
+        "group": "tenantRoutes",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 367,
+        "group": "tenantRoutes",
+        "method": "GET",
+        "path": "/kv/:key"
+      },
+      {
+        "line": 368,
+        "group": "tenantRoutes",
+        "method": "PUT",
+        "path": "/kv/:key"
+      },
+      {
+        "line": 378,
+        "group": "models",
+        "method": "GET",
+        "path": "/providers"
+      },
+      {
+        "line": 384,
+        "group": "models",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 386,
+        "group": "models",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 388,
+        "group": "models",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 395,
+        "group": "evaluationRoutes",
+        "method": "POST",
+        "path": "/"
+      },
+      {
+        "line": 396,
+        "group": "evaluationRoutes",
+        "method": "GET",
+        "path": "/"
+      },
+      {
+        "line": 402,
+        "group": "r",
+        "method": "POST",
+        "path": "/auth/register"
+      },
+      {
+        "line": 403,
+        "group": "r",
+        "method": "POST",
+        "path": "/auth/login"
+      },
+      {
+        "line": 404,
+        "group": "r",
+        "method": "POST",
+        "path": "/auth/auto-setup"
+      },
+      {
+        "line": 405,
+        "group": "r",
+        "method": "GET",
+        "path": "/auth/oidc/config"
+      },
+      {
+        "line": 406,
+        "group": "r",
+        "method": "GET",
+        "path": "/auth/oidc/url"
+      },
+      {
+        "line": 407,
+        "group": "r",
+        "method": "GET",
+        "path": "/auth/oidc/callback"
+      },
+      {
+        "line": 408,
+        "group": "r",
+        "method": "POST",
+        "path": "/auth/refresh"
+      },
+      {
+        "line": 409,
+        "group": "r",
+        "method": "GET",
+        "path": "/auth/validate"
+      },
+      {
+        "line": 410,
+        "group": "r",
+        "method": "POST",
+        "path": "/auth/logout"
+      },
+      {
+        "line": 411,
+        "group": "r",
+        "method": "GET",
+        "path": "/auth/me"
+      },
+      {
+        "line": 412,
+        "group": "r",
+        "method": "POST",
+        "path": "/auth/change-password"
+      },
+      {
+        "line": 417,
+        "group": "r",
+        "method": "GET",
+        "path": "/initialization/config/:kbId"
+      },
+      {
+        "line": 418,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/initialize/:kbId"
+      },
+      {
+        "line": 419,
+        "group": "r",
+        "method": "PUT",
+        "path": "/initialization/config/:kbId"
+      },
+      {
+        "line": 422,
+        "group": "r",
+        "method": "GET",
+        "path": "/initialization/ollama/status"
+      },
+      {
+        "line": 423,
+        "group": "r",
+        "method": "GET",
+        "path": "/initialization/ollama/models"
+      },
+      {
+        "line": 424,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/ollama/models/check"
+      },
+      {
+        "line": 425,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/ollama/models/download"
+      },
+      {
+        "line": 426,
+        "group": "r",
+        "method": "GET",
+        "path": "/initialization/ollama/download/progress/:taskId"
+      },
+      {
+        "line": 427,
+        "group": "r",
+        "method": "GET",
+        "path": "/initialization/ollama/download/tasks"
+      },
+      {
+        "line": 430,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/remote/check"
+      },
+      {
+        "line": 431,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/embedding/test"
+      },
+      {
+        "line": 432,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/rerank/check"
+      },
+      {
+        "line": 433,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/asr/check"
+      },
+      {
+        "line": 434,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/multimodal/test"
+      },
+      {
+        "line": 436,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/extract/text-relation"
+      },
+      {
+        "line": 437,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/extract/fabri-tag"
+      },
+      {
+        "line": 438,
+        "group": "r",
+        "method": "POST",
+        "path": "/initialization/extract/fabri-text"
+      },
+      {
+        "line": 445,
+        "group": "systemRoutes",
+        "method": "GET",
+        "path": "/info"
+      },
+      {
+        "line": 446,
+        "group": "systemRoutes",
+        "method": "GET",
+        "path": "/parser-engines"
+      },
+      {
+        "line": 447,
+        "group": "systemRoutes",
+        "method": "POST",
+        "path": "/parser-engines/check"
+      },
+      {
+        "line": 448,
+        "group": "systemRoutes",
+        "method": "POST",
+        "path": "/docreader/reconnect"
+      },
+      {
+        "line": 449,
+        "group": "systemRoutes",
+        "method": "GET",
+        "path": "/storage-engine-status"
+      },
+      {
+        "line": 450,
+        "group": "systemRoutes",
+        "method": "POST",
+        "path": "/storage-engine-check"
+      },
+      {
+        "line": 463,
+        "group": "mcpServices",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 465,
+        "group": "mcpServices",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 467,
+        "group": "mcpServices",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 469,
+        "group": "mcpServices",
+        "method": "POST",
+        "path": "/:id/test"
+      },
+      {
+        "line": 471,
+        "group": "mcpServices",
+        "method": "GET",
+        "path": "/:id/tools"
+      },
+      {
+        "line": 473,
+        "group": "mcpServices",
+        "method": "GET",
+        "path": "/:id/resources"
+      },
+      {
+        "line": 483,
+        "group": "webSearch",
+        "method": "GET",
+        "path": "/providers"
+      },
+      {
+        "line": 492,
+        "group": "providers",
+        "method": "GET",
+        "path": "/types"
+      },
+      {
+        "line": 494,
+        "group": "providers",
+        "method": "POST",
+        "path": "/test"
+      },
+      {
+        "line": 498,
+        "group": "providers",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 499,
+        "group": "providers",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 500,
+        "group": "providers",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 502,
+        "group": "providers",
+        "method": "POST",
+        "path": "/:id/test"
+      },
+      {
+        "line": 511,
+        "group": "stores",
+        "method": "GET",
+        "path": "/types"
+      },
+      {
+        "line": 513,
+        "group": "stores",
+        "method": "POST",
+        "path": "/test"
+      },
+      {
+        "line": 517,
+        "group": "stores",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 518,
+        "group": "stores",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 519,
+        "group": "stores",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 521,
+        "group": "stores",
+        "method": "POST",
+        "path": "/:id/test"
+      },
+      {
+        "line": 530,
+        "group": "agents",
+        "method": "GET",
+        "path": "/placeholders"
+      },
+      {
+        "line": 536,
+        "group": "agents",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 538,
+        "group": "agents",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 540,
+        "group": "agents",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 542,
+        "group": "agents",
+        "method": "POST",
+        "path": "/:id/copy"
+      },
+      {
+        "line": 545,
+        "group": "r",
+        "method": "GET",
+        "path": "/agents/:id/suggested-questions"
+      },
+      {
+        "line": 567,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/preview/:code"
+      },
+      {
+        "line": 569,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/join"
+      },
+      {
+        "line": 571,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/join-request"
+      },
+      {
+        "line": 573,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/search"
+      },
+      {
+        "line": 575,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/join-by-id"
+      },
+      {
+        "line": 577,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 579,
+        "group": "orgs",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 581,
+        "group": "orgs",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 583,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/:id/leave"
+      },
+      {
+        "line": 585,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/:id/request-upgrade"
+      },
+      {
+        "line": 587,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/:id/invite-code"
+      },
+      {
+        "line": 589,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/search-users"
+      },
+      {
+        "line": 591,
+        "group": "orgs",
+        "method": "POST",
+        "path": "/:id/invite"
+      },
+      {
+        "line": 593,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/members"
+      },
+      {
+        "line": 595,
+        "group": "orgs",
+        "method": "PUT",
+        "path": "/:id/members/:user_id"
+      },
+      {
+        "line": 597,
+        "group": "orgs",
+        "method": "DELETE",
+        "path": "/:id/members/:user_id"
+      },
+      {
+        "line": 599,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/join-requests"
+      },
+      {
+        "line": 601,
+        "group": "orgs",
+        "method": "PUT",
+        "path": "/:id/join-requests/:request_id/review"
+      },
+      {
+        "line": 603,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/shares"
+      },
+      {
+        "line": 605,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/agent-shares"
+      },
+      {
+        "line": 607,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/shared-knowledge-bases"
+      },
+      {
+        "line": 609,
+        "group": "orgs",
+        "method": "GET",
+        "path": "/:id/shared-agents"
+      },
+      {
+        "line": 620,
+        "group": "kbShares",
+        "method": "PUT",
+        "path": "/:share_id"
+      },
+      {
+        "line": 622,
+        "group": "kbShares",
+        "method": "DELETE",
+        "path": "/:share_id"
+      },
+      {
+        "line": 630,
+        "group": "agentShares",
+        "method": "DELETE",
+        "path": "/:share_id"
+      },
+      {
+        "line": 634,
+        "group": "r",
+        "method": "GET",
+        "path": "/shared-knowledge-bases"
+      },
+      {
+        "line": 636,
+        "group": "r",
+        "method": "GET",
+        "path": "/shared-agents"
+      },
+      {
+        "line": 637,
+        "group": "r",
+        "method": "POST",
+        "path": "/shared-agents/disabled"
+      },
+      {
+        "line": 645,
+        "group": "im",
+        "method": "GET",
+        "path": "/callback/:channel_id"
+      },
+      {
+        "line": 646,
+        "group": "im",
+        "method": "POST",
+        "path": "/callback/:channel_id"
+      },
+      {
+        "line": 662,
+        "group": "channels",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 663,
+        "group": "channels",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 664,
+        "group": "channels",
+        "method": "POST",
+        "path": "/:id/toggle"
+      },
+      {
+        "line": 670,
+        "group": "wechatGroup",
+        "method": "POST",
+        "path": "/qrcode"
+      },
+      {
+        "line": 671,
+        "group": "wechatGroup",
+        "method": "POST",
+        "path": "/qrcode/status"
+      },
+      {
+        "line": 734,
+        "group": "r",
+        "method": "GET",
+        "path": "/files"
+      },
+      {
+        "line": 804,
+        "group": "ds",
+        "method": "GET",
+        "path": "/types"
+      },
+      {
+        "line": 807,
+        "group": "ds",
+        "method": "POST",
+        "path": "/validate-credentials"
+      },
+      {
+        "line": 812,
+        "group": "ds",
+        "method": "GET",
+        "path": "/:id"
+      },
+      {
+        "line": 813,
+        "group": "ds",
+        "method": "PUT",
+        "path": "/:id"
+      },
+      {
+        "line": 814,
+        "group": "ds",
+        "method": "DELETE",
+        "path": "/:id"
+      },
+      {
+        "line": 817,
+        "group": "ds",
+        "method": "POST",
+        "path": "/:id/validate"
+      },
+      {
+        "line": 818,
+        "group": "ds",
+        "method": "GET",
+        "path": "/:id/resources"
+      },
+      {
+        "line": 821,
+        "group": "ds",
+        "method": "POST",
+        "path": "/:id/sync"
+      },
+      {
+        "line": 822,
+        "group": "ds",
+        "method": "POST",
+        "path": "/:id/pause"
+      },
+      {
+        "line": 823,
+        "group": "ds",
+        "method": "POST",
+        "path": "/:id/resume"
+      },
+      {
+        "line": 826,
+        "group": "ds",
+        "method": "GET",
+        "path": "/:id/logs"
+      },
+      {
+        "line": 827,
+        "group": "ds",
+        "method": "GET",
+        "path": "/logs/:log_id"
+      },
+      {
+        "line": 833,
+        "group": "r",
+        "method": "POST",
+        "path": "/weknoracloud/credentials"
+      },
+      {
+        "line": 834,
+        "group": "r",
+        "method": "GET",
+        "path": "/models/weknoracloud/status"
+      }
+    ]
+  },
+  "frontend": {
+    "source": "WeKnora/frontend/src/router/index.ts",
+    "count": 16,
+    "items": [
+      {
+        "line": 39,
+        "path": "/"
+      },
+      {
+        "line": 43,
+        "path": "/login"
+      },
+      {
+        "line": 49,
+        "path": "/join"
+      },
+      {
+        "line": 55,
+        "path": "/platform/organizations"
+      },
+      {
+        "line": 62,
+        "path": "/knowledgeBase"
+      },
+      {
+        "line": 68,
+        "path": "/platform"
+      },
+      {
+        "line": 75,
+        "path": "tenant"
+      },
+      {
+        "line": 79,
+        "path": "settings"
+      },
+      {
+        "line": 85,
+        "path": "knowledge-bases"
+      },
+      {
+        "line": 91,
+        "path": "knowledge-bases/:kbId"
+      },
+      {
+        "line": 97,
+        "path": "knowledge-search"
+      },
+      {
+        "line": 103,
+        "path": "agents"
+      },
+      {
+        "line": 109,
+        "path": "creatChat"
+      },
+      {
+        "line": 115,
+        "path": "knowledge-bases/:kbId/creatChat"
+      },
+      {
+        "line": 121,
+        "path": "chat/:chatid"
+      },
+      {
+        "line": 127,
+        "path": "organizations"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "product-agent-dc2eff47-7de3-411f-9948-32e0c30b176a",
+  "subprojectId": null,
+  "name": "Virtual Strategy Radar PM",
+  "status": "ready",
+  "source": "workspace",
+  "role": "strategy",
+  "level": "specialist",
+  "scope": "platform",
+  "summary": "Owns strategic radar for new agent patterns, manager-agent opportunities, skill ecosystems, and automatic optimization candidates.",
+  "problem": "Emerging strategic options such as manager patterns, skill marketplaces, and tool ecosystems are noticed in chat, but not governed as a recurring decision stream.",
+  "targetUsers": [],
+  "goals": [
+    "Track new strategic patterns and explain relevance to PMAIOS.",
+    "Recommend adopt, watch, reject, or revisit decisions.",
+    "Feed strategic findings into roadmap and backlog."
+  ],
+  "nonGoals": [],
+  "constraints": [],
+  "acceptanceCriteria": [
+    "Strategic radar outputs explain what changed, why it matters, and what PMAIOS should do next."
+  ],
+  "relatedPaths": [
+    "docs/templates/daily_intelligence_report_template.md",
+    "docs/templates/roadmap_template.md",
+    "docs/templates/solution_analysis_sync_template.md"
+  ],
+  "governanceRefs": [
+    "docs/operations/ai-product-office-roadmap.md"
+  ],
+  "managedAgentIds": [],
+  "promptPath": "prompts/product-management/virtual_strategy_radar_pm_prompt.md",
+  "templateId": "virtual-strategy-radar-pm",
+  "contextSnapshotId": null,
+  "chatSessionId": null,
+  "generatedByRunId": null,
+  "createdAt": "2026-04-27T10:04:22.129Z",
+  "updatedAt": "2026-04-27T10:04:22.129Z"
+}

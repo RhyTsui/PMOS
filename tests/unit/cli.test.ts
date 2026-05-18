@@ -106,7 +106,7 @@ describe('CLI-aligned runtime flow', () => {
     });
 
     let current = run;
-    while (current.currentStageId && current.currentStageId !== 'review-metrics-telemetry') {
+    while (current.currentStageId && current.currentStageId !== 'frontend-backend-integration') {
       current = await orchestratorRuntime.advanceRun(current.id);
     }
 
@@ -121,8 +121,8 @@ describe('CLI-aligned runtime flow', () => {
       openSourceEvidencePaths: openSourceEvidence.evidencePaths,
     });
 
-    expect(current.currentStageId).toBe('review-metrics-telemetry');
-    expect(artifactCount).toBeGreaterThanOrEqual(5);
+    expect(current.currentStageId).toBe('frontend-backend-integration');
+    expect(artifactCount).toBeGreaterThanOrEqual(6);
     expect(openSourceEvidence.present).toBe(true);
     expect(review.gate.decision).toBe('pass');
   });
@@ -287,7 +287,7 @@ describe('CLI-aligned runtime flow', () => {
     });
 
     let current = run;
-    while (current.currentStageId && current.currentStageId !== 'review-metrics-telemetry') {
+    while (current.currentStageId && current.currentStageId !== 'frontend-backend-integration') {
       current = await orchestratorRuntime.advanceRun(current.id);
     }
 
@@ -296,18 +296,18 @@ describe('CLI-aligned runtime flow', () => {
     });
 
     expect(blocked.status).toBe('needs-rework');
-    expect(blocked.currentStageId).toBe('operations-surface');
-    expect(blocked.stages.find((stage) => stage.id === 'operations-surface')?.status).toBe('blocked');
+    expect(blocked.currentStageId).toBe('backend-api');
+    expect(blocked.stages.find((stage) => stage.id === 'backend-api')?.status).toBe('blocked');
 
     const resumed = await orchestratorRuntime.advanceRun(blocked.id);
-    const resumedStage = resumed.stages.find((stage) => stage.id === 'operations-surface');
+    const resumedStage = resumed.stages.find((stage) => stage.id === 'backend-api');
     const events = await orchestratorRuntime.loadEvents(resumed.id);
 
     expect(resumed.status).toBe('running');
-    expect(resumed.currentStageId).toBe('review-metrics-telemetry');
+    expect(resumed.currentStageId).toBe('frontend-backend-integration');
     expect(resumedStage?.status).toBe('completed');
     expect(resumedStage?.blockedReason).toBeNull();
-    expect(events.some((event) => event.id === `${resumed.id}-operations-surface-restarted`)).toBe(true);
+    expect(events.some((event) => event.id === `${resumed.id}-backend-api-restarted`)).toBe(true);
   });
 
   it('can assemble portfolio-style summary across platform and subprojects', async () => {

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 820" width="1280" height="820">
+  <style>
+    text { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #132238; }
+    .title { font-size: 30px; font-weight: 700; }
+    .sub { font-size: 14px; fill: #5b6b82; }
+    .card { fill: #fff; stroke: #d7dfeb; stroke-width: 1.5; rx: 18; }
+    .h { font-size: 19px; font-weight: 700; }
+    .b { font-size: 14px; }
+    .link { font-size: 14px; fill: #2563eb; font-weight: 600; }
+  </style>
+  <rect width="1280" height="820" fill="#f7f9fc"/>
+  <text x="64" y="66" class="title">知识库项目 / roadmap-board</text>
+  <text x="64" y="96" class="sub">路线按“准备包 -> PoC -> 平台接缝 -> 产品化二开”推进，不从研究直接跳到页面开发。</text>
+
+  <rect x="64" y="146" width="260" height="220" class="card"/>
+  <text x="92" y="186" class="h">P0 准备包</text>
+  <text x="92" y="226" class="b">- 准备真源</text>
+  <text x="92" y="252" class="b">- 开工检查清单</text>
+  <text x="92" y="278" class="b">- 代码扫描脚本</text>
+  <text x="92" y="304" class="b">- 子项目技能入口</text>
+
+  <rect x="356" y="146" width="260" height="220" class="card"/>
+  <text x="384" y="186" class="h">P1 底座 PoC</text>
+  <text x="384" y="226" class="b">- 跑通最小环境</text>
+  <text x="384" y="252" class="b">- 验证导入/检索/引用</text>
+  <text x="384" y="278" class="b">- 只做能力映射</text>
+  <text x="384" y="304" class="b">- 不直接做大改版 UI</text>
+
+  <rect x="648" y="146" width="260" height="220" class="card"/>
+  <text x="676" y="186" class="h">P2 平台接缝</text>
+  <text x="676" y="226" class="b">- 资产对象</text>
+  <text x="676" y="252" class="b">- 权限对象</text>
+  <text x="676" y="278" class="b">- 消费绑定对象</text>
+  <text x="676" y="304" class="b">- 平台边界确认</text>
+
+  <rect x="940" y="146" width="260" height="220" class="card"/>
+  <text x="968" y="186" class="h">P3 产品化二开</text>
+  <text x="968" y="226" class="b">- 主对话框</text>
+  <text x="968" y="252" class="b">- 知识资产</text>
+  <text x="968" y="278" class="b">- 提示词资产</text>
+  <text x="968" y="304" class="b">- 权限与接入中心</text>
+
+  <rect x="64" y="422" width="1136" height="250" class="card"/>
+  <text x="92" y="464" class="h">当前里程碑判断</text>
+  <text x="92" y="504" class="b">- 已到达：P0 文档、技能入口、项目入口板</text>
+  <text x="92" y="530" class="b">- 未到达：P0 扫描产物、P1 环境跑通</text>
+  <text x="92" y="556" class="b">- 阻塞项：镜像拉取代理、Go 工具链、平台边界拍板</text>
+  <a href="docs/WeKnora二开准备与PMAIOS-v0.5收敛方案.md"><text x="92" y="612" class="link">查看准备方案</text></a>
+  <a href="docs/WeKnora开工条件检查清单.md"><text x="272" y="612" class="link">查看开工清单</text></a>
+  <a href="decision-board.svg"><text x="462" y="612" class="link">查看决策板</text></a>
+</svg>

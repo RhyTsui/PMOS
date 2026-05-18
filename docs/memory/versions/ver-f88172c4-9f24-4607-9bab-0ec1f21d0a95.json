@@ -1,0 +1,51 @@
+{
+  "id": "ver-f88172c4-9f24-4607-9bab-0ec1f21d0a95",
+  "subprojectId": null,
+  "entityType": "product-output",
+  "entityId": "product-output-3b564395-a43d-4fc7-8235-5bcff56425c9",
+  "changeType": "generate",
+  "summary": "Generated governed Product Chief output: Product definition baseline",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-a1709293-c9fc-4ca2-a025-d9dcda04023f"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/product-office/outputs/product-output-3b564395-a43d-4fc7-8235-5bcff56425c9.md",
+    "docs/memory/product-chief/outputs/product-output-3b564395-a43d-4fc7-8235-5bcff56425c9.json",
+    "docs/memory/product-chief/reports/product-chief-e96a58e5-78e8-4724-937a-2657867c0f07.json",
+    "docs/product-office/specialist-tasks/product-chief-task-6c89ce80-29f6-456b-9f8c-03fd42016cf5.md",
+    "docs/product-office/specialist-tasks/product-chief-task-e16ad48e-8e4b-46ad-872a-33ac4a4fe802.md",
+    "docs/memory/product-chief/specialist-tasks/product-chief-task-6c89ce80-29f6-456b-9f8c-03fd42016cf5.json",
+    "docs/memory/product-chief/specialist-tasks/product-chief-task-e16ad48e-8e4b-46ad-872a-33ac4a4fe802.json",
+    "docs/product-office/multi-agent-reviews/product-chief-review-40a2b9ad-c631-4a52-8bcc-7e8275c8d271.md",
+    "docs/memory/product-chief/multi-agent-reviews/product-chief-review-40a2b9ad-c631-4a52-8bcc-7e8275c8d271.json"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Generated product-definition-baseline from Product Chief report product-chief-e96a58e5-78e8-4724-937a-2657867c0f07.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Generated output is ready for human/specialist review."
+  },
+  "createdAt": "2026-04-28T01:40:26.445Z",
+  "metadata": {
+    "reportId": "product-chief-e96a58e5-78e8-4724-937a-2657867c0f07",
+    "outputType": "product-definition-baseline",
+    "priority": "P0",
+    "specialistAgentIds": [
+      "product-agent-28e18ebb-7b16-42cb-aa45-c1d64f447be2",
+      "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+    ],
+    "specialistTaskIds": [
+      "product-chief-task-6c89ce80-29f6-456b-9f8c-03fd42016cf5",
+      "product-chief-task-e16ad48e-8e4b-46ad-872a-33ac4a4fe802"
+    ],
+    "multiAgentReviewId": "product-chief-review-40a2b9ad-c631-4a52-8bcc-7e8275c8d271",
+    "multiAgentReviewStatus": "needs-human-decision"
+  }
+}

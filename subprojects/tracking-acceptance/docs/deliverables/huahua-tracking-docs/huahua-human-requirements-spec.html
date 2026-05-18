@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>花花世界埋点需求总册</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Business Spec</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">花花世界埋点需求总册</h1>
+        <p>按《代号Q》这类业务完整需求文档的组织方式重写。重点是“业务清单 + 字段要求 + 研发责任 + 状态”。</p>
+        <nav class="nav">
+          <a href="./index.html">返回入口</a>
+          <a href="#summary">文档摘要</a>
+          <a href="#list">埋点清单</a>
+          <a href="#server-custom">服务器自定义事件</a>
+          <a href="#client-custom">客户端自定义事件</a>
+          <a href="#pre">前置流程</a>
+          <a href="#tutorial">新手引导</a>
+          <a href="#pay">支付链需求</a>
+          <a href="#fields">关键字段要求</a>
+          <a href="#risk">灰区与说明</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero" id="summary">
+          <span class="eyebrow">Requirement Book</span>
+          <h1>花花世界埋点需求总册</h1>
+          <p>
+            这份文档不是总览，而是把 `花花世界` 当前埋点资料按业务需求文档方式重新组织成一个完整清单：
+            先看事件清单，再看服务端/客户端自定义事件，再看前置与新手流程，最后看关键字段和冲突说明。
+          </p>
+          <div class="metric-grid">
+            <article class="metric"><span>核心事件</span><strong>12+</strong></article>
+            <article class="metric"><span>自定义事件</span><strong>27</strong></article>
+            <article class="metric"><span>前置版本</span><strong>2 套</strong></article>
+            <article class="metric"><span>定位</span><strong>业务需求</strong></article>
+          </div>
+          <div class="callout assumption">
+            <p><strong>说明：</strong>这是 demo 级完整需求总册，不是生产最终版。对源资料无法完全证明的地方，本文会保留“默认判断”而不是假装已经定稿。</p>
+          </div>
+        </section>
+
+        <section class="section" id="list">
+          <h2>一、埋点清单</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件名称</th>
+                  <th>事件描述</th>
+                  <th>埋点上报方</th>
+                  <th>事件类型</th>
+                  <th>需求优先级</th>
+                  <th>当前状态</th>
+                  <th>验收关注点</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>启动 / SDK 初始化</td><td>用户打开游戏，初始化 SDK</td><td>SDK 客户端</td><td>核心</td><td>P0</td><td>已定义</td><td>基础账号链是否可用</td></tr>
+                <tr><td>账号登录</td><td>获取账号凭证并进入登录流程</td><td>SDK 客户端 / 服务端</td><td>核心</td><td>P0</td><td>已定义</td><td>账号链闭环</td></tr>
+                <tr><td>角色登录</td><td>进入游戏、获取角色 ID 成功</td><td>SDK 客户端 / 服务端</td><td>核心</td><td>P0</td><td>已定义</td><td>role_id / server / realserver</td></tr>
+                <tr><td>升级</td><td>角色升级时上报</td><td>SDK 客户端 / 服务端</td><td>核心</td><td>P0</td><td>已定义</td><td>升级前后等级</td></tr>
+                <tr><td>充值</td><td>支付成功及支付流程过程上报</td><td>客户端 / 服务端</td><td>核心</td><td>P0</td><td>已定义但存在字段冲突</td><td>106/221/205 闭环</td></tr>
+                <tr><td>前置埋点</td><td>启动到进入游戏前完整流程打点</td><td>研发客户端</td><td>核心</td><td>P0</td><td>已定义</td><td>step_version 不可混</td></tr>
+                <tr><td>新手引导</td><td>进入游戏后新手阶段关键步骤</td><td>研发客户端 + 后端</td><td>核心</td><td>P0</td><td>已定义</td><td>108 + 20001 联动</td></tr>
+                <tr><td>客户端自定义事件</td><td>剧情、入口检测、平台特性、活动展示等</td><td>研发客户端</td><td>非核心 / 高价值</td><td>P1</td><td>已定义</td><td>event / extra 合法</td></tr>
+                <tr><td>服务端自定义事件</td><td>成长、解锁、货币、种植、花艺、社交、公会、活动等</td><td>研发服务器</td><td>高价值</td><td>P1</td><td>已定义，局部字段待补</td><td>字段完备性</td></tr>
+                <tr><td>在线人数</td><td>5 分钟周期上报在线人数</td><td>研发服务器</td><td>核心</td><td>P0</td><td>已定义</td><td>周期稳定性</td></tr>
+                <tr><td>资源产销</td><td>资源产出消耗场景上报</td><td>研发服务器</td><td>核心</td><td>P0</td><td>已定义</td><td>scene / item 语义</td></tr>
+                <tr><td>激励视频</td><td>广告奖励流程前后端链路</td><td>客户端 / 服务端</td><td>核心</td><td>P0</td><td>已定义</td><td>110/223 闭环</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="server-custom">
+          <h2>二、服务器自定义事件需求</h2>
+          <p>下表按“服务端通用字段 + 业务事件字段”组织，类似《代号Q》的服务器自定义事件 sheet。</p>
+
+          <h3>1. 服务端通用字段</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>字段名称</th>
+                  <th>描述</th>
+                  <th>是否必须</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>game_uuid</td><td>数据唯一 ID</td><td>必填</td><td>建议作为服务端事件唯一标识</td></tr>
+                <tr><td>app_id</td><td>数据中心登记 app_id</td><td>必填</td><td>资料示例为 10100057</td></tr>
+                <tr><td>ip</td><td>玩家 IP 地址</td><td>必填</td><td>非服务器 IP</td></tr>
+                <tr><td>start_time</td><td>数据发生时间（13 位时间戳）</td><td>必填</td><td>全事件通用</td></tr>
+                <tr><td>device_id</td><td>设备 ID</td><td>必填</td><td>建议来自客户端透传</td></tr>
+                <tr><td>user_id</td><td>账号 ID</td><td>必填</td><td>SDK 登录返回</td></tr>
+                <tr><td>role_id</td><td>角色 ID</td><td>必填</td><td>服务端角色对象</td></tr>
+                <tr><td>server</td><td>区服 ID</td><td>必填</td><td>创角区服</td></tr>
+                <tr><td>channel</td><td>渠道 ID</td><td>必填</td><td>建议沿用透传口径</td></tr>
+                <tr><td>os_type</td><td>设备系统</td><td>必填</td><td>Android / iOS</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>2. 重点服务端自定义事件</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件</th>
+                  <th>关键字段</th>
+                  <th>说明</th>
+                  <th>优先级</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>20001 关卡/引导类起始状态</td><td>event_id, tutorial_id, tutorial_state</td><td>新手链后端状态</td><td>P1</td></tr>
+                <tr><td>20002 PlayerGrow</td><td>grow_type, grow_target, grow_pre, grow_post</td><td>成长日志</td><td>P1</td></tr>
+                <tr><td>20003 GrowUnlock</td><td>unlock_type, unlock_target</td><td>解锁日志</td><td>P1</td></tr>
+                <tr><td>20004 GameCurrency</td><td>currency_id, act_type, act_amount, scene</td><td>货币变化</td><td>P1</td></tr>
+                <tr><td>20006 Plant</td><td>plant_id, operation_type, operation_cnt</td><td>种植操作</td><td>P1</td></tr>
+                <tr><td>20007 FloralMake</td><td>formula_id, operation_type, output_id, output_cnt</td><td>花艺制作</td><td>P1</td></tr>
+                <tr><td>20008 FloralSell</td><td>operation_type, floral_id, floral_cnt</td><td>花艺售卖</td><td>P1</td></tr>
+                <tr><td>20009 OperateOrder</td><td>order_type, operation_type, order_item</td><td>经营订单</td><td>P1</td></tr>
+                <tr><td>20016 Social</td><td>friend_cnt, buddy_cnt, operation_type</td><td>社交系统</td><td>P1</td></tr>
+                <tr><td>20017 Trade</td><td>trade_type, trade_id, trade_price</td><td>交易系统</td><td>P1</td></tr>
+                <tr><td>20018 GameRanking</td><td>rank_key, cur_rank, pre_rank</td><td>排行</td><td>P1</td></tr>
+                <tr><td>20019 Guild</td><td>字段待补完</td><td>公会系统，已立项但字段未完整</td><td>P2</td></tr>
+                <tr><td>20020 GuildLeague</td><td>字段待补完</td><td>公会竞赛，已立项但字段未完整</td><td>P2</td></tr>
+                <tr><td>20021 MiniGame</td><td>game_mode, game_level, operation_type, result_rank</td><td>内嵌游戏</td><td>P1</td></tr>
+                <tr><td>20024 GoodsPurchase</td><td>goods_id, store_id, purchase_amount</td><td>商品购买</td><td>P1</td></tr>
+                <tr><td>20025 Gacha</td><td>gacha_id, operation_type, draw_times</td><td>扭蛋抽奖</td><td>P1</td></tr>
+                <tr><td>20027 OpAct</td><td>act_key, act_goal, operation_type</td><td>运营活动</td><td>P1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="client-custom">
+          <h2>三、客户端自定义事件需求</h2>
+          <p>按《代号Q》客户端自定义事件的方式，列出客户端真正负责的自定义上报。</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件</th>
+                  <th>字段名称</th>
+                  <th>描述</th>
+                  <th>是否必须</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>20011 GameStory</td><td>story_type, story_id, operation_type</td><td>剧情播放、跳过、自动、回看等</td><td>必填</td><td>客户端自定义事件，type=0</td></tr>
+                <tr><td>20022 LaunchFrom</td><td>launch_scene, launch_extension, operation_type</td><td>入口检测、激励类入口行为</td><td>必填</td><td>客户端自定义事件，type=0</td></tr>
+                <tr><td>20023 PlatformFeature</td><td>scene, feature_state, feature_extension, operation_type</td><td>平台特性触发/反馈</td><td>必填</td><td>客户端自定义事件，type=0</td></tr>
+                <tr><td>20026 OpActHUD</td><td>act_key, act_extension, operation_type</td><td>活动 HUD 弹出/打开/关闭</td><td>必填</td><td>客户端自定义事件，type=0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout fact">
+            <p><strong>客户端自定义事件统一规则：</strong><code>type="0"</code>，<code>event</code> 必须为数字字符串，且大于 10000，<code>extra</code> 承载业务字段。</p>
+          </div>
+        </section>
+
+        <section class="section" id="pre">
+          <h2>四、客户端前置流程需求</h2>
+          <p>这一部分直接对齐《代号Q》的“客户端-前置流程”写法。</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件类型</th>
+                  <th>step_id</th>
+                  <th>是否依次必经</th>
+                  <th>埋点类型</th>
+                  <th>step_name</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>前置流程</td><td>10</td><td>是</td><td>客户端</td><td>游戏启动</td><td>20250122 / 20250724 都存在</td></tr>
+                <tr><td>前置流程</td><td>30-32</td><td>是</td><td>客户端</td><td>CDN 下载开始 / 失败 / 重连</td><td>旧版本资源链</td></tr>
+                <tr><td>前置流程</td><td>50-60</td><td>是</td><td>客户端</td><td>SDK 登录开始 / 失败 / 成功</td><td>旧版本登录链</td></tr>
+                <tr><td>前置流程</td><td>100-102</td><td>是</td><td>客户端</td><td>SDK 登录开始 / 失败 / 成功</td><td>20250724 新编号</td></tr>
+                <tr><td>前置流程</td><td>110-112</td><td>是</td><td>客户端</td><td>设备信息获取开始 / 失败 / 成功</td><td>透传链新步骤</td></tr>
+                <tr><td>前置流程</td><td>120-123</td><td>是</td><td>客户端</td><td>请求服务器列表</td><td>新版本接服流程</td></tr>
+                <tr><td>前置流程</td><td>130-132</td><td>是</td><td>客户端</td><td>加载配置文件</td><td>新版本配置链</td></tr>
+                <tr><td>前置流程</td><td>140-142</td><td>是</td><td>客户端</td><td>获取网关地址</td><td>新版本网络链</td></tr>
+                <tr><td>前置流程</td><td>150-152</td><td>是</td><td>客户端</td><td>连接网络服务器</td><td>新版本网络链</td></tr>
+                <tr><td>前置流程</td><td>160</td><td>是</td><td>客户端</td><td>客户端角色登录开始</td><td>进入游戏前最后一步</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout risk">
+            <p><strong>要求：</strong>前置流程必须显式带 <code>step_version</code>。否则旧版和新版流程会被混在一起，漏斗不可比。</p>
+          </div>
+        </section>
+
+        <section class="section" id="tutorial">
+          <h2>五、新手引导需求</h2>
+          <p>这一部分对应《代号Q》的“客户端-新手引导”写法，只是花花世界的实际步骤来自 RM。</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件类型</th>
+                  <th>step_id</th>
+                  <th>是否依次必经</th>
+                  <th>埋点类型</th>
+                  <th>step_name</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>新手引导</td><td>90</td><td>是</td><td>客户端</td><td>新手漫画剧情一</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>91</td><td>否</td><td>客户端</td><td>新手漫画剧情一·加速</td><td>允许多次</td></tr>
+                <tr><td>新手引导</td><td>100</td><td>是</td><td>客户端</td><td>新手漫画剧情二</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>101</td><td>否</td><td>客户端</td><td>新手漫画剧情二·加速</td><td>允许多次</td></tr>
+                <tr><td>新手引导</td><td>110</td><td>是</td><td>客户端</td><td>进入花灵选择界面</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>120</td><td>是</td><td>客户端</td><td>完成花灵选择</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>130</td><td>是</td><td>客户端</td><td>进入角色创建界面</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>140</td><td>是</td><td>客户端</td><td>角色创建完成</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>170-190</td><td>是</td><td>客户端</td><td>花灵契约动画 / 对话 / 剧情结束</td><td>20250122</td></tr>
+                <tr><td>新手引导</td><td>200</td><td>是</td><td>客户端</td><td>完成新手剧情，进入主场景</td><td>新手流程完成</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout fact">
+            <p><strong>配套服务端事件：</strong>客户端 `108 - TutorialStep` 之外，还应联动服务端 `20001 - Tutorial`，确保步骤与状态同时可解释。</p>
+          </div>
+        </section>
+
+        <section class="section" id="pay">
+          <h2>六、支付链需求</h2>
+          <p>支付链是当前最关键的完整业务需求，不只是一个“支付成功事件”。</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件</th>
+                  <th>责任方</th>
+                  <th>需求说明</th>
+                  <th>关键字段</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>106 PayFlow</td><td>客户端 / SDK</td><td>记录支付前端流程步骤</td><td>step_version, step_id, step_name, result, game_order_id</td></tr>
+                <tr><td>221 PayFlow</td><td>服务端</td><td>记录支付后端流程步骤并补字段</td><td>order_id, channel_order_id, pay_channel, recharge_channel, currency, amount</td></tr>
+                <tr><td>205 Pay</td><td>服务端</td><td>记录支付成功 / 发货成功结果</td><td>order_id, recharge_channel, currency, amount, product_ID</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout risk">
+            <p><strong>业务完整需求中的关键问题：</strong>当前资料已经明确表明，这条链存在“字段定义为必填，但部分步骤不发送 / 未获取”的冲突。这不是文档错误，而是业务完整需求的一部分，必须保留给研发和测试看。</p>
+          </div>
+        </section>
+
+        <section class="section" id="fields">
+          <h2>七、关键字段要求</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>字段</th>
+                  <th>适用范围</th>
+                  <th>是否必须</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>game_uuid</td><td>服务端通用</td><td>必填</td><td>唯一 ID</td></tr>
+                <tr><td>start_time</td><td>全事件</td><td>必填</td><td>13 位毫秒时间戳</td></tr>
+                <tr><td>device_id</td><td>客户端透传 / 服务端事件</td><td>必填</td><td>设备标识</td></tr>
+                <tr><td>user_id</td><td>账号链 / 透传链</td><td>必填</td><td>SDK 账号</td></tr>
+                <tr><td>role_id</td><td>角色链 / 服务端</td><td>必填</td><td>角色 ID</td></tr>
+                <tr><td>server</td><td>角色链 / 服务端</td><td>必填</td><td>区服 ID</td></tr>
+                <tr><td>stepId / step_id</td><td>前置 / 引导 / 支付 / 激励视频</td><td>必填</td><td>数字字符串或整型，保持一致</td></tr>
+                <tr><td>stepName / step_name</td><td>前置 / 引导 / 支付 / 激励视频</td><td>必填</td><td>可读步骤名称</td></tr>
+                <tr><td>order_id</td><td>支付链</td><td>关键必备</td><td>当前存在实现冲突</td></tr>
+                <tr><td>channel_order_id</td><td>支付链</td><td>关键必备</td><td>当前存在实现冲突</td></tr>
+                <tr><td>pay_channel</td><td>支付链</td><td>关键必备</td><td>充值渠道</td></tr>
+                <tr><td>recharge_channel</td><td>支付链</td><td>关键必备</td><td>支付方式</td></tr>
+                <tr><td>cpsid / c_oneid / s_oneid</td><td>透传链</td><td>建议必保</td><td>端到端渠道与设备链</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="risk">
+          <h2>八、灰区与补充说明</h2>
+          <div class="callout risk">
+            <p><strong>1. 107 / 108 的定位冲突：</strong>资料中写成“是 / 必接”，但执行中常被当增强项。本文按核心链处理。</p>
+          </div>
+          <div class="callout risk">
+            <p><strong>2. 支付链字段冲突：</strong>关键字段在规范层和实现层不一致，因此研发交接时必须把“字段目标状态”和“当前发送状态”分开写。</p>
+          </div>
+          <div class="callout assumption">
+            <p><strong>3. Demo 边界：</strong>本文会尽量完整，但不会伪造不存在的 API 网关、环境地址和鉴权策略。</p>
+          </div>
+          <div class="callout assumption">
+            <p><strong>4. 对标《代号Q》的写法：</strong>当前版本已经按“埋点清单 + 服务器自定义事件 + 客户端自定义事件 + 前置流程 + 新手引导”的方式重写，但花花世界实际复杂度高于《代号Q》。</p>
+          </div>
+        </section>
+
+        <div class="footer">文档地址：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\huahua-human-requirements-spec.html</div>
+      </main>
+    </div>
+  </body>
+</html>

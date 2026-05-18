@@ -6,7 +6,7 @@
 ## Context
 
 The repository already defines a Virtual Product Chief operating model, product-management roles, and governed workflow execution.
-However, product work could still jump from raw input or partial discussion directly into Product Solution, PRD, or prototype output before research and architecture decisions were complete.
+However, product work could still jump from raw input or partial discussion directly into downstream design or implementation output before research, planning, requirements, and functional definition were complete.
 
 This created a recurring failure mode:
 - candidate directions were presented as final decisions
@@ -19,18 +19,22 @@ This created a recurring failure mode:
 PMAIOS adopts mandatory product-management stage gates for product work that depends on platform capability or unresolved architecture boundaries.
 
 The required stage order is:
-1. Problem Definition
-2. Research Analysis
-3. Architecture Confirmation
-4. Product Solution
-5. PRD And Prototype
-6. Delivery Planning
+1. 调研文档
+2. 规划文档
+3. 需求文档
+4. 功能文档
+5. 前端页面（简单版）
+6. 前端页面（UI/UX版）
+7. 数据表
+8. 后端接口
+9. 前后端联调
 
 The following rules are now active:
-- Product Solution, PRD, and prototype work must not proceed before Research Analysis and Architecture Confirmation are complete when platform capability, base selection, competitor route choice, or shared ownership is involved.
+- Formal UI, data, API, and integration work must not proceed before 调研、规划、需求、功能 这些上游文档完成 when platform capability, base selection, competitor route choice, or shared ownership is involved.
 - If those stages are incomplete, outputs must be downgraded to candidate directions, risks, missing information, and chief confirmation questions.
-- Changes that alter platform vs subproject scope or shared capability ownership must re-enter Architecture Confirmation.
-- Changes that introduce new base selection, competitor route analysis, or platform capability assumptions must re-enter Research Analysis.
+- Changes that alter platform vs subproject scope or shared capability ownership must re-enter 功能文档 or earlier upstream stages as applicable.
+- Changes that introduce new base selection, competitor route analysis, or platform capability assumptions must re-enter 调研文档.
+- `前后端联调` is the built-in final review gate and may trigger rework back to real upstream delivery stages instead of a detached generic review phase.
 
 ## Source Of Truth
 
@@ -48,6 +52,7 @@ The rule is implemented through:
 
 Positive:
 - product work now has explicit stage gates before solution output
+- the built-in runtime chain now matches product delivery reality from research through integration
 - platform and subproject boundary decisions must be confirmed in writing
 - agent outputs are less likely to overstate confidence or skip research
 - requirement changes can force re-entry into earlier stages with traceable governance

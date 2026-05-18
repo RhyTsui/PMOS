@@ -164,11 +164,13 @@ Examples:
 - version review docs for development
 - Word-compatible human review docs
 - concise requirement lists
+- HTML runtime pages for dashboards, review / approval surfaces, workflow views, trace views, reports, and delivery-quality UI direction comparison
 
 In those cases:
 
-- the SVG remains the visual overview
-- the downstream doc remains the execution contract
+- the SVG remains the visual overview when visual reasoning or chief confirmation is needed
+- the downstream doc or runtime page remains the execution / review contract
+- HTML-first surfaces must be generated from schema, PMOS DSL, or registered components rather than arbitrary agent-written production HTML
 
 ## Implementation Note
 

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>附录：事件与字段索引</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Appendix</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">事件与字段索引</h1>
+        <p>供快速查阅全量事件和关键字段结构。</p>
+        <nav class="nav">
+          <a href="./index.html">返回入口</a>
+          <a href="./huahua-human-integration-manual.html">人读总册</a>
+          <a href="./huahua-ai-structured-spec.html">AI 规格总册</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="section">
+          <h2>核心事件索引</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件</th>
+                  <th>关键字段</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>106 PayFlow</td><td>step_version, step_id, step_name, result, order_id, channel_order_id, pay_channel, recharge_channel, currency, amount</td><td>前端支付漏斗</td></tr>
+                <tr><td>107 PreEvent</td><td>stepId, stepName</td><td>前置步骤链</td></tr>
+                <tr><td>108 TutorialStep</td><td>stepId, stepName</td><td>新手引导前端链</td></tr>
+                <tr><td>110 AdVideo</td><td>step_version, step_id, step_name, ad_sid, reward_target</td><td>前端激励视频链</td></tr>
+                <tr><td>205 Pay</td><td>order_id, channel_order_id, product_ID, pay_channel, recharge_channel, currency, amount</td><td>支付成功/发货闭环</td></tr>
+                <tr><td>208 Prop</td><td>item_consumetype, scene, item_type, item_id, item_name, item_num, left_num</td><td>资源产销基础事件</td></tr>
+                <tr><td>221 PayFlow</td><td>step_version, step_id, step_name, order_id, channel_order_id, pay_channel, recharge_channel, game_order_id</td><td>后端支付漏斗</td></tr>
+                <tr><td>223 AdVideo</td><td>step_version, step_id, step_name, ad_sid, reward_target</td><td>后端激励视频</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>自定义事件索引</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事件</th>
+                  <th>领域</th>
+                  <th>关键字段</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>20001 Tutorial</td><td>引导</td><td>tutorial_id, tutorial_state</td></tr>
+                <tr><td>20002 PlayerGrow</td><td>成长</td><td>grow_type, grow_target, grow_pre, grow_post</td></tr>
+                <tr><td>20003 GrowUnlock</td><td>解锁</td><td>unlock_type, unlock_target</td></tr>
+                <tr><td>20004 GameCurrency</td><td>货币</td><td>currency_id, act_type, act_amount, scene</td></tr>
+                <tr><td>20005 Inventory</td><td>库存</td><td>inventory, item_id, item_cnt</td></tr>
+                <tr><td>20006 Plant</td><td>种植</td><td>plant_id, operation_type, operation_cnt, gain_item</td></tr>
+                <tr><td>20007 FloralMake</td><td>花艺制作</td><td>formula_id, operation_type, output_id, output_cnt</td></tr>
+                <tr><td>20008 FloralSell</td><td>花艺售卖</td><td>operation_type, floral_id, floral_cnt</td></tr>
+                <tr><td>20009 OperateOrder</td><td>经营订单</td><td>order_type, operation_type, order_item</td></tr>
+                <tr><td>20010 SceneEvent</td><td>场景事件</td><td>event_type, game_event_id, operation_type</td></tr>
+                <tr><td>20011 GameStory</td><td>剧情</td><td>story_type, story_id, operation_type</td></tr>
+                <tr><td>20012 Task</td><td>任务成就</td><td>task_type, task_id, task_state</td></tr>
+                <tr><td>20013 RankReward</td><td>分档奖励</td><td>rank_type, rank_id, operation_type</td></tr>
+                <tr><td>20014 PlayerAvatar</td><td>换装</td><td>avatar_type, avatar_id, operation_type, color_index</td></tr>
+                <tr><td>20015 SceneLayout</td><td>场景布置</td><td>layout_type, layout_id, operation_type</td></tr>
+                <tr><td>20016 Social</td><td>社交</td><td>friend_cnt, buddy_cnt, operation_type, pluck_item</td></tr>
+                <tr><td>20017 Trade</td><td>交易</td><td>trade_type, trade_id, trade_cnt, trade_price</td></tr>
+                <tr><td>20018 GameRanking</td><td>排行</td><td>rank_key, operation_type, cur_rank, gain_item</td></tr>
+                <tr><td>20019 Guild</td><td>公会</td><td>字段待补完</td></tr>
+                <tr><td>20020 GuildLeague</td><td>公会竞赛</td><td>字段待补完</td></tr>
+                <tr><td>20021 MiniGame</td><td>内嵌游戏</td><td>game_mode, game_level, operation_type, result_rank</td></tr>
+                <tr><td>20022 LaunchFrom</td><td>入口检测</td><td>launch_scene, launch_extension, operation_type</td></tr>
+                <tr><td>20023 PlatformFeature</td><td>平台特性</td><td>operation_type, scene, feature_state, feature_extension</td></tr>
+                <tr><td>20024 GoodsPurchase</td><td>商品购买</td><td>goods_id, store_id, purchase_amount, price_item, price_cnt</td></tr>
+                <tr><td>20025 Gacha</td><td>扭蛋</td><td>gacha_id, operation_type, draw_times, draw_loops, gain_item</td></tr>
+                <tr><td>20026 OpActHUD</td><td>活动展示</td><td>act_key, act_extension, operation_type</td></tr>
+                <tr><td>20027 OpAct</td><td>运营活动</td><td>act_key, act_goal, operation_type, gain_item</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>关键字段索引</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>字段</th>
+                  <th>类别</th>
+                  <th>主要事件</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>s_oneid / c_oneid / device_id / cpsid</td><td>透传</td><td>221 及服务端事件</td><td>来自 getTrackingInfo</td></tr>
+                <tr><td>order_id / channel_order_id / game_order_id</td><td>支付链</td><td>106 / 205 / 221</td><td>当前存在实现冲突</td></tr>
+                <tr><td>pay_channel / recharge_channel</td><td>支付链</td><td>205 / 221</td><td>规范关键字段</td></tr>
+                <tr><td>step_version / step_id / step_name</td><td>步骤链</td><td>106 / 107 / 110 / 221 / 223</td><td>跨版本不可忽略</td></tr>
+                <tr><td>scene / scene_extension</td><td>资源产销 / 自定义事件</td><td>208 / 20004 等</td><td>依赖枚举字典和内容 ID</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <div class="footer">文档地址：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\appendix-events-fields.html</div>
+      </main>
+    </div>
+  </body>
+</html>

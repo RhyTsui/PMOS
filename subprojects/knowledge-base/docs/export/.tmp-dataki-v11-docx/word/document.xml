@@ -1,0 +1,1610 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 wp14">
+  <w:body>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="36" />
+          <w:szCs w:val="36" />
+        </w:rPr>
+        <w:t xml:space="preserve">Dataki v1.1 最新需求与设计图合集</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">版本：v1.1</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">日期：2026-04-24</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">状态：Current</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="120" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="28" />
+          <w:szCs w:val="28" />
+        </w:rPr>
+        <w:t xml:space="preserve">1. 当前版本定位</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="100" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">Dataki v1.1 当前只服务一个核心目标：先解决内部知识与数据协同场景。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 当前版本是业务工作台首版，不是平台化完整版。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 当前版本优先解决内部使用闭环，不承担平台外延目标。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 当前版本成功标准是场景闭环，不是能力求全。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="120" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="28" />
+          <w:szCs w:val="28" />
+        </w:rPr>
+        <w:t xml:space="preserve">2. 当前版本总原则</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 基本保留 WeKnora 产品壳。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 只做轻品牌替换与必要范围收敛。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 不做大规模首页、导航、产品结构重设计。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 所有改动先出图、再确认、再开发。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="120" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="28" />
+          <w:szCs w:val="28" />
+        </w:rPr>
+        <w:t xml:space="preserve">3. 已确认必做项</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.1 品牌与前台</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 产品名统一为 Dataki。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• Slogan 统一为 让知识与数据相遇。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 替换 Logo、必要文案、必要色彩语义。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 登录页需补齐前端可切片交付说明，至少拆出 Logo、品牌标题、副标题、登录主按钮区、企业登录扩展位、背景插画 / 底纹层级。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• Logo 需提供前端可直接落地的切图或矢量源文件，并明确深浅背景版本、最小尺寸、留白和安全区规范。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 保留 WeKnora 现有主要页面结构和产品壳。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 当前版本不按深接管 Dataki 工作台路线推进。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.2 知识范围</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 个人知识库。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 部门知识库。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 公司知识库。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.3 账号与登录</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 首个注册用户自动成为超管。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 普通用户默认走小闪登录。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 登录页必须保留小闪登录主入口。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 登录页不能退化成只支持扫码 / 手机号双态。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 登录容器需要预留企业登录扩展位。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 登录页视觉稿不能只停留整页图，需同步输出前端切片清单、资源命名规范和 1x / 2x 交付口径。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.4 用户与组织</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 用户和组织信息以小闪返回为准。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 组织层级至少覆盖小组 / 部门 / 公司 / 集团。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 当前版本不另起一套并行组织树。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.5 知识使用规则</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 个人知识库默认私有，可分享给人或空间，可挂主对话框。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 部门知识库由部门管理员维护，可供部门成员使用，可挂指定业务 Chat。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 公司知识库由指定负责人维护，可供公司内部检索，可挂指定 AI 应用，开放范围必须受控。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.6 Prompt 知识资产管理</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• v1.1 增加 Prompt 作为知识资产类型，挂在知识库菜单下统一管理，作为知识的一种进入 Dataki 资产体系。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• Prompt 资产至少支持列表、筛选、详情、新增、编辑、启停状态、版本说明与最近更新时间展示。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• Prompt 资产基础字段至少包含名称、用途说明、正文内容、变量说明、适用模型或场景、归属范围、负责人、状态。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• Prompt 资产需支持挂载到主对话框、指定业务 Chat 与外部 Agent；调用前必须经过绑定关系和权限校验。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• Prompt 资产沿用知识资产权限模型，至少区分查看、编辑、发布、绑定 / 调用四类权限，并记录调用主体。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="160" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">3.7 模型与 MCP</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 模型仅支持超管配置。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 普通用户只使用系统内置模型。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 前台只展示模型名称。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 默认内置数据部 MCP 服务，并支持 MCP 外挂管理。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="120" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="28" />
+          <w:szCs w:val="28" />
+        </w:rPr>
+        <w:t xml:space="preserve">4. 当前版本明确不做</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 不做重型 Prompt 中台建设，但当前版本需支持 Prompt 作为知识资产被管理和调用。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 权限中心与统一平台能力整合。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 发布、版本、评测能力建设。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 普通用户自定义模型配置。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 非小闪体系的用户管理体系重做。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 与更多外部身份源并行接入。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 大规模重做 WeKnora 前台产品结构。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• 大规模重新设计 WeKnora 底层文档解析与检索链路。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="120" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="28" />
+          <w:szCs w:val="28" />
+        </w:rPr>
+        <w:t xml:space="preserve">5. 当前版本页面范围</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• P0：登录页、首次超管注册页、主对话框首页、会话详情页、知识资产列表页、知识库详情页、新建 / 编辑知识库页、Prompt 资产列表页、Prompt 资产详情 / 编辑页、分享与挂载弹层。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="60" />
+        <w:ind w:left="240" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">• P1：MCP 管理页、组织映射页、超管系统配置页。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="40" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="120" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="28" />
+          <w:szCs w:val="28" />
+        </w:rPr>
+        <w:t xml:space="preserve">6. 设计图合集</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="100" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="22" />
+          <w:szCs w:val="22" />
+        </w:rPr>
+        <w:t xml:space="preserve">以下图片按当前版本口径整理。可直接参考的图优先放前，探索性较强的图仅作表达参考。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">P01 登录页整页方案 A</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。已包含 Dataki 品牌和小闪登录主入口。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="91042" name="P01 登录页整页方案 A" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="P01 登录页整页方案 A" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId1" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">P02 首页 / 主入口整页方案 A</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">仅作探索参考。改动较重，超过当前轻品牌替换边界。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="45391" name="P02 首页 / 主入口整页方案 A" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="P02 首页 / 主入口整页方案 A" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId2" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">C01 登录页轻品牌版</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。保留分栏壳体，只做品牌与视觉调整。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3390242" />
+            <wp:docPr id="94283" name="C01 登录页轻品牌版" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="C01 登录页轻品牌版" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId3" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3390242" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">C02 对话首页 / 主入口改动图</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">需收敛后使用。建议只参考品牌语义和组件风格。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3390242" />
+            <wp:docPr id="7845" name="C02 对话首页 / 主入口改动图" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="C02 对话首页 / 主入口改动图" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId4" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3390242" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">S01 对话详情页 + 来源与参考侧栏</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。适合作为引用来源与可引用状态的表达基线。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="88381" name="S01 对话详情页 + 来源与参考侧栏" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="S01 对话详情页 + 来源与参考侧栏" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId5" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">S02 知识详情右侧抽屉</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。适合作为知识详情、共享范围、来源说明、权限说明抽屉。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="81300" name="S02 知识详情右侧抽屉" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="S02 知识详情右侧抽屉" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId6" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">S03 已共享对象总表弹窗</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。适合作为共享对象列表与权限管理弹层。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="6465" name="S03 已共享对象总表弹窗" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="S03 已共享对象总表弹窗" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId7" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">S04 选择小闪用户弹窗</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。适合作为共享给用户的选择器弹窗。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="58481" name="S04 选择小闪用户弹窗" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="S04 选择小闪用户弹窗" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId8" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="240" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b />
+          <w:sz w:val="24" />
+          <w:szCs w:val="24" />
+        </w:rPr>
+        <w:t xml:space="preserve">S05 分享知识主弹窗</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">可直接参考。适合作为设置共享对象与权限等级的主弹窗。</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:drawing>
+          <wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+            <wp:extent cx="5300000" cy="3315006" />
+            <wp:docPr id="97161" name="S05 分享知识主弹窗" />
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:pic>
+                  <pic:nvPicPr>
+                    <pic:cNvPr id="0" name="S05 分享知识主弹窗" />
+                    <pic:cNvPicPr />
+                  </pic:nvPicPr>
+                  <pic:blipFill>
+                    <a:blip r:embed="rId9" />
+                    <a:stretch>
+                      <a:fillRect />
+                    </a:stretch>
+                  </pic:blipFill>
+                  <pic:spPr>
+                    <a:xfrm>
+                      <a:off x="0" y="0" />
+                      <a:ext cx="5300000" cy="3315006" />
+                    </a:xfrm>
+                    <a:prstGeom prst="rect">
+                      <a:avLst />
+                    </a:prstGeom>
+                  </pic:spPr>
+                </pic:pic>
+              </a:graphicData>
+            </a:graphic>
+          </wp:inline>
+        </w:drawing>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:spacing w:before="0" w:after="80" />
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="20" />
+          <w:szCs w:val="20" />
+        </w:rPr>
+        <w:t xml:space="preserve">
+        </w:t>
+      </w:r>
+    </w:p>
+    <w:sectPr>
+      <w:pgSz w:w="11906" w:h="16838" />
+      <w:pgMar w:top="1440" w:right="1040" w:bottom="1440" w:left="1040" w:header="708" w:footer="708" w:gutter="0" />
+    </w:sectPr>
+  </w:body>
+</w:document>

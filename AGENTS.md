@@ -1,6 +1,6 @@
 # PMAIOS Shared Tool Context
 
-Codex must treat this repository as a shared workspace with Claude.
+Codex must treat this repository as the current default executor workspace. Historical multi-executor artifacts may still exist in archive, migration, and compatibility records.
 
 ## Shared State Write Rule
 
@@ -157,4 +157,106 @@ During work:
 - Record important decisions with `npm run cli -- mcp-context checkpoint "<label>" --tool codex`.
 - Mark completed shared tasks with `npm run cli -- mcp-context task-complete <taskId> --tool codex`.
 
-If switching between Codex and Claude, use the shared `mcp-context` commands as the handoff source of truth. Do not rely only on the hidden conversation context of either CLI.
+If switching between Codex sessions or reconciling historical executor context, use the shared `mcp-context` commands as the handoff source of truth. Do not rely only on hidden conversation context.
+
+## PMOS UI Guardrail Supplement
+
+When the task involves PMOS frontend, page layout, UISchema, component selection, AI copilot workbench, requirement / PRD / task / approval surfaces, or Ant Design X implementation, apply these rules in addition to the repository-wide defaults.
+
+### Product Identity
+
+PMOS UI is not:
+
+- a landing page
+- a marketing site
+- a poster wall
+- a feature grid
+- a generic AI SaaS demo
+- a Claude-style flat card wall
+- an Ant Design Pro dashboard pasted in as-is
+
+The default target shape is:
+
+- workflow-driven command center
+- context + evidence + decision + action surface
+- AI copilot interaction embedded into real operator work
+- approval and audit aware delivery page
+
+### UI Authoring Rule
+
+AI may not freely design PMOS pages from taste alone.
+
+The required order is:
+
+1. read `docs/operations/frontend-style-default.md`
+2. read `docs/operations/uiux-stack-baseline.md`
+3. read `docs/operations/product-workflow-total-design.md`
+4. read `docs/operations/ui-pmos-copilot-contract.md`
+5. read `docs/templates/ui_schema_spec_template.md`
+6. read `src/ui-schema/registry.ts`
+7. determine the target `screenType`
+8. create or update UISchema first
+9. implement React only after the UISchema contract is explicit
+
+Current-stage rule:
+
+- all new governed business pages must define UISchema first
+- React implementation must declare its `screenType`, component bindings, evidence/source references, and decision/approval contract
+- the repository may converge to a schema renderer later, but that is not assumed complete today
+
+### Forbidden UI Patterns
+
+Do not create or preserve:
+
+- hero section
+- poster card
+- feature grid
+- landing section
+- marketing CTA
+- pricing card
+- showcase section
+- glassmorphism
+- large decorative gradients
+- fake dashboard
+- standalone demo app
+
+### Required Layout Pattern
+
+Desktop pages should default to a governed workbench structure:
+
+- `contextRail`
+- `main`
+- `evidencePanel`
+- `approvalPanel` or equivalent decision surface when risky actions exist
+
+Mobile pages should default to a stacked decision flow:
+
+- context summary
+- current AI conclusion
+- key evidence / source reference
+- recommended action
+- approve / reject / continue
+
+### PMOS-Semantic Rule
+
+Any governed recommendation or decision block must carry:
+
+- `summary`
+- `recommendedActions`
+- `evidenceRefs` or `sourceRefs`
+- `riskLevel` when the action can affect project scope or execution state
+
+Any risky action must carry:
+
+- `label`
+- `riskLevel`
+- `approvalPolicy` or `requiresApproval`
+- `auditRequired`
+
+### Validation Rule
+
+Before closing a governed UI task, run:
+
+- `npm run ui:schema:check`
+- `npm run ui:lint`
+- `npm run validate` when available

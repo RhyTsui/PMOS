@@ -1,0 +1,260 @@
+{
+  "runId": "run_b0b074b5ea74",
+  "scenario": [
+    "S2: interruption and resume",
+    "S3: low review score triggers auto rework"
+  ],
+  "runStartedAt": "2026-05-09T16:35:20.428412",
+  "runEndedAt": "2026-05-09T17:36:20.430432",
+  "totalRuntimeMinutes": 61,
+  "checkpointCount": 6,
+  "resumeCount": 1,
+  "reworkCount": 1,
+  "finalDecision": "solved",
+  "runState": "completed",
+  "currentGoalId": null,
+  "currentTaskId": null,
+  "latestReviewScore": 90,
+  "latestReviewDecision": "pass",
+  "finalArtifacts": [
+    "docs/小乔智投-需求文档-2026-05-08.md",
+    "docs/小乔智投-设计文档-2026-05-08.md",
+    "docs/小乔智投-接口真源-2026-05-07.md",
+    "docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md",
+    "tests/test_autonomous_runtime.py"
+  ],
+  "goalStates": [
+    {
+      "id": "run_b0b074b5ea74_G0",
+      "title": "把 ad 收口成可持续推进的交付级实现样本",
+      "state": "completed",
+      "evidencePaths": []
+    },
+    {
+      "id": "run_b0b074b5ea74_G1",
+      "title": "工作台主链可稳定运行",
+      "state": "completed",
+      "evidencePaths": [
+        "frontend/src/App.jsx",
+        "src/ad/xiaoqiao/autonomous_runtime.py",
+        "docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md"
+      ]
+    },
+    {
+      "id": "run_b0b074b5ea74_G2",
+      "title": "四类结构化结果可稳定返回",
+      "state": "completed",
+      "evidencePaths": [
+        "docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md",
+        "frontend/src/App.jsx",
+        "src/ad/xiaoqiao/autonomous_runtime.py"
+      ]
+    },
+    {
+      "id": "run_b0b074b5ea74_G3",
+      "title": "评审与返工闭环可运行",
+      "state": "completed",
+      "evidencePaths": [
+        "docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md",
+        "frontend/src/App.jsx",
+        "src/ad/xiaoqiao/autonomous_runtime.py"
+      ]
+    },
+    {
+      "id": "run_b0b074b5ea74_G4",
+      "title": "运行状态可在工作台追踪",
+      "state": "completed",
+      "evidencePaths": [
+        "frontend/src/App.jsx",
+        "src/ad/xiaoqiao/autonomous_runtime.py",
+        "docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md"
+      ]
+    },
+    {
+      "id": "run_b0b074b5ea74_G5",
+      "title": "支持持续执行与中断恢复",
+      "state": "completed",
+      "evidencePaths": [
+        "docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md",
+        "frontend/src/App.jsx",
+        "src/ad/xiaoqiao/autonomous_runtime.py"
+      ]
+    }
+  ],
+  "taskStates": [
+    {
+      "id": "run_b0b074b5ea74_T-01",
+      "title": "工作台头部与运行状态区接入真实 workspace",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 1
+    },
+    {
+      "id": "run_b0b074b5ea74_T-02",
+      "title": "主对话区与消息发送链路接入真实会话",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-03",
+      "title": "历史任务区与任务详情接入真实 tasks",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-11",
+      "title": "使用帮助结果 contract 收口",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-21",
+      "title": "需求沟通结果 contract 收口",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-31",
+      "title": "问题排查结果 contract 收口",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-41",
+      "title": "广告联调结果 contract 收口",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-51",
+      "title": "Review 评分与自动返工接入",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    },
+    {
+      "id": "run_b0b074b5ea74_T-61",
+      "title": "60 分钟连续执行压测与中断恢复验证",
+      "state": "completed",
+      "reviewScore": 90,
+      "reworkCount": 0
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "ckpt_7792be062f7b",
+      "summary": "自动 checkpoint：目标=工作台主链可稳定运行；任务=工作台头部与运行状态区接入真实 workspace；rework=0；resume=0",
+      "runtimeMinute": 60,
+      "createdAt": "2026-05-09T17:35:20.428412"
+    },
+    {
+      "id": "ckpt_9c1c033f269c",
+      "summary": "自动 checkpoint：目标=工作台主链可稳定运行；任务=工作台头部与运行状态区接入真实 workspace；rework=0；resume=0",
+      "runtimeMinute": 50,
+      "createdAt": "2026-05-09T17:25:20.428412"
+    },
+    {
+      "id": "ckpt_90ab6a5c36da",
+      "summary": "自动 checkpoint：目标=工作台主链可稳定运行；任务=工作台头部与运行状态区接入真实 workspace；rework=0；resume=0",
+      "runtimeMinute": 40,
+      "createdAt": "2026-05-09T17:15:20.428412"
+    },
+    {
+      "id": "ckpt_73b45d681302",
+      "summary": "自动 checkpoint：目标=工作台主链可稳定运行；任务=工作台头部与运行状态区接入真实 workspace；rework=0；resume=0",
+      "runtimeMinute": 30,
+      "createdAt": "2026-05-09T17:05:20.428412"
+    },
+    {
+      "id": "ckpt_aa88b5bbae14",
+      "summary": "自动 checkpoint：目标=工作台主链可稳定运行；任务=工作台头部与运行状态区接入真实 workspace；rework=0；resume=0",
+      "runtimeMinute": 20,
+      "createdAt": "2026-05-09T16:55:20.428412"
+    },
+    {
+      "id": "ckpt_07f9e4e5ddaa",
+      "summary": "自动 checkpoint：目标=工作台主链可稳定运行；任务=工作台头部与运行状态区接入真实 workspace；rework=0；resume=0",
+      "runtimeMinute": 10,
+      "createdAt": "2026-05-09T16:45:20.428412"
+    }
+  ],
+  "reviews": [
+    {
+      "taskId": "run_b0b074b5ea74_T-61",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-51",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-41",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-31",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-21",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-11",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-03",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-02",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-01",
+      "score": 90,
+      "decision": "pass",
+      "blockingIssues": []
+    },
+    {
+      "taskId": "run_b0b074b5ea74_T-01",
+      "score": 55,
+      "decision": "reject",
+      "blockingIssues": [
+        "运行状态区缺少证据追踪字段"
+      ]
+    }
+  ],
+  "reworks": [
+    {
+      "taskId": "run_b0b074b5ea74_T-01",
+      "attempt": 1,
+      "owner": "Frontend PM",
+      "status": "completed",
+      "reason": "运行状态区缺少证据追踪字段"
+    }
+  ]
+}

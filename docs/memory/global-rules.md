@@ -96,3 +96,45 @@
 - canonicalRule:
   - 当用户明确要求“不再找聊天记录”后，后续工作不得继续把历史聊天检索作为主路径。
   - 后续需求回溯、执行判断与实现推进，应优先基于当前仓库真源文档、配置、代码、requirements、roadmap 与运行状态。
+
+## rule-subproject-ssot-before-build
+- createdAt: 2026-05-06T00:00:00.000Z
+- status: active
+- source: tracking-acceptance-postmortem
+- sessionId: n/a
+- messageId: n/a
+- subprojectId: platform
+- captureMode: manual
+- canonicalRule:
+  - 重要子项目在进入设计主链、前端主实现或多文档并行收口前，必须先建立唯一产品主真源，并明确文档分层与生效顺序。
+  - 如果会议纪要、分析稿、SVG、设计稿、前端现状同时对产品边界生效，默认判定为高风险漂移状态，不应继续扩写实现。
+  - 默认固定改动顺序为：主真源 -> 治理/覆盖检查 -> 设计/交互 -> 工程/测试 -> 实现。
+  - 未完成这条链路时，阶段性成果只能标记为 `partial`，不能按“已收口”对外表述。
+
+## rule-ai-result-must-writeback
+- createdAt: 2026-05-06T00:00:00.000Z
+- status: active
+- source: tracking-acceptance-postmortem
+- sessionId: n/a
+- messageId: n/a
+- subprojectId: platform
+- captureMode: manual
+- canonicalRule:
+  - AI 输出默认只是候选结果，不是正式交付物。
+  - 任何会影响需求、规则、报告、查询方案、设计承接或其他正式对象的 AI 结果，都必须经过“上下文包 -> AI 结果 -> 回写任务 -> 人工确认 -> 正式对象”链路。
+  - 没有回写目标、没有人工确认记录、或没有正式对象落点的 AI 输出，不得声称已经落地。
+  - 证据层对象尤其不能被 AI 摘要直接替代，原始查询与原始日志仍然保留优先级。
+
+## rule-active-subproject-runtime-contract
+- createdAt: 2026-05-06T00:00:00.000Z
+- status: active
+- source: tracking-acceptance-postmortem
+- sessionId: n/a
+- messageId: n/a
+- subprojectId: platform
+- captureMode: manual
+- canonicalRule:
+  - 活跃子项目在深做产品、设计、前端或协作前，必须先补齐最小运行合同。
+  - 最小运行合同至少包括：可读的 `session-state.json`、固定恢复链、子项目 `startup-whoami`、子项目 `AGENTS.md`、有效的 `subproject.json` 必填字段，以及可追踪的 prep checklist。
+  - 如果 manifest 字段缺失、恢复链不固定、或共享状态入口缺失，应优先补运行合同，而不是先继续堆前端或文档。
+  - 子项目未满足最小运行合同时，平台应将其视为 `partial adoption` 而不是稳定接入。

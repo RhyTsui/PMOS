@@ -1,0 +1,253 @@
+import type { PMOSScreenSchema } from '../schema';
+
+export const pmchatHomeSchema: PMOSScreenSchema = {
+  schemaVersion: '1.0',
+  screenId: 'pmchat-home',
+  screenType: 'pmchat-home',
+  workflowStage: 'design',
+  title: 'PMChat AI Native Workspace',
+  description:
+    'Use one main conversation as the PMOS platform entry and progressively reveal evidence, approvals, traces, and structured dynamic surfaces.',
+  productContext: {
+    productId: 'pmchat-v1',
+    productName: 'PMChat',
+    projectId: 'platform',
+    projectName: 'PMOS Platform',
+    requirementId: 'req-pmchat-ai-native-workspace',
+    requirementTitle: 'Upgrade the PMOS home shell into an AI-native conversational workspace.',
+    stageOwner: 'Product Chief Agent',
+    targetRole: 'product-manager',
+  },
+  layout: {
+    desktop: 'chat-first',
+    mobile: 'stacked-decision-flow',
+    density: 'high',
+    stickyActions: true,
+  },
+  homepageMode: 'chat-first',
+  regions: {
+    contextRail: [
+      {
+        type: 'ContextRail',
+        id: 'pmchat-context-rail',
+        title: 'Session Context',
+        items: [
+          { label: 'Scope', value: 'PMOS Platform', status: 'normal' },
+          { label: 'Shell', value: 'PMChat', status: 'success' },
+          { label: 'Mode', value: 'AI Native Workspace', status: 'success' },
+          { label: 'Runtime', value: 'Agent-aware streaming', status: 'warning' },
+        ],
+      },
+    ],
+    main: [
+      {
+        type: 'ChatShell',
+        id: 'pmchat-main-shell',
+        title: 'PMChat',
+        aiAssistanceMode: 'copilot',
+        playgroundVariant: 'operator',
+        starterPrompts: [
+          'Summarize the active requirement context.',
+          'Show the current execution trace.',
+          'Render the latest structured recommendation.',
+        ],
+      },
+      {
+        type: 'WorkflowStatusPanel',
+        id: 'pmchat-execution-state',
+        title: 'Execution State',
+        workflowStage: 'design',
+        status: 'running',
+        currentStep: 'Streaming reply and waiting for downstream evidence expansion.',
+      },
+      {
+        type: 'DecisionCard',
+        id: 'pmchat-current-recommendation',
+        title: 'Current Recommendation',
+        summary:
+          'Keep the home shell centered on one main conversation and reveal evidence, approvals, traces, and structured tool surfaces only when the active task needs them.',
+        decisionPolicy: 'review',
+        riskLevel: 'medium',
+        evidenceRefs: ['workspace-design-language', 'home-shell-evidence'],
+        recommendedActions: [
+          {
+            id: 'implement-home-shell',
+            label: 'Implement the AI-native home shell against this schema',
+            actionType: 'advance_workflow',
+            riskLevel: 'medium',
+            approvalPolicy: 'human-review',
+            auditRequired: true,
+            targetObject: '/workspace',
+            rollbackPlan: 'Preserve the previous home-shell contract and revert the route-level binding.',
+          },
+          {
+            id: 'request-ui-review',
+            label: 'Request governed UI review before broader rollout',
+            actionType: 'request_review',
+            riskLevel: 'low',
+            decisionPolicy: 'review',
+            auditRequired: true,
+            targetObject: 'pmchat-home-ui-schema',
+          },
+        ],
+      },
+    ],
+    evidencePanel: [
+      {
+        type: 'EvidencePanel',
+        id: 'home-shell-evidence',
+        title: 'Evidence and Sources',
+        evidenceRefs: [
+          'workspace-design-language',
+          'copilot-contract',
+          'frontend-default-style',
+          'pmchat-capability-matrix',
+        ],
+        sourceRefs: [
+          'docs/operations/pmos-ai-native-workspace-design-language.md',
+          'docs/operations/ui-pmos-copilot-contract.md',
+          'docs/operations/frontend-style-default.md',
+          'docs/operations/pmchat-ant-design-x-capability-matrix.md',
+        ],
+        lastUpdatedAt: '2026-05-13T00:00:00+08:00',
+      },
+      {
+        type: 'SourceReferenceList',
+        id: 'home-shell-source-list',
+        title: 'Freshness',
+        sourceRefs: [
+          'docs/operations/pmos-ai-native-workspace-design-language.md',
+          'docs/operations/frontend-style-default.md',
+          'docs/operations/ui-pmos-copilot-contract.md',
+        ],
+        lastUpdatedAt: '2026-05-13T00:00:00+08:00',
+      },
+    ],
+    sidePanel: [
+      {
+        type: 'AgentControlCard',
+        id: 'pmchat-agent-control',
+        title: 'Agent Control',
+        agentRole: 'PMChat Copilot',
+        summary:
+          'Expose current agent role, next-step actions, and structured side-surface activation without turning the home page into a dashboard.',
+        recommendedActions: [
+          {
+            id: 'run-deep-analysis',
+            label: 'Run deeper analysis',
+            actionType: 'run_deep_analysis',
+            riskLevel: 'medium',
+            approvalPolicy: 'human-review',
+            auditRequired: true,
+            targetObject: 'active-conversation',
+          },
+        ],
+      },
+      {
+        type: 'DynamicSurfaceCard',
+        id: 'pmchat-structured-surface',
+        title: 'Structured Output Surface',
+        surfaceKind: 'side-sheet',
+        sourceRefs: ['docs/operations/pmchat-ant-design-x-capability-matrix.md'],
+        evidenceRefs: ['pmchat-capability-matrix'],
+      },
+    ],
+    approvalPanel: [
+      {
+        type: 'ApprovalPanel',
+        id: 'pmchat-approval-gate',
+        title: 'Approval Gate',
+        approvalPolicy: 'human-review',
+        actions: [
+          {
+            id: 'approve-shell-rollout',
+            label: 'Approve home-shell rollout',
+            actionType: 'approve_change',
+            riskLevel: 'high',
+            approvalPolicy: 'human-review',
+            requiresApproval: true,
+            auditRequired: true,
+            targetObject: '/workspace',
+            rollbackPlan: 'Restore the previous shell contract and re-run schema verification.',
+          },
+          {
+            id: 'reject-shell-rollout',
+            label: 'Reject and keep current shell',
+            actionType: 'reject_change',
+            riskLevel: 'high',
+            approvalPolicy: 'human-review',
+            requiresApproval: true,
+            auditRequired: true,
+            targetObject: '/workspace',
+            rollbackPlan: 'No deployment change; continue on current shell.',
+          },
+        ],
+      },
+    ],
+    auditTrail: [
+      {
+        type: 'AuditLog',
+        id: 'pmchat-audit-log',
+        title: 'Execution Trace',
+        logs: [
+          {
+            id: 'log-1',
+            actor: 'PMChat Copilot',
+            action: 'Generated workspace-first recommendation',
+            timestamp: '2026-05-13T00:00:00+08:00',
+            result: 'completed',
+          },
+          {
+            id: 'log-2',
+            actor: 'Operator',
+            action: 'Expanded evidence and approval surfaces',
+            timestamp: '2026-05-13T00:05:00+08:00',
+            result: 'pending-review',
+          },
+        ],
+      },
+    ],
+  },
+  evidenceRefs: ['workspace-design-language', 'home-shell-evidence'],
+  sourceRefs: [
+    'docs/operations/pmos-ai-native-workspace-design-language.md',
+    'docs/operations/frontend-style-default.md',
+    'docs/operations/ui-pmos-copilot-contract.md',
+    'docs/operations/pmchat-ant-design-x-capability-matrix.md',
+  ],
+  lastUpdatedAt: '2026-05-13T00:00:00+08:00',
+  decisionPolicy: 'review',
+  approvalPolicy: 'human-review',
+  riskLevel: 'medium',
+  auditRequired: true,
+  aiAssistanceMode: 'copilot',
+  recommendedActions: [
+    {
+      id: 'align-workspace-implementation',
+      label: 'Align the workspace implementation to the pmchat-home schema',
+      actionType: 'advance_workflow',
+      riskLevel: 'medium',
+      approvalPolicy: 'human-review',
+      auditRequired: true,
+      targetObject: 'src/frontend/App.tsx',
+      rollbackPlan: 'Restore the previous workspace shell and keep this schema as pending.',
+    },
+  ],
+  validationRules: [
+    {
+      id: 'chat-remains-primary',
+      description: 'The main conversation must remain the dominant always-visible region.',
+      severity: 'error',
+    },
+    {
+      id: 'secondary-surfaces-invoked',
+      description: 'Evidence, approval, and audit surfaces must stay hidden until invoked.',
+      severity: 'error',
+    },
+    {
+      id: 'no-dashboard-regression',
+      description: 'Implementation must not regress into dashboard-first or card-wall composition.',
+      severity: 'error',
+    },
+  ],
+};

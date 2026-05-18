@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI埋点平台 - 概览页静态HTML确认稿 v1</title>
+    <meta
+      name="description"
+      content="AI埋点平台概览页最终交付级静态HTML确认稿，用于产品确认、业务评审与后端一比一还原。"
+    />
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --surface-soft: #fafcff;
+        --line: #d9e2ec;
+        --line-strong: #c6d4e3;
+        --text: #252934;
+        --text-secondary: #516277;
+        --text-tertiary: #6b7981;
+        --brand: #3b86f9;
+        --brand-soft: #edf4ff;
+        --danger: #f5222d;
+        --danger-soft: #fff1f0;
+        --warning: #faad14;
+        --warning-soft: #fffbe6;
+        --info: #1677ff;
+        --info-soft: #edf4ff;
+        --success: #52c41a;
+        --success-soft: #f6ffed;
+        --shadow: 0 6px 18px rgba(15, 32, 56, 0.06);
+        --radius: 2px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: 64px 1fr;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: 220px 1fr 148px;
+        align-items: center;
+        gap: 16px;
+        padding: 0 16px 0 20px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .brand-logo {
+        width: 20px;
+        height: 20px;
+        border-radius: var(--radius);
+        background: var(--brand);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .brand-title {
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 1;
+      }
+
+      .inline-icon {
+        width: 10px;
+        height: 10px;
+        color: currentColor;
+      }
+
+      .top-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 188px));
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .top-action,
+      .top-profile {
+        min-height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .top-action {
+        position: relative;
+        cursor: pointer;
+      }
+
+      .top-action:hover,
+      .top-profile:hover {
+        border-color: var(--brand);
+      }
+
+      .top-action-main,
+      .top-profile-main {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .top-action-copy,
+      .top-profile-copy {
+        min-width: 0;
+      }
+
+      .top-action-copy strong,
+      .top-profile-copy strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text);
+      }
+
+      .top-action-trigger,
+      .top-profile-trigger,
+      .nav-trigger {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        color: inherit;
+        font: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .top-action-menu,
+      .top-profile-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: 10;
+        padding: 6px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        display: none;
+      }
+
+      .top-action.open .top-action-menu,
+      .top-profile.open .top-profile-menu {
+        display: grid;
+        gap: 4px;
+      }
+
+      .top-action-option,
+      .top-profile-option {
+        min-height: 32px;
+        padding: 0 8px;
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        background: transparent;
+        color: var(--text-secondary);
+        font: inherit;
+        font-size: 12px;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .top-action-option:hover,
+      .top-profile-option:hover,
+      .top-action-option.active,
+      .top-profile-option.active {
+        color: var(--brand);
+        background: var(--brand-soft);
+        border-color: #c9dcff;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        min-height: 0;
+      }
+
+      .sidebar {
+        background: var(--surface);
+        border-right: 1px solid var(--line);
+        padding: 16px 12px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 4px;
+      }
+
+      .nav-item {
+        min-height: 40px;
+        padding: 0;
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .nav-trigger {
+        min-height: 40px;
+        padding: 0 12px;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .nav-item.active {
+        color: var(--brand);
+        background: var(--brand-soft);
+        border-color: #c9dcff;
+      }
+
+      .main {
+        padding: 16px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .panel-body {
+        padding: 16px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .section-head h2,
+      .section-head h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--text-secondary);
+      }
+
+      .section-head span {
+        font-size: 10px;
+        color: var(--text-tertiary);
+      }
+
+      .context-grid,
+      .goal-grid,
+      .metrics-grid,
+      .risk-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .context-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .context-card,
+      .goal-card,
+      .metric-card,
+      .update-item {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface-soft);
+      }
+
+      .context-card {
+        padding: 12px;
+      }
+
+      .context-card label,
+      .goal-item small,
+      .metric-card small,
+      .mini-label {
+        display: block;
+        font-size: 10px;
+        color: var(--text-tertiary);
+      }
+
+      .context-card strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text-secondary);
+      }
+
+      .chip-row {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .chip {
+        min-height: 24px;
+        padding: 0 8px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        display: inline-flex;
+        align-items: center;
+        font-size: 10px;
+        color: var(--text-secondary);
+      }
+
+      .chip.active {
+        color: var(--brand);
+        border-color: #c9dcff;
+        background: var(--brand-soft);
+      }
+
+      .goal-item strong,
+      .metric-card strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text);
+      }
+
+      .goal-card {
+        padding: 16px;
+      }
+
+      .goal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .goal-item {
+        min-height: 64px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .goal-item.full {
+        grid-column: 1 / -1;
+      }
+
+      .metrics-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+
+      .metric-card {
+        min-height: 92px;
+        padding: 12px;
+      }
+
+      .metric-card strong {
+        margin-top: 8px;
+        font-size: 20px;
+      }
+
+      .metric-card p {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+
+      .metric-card.risk {
+        border-color: var(--line);
+        background: var(--surface-soft);
+      }
+
+      .updates {
+        display: grid;
+        gap: 8px;
+      }
+
+      .update-item {
+        padding: 12px;
+      }
+
+      .update-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .update-type {
+        min-height: 20px;
+        padding: 0 8px;
+        border: 1px solid #e2eaf3;
+        border-radius: var(--radius);
+        background: #fbfcfe;
+        color: #6b7981;
+        display: inline-flex;
+        align-items: center;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .update-time {
+        font-size: 10px;
+        color: var(--text-tertiary);
+      }
+
+      .update-title {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text);
+      }
+
+      .update-desc {
+        margin-top: 4px;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .trend-shell {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(180deg, #fbfdff 0%, #f6f9fe 100%);
+      }
+
+      .trend-note {
+        margin-bottom: 8px;
+        font-size: 10px;
+        color: var(--text-tertiary);
+      }
+
+      .trend-svg text,
+      .trend-svg path,
+      .trend-svg circle,
+      .trend-svg line,
+      .trend-svg polyline,
+      .trend-svg polygon {
+        transition: all 0.2s ease;
+      }
+
+      .risk-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .table-shell {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface-soft);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+
+      thead th {
+        height: 36px;
+        padding: 0 10px;
+        background: #fbfdff;
+        border-bottom: 1px solid var(--line);
+        color: var(--text-tertiary);
+        text-align: left;
+        font-weight: 400;
+      }
+
+      tbody td {
+        padding: 10px;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: top;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .badge {
+        min-height: 18px;
+        padding: 0 6px;
+        border-radius: var(--radius);
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .badge.p0 {
+        color: #516277;
+        background: #fbfcfe;
+        border-color: #e3eaf2;
+      }
+
+      .badge.p1 {
+        color: #516277;
+        background: #fbfcfe;
+        border-color: #e3eaf2;
+      }
+
+      .badge.wait-fix {
+        color: #6a7584;
+        background: #fbfcfe;
+        border-color: #e3eaf2;
+      }
+
+      .badge.wait-check {
+        color: #6a7584;
+        background: #fbfcfe;
+        border-color: #e3eaf2;
+      }
+
+      .badge.queued {
+        color: #6a7584;
+        background: #fbfcfe;
+        border-color: #e3eaf2;
+      }
+
+      @media (max-width: 1360px) {
+        .metrics-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+      }
+
+      @media (max-width: 1180px) {
+        .topbar {
+          grid-template-columns: 1fr;
+          height: auto;
+          padding: 16px;
+        }
+
+        .top-actions {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          justify-content: start;
+        }
+
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          display: none;
+        }
+
+        .risk-grid,
+        .goal-grid,
+        .context-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .top-actions,
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .main {
+          padding: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" data-yk-component="YkContainer">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-logo">AI</div>
+          <div class="brand-title">AI埋点平台</div>
+        </div>
+
+        <div class="top-actions">
+          <div class="top-action" data-yk-component="YkProjectSelect">
+            <button class="top-action-trigger" type="button" data-action-trigger="project" aria-expanded="false">
+              <div class="top-action-main">
+                <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                  <path d="M512 128l352 192v384L512 896 160 704V320l352-192z" stroke="currentColor" stroke-width="72" stroke-linejoin="round"></path>
+                </svg>
+                <div class="top-action-copy"><strong id="projectValue">花花世界</strong></div>
+              </div>
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                <path d="M512 672L224 384h576L512 672z"></path>
+              </svg>
+            </button>
+            <div class="top-action-menu" data-action-menu="project">
+              <button class="top-action-option active" type="button" data-project="花花世界">花花世界</button>
+              <button class="top-action-option" type="button" data-project="天天爱消除">天天爱消除</button>
+            </div>
+          </div>
+
+          <div class="top-action" data-yk-component="LabelSelect">
+            <button class="top-action-trigger" type="button" data-action-trigger="version" aria-expanded="false">
+              <div class="top-action-main">
+                <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                  <rect x="176" y="224" width="672" height="624" rx="48" stroke="currentColor" stroke-width="72"></rect>
+                  <path d="M304 128v192M720 128v192M176 416h672" stroke="currentColor" stroke-width="72" stroke-linecap="round"></path>
+                </svg>
+                <div class="top-action-copy"><strong id="versionValue">2026S2-五月验收</strong></div>
+              </div>
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                <path d="M512 672L224 384h576L512 672z"></path>
+              </svg>
+            </button>
+            <div class="top-action-menu" data-action-menu="version"></div>
+          </div>
+
+          <div class="top-action" data-yk-component="LabelSelect">
+            <button class="top-action-trigger" type="button" data-action-trigger="view" aria-expanded="false">
+              <div class="top-action-main">
+                <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                  <circle cx="352" cy="352" r="112" stroke="currentColor" stroke-width="72"></circle>
+                  <path d="M176 784c44-116 150-184 336-184s292 68 336 184" stroke="currentColor" stroke-width="72" stroke-linecap="round"></path>
+                </svg>
+                <div class="top-action-copy"><strong id="viewValue">全部</strong></div>
+              </div>
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                <path d="M512 672L224 384h576L512 672z"></path>
+              </svg>
+            </button>
+            <div class="top-action-menu" data-action-menu="view">
+              <button class="top-action-option active" type="button" data-view="全部">全部</button>
+              <button class="top-action-option" type="button" data-view="游戏客户端">游戏客户端</button>
+              <button class="top-action-option" type="button" data-view="游戏服务端">游戏服务端</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="top-profile">
+          <button class="top-profile-trigger" type="button" data-action-trigger="profile" aria-expanded="false">
+            <div class="top-profile-main">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <circle cx="512" cy="352" r="144" stroke="currentColor" stroke-width="72"></circle>
+                <path d="M256 800c58-124 164-192 256-192s198 68 256 192" stroke="currentColor" stroke-width="72" stroke-linecap="round"></path>
+              </svg>
+              <div class="top-profile-copy"><strong id="profileValue">徐云</strong></div>
+            </div>
+            <svg class="inline-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+              <path d="M512 672L224 384h576L512 672z"></path>
+            </svg>
+          </button>
+          <div class="top-profile-menu" data-action-menu="profile">
+            <button class="top-profile-option active" type="button">个人中心</button>
+            <button class="top-profile-option" type="button">退出登录</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="shell">
+        <aside class="sidebar">
+          <nav class="nav">
+            <div class="nav-item active">
+              <button class="nav-trigger" type="button" data-nav="概览">
+                <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                  <path d="M160 224h704v576H160z" stroke="currentColor" stroke-width="72"></path>
+                  <path d="M160 416h704M384 416v384" stroke="currentColor" stroke-width="72"></path>
+                </svg>
+                <span>概览</span>
+              </button>
+            </div>
+            <div class="nav-item">
+              <button class="nav-trigger" type="button" data-nav="埋点需求">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <path d="M256 208h512a48 48 0 0148 48v512a48 48 0 01-48 48H256a48 48 0 01-48-48V256a48 48 0 0148-48z" stroke="currentColor" stroke-width="72"></path>
+                <path d="M336 384h352M336 512h352M336 640h240" stroke="currentColor" stroke-width="72" stroke-linecap="round"></path>
+              </svg>
+              <span>埋点需求</span>
+              </button>
+            </div>
+            <div class="nav-item">
+              <button class="nav-trigger" type="button" data-nav="数据字典">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <path d="M224 208h448l128 128v480H224z" stroke="currentColor" stroke-width="72" stroke-linejoin="round"></path>
+                <path d="M672 208v160h160" stroke="currentColor" stroke-width="72"></path>
+              </svg>
+              <span>数据字典</span>
+              </button>
+            </div>
+            <div class="nav-item">
+              <button class="nav-trigger" type="button" data-nav="校验规则">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <path d="M512 160l96 192 208 32-152 144 40 208-192-104-192 104 40-208-152-144 208-32z" stroke="currentColor" stroke-width="72" stroke-linejoin="round"></path>
+              </svg>
+              <span>校验规则</span>
+              </button>
+            </div>
+            <div class="nav-item">
+              <button class="nav-trigger" type="button" data-nav="日志查询">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <circle cx="448" cy="448" r="208" stroke="currentColor" stroke-width="72"></circle>
+                <path d="M784 784L640 640" stroke="currentColor" stroke-width="72" stroke-linecap="round"></path>
+              </svg>
+              <span>日志查询</span>
+              </button>
+            </div>
+            <div class="nav-item">
+              <button class="nav-trigger" type="button" data-nav="验收报告">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <path d="M224 208h576v608H224z" stroke="currentColor" stroke-width="72"></path>
+                <path d="M336 384h352M336 512h352M336 640h224" stroke="currentColor" stroke-width="72" stroke-linecap="round"></path>
+              </svg>
+              <span>验收报告</span>
+              </button>
+            </div>
+            <div class="nav-item">
+              <button class="nav-trigger" type="button" data-nav="AI 助手">
+              <svg class="inline-icon" viewBox="0 0 1024 1024" fill="none" aria-hidden="true">
+                <path d="M224 256h576v384H448L320 768V640H224z" stroke="currentColor" stroke-width="72" stroke-linejoin="round"></path>
+                <circle cx="416" cy="448" r="24" fill="currentColor"></circle>
+                <circle cx="512" cy="448" r="24" fill="currentColor"></circle>
+                <circle cx="608" cy="448" r="24" fill="currentColor"></circle>
+              </svg>
+              <span>AI 助手</span>
+              </button>
+            </div>
+          </nav>
+        </aside>
+
+        <main class="main">
+          <section>
+            <div class="panel">
+              <div class="panel-body">
+                <div class="section-head">
+                  <h2>版本目标</h2>
+                </div>
+                <div class="goal-grid" data-yk-component="YkContainer FlexGrid">
+                  <div class="goal-item">
+                    <small>版本号</small>
+                    <strong id="goalVersion">2.3.0-五月验收</strong>
+                  </div>
+                  <div class="goal-item">
+                    <small>当前状态</small>
+                    <strong id="goalStatus">进行中</strong>
+                  </div>
+                  <div class="goal-item">
+                    <small>开始时间</small>
+                    <strong id="goalStart">2026-05-01</strong>
+                  </div>
+                  <div class="goal-item">
+                    <small>结束时间</small>
+                    <strong id="goalEnd">2026-05-14</strong>
+                  </div>
+                  <div class="goal-item">
+                    <small>版本目标</small>
+                    <strong id="goalTarget">完成商城、战斗、任务主链路验收</strong>
+                  </div>
+                  <div class="goal-item">
+                    <small>验收范围</small>
+                    <strong id="goalScope">战斗 / 商城 / 任务主链路</strong>
+                  </div>
+                  <div class="goal-item full">
+                    <small>验收通过门槛</small>
+                    <strong id="goalGate">高优事件全部通过，核心链路通过率 ≥ 95%</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-body">
+              <div class="section-head">
+                <h2>验收进度</h2>
+              </div>
+                <div class="metrics-grid" data-yk-component="FlexGrid YkTooltip">
+                <div class="metric-card">
+                  <small>埋点数量</small>
+                  <strong id="metricTotal">186</strong>
+                  <p id="metricTotalDesc">去重后统计</p>
+                </div>
+                <div class="metric-card">
+                  <small>已验收</small>
+                  <strong id="metricAccepted">128</strong>
+                  <p id="metricAcceptedDesc">最近批次已合并</p>
+                </div>
+                <div class="metric-card">
+                  <small>待验收</small>
+                  <strong id="metricPending">58</strong>
+                  <p id="metricPendingDesc">含新增埋点需求</p>
+                </div>
+                <div class="metric-card">
+                  <small>通过率</small>
+                  <strong id="metricPassRate">68.8%</strong>
+                  <p id="metricPassRateDesc">已验收埋点数量 / 埋点数量</p>
+                </div>
+                  <div class="metric-card risk">
+                    <small>高优埋点数量</small>
+                    <strong id="metricHighPriority">18</strong>
+                    <p id="metricHighPriorityDesc">当前版本高优先级范围</p>
+                </div>
+                  <div class="metric-card risk">
+                    <small>高优待回归</small>
+                    <strong id="metricHighPending">2</strong>
+                    <p id="metricHighPendingDesc">当前仍未完成验收</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-body">
+              <div class="section-head">
+                <h2>最近变更</h2>
+              </div>
+              <div class="updates" data-yk-component="YkContainer YkTooltip">
+                <div class="update-item">
+                  <div class="update-top">
+                    <div class="update-type">埋点需求变更</div>
+                    <div class="update-time">今天 10:24</div>
+                  </div>
+                  <div class="update-title" id="updateTitle1">商城支付链路新增 6 个埋点</div>
+                  <div class="update-desc" id="updateDesc1">支付确认、失败回退、券核销范围同步进入当前版本验收。</div>
+                </div>
+                <div class="update-item">
+                  <div class="update-top">
+                    <div class="update-type">校验规则变更</div>
+                    <div class="update-time">今天 09:10</div>
+                  </div>
+                  <div class="update-title" id="updateTitle2">战斗结算补充 user_level 必填</div>
+                  <div class="update-desc" id="updateDesc2">战斗结算事件重新进入回归队列，影响当前版本验收结论。</div>
+                </div>
+                <div class="update-item">
+                  <div class="update-top">
+                    <div class="update-type">验收批次报告更新</div>
+                    <div class="update-time">昨天 18:40</div>
+                  </div>
+                  <div class="update-title" id="updateTitle3">第 5 批客户端回归报告已上传</div>
+                  <div class="update-desc" id="updateDesc3">客户端补回 14 个事件，商城支付问题仍未解除阻塞。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-body">
+              <div class="section-head">
+                <h2>通过率趋势</h2>
+                <span>按日</span>
+              </div>
+              <div class="trend-shell" data-yk-component="YkCharts YkTooltip">
+                <div class="trend-note" id="trendNote">统计口径：已验收埋点数量 / 当前版本埋点总数</div>
+                <svg class="trend-svg" viewBox="0 0 980 240" width="100%" height="240" aria-label="通过率趋势图">
+                  <defs>
+                    <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#91caff" stop-opacity="0.28"></stop>
+                      <stop offset="100%" stop-color="#91caff" stop-opacity="0.04"></stop>
+                    </linearGradient>
+                  </defs>
+                  <line x1="60" y1="180" x2="920" y2="180" stroke="#d9e2ec" stroke-width="1"></line>
+                  <line x1="60" y1="130" x2="920" y2="130" stroke="#edf2f7" stroke-width="1"></line>
+                  <line x1="60" y1="80" x2="920" y2="80" stroke="#edf2f7" stroke-width="1"></line>
+                  <line x1="60" y1="30" x2="920" y2="30" stroke="#edf2f7" stroke-width="1"></line>
+                  <polygon id="trendArea" points="60,166 190,160 320,146 450,136 580,124 710,108 840,90 920,84 920,180 60,180" fill="url(#trendFill)"></polygon>
+                  <polyline id="trendLine" points="60,166 190,160 320,146 450,136 580,124 710,108 840,90 920,84" fill="none" stroke="#3B86F9" stroke-width="4"></polyline>
+                  <circle id="trendLastPoint" cx="920" cy="84" r="5" fill="#3B86F9"></circle>
+                  <text x="26" y="184" fill="#7c8da3" font-size="12">0%</text>
+                  <text x="18" y="134" fill="#7c8da3" font-size="12">40%</text>
+                  <text x="18" y="84" fill="#7c8da3" font-size="12">70%</text>
+                  <text x="18" y="34" fill="#7c8da3" font-size="12">100%</text>
+                  <text x="52" y="210" fill="#7c8da3" font-size="12">05-01</text>
+                  <text x="304" y="210" fill="#7c8da3" font-size="12">05-05</text>
+                  <text x="558" y="210" fill="#7c8da3" font-size="12">05-09</text>
+                  <text x="810" y="210" fill="#7c8da3" font-size="12">05-14</text>
+                </svg>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-body">
+              <div class="section-head">
+                <h2>重点风险</h2>
+              </div>
+              <div class="risk-grid" data-yk-component="FlexGrid TableTheme YkTooltip">
+                <div>
+                  <div class="section-head">
+                    <h3>不通过事件 TOP5</h3>
+                  </div>
+                  <div class="table-shell">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>事件 ID</th>
+                          <th>事件名</th>
+                          <th>优先级</th>
+                          <th>数据来源</th>
+                          <th>问题参数</th>
+                          <th>触发规则</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td id="failEventId1">evt_pay_03</td>
+                          <td id="failEventName1">商城支付完成</td>
+                          <td><span class="badge p0" id="failPriority1">高优</span></td>
+                          <td id="failSource1">游戏客户端</td>
+                          <td id="failParam1">currency / amount</td>
+                          <td id="failRule1">支付成功字段完整性</td>
+                          <td><span class="badge wait-fix" id="failStatus1">待修复</span></td>
+                        </tr>
+                        <tr>
+                          <td id="failEventId2">evt_battle_09</td>
+                          <td id="failEventName2">战斗结算</td>
+                          <td><span class="badge p0" id="failPriority2">高优</span></td>
+                          <td id="failSource2">游戏客户端</td>
+                          <td id="failParam2">user_level</td>
+                          <td id="failRule2">战斗核心参数必填</td>
+                          <td><span class="badge wait-check" id="failStatus2">待回归</span></td>
+                        </tr>
+                        <tr>
+                          <td id="failEventId3">evt_task_12</td>
+                          <td id="failEventName3">任务领取</td>
+                          <td><span class="badge p1" id="failPriority3">P1</span></td>
+                          <td id="failSource3">游戏服务端</td>
+                          <td id="failParam3">task_type</td>
+                          <td id="failRule3">任务分类枚举校验</td>
+                          <td><span class="badge wait-fix" id="failStatus3">待修复</span></td>
+                        </tr>
+                        <tr>
+                          <td id="failEventId4">evt_login_01</td>
+                          <td id="failEventName4">登录成功</td>
+                          <td><span class="badge p1" id="failPriority4">P1</span></td>
+                          <td id="failSource4">游戏客户端</td>
+                          <td id="failParam4">server_id</td>
+                          <td id="failRule4">登录链路基础字段校验</td>
+                          <td><span class="badge wait-check" id="failStatus4">待回归</span></td>
+                        </tr>
+                        <tr>
+                          <td id="failEventId5">evt_shop_17</td>
+                          <td id="failEventName5">商城券核销</td>
+                          <td><span class="badge p1" id="failPriority5">P1</span></td>
+                          <td id="failSource5">游戏服务端</td>
+                          <td id="failParam5">coupon_id</td>
+                          <td id="failRule5">券链路主键完整性</td>
+                          <td><span class="badge wait-fix" id="failStatus5">待修复</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="section-head">
+                    <h3>待验收埋点 TOP5</h3>
+                  </div>
+                  <div class="table-shell">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>事件 ID</th>
+                          <th>事件名</th>
+                          <th>优先级</th>
+                          <th>数据来源</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td id="pendingEventId1">evt_refund_05</td>
+                          <td id="pendingEventName1">支付退款完成</td>
+                          <td><span class="badge p0" id="pendingPriority1">高优</span></td>
+                          <td id="pendingSource1">游戏服务端</td>
+                          <td><span class="badge queued" id="pendingStatus1">待验收</span></td>
+                        </tr>
+                        <tr>
+                          <td id="pendingEventId2">evt_battle_11</td>
+                          <td id="pendingEventName2">战斗失败结算</td>
+                          <td><span class="badge p0" id="pendingPriority2">高优</span></td>
+                          <td id="pendingSource2">游戏客户端</td>
+                          <td><span class="badge queued" id="pendingStatus2">待验收</span></td>
+                        </tr>
+                        <tr>
+                          <td id="pendingEventId3">evt_task_15</td>
+                          <td id="pendingEventName3">任务跳转完成</td>
+                          <td><span class="badge p1" id="pendingPriority3">P1</span></td>
+                          <td id="pendingSource3">游戏客户端</td>
+                          <td><span class="badge queued" id="pendingStatus3">待验收</span></td>
+                        </tr>
+                        <tr>
+                          <td id="pendingEventId4">evt_mail_07</td>
+                          <td id="pendingEventName4">邮件领取奖励</td>
+                          <td><span class="badge p1" id="pendingPriority4">P1</span></td>
+                          <td id="pendingSource4">游戏服务端</td>
+                          <td><span class="badge queued" id="pendingStatus4">待验收</span></td>
+                        </tr>
+                        <tr>
+                          <td id="pendingEventId5">evt_shop_22</td>
+                          <td id="pendingEventName5">礼包购买完成</td>
+                          <td><span class="badge p1" id="pendingPriority5">P1</span></td>
+                          <td id="pendingSource5">游戏客户端</td>
+                          <td><span class="badge queued" id="pendingStatus5">待验收</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+    <template id="overview-empty-state">
+      <section class="panel"><div class="panel-body">当前版本暂无验收数据</div></section>
+    </template>
+    <template id="overview-loading-state">
+      <section class="panel"><div class="panel-body">页面加载中</div></section>
+    </template>
+    <template id="overview-error-state">
+      <section class="panel"><div class="panel-body">页面读取失败</div></section>
+    </template>
+    <template id="overview-no-permission-state">
+      <section class="panel"><div class="panel-body">当前无权查看</div></section>
+    </template>
+    <script>
+      const overviewData = {
+        "花花世界": {
+          versions: {
+            "2026S2-五月验收": {
+              goal: {
+                version: "2.3.0-五月验收",
+                status: "进行中",
+                start: "2026-05-01",
+                end: "2026-05-14",
+                target: "完成商城、战斗、任务主链路验收",
+                scope: "战斗 / 商城 / 任务主链路",
+                gate: "高优事件全部通过，核心链路通过率 ≥ 95%"
+              },
+              updates: [
+                ["商城支付链路新增 6 个埋点", "支付确认、失败回退、券核销范围同步进入当前版本验收。"],
+                ["战斗结算补充 user_level 必填", "战斗结算事件重新进入回归队列，影响当前版本验收结论。"],
+                ["第 5 批客户端回归报告已上传", "客户端补回 14 个事件，商城支付问题仍未解除阻塞。"]
+              ],
+              views: {
+                "全部": {
+                  metrics: ["186", "128", "58", "68.8%", "18", "2"],
+                  trend: [166, 160, 146, 136, 124, 108, 90, 84],
+                  fails: [
+                    ["evt_pay_03", "商城支付完成", "高优", "游戏客户端", "currency / amount", "支付成功字段完整性", "待修复"],
+                    ["evt_battle_09", "战斗结算", "高优", "游戏客户端", "user_level", "战斗核心参数必填", "待回归"],
+                    ["evt_task_12", "任务领取", "P1", "游戏服务端", "task_type", "任务分类枚举校验", "待修复"],
+                    ["evt_login_01", "登录成功", "P1", "游戏客户端", "server_id", "登录链路基础字段校验", "待回归"],
+                    ["evt_shop_17", "商城券核销", "P1", "游戏服务端", "coupon_id", "券链路主键完整性", "待修复"]
+                  ],
+                  pending: [
+                    ["evt_refund_05", "支付退款完成", "高优", "游戏服务端", "待验收"],
+                    ["evt_battle_11", "战斗失败结算", "高优", "游戏客户端", "待验收"],
+                    ["evt_task_15", "任务跳转完成", "P1", "游戏客户端", "待验收"],
+                    ["evt_mail_07", "邮件领取奖励", "P1", "游戏服务端", "待验收"],
+                    ["evt_shop_22", "礼包购买完成", "P1", "游戏客户端", "待验收"]
+                  ]
+                },
+                "游戏客户端": {
+                  metrics: ["112", "74", "38", "66.1%", "11", "2"],
+                  trend: [170, 165, 156, 147, 136, 122, 104, 96],
+                  fails: [
+                    ["evt_pay_03", "商城支付完成", "高优", "游戏客户端", "currency / amount", "支付成功字段完整性", "待修复"],
+                    ["evt_battle_09", "战斗结算", "高优", "游戏客户端", "user_level", "战斗核心参数必填", "待回归"],
+                    ["evt_login_01", "登录成功", "P1", "游戏客户端", "server_id", "登录链路基础字段校验", "待回归"],
+                    ["evt_battle_11", "战斗失败结算", "P1", "游戏客户端", "battle_result", "失败结算字段完整性", "待修复"],
+                    ["evt_shop_22", "礼包购买完成", "P1", "游戏客户端", "gift_pack_id", "礼包购买结果校验", "待修复"]
+                  ],
+                  pending: [
+                    ["evt_battle_11", "战斗失败结算", "高优", "游戏客户端", "待验收"],
+                    ["evt_task_15", "任务跳转完成", "P1", "游戏客户端", "待验收"],
+                    ["evt_shop_22", "礼包购买完成", "P1", "游戏客户端", "待验收"],
+                    ["evt_login_07", "区服登录完成", "P1", "游戏客户端", "待验收"],
+                    ["evt_pay_08", "支付失败回退", "P1", "游戏客户端", "待验收"]
+                  ]
+                },
+                "游戏服务端": {
+                  metrics: ["94", "69", "25", "73.4%", "9", "0"],
+                  trend: [164, 156, 144, 132, 118, 104, 86, 66],
+                  fails: [
+                    ["evt_task_12", "任务领取", "P1", "游戏服务端", "task_type", "任务分类枚举校验", "待修复"],
+                    ["evt_shop_17", "商城券核销", "P1", "游戏服务端", "coupon_id", "券链路主键完整性", "待修复"],
+                    ["evt_refund_05", "支付退款完成", "P1", "游戏服务端", "refund_status", "退款状态字段校验", "待回归"],
+                    ["evt_mail_07", "邮件领取奖励", "P1", "游戏服务端", "reward_id", "奖励字段完整性", "待修复"],
+                    ["evt_shop_31", "商城发货完成", "P1", "游戏服务端", "delivery_type", "发货链路字段校验", "待回归"]
+                  ],
+                  pending: [
+                    ["evt_refund_05", "支付退款完成", "高优", "游戏服务端", "待验收"],
+                    ["evt_mail_07", "邮件领取奖励", "P1", "游戏服务端", "待验收"],
+                    ["evt_shop_31", "商城发货完成", "P1", "游戏服务端", "待验收"],
+                    ["evt_task_18", "任务奖励下发", "P1", "游戏服务端", "待验收"],
+                    ["evt_role_03", "角色创建完成", "P1", "游戏服务端", "待验收"]
+                  ]
+                }
+              }
+            },
+            "2026S1-四月验收": {
+              goal: {
+                version: "2.2.4-四月验收",
+                status: "已完成",
+                start: "2026-04-01",
+                end: "2026-04-28",
+                target: "完成登录、任务、邮件主链路验收",
+                scope: "登录 / 任务 / 邮件主链路",
+                gate: "高优事件全部通过，核心链路通过率 ≥ 95%"
+              },
+              updates: [
+                ["第 4 批验收报告归档", "四月版本验收结果已归档，进入历史追溯范围。"],
+                ["任务链路规则冻结", "任务链路规则不再追加变更。"],
+                ["邮件奖励字段回补完成", "邮件主链路字段已完成回补。"]
+              ],
+              views: {
+                "全部": {
+                  metrics: ["154", "152", "2", "98.7%", "12", "0"],
+                  trend: [170, 154, 132, 114, 90, 70, 44, 32],
+                  fails: [
+                    ["evt_login_03", "登录失败", "P1", "游戏客户端", "error_code", "登录失败码完整性", "待回归"],
+                    ["evt_task_08", "任务提交", "P1", "游戏服务端", "task_state", "任务状态枚举校验", "待修复"],
+                    ["evt_mail_04", "邮件打开", "P1", "游戏客户端", "mail_type", "邮件类型字段校验", "待回归"],
+                    ["evt_role_01", "角色登录", "P1", "游戏服务端", "role_id", "角色主键校验", "待修复"],
+                    ["evt_scene_01", "场景进入", "P1", "游戏客户端", "scene_id", "场景字段完整性", "待回归"]
+                  ],
+                  pending: [
+                    ["evt_mail_09", "邮件附件领取", "P1", "游戏服务端", "待验收"],
+                    ["evt_task_11", "任务追踪", "P1", "游戏客户端", "待验收"],
+                    ["evt_login_05", "游客登录完成", "P1", "游戏客户端", "待验收"],
+                    ["evt_role_06", "角色升级", "P1", "游戏服务端", "待验收"],
+                    ["evt_chat_01", "聊天发送", "P1", "游戏客户端", "待验收"]
+                  ]
+                },
+                "游戏客户端": { metrics: ["88", "87", "1", "98.9%", "7", "0"], trend: [170,156,136,118,96,72,48,34], fails: [["evt_mail_04","邮件打开","P1","游戏客户端","mail_type","邮件类型字段校验","待回归"],["evt_scene_01","场景进入","P1","游戏客户端","scene_id","场景字段完整性","待回归"],["evt_login_03","登录失败","P1","游戏客户端","error_code","登录失败码完整性","待回归"],["evt_task_11","任务追踪","P1","游戏客户端","trace_type","任务追踪字段校验","待修复"],["evt_chat_01","聊天发送","P1","游戏客户端","chat_type","聊天字段校验","待回归"]], pending: [["evt_task_11","任务追踪","P1","游戏客户端","待验收"],["evt_login_05","游客登录完成","P1","游戏客户端","待验收"],["evt_chat_01","聊天发送","P1","游戏客户端","待验收"],["evt_mail_12","邮件删除","P1","游戏客户端","待验收"],["evt_scene_05","场景退出","P1","游戏客户端","待验收"]] },
+                "游戏服务端": { metrics: ["66", "65", "1", "98.5%", "5", "0"], trend: [170,158,138,120,102,80,58,38], fails: [["evt_task_08","任务提交","P1","游戏服务端","task_state","任务状态枚举校验","待修复"],["evt_role_01","角色登录","P1","游戏服务端","role_id","角色主键校验","待修复"],["evt_mail_09","邮件附件领取","P1","游戏服务端","attachment_id","附件字段校验","待回归"],["evt_role_06","角色升级","P1","游戏服务端","level_after","升级字段校验","待回归"],["evt_task_14","任务放弃","P1","游戏服务端","abandon_reason","任务放弃原因校验","待修复"]], pending: [["evt_mail_09","邮件附件领取","P1","游戏服务端","待验收"],["evt_role_06","角色升级","P1","游戏服务端","待验收"],["evt_task_14","任务放弃","P1","游戏服务端","待验收"],["evt_role_08","角色注销","P1","游戏服务端","待验收"],["evt_team_01","组队创建","P1","游戏服务端","待验收"]] }
+              }
+            }
+          }
+        },
+        "天天爱消除": {
+          versions: {
+            "2026S2-五月验收": {
+              goal: {
+                version: "5.8.1-五月验收",
+                status: "进行中",
+                start: "2026-05-03",
+                end: "2026-05-18",
+                target: "完成闯关、道具、活动主链路验收",
+                scope: "闯关 / 道具 / 活动主链路",
+                gate: "高优事件全部通过，核心链路通过率 ≥ 95%"
+              },
+              updates: [
+                ["活动结算链路新增 4 个埋点", "活动结算与补发链路已并入本轮验收。"],
+                ["道具购买规则变更", "道具库存字段校验规则已更新。"],
+                ["第 2 批服务端报告更新", "服务端补回 9 个事件，活动链路仍有待验收项。"]
+              ],
+              views: {
+                "全部": { metrics: ["132","87","45","65.9%","15","3"], trend: [170,164,156,149,138,124,102,96], fails: [["evt_stage_08","闯关结算","高优","游戏客户端","score / stage_id","结算字段完整性","待回归"],["evt_prop_06","道具购买","高优","游戏服务端","prop_id","道具链路主键校验","待修复"],["evt_event_03","活动领取","P1","游戏客户端","event_id","活动字段枚举校验","待修复"],["evt_energy_02","体力恢复","P1","游戏服务端","energy_after","体力字段校验","待回归"],["evt_login_02","开屏登录","P1","游戏客户端","channel_id","渠道字段校验","待回归"]], pending: [["evt_event_08","活动结算","高优","游戏服务端","待验收"],["evt_stage_11","闯关失败","高优","游戏客户端","待验收"],["evt_prop_12","道具赠送","P1","游戏服务端","待验收"],["evt_sign_04","签到补签","P1","游戏客户端","待验收"],["evt_mail_10","奖励邮件发放","P1","游戏服务端","待验收"]] },
+                "游戏客户端": { metrics: ["79","49","30","62.0%","9","2"], trend: [172,166,160,153,146,136,116,108], fails: [["evt_stage_08","闯关结算","高优","游戏客户端","score / stage_id","结算字段完整性","待回归"],["evt_event_03","活动领取","P1","游戏客户端","event_id","活动字段枚举校验","待修复"],["evt_login_02","开屏登录","P1","游戏客户端","channel_id","渠道字段校验","待回归"],["evt_stage_11","闯关失败","P1","游戏客户端","fail_reason","失败原因字段校验","待修复"],["evt_sign_04","签到补签","P1","游戏客户端","sign_type","补签字段校验","待回归"]], pending: [["evt_stage_11","闯关失败","高优","游戏客户端","待验收"],["evt_sign_04","签到补签","P1","游戏客户端","待验收"],["evt_event_06","活动分享","P1","游戏客户端","待验收"],["evt_stage_15","闯关复活","P1","游戏客户端","待验收"],["evt_home_03","大厅曝光","P1","游戏客户端","待验收"]] },
+                "游戏服务端": { metrics: ["53","38","15","71.7%","6","1"], trend: [168,162,154,142,130,118,98,88], fails: [["evt_prop_06","道具购买","高优","游戏服务端","prop_id","道具链路主键校验","待修复"],["evt_energy_02","体力恢复","P1","游戏服务端","energy_after","体力字段校验","待回归"],["evt_event_08","活动结算","P1","游戏服务端","reward_id","活动奖励字段校验","待回归"],["evt_mail_10","奖励邮件发放","P1","游戏服务端","mail_batch_id","邮件批次字段校验","待修复"],["evt_prop_12","道具赠送","P1","游戏服务端","gift_prop_id","赠送字段校验","待修复"]], pending: [["evt_event_08","活动结算","高优","游戏服务端","待验收"],["evt_prop_12","道具赠送","P1","游戏服务端","待验收"],["evt_mail_10","奖励邮件发放","P1","游戏服务端","待验收"],["evt_energy_06","体力扣减","P1","游戏服务端","待验收"],["evt_prop_16","背包整理","P1","游戏服务端","待验收"]] }
+              }
+            }
+          }
+        }
+      };
+
+      let currentProject = "花花世界";
+      let currentVersion = "2026S2-五月验收";
+      let currentView = "全部";
+
+      const metricIds = ["metricTotal", "metricAccepted", "metricPending", "metricPassRate", "metricHighPriority", "metricHighPending"];
+      const updateTitleIds = ["updateTitle1", "updateTitle2", "updateTitle3"];
+      const updateDescIds = ["updateDesc1", "updateDesc2", "updateDesc3"];
+
+      function getCurrentScope() {
+        return overviewData[currentProject].versions[currentVersion];
+      }
+
+      function toggleMenu(type) {
+        document.querySelectorAll(".top-action, .top-profile").forEach((node) => {
+          const isTarget = node.querySelector(`[data-action-trigger="${type}"]`);
+          node.classList.toggle("open", !!isTarget && !node.classList.contains("open"));
+          const trigger = node.querySelector("[data-action-trigger]");
+          if (trigger) trigger.setAttribute("aria-expanded", node.classList.contains("open") ? "true" : "false");
+        });
+      }
+
+      function closeMenus() {
+        document.querySelectorAll(".top-action, .top-profile").forEach((node) => {
+          node.classList.remove("open");
+          const trigger = node.querySelector("[data-action-trigger]");
+          if (trigger) trigger.setAttribute("aria-expanded", "false");
+        });
+      }
+
+      function renderVersionMenu() {
+        const menu = document.querySelector('[data-action-menu="version"]');
+        const versions = Object.keys(overviewData[currentProject].versions);
+        menu.innerHTML = versions
+          .map((version) => `<button class="top-action-option${version === currentVersion ? " active" : ""}" type="button" data-version="${version}">${version}</button>`)
+          .join("");
+      }
+
+      function renderGoal(goal) {
+        document.getElementById("goalVersion").textContent = goal.version;
+        document.getElementById("goalStatus").textContent = goal.status;
+        document.getElementById("goalStart").textContent = goal.start;
+        document.getElementById("goalEnd").textContent = goal.end;
+        document.getElementById("goalTarget").textContent = goal.target;
+        document.getElementById("goalScope").textContent = goal.scope;
+        document.getElementById("goalGate").textContent = goal.gate;
+      }
+
+      function renderMetrics(metrics) {
+        metricIds.forEach((id, index) => {
+          document.getElementById(id).textContent = metrics[index];
+        });
+      }
+
+      function renderUpdates(updates) {
+        updateTitleIds.forEach((id, index) => {
+          document.getElementById(id).textContent = updates[index][0];
+          document.getElementById(updateDescIds[index]).textContent = updates[index][1];
+        });
+      }
+
+      function renderTrend(points) {
+        const xPoints = [60, 190, 320, 450, 580, 710, 840, 920];
+        const linePoints = points.map((point, index) => `${xPoints[index]},${point}`).join(" ");
+        document.getElementById("trendLine").setAttribute("points", linePoints);
+        document.getElementById("trendArea").setAttribute("points", `${linePoints} 920,180 60,180`);
+        document.getElementById("trendLastPoint").setAttribute("cx", "920");
+        document.getElementById("trendLastPoint").setAttribute("cy", `${points[points.length - 1]}`);
+      }
+
+      function setBadge(id, text, status) {
+        const node = document.getElementById(id);
+        node.textContent = text;
+        node.className = `badge ${status}`;
+      }
+
+      function renderFails(fails) {
+        fails.forEach((row, index) => {
+          const no = index + 1;
+          document.getElementById(`failEventId${no}`).textContent = row[0];
+          document.getElementById(`failEventName${no}`).textContent = row[1];
+          setBadge(`failPriority${no}`, row[2], row[2] === "高优" ? "p0" : "p1");
+          document.getElementById(`failSource${no}`).textContent = row[3];
+          document.getElementById(`failParam${no}`).textContent = row[4];
+          document.getElementById(`failRule${no}`).textContent = row[5];
+          setBadge(`failStatus${no}`, row[6], row[6] === "待回归" ? "wait-check" : "wait-fix");
+        });
+      }
+
+      function renderPending(pending) {
+        pending.forEach((row, index) => {
+          const no = index + 1;
+          document.getElementById(`pendingEventId${no}`).textContent = row[0];
+          document.getElementById(`pendingEventName${no}`).textContent = row[1];
+          setBadge(`pendingPriority${no}`, row[2], row[2] === "高优" ? "p0" : "p1");
+          document.getElementById(`pendingSource${no}`).textContent = row[3];
+          setBadge(`pendingStatus${no}`, row[4], "queued");
+        });
+      }
+
+      function renderView() {
+        const scope = getCurrentScope();
+        const viewData = scope.views[currentView];
+        document.getElementById("projectValue").textContent = currentProject;
+        document.getElementById("versionValue").textContent = currentVersion;
+        document.getElementById("viewValue").textContent = currentView;
+        renderGoal(scope.goal);
+        renderMetrics(viewData.metrics);
+        renderUpdates(scope.updates);
+        renderTrend(viewData.trend);
+        renderFails(viewData.fails);
+        renderPending(viewData.pending);
+        document.querySelectorAll("[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === currentView));
+        document.querySelectorAll("[data-project]").forEach((button) => button.classList.toggle("active", button.dataset.project === currentProject));
+        document.querySelectorAll("[data-version]").forEach((button) => button.classList.toggle("active", button.dataset.version === currentVersion));
+      }
+
+      document.querySelectorAll("[data-action-trigger]").forEach((trigger) => {
+        trigger.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const type = trigger.dataset.actionTrigger;
+          const host = trigger.closest(".top-action, .top-profile");
+          const isOpen = host.classList.contains("open");
+          closeMenus();
+          if (!isOpen) {
+            host.classList.add("open");
+            trigger.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        const projectButton = event.target.closest("[data-project]");
+        const versionButton = event.target.closest("[data-version]");
+        const viewButton = event.target.closest("[data-view]");
+        const navButton = event.target.closest("[data-nav]");
+
+        if (projectButton) {
+          currentProject = projectButton.dataset.project;
+          currentVersion = Object.keys(overviewData[currentProject].versions)[0];
+          renderVersionMenu();
+          renderView();
+          closeMenus();
+          return;
+        }
+
+        if (versionButton) {
+          currentVersion = versionButton.dataset.version;
+          renderView();
+          closeMenus();
+          return;
+        }
+
+        if (viewButton) {
+          currentView = viewButton.dataset.view;
+          renderView();
+          closeMenus();
+          return;
+        }
+
+        if (navButton) {
+          const currentNav = navButton.dataset.nav;
+          document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.textContent.includes(currentNav)));
+          closeMenus();
+          return;
+        }
+
+        if (!event.target.closest(".top-action, .top-profile")) {
+          closeMenus();
+        }
+      });
+
+      renderVersionMenu();
+      renderView();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "id": "req-ecc63ebe-a6be-4890-b065-28e5238d038d",
+  "subprojectId": null,
+  "title": "Review governed output: Page-by-page image2 prompt pack",
+  "description": "Page-by-page image2 prompt pack generated from Product Chief report product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905; image generation was not completed.\n\nProduct Chief report: product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905\nOutput id: product-output-e0bfb6ac-9f61-4b95-8781-db10e461b1a5\nOutput type: design-image2-prompt-pack\n\n请直接给一个 AI 埋点平台出首页、需求中心、事件字典三页的设计图，后续可能还会做前端，但现在先要出图。",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "product-output",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "product-chief-report",
+      "entityId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+      "path": "docs/product-office/outputs/product-output-e0bfb6ac-9f61-4b95-8781-db10e461b1a5.md",
+      "label": "design-image2-prompt-pack"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-efe40cca-aa47-47f9-bb03-8f5e025ff04f"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/product-office/outputs/product-output-e0bfb6ac-9f61-4b95-8781-db10e461b1a5.md",
+      "docs/memory/product-chief/outputs/product-output-e0bfb6ac-9f61-4b95-8781-db10e461b1a5.json",
+      "docs/memory/product-chief/reports/product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905.json",
+      "docs/product-office/specialist-tasks/product-chief-task-3631b67d-b75c-4ccd-b2fb-2115321d4633.md",
+      "docs/product-office/specialist-tasks/product-chief-task-2cbba484-2d1d-49d8-9c61-ed3cc29b7a6c.md",
+      "docs/memory/product-chief/specialist-tasks/product-chief-task-3631b67d-b75c-4ccd-b2fb-2115321d4633.json",
+      "docs/memory/product-chief/specialist-tasks/product-chief-task-2cbba484-2d1d-49d8-9c61-ed3cc29b7a6c.json",
+      "docs/product-office/multi-agent-reviews/product-chief-review-497d61c3-c2ac-4bbd-b1b5-8f3051d1999b.md",
+      "docs/memory/product-chief/multi-agent-reviews/product-chief-review-497d61c3-c2ac-4bbd-b1b5-8f3051d1999b.json"
+    ]
+  },
+  "createdAt": "2026-04-28T01:43:01.882Z",
+  "updatedAt": "2026-04-28T01:43:01.890Z",
+  "metadata": {
+    "source": "product-chief-output",
+    "productChiefReportId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+    "productChiefOutputId": "product-output-e0bfb6ac-9f61-4b95-8781-db10e461b1a5",
+    "outputType": "design-image2-prompt-pack"
+  }
+}

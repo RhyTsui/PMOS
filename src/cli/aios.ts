@@ -13,11 +13,13 @@ import { SubprojectRegistry } from '../core/subprojectRegistry.js';
 import { ProductAgentService } from '../core/productAgentService.js';
 import { ProductChiefService } from '../core/productChiefService.js';
 import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
+import { DocumentGovernanceService } from '../core/documentGovernanceService.js';
 import { McpContextSyncService, type CollaborationMode, type ToolIdentity } from '../core/mcpContextSyncService.js';
 import { SkillRegistry } from '../core/skillRegistry.js';
+import { SubprojectPrepService } from '../core/subprojectPrepService.js';
 import { CodexLocalStateService } from '../core/codexLocalStateService.js';
+import { RequirementExcelPoolService } from '../core/requirementExcelPoolService.js';
 import { LlmRouter } from '../llm_router/index.js';
-import { syncActiveModelToSettings } from '../llm_router/claudeSettingsSync.js';
 import type { ProviderCapability } from '../shared/schemas.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
@@ -31,9 +33,12 @@ const reviewCommittee = new ReviewCommittee();
 const subprojectRegistry = new SubprojectRegistry(store);
 const productAgentService = new ProductAgentService(store);
 const skillRegistry = new SkillRegistry(store);
+const subprojectPrepService = new SubprojectPrepService(store, skillRegistry, subprojectRegistry);
 const codexLocalStateService = new CodexLocalStateService(store, skillRegistry);
 const productChiefService = new ProductChiefService(store, memoryService, productAgentService, skillRegistry);
 const documentationNormalizationService = new DocumentationNormalizationService(store, memoryService);
+const documentGovernanceService = new DocumentGovernanceService(store);
+const requirementExcelPoolService = new RequirementExcelPoolService(store, memoryService);
 const mcpContextSync = new McpContextSyncService(rootDir);
 const llmRouter = new LlmRouter(store);
 
@@ -97,8 +102,10 @@ async function buildReviewForRun(runId: string, subprojectId?: string | null) {
   return reviewCommittee.buildReportForRun({
     runId,
     artifactCount,
+    activeStageId: run.currentStageId,
     openSourceEvaluationPresent: openSourceEvidence.present,
     openSourceEvidencePaths: openSourceEvidence.evidencePaths,
+    artifacts: artifacts.map((artifact) => ({ path: artifact.path, content: artifact.content })),
   });
 }
 
@@ -122,7 +129,7 @@ function printUsage() {
     '  npm run cli -- run metrics [runId] [--subproject <id>]',
     '  npm run cli -- provider list',
     '  npm run cli -- provider check [name]',
-    '  npm run cli -- provider use <name> [--tool claude|codex] [--subproject <id>]',
+    '  npm run cli -- provider use <name> [--tool codex|other] [--subproject <id>]',
     '  npm run cli -- provider routing [text|code|review|text-multimodal] [--subproject <id>]',
     '  npm run cli -- product-agent list [--subproject <id>]',
     '  npm run cli -- product-agent blueprints',
@@ -132,6 +139,9 @@ function printUsage() {
     '  npm run cli -- product-agent show <id> [--subproject <id>]',
     '  npm run cli -- skill list [--subproject <id>]',
     '  npm run cli -- skill find <brief> [stageId] [outputType] [--subproject <id>]',
+    '  npm run cli -- subproject-prep scan [--subproject <id>]',
+    '  npm run cli -- subproject-prep check [--subproject <id>]',
+    '  npm run cli -- subproject-prep status [--subproject <id>]',
     '  npm run cli -- codex-state status [--subproject <id>]',
     '  npm run cli -- codex-state write [relativePath] [--subproject <id>]',
     '  npm run cli -- codex-state sync [relativePath] [--subproject <id>]',
@@ -140,21 +150,29 @@ function printUsage() {
     '  npm run cli -- product-chief reports [--subproject <id>]',
     '  npm run cli -- product-chief outputs [--subproject <id>]',
     '  npm run cli -- documentation normalize [sourceRoot] [--subproject <id>]',
+    '  npm run cli -- documentation normalize-paths <path1[,path2...]> [--subproject <id>]',
+    '  npm run cli -- documentation ingest-inbox-updates [sourceRoot] [--subproject <id>]',
     '  npm run cli -- documentation runs [--subproject <id>]',
+    '  npm run cli -- documentation truth-source-list [--subproject <id>]',
+    '  npm run cli -- documentation truth-source-upsert <topicKey> <path> [status] [title] [--subproject <id>]',
+    '  npm run cli -- documentation truth-source-audit [--subproject <id>]',
+    '  npm run cli -- requirement-pool export [outputPath] [--subproject <id>]',
+    '  npm run cli -- requirement-pool import <inputPath> [--subproject <id>]',
+    '  npm run cli -- requirement-pool path [--subproject <id>]',
     '  npm run cli -- review show [runId] [--subproject <id>]',
     '  npm run cli -- memory show [runId] [--subproject <id>]',
-    '  npm run cli -- mcp-context status [--tool claude|codex]',
+    '  npm run cli -- mcp-context status [--tool codex|other]',
     '  npm run cli -- mcp-context tasks [--status pending|in_progress|completed|blocked]',
-    '  npm run cli -- mcp-context task-start <label> [--tool claude|codex]',
-    '  npm run cli -- mcp-context task-complete <taskId> [--tool claude|codex]',
-    '  npm run cli -- mcp-context task-note <taskId> <note> [--tool claude|codex]',
+    '  npm run cli -- mcp-context task-start <label> [--tool codex|other]',
+    '  npm run cli -- mcp-context task-complete <taskId> [--tool codex|other]',
+    '  npm run cli -- mcp-context task-note <taskId> <note> [--tool codex|other]',
     '  npm run cli -- mcp-context events [--count <n>]',
-    '  npm run cli -- mcp-context checkpoint <label> [--tool claude|codex]',
+    '  npm run cli -- mcp-context checkpoint <label> [--tool codex|other]',
     '  npm run cli -- mcp-context mode',
-    '  npm run cli -- mcp-context mode-set <default|plan|deep|do> [label] [--tool claude|codex]',
+    '  npm run cli -- mcp-context mode-set <default|plan|deep|do> [label] [--tool codex|other]',
     '  npm run cli -- mcp-context mode-history',
-    '  npm run cli -- mcp-context digest-day [YYYY-MM-DD] [--tool claude|codex]',
-    '  npm run cli -- mcp-context repair [--tool claude|codex]',
+    '  npm run cli -- mcp-context digest-day [YYYY-MM-DD] [--tool codex|other]',
+    '  npm run cli -- mcp-context repair [--tool codex|other]',
   ].join('\n'));
 }
 
@@ -174,7 +192,7 @@ async function runInit(subprojectId?: string | null) {
 
 async function runAdvance(runId?: string, subprojectId?: string | null) {
   const targetRun = runId ? await orchestratorRuntime.loadRun(runId, subprojectId) : await ensureCurrentRun(subprojectId);
-  const review = targetRun.currentStageId === 'review-metrics-telemetry' ? await buildReviewForRun(targetRun.id, targetRun.subprojectId) : null;
+  const review = targetRun.currentStageId === 'frontend-backend-integration' ? await buildReviewForRun(targetRun.id, targetRun.subprojectId) : null;
   const updated = await orchestratorRuntime.advanceRun(targetRun.id, { reviewReport: review });
   console.log(JSON.stringify(updated, null, 2));
 }
@@ -184,7 +202,7 @@ async function runUntilBlocked(runId?: string, subprojectId?: string | null) {
   let run = targetRun;
 
   while (run.status === 'running' && run.currentStageId) {
-    const review = run.currentStageId === 'review-metrics-telemetry' ? await buildReviewForRun(run.id, run.subprojectId) : null;
+    const review = run.currentStageId === 'frontend-backend-integration' ? await buildReviewForRun(run.id, run.subprojectId) : null;
     run = await orchestratorRuntime.advanceRun(run.id, { reviewReport: review });
   }
 
@@ -387,9 +405,6 @@ async function providerUse(name?: string, subprojectId?: string | null, tool?: s
   }
 
   const toolIdentity = parseToolIdentity(tool ?? undefined);
-  if (toolIdentity === 'claude') {
-    await syncActiveModelToSettings(provider);
-  }
 
   console.log(
     JSON.stringify(
@@ -398,10 +413,7 @@ async function providerUse(name?: string, subprojectId?: string | null, tool?: s
         subprojectId: subprojectId ?? null,
         toolIdentity,
         defaultProvider: (await providerRegistry.loadConfig(subprojectId)).defaultProvider,
-        note:
-          toolIdentity === 'claude'
-            ? 'Claude settings sync was requested. Existing interactive sessions may need restart or an in-tool model switch.'
-            : 'PMAIOS runtime default was updated. Native Codex login sessions are not intercepted by this command.',
+        note: 'PMAIOS runtime default was updated. Native Codex login sessions are not intercepted by this command.',
       },
       null,
       2,
@@ -505,6 +517,18 @@ async function skillFind(query?: string, stageId?: string, outputType?: string, 
   );
 }
 
+async function subprojectPrepScan(subprojectId?: string | null) {
+  console.log(JSON.stringify(await subprojectPrepService.scan(subprojectId), null, 2));
+}
+
+async function subprojectPrepCheck(subprojectId?: string | null) {
+  console.log(JSON.stringify(await subprojectPrepService.check(subprojectId), null, 2));
+}
+
+async function subprojectPrepStatus(subprojectId?: string | null) {
+  console.log(JSON.stringify(await subprojectPrepService.status(subprojectId), null, 2));
+}
+
 async function codexStateStatus(subprojectId?: string | null) {
   console.log(JSON.stringify(await codexLocalStateService.inspect(subprojectId), null, 2));
 }
@@ -599,8 +623,91 @@ async function documentationNormalize(sourceRoot?: string, subprojectId?: string
   console.log(JSON.stringify(run, null, 2));
 }
 
+async function documentationNormalizePaths(rawPaths?: string, subprojectId?: string | null) {
+  const sourcePaths = (rawPaths ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (sourcePaths.length === 0) {
+    throw new Error('documentation normalize-paths requires at least one source path.');
+  }
+
+  const run = await documentationNormalizationService.normalize({
+    subprojectId,
+    sourcePaths,
+  });
+  console.log(JSON.stringify(run, null, 2));
+}
+
+async function documentationIngestInboxUpdates(sourceRoot?: string, subprojectId?: string | null) {
+  const run = await documentationNormalizationService.ingestInboxUpdates({
+    subprojectId,
+    sourceRoot: sourceRoot?.trim() || null,
+  });
+  console.log(JSON.stringify(run, null, 2));
+}
+
 async function documentationRuns(subprojectId?: string | null) {
   console.log(JSON.stringify(await documentationNormalizationService.listRuns(subprojectId), null, 2));
+}
+
+async function documentationTruthSourceList(subprojectId?: string | null) {
+  console.log(JSON.stringify(await documentGovernanceService.listEntries(subprojectId), null, 2));
+}
+
+async function documentationTruthSourceUpsert(
+  topicKey?: string,
+  documentPath?: string,
+  status?: string,
+  title?: string,
+  subprojectId?: string | null,
+) {
+  if (!topicKey?.trim()) {
+    throw new Error('documentation truth-source-upsert requires topicKey.');
+  }
+  if (!documentPath?.trim()) {
+    throw new Error('documentation truth-source-upsert requires path.');
+  }
+  const allowedStatuses = ['draft', 'active', 'superseded', 'archived', 'deleted'];
+  if (status && !allowedStatuses.includes(status)) {
+    throw new Error(`documentation truth-source-upsert status must be one of: ${allowedStatuses.join(', ')}`);
+  }
+  const entry = await documentGovernanceService.upsertEntry({
+    topicKey,
+    path: documentPath,
+    status: (status as 'draft' | 'active' | 'superseded' | 'archived' | 'deleted' | undefined) ?? 'draft',
+    title: title?.trim() || documentPath,
+    subprojectId,
+  });
+  console.log(JSON.stringify(entry, null, 2));
+}
+
+async function documentationTruthSourceAudit(subprojectId?: string | null) {
+  console.log(JSON.stringify(await documentGovernanceService.audit(subprojectId), null, 2));
+}
+
+async function requirementPoolExport(outputPath?: string, subprojectId?: string | null) {
+  console.log(JSON.stringify(await requirementExcelPoolService.exportWorkbook(outputPath, subprojectId), null, 2));
+}
+
+async function requirementPoolImport(inputPath?: string, subprojectId?: string | null) {
+  if (!inputPath) {
+    throw new Error('requirement-pool import requires an input workbook path.');
+  }
+  console.log(JSON.stringify(await requirementExcelPoolService.importWorkbook(inputPath, subprojectId), null, 2));
+}
+
+async function requirementPoolPath(subprojectId?: string | null) {
+  console.log(
+    JSON.stringify(
+      {
+        subprojectId: subprojectId ?? null,
+        defaultPath: requirementExcelPoolService.getDefaultWorkbookPath(subprojectId),
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 async function subprojectList() {
@@ -1067,6 +1174,21 @@ async function main() {
     return;
   }
 
+  if (scope === 'subproject-prep' && action === 'scan') {
+    await subprojectPrepScan(subprojectId);
+    return;
+  }
+
+  if (scope === 'subproject-prep' && action === 'check') {
+    await subprojectPrepCheck(subprojectId);
+    return;
+  }
+
+  if (scope === 'subproject-prep' && action === 'status') {
+    await subprojectPrepStatus(subprojectId);
+    return;
+  }
+
   if (scope === 'codex-state' && action === 'status') {
     await codexStateStatus(subprojectId);
     return;
@@ -1107,8 +1229,48 @@ async function main() {
     return;
   }
 
+  if (scope === 'documentation' && action === 'normalize-paths') {
+    await documentationNormalizePaths(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'ingest-inbox-updates') {
+    await documentationIngestInboxUpdates(target, subprojectId);
+    return;
+  }
+
   if (scope === 'documentation' && action === 'runs') {
     await documentationRuns(subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'truth-source-list') {
+    await documentationTruthSourceList(subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'truth-source-upsert') {
+    await documentationTruthSourceUpsert(target, extraName, extraDescription, positional[5], subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'truth-source-audit') {
+    await documentationTruthSourceAudit(subprojectId);
+    return;
+  }
+
+  if (scope === 'requirement-pool' && action === 'export') {
+    await requirementPoolExport(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'requirement-pool' && action === 'import') {
+    await requirementPoolImport(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'requirement-pool' && action === 'path') {
+    await requirementPoolPath(subprojectId);
     return;
   }
 

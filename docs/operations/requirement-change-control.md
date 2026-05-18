@@ -2,7 +2,7 @@
 
 ## Purpose
 
-这个流程用于防止 PMAIOS 把新需求混进当前版本，却不更新计划。
+这个流程用于防止 PMAIOS 把新需求混进当前版本，却不更新规划、需求治理、交付链位置和验收口径。
 
 它适用于所有新的产品、工程、工具、文档和环境类需求。
 
@@ -10,16 +10,15 @@
 
 | Type | Meaning | Default Handling |
 | --- | --- | --- |
-| `scope-add` | 新能力或新特性 | 新增 requirement，判断优先级，并决定进当前版还是下一版。 |
-| `scope-change` | 改变已接受行为或验收标准 | 在实施前先更新 requirement 和 version plan。 |
-| `defect` | 当前已接受能力损坏 | 如果阻塞验证则立即修；同轮补齐记录。 |
-| `environment` | 本机、Docker、包、CI、凭证问题 | 尽早记录影响和所需 owner 动作。 |
-| `documentation` | 计划、runbook、状态、模板更新 | 文档先于或伴随实现更新。 |
+| `scope-add` | 新能力或新特性 | 新增 requirement，判断优先级，并决定进当前版本还是下一版本 |
+| `scope-change` | 改变已接受行为或验收标准 | 在实施前先更新 requirement 和 version plan |
+| `defect` | 当前已接受能力损坏 | 如果阻塞验证则立即修；同轮补齐记录 |
+| `environment` | 本机、Docker、包、CI、凭证问题 | 尽早记录影响和所需 owner 动作 |
+| `documentation` | 计划、runbook、状态、模板更新 | 文档先于或伴随实现更新 |
 
 ## Required Fields
 
 每个变更至少记录：
-
 - request summary
 - requirement layer:
   - `user-requirement`
@@ -35,89 +34,99 @@
 ## Priority Rules
 
 - `P0`：阻塞本地运行、验证、当前版本验收或核心产品闭环
-- `P1`：显著提升当前版本可追踪性、操作者工作流或受治理产品输出
+- `P1`：显著提升当前版本可追溯性、操作面流程或受治理产品输出
 - `P2`：加固、外部集成、环境扩展或未来版本杠杆
 
 ## Current Version Handling
 
-当前版本：`v0.4`。
+当前活动版本：`v0.7`
 
-新工作只有在以下条件之一成立时才能进入 `v0.4`：
-
-- 它是 `v0.4` 验收所必需
+新工作只有在以下条件之一成立时，才能进入当前版本：
+- 它是 `v0.7` 验收所必需
 - 它修复了验证阻塞
-- 它澄清了版本跟踪或日常汇报
-- 它被计划明确接受为当前版本变更
+- 它补齐了交付链、真源或运行时治理中的关键缺口
+- 它被规划明确接受为当前版本变更
 
 否则应归入未来版本候选。
 
 ## Operating Rule
 
 当出现新需求时：
-
 1. 先识别这句话是 `user requirement`、`product requirement`，还是两者都有。
 2. 更新 `docs/operations/current-version-progress.md`。
 3. 如果版本范围变化，更新 `docs/operations/pmaios-version-plan.md`。
 4. 如果开始实施，尽量在运行态系统里创建或更新 requirement/version trace。
 5. 完成后记录验证证据。
-6. 如果这个需求是“通过收敛解决的”，必须显式回查原始用户需求是否真的解决，而不是默认新抽象就够了。
-7. 如果这次工作完成的是产品需求，必须用用户语言回给用户，并走查原始用户场景，再决定是否闭环。
+6. 如果这个需求是“通过抽象解决的”，必须显式回查原始用户需求是否真的被解决，而不是默认新抽象就够了。
+7. 如果这次工作完成的是产品需求，必须用用户语言回给用户，并回查原始用户场景，再决定是否闭环。
 
 ## Progress Tracking Rule
 
 进度同步不应默认只报：
-
 - “我完成了什么”
 
 而应默认报：
-
 - 当前长目标清单的分母
 - 本轮真正推进了多少项或子项
-- 哪些已经 solved / promoted / parked / still missing
+- 哪些已经 `solved / promoted / parked / still missing`
 
 推荐结构：
-
 - target denominator: total tracked items
 - solved numerator: fully solved items
 - promoted numerator: items formally promoted into plan/backlog
 - parked numerator: items intentionally deferred with reason
 - missing numerator: items identified but not yet properly placed
 
-这条规则尤其适用于用户问这些问题时：
-
-- plan progress
-- today progress
-- what remains
-- whether something has been solved by the latest convergence
-
 ## Closure Rule
 
-一个产品需求不会因为以下任一项发生就自动算 fully closed：
-
+一个产品需求不会因为以下任一项发生就自动算 `fully closed`：
 - 定义了一个机制
 - 加了一条计划项
 - 写了一份文档
 
 只有满足以下条件才算闭环：
-
 1. 产品侧需求已经实现或清晰推进
 2. 结果已用用户语言回复给用户
-3. 原始用户场景已被走查
+3. 原始用户场景已被回查
 4. 结论被标记为 `solved / partial / unsolved`
 
-## Research And Architecture Re-entry Rules
+## Re-entry Rules For The Built-In Delivery Chain
 
-当变更引入以下内容时，必须先回到 Research Analysis，再进入 solution design：
-
+当变更引入以下内容时，必须先回到 `调研文档`，再继续后续交付链：
 - 开源 base 的选择或替换
-- 新竞争路线比较
+- 新竞品路线比较
 - 新的平台级能力假设
 - 共享模块 ownership 不明确
 
-当变更影响以下内容时，必须先回到 Architecture Confirmation，再进入 PRD 或 prototype：
+当变更影响以下内容时，必须先回到 `规划文档` 或 `需求文档`，再继续下游：
+- 范围、优先级、里程碑顺序
+- 原始用户场景或验收标准
+- 需求池接收/拒绝判断
 
-- platform vs subproject scope
-- permissions、prompt、knowledge、MCP、evaluation、gateway、release capability 的 ownership
-- 一级菜单或主要模块职责
+当变更影响以下内容时，必须先回到 `功能文档`，再进入页面、数据或接口阶段：
+- 模块责任
+- 主流程
+- 状态机
+- 前后端边界
+- 核心对象模型
 
-触发任一条时，必须用 decision change template 记录，并在 gate clear 之前阻断后续产品定义工作。
+当变更影响以下内容时，必须先回到 `前端页面（UI/UX版）`、`数据表` 或 `后端接口` 对应阶段再联调：
+- 页面状态与交互语义
+- 数据对象、字段、索引
+- API 契约、错误码、权限边界
+
+## Semantic Front-Loading Rule
+
+不得在页面完成后才第一次思考数据表和后端接口。
+
+正确路径是：
+
+`先抽对象 -> 再做交互与状态设计 -> 再正式定表 -> 再正式定接口`
+
+对应要求：
+- `功能文档`：先定义核心对象模型
+- 页面 / UI 阶段：先暴露关键数据状态和交互状态
+- `数据表`：正式定表
+- `后端接口`：正式定契约
+
+触发任一条时，必须记录 change decision，并在 gate clear 之前阻断后续正式交付输出。

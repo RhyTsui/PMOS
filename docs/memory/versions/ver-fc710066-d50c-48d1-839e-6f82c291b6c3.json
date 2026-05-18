@@ -1,0 +1,46 @@
+{
+  "id": "ver-fc710066-d50c-48d1-839e-6f82c291b6c3",
+  "subprojectId": null,
+  "entityType": "document-normalization",
+  "entityId": "docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4",
+  "changeType": "normalize",
+  "summary": "Normalized historical document source docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-7214892e-7a34-455b-80e4-9a407daf5412"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Created governed normalization artifact docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md and background digest docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Normalization and background knowledge assets are ready for review before moving source material."
+  },
+  "createdAt": "2026-05-09T05:50:38.607Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/context/weekly/周报-产品组-徐韵-0509.xlsx",
+    "documentType": "product-intelligence",
+    "projectHints": [
+      "ad",
+      "tracking-acceptance",
+      "testing-platform",
+      "knowledge-base",
+      "platform"
+    ],
+    "backgroundContextPath": "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+    "notionPageId": null,
+    "notionPageUrl": null
+  }
+}

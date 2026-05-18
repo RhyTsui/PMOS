@@ -1,7 +1,7 @@
 """
 PMAIOS v0.3.3 Worker Agent
 
-执行单元：调用 Claude API 执行任务
+执行单元：调用 Anthropic API 执行任务
 """
 import anthropic
 from typing import Optional, Dict, Any
@@ -25,14 +25,14 @@ class WorkerResult:
 
 
 class WorkerAgent:
-    """Worker Agent - Claude 执行单元"""
+    """Worker Agent - Anthropic 执行单元"""
 
     def __init__(self, worker_id: int, config: Optional[Config] = None):
         self.worker_id = worker_id
         self.config = config or Config.from_env()
-        self.client = anthropic.Anthropic(api_key=self.config.claude_api_key)
-        self.model = self.config.claude_model
-        self.max_tokens = self.config.claude_max_tokens
+        self.client = anthropic.Anthropic(api_key=self.config.anthropic_api_key)
+        self.model = self.config.anthropic_model
+        self.max_tokens = self.config.anthropic_max_tokens
 
     def run(self, task_content: str, system_prompt: Optional[str] = None) -> WorkerResult:
         """执行任务"""
@@ -40,7 +40,7 @@ class WorkerAgent:
             # 构建 prompt
             prompt = self._build_prompt(task_content)
 
-            # 调用 Claude API
+            # 调用 Anthropic API
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
@@ -101,8 +101,8 @@ class PlannerAgent:
 
     def __init__(self, config: Optional[Config] = None):
         self.config = config or Config.from_env()
-        self.client = anthropic.Anthropic(api_key=self.config.claude_api_key)
-        self.model = self.config.claude_model
+        self.client = anthropic.Anthropic(api_key=self.config.anthropic_api_key)
+        self.model = self.config.anthropic_model
 
     def create_tasks(self, state: Dict[str, Any]) -> list:
         """根据状态生成并行任务列表"""
@@ -150,8 +150,8 @@ class ReviewerAgent:
 
     def __init__(self, config: Optional[Config] = None):
         self.config = config or Config.from_env()
-        self.client = anthropic.Anthropic(api_key=self.config.claude_api_key)
-        self.model = self.config.claude_model
+        self.client = anthropic.Anthropic(api_key=self.config.anthropic_api_key)
+        self.model = self.config.anthropic_model
 
     def review(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """评审状态"""
@@ -194,8 +194,8 @@ class SynthesizerAgent:
 
     def __init__(self, config: Optional[Config] = None):
         self.config = config or Config.from_env()
-        self.client = anthropic.Anthropic(api_key=self.config.claude_api_key)
-        self.model = self.config.claude_model
+        self.client = anthropic.Anthropic(api_key=self.config.anthropic_api_key)
+        self.model = self.config.anthropic_model
 
     def merge(self, results: list, state: Dict[str, Any]) -> Dict[str, Any]:
         """合并多个结果"""

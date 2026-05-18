@@ -1,0 +1,132 @@
+<svg width="1600" height="980" viewBox="0 0 1600 980" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="980" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#EEF4FA"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="64" y1="40" x2="1536" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 30px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #FFFFFF; }
+      .subtitle { font: 500 14px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #CBD5E1; }
+      .section { font: 700 18px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #0F172A; }
+      .cardTitle { font: 700 16px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #0F172A; }
+      .body { font: 500 13px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #475569; }
+      .small { font: 500 11px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #64748B; }
+      .chip { font: 600 12px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #1D4ED8; }
+      .metricLabel { font: 600 12px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #BFDBFE; }
+      .metric { font: 700 24px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #FFFFFF; }
+      .flow { font: 700 14px 'Segoe UI', 'Microsoft YaHei', sans-serif; fill: #E2E8F0; }
+      .link { stroke: #94A3B8; stroke-width: 2; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="980" rx="28" fill="url(#bg)"/>
+
+  <rect x="44" y="36" width="1512" height="176" rx="28" fill="url(#hero)"/>
+  <text x="80" y="92" class="title">AI 埋点平台 v2 概念图</text>
+  <text x="80" y="124" class="subtitle">企业级数据平台风格 / 角色作用域优先 / 中高信息密度 / 7 模块结构 / AI Coding 并入研发协同</text>
+
+  <rect x="80" y="150" width="186" height="38" rx="19" fill="#DBEAFE"/>
+  <text x="109" y="174" class="chip">默认只看自己相关范围</text>
+  <rect x="282" y="150" width="196" height="38" rx="19" fill="#DBEAFE"/>
+  <text x="308" y="174" class="chip">概览中密 / 列表中高密</text>
+  <rect x="494" y="150" width="212" height="38" rx="19" fill="#DBEAFE"/>
+  <text x="520" y="174" class="chip">日志 / 规则 / 报告紧凑优先</text>
+
+  <text x="1112" y="86" class="metricLabel">正式模块</text>
+  <text x="1112" y="120" class="metric">7</text>
+  <text x="1248" y="86" class="metricLabel">主要角色</text>
+  <text x="1248" y="120" class="metric">7</text>
+  <text x="1372" y="86" class="metricLabel">首要规则</text>
+  <text x="1372" y="120" class="metric">Scope First</text>
+
+  <rect x="60" y="248" width="258" height="316" rx="24" fill="#FFFFFF" stroke="#D9E3EE"/>
+  <text x="88" y="284" class="section">角色作用域层</text>
+  <text x="88" y="314" class="body">角色作用域不是普通筛选，而是默认内容范围控制。系统先确定当前岗位，再决定需求、规则、日志、报告和 AI 协同默认看什么。</text>
+
+  <rect x="88" y="350" width="202" height="34" rx="17" fill="#EFF6FF"/>
+  <text x="112" y="372" class="chip">数据分析师 → 贯穿全部阶段</text>
+  <rect x="88" y="394" width="202" height="34" rx="17" fill="#EFF6FF"/>
+  <text x="104" y="416" class="chip">游戏客户端开发 → 客户端事件</text>
+  <rect x="88" y="438" width="202" height="34" rx="17" fill="#EFF6FF"/>
+  <text x="104" y="460" class="chip">游戏服务端开发 → 服务端事件</text>
+  <rect x="88" y="482" width="202" height="34" rx="17" fill="#EFF6FF"/>
+  <text x="114" y="504" class="chip">SDK 开发 / QA / 项目经理运营</text>
+  <text x="88" y="548" class="small">允许受控穿透：查看全部 / 上下游依赖 / 跨角色关联问题</text>
+
+  <rect x="336" y="248" width="1204" height="316" rx="24" fill="#FFFFFF" stroke="#D9E3EE"/>
+  <text x="364" y="284" class="section">7 模块结构</text>
+  <text x="364" y="314" class="body">模块围绕业务验收闭环组织，不围绕 AI 能力堆页面。AI 助手是跨模块能力入口，AI Coding 是其中面向研发协同的专门子能力。</text>
+
+  <rect x="364" y="350" width="148" height="146" rx="20" fill="#F8FAFC" stroke="#DCE6F1"/>
+  <text x="390" y="382" class="cardTitle">概览</text>
+  <text x="390" y="406" class="body">角色化 Dashboard</text>
+  <text x="390" y="428" class="small">版本 / 指标 / 动态 / 趋势 / 关键问题</text>
+
+  <rect x="532" y="350" width="148" height="146" rx="20" fill="#F8FAFC" stroke="#DCE6F1"/>
+  <text x="558" y="382" class="cardTitle">埋点需求</text>
+  <text x="558" y="406" class="body">事件 + 参数 + 差异</text>
+  <text x="558" y="428" class="small">导入导出 / 参数详情 / 最新版本</text>
+
+  <rect x="700" y="350" width="148" height="146" rx="20" fill="#F8FAFC" stroke="#DCE6F1"/>
+  <text x="726" y="382" class="cardTitle">数据字典</text>
+  <text x="726" y="406" class="body">主数据 / 中文映射</text>
+  <text x="726" y="428" class="small">版本号 / 更新时间 / 更新摘要</text>
+
+  <rect x="868" y="350" width="148" height="146" rx="20" fill="#F8FAFC" stroke="#DCE6F1"/>
+  <text x="894" y="382" class="cardTitle">校验规则</text>
+  <text x="894" y="406" class="body">AI 生成 + 人工修正</text>
+  <text x="894" y="428" class="small">规则版本 / 关联事件 / 批量暂停</text>
+
+  <rect x="1036" y="350" width="148" height="146" rx="20" fill="#F8FAFC" stroke="#DCE6F1"/>
+  <text x="1062" y="382" class="cardTitle">日志查询</text>
+  <text x="1062" y="406" class="body">中文搜索 / 核心参数优先</text>
+  <text x="1062" y="428" class="small">我的设备 / 我的账号 / 完整参数展开</text>
+
+  <rect x="1204" y="350" width="148" height="146" rx="20" fill="#F8FAFC" stroke="#DCE6F1"/>
+  <text x="1230" y="382" class="cardTitle">验收报告</text>
+  <text x="1230" y="406" class="body">发起批次 / 查看 / 分享</text>
+  <text x="1230" y="428" class="small">通过率 / 问题明细 / 图片输出</text>
+
+  <rect x="1372" y="334" width="140" height="178" rx="20" fill="#E0F2FE" stroke="#BAE6FD"/>
+  <text x="1398" y="368" class="cardTitle">AI 助手</text>
+  <text x="1398" y="392" class="body">问答 + 协同入口</text>
+  <text x="1398" y="414" class="small">默认继承当前角色与页面上下文</text>
+  <rect x="1388" y="432" width="108" height="30" rx="15" fill="#DBEAFE"/>
+  <text x="1412" y="452" class="chip">AI Coding</text>
+  <text x="1392" y="478" class="small">= 知识库 + MCP + 代码仓库</text>
+
+  <rect x="60" y="596" width="1480" height="162" rx="24" fill="#FFFFFF" stroke="#D9E3EE"/>
+  <text x="88" y="632" class="section">业务闭环</text>
+  <text x="88" y="660" class="body">这套平台的核心不是让 AI 看起来很多，而是让不同角色最快完成自己的验收链路，并在需要时有证据、有规则、有报告地协同。</text>
+
+  <rect x="88" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="132" y="718" class="flow">1. 录入版本需求</text>
+  <rect x="292" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="326" y="718" class="flow">2. 结构化事件参数</text>
+  <rect x="496" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="539" y="718" class="flow">3. 维护数据字典</text>
+  <rect x="700" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="742" y="718" class="flow">4. 生成执行规则</text>
+  <rect x="904" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="950" y="718" class="flow">5. 查询真实日志</text>
+  <rect x="1108" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="1150" y="718" class="flow">6. 发起验收批次</text>
+  <rect x="1312" y="692" width="172" height="42" rx="21" fill="#0F172A"/>
+  <text x="1362" y="718" class="flow">7. 输出验收报告</text>
+
+  <line x1="260" y1="713" x2="292" y2="713" class="link"/>
+  <line x1="464" y1="713" x2="496" y2="713" class="link"/>
+  <line x1="668" y1="713" x2="700" y2="713" class="link"/>
+  <line x1="872" y1="713" x2="904" y2="713" class="link"/>
+  <line x1="1076" y1="713" x2="1108" y2="713" class="link"/>
+  <line x1="1280" y1="713" x2="1312" y2="713" class="link"/>
+
+  <rect x="60" y="792" width="1480" height="140" rx="24" fill="#0F172A"/>
+  <text x="88" y="830" class="flow">设计基线</text>
+  <text x="88" y="862" class="subtitle">企业级数据平台 / 中高信息密度 / 表格优先 / 默认只显示角色相关范围 / 允许受控穿透全局</text>
+  <text x="88" y="892" class="subtitle">概览中密；列表中高密；规则、日志、报告表紧凑优先；AI Coding 作为研发协同能力，连接知识库、MCP 与代码仓库</text>
+</svg>

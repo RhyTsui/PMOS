@@ -1,0 +1,69 @@
+{
+  "kind": "frontend-delivery-regression",
+  "target": "subprojects/ad/frontend/index.html",
+  "iterations": 3,
+  "generatedAt": "2026-05-11T13:17:19.813Z",
+  "verdict": "pass",
+  "summary": {
+    "total": 3,
+    "passCount": 3,
+    "failCount": 0,
+    "averageTextLength": 2128,
+    "minimumSections": 18
+  },
+  "iterationReports": [
+    {
+      "iteration": 1,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-homepage-redesign-desktop/playwright-browser-verification-iter-1.png",
+      "metrics": {
+        "headings": 22,
+        "buttons": 13,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 18,
+        "links": 1,
+        "textLength": 2128
+      },
+      "navigationError": null
+    },
+    {
+      "iteration": 2,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-homepage-redesign-desktop/playwright-browser-verification-iter-2.png",
+      "metrics": {
+        "headings": 22,
+        "buttons": 13,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 18,
+        "links": 1,
+        "textLength": 2128
+      },
+      "navigationError": null
+    },
+    {
+      "iteration": 3,
+      "status": "ok",
+      "title": "小乔智投工作台",
+      "screenshotPath": "subprojects/ad/docs/review/frontend-delivery-regression-homepage-redesign-desktop/playwright-browser-verification-iter-3.png",
+      "metrics": {
+        "headings": 22,
+        "buttons": 13,
+        "inputs": 1,
+        "tables": 0,
+        "sections": 18,
+        "links": 1,
+        "textLength": 2128
+      },
+      "navigationError": null
+    }
+  ],
+  "rules": [
+    "All browser iterations must navigate successfully.",
+    "The page must expose enough visible text to qualify as a real business page.",
+    "The page must expose multiple structural sections instead of a blank shell."
+  ]
+}

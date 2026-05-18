@@ -1,0 +1,45 @@
+{
+  "id": "ver-fb5aa9dd-9a98-4f3e-98a4-165e38face85",
+  "subprojectId": null,
+  "entityType": "document-normalization",
+  "entityId": "docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4",
+  "changeType": "normalize",
+  "summary": "Normalized historical document source docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-324d3f15-53c3-4943-a6b3-df2434538ec5"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+    "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+    "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Created governed normalization artifact docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md and background digest docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Normalization and background knowledge assets are ready for review before moving source material."
+  },
+  "createdAt": "2026-05-09T05:50:38.587Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/sources/version-planning/连弩测试平台5月版本计划.md",
+    "documentType": "version-planning",
+    "projectHints": [
+      "ad",
+      "tracking-acceptance",
+      "testing-platform",
+      "platform"
+    ],
+    "backgroundContextPath": "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+    "notionPageId": null,
+    "notionPageUrl": null
+  }
+}

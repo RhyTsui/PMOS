@@ -3,7 +3,7 @@
 # Redis 客户端
 redis>=5.0.0
 
-# Anthropic Claude API
+# Anthropic Messages API
 anthropic>=0.18.0
 
 # LangGraph 工作流编排

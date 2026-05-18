@@ -202,6 +202,38 @@ export function getHermesPolicyReportPath(runId: string, subprojectId?: string |
   return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/hermes/reports/${runId}.json`);
 }
 
+export function getHermesResearchDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/hermes/research');
+}
+
+export function getHermesResearchPath(runId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/hermes/research/${runId}.json`);
+}
+
+export function getHermesPromotionDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/hermes/promotions');
+}
+
+export function getHermesPromotionPath(runId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/hermes/promotions/${runId}.json`);
+}
+
+export function getHermesWatchDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/hermes/watch');
+}
+
+export function getHermesWatchPath(runId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/hermes/watch/${runId}.json`);
+}
+
+export function getOutboxEnvelopeDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/outbox/envelopes');
+}
+
+export function getOutboxEnvelopePath(syncId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/outbox/envelopes/${syncId}.json`);
+}
+
 export function getProductChiefReportDirectoryPath(subprojectId?: string | null) {
   return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/product-chief/reports');
 }
@@ -220,6 +252,30 @@ export function getProductChiefOutputPath(outputId: string, subprojectId?: strin
 
 export function getProductChiefOutputArtifactPath(outputId: string, subprojectId?: string | null) {
   return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/outputs/${outputId}.md`);
+}
+
+export function getProductChiefOutputVariantArtifactPath(
+  outputId: string,
+  variantFileName: string,
+  subprojectId?: string | null,
+) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/outputs/${outputId}-${variantFileName}`);
+}
+
+export function getProductChiefGeneratedAssetDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/product-office/generated-assets');
+}
+
+export function getProductChiefOutputGeneratedAssetPath(
+  versionTag: string,
+  batchFolder: string,
+  fileName: string,
+  subprojectId?: string | null,
+) {
+  return prefixProjectPath(
+    getProjectRoot(subprojectId),
+    `docs/product-office/generated-assets/${versionTag}/${batchFolder}/${fileName}`,
+  );
 }
 
 export function getProductChiefSpecialistTaskDirectoryPath(subprojectId?: string | null) {
@@ -246,6 +302,18 @@ export function getProductChiefMultiAgentReviewArtifactPath(reviewId: string, su
   return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/multi-agent-reviews/${reviewId}.md`);
 }
 
+export function getProductChiefGroupSessionDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/product-chief/group-sessions');
+}
+
+export function getProductChiefGroupSessionPath(sessionId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/product-chief/group-sessions/${sessionId}.json`);
+}
+
+export function getProductChiefGroupSessionArtifactPath(sessionId: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/group-sessions/${sessionId}.md`);
+}
+
 export function getDocumentNormalizationRunDirectoryPath(subprojectId?: string | null) {
   return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/document-normalization/runs');
 }
@@ -254,8 +322,28 @@ export function getDocumentNormalizationRunPath(runId: string, subprojectId?: st
   return prefixProjectPath(getProjectRoot(subprojectId), `docs/memory/document-normalization/runs/${runId}.json`);
 }
 
+export function getDocumentNormalizationInboxStatePath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/document-normalization/inbox-state.json');
+}
+
 export function getDocumentNormalizationArtifactPath(runId: string, sourceSlug: string, subprojectId?: string | null) {
   return prefixProjectPath(getProjectRoot(subprojectId), `docs/product-office/document-normalization/${runId}-${sourceSlug}.md`);
+}
+
+export function getDocumentNormalizationBackgroundArtifactPath(runId: string, sourceSlug: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/context/project/inbox-background/${runId}-${sourceSlug}.md`);
+}
+
+export function getDocumentNormalizationProjectContextPath(tag: string, runId: string, sourceSlug: string, subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), `docs/context/project/by-tag/${tag}/${runId}-${sourceSlug}.md`);
+}
+
+export function getDocumentGovernanceRegistryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/document-governance/truth-sources.json');
+}
+
+export function getDocumentGovernanceAuditPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/document-governance/latest-audit.json');
 }
 
 export function createPlatformProjectContext(): ProjectContext {

@@ -21,6 +21,12 @@ export class FileStore {
     await fs.writeFile(target, content, 'utf8');
   }
 
+  async writeBytes(relativePath: string, content: Uint8Array) {
+    const target = this.resolve(relativePath);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, content);
+  }
+
   async readJson<T>(relativePath: string): Promise<T> {
     return JSON.parse(await this.read(relativePath)) as T;
   }

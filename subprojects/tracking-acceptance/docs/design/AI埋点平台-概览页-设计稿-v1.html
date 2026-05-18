@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI埋点平台 - 概览页 - 企业交付版 v1</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --panel: #ffffff;
+        --line: #dbe5f0;
+        --text: #0f172a;
+        --muted: #64748b;
+        --brand: #2563eb;
+        --brand-soft: #eaf2ff;
+        --green: #16a34a;
+        --cyan: #06b6d4;
+        --orange: #f97316;
+        --purple: #6366f1;
+        --shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+          linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+        color: var(--text);
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      button, input { font: inherit; }
+      .topbar {
+        height: 76px;
+        display: grid;
+        grid-template-columns: auto auto 1fr auto auto;
+        align-items: center;
+        gap: 16px;
+        padding: 0 24px;
+        background: rgba(255,255,255,.92);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+      }
+      .brand {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        color: #fff;
+      }
+      .brand-name { font-size: 20px; font-weight: 700; }
+      .search {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        color: var(--muted);
+      }
+      .pill, .toolbar-chip, .ghost-btn, .primary-btn {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+      .pill { padding: 8px 12px; font-size: 13px; color: var(--muted); }
+      .layout {
+        display: grid;
+        grid-template-columns: 208px 1fr 360px;
+        min-height: calc(100vh - 76px);
+      }
+      .sidebar {
+        padding: 16px 12px;
+        border-right: 1px solid var(--line);
+        background: rgba(255,255,255,.88);
+        display: grid;
+        align-content: start;
+        gap: 10px;
+      }
+      .nav-item {
+        height: 44px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: #1e3a8a;
+        cursor: pointer;
+      }
+      .nav-item.active {
+        background: var(--brand-soft);
+        border-color: #bfd3ff;
+        font-weight: 700;
+      }
+      .main {
+        padding: 18px 20px 24px;
+        display: grid;
+        gap: 16px;
+      }
+      .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .page-title { margin: 0; font-size: 24px; }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .toolbar-chip { padding: 10px 12px; color: var(--muted); }
+      .toolbar-chip.active { background: var(--brand-soft); border-color: #bfd3ff; color: var(--brand); font-weight: 700; }
+      .ghost-btn, .primary-btn {
+        height: 42px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .primary-btn { background: var(--brand); color: #fff; border-color: var(--brand); }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .metric-card {
+        padding: 16px;
+        display: grid;
+        gap: 6px;
+      }
+      .metric-card strong { font-size: 28px; }
+      .metric-card span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+      .metric-card .green { color: var(--green); }
+      .metric-card .cyan { color: var(--cyan); }
+      .metric-card .orange { color: var(--orange); }
+      .metric-card .purple { color: var(--purple); }
+      .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 16px;
+      }
+      .chart-panel, .activity-panel, .insight-panel, .side-panel {
+        display: grid;
+      }
+      .section-head {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .canvas {
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+      .trend-card {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+      }
+      .trend-bars {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        align-items: end;
+        min-height: 170px;
+      }
+      .trend-bars span {
+        display: block;
+        border-radius: 12px 12px 6px 6px;
+        background: linear-gradient(180deg, #60a5fa, #2563eb);
+      }
+      .activity-list {
+        display: grid;
+        gap: 10px;
+      }
+      .activity-row {
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        display: grid;
+        gap: 6px;
+      }
+      .activity-row small { color: var(--muted); }
+      .insight-card {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        display: grid;
+        gap: 8px;
+      }
+      .side {
+        padding: 18px;
+        border-left: 1px solid var(--line);
+        background: rgba(255,255,255,.92);
+        display: grid;
+        gap: 14px;
+      }
+      .detail-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        overflow: hidden;
+      }
+      .detail-card h3 {
+        margin: 0;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        font-size: 16px;
+      }
+      .detail-grid {
+        display: grid;
+      }
+      .detail-row {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid #eef3f9;
+      }
+      .detail-row:last-child { border-bottom: none; }
+      .detail-row span:first-child { color: var(--muted); font-size: 13px; }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .svg-icon { width: 18px; height: 18px; display: inline-grid; place-items: center; }
+      @media (max-width: 1280px) {
+        .layout { grid-template-columns: 208px 1fr; }
+        .side { grid-column: 1 / -1; border-left: none; border-top: 1px solid var(--line); }
+        .content-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m12 12 8-4.5"/><path d="M12 12v9"/><path d="M12 12 4 7.5"/></svg>
+      </div>
+      <div class="brand-name">AI埋点平台</div>
+      <div class="search">
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></svg>
+        <span>搜索指标 / 报表 / 规则 / 负责人</span>
+      </div>
+      <div class="pill">v2.4.0 正式包</div>
+      <div class="pill">角色：数据团队负责人</div>
+    </header>
+    <div class="layout">
+      <aside class="sidebar">
+        <button class="nav-item active"><span class="svg-icon">🏠</span><span>概览</span></button>
+        <button class="nav-item"><span class="svg-icon">📘</span><span>埋点需求</span></button>
+        <button class="nav-item"><span class="svg-icon">🧩</span><span>数据字典</span></button>
+        <button class="nav-item"><span class="svg-icon">🛡️</span><span>校验规则</span></button>
+        <button class="nav-item"><span class="svg-icon">📊</span><span>验收报告</span></button>
+      </aside>
+      <main class="main">
+        <section class="page-head">
+          <div>
+            <h1 class="page-title">平台概览</h1>
+            <p>交付级企业前端页面：指标、趋势、活动、洞察和侧边详情区全部用真实页面结构表达。</p>
+          </div>
+          <div class="toolbar">
+            <div class="toolbar-chip active">今日概况</div>
+            <div class="toolbar-chip">近 7 日</div>
+            <div class="toolbar-chip">近 30 日</div>
+            <button class="ghost-btn">导出报表</button>
+            <button class="primary-btn">创建分析任务</button>
+          </div>
+        </section>
+        <section class="metric-grid">
+          <article class="panel metric-card"><span>覆盖事件</span><strong class="green">1,248</strong><p>当前接入事件总量</p></article>
+          <article class="panel metric-card"><span>通过率</span><strong class="cyan">89%</strong><p>较上周提升 3%</p></article>
+          <article class="panel metric-card"><span>告警数</span><strong class="orange">37</strong><p>待规则校验处理</p></article>
+          <article class="panel metric-card"><span>新增需求</span><strong class="purple">16</strong><p>本周新增页面与参数项</p></article>
+        </section>
+        <section class="content-grid">
+          <div style="display:grid; gap:16px;">
+            <section class="panel chart-panel">
+              <div class="section-head"><strong>埋点健康趋势</strong><span class="pill">默认展示主趋势图</span></div>
+              <div class="canvas">
+                <div class="trend-card">
+                  <strong>通过率趋势 / 近 7 日</strong>
+                  <div class="trend-bars">
+                    <span style="height: 72px"></span>
+                    <span style="height: 110px"></span>
+                    <span style="height: 95px"></span>
+                    <span style="height: 135px"></span>
+                    <span style="height: 148px"></span>
+                    <span style="height: 138px"></span>
+                    <span style="height: 160px"></span>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section class="panel activity-panel">
+              <div class="section-head"><strong>最近活动</strong><span class="pill">列表型信息区</span></div>
+              <div class="canvas">
+                <div class="activity-list">
+                  <article class="activity-row"><strong>版本 v2.4.0 已发布</strong><small>30 分钟前 / 关联需求 12 项</small></article>
+                  <article class="activity-row"><strong>支付链路规则告警增加</strong><small>1 小时前 / 需规则负责人跟进</small></article>
+                  <article class="activity-row"><strong>客户端登录参数完成校对</strong><small>2 小时前 / EVT_1001001</small></article>
+                </div>
+              </div>
+            </section>
+          </div>
+          <section class="panel insight-panel">
+            <div class="section-head"><strong>重点洞察</strong><span class="pill">侧重经营判断</span></div>
+            <div class="canvas">
+              <article class="insight-card"><strong>登录链路最稳定</strong><p>角色登录、进入游戏、任务领取三条主链通过率高，可作为标准模板。</p></article>
+              <article class="insight-card"><strong>付费链路波动较大</strong><p>充值下单和支付回调存在字段不一致，需要优先进入规则修正。</p></article>
+              <article class="insight-card"><strong>数据字典需持续同步</strong><p>本周新增字段较多，建议同步更新页面契约和验收门禁。</p></article>
+            </div>
+          </section>
+        </section>
+      </main>
+      <aside class="side">
+        <div class="detail-card">
+          <h3>当前看板说明</h3>
+          <div class="detail-grid">
+            <div class="detail-row"><span>页面定位</span><strong>企业交付级概览页</strong></div>
+            <div class="detail-row"><span>默认动作</span><strong>查看趋势 / 导出 / 创建分析任务</strong></div>
+            <div class="detail-row"><span>关键区块</span><strong>指标 / 趋势 / 活动 / 洞察</strong></div>
+            <div class="detail-row"><span>后续承接</span><strong>schema-delivery + handoff</strong></div>
+          </div>
+        </div>
+        <div class="detail-card">
+          <h3>前端实现提示</h3>
+          <div class="detail-grid">
+            <div class="detail-row"><span>组件层级</span><strong>Header / Sidebar / Metrics / Chart / Feed / Insight / Sidepanel</strong></div>
+            <div class="detail-row"><span>交互语义</span><strong>时间粒度切换、趋势查看、导出、任务创建</strong></div>
+            <div class="detail-row"><span>视觉要求</span><strong>真实企业产品，不允许线框图感</strong></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="ghost-btn">打开 schema</button>
+          <button class="ghost-btn">查看 handoff</button>
+          <button class="primary-btn">确认交付态</button>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>

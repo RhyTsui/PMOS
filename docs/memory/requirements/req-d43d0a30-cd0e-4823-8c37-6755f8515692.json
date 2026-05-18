@@ -1,0 +1,47 @@
+{
+  "id": "req-d43d0a30-cd0e-4823-8c37-6755f8515692",
+  "subprojectId": null,
+  "title": "Review governed output: Requirement baseline package",
+  "description": "Requirement baseline package generated from Product Chief report product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905.\n\nProduct Chief report: product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905\nOutput id: product-output-9ce04c36-7a10-45b6-aa4d-ba599086828f\nOutput type: requirement-baseline\n\n请直接给一个 AI 埋点平台出首页、需求中心、事件字典三页的设计图，后续可能还会做前端，但现在先要出图。",
+  "category": "feature",
+  "status": "draft",
+  "priority": "P0",
+  "source": {
+    "kind": "product-output",
+    "sessionId": null,
+    "messageId": null,
+    "runId": null,
+    "sourceRef": {
+      "entityType": "product-chief-report",
+      "entityId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+      "path": "docs/product-office/outputs/product-output-9ce04c36-7a10-45b6-aa4d-ba599086828f.md",
+      "label": "requirement-baseline"
+    }
+  },
+  "trace": {
+    "relatedRequirementIds": [],
+    "linkedVersionIds": [
+      "ver-eae1bd86-7d00-4e76-81d0-ef25986839d9"
+    ],
+    "linkedRunIds": [],
+    "artifactPaths": [
+      "docs/product-office/outputs/product-output-9ce04c36-7a10-45b6-aa4d-ba599086828f.md",
+      "docs/memory/product-chief/outputs/product-output-9ce04c36-7a10-45b6-aa4d-ba599086828f.json",
+      "docs/memory/product-chief/reports/product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905.json",
+      "docs/product-office/specialist-tasks/product-chief-task-8838ee82-ba21-449e-9881-8bf578aee4c5.md",
+      "docs/product-office/specialist-tasks/product-chief-task-deb21f2a-1aae-419e-af58-60b43f0e057e.md",
+      "docs/memory/product-chief/specialist-tasks/product-chief-task-8838ee82-ba21-449e-9881-8bf578aee4c5.json",
+      "docs/memory/product-chief/specialist-tasks/product-chief-task-deb21f2a-1aae-419e-af58-60b43f0e057e.json",
+      "docs/product-office/multi-agent-reviews/product-chief-review-4bdd4dbd-6ede-40cb-8593-9e391cd69efb.md",
+      "docs/memory/product-chief/multi-agent-reviews/product-chief-review-4bdd4dbd-6ede-40cb-8593-9e391cd69efb.json"
+    ]
+  },
+  "createdAt": "2026-04-28T01:41:33.149Z",
+  "updatedAt": "2026-04-28T01:41:33.154Z",
+  "metadata": {
+    "source": "product-chief-output",
+    "productChiefReportId": "product-chief-6b5343fe-167f-4e00-b3a0-43da94bf6905",
+    "productChiefOutputId": "product-output-9ce04c36-7a10-45b6-aa4d-ba599086828f",
+    "outputType": "requirement-baseline"
+  }
+}

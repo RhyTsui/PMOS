@@ -1,0 +1,173 @@
+{
+  "project": {
+    "id": "ad",
+    "name": "广告支持与投放协同自动化工作台",
+    "date": "2026-04-21",
+    "scope": "先服务广告支持，再逐步赋能投放自助，月底 Demo 优先验证对话式诊断与分析工作台"
+  },
+  "feature_modules": [
+    {
+      "id": "demand-intake",
+      "name": "需求接入",
+      "goal": "把自由文本需求收口成结构化任务",
+      "demo_priority": "p1",
+      "actors": ["投放", "广告支持", "QA"],
+      "core_fields": ["媒体", "应用", "需求类型", "测试项目", "预期时间", "测试账号", "文档地址"],
+      "mock_entry": {
+        "request_id": "REQ-20260421-001",
+        "submitter": "投放-小林",
+        "media": "巨量",
+        "app": "指间山海",
+        "request_type": "监测回传对接",
+        "target_date": "2026-04-26",
+        "attachments": ["巨量开户链接说明", "测试包地址", "联调账号列表"],
+        "status": "待结构化"
+      }
+    },
+    {
+      "id": "standard-docking",
+      "name": "标准联调",
+      "goal": "把浏览器后台、设备桥接、抖音消耗、打开游戏、启动登录串成可执行流程",
+      "demo_priority": "p0",
+      "actors": ["广告支持", "测试", "投放"],
+      "core_fields": ["task_id", "入口对象", "设备状态", "抖音状态", "游戏状态", "验收口径"],
+      "mock_entry": {
+        "task_id": "TASK-POC-001",
+        "media": "巨量",
+        "game": "指间山海",
+        "entry_mode": "二维码",
+        "device_id": "ANDROID-01",
+        "device_status": "在线",
+        "acceptance": ["打开游戏", "启动", "登录"],
+        "status": "执行中"
+      }
+    },
+    {
+      "id": "anomaly-diagnosis",
+      "name": "异常诊断",
+      "goal": "用固定 4 到 5 步证据链回答业务异常问题",
+      "demo_priority": "p0",
+      "actors": ["投放", "数据分析", "广告支持"],
+      "core_fields": ["问题", "时间范围", "计划", "异常表现", "诊断步骤", "结论", "建议"],
+      "mock_entry": {
+        "question": "为什么昨天巨量激活比 BI 少 30%？",
+        "time_range": "2026-04-20",
+        "plan_id": "PLAN-7788",
+        "symptom": "激活缺口 30%",
+        "status": "可诊断"
+      }
+    },
+    {
+      "id": "conversational-analysis",
+      "name": "对话式分析",
+      "goal": "把自然语言问题转成模板化分析请求并返回结构化结果",
+      "demo_priority": "p0",
+      "actors": ["投放", "运营", "广告支持"],
+      "core_fields": ["对比对象", "指标", "时间范围", "分析表", "追问"],
+      "mock_entry": {
+        "question": "对比素材 A 和素材 B 近 7 天消耗和 ROI",
+        "compare_targets": ["素材A", "素材B"],
+        "metrics": ["消耗", "ROI", "CTR"],
+        "time_range": "近7天",
+        "status": "可分析"
+      }
+    },
+    {
+      "id": "knowledge-reuse",
+      "name": "知识复用",
+      "goal": "把媒体规则、隐性坑点、成功案例变成可检索的知识底座",
+      "demo_priority": "p2",
+      "actors": ["广告支持", "开发", "QA"],
+      "core_fields": ["知识标题", "媒体", "主题", "规则", "风险", "处理方法"],
+      "mock_entry": {
+        "article_id": "KB-GL-014",
+        "title": "巨量激活回传时间戳格式检查",
+        "media": "巨量",
+        "topic": "回传校验",
+        "risk_level": "高",
+        "status": "已沉淀"
+      }
+    },
+    {
+      "id": "case-archive",
+      "name": "Case 归档",
+      "goal": "把每次诊断与联调结果沉淀为可追溯记录",
+      "demo_priority": "p1",
+      "actors": ["广告支持", "投放", "产品"],
+      "core_fields": ["case_id", "提交人", "时间", "场景", "条件", "结果", "后续动作"],
+      "mock_entry": {
+        "case_id": "CASE-20260421-009",
+        "submitter": "投放-小林",
+        "scene": "激活异常诊断",
+        "summary": "定位到媒体回传时间戳格式异常",
+        "follow_up": "更新配置并复测",
+        "status": "待复盘"
+      }
+    }
+  ],
+  "walkthrough": [
+    {
+      "step": 1,
+      "module": "需求接入",
+      "title": "投放提交结构化需求",
+      "expected_output": "生成 request_id 和标准化字段"
+    },
+    {
+      "step": 2,
+      "module": "标准联调",
+      "title": "广告支持发起联调任务",
+      "expected_output": "生成 task_id、入口对象、执行步骤"
+    },
+    {
+      "step": 3,
+      "module": "异常诊断",
+      "title": "业务在工作台提问异常问题",
+      "expected_output": "看到步骤、证据、结论、建议"
+    },
+    {
+      "step": 4,
+      "module": "对话式分析",
+      "title": "业务发起素材或计划对比",
+      "expected_output": "拿到结构化分析卡片与追问能力"
+    },
+    {
+      "step": 5,
+      "module": "知识复用",
+      "title": "系统关联相似规则与历史经验",
+      "expected_output": "返回相关知识条目"
+    },
+    {
+      "step": 6,
+      "module": "Case归档",
+      "title": "系统沉淀本次过程与结果",
+      "expected_output": "生成可追溯 case 记录"
+    }
+  ],
+  "mock_cards": {
+    "diagnosis_result": {
+      "title": "激活缺口诊断结果",
+      "summary": "巨量回传时间戳格式异常，导致 30% 激活未入 BI",
+      "evidence": [
+        "媒体报表激活 1200",
+        "内部 BI 激活 840",
+        "缺失订单集中在 19:00 到 21:00",
+        "回传 URL 中时间戳格式不一致"
+      ],
+      "action": "修正回传格式后复测"
+    },
+    "analysis_table": [
+      {
+        "target": "素材A",
+        "spend": 12800,
+        "roi": 1.82,
+        "ctr": 0.031
+      },
+      {
+        "target": "素材B",
+        "spend": 11300,
+        "roi": 1.26,
+        "ctr": 0.024
+      }
+    ]
+  }
+}

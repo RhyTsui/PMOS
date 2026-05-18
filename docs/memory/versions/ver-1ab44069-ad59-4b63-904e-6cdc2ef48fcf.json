@@ -1,0 +1,46 @@
+{
+  "id": "ver-1ab44069-ad59-4b63-904e-6cdc2ef48fcf",
+  "subprojectId": null,
+  "entityType": "document-normalization",
+  "entityId": "docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01",
+  "changeType": "normalize",
+  "summary": "Normalized historical document source docs/sources/inbox/周报-产品组-徐韵-0509.xlsx.",
+  "previousVersion": null,
+  "newVersion": null,
+  "requirementIds": [
+    "req-4760df59-3cea-4602-a0ed-1df0c1eaff3d"
+  ],
+  "runId": null,
+  "artifactPaths": [
+    "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "docs/product-office/document-normalization/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+    "docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md"
+  ],
+  "triggeredBy": "agent",
+  "releaseNotes": null,
+  "diffSummary": "Created governed normalization artifact docs/product-office/document-normalization/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md and background digest docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md.",
+  "rollbackOfVersionEntryId": null,
+  "approval": {
+    "approved": false,
+    "approver": null,
+    "approvedAt": null,
+    "summary": "Normalization and background knowledge assets are ready for review before moving source material."
+  },
+  "createdAt": "2026-05-09T06:02:09.240Z",
+  "metadata": {
+    "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+    "sourceRoot": "docs/sources/inbox",
+    "suggestedTarget": "docs/context/weekly/周报-产品组-徐韵-0509.xlsx",
+    "documentType": "product-intelligence",
+    "projectHints": [
+      "ad",
+      "tracking-acceptance",
+      "testing-platform",
+      "knowledge-base",
+      "platform"
+    ],
+    "backgroundContextPath": "docs/context/project/inbox-background/docnorm-f92b5e0a-e9d9-4a97-b554-7fe39706af01-docs-sources-inbox-0509.md",
+    "notionPageId": "35bd53f7-155c-81a6-a406-e80e3ca45d10",
+    "notionPageUrl": "https://www.notion.so/Inbox-Knowledge-Digest-0509-xlsx-35bd53f7155c81a6a406e80e3ca45d10"
+  }
+}

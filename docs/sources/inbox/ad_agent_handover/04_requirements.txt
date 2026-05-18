@@ -1,0 +1,20 @@
+# Ad_Agent_Stable_V6 Python依赖
+# Python版本要求: 3.10+
+
+# Web自动化
+playwright>=1.40.0
+
+# HTTP客户端（调用MiniMax API）
+httpx>=0.25.0
+
+# 桌面截图
+pyautogui>=0.9.54
+
+# 图像处理
+Pillow>=10.0.0
+
+# 可选：日志格式化
+# rich>=13.0.0
+
+# 可选：配置文件校验
+# pydantic>=2.0.0

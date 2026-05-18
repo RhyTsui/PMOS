@@ -1,0 +1,68 @@
+{
+  "id": "docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1",
+  "subprojectId": null,
+  "status": "completed",
+  "sourceRoot": "docs/sources/inbox",
+  "startedAt": "2026-05-09T06:12:55.135Z",
+  "completedAt": "2026-05-09T06:12:57.935Z",
+  "normalizedSources": [
+    {
+      "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "artifactPath": "docs/product-office/document-normalization/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "backgroundContextPath": "docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+      "projectContextPaths": [
+        "docs/context/project/by-tag/ad/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+        "docs/context/project/by-tag/tracking-acceptance/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+        "docs/context/project/by-tag/testing-platform/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+        "docs/context/project/by-tag/knowledge-base/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md",
+        "docs/context/project/by-tag/platform/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md"
+      ],
+      "notionPageId": "35bd53f7-155c-8198-90dd-f9f68b18e9ab",
+      "notionPageUrl": "https://www.notion.so/Inbox-Knowledge-Digest-0509-xlsx-35bd53f7155c819890ddf9f68b18e9ab",
+      "requirementId": "req-33bc689a-e332-468b-b929-b4f8fd864079",
+      "versionEntryId": "ver-208507c1-b5e5-4537-b8dc-4d5a33596b9a",
+      "extractedRequirementIds": [
+        "req-05269e58-05ec-49e8-b9a2-a4c8682e8480",
+        "req-1510f568-06be-4b66-b6f4-88cd1d96a204",
+        "req-8c7addc4-67fc-4a83-9adb-e60651462446",
+        "req-1d77df20-bfe3-4859-8260-be8686db3aab",
+        "req-febc68e9-3cf0-4659-9fb0-7339dbee8456"
+      ],
+      "documentType": "version-planning",
+      "suggestedTarget": "docs/sources/version-planning/周报-产品组-徐韵-0509.xlsx",
+      "extractedSignals": [
+        "contains:requirements",
+        "contains:version-planning",
+        "contains:ui-scope"
+      ],
+      "projectHints": [
+        "ad",
+        "tracking-acceptance",
+        "testing-platform",
+        "knowledge-base",
+        "platform"
+      ],
+      "sourceFingerprint": "eac9476aab38fb39f72ca68e253cf3f77e952934"
+    }
+  ],
+  "requirementIds": [
+    "req-33bc689a-e332-468b-b929-b4f8fd864079"
+  ],
+  "versionEntryIds": [
+    "ver-208507c1-b5e5-4537-b8dc-4d5a33596b9a"
+  ],
+  "summary": "Normalized 1 document source(s) from docs/sources/inbox.",
+  "metadata": {
+    "mode": "full",
+    "sourcePathCount": 1,
+    "sourceFingerprints": {
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx": "eac9476aab38fb39f72ca68e253cf3f77e952934"
+    },
+    "backgroundContextPaths": [
+      "docs/context/project/inbox-background/docnorm-013ca0d6-5fe8-4414-b41b-f13a3a75d7a1-docs-sources-inbox-0509.md"
+    ],
+    "notionPageIds": [
+      "35bd53f7-155c-8198-90dd-f9f68b18e9ab"
+    ]
+  }
+}

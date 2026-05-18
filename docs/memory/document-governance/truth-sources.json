@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-18T02:10:16.158Z",
+  "subprojectId": null,
+  "entries": [
+    {
+      "id": "doc-ts-platform-index",
+      "topicKey": "platform-truth-source-index",
+      "subprojectId": null,
+      "title": "Platform Truth Source Index",
+      "path": "docs/operations/platform-truth-source-index.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "truth-source",
+        "index"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Platform truth-source entry document.",
+      "createdAt": "2026-05-09T15:26:00.000Z",
+      "updatedAt": "2026-05-09T15:26:00.000Z"
+    },
+    {
+      "id": "doc-ts-current-version-progress",
+      "topicKey": "platform-current-version-progress",
+      "subprojectId": null,
+      "title": "Current Version Progress",
+      "path": "docs/operations/current-version-progress.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "version",
+        "runtime"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Current landed-vs-missing denominator.",
+      "createdAt": "2026-05-09T15:26:00.000Z",
+      "updatedAt": "2026-05-09T15:26:00.000Z"
+    },
+    {
+      "id": "doc-ts-v1-direction",
+      "topicKey": "platform-v1-direction",
+      "subprojectId": null,
+      "title": "PMAIOS v1.0 Direction",
+      "path": "docs/operations/pmaios-v1.0-direction.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "v1.0",
+        "direction"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Current product-version direction document.",
+      "createdAt": "2026-05-09T15:26:00.000Z",
+      "updatedAt": "2026-05-09T15:26:00.000Z"
+    },
+    {
+      "id": "doc-ts-v1-program",
+      "topicKey": "platform-v1-program",
+      "subprojectId": null,
+      "title": "v1.0 Product Version Program",
+      "path": "docs/operations/v1.0-product-version-program.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "v1.0",
+        "program"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Execution program for current product version.",
+      "createdAt": "2026-05-09T15:26:00.000Z",
+      "updatedAt": "2026-05-09T15:26:00.000Z"
+    },
+    {
+      "id": "doc-ts-v1-acceptance",
+      "topicKey": "platform-v1-acceptance",
+      "subprojectId": null,
+      "title": "v1.0 Acceptance Standard",
+      "path": "docs/operations/v1.0-acceptance-standard.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "v1.0",
+        "acceptance"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "High-quality acceptance denominator for v1.0.",
+      "createdAt": "2026-05-09T15:26:00.000Z",
+      "updatedAt": "2026-05-09T15:26:00.000Z"
+    },
+    {
+      "id": "doc-ts-document-governance",
+      "topicKey": "platform-document-lifecycle-governance",
+      "subprojectId": null,
+      "title": "Document Lifecycle Governance",
+      "path": "docs/operations/document-lifecycle-governance.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "document-governance",
+        "lifecycle"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Rules and mechanism target for document lifecycle governance.",
+      "createdAt": "2026-05-09T15:26:00.000Z",
+      "updatedAt": "2026-05-09T15:26:00.000Z"
+    },
+    {
+      "id": "doc-ts-engineering-agent-baseline",
+      "topicKey": "platform-engineering-agent-baseline",
+      "subprojectId": null,
+      "title": "PMOS Engineering Agent Baseline",
+      "path": "docs/operations/pmos-fullstack-and-testing-agent-baseline.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "engineering",
+        "agent-lane",
+        "governance"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Defines the active architecture, implementation, review, and testing lanes after product/design governance.",
+      "createdAt": "2026-05-12T09:15:00.000Z",
+      "updatedAt": "2026-05-12T09:15:00.000Z"
+    },
+    {
+      "id": "doc-ts-architecture-decision-record-template",
+      "topicKey": "platform-architecture-decision-record-template",
+      "subprojectId": null,
+      "title": "Architecture Decision Record Template",
+      "path": "docs/templates/architecture_decision_record_template.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "template",
+        "architecture",
+        "governed-output"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Default governed output template for architecture decisions before implementation handoff.",
+      "createdAt": "2026-05-12T09:15:00.000Z",
+      "updatedAt": "2026-05-12T09:15:00.000Z"
+    },
+    {
+      "id": "doc-ts-code-review-brief-template",
+      "topicKey": "platform-code-review-brief-template",
+      "subprojectId": null,
+      "title": "Code Review Brief Template",
+      "path": "docs/templates/code_review_brief_template.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "template",
+        "review",
+        "governed-output"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Default governed output template for incremental code review before testing acceptance.",
+      "createdAt": "2026-05-12T09:15:00.000Z",
+      "updatedAt": "2026-05-12T09:15:00.000Z"
+    },
+    {
+      "id": "doc-ts-historical-code-review-brief-template",
+      "topicKey": "platform-historical-code-review-brief-template",
+      "subprojectId": null,
+      "title": "Historical Code Review Brief Template",
+      "path": "docs/templates/historical_code_review_brief_template.md",
+      "status": "active",
+      "tags": [
+        "platform",
+        "template",
+        "review",
+        "historical-review",
+        "governed-output"
+      ],
+      "supersedes": [],
+      "successorPath": null,
+      "note": "Default governed output template for hotspot-first historical code review and remediation queue capture.",
+      "createdAt": "2026-05-12T09:15:00.000Z",
+      "updatedAt": "2026-05-12T09:15:00.000Z"
+    },
+    {
+      "id": "doc-ts-641e5a51-00b6-4fc2-93f8-3cb5c29efeb6",
+      "topicKey": "platform-html-first-document-output-policy",
+      "subprojectId": null,
+      "title": "HTML-First Document Output Policy",
+      "path": "docs/operations/html-first-document-output-policy.md",
+      "status": "active",
+      "tags": [],
+      "supersedes": [],
+      "successorPath": null,
+      "note": null,
+      "createdAt": "2026-05-18T02:10:16.158Z",
+      "updatedAt": "2026-05-18T02:10:16.158Z"
+    }
+  ]
+}

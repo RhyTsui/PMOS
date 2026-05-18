@@ -59,6 +59,11 @@ export class SubprojectRegistry {
       workflow?: string;
       mcpConfigPath?: string;
       skillConfigPath?: string;
+      dataki?: {
+        agentId?: string;
+        knowledgeBaseId?: string;
+        knowledgeBaseIds?: string[];
+      };
     };
   }): Promise<Subproject> {
     const id = SubprojectIdSchema.parse(input.id.trim());
@@ -85,6 +90,13 @@ export class SubprojectRegistry {
         workflow: input.overrides?.workflow?.trim() || undefined,
         mcpConfigPath: input.overrides?.mcpConfigPath?.trim() || undefined,
         skillConfigPath: input.overrides?.skillConfigPath?.trim() || undefined,
+        dataki: input.overrides?.dataki
+          ? {
+              agentId: input.overrides.dataki.agentId?.trim() || undefined,
+              knowledgeBaseId: input.overrides.dataki.knowledgeBaseId?.trim() || undefined,
+              knowledgeBaseIds: (input.overrides.dataki.knowledgeBaseIds ?? []).map((item) => item.trim()).filter(Boolean),
+            }
+          : undefined,
       },
     };
 
@@ -125,6 +137,13 @@ export class SubprojectRegistry {
       workflow?: string | null;
       mcpConfigPath?: string | null;
       skillConfigPath?: string | null;
+      dataki?:
+        | {
+            agentId?: string | null;
+            knowledgeBaseId?: string | null;
+            knowledgeBaseIds?: string[] | null;
+          }
+        | null;
     },
   ): Promise<Subproject> {
     const subproject = await this.loadSubproject(subprojectId);
@@ -141,6 +160,16 @@ export class SubprojectRegistry {
           overrides.mcpConfigPath !== undefined ? overrides.mcpConfigPath?.trim() || undefined : subproject.overrides.mcpConfigPath,
         skillConfigPath:
           overrides.skillConfigPath !== undefined ? overrides.skillConfigPath?.trim() || undefined : subproject.overrides.skillConfigPath,
+        dataki:
+          overrides.dataki !== undefined
+            ? overrides.dataki
+              ? {
+                  agentId: overrides.dataki.agentId?.trim() || undefined,
+                  knowledgeBaseId: overrides.dataki.knowledgeBaseId?.trim() || undefined,
+                  knowledgeBaseIds: (overrides.dataki.knowledgeBaseIds ?? []).map((item) => item.trim()).filter(Boolean),
+                }
+              : undefined
+            : subproject.overrides.dataki,
       },
     };
 

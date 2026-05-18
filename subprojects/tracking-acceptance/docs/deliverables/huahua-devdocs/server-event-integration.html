@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>服务端事件接入 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Server Events</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">服务端事件接入</h1>
+        <p>服务端接入不是补充说明，而是闭环核心。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="#common">通用字段</a>
+          <a href="#core">核心事件</a>
+          <a href="#custom">自定义事件</a>
+          <a href="#payment">支付链要求</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero" id="common">
+          <span class="eyebrow">Server Contract</span>
+          <h1>服务端负责补齐业务上下文</h1>
+          <p>角色链、支付链、资源链和大部分玩法事件都依赖服务端上报，不能只看客户端。</p>
+        </section>
+        <section class="section">
+          <h2>通用字段</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>字段</th><th>是否必须</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>game_uuid</td><td>必填</td><td>服务端事件唯一标识</td></tr>
+                <tr><td>app_id</td><td>必填</td><td>数据中心登记 app_id</td></tr>
+                <tr><td>ip</td><td>必填</td><td>玩家 IP</td></tr>
+                <tr><td>start_time</td><td>必填</td><td>13 位毫秒时间戳</td></tr>
+                <tr><td>device_id</td><td>必填</td><td>建议来自客户端透传</td></tr>
+                <tr><td>user_id</td><td>必填</td><td>账号 ID</td></tr>
+                <tr><td>role_id</td><td>必填</td><td>角色 ID</td></tr>
+                <tr><td>server / realserver</td><td>必填</td><td>区服信息</td></tr>
+                <tr><td>channel</td><td>必填</td><td>渠道标识</td></tr>
+                <tr><td>os_type</td><td>必填</td><td>系统类型</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="core">
+          <h2>核心事件</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>事件</th><th>用途</th><th>关键字段</th></tr></thead>
+              <tbody>
+                <tr><td>201 GameLogin</td><td>账号登录</td><td>event_id, start_time</td></tr>
+                <tr><td>203 RoleLogin</td><td>角色登录</td><td>role_id, user_lev, server</td></tr>
+                <tr><td>204 RoleLogout</td><td>登出</td><td>duration</td></tr>
+                <tr><td>205 Pay</td><td>支付成功 / 发货成功</td><td>order_id, recharge_channel, amount</td></tr>
+                <tr><td>206 LevelUp</td><td>升级</td><td>pre_lev, pre_vip_lev</td></tr>
+                <tr><td>207 CCU</td><td>在线人数</td><td>user_count</td></tr>
+                <tr><td>208 Prop</td><td>资源产销</td><td>item_consumetype, scene, item_id, item_num</td></tr>
+                <tr><td>215 GameLoginSign</td><td>验签结果</td><td>result</td></tr>
+                <tr><td>221 PayFlow</td><td>支付后端步骤链</td><td>step_id, order_id, pay_channel, recharge_channel</td></tr>
+                <tr><td>223 AdVideo</td><td>激励视频后端步骤链</td><td>step_id, ad_sid, reward_target</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="custom">
+          <h2>自定义事件</h2>
+          <p>服务端自定义事件覆盖成长、解锁、货币、种植、制作、售卖、订单、场景、任务、换装、社交、交易、排行、公会、公会竞赛、内嵌游戏、活动等。</p>
+          <div class="callout fact"><p><strong>范围：</strong><code>20001-20027</code>，其中 20019 / 20020 字段设计当前仍不完整。</p></div>
+        </section>
+        <section class="section" id="payment">
+          <h2>支付链要求</h2>
+          <div class="callout risk"><p><strong>核心冲突：</strong><code>order_id</code>、<code>channel_order_id</code>、<code>pay_channel</code>、<code>recharge_channel</code> 在规范层是关键字段，但部分步骤存在“未获取 / 不发送”。服务端文档必须保留这个事实。</p></div>
+          <ul>
+            <li>221 负责支付后端步骤和关键字段补齐。</li>
+            <li>205 负责最终支付成功 / 发货成功结果。</li>
+            <li>验收时必须按 106 -> 221 -> 205 串查，而不是只查 205。</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

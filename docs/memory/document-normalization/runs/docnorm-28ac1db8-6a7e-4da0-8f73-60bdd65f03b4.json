@@ -1,0 +1,88 @@
+{
+  "id": "docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4",
+  "subprojectId": null,
+  "status": "completed",
+  "sourceRoot": "docs/sources/inbox",
+  "startedAt": "2026-05-09T05:50:38.580Z",
+  "completedAt": "2026-05-09T05:50:38.618Z",
+  "normalizedSources": [
+    {
+      "sourcePath": "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md",
+      "artifactPath": "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+      "backgroundContextPath": "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+      "notionPageId": null,
+      "notionPageUrl": null,
+      "requirementId": "req-324d3f15-53c3-4943-a6b3-df2434538ec5",
+      "versionEntryId": "ver-fb5aa9dd-9a98-4f3e-98a4-165e38face85",
+      "extractedRequirementIds": [
+        "req-b7a8d103-c128-4770-a594-ada59204806f"
+      ],
+      "documentType": "version-planning",
+      "suggestedTarget": "docs/sources/version-planning/连弩测试平台5月版本计划.md",
+      "extractedSignals": [
+        "contains:requirements",
+        "contains:version-planning"
+      ],
+      "projectHints": [
+        "ad",
+        "tracking-acceptance",
+        "testing-platform",
+        "platform"
+      ],
+      "sourceFingerprint": "6fe20b55fefd2ebb9baa9ff5050d9cc4e57ecefd"
+    },
+    {
+      "sourcePath": "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx",
+      "artifactPath": "docs/product-office/document-normalization/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+      "backgroundContextPath": "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md",
+      "notionPageId": null,
+      "notionPageUrl": null,
+      "requirementId": "req-7214892e-7a34-455b-80e4-9a407daf5412",
+      "versionEntryId": "ver-fc710066-d50c-48d1-839e-6f82c291b6c3",
+      "extractedRequirementIds": [
+        "req-6aa29190-c759-4a95-9d25-3e0f7bfe05eb",
+        "req-fd202ffe-0e5d-46c4-bc6a-2683a1f1c2b9",
+        "req-0bc3fb92-a12d-4c46-8344-8552ebfa9eee",
+        "req-96686c6f-ff18-4c42-9e3c-4593d723d7f5",
+        "req-1efa5999-f035-48e3-8ee0-5c7a982bcffc"
+      ],
+      "documentType": "product-intelligence",
+      "suggestedTarget": "docs/context/weekly/周报-产品组-徐韵-0509.xlsx",
+      "extractedSignals": [
+        "contains:requirements",
+        "contains:version-planning",
+        "contains:ui-scope"
+      ],
+      "projectHints": [
+        "ad",
+        "tracking-acceptance",
+        "testing-platform",
+        "knowledge-base",
+        "platform"
+      ],
+      "sourceFingerprint": "eac9476aab38fb39f72ca68e253cf3f77e952934"
+    }
+  ],
+  "requirementIds": [
+    "req-324d3f15-53c3-4943-a6b3-df2434538ec5",
+    "req-7214892e-7a34-455b-80e4-9a407daf5412"
+  ],
+  "versionEntryIds": [
+    "ver-fb5aa9dd-9a98-4f3e-98a4-165e38face85",
+    "ver-fc710066-d50c-48d1-839e-6f82c291b6c3"
+  ],
+  "summary": "Normalized 2 document source(s) from docs/sources/inbox.",
+  "metadata": {
+    "mode": "full",
+    "sourcePathCount": 2,
+    "sourceFingerprints": {
+      "docs/sources/inbox/智投版本需求文档/连弩测试平台5月版本计划.md": "6fe20b55fefd2ebb9baa9ff5050d9cc4e57ecefd",
+      "docs/sources/inbox/周报-产品组-徐韵-0509.xlsx": "eac9476aab38fb39f72ca68e253cf3f77e952934"
+    },
+    "backgroundContextPaths": [
+      "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-5.md",
+      "docs/context/project/inbox-background/docnorm-28ac1db8-6a7e-4da0-8f73-60bdd65f03b4-docs-sources-inbox-0509.md"
+    ],
+    "notionPageIds": []
+  }
+}

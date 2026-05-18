@@ -6,7 +6,6 @@ import { AiStudioProviderAdapter } from './providers/aiStudioProviderAdapter.js'
 import { AnthropicProviderAdapter } from './providers/anthropicProviderAdapter.js';
 import { MockProvider } from './providers/mockProvider.js';
 import { OpenAICompatibleProviderAdapter } from './providers/openAICompatibleProviderAdapter.js';
-import { syncActiveModelToSettings } from './claudeSettingsSync.js';
 
 type LlmRouterScope = {
   subprojectId?: string | null;
@@ -93,9 +92,6 @@ export class LlmRouter {
               warning: [result.warning, `LLM Router automatically fell back to ${provider.name}.`].filter(Boolean).join(' '),
             }
           : result;
-        if (fellBack) {
-          syncActiveModelToSettings(provider).catch(() => {});
-        }
         events.push({
           kind: 'provider_succeeded',
           status: 'ok',

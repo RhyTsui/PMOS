@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>快速开始 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Quick Start</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">快速开始</h1>
+        <p>先用一页把接入流程讲清楚。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="./client-sdk-integration.html">客户端 SDK 接入</a>
+          <a href="./server-event-integration.html">服务端事件接入</a>
+          <a href="./flows-and-acceptance.html">验收与排障</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Quick Start</span>
+          <h1>五步完成接入</h1>
+          <p>如果你是第一次接入花花世界埋点，先按这个顺序做，不要一开始就看全量事件表。</p>
+        </section>
+        <section class="section">
+          <h2>步骤 1：确认接入范围</h2>
+          <ol>
+            <li>基础账号链：111 / 114 / 102 / 104 / 105 / 201 / 203 / 204 / 206</li>
+            <li>前置链：107</li>
+            <li>新手链：108 + 20001</li>
+            <li>支付链：106 + 221 + 205</li>
+            <li>透传链：getTrackingInfo + 服务端字段消费</li>
+          </ol>
+        </section>
+        <section class="section">
+          <h2>步骤 2：客户端先通 SDK 调用</h2>
+          <div class="callout fact">
+            <p><strong>统一调用：</strong><code>GSSDK.getInstance().call("analytics", "track", info)</code></p>
+          </div>
+          <ul>
+            <li>前置事件：<code>type = "1"</code></li>
+            <li>新手引导：<code>type = "2"</code></li>
+            <li>客户端自定义事件：<code>type = "0"</code></li>
+            <li>支付 / 激励视频：<code>type = "9"</code></li>
+          </ul>
+        </section>
+        <section class="section">
+          <h2>步骤 3：服务端补齐业务上下文</h2>
+          <ul>
+            <li>角色链、支付链、资源链、自定义玩法链由服务端补齐关键字段。</li>
+            <li>特别是支付链，不能只靠客户端。</li>
+            <li>服务端统一产出 <code>game_uuid</code>、<code>start_time</code>、<code>role_id</code>、<code>server</code> 等公共头。</li>
+          </ul>
+        </section>
+        <section class="section">
+          <h2>步骤 4：明确版本与字典</h2>
+          <ul>
+            <li>前置 / 支付 / 激励视频链都必须带 <code>step_version</code>。</li>
+            <li>枚举字段必须对应字典。</li>
+            <li>内容对象 ID 必须可回溯到内容 ID 字典。</li>
+          </ul>
+        </section>
+        <section class="section">
+          <h2>步骤 5：按链路验收</h2>
+          <ul>
+            <li>支付链：106 -> 221 -> 205</li>
+            <li>前置链：按 step_version 重建漏斗</li>
+            <li>新手链：108 + 20001 同时可解释</li>
+            <li>透传链：<code>device_id / c_oneid / s_oneid / cpsid</code> 端到端一致</li>
+          </ul>
+          <div class="callout risk">
+            <p><strong>不要忽略：</strong>资料里写明的 <code>未获取 / 不发送</code> 是开发与验收重点，不是应当从文档里删掉的瑕疵。</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

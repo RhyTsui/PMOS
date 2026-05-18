@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI埋点平台 - 概览页截图还原 v1</title>
+    <style>
+      :root {
+        --bg: #f5f8fd;
+        --panel: #ffffff;
+        --line: #e4ecf7;
+        --text: #16233b;
+        --muted: #7c8daa;
+        --blue: #2f6bff;
+        --blue-soft: #eef4ff;
+        --green: #16a34a;
+        --green-soft: #e9f9ee;
+        --teal: #13b8b8;
+        --purple: #6a63ff;
+        --orange: #ff8a34;
+        --shadow: 0 10px 30px rgba(30, 58, 138, 0.06);
+        font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #fbfdff, var(--bg));
+        color: var(--text);
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: 74px 1fr;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
+        align-items: center;
+        gap: 18px;
+        padding: 0 22px;
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .cube {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #5ba2ff, #2668ff);
+        position: relative;
+      }
+
+      .project-switch {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 44px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .project-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffcf70, #13b8b8);
+      }
+
+      .version-chip {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        color: var(--blue);
+        font-size: 14px;
+      }
+
+      .search-box {
+        justify-self: center;
+        width: min(100%, 360px);
+        height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        color: var(--muted);
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .icon-btn, .user-chip {
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+      }
+
+      .user-chip {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        border-radius: 12px;
+      }
+
+      .user-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffbf94, #ef4444);
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: 184px 1fr;
+      }
+
+      .sidebar {
+        padding: 16px 14px;
+        border-right: 1px solid var(--line);
+        background: rgba(255,255,255,0.85);
+      }
+
+      .nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .nav-item {
+        height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 14px;
+        border-radius: 12px;
+        color: #294c92;
+      }
+
+      .nav-item.active {
+        background: var(--blue-soft);
+        font-weight: 700;
+      }
+
+      .nav-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: #b8d0ff;
+      }
+
+      .collapse {
+        position: absolute;
+        bottom: 16px;
+        left: 14px;
+        right: 14px;
+        height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        color: var(--muted);
+      }
+
+      .sidebar-wrap {
+        position: relative;
+      }
+
+      .workspace {
+        padding: 18px 20px 24px;
+        display: grid;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+      }
+
+      .metric-card {
+        padding: 16px;
+      }
+
+      .metric-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #334155;
+        font-size: 14px;
+      }
+
+      .metric-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+      }
+
+      .metric-value {
+        margin-top: 10px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .metric-meta {
+        margin-top: 10px;
+        display: grid;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .metric-meta strong {
+        color: var(--blue);
+        margin-right: 8px;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: 178px repeat(6, 1fr);
+        align-items: center;
+        padding: 12px 0;
+      }
+
+      .summary-title {
+        padding: 0 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .summary-title-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: #d7e6ff;
+      }
+
+      .summary-item {
+        padding: 0 24px;
+        border-left: 1px solid var(--line);
+      }
+
+      .summary-item label {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+
+      .summary-item strong {
+        font-size: 16px;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 1.35fr 0.9fr;
+        gap: 14px;
+      }
+
+      .section {
+        padding: 16px 18px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .section-head strong {
+        font-size: 16px;
+      }
+
+      .section-head span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .dynamic-list {
+        display: grid;
+        gap: 0;
+      }
+
+      .dynamic-item {
+        display: grid;
+        grid-template-columns: 88px 1fr 48px;
+        align-items: center;
+        gap: 12px;
+        min-height: 50px;
+        border-bottom: 1px solid #eef3fa;
+      }
+
+      .dynamic-tag {
+        justify-self: start;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .blue { background: #eaf2ff; color: var(--blue); }
+      .green { background: #ecfbf2; color: var(--green); }
+      .orange { background: #fff2e9; color: var(--orange); }
+      .purple { background: #f1efff; color: var(--purple); }
+      .cyan { background: #eafdfd; color: var(--teal); }
+
+      .dynamic-item span:last-child {
+        text-align: right;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .chart-toolbar {
+        display: flex;
+        gap: 10px;
+      }
+
+      .toolbar-chip {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 12px;
+        color: #47607e;
+      }
+
+      .chart-box {
+        height: 300px;
+        border: 1px solid #edf3fa;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #fbfdff, #f7fbff);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .chart-box::before {
+        content: "";
+        position: absolute;
+        inset: 42px 16px 38px 52px;
+        background:
+          linear-gradient(#edf3fa 1px, transparent 1px) 0 0 / 100% 25%,
+          linear-gradient(90deg, #edf3fa 1px, transparent 1px) 0 0 / 16.66% 100%;
+      }
+
+      .chart-lines {
+        position: absolute;
+        inset: 0;
+      }
+
+      .line {
+        position: absolute;
+        left: 54px;
+        right: 26px;
+        height: 2px;
+        border-radius: 999px;
+      }
+
+      .line.a { top: 108px; background: linear-gradient(90deg, #8fb2ff, #2668ff); transform: skewY(-6deg); }
+      .line.b { top: 156px; background: linear-gradient(90deg, #67e8f9, #0ea5a6); transform: skewY(-5deg); }
+      .line.c { top: 188px; background: linear-gradient(90deg, #9ae6b4, #22c55e); transform: skewY(-4deg); }
+
+      .chart-axis {
+        position: absolute;
+        left: 52px;
+        right: 24px;
+        bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .insight-list {
+        display: grid;
+        gap: 18px;
+      }
+
+      .insight-block strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 15px;
+      }
+
+      .insight-block ul {
+        margin: 0;
+        padding-left: 18px;
+        line-height: 1.7;
+        font-size: 14px;
+      }
+
+      .hint-box {
+        margin-top: 16px;
+        min-height: 76px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: linear-gradient(180deg, #fbfdff, #f7faff);
+        padding: 14px 16px;
+        display: grid;
+        align-content: center;
+        color: var(--muted);
+      }
+
+      .hint-box a {
+        color: var(--blue);
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      .table-panel {
+        padding: 14px 18px 18px;
+      }
+
+      .table-wrap {
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        height: 40px;
+        border-bottom: 1px solid #eef3fa;
+        text-align: left;
+        padding: 0 8px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .pill-p0, .pill-p1, .pill-p2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .pill-p0 { background: #ffe8e8; color: #ff4d4f; }
+      .pill-p1 { background: #fff1e6; color: #ff8a34; }
+      .pill-p2 { background: #eef4ff; color: var(--blue); }
+
+      .status-link { color: var(--blue); font-weight: 700; }
+      .status-ok { color: var(--green); font-weight: 700; }
+      .status-warn { color: var(--orange); font-weight: 700; }
+
+      @media (max-width: 1400px) {
+        .metric-grid { grid-template-columns: repeat(3, 1fr); }
+        .content-grid { grid-template-columns: 1fr; }
+        .summary { grid-template-columns: 1fr 1fr 1fr; gap: 12px 0; padding: 18px; }
+        .summary-title { grid-column: 1 / -1; padding-bottom: 10px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand"><div class="cube"></div><span>AI埋点平台</span></div>
+        <div class="project-switch"><div class="project-avatar"></div><strong>花花世界</strong></div>
+        <div class="top-actions">
+          <button class="icon-btn"></button>
+          <button class="icon-btn"></button>
+          <div class="user-chip"><div class="user-avatar"></div><strong>数据分析师</strong></div>
+        </div>
+      </header>
+
+      <div class="main">
+        <aside class="sidebar sidebar-wrap">
+          <nav class="nav">
+            <div class="nav-item active"><span class="nav-dot"></span><span>概览</span></div>
+            <div class="nav-item"><span class="nav-dot"></span><span>埋点需求</span></div>
+            <div class="nav-item"><span class="nav-dot"></span><span>数据字典</span></div>
+            <div class="nav-item"><span class="nav-dot"></span><span>校验规则</span></div>
+            <div class="nav-item"><span class="nav-dot"></span><span>日志查询</span></div>
+            <div class="nav-item"><span class="nav-dot"></span><span>验收报告</span></div>
+            <div class="nav-item"><span class="nav-dot"></span><span>AI 助手</span></div>
+          </nav>
+          <div class="collapse">收起菜单</div>
+        </aside>
+
+        <main class="workspace">
+          <h1>概览</h1>
+
+          <section class="metric-grid">
+            <article class="panel metric-card">
+              <div class="metric-head"><div class="metric-icon" style="background:#eef4ff;"></div><span>核心事件通过数 / 总数</span></div>
+              <div class="metric-value">2,746</div>
+            </article>
+            <article class="panel metric-card">
+              <div class="metric-head"><div class="metric-icon" style="background:#eafdfd;"></div><span>非核心事件通过数 / 总数</span></div>
+              <div class="metric-value">8,961</div>
+            </article>
+            <article class="panel metric-card">
+              <div class="metric-head"><div class="metric-icon" style="background:#f1efff;"></div><span>广告事件通过数 / 总数</span></div>
+              <div class="metric-value">1,387</div>
+            </article>
+            <article class="panel metric-card">
+              <div class="metric-head"><div class="metric-icon" style="background:#eef4ff;"></div><span>游戏客户端通过数 / 总数</span></div>
+              <div class="metric-value">3,214</div>
+            </article>
+            <article class="panel metric-card">
+              <div class="metric-head"><div class="metric-icon" style="background:#ecfbf2;"></div><span>游戏服务端通过数 / 总数</span></div>
+              <div class="metric-value">4,523</div>
+            </article>
+            <article class="panel metric-card">
+              <div class="metric-head"><div class="metric-icon" style="background:#fff2e9;"></div><span>规则命中数（本周）</span></div>
+              <div class="metric-value">12,987</div>
+            </article>
+          </section>
+
+          <section class="panel summary">
+            <div class="summary-title"><div class="summary-title-dot"></div><span>验收版本摘要</span></div>
+            <div class="summary-item"><label>版本号</label><strong>v2.4.0 正式包</strong></div>
+            <div class="summary-item"><label>版本名称</label><strong>2.4 版本正式验收</strong></div>
+            <div class="summary-item"><label>开始时间</label><strong>2024-05-12 00:00:00</strong></div>
+            <div class="summary-item"><label>结束时间</label><strong>2024-05-18 23:59:59</strong></div>
+            <div class="summary-item"><label>渠道包数量</label><strong>36 个</strong></div>
+            <div class="summary-item"><label>验收埋点数量</label><strong>28,642 个</strong></div>
+          </section>
+
+          <section class="content-grid">
+            <article class="panel section">
+              <div class="section-head"><strong>最近动态</strong><span>查看全部</span></div>
+              <div class="dynamic-list">
+                <div class="dynamic-item"><span class="dynamic-tag blue">需求变更</span><strong>REQ-240518-02 已更新</strong><span>10:30</span></div>
+                <div class="dynamic-item"><span class="dynamic-tag green">字典更新</span><strong>新增 12 个字段，更新 8 个枚举值</strong><span>09:48</span></div>
+                <div class="dynamic-item"><span class="dynamic-tag orange">规则变更</span><strong>校验规则 24 条，新增 6 条</strong><span>09:15</span></div>
+                <div class="dynamic-item"><span class="dynamic-tag purple">验收批次</span><strong>批次 B-240518-02 已完成</strong><span>09:02</span></div>
+                <div class="dynamic-item"><span class="dynamic-tag cyan">结果变化</span><strong>整体通过率从 88.1% 升至 91.9%</strong><span>04-29</span></div>
+                <div class="dynamic-item"><span class="dynamic-tag blue">步骤结构</span><strong>新手引导、前置流程等少数事件支持 事件-步骤-参数 结构</strong><span>04-29</span></div>
+              </div>
+            </article>
+
+            <article class="panel section">
+              <div class="section-head">
+                <strong>通过率趋势</strong>
+                <div class="chart-toolbar">
+                  <div class="toolbar-chip">近 7 天</div>
+                  <div class="toolbar-chip">按：事件上报方</div>
+                </div>
+              </div>
+              <div class="chart-box">
+                <div class="chart-lines">
+                  <div class="line a"></div>
+                  <div class="line b"></div>
+                  <div class="line c"></div>
+                </div>
+                <div class="chart-axis">
+                  <span>05-12</span><span>05-13</span><span>05-14</span><span>05-15</span><span>05-16</span><span>05-17</span><span>05-18</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel section">
+              <div class="section-head"><strong>AI 助手建议</strong><span>⌃</span></div>
+              <div class="insight-list">
+                <div class="insight-block">
+                  <strong>异常洞察</strong>
+                  <ul><li>部分付费事件参数缺失率上升明显，建议重点关注付费成功（amount）缺失率从 3.2% 上升至 8.7%。</li></ul>
+                </div>
+                <div class="insight-block">
+                  <strong>变更影响分析</strong>
+                  <ul><li>本周需求变更影响的事件整体通过率 89.2%，低于全量平均 91.9%，需关注 3 个高风险事件。</li></ul>
+                </div>
+                <div class="insight-block">
+                  <strong>差异总结</strong>
+                  <ul>
+                    <li>新增事件 128 个，减少事件 36 个</li>
+                    <li>新增字段 236 个，修改参数定义 112 处</li>
+                    <li>步骤型事件结构变化 8 个</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="hint-box">优化提示词可增强洞察效果，获取更精准建议。<a href="#">去优化提示词</a></div>
+            </article>
+          </section>
+
+          <section class="panel table-panel">
+            <div class="section-head"><strong>关键问题 TOP 5</strong><span>查看全部</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>优先级</th><th>事件ID</th><th>事件名称</th><th>参数</th><th>参数值</th><th>问题描述</th><th>错误原因</th><th>责任人</th><th>出现次数</th><th>最近出现时间</th><th>状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><span class="pill-p0">P0</span></td><td>EVT_100103</td><td>任务领取</td><td>item_id</td><td>缺失</td><td>部分付费事件参数缺失</td><td>amount 全链路起止脱刷</td><td>王磊</td><td>98</td><td>2024-05-18 09:56</td><td class="status-link">进行中</td></tr>
+                  <tr><td><span class="pill-p0">P0</span></td><td>EVT_100107</td><td>充值成功</td><td>amount</td><td>-</td><td>道具使用数量不准确</td><td>source 字段值不符合规范</td><td>陈晨</td><td>34</td><td>2024-05-18 07:59</td><td class="status-ok">已解决</td></tr>
+                  <tr><td><span class="pill-p1">P1</span></td><td>EVT_100102</td><td>进入游戏</td><td>uid</td><td>-</td><td>部分设备上报缺失</td><td>level 字段类型不匹配</td><td>李明</td><td>56</td><td>2024-05-18 10:28</td><td class="status-link">进行中</td></tr>
+                  <tr><td><span class="pill-p1">P1</span></td><td>EVT_100112</td><td>新手引导</td><td>step_id</td><td>113</td><td>步骤顺序异常</td><td>StepID 顺序校验未通过</td><td>刘畅</td><td>26</td><td>2024-05-18 06:32</td><td class="status-link">进行中</td></tr>
+                  <tr><td><span class="pill-p2">P2</span></td><td>EVT_100201</td><td>道具使用</td><td>item_type</td><td>未知</td><td>参数枚举值异常</td><td>字典枚举未同步</td><td>张伟</td><td>18</td><td>2024-05-18 05:48</td><td class="status-warn">待处理</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>花花世界文档多版本对比</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Version Compare</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">多版本对比</h1>
+        <p>把当前几份文档明确当成不同版本/不同定位的交付物，方便横向比较。</p>
+        <nav class="nav">
+          <a href="./index.html">返回入口</a>
+          <a href="#versions">版本说明</a>
+          <a href="#matrix">覆盖矩阵</a>
+          <a href="#recommend">使用建议</a>
+          <a href="./huahua-doc-versions-compare.xlsx">下载 Excel 对比工作簿</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero" id="versions">
+          <span class="eyebrow">Compare</span>
+          <h1>花花世界文档多版本对比</h1>
+          <p>当前我把已有产物按“版本 / 定位”重命名为 4 类，避免它们混在一起看起来都像半成品。</p>
+          <div class="metric-grid">
+            <article class="metric"><span>版本数</span><strong>4</strong></article>
+            <article class="metric"><span>人看版本</span><strong>3</strong></article>
+            <article class="metric"><span>AI 版本</span><strong>1</strong></article>
+            <article class="metric"><span>Excel</span><strong>已产出</strong></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>一、版本说明</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>版本</th>
+                  <th>定位</th>
+                  <th>适合对象</th>
+                  <th>优点</th>
+                  <th>不足</th>
+                  <th>地址</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>V1 概览版</td>
+                  <td>高层总览</td>
+                  <td>老板、项目方、第一次了解项目的人</td>
+                  <td>快、清楚、适合先读</td>
+                  <td>不是完整需求文档</td>
+                  <td><a href="./huahua-human-overview.svg">SVG 总览板</a></td>
+                </tr>
+                <tr>
+                  <td>V2 接入版</td>
+                  <td>开发者接入文档</td>
+                  <td>客户端、SDK、服务端、测试</td>
+                  <td>补了接入方式、payload、职责、时序、校验</td>
+                  <td>仍然偏“规范”而不是“业务清单”</td>
+                  <td><a href="./huahua-human-integration-manual.html">开发者版接入总册</a></td>
+                </tr>
+                <tr>
+                  <td>V3 需求版</td>
+                  <td>业务完整需求总册</td>
+                  <td>产品、数据 BP、研发交接</td>
+                  <td>更接近《代号Q》那种“清单 + 自定义事件 + 流程”结构</td>
+                  <td>还没展开到每个事件独立一节</td>
+                  <td><a href="./huahua-human-requirements-spec.html">人读需求总册</a></td>
+                </tr>
+                <tr>
+                  <td>V4 AI 结构版</td>
+                  <td>结构化规格</td>
+                  <td>AI、规则生成、自动验收</td>
+                  <td>Fact / Conflict / Assumption 清晰</td>
+                  <td>不适合作为业务方首读版本</td>
+                  <td><a href="./huahua-ai-structured-spec.html">AI 结构化规格总册</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="matrix">
+          <h2>二、覆盖矩阵</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>能力点</th>
+                  <th>V1</th>
+                  <th>V2</th>
+                  <th>V3</th>
+                  <th>V4</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>项目整体理解</td><td>强</td><td>中</td><td>中</td><td>弱</td></tr>
+                <tr><td>业务需求完整性</td><td>弱</td><td>中</td><td>强</td><td>中</td></tr>
+                <tr><td>SDK 接入方式</td><td>弱</td><td>强</td><td>中</td><td>中</td></tr>
+                <tr><td>服务端事件契约</td><td>弱</td><td>强</td><td>中</td><td>强</td></tr>
+                <tr><td>前置/新手流程清单</td><td>中</td><td>中</td><td>强</td><td>中</td></tr>
+                <tr><td>支付链字段冲突暴露</td><td>中</td><td>强</td><td>强</td><td>强</td></tr>
+                <tr><td>AI 继续消费</td><td>弱</td><td>中</td><td>中</td><td>强</td></tr>
+                <tr><td>适合作为最终正式文档底稿</td><td>弱</td><td>中</td><td>强</td><td>中</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="recommend">
+          <h2>三、使用建议</h2>
+          <div class="callout fact">
+            <p><strong>如果你要拿给业务和研发一起看：</strong>优先看 V3，再补 V2。</p>
+          </div>
+          <div class="callout fact">
+            <p><strong>如果你要拿来继续扩成最终正式文档：</strong>以 V3 为主线，把 V2 的接口契约内容并进去。</p>
+          </div>
+          <div class="callout fact">
+            <p><strong>如果你要交给 AI 或后续自动验收：</strong>看 V4。</p>
+          </div>
+          <div class="callout ok">
+            <p><strong>Excel 对比工作簿：</strong><a href="./huahua-doc-versions-compare.xlsx">huahua-doc-versions-compare.xlsx</a></p>
+          </div>
+        </section>
+        <div class="footer">文档地址：E:\AI\ai-os\subprojects\tracking-acceptance\docs\deliverables\huahua-tracking-docs\huahua-version-comparison.html</div>
+      </main>
+    </div>
+  </body>
+</html>

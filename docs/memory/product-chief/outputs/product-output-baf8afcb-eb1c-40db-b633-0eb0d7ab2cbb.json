@@ -1,0 +1,53 @@
+{
+  "id": "product-output-baf8afcb-eb1c-40db-b633-0eb0d7ab2cbb",
+  "reportId": "product-chief-e96a58e5-78e8-4724-937a-2657867c0f07",
+  "subprojectId": null,
+  "type": "ui-schema-spec",
+  "title": "Schema-driven UI and business-block spec",
+  "status": "ready-for-review",
+  "artifactPath": "docs/product-office/outputs/product-output-baf8afcb-eb1c-40db-b633-0eb0d7ab2cbb.md",
+  "generatedAt": "2026-04-28T01:40:26.458Z",
+  "specialistAgentIds": [
+    "product-agent-1dc558d0-aac8-4236-a6c3-f35c5994e61a",
+    "product-agent-cf87d426-355e-40fb-a76f-0d72c2a87389"
+  ],
+  "specialistTaskIds": [
+    "product-chief-task-d6ff76df-308d-459e-a486-3a69cfaf558d",
+    "product-chief-task-c4f29ed1-1ebf-44f2-a781-1529a0de1cf7"
+  ],
+  "specialistTaskArtifactPaths": [
+    "docs/product-office/specialist-tasks/product-chief-task-d6ff76df-308d-459e-a486-3a69cfaf558d.md",
+    "docs/product-office/specialist-tasks/product-chief-task-c4f29ed1-1ebf-44f2-a781-1529a0de1cf7.md"
+  ],
+  "multiAgentReviewId": "product-chief-review-2c2b614c-352b-4cb3-b3e6-e1705a4df2d9",
+  "multiAgentReviewStatus": "needs-human-decision",
+  "multiAgentReviewArtifactPath": "docs/product-office/multi-agent-reviews/product-chief-review-2c2b614c-352b-4cb3-b3e6-e1705a4df2d9.md",
+  "requirementIds": [
+    "req-8f88a4d0-8201-4819-97d5-183e30b802e9"
+  ],
+  "versionEntryId": "ver-50a2e85d-63ef-46f0-9f30-bf419f945911",
+  "templatePath": "docs/templates/ui_schema_spec_template.md",
+  "summary": "Schema-driven UI and business-block spec generated from Product Chief report product-chief-e96a58e5-78e8-4724-937a-2657867c0f07.",
+  "metadata": {
+    "priority": "P0",
+    "reason": "UI work should start from reusable business blocks and interaction contracts.",
+    "dependsOn": [
+      "product-definition-baseline",
+      "requirement-baseline"
+    ],
+    "autoBackfillOnSkip": true,
+    "autoBackfilledOutputIds": [],
+    "autoBackfilledOutputTypes": [],
+    "outputRecordPath": "docs/memory/product-chief/outputs/product-output-baf8afcb-eb1c-40db-b633-0eb0d7ab2cbb.json",
+    "recommendedSkillIds": [
+      "five-w-two-h",
+      "persona",
+      "requirement-pool-operations",
+      "system-boundary",
+      "version-repository-operations",
+      "claude-design-system",
+      "follow-builders",
+      "committee-gate"
+    ]
+  }
+}

@@ -6,6 +6,12 @@ export type ModelProviderRequest = {
   stageId: string;
   capability: ProviderCapability;
   prompt: string;
+  imageGeneration?: {
+    profile: 'concept-review' | 'delivery-handoff';
+    resolution: '1024x1024' | '1536x1024' | '1024x1536';
+    quality: 'standard' | 'high';
+    outputHint: string | null;
+  };
 };
 
 export type ProviderEventRecord = {

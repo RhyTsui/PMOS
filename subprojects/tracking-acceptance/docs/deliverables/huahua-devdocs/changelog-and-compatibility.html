@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>变更与兼容 - 花花世界开发者文档</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <span class="eyebrow">Compatibility</span>
+        <h1 style="margin-top: 12px; font-size: 28px;">变更与兼容</h1>
+        <p>所有版本和迁移问题统一从这里看。</p>
+        <nav class="nav">
+          <a href="./index.html">返回首页</a>
+          <a href="#steps">步骤版本</a>
+          <a href="#migration">事件迁移</a>
+          <a href="#policy">兼容策略</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <section class="hero">
+          <span class="eyebrow">Changelog</span>
+          <h1>变更与兼容</h1>
+          <p>花花世界当前最突出的版本问题不是 SDK 版本，而是步骤版本、事件迁移和字段来源变化。</p>
+        </section>
+        <section class="section" id="steps">
+          <h2>步骤版本</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>step_version</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>20250122</td><td>旧版前置 / 新手链路版本</td></tr>
+                <tr><td>20250724</td><td>新版前置链路版本，新增设备信息、服务器列表、网关等步骤</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section" id="migration">
+          <h2>事件迁移</h2>
+          <p>RM 中已明确多组自定义事件是从旧编号迁移而来，例如：</p>
+          <ul>
+            <li><code>20001 -> 原 10001</code></li>
+            <li><code>20002 -> 原 10002</code></li>
+            <li><code>20004 -> 原 10004</code></li>
+            <li><code>20012 -> 原 10014</code></li>
+            <li><code>20018 -> 原 10031</code></li>
+          </ul>
+        </section>
+        <section class="section" id="policy">
+          <h2>兼容策略</h2>
+          <ul>
+            <li>步骤版本变化必须增量更新 <code>step_version</code>，不能静默替换。</li>
+            <li>自定义事件迁移必须保留新旧映射。</li>
+            <li>字段命名变更必须同步更新字段参考和验收规则。</li>
+            <li>当前未补完字段的事件必须显式标记“待补完”，不能伪装成稳定规范。</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
