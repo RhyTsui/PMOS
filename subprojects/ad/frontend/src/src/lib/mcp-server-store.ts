@@ -11,6 +11,7 @@ const OCEANENGINE_MCP_ID = 'mcp-oceanengine';
 const DEBUG_AUTOMATION_MCP_ID = 'mcp-debug-automation';
 const TRACKING_LINK_MCP_ID = 'mcp-tracking-link';
 const REPORT_ORCHESTRATOR_MCP_ID = 'mcp-report-orchestrator';
+const PIXSO_MCP_ID = 'mcp-pixso';
 
 interface McpServersFile {
   servers: McpServerConfig[];
@@ -21,6 +22,25 @@ function nowTs(): number {
 }
 
 const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
+  {
+    id: PIXSO_MCP_ID,
+    name: 'Pixso MCP',
+    description: 'Pixso design MCP endpoint for Zhitou Chat design artifact access.',
+    category: 'function',
+    endpoint_url: 'http://127.0.0.1:3667/mcp',
+    transport: 'streamable-http',
+    auth_type: 'none',
+    auth_config: {},
+    status: 'disconnected',
+    enabled: true,
+    business_domains: ['design', 'prototype', 'zhitou-chat'],
+    bound_agents: ['demand', 'debugging'],
+    tags: ['Pixso', 'design', 'MCP'],
+    tools: [],
+    health_check_url: 'http://127.0.0.1:3667/mcp',
+    created_at: 0,
+    updated_at: 0,
+  },
   {
     id: COLLECTION_GATEWAY_MCP_ID,
     name: '统一采集网关 MCP',
