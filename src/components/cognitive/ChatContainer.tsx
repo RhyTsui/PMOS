@@ -4316,6 +4316,9 @@ export default function ChatContainer({
           <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
             <section style={{ borderRadius: 16, background: '#f6f7f9', padding: 18, minHeight: 160 }}>
               <div style={{ fontSize: 16, fontWeight: 680, color: c.textPrimary }}>你可以直接这样问</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: c.textSecondary, lineHeight: 1.6 }}>
+                这些入口会直接带入标准提问模板，点一下就能开始。
+              </div>
               <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
                 {starterGroups.map((group) => (
                   <div
@@ -4336,11 +4339,11 @@ export default function ChatContainer({
                           <button
                             key={item.label}
                             type="button"
-                            disabled={item.disabled}
-                            onClick={() => {
-                              if (item.disabled) return;
-                              onOpenAgentPanel?.(item.agent);
-                              onFollowUpClick?.(item.prompt);
+                          disabled={item.disabled}
+                          onClick={() => {
+                            if (item.disabled) return;
+                            onOpenAgentPanel?.(item.agent);
+                            onFollowUpClick?.(item.prompt);
                             }}
                             style={{
                               width: '100%',
@@ -4359,7 +4362,7 @@ export default function ChatContainer({
                             }}
                           >
                             <span style={{ minWidth: 66, fontWeight: 650, flexShrink: 0 }}>{item.label}</span>
-                            <span style={{ flex: 1, color: c.textSecondary, lineHeight: 1.5 }}>{item.description}</span>
+                            <span style={{ flex: 1, color: c.textSecondary, lineHeight: 1.5, fontSize: 12 }}>{item.description}</span>
                           </button>
                         );
                         return item.disabled ? <Tooltip key={item.label} title="规划中">{button}</Tooltip> : button;
