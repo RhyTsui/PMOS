@@ -58,6 +58,7 @@ type StageRoleSpec = {
 type StageChecks = {
   requirementToFunction: boolean;
   functionToApi: boolean;
+  apiToTask: boolean;
   objectModel: boolean;
   solutionOptimality: boolean;
   currentSystemState: boolean;
@@ -129,10 +130,27 @@ export class ReviewCommittee {
 
     const contains = (pattern: RegExp) => (!hasArtifactContent ? true : pattern.test(artifactText));
     const containsAll = (patterns: RegExp[]) => (!hasArtifactContent ? true : patterns.every((pattern) => pattern.test(artifactText)));
+    const hasUsableStructuredMapping = (kind: 'requirement-to-function' | 'function-to-api' | 'api-to-task') =>
+      artifacts.some((artifact) => {
+        if (!artifact.path.includes(kind) && !artifact.content.includes(kind)) {
+          return false;
+        }
+        return !/Replace this placeholder|待补|TBD/iu.test(artifact.content);
+      });
 
     const checks: StageChecks = {
-      requirementToFunction: contains(/requirement-to-function|Function IDs|Requirement ID|需求拆解|功能拆解/iu),
-      functionToApi: contains(/function-to-api|API \/ Event Candidate|Function ID|接口收口|接口映射/iu),
+      requirementToFunction:
+        hasUsableStructuredMapping('requirement-to-function') ||
+        (!artifacts.some((artifact) => artifact.path.includes('requirement-to-function')) &&
+          contains(/Function IDs|Requirement ID|需求拆解|功能拆解/iu)),
+      functionToApi:
+        hasUsableStructuredMapping('function-to-api') ||
+        (!artifacts.some((artifact) => artifact.path.includes('function-to-api')) &&
+          contains(/API \/ Event Candidate|Function ID|接口收口|接口映射/iu)),
+      apiToTask:
+        hasUsableStructuredMapping('api-to-task') ||
+        (!artifacts.some((artifact) => artifact.path.includes('api-to-task')) &&
+          contains(/implementationTasks|testTasks|API 到开发任务|开发任务映射/iu)),
       objectModel: contains(/core object model|实体|关系|关键状态|对象模型/iu),
       solutionOptimality: containsAll([
         /solution optimality|候选替代方案|替代方案|更优解|optimal solution/iu,
@@ -618,11 +636,11 @@ export class ReviewCommittee {
             },
             {
               title: 'Implementation impact is explicit',
-              passWhen: checks.currentSystemState || checks.developmentTaskBreakdown,
-              description: 'API review should still name touched modules, compatibility boundaries, and regression surface.',
+              passWhen: checks.apiToTask && (checks.currentSystemState || checks.developmentTaskBreakdown),
+              description: 'API review should still map contracts into implementation and test tasks with touched modules, compatibility boundaries, and regression surface.',
               impact: 'Without it, backend implementation remains a hidden second planning cycle.',
-              recommendation: 'Add impacted modules, compatibility constraints, and backend/test task notes to the API package.',
-              expectedAnswer: 'The backend team can identify where to change code and what might regress.',
+              recommendation: 'Add api-to-task mapping, impacted modules, compatibility constraints, and backend/test task notes to the API package.',
+              expectedAnswer: 'The backend team can identify which tasks implement each API and what might regress.',
               failStageId: 'backend-api',
             },
           ],
@@ -652,11 +670,11 @@ export class ReviewCommittee {
         checks: [
           {
             title: 'Function, schema, and API semantics remained connected',
-            passWhen: checks.functionToApi && checks.apiContract && checks.dataSchema,
+            passWhen: checks.functionToApi && checks.apiToTask && checks.apiContract && checks.dataSchema,
             description: 'Integration review should still show the connection from function to schema to API.',
             impact: 'Without this, the run may pass local integration while still losing governed semantics.',
-            recommendation: 'Reference the upstream matrices and contracts inside the integration output.',
-            expectedAnswer: 'Integration reviewers can trace behavior back to the governed artifacts.',
+            recommendation: 'Reference the upstream matrices, api-to-task mapping, and contracts inside the integration output.',
+            expectedAnswer: 'Integration reviewers can trace behavior back to the governed artifacts and implementation tasks.',
             failStageId: 'backend-api',
           },
           {

@@ -16,13 +16,18 @@ Secrets are stored only in local `.env`. Do not write raw tokens into tracked do
 
 | Connector | Status | Current Capability | Blocker / Note |
 | --- | --- | --- | --- |
-| Notion | page-mode connected / inbox digest sync verified | API token loaded from local `.env`; connector now supports `NOTION_DATABASE_ID` or `NOTION_PAGE_ID`; inbox knowledge digests have been written into the configured Notion page target | PRD / meeting-note history queries still benefit from real database targets; a live check against Dataki `版本库` still showed `0` retrieval hits for the fresh inbox digest pages, so downstream `Notion -> Dataki` auto-refresh is not yet proven |
+| Notion | page-mode connected / inbox digest sync verified / Dataki retrieval loop operator-verified | API token loaded from local `.env`; connector now supports `NOTION_DATABASE_ID` or `NOTION_PAGE_ID`; inbox knowledge digests have been written into the configured Notion page target; operator confirmed the downstream `Notion -> Dataki` retrieval loop is OK for the current todo | PRD / meeting-note history queries still benefit from real database targets; broader default review/stage grounding should record retrieval evidence explicitly |
 | Figma | team id configured / token remote check failing | `FIGMA_TEAM_ID` is configured from the provided team URL; team-project listing endpoint is implemented | Current local Figma token returns `403 Invalid token`; needs a fresh Figma API token or token with access to the team |
 | Web page fetch | implemented | Fetches a URL and writes source markdown into `docs/sources/inbox/` | Network access depends on local runtime permissions |
 | DingTalk AI meeting notes | implemented as manual import | Paste/export transcript into console; system writes inbox source and runs documentation normalization | Automatic extraction from logged-in DingTalk desktop is not reliable without an official export/API/source path |
 | GitHub push / CI artifact | completed for artifact publication | Remote `origin` is `https://github.com/RhyTsui/pmaios.git`; `main` is pushed without force-push; GitHub Actions run `24621458060` succeeded and published `pmaios-dist` | Artifact id `6515788105`, digest `sha256:ccc33b3e4ce274f52afc855a60d4eb21dae318fafaac3ba96e3cf728d3e19938`; direct anonymous REST download returns `401`, so download requires an authenticated GitHub browser/API session |
 
 ## Implemented API
+
+## 2026-05-21 Operator Verification
+
+- The operator has verified the `Notion -> Dataki` retrieval loop is OK for the current todo.
+- The remaining connector work is no longer live-loop repair; it is broader default adoption and explicit retrieval-evidence recording in stage/review packets.
 
 - `GET /api/connectors/status`
 - `GET /api/connectors/status?checkRemote=true`

@@ -13,6 +13,7 @@ import { MemoryService } from './memoryService.js';
 import { RequirementService } from './requirementService.js';
 import { StageRunners } from './stageRunners.js';
 import { SpecialistActivationService } from './specialistActivationService.js';
+import { PlanArchiveService } from './planArchiveService.js';
 import type { ProjectContext } from './projectPaths.js';
 
 export class OrchestratorRuntime {
@@ -23,6 +24,7 @@ export class OrchestratorRuntime {
   constructor(
     private readonly store: FileStore,
     private readonly memoryService: MemoryService,
+    private readonly planArchiveService: PlanArchiveService | null = null,
   ) {
     this.stageRunners = new StageRunners(store, memoryService);
     this.requirementService = new RequirementService(memoryService);
@@ -798,6 +800,32 @@ export class OrchestratorRuntime {
         stage: stage.label,
         type: output.kind,
       });
+
+      if (this.shouldArchivePlan(stage, artifactPath)) {
+        const workflowTask = run.tasks.find((task) => task.stageId === stage.id) ?? null;
+        const archive = await this.planArchiveService?.archivePlan({
+          title: `${run.projectName} / ${stage.label}`,
+          content,
+          source: 'workflow-planning',
+          subprojectId: run.subprojectId,
+          taskId: workflowTask?.id ?? null,
+          triggerRef: artifactPath,
+        });
+        if (archive && !archive.duplicate) {
+          if (!outputPaths.includes(archive.record.path)) {
+            outputPaths.push(archive.record.path);
+          }
+          artifacts.push({
+            id: `${stage.id}-${index + 1}-plan-archive`,
+            runId: run.id,
+            stageId: stage.id,
+            title: `${stage.label} plan archive`,
+            path: archive.record.path,
+            stage: stage.label,
+            type: 'document',
+          });
+        }
+      }
     }
 
     const execution = this.stageRunners.getExecutionBundle(run.id, stage.id);
@@ -816,6 +844,14 @@ export class OrchestratorRuntime {
 
     const extension = kind === 'json' ? '.json' : kind === 'code' ? '.ts' : '.md';
     return templatePath.replace(`*${extension}`, `${runId}${extension}`);
+  }
+
+  private shouldArchivePlan(stage: WorkflowStageRun, artifactPath: string) {
+    if (!this.planArchiveService) {
+      return false;
+    }
+    const normalized = `${stage.id} ${stage.label} ${artifactPath}`.toLowerCase();
+    return /planning|plan|roadmap|规划|计划/u.test(normalized);
   }
 
   private buildStageSummary(stage: WorkflowStageRun, outputPaths: string[], reviewReport: CommitteeReport | null) {

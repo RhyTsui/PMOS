@@ -34,7 +34,15 @@ export type McpContextState = {
 export type McpContextEvent = {
   id: string;
   toolIdentity: ToolIdentity;
-  kind: 'task_started' | 'task_completed' | 'task_blocked' | 'checkpoint' | 'decision' | 'note' | 'mode_changed';
+  kind:
+    | 'task_started'
+    | 'task_completed'
+    | 'task_blocked'
+    | 'checkpoint'
+    | 'decision'
+    | 'note'
+    | 'mode_changed'
+    | 'plan_archived';
   taskId: string | null;
   content: string;
   timestamp: string;

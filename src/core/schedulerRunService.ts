@@ -116,6 +116,9 @@ export class SchedulerRunService {
         targetStageId: run.rework?.targetStageId ?? run.currentStageId,
         reason: 'Scheduler auto resume rework after cooldown.',
       });
+      if (schedulerPlan.mode === 'auto-rework') {
+        return this.toSchedulerRun(run);
+      }
     }
 
     let safetyCounter = 0;
@@ -151,9 +154,14 @@ export class SchedulerRunService {
 
   async buildRuntimeSummary(subprojectId?: string | null) {
     const items = await this.listRuns(subprojectId);
+    const dueItems = items.filter((item) => item.dueNow);
+    const scheduledItems = items
+      .filter((item) => item.nextRunAt)
+      .sort((a, b) => (a.nextRunAt ?? '').localeCompare(b.nextRunAt ?? ''));
+    const manualAttention = items.filter((item) => item.status === 'blocked' || item.recoveryPolicy === 'manual-only');
     return {
       total: items.length,
-      dueNow: items.filter((item) => item.dueNow).length,
+      dueNow: dueItems.length,
       autoRetry: items.filter((item) => item.recoveryPolicy === 'auto-retry').length,
       autoRework: items.filter((item) => item.recoveryPolicy === 'auto-rework').length,
       scheduled: items.filter((item) => item.recoveryPolicy === 'scheduled').length,
@@ -161,6 +169,14 @@ export class SchedulerRunService {
       budgetExhausted: items.filter((item) => item.budgetExhausted).length,
       blocked: items.filter((item) => item.status === 'blocked').length,
       completed: items.filter((item) => item.status === 'completed').length,
+      dueRunIds: dueItems.map((item) => item.workflowRunId),
+      nextRunAt: scheduledItems[0]?.nextRunAt ?? null,
+      manualAttention: manualAttention.map((item) => ({
+        workflowRunId: item.workflowRunId,
+        status: item.status,
+        recoveryPolicy: item.recoveryPolicy,
+        currentStageId: item.currentStageId,
+      })),
     };
   }
 
@@ -188,7 +204,8 @@ export class SchedulerRunService {
   }
 
   private readCooldownUntil(run: WorkflowRun): Date | null {
-    const raw = typeof run.metadata.cooldownUntil === 'string' ? run.metadata.cooldownUntil : null;
+    const metadata = this.readRunMetadata(run);
+    const raw = typeof metadata.cooldownUntil === 'string' ? metadata.cooldownUntil : null;
     if (!raw) {
       return null;
     }
@@ -197,13 +214,14 @@ export class SchedulerRunService {
   }
 
   private readSchedulerAction(run: WorkflowRun): SchedulerAction | null {
-    const value = run.metadata.schedulerAction;
+    const value = this.readRunMetadata(run).schedulerAction;
     return value === 'advance' || value === 'resume-current-stage' || value === 'resume-rework-stage' ? value : null;
   }
 
   private resolveSchedulerPlan(run: WorkflowRun): ResolvedSchedulerPlan {
     const explicitAction = this.readSchedulerAction(run);
-    const explicitReason = typeof run.metadata.schedulerReason === 'string' ? run.metadata.schedulerReason : null;
+    const metadata = this.readRunMetadata(run);
+    const explicitReason = typeof metadata.schedulerReason === 'string' ? metadata.schedulerReason : null;
     if (explicitAction) {
       return {
         action: explicitAction,
@@ -336,7 +354,8 @@ export class SchedulerRunService {
     const consumedBudget = this.readConsumedBudget(run);
     const remainingBudget = Math.max(0, sessionBudget - consumedBudget);
     const budgetExhausted = remainingBudget === 0;
-    const cooldownUntil = typeof run.metadata.cooldownUntil === 'string' ? run.metadata.cooldownUntil : null;
+    const metadata = this.readRunMetadata(run);
+    const cooldownUntil = typeof metadata.cooldownUntil === 'string' ? metadata.cooldownUntil : null;
     const schedulerPlan = this.resolveSchedulerPlan(run);
     const schedulerAction = schedulerPlan.action;
     const schedulerReason = schedulerPlan.reason;
@@ -433,13 +452,17 @@ export class SchedulerRunService {
   }
 
   private readSessionBudget(run: WorkflowRun) {
-    const raw = run.metadata.schedulerSessionBudget;
+    const raw = this.readRunMetadata(run).schedulerSessionBudget;
     return typeof raw === 'number' && Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : DEFAULT_SCHEDULER_SESSION_BUDGET;
   }
 
   private readConsumedBudget(run: WorkflowRun) {
-    const raw = run.metadata.schedulerConsumedBudget;
+    const raw = this.readRunMetadata(run).schedulerConsumedBudget;
     return typeof raw === 'number' && Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : 0;
+  }
+
+  private readRunMetadata(run: WorkflowRun): Record<string, unknown> {
+    return run.metadata && typeof run.metadata === 'object' ? run.metadata : {};
   }
 
   private shouldStopForBudget(run: WorkflowRun, schedulerAction: SchedulerAction | null) {

@@ -42,6 +42,18 @@ export class StageRunners {
       return this.buildFrontendBrowserVerificationArtifact(run, stage, artifactPath, input.existingOutputPaths ?? []);
     }
 
+    if (artifactKind === 'json' && /requirement-to-function/iu.test(artifactPath)) {
+      return JSON.stringify(this.buildRequirementToFunctionArtifact(run, stage, artifactPath), null, 2);
+    }
+
+    if (artifactKind === 'json' && /function-to-api/iu.test(artifactPath)) {
+      return JSON.stringify(this.buildFunctionToApiArtifact(run, stage, artifactPath), null, 2);
+    }
+
+    if (artifactKind === 'json' && /api-to-task/iu.test(artifactPath)) {
+      return JSON.stringify(this.buildApiToTaskArtifact(run, stage, artifactPath), null, 2);
+    }
+
     if (stage.capability === 'multimodal') {
       const execution = await this.getOrCreateMultimodalExecution(run, stage);
       if (artifactKind === 'json') {
@@ -336,10 +348,168 @@ export class StageRunners {
     return JSON.stringify(report, null, 2);
   }
 
+  private buildRequirementToFunctionArtifact(run: WorkflowRun, stage: WorkflowStageRun, artifactPath: string) {
+    const runtimeContext = this.buildStageRuntimeContext(run, stage);
+    return {
+      kind: 'requirement-to-function-matrix',
+      version: 1,
+      runId: run.id,
+      stageId: stage.id,
+      artifactPath,
+      generatedAt: new Date().toISOString(),
+      status: 'draft',
+      contextBundle: runtimeContext.contextBundle,
+      rows: [
+        {
+          requirementId: 'REQ-001',
+          userRequirement: 'Replace this placeholder with the original user requirement.',
+          productRequirement: 'Map the user requirement to a product-level capability.',
+          functionIds: ['FUNC-001'],
+          acceptanceRefs: ['AC-001'],
+          evidenceRefs: runtimeContext.contextBundle.truthRefs,
+          riskLevel: 'medium',
+        },
+      ],
+      requiredReviewChecks: [
+        'Every important user requirement maps to at least one function.',
+        'Every function has acceptance evidence or an explicit unknown.',
+        'Unmapped requirements block downstream functional specification.',
+      ],
+    };
+  }
+
+  private buildFunctionToApiArtifact(run: WorkflowRun, stage: WorkflowStageRun, artifactPath: string) {
+    const runtimeContext = this.buildStageRuntimeContext(run, stage);
+    return {
+      kind: 'function-to-api-mapping',
+      version: 1,
+      runId: run.id,
+      stageId: stage.id,
+      artifactPath,
+      generatedAt: new Date().toISOString(),
+      status: 'draft',
+      contextBundle: runtimeContext.contextBundle,
+      rows: [
+        {
+          functionId: 'FUNC-001',
+          functionSummary: 'Replace this placeholder with the concrete function.',
+          apiCandidates: [
+            {
+              apiId: 'API-001',
+              method: 'GET',
+              path: '/api/example',
+              requestSchemaRef: 'TBD',
+              responseSchemaRef: 'TBD',
+              errorSemantics: ['permission-denied', 'not-found', 'validation-error'],
+            },
+          ],
+          stateDependencies: [],
+          evidenceRefs: runtimeContext.contextBundle.artifactRefs,
+        },
+      ],
+      requiredReviewChecks: [
+        'Every core function has an API, event, job, or explicit non-API implementation path.',
+        'Request, response, error, permission, and state semantics are visible before development.',
+        'Functions without implementation route block backend/data task creation.',
+      ],
+    };
+  }
+
+  private buildApiToTaskArtifact(run: WorkflowRun, stage: WorkflowStageRun, artifactPath: string) {
+    const runtimeContext = this.buildStageRuntimeContext(run, stage);
+    return {
+      kind: 'api-to-task-mapping',
+      version: 1,
+      runId: run.id,
+      stageId: stage.id,
+      artifactPath,
+      generatedAt: new Date().toISOString(),
+      status: 'draft',
+      contextBundle: runtimeContext.contextBundle,
+      rows: [
+        {
+          apiId: 'API-001',
+          implementationTasks: [
+            {
+              taskId: 'DEV-001',
+              ownerRole: 'Backend Engineer',
+              scope: 'Implement API handler, validation, persistence boundary, and tests.',
+              dependsOn: [],
+              acceptanceRefs: ['AC-001'],
+            },
+          ],
+          testTasks: [
+            {
+              taskId: 'TEST-001',
+              ownerRole: 'QA Engineer',
+              scope: 'Verify success, permission, validation, empty, and failure paths.',
+            },
+          ],
+          evidenceRefs: runtimeContext.contextBundle.artifactRefs,
+        },
+      ],
+      requiredReviewChecks: [
+        'Every API candidate maps to development and test tasks.',
+        'Task dependencies, owner roles, and acceptance references are explicit.',
+        'APIs without task projection block delivery readiness.',
+      ],
+    };
+  }
+
   private getStageSections(run: WorkflowRun, stageId: string, skills: SkillDefinition[]) {
     const skillLines = skills.map((skill) => `- ${skill.name}: ${skill.outputs.join('、')}`);
 
     switch (stageId) {
+      case 'requirements-document':
+        return [
+          '## 需求到功能矩阵',
+          '| Requirement ID | 用户需求 | 产品需求 | Function IDs | 验收引用 | 证据 | 风险 |',
+          '| --- | --- | --- | --- | --- | --- | --- |',
+          '| REQ-001 | 待补原始用户需求 | 待补产品能力描述 | FUNC-001 | AC-001 | 上游真源 / 访谈 / 调研 | medium |',
+          '',
+          '## 缺口处理',
+          '- 未映射到功能的用户需求不得进入功能规格阶段。',
+          '- 信息不足时标记 unknown，并生成澄清问题或人工确认项。',
+          '- 高风险范围变更必须携带 sourceRefs / evidenceRefs。',
+          '',
+          '## Review Packet 要点',
+          '- requirement-to-function matrix 已写入结构化 JSON。',
+          '- 每个功能都能追溯到用户需求、产品需求、验收标准和证据。',
+          '- Review 需要检查遗漏需求、伪需求、过度实现和验收不可测问题。',
+        ];
+      case 'functional-specification':
+        return [
+          '## 功能到 API 映射',
+          '| Function ID | 功能摘要 | API / Event / Job | 请求语义 | 响应语义 | 错误语义 | 权限边界 |',
+          '| --- | --- | --- | --- | --- | --- | --- |',
+          '| FUNC-001 | 待补核心功能 | API-001 | TBD | TBD | permission / validation / not-found | TBD |',
+          '',
+          '## API 到任务预投影',
+          '- 对每个 API / Event / Job 标出前端、后端、数据、测试、联调任务候选。',
+          '- 无 API 的功能必须说明是纯前端、批任务、人工流程还是配置能力。',
+          '',
+          '## Review Packet 要点',
+          '- function-to-api mapping 已写入结构化 JSON。',
+          '- 功能边界、状态、异常、权限和数据依赖必须能被开发直接消费。',
+          '- 无法落到接口或任务的功能不得进入设计 / 开发下游。',
+        ];
+      case 'backend-api':
+        return [
+          '## API 到开发任务映射',
+          '| API ID | Handler / Job | Data / Permission | Backend Task | Test Task | 联调证据 |',
+          '| --- | --- | --- | --- | --- | --- |',
+          '| API-001 | TBD | TBD | DEV-001 | TEST-001 | TBD |',
+          '',
+          '## 任务拆解规则',
+          '- 每个接口必须拆到实现任务、测试任务和联调验收任务。',
+          '- 权限、错误码、空数据、幂等、审计、回滚必须显式处理。',
+          '- API 无法对应开发任务时，阻塞交付 readiness。',
+          '',
+          '## Review Packet 要点',
+          '- api-to-task mapping 已写入结构化 JSON。',
+          '- 下游任务有 ownerRole、依赖、验收引用和证据引用。',
+          '- Review 需要检查是否仍依赖人工重新解释接口文档。',
+        ];
       case 'research-document':
         return [
           '## Competitive Analysis',

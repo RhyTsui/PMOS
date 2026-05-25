@@ -61,7 +61,7 @@ describe('DAG and retrieval governance', () => {
     const graph = await dagService.loadGraph();
     const result = await dagService.registerChange({
       runId: 'workflow-run-1',
-      nodeId: 'orchestrator-kernel',
+      nodeId: 'research-document',
       changeType: 'backend',
       previousVersion: 'v1',
       newVersion: 'v2',
@@ -69,14 +69,14 @@ describe('DAG and retrieval governance', () => {
     });
 
     expect(graph.nodes.length).toBeGreaterThan(0);
-    expect(result.analysis.dirtyNodes).toContain('capability-slots');
+    expect(result.analysis.dirtyNodes).toContain('planning-document');
     expect(result.event.affectedNodes.length).toBeGreaterThan(0);
     expect(result.dagRun.dirtyNodes.length).toBeGreaterThan(0);
 
     const runs = await dagService.listRuns();
     const changes = await dagService.listChangeEvents();
-    expect(runs[0]?.metadata.sourceNodeId).toBe('orchestrator-kernel');
-    expect(changes[0]?.nodeId).toBe('orchestrator-kernel');
+    expect(runs[0]?.metadata.sourceNodeId).toBe('research-document');
+    expect(changes[0]?.nodeId).toBe('research-document');
   });
 
   it('connects DAG dirty-node reruns back into the workflow runtime loop', async () => {
@@ -108,7 +108,7 @@ describe('DAG and retrieval governance', () => {
     await runtime.advanceRun(run.id);
     const change = await dagService.registerChange({
       runId: run.id,
-      nodeId: 'orchestrator-kernel',
+      nodeId: 'research-document',
       changeType: 'backend',
       previousVersion: 'v1',
       newVersion: 'v2',
@@ -121,11 +121,11 @@ describe('DAG and retrieval governance', () => {
       runUntilBlocked: true,
     });
 
-    expect(rerun.rerunStageIds).toContain('capability-slots');
-    expect(rerun.completedStageIds).toContain('capability-slots');
+    expect(rerun.rerunStageIds).toContain('planning-document');
+    expect(rerun.completedStageIds).toContain('planning-document');
     expect(rerun.dagRun.status).toBe('completed');
-    expect(rerun.dagRun.dirtyNodes).not.toContain('capability-slots');
-    expect(rerun.workflowRun.stages.find((stage) => stage.id === 'capability-slots')?.attemptCount).toBeGreaterThan(1);
+    expect(rerun.dagRun.dirtyNodes).not.toContain('planning-document');
+    expect(rerun.workflowRun.stages.find((stage) => stage.id === 'planning-document')?.attemptCount).toBeGreaterThan(1);
 
     const events = await workflowEngine.loadEvents(run.id);
     expect(events.some((event) => event.metadata.dagRunId === change.dagRun.id)).toBe(true);

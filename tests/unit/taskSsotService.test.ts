@@ -394,4 +394,84 @@ describe('TaskSsotService', () => {
     expect(task?.collaborationLevel).toBe('L3');
     expect(task?.gateChecks.some((gate) => gate.gateId === 'asset-backwrite-gate' && gate.status === 'block')).toBe(true);
   });
+
+  it('projects deep-decomposition artifacts into task ssot gates', async () => {
+    const { root, store } = createFixture();
+    await seedFixture(store);
+
+    const memoryService = new MemoryService(store);
+    const workflowEngine = new WorkflowEngine(store, memoryService);
+    const orchestratorRuntime = new OrchestratorRuntime(store, memoryService);
+    const mcpContextSync = new McpContextSyncService(root);
+    const taskSsotService = new TaskSsotService(store, mcpContextSync, memoryService);
+    const definition = await workflowEngine.loadDefinition();
+
+    const run = await orchestratorRuntime.initRun({
+      definition,
+      project: {
+        subprojectId: null,
+        projectName: 'Deep Mapping Fixture',
+        projectDescription: null,
+        projectRoot: '',
+        projectMemoryPath: 'docs/memory/project-memory.md',
+        selectedProvider: null,
+        providerConfigPath: null,
+        mcpConfigPath: null,
+      },
+      providerCount: 1,
+      mcpServerCount: 1,
+    });
+
+    const snapshot = await memoryService.loadRunSnapshot(run.id);
+    snapshot.tasks = snapshot.tasks.map((task) =>
+      task.stageId === 'backend-api'
+        ? {
+            ...task,
+            status: 'active',
+            artifactPaths: ['docs/implementation/api-to-task-demo.json'],
+            summary: 'backend-api api-to-task mapping ready',
+          }
+        : task,
+    );
+    await memoryService.saveRunSnapshot(run.id, snapshot);
+
+    const state = await taskSsotService.getState();
+    const backendTask = state.tasks.find((item) => item.taskId === `${run.id}-backend-api`);
+    expect(backendTask?.gateChecks.some((gate) => gate.gateId === 'api-to-task-gate' && gate.status === 'pass')).toBe(true);
+  });
+
+  it('skips legacy workflow snapshots that do not contain task arrays', async () => {
+    const { root, store } = createFixture();
+    await seedFixture(store);
+
+    const memoryService = new MemoryService(store);
+    const workflowEngine = new WorkflowEngine(store, memoryService);
+    const orchestratorRuntime = new OrchestratorRuntime(store, memoryService);
+    const mcpContextSync = new McpContextSyncService(root);
+    const taskSsotService = new TaskSsotService(store, mcpContextSync, memoryService);
+    const definition = await workflowEngine.loadDefinition();
+
+    const run = await orchestratorRuntime.initRun({
+      definition,
+      project: {
+        subprojectId: null,
+        projectName: 'Legacy Task Snapshot Fixture',
+        projectDescription: null,
+        projectRoot: '',
+        projectMemoryPath: 'docs/memory/project-memory.md',
+        selectedProvider: null,
+        providerConfigPath: null,
+        mcpConfigPath: null,
+      },
+      providerCount: 1,
+      mcpServerCount: 1,
+    });
+
+    const legacyRun = { ...run } as unknown as Record<string, unknown>;
+    delete legacyRun.tasks;
+    await store.writeJson(run.memory.runStatePath, legacyRun);
+
+    const state = await taskSsotService.getState();
+    expect(state.tasks.some((task) => task.sourceRef === run.id)).toBe(false);
+  });
 });

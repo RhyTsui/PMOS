@@ -11,6 +11,11 @@ type DispatchResult = {
   adapterKey: string | null;
 };
 
+type DispatchPendingOptions = {
+  limit?: number;
+  targetCategory?: TaskSsotSyncEnvelope['targetCategory'];
+};
+
 export class OutboxService {
   constructor(private readonly store: FileStore) {}
 
@@ -110,6 +115,13 @@ export class OutboxService {
     const target = getOutboxEnvelopePath(syncId, input.subprojectId);
     const current = await this.store.readJson<TaskSsotSyncEnvelope>(target);
     const adapterKey = this.resolveAdapterKey(current);
+    if (current.status !== 'processing') {
+      await this.store.writeJson(target, {
+        ...current,
+        status: 'processing',
+        error: null,
+      } satisfies TaskSsotSyncEnvelope);
+    }
     if (!(await this.store.exists(current.payloadRef))) {
       const failed = await this.retry(syncId, {
         subprojectId: input.subprojectId,
@@ -138,9 +150,13 @@ export class OutboxService {
     };
   }
 
-  async dispatchPending(subprojectId?: string | null) {
+  async dispatchPending(subprojectId?: string | null, options: DispatchPendingOptions = {}) {
     const items = await this.listEnvelopes(subprojectId);
-    const pending = items.filter((item) => item.status === 'pending' || item.status === 'processing');
+    const limit = Math.max(0, options.limit ?? Number.POSITIVE_INFINITY);
+    const pending = items
+      .filter((item) => item.status === 'pending' || item.status === 'processing')
+      .filter((item) => (options.targetCategory ? item.targetCategory === options.targetCategory : true))
+      .slice(0, limit);
     const results: DispatchResult[] = [];
     for (const item of pending) {
       results.push(await this.dispatchEnvelope(item.syncId, { subprojectId }));
@@ -162,12 +178,32 @@ export class OutboxService {
         return acc;
       }, {}),
     ).map(([targetCategory, total]) => ({ targetCategory, total }));
+    const openItems = items.filter((item) => item.status === 'pending' || item.status === 'processing');
+    const retryExhausted = items.filter((item) => item.status === 'failed' || item.retryCount >= item.maxRetries);
+    const oldestPending = openItems
+      .filter((item) => item.scheduledAt)
+      .sort((a, b) => (a.scheduledAt ?? '').localeCompare(b.scheduledAt ?? ''))[0] ?? null;
+    const nextPending = openItems
+      .filter((item) => item.scheduledAt)
+      .sort((a, b) => (a.scheduledAt ?? '').localeCompare(b.scheduledAt ?? ''))[0] ?? null;
     return {
       total: items.length,
       pending: items.filter((item) => item.status === 'pending' || item.status === 'processing').length,
+      processing: items.filter((item) => item.status === 'processing').length,
       completed: items.filter((item) => item.status === 'completed').length,
       failed: items.filter((item) => item.status === 'failed').length,
       dropped: items.filter((item) => item.status === 'dropped').length,
+      retryExhausted: retryExhausted.length,
+      oldestPendingAt: oldestPending?.scheduledAt ?? null,
+      nextPending: nextPending
+        ? {
+            syncId: nextPending.syncId,
+            taskId: nextPending.taskId,
+            targetSystem: nextPending.targetSystem,
+            targetCategory: nextPending.targetCategory,
+            scheduledAt: nextPending.scheduledAt,
+          }
+        : null,
       byTargetSystem,
       byCategory,
     };

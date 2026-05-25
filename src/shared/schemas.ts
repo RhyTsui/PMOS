@@ -13,6 +13,8 @@ export const GateCheckStatusSchema = z.enum(['pass', 'warn', 'block']);
 export const TaskSsotArtifactRoleSchema = z.enum(['upstream-truth', 'working-output', 'review-evidence', 'final-delivery']);
 export const TaskSsotAssignmentTypeSchema = z.enum(['owner', 'support', 'reviewer']);
 export const TaskSsotSyncStatusSchema = z.enum(['pending', 'processing', 'completed', 'failed', 'dropped']);
+export const PlanArchiveSourceSchema = z.enum(['codex-plan', 'workflow-planning', 'mcp-context-plan', 'manual']);
+export const PlanArchiveStatusSchema = z.enum(['active', 'superseded']);
 export const ProviderCapabilitySchema = z.enum([
   'text',
   'code',
@@ -181,6 +183,32 @@ export const TaskSsotSyncEnvelopeSchema = z.object({
   completedAt: z.string().nullable(),
   receiptRef: z.string().nullable(),
   error: z.string().nullable(),
+});
+
+export const PlanArchiveRecordSchema = z.object({
+  id: z.string(),
+  planThreadId: z.string(),
+  version: z.number().int().positive(),
+  status: PlanArchiveStatusSchema,
+  title: z.string(),
+  summary: z.string().nullable().default(null),
+  source: PlanArchiveSourceSchema,
+  subprojectId: z.string().nullable().default(null),
+  taskId: z.string().nullable().default(null),
+  triggerRef: z.string().nullable().default(null),
+  path: z.string(),
+  supersedes: z.string().nullable().default(null),
+  latestPath: z.string(),
+  contentHash: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const PlanArchiveIndexSchema = z.object({
+  version: z.literal(1),
+  generatedAt: z.string(),
+  subprojectId: z.string().nullable().default(null),
+  records: z.array(PlanArchiveRecordSchema),
 });
 
 export const TaskSsotBlockerTypeSchema = z.enum(['permission', 'dependency', 'risk', 'information', 'manual', 'unknown']);
@@ -1275,6 +1303,10 @@ export type TaskSsotGateEvent = z.infer<typeof TaskSsotGateEventSchema>;
 export type TaskSsotArtifactLink = z.infer<typeof TaskSsotArtifactLinkSchema>;
 export type TaskSsotAgentAssignment = z.infer<typeof TaskSsotAgentAssignmentSchema>;
 export type TaskSsotSyncEnvelope = z.infer<typeof TaskSsotSyncEnvelopeSchema>;
+export type PlanArchiveSource = z.infer<typeof PlanArchiveSourceSchema>;
+export type PlanArchiveStatus = z.infer<typeof PlanArchiveStatusSchema>;
+export type PlanArchiveRecord = z.infer<typeof PlanArchiveRecordSchema>;
+export type PlanArchiveIndex = z.infer<typeof PlanArchiveIndexSchema>;
 export type TaskSsotTask = z.infer<typeof TaskSsotTaskSchema>;
 export type TaskSsotState = z.infer<typeof TaskSsotStateSchema>;
 export type SchedulerRunStatus = z.infer<typeof SchedulerRunStatusSchema>;

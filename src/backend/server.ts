@@ -25,6 +25,7 @@ import { HermesPolicyService } from '../core/hermesPolicyService.js';
 import { ProductChiefService } from '../core/productChiefService.js';
 import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
 import { DocumentGovernanceService } from '../core/documentGovernanceService.js';
+import { PlanArchiveService } from '../core/planArchiveService.js';
 import { SkillRegistry } from '../core/skillRegistry.js';
 import { ExternalConnectorService } from '../core/externalConnectorService.js';
 import { DatakiKnowledgeBaseService } from '../core/datakiKnowledgeBaseService.js';
@@ -40,17 +41,20 @@ import { SpecialistActivationService } from '../core/specialistActivationService
 import { V07RuntimeGovernanceService } from '../core/v07RuntimeGovernanceService.js';
 import { ContextInjectionService } from '../core/contextInjectionService.js';
 import { PipelineLauncherService } from '../core/pipelineLauncherService.js';
+import { CloudMirrorService } from '../core/cloudMirrorService.js';
 import { LlmRouter } from '../llm_router/index.js';
+import type { PlanArchiveSource } from '../shared/schemas.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
 const store = new FileStore(rootDir);
 const memoryService = new MemoryService(store);
+const planArchiveService = new PlanArchiveService(store);
 const workflowEngine = new WorkflowEngine(store, memoryService);
 const reviewCommittee = new ReviewCommittee();
 const multiPmGroupSessionService = new MultiPmGroupSessionService(store);
 const providerRegistry = new ProviderRegistry(store);
 const mcpRegistry = new McpRegistry(store);
-const orchestratorRuntime = new OrchestratorRuntime(store, memoryService);
+const orchestratorRuntime = new OrchestratorRuntime(store, memoryService, planArchiveService);
 const subprojectRegistry = new SubprojectRegistry(store);
 const chatService = new ChatService(store);
 const productAgentService = new ProductAgentService(store);
@@ -85,6 +89,7 @@ const specialistActivationService = new SpecialistActivationService();
 const v07RuntimeGovernanceService = new V07RuntimeGovernanceService(store, memoryService, requirementService);
 const contextInjectionService = new ContextInjectionService();
 const pipelineLauncherService = new PipelineLauncherService();
+const cloudMirrorService = new CloudMirrorService(store);
 const llmRouter = new LlmRouter(store);
 
 const app = express();
@@ -649,6 +654,12 @@ function escapeHtml(value: string) {
 
 function normalizeSubprojectId(value: unknown) {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
+function normalizePlanArchiveSource(value: unknown): PlanArchiveSource {
+  return value === 'codex-plan' || value === 'workflow-planning' || value === 'mcp-context-plan' || value === 'manual'
+    ? value
+    : 'manual';
 }
 
 type DatakiContextDefaults = {
@@ -3319,6 +3330,57 @@ app.get('/api/document-governance/audit', async (req, res) => {
   res.json(audit);
 });
 
+app.post('/api/document-governance/artifact-flow-check', async (req, res) => {
+  res.json(
+    await documentGovernanceService.evaluateArtifactFlow({
+      artifactPaths: Array.isArray(req.body?.artifactPaths) ? req.body.artifactPaths.filter((item: unknown) => typeof item === 'string') : [],
+      subprojectId: normalizeSubprojectId(req.body?.subprojectId),
+      requireRegistered: req.body?.requireRegistered === true,
+      source: typeof req.body?.source === 'string' ? req.body.source : 'api',
+    }),
+  );
+});
+
+app.post('/api/plan-archives', async (req, res) => {
+  if (typeof req.body?.title !== 'string' || !req.body.title.trim()) {
+    res.status(400).json({ error: 'title is required' });
+    return;
+  }
+  if (typeof req.body?.content !== 'string' || !req.body.content.trim()) {
+    res.status(400).json({ error: 'content is required' });
+    return;
+  }
+  const result = await planArchiveService.archivePlan({
+    title: req.body.title,
+    content: req.body.content,
+    source: normalizePlanArchiveSource(req.body?.source),
+    subprojectId: normalizeSubprojectId(req.body?.subprojectId),
+    taskId: typeof req.body?.taskId === 'string' ? req.body.taskId : null,
+    planThreadId: typeof req.body?.planThreadId === 'string' ? req.body.planThreadId : null,
+    triggerRef: typeof req.body?.triggerRef === 'string' ? req.body.triggerRef : null,
+  });
+  res.status(result.duplicate ? 200 : 201).json(result);
+});
+
+app.get('/api/plan-archives', async (req, res) => {
+  res.json({
+    items: await planArchiveService.listArchives({
+      subprojectId: normalizeSubprojectId(req.query.subprojectId),
+      source: typeof req.query.source === 'string' ? normalizePlanArchiveSource(req.query.source) : null,
+      limit: typeof req.query.limit === 'string' ? parseInt(req.query.limit, 10) : null,
+    }),
+  });
+});
+
+app.get('/api/plan-archives/:archiveId', async (req, res) => {
+  const archive = await planArchiveService.getArchive(req.params.archiveId, normalizeSubprojectId(req.query.subprojectId));
+  if (!archive) {
+    res.status(404).json({ error: 'plan archive not found' });
+    return;
+  }
+  res.json(archive);
+});
+
 app.post('/api/product-agents', async (req, res) => {
   if (typeof req.body?.name !== 'string' || !req.body.name.trim()) {
     res.status(400).json({ error: 'name is required' });
@@ -4277,30 +4339,19 @@ app.post('/api/task-ssot/tasks/:taskId/pipeline-launcher/:planId/trigger', async
     return;
   }
   const workflowRun = await orchestratorRuntime.loadRun(task.sourceRef, subprojectId);
-  const plan = pipelineLauncherService.buildPlans(task, workflowRun).find((item) => item.id === req.params.planId) ?? null;
-  if (!plan) {
-    res.status(404).json({ error: 'plan_not_found' });
-    return;
+  try {
+    res.json(
+      await pipelineLauncherService.triggerPlan({
+        task,
+        workflowRun,
+        planId: req.params.planId,
+        resumeRun: (targetStageId, reason) => orchestratorRuntime.resumeRun(workflowRun.id, { targetStageId, reason }),
+      }),
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(message.includes('not found') ? 404 : 400).json({ error: 'pipeline_launcher_trigger_failed', message });
   }
-  if (plan.status !== 'ready') {
-    res.status(400).json({ error: 'plan_not_ready', plan });
-    return;
-  }
-  const targetStageId = plan.targetStages[0] ?? null;
-  if (!targetStageId) {
-    res.status(400).json({ error: 'plan_has_no_target_stage' });
-    return;
-  }
-  const updated = await orchestratorRuntime.resumeRun(workflowRun.id, {
-    targetStageId,
-    reason: `pipeline-launcher:${plan.id}`,
-  });
-  res.json({
-    taskId: task.taskId,
-    plan,
-    targetStageId,
-    workflowRun: updated,
-  });
 });
 
 app.get('/api/task-ssot/tasks/:taskId/frontend-browser-verification', async (req, res) => {
@@ -4558,9 +4609,32 @@ app.get('/api/outbox/runtime', async (req, res) => {
   res.json(await outboxService.buildRuntimeSummary(normalizeSubprojectId(req.query.subprojectId)));
 });
 
+app.get('/api/cloud-mirror/runtime-status', async (req, res) => {
+  const subprojectId = normalizeSubprojectId(req.query.subprojectId);
+  const [mcpContext, taskState, outboxRuntime, schedulerRuntime, documentGovernanceAudit] = await Promise.all([
+    mcpContextSync.getState(),
+    taskSsotService.getState(subprojectId),
+    outboxService.buildRuntimeSummary(subprojectId),
+    schedulerRunService.buildRuntimeSummary(subprojectId),
+    documentGovernanceService.readLatestAudit(subprojectId),
+  ]);
+  res.json(
+    await cloudMirrorService.writeRuntimeStatus({
+      mcpContext,
+      taskState,
+      outboxRuntime,
+      schedulerRuntime,
+      documentGovernanceAudit,
+      subprojectId,
+    }),
+  );
+});
+
 app.post('/api/outbox/dispatch', async (req, res) => {
   const subprojectId = normalizeSubprojectId(req.body?.subprojectId ?? req.query.subprojectId);
-  const items = await outboxService.dispatchPending(subprojectId);
+  const limit = typeof req.body?.limit === 'number' ? req.body.limit : undefined;
+  const targetCategory = typeof req.body?.targetCategory === 'string' ? req.body.targetCategory : undefined;
+  const items = await outboxService.dispatchPending(subprojectId, { limit, targetCategory: targetCategory as never });
   res.json({ items, total: items.length });
 });
 

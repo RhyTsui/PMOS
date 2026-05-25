@@ -139,4 +139,23 @@ describe('runtime capability closure services', () => {
     expect(plans[0]?.status).toBe('ready');
     expect(plans[0]?.targetStages).toContain('design-document');
   });
+
+  it('triggers a ready pipeline launcher plan through the service boundary', async () => {
+    const service = new PipelineLauncherService();
+    const run = createRun();
+    const result = await service.triggerPlan({
+      task: createTask(),
+      workflowRun: run,
+      planId: 'functional-to-design',
+      resumeRun: async (targetStageId, reason) => ({
+        ...run,
+        currentStageId: targetStageId,
+        metadata: { reason },
+      }),
+    });
+
+    expect(result.targetStageId).toBe('design-document');
+    expect(result.workflowRun.currentStageId).toBe('design-document');
+    expect(result.workflowRun.metadata.reason).toBe('pipeline-launcher:functional-to-design');
+  });
 });

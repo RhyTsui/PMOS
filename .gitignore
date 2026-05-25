@@ -14,6 +14,7 @@ yarn-error.log*
 pnpm-debug.log*
 .codex*.log
 .tmp/
+.runtime/
 .wiki-server*.log
 tmp-dev-backend*.log
 auto-debug-workbench-check*.png
@@ -49,3 +50,4 @@ product-repo/
 subprojects/coze-studio/
 subprojects/wekrona/
 subprojects/ad/imported/projects/
+docs/sources/inbox/aiad-next-frontend/

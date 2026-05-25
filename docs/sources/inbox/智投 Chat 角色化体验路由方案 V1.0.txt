@@ -1,0 +1,1189 @@
+智投 Chat 角色化体验路由方案 V1.0
+1. 一句话定义
+
+智投 Chat 根据用户的 角色、项目、当前分析视角、个人偏好，自动决定：
+
+展示哪些快捷入口
+默认用什么业务口径理解问题
+路由到哪个 Agent / Workflow / Skill
+模糊越界问题是否需要确认
+明确越界问题如何引导回当前角色范围
+回答时用什么风格和数据解释
+
+MCP 风控仍然保留，但只作为最终兜底，不作为主要产品体验路径。
+
+2. 核心目标
+
+这个方案解决三个问题：
+
+2.1 提升用户体验
+
+用户不再频繁遇到：
+
+无权限
+工具调用失败
+MCP 拒绝
+无法访问
+
+而是系统提前根据角色和视角引导用户进入合适的业务范围。
+
+2.2 减少 MCP 风控拒绝
+
+Chat 层先做体验路由和语义收敛，减少不必要的越界工具调用。
+
+例如设计师问：
+
+今天广告账户总消耗多少？
+
+系统不要先去调广告数据 MCP 再被拒绝，而是前置判断：
+
+这是投放视角数据。
+当前角色默认是素材创意视角。
+可以引导用户查看素材侧消耗，或生成给优化师确认的协同需求。
+2.3 让 Chat 更像企业内部专家助手
+
+不同角色问同一句话，系统给出不同默认理解。
+
+例如：
+
+今天总消耗多少？
+角色	默认理解
+设计师	今天素材侧总消耗
+投放优化师	今天广告投放总消耗
+大老板	今天项目经营视角下的总投入
+财务	今天财务/预算口径下的消耗
+观察员	今天可见范围内的摘要消耗
+
+这就是角色化体验路由的价值。
+
+3. 设计原则
+原则一：角色不是权限，角色是默认工作模式
+
+角色决定：
+
+默认视角
+默认入口
+默认 Agent
+默认指标口径
+默认回答风格
+默认降级策略
+
+但角色不等于最终数据权限。
+
+最终能不能查数据，还是由 MCP 中台和后端权限决定。
+
+原则二：视角可以切换，但不代表权限升级
+
+用户可以尝试不同分析视角，比如设计师可以切到：
+
+投放摘要视角
+经营摘要视角
+
+但这不代表设计师获得了广告账户明细、包管理、回传日志等权限。
+
+视角切换只是改变：
+
+问题理解方式
+分析框架
+回答角度
+可用摘要能力
+
+不是权限升级。
+
+原则三：模糊越界先确认，明确越界先引导
+
+用户问题分三类处理。
+
+1. 明确在范围内
+
+直接执行。
+
+例如设计师问：
+
+今天素材表现怎么样？
+
+系统直接进入：
+
+素材分析 Agent
+→ 素材表现 Workflow
+2. 模糊但可能跨范围
+
+先按角色默认视角解释，并让用户确认。
+
+例如设计师问：
+
+今天总消耗多少？
+
+系统回答：
+
+我会按你的设计师角色，默认理解为“素材侧总消耗”。
+该数据只代表素材创意视角，不等于完整广告投放总消耗。
+
+是否按素材侧消耗继续查询？
+
+快捷按钮：
+
+按素材侧查询
+切到投放摘要视角
+取消
+3. 明确超过范围
+
+不执行越界查询，说明原因，并引导回可处理范围。
+
+例如设计师问：
+
+今天广告账户总消耗多少？
+
+系统回答：
+
+你问的是广告账户总消耗，属于投放视角数据。
+
+当前我可以帮你查看素材侧消耗，或生成一条给优化师确认广告账户消耗的协同需求。
+4. V1.0 不要做复杂
+
+不要一开始就做成完整权限平台。
+
+V1.0 只需要做 5 个核心配置：
+
+1. Role Profile：角色配置
+2. Perspective Profile：分析视角配置
+3. Shortcut Entry：快捷入口配置
+4. Route Rule：路由规则配置
+5. Prompt Profile：角色提示词配置
+
+MCP 权限不重复做。
+
+Chat 只做体验层和路由层。
+
+5. 核心对象设计
+5.1 Role：角色
+
+角色代表用户岗位身份和默认工作模式。
+
+第一版建议支持：
+
+角色	默认视角	说明
+大老板	经营视角	看结论、趋势、风险、重点动作
+项目制作人	项目经营视角	看项目整体、版本、投放、素材、收入联动
+设计师	素材创意视角	看素材表现、创意趋势、素材需求
+投放优化师	广告投放视角	看消耗、ROI、异常、包、回传
+财务	财务视角	看预算、结算、成本、消耗口径
+观察员	只读摘要视角	看可见范围内摘要，不做操作
+5.2 Perspective：分析视角
+
+视角代表当前问题的业务观察角度。
+
+建议第一版支持：
+
+视角	说明
+creative	素材创意视角
+delivery	广告投放视角
+business	经营视角
+finance	财务视角
+diagnosis	技术诊断视角
+readonly	只读观察视角
+5.3 Perspective Level：视角级别
+
+为了不复杂，可以只分三级：
+
+级别	含义
+summary	摘要视角，只看汇总和趋势
+analysis	分析视角，可以做原因分析
+operation	操作视角，可以创建、修改、执行动作
+
+例如设计师可以允许：
+
+creative.analysis
+delivery.summary
+business.summary
+
+但不允许：
+
+delivery.operation
+diagnosis.analysis
+finance.analysis
+
+这样设计师可以“理解投放”，但不能“操作投放”。
+
+6. 角色与视角配置建议
+6.1 角色视角矩阵
+角色	默认视角	可切换视角
+大老板	business.analysis	delivery.summary、creative.summary、finance.summary
+项目制作人	business.analysis	delivery.summary、creative.analysis、finance.summary
+设计师	creative.analysis	delivery.summary、business.summary
+投放优化师	delivery.analysis	creative.analysis、business.summary、diagnosis.summary
+财务	finance.analysis	business.summary、delivery.summary
+观察员	readonly.summary	business.summary、creative.summary、delivery.summary
+
+这里的重点是：
+
+用户可以跨角色理解业务，但不能跨权限执行操作。
+
+7. 用户体验流程
+7.1 用户进入 Chat
+
+系统自动加载：
+
+user_id
+project_id
+role
+default_perspective
+enabled_perspectives
+user_preferences
+visible_shortcuts
+
+然后前端展示：
+
+当前角色：设计师
+当前视角：素材创意视角
+可切换视角：投放摘要、经营摘要
+快捷入口：素材表现、素材日报、竞品素材、素材需求
+7.2 用户切换视角
+
+设计师可以从：
+
+素材创意视角
+
+切换到：
+
+投放摘要视角
+
+切换后，系统提示：
+
+已切换到投放摘要视角。
+你可以查看投放趋势、消耗摘要、ROI 摘要，但不能进入广告账户明细、包管理或投放操作。
+7.3 用户提问
+
+系统处理逻辑：
+
+识别意图
+  ↓
+判断是否在当前角色/视角范围内
+  ↓
+如果在范围内：直接执行
+如果模糊跨范围：给默认理解，让用户确认
+如果明确超范围：不执行越界查询，引导回可处理范围
+  ↓
+选择 Agent / Workflow / Skill
+  ↓
+调用 MCP
+  ↓
+组织回答并带上角色语义和口径说明
+8. 路由判断规则
+8.1 路由优先级
+
+从高到低：
+
+1. 用户显式表达
+2. 当前页面 / 当前对象上下文
+3. 当前会话上下文
+4. 用户当前选择的分析视角
+5. 用户角色默认视角
+6. 项目默认配置
+8.2 举例
+例子一：设计师问“今天素材消耗多少？”
+
+明确在范围内。
+
+角色：设计师
+视角：素材创意视角
+意图：查询素材消耗
+处理：直接执行
+
+回答：
+
+今天素材侧累计消耗 32.5 万。
+
+统计范围：当前项目下已接入素材数据的媒体。
+说明：这是素材创意视角下的消耗，不代表完整广告投放总消耗。
+例子二：设计师问“今天总消耗多少？”
+
+模糊跨范围。
+
+“总消耗”可能是素材消耗，也可能是广告总消耗。
+设计师默认是素材创意视角。
+
+系统先确认：
+
+我会按你的设计师角色，默认理解为“素材侧总消耗”。
+该数据不等于完整广告投放总消耗。
+
+是否按素材侧消耗继续查询？
+例子三：设计师问“今天广告账户总消耗多少？”
+
+明确超范围。
+
+系统不调用广告账户数据工具，直接引导：
+
+你问的是广告账户总消耗，属于投放视角数据。
+
+我可以帮你：
+1. 查看素材侧消耗；
+2. 切到投放摘要视角查看可见范围内的投放摘要；
+3. 生成一条给优化师确认广告账户消耗的协同需求。
+例子四：投放优化师问“帮我出日报”
+
+明确在投放角色默认范围内。
+
+默认生成投放日报。
+
+回答：
+
+我将按广告投放视角生成投放日报，包含总消耗、ROI、分媒体表现、异常波动和明日建议。
+例子五：大老板问“今天怎么样？”
+
+老板默认是经营视角。
+
+系统不要展示明细，而是输出摘要：
+
+今天项目整体表现稳定，消耗较昨日上升 8%，ROI 略有回落，主要受 A 媒体成本上升影响。
+
+建议关注：
+1. A 媒体成本波动；
+2. 两个高消耗低回收计划；
+3. 本周素材衰退导致的转化下降。
+9. Agent / Workflow / Skill 路由设计
+9.1 简化结构
+
+不要把 Agent 设计太多。
+
+V1.0 建议先保留 6 个 Agent：
+
+Agent	负责范围
+creative_agent	素材表现、创意诊断、素材指标
+delivery_agent	投放消耗、ROI、包管理、投放分析
+diagnosis_agent	没量、回传、联调、归因异常
+report_agent	日报、周报、汇总报告
+business_agent	老板/制作人经营视角分析
+collaboration_agent	提需求、跟进需求、协同清单
+9.2 典型路由表
+用户问题	设计师默认路由	投放默认路由	老板默认路由
+今天总消耗多少？	素材消耗，需确认	广告总消耗	经营投入摘要
+今天 ROI 怎么样？	引导到投放摘要或素材影响分析	ROI 分析	经营 ROI 摘要
+帮我出日报	素材日报	投放日报	经营日报
+为什么没量？	素材侧影响分析 / 给投放清单	没量排查	风险摘要
+最近竞品什么素材起量？	竞品素材洞察	竞品素材洞察	市场趋势摘要
+帮我提需求	素材需求	投放/素材需求	项目协同事项
+10. 快捷入口设计
+10.1 快捷入口必须动态展示
+
+快捷入口根据：
+
+role
+current_perspective
+project
+user_preference
+feature_flag
+
+动态生成。
+
+不要写死在前端。
+
+10.2 设计师快捷入口
+素材表现
+- 今天素材表现怎么样？
+- 哪些素材点击率高？
+- 哪些素材转化率异常？
+- 帮我分析素材衰退原因
+
+指标解释
+- 素材点击率怎么算？
+- 素材转化率口径是什么？
+- 为什么素材报表和日报不一致？
+
+报告生成
+- 帮我生成素材日报
+- 帮我生成创意周报
+- 汇总今天素材表现
+
+市场情报
+- 最近竞品什么素材起量了？
+- 游戏买量素材趋势
+- 最近热门创意方向有哪些？
+
+业务协同
+- 帮我提素材需求
+- 跟进我的设计需求
+- 汇总投放同学的素材反馈
+10.3 投放优化师快捷入口
+投放交付
+- 哪些包能投？
+- 为什么不能投？
+- 帮我准备投放包
+
+异常排查
+- 为什么没量？
+- 为什么没回传？
+- 为什么联调失败？
+
+数据分析
+- 今天 ROI 怎么样？
+- 看看异常波动
+- 分析下转化率
+
+报告生成
+- 帮我出日报
+- 帮我生成周报
+- 汇总今天投放
+
+市场情报
+- 最近竞品什么素材起量了？
+- 游戏买量行业动态
+- 媒体的流量趋势
+10.4 老板 / 制作人快捷入口
+经营概览
+- 今天项目整体怎么样？
+- 本周 ROI 趋势如何？
+- 哪些风险需要关注？
+
+异常摘要
+- 今天有哪些异常波动？
+- 哪些媒体成本变高了？
+- 哪些素材或计划拖累表现？
+
+决策建议
+- 明天应该重点关注什么？
+- 哪些动作优先级最高？
+- 帮我生成项目经营日报
+10.5 财务快捷入口
+成本预算
+- 今天消耗和预算怎么样？
+- 本月预算使用进度如何？
+- 哪些项目成本异常？
+
+结算口径
+- 媒体消耗和财务结算差异是什么？
+- 这个成本口径怎么算？
+- 帮我生成成本汇总
+10.6 观察员快捷入口
+项目摘要
+- 今天项目整体表现如何？
+- 最近有哪些异常？
+- 本周趋势怎么样？
+
+报告查看
+- 查看今天日报
+- 查看本周周报
+- 汇总关键变化
+
+观察员只读，不提供操作入口。
+
+11. 用户偏好设计
+
+用户可以配置一些轻量偏好，但不要太复杂。
+
+11.1 用户可配置项
+偏好	说明
+默认分析视角	从当前角色允许的视角里选择
+回答详细度	简洁 / 标准 / 详细
+是否显示跨视角建议	开启后，系统会提示可切换到其他视角
+常用快捷入口	用户可以收藏常用入口
+默认报告类型	例如素材日报 / 投放日报 / 经营日报
+11.2 示例
+
+设计师的用户偏好：
+
+{
+  "user_id": "u001",
+  "default_perspective": "creative.analysis",
+  "answer_depth": "standard",
+  "show_cross_perspective_tips": true,
+  "favorite_shortcuts": [
+    "creative_daily_report",
+    "creative_performance_analysis",
+    "competitor_creative_insight"
+  ]
+}
+12. 后端开发需求
+12.1 后端模块清单
+
+后端需要 7 个模块。
+
+模块	作用
+Context Service	加载用户角色、项目、视角、偏好
+Config Service	管理角色、视角、快捷入口、路由规则
+Intent Router	识别意图和是否越界
+Route Resolver	决定 Agent / Workflow / Skill
+Prompt Builder	根据角色和视角生成提示词上下文
+MCP Client	调用 MCP，并传递角色/视角上下文
+Fallback Handler	MCP 拒绝或越界时生成引导回答
+12.2 Context Service
+
+用户进入 Chat 时，后端返回完整上下文。
+
+API
+GET /api/chat/context?project_id=xxx
+返回
+{
+  "user_id": "u001",
+  "project_id": "game_x",
+  "role": {
+    "role_id": "designer",
+    "role_name": "设计师"
+  },
+  "current_perspective": {
+    "perspective_id": "creative.analysis",
+    "name": "素材创意视角"
+  },
+  "enabled_perspectives": [
+    {
+      "perspective_id": "creative.analysis",
+      "name": "素材创意视角",
+      "is_default": true
+    },
+    {
+      "perspective_id": "delivery.summary",
+      "name": "投放摘要视角",
+      "is_default": false
+    },
+    {
+      "perspective_id": "business.summary",
+      "name": "经营摘要视角",
+      "is_default": false
+    }
+  ],
+  "shortcuts": [
+    {
+      "group": "素材表现",
+      "items": [
+        {
+          "shortcut_id": "creative_today_performance",
+          "title": "今天素材表现怎么样？"
+        }
+      ]
+    }
+  ],
+  "preferences": {
+    "answer_depth": "standard",
+    "show_cross_perspective_tips": true
+  }
+}
+12.3 角色配置 Role Profile
+
+建议用配置表或 JSON 配置。
+
+{
+  "role_id": "designer",
+  "role_name": "设计师",
+  "default_perspective": "creative.analysis",
+  "enabled_perspectives": [
+    "creative.analysis",
+    "delivery.summary",
+    "business.summary"
+  ],
+  "preferred_agents": [
+    "creative_agent",
+    "report_agent",
+    "business_agent",
+    "collaboration_agent"
+  ],
+  "default_response_style": "偏素材洞察、创意建议、说明统计范围",
+  "ambiguous_policy": "confirm_default_scope",
+  "explicit_out_of_scope_policy": "guide_back_to_allowed_scope"
+}
+12.4 视角配置 Perspective Profile
+{
+  "perspective_id": "creative.analysis",
+  "perspective_name": "素材创意视角",
+  "data_scope_description": "当前项目下已接入素材数据的媒体和素材维度指标",
+  "default_metrics": {
+    "总消耗": "creative_total_spend",
+    "转化率": "creative_cvr",
+    "点击率": "creative_ctr",
+    "日报": "creative_daily_report"
+  },
+  "must_disclose_scope_metrics": [
+    "总消耗",
+    "转化率",
+    "成本"
+  ]
+}
+12.5 路由结果 Route Result
+
+每次用户提问，后端都生成一个结构化路由结果。
+
+{
+  "route_id": "r_001",
+  "query": "今天总消耗多少？",
+  "role": "designer",
+  "current_perspective": "creative.analysis",
+  "scope_status": "ambiguous_cross_scope",
+  "default_resolution": {
+    "metric": "creative_total_spend",
+    "meaning": "素材侧总消耗",
+    "needs_confirmation": true
+  },
+  "candidate_actions": [
+    {
+      "action_id": "confirm_creative_spend",
+      "label": "按素材侧消耗查询",
+      "agent": "creative_agent",
+      "workflow": "creative_metric_query",
+      "skill": "query_creative_spend"
+    },
+    {
+      "action_id": "switch_delivery_summary",
+      "label": "切到投放摘要视角",
+      "agent": "delivery_agent",
+      "workflow": "delivery_summary_query",
+      "skill": "query_delivery_summary_spend"
+    }
+  ]
+}
+12.6 消息发送 API
+API
+POST /api/chat/message
+请求
+{
+  "conversation_id": "c001",
+  "project_id": "game_x",
+  "message": "今天总消耗多少？",
+  "current_perspective": "creative.analysis"
+}
+返回：需要确认
+{
+  "type": "confirmation_required",
+  "route_id": "r_001",
+  "message": "我会按你的设计师角色，默认理解为“素材侧总消耗”。该数据不等于完整广告投放总消耗。是否按素材侧消耗继续查询？",
+  "actions": [
+    {
+      "action_id": "confirm_creative_spend",
+      "label": "按素材侧查询"
+    },
+    {
+      "action_id": "switch_delivery_summary",
+      "label": "切到投放摘要视角"
+    },
+    {
+      "action_id": "cancel",
+      "label": "取消"
+    }
+  ]
+}
+12.7 确认执行 API
+POST /api/chat/confirm-route
+请求
+{
+  "route_id": "r_001",
+  "action_id": "confirm_creative_spend"
+}
+返回
+{
+  "type": "answer",
+  "message": "今天素材侧累计消耗 32.5 万。\n\n统计范围：当前项目下已接入素材数据的媒体。\n说明：这是素材创意视角下的消耗，不代表完整广告投放总消耗。",
+  "scope_note": {
+    "perspective": "素材创意视角",
+    "scope": "已接入素材数据的媒体",
+    "not_equal_to": "完整广告投放总消耗"
+  }
+}
+12.8 用户偏好 API
+GET /api/user/preferences
+PUT /api/user/preferences
+请求示例
+{
+  "default_perspective": "creative.analysis",
+  "answer_depth": "standard",
+  "show_cross_perspective_tips": true,
+  "favorite_shortcuts": [
+    "creative_daily_report",
+    "creative_today_performance"
+  ]
+}
+12.9 MCP 调用要求
+
+Chat 调 MCP 时，必须带上上下文：
+
+{
+  "user_id": "u001",
+  "project_id": "game_x",
+  "role": "designer",
+  "current_perspective": "creative.analysis",
+  "route_id": "r_001",
+  "agent": "creative_agent",
+  "workflow": "creative_metric_query",
+  "skill": "query_creative_spend",
+  "requested_resource": "creative_performance_summary",
+  "requested_metric": "creative_total_spend"
+}
+
+如果 MCP 拒绝，后端不要原样返回“权限失败”，而是进入 Fallback Handler。
+
+12.10 Fallback Handler
+
+MCP 拒绝时，返回角色化降级回答。
+
+例如：
+
+{
+  "type": "fallback",
+  "message": "当前无法获取广告账户总消耗。我可以继续帮你查看素材侧消耗，或生成一条给优化师确认广告消耗的协同需求。",
+  "actions": [
+    {
+      "action_id": "query_creative_spend",
+      "label": "查看素材侧消耗"
+    },
+    {
+      "action_id": "create_optimizer_request",
+      "label": "生成给优化师的需求"
+    }
+  ]
+}
+13. 前端开发需求
+13.1 前端页面与组件
+
+前端需要 6 类组件。
+
+组件	说明
+Role / Perspective Header	显示当前角色和当前分析视角
+Perspective Switcher	允许用户切换可用分析视角
+Dynamic Shortcut Panel	动态展示快捷入口
+Confirmation Card	模糊越界时让用户确认范围
+Fallback Action Card	明确越界或 MCP 拒绝时展示替代动作
+Scope Note	回答中展示数据视角、统计范围和口径说明
+13.2 Chat 顶部区域
+
+展示：
+
+当前项目：游戏 A
+当前角色：设计师
+当前视角：素材创意视角
+可切换：投放摘要 / 经营摘要
+
+交互：
+
+点击视角可以切换
+切换后刷新快捷入口
+切换后后续对话按新视角理解
+13.3 快捷入口动态展示
+
+前端不写死快捷入口。
+
+流程：
+
+进入页面
+  ↓
+调用 /api/chat/context
+  ↓
+拿到 shortcuts
+  ↓
+按 group 渲染
+
+快捷入口结构：
+
+{
+  "group": "素材表现",
+  "items": [
+    {
+      "shortcut_id": "creative_today_performance",
+      "title": "今天素材表现怎么样？"
+    }
+  ]
+}
+13.4 模糊越界确认卡
+
+当后端返回：
+
+"type": "confirmation_required"
+
+前端渲染确认卡。
+
+展示内容：
+
+我会按你的设计师角色，默认理解为“素材侧总消耗”。
+该数据不等于完整广告投放总消耗。
+
+[按素材侧查询] [切到投放摘要视角] [取消]
+
+用户点击后调用：
+
+POST /api/chat/confirm-route
+13.5 明确越界引导卡
+
+当后端返回：
+
+"type": "fallback"
+
+前端渲染替代动作。
+
+例如：
+
+你问的是广告账户总消耗，属于投放视角数据。
+
+我可以帮你：
+[查看素材侧消耗]
+[切到投放摘要视角]
+[生成给优化师的需求]
+13.6 回答口径说明
+
+凡是后端返回 scope_note，前端要展示轻量口径说明。
+
+例如：
+
+当前口径：素材创意视角
+统计范围：已接入素材数据的媒体
+说明：不代表完整广告投放总消耗
+
+可以做成灰色小卡片，不要太打扰用户。
+
+13.7 用户偏好设置
+
+设置入口可以放在 Chat 右上角。
+
+支持：
+
+默认分析视角
+回答详细度
+是否显示跨视角建议
+收藏快捷入口
+
+第一版偏好设置可以很简单，不需要复杂后台。
+
+14. Prompt 配置需求
+
+Prompt 只负责表达和语义引导，不负责权限判断。
+
+14.1 通用角色上下文 Prompt
+当前用户上下文：
+- 项目：{{project_name}}
+- 角色：{{role_name}}
+- 当前分析视角：{{perspective_name}}
+- 可切换视角：{{enabled_perspectives}}
+- 回答详细度：{{answer_depth}}
+
+你需要优先按照当前角色和当前分析视角理解用户问题。
+如果用户问题模糊且可能跨视角，应说明默认理解并请求确认。
+如果用户问题明确超出当前角色/视角范围，不要直接执行越界工具调用，应引导回当前可处理范围，或提供可选的跨视角摘要/协同动作。
+最终数据和工具访问由 MCP 中台校验。
+14.2 设计师 Prompt
+当前用户是设计师，默认视角是素材创意视角。
+
+当用户询问消耗、点击率、转化率、日报、异常波动、表现趋势时：
+- 默认优先理解为素材侧问题；
+- 如果指标可能与投放总口径混淆，应说明统计范围；
+- 不要把素材侧消耗表述为完整广告投放总消耗。
+
+当用户明确询问广告账户、包管理、投放操作、回传、联调、广告 ROI 时：
+- 不要直接进入投放深度流程；
+- 引导到素材侧分析、投放摘要视角，或生成给优化师的协同需求。
+14.3 投放优化师 Prompt
+当前用户是投放优化师，默认视角是广告投放视角。
+
+当用户询问消耗、ROI、转化率、没量、回传、联调、包管理、日报、异常波动时：
+- 默认按投放视角理解；
+- 可路由到投放交付、异常排查、数据分析、报告生成等能力；
+- 如果用户主动询问素材表现，也可以切到素材创意视角分析。
+14.4 老板 / 制作人 Prompt
+当前用户偏经营视角。
+
+回答应优先给结论、趋势、风险和建议动作。
+不要默认展开过多明细，除非用户要求下钻。
+如果涉及投放、素材、财务等跨领域信息，应用摘要方式呈现，并说明关键影响因素。
+15. 配置表设计
+15.1 role_profile
+字段	类型	说明
+role_id	string	角色 ID
+role_name	string	角色名称
+default_perspective	string	默认视角
+enabled_perspectives	json	可切换视角
+preferred_agents	json	偏好 Agent
+ambiguous_policy	string	模糊越界策略
+explicit_out_of_scope_policy	string	明确越界策略
+response_style	string	回答风格
+15.2 perspective_profile
+字段	类型	说明
+perspective_id	string	视角 ID
+perspective_name	string	视角名称
+level	string	summary / analysis / operation
+data_scope_description	string	数据范围描述
+default_metric_map	json	默认指标映射
+must_disclose_scope	boolean	是否必须展示口径
+15.3 shortcut_entry
+字段	类型	说明
+shortcut_id	string	快捷入口 ID
+title	string	展示文案
+group_name	string	分组
+visible_roles	json	可见角色
+visible_perspectives	json	可见视角
+default_agent	string	默认 Agent
+default_workflow	string	默认 Workflow
+enabled	boolean	是否启用
+15.4 route_rule
+字段	类型	说明
+rule_id	string	规则 ID
+intent	string	意图
+object_type	string	业务对象
+role_id	string	角色
+perspective_id	string	视角
+scope_status	string	in_scope / ambiguous / out_of_scope
+target_agent	string	目标 Agent
+target_workflow	string	目标 Workflow
+fallback_action	string	降级动作
+16. 路由伪代码
+def handle_message(user_id, project_id, message, current_perspective):
+    context = load_context(user_id, project_id)
+    role = context.role
+    perspective = current_perspective or context.default_perspective
+
+    intent = parse_intent(message)
+    scope_status = detect_scope_status(
+        message=message,
+        intent=intent,
+        role=role,
+        perspective=perspective
+    )
+
+    if scope_status == "in_scope":
+        route = resolve_route(intent, role, perspective)
+        return execute_route(route, context)
+
+    if scope_status == "ambiguous_cross_scope":
+        default_route = resolve_default_role_route(intent, role, perspective)
+        alternatives = resolve_allowed_alternatives(intent, role)
+        return build_confirmation_card(default_route, alternatives)
+
+    if scope_status == "explicit_out_of_scope":
+        fallback_actions = build_fallback_actions(intent, role, perspective)
+        return build_fallback_card(fallback_actions)
+
+    return ask_minimum_clarification()
+17. 可观测与指标
+
+为了证明企业价值，需要埋点。
+
+17.1 必须记录
+user_id
+project_id
+role
+current_perspective
+query
+intent
+scope_status
+selected_agent
+selected_workflow
+selected_skill
+是否触发确认
+是否触发 fallback
+是否调用 MCP
+MCP 是否拒绝
+用户是否点击替代动作
+用户反馈
+17.2 核心指标
+指标	含义
+MCP 拒绝率	是否减少无效越界调用
+首轮成功率	用户第一轮是否拿到有效结果
+模糊问题确认完成率	用户是否接受系统默认范围
+Fallback 转化率	越界后是否进入替代动作
+快捷入口点击率	角色化入口是否有效
+视角切换率	用户是否使用跨角色视角
+负反馈率	回答是否符合角色预期
+18. MVP 开发范围
+V1.0 必做
+1. 角色上下文加载
+2. 视角上下文加载
+3. 欢迎页快捷入口动态展示
+4. 当前视角展示和切换
+5. 模糊越界确认卡
+6. 明确越界引导卡
+7. Route Result 结构化输出
+8. MCP 调用带上 role / perspective / route_id
+9. 回答中展示口径说明
+10. 基础埋点
+V1.0 先支持的角色
+
+建议先支持：
+
+设计师
+投放优化师
+大老板 / 项目制作人
+观察员
+
+财务可以先配置角色，但能力不一定第一版全部打通。
+
+V1.0 先支持的高频问题
+今天总消耗多少？
+今天 ROI 怎么样？
+今天转化率怎么样？
+帮我出日报
+为什么没量？
+为什么没回传？
+最近竞品什么素材起量了？
+帮我提需求
+看看异常波动
+汇总今天投放 / 素材表现
+V1.0 暂不做
+复杂权限矩阵
+完整后台配置平台
+自动学习用户所有偏好
+跨角色权限申请流
+多级审批流
+复杂多 Agent 自主协商
+
+这些可以后续做，不要第一版堆太重。
+
+19. 前后端任务拆分
+19.1 前端任务
+任务	说明
+Chat 上下文初始化	调用 /api/chat/context 获取角色、视角、快捷入口
+快捷入口动态渲染	按后端返回分组展示
+当前角色/视角展示	顶部展示当前角色和当前视角
+视角切换组件	用户只能切换 enabled_perspectives
+确认卡组件	渲染 confirmation_required 类型响应
+Fallback 卡组件	渲染 fallback 类型响应
+Scope Note 展示	展示数据口径和统计范围
+用户偏好设置	默认视角、回答详细度、快捷入口收藏
+埋点	快捷入口点击、视角切换、确认动作、fallback 动作
+19.2 后端任务
+任务	说明
+Context Service	返回用户角色、视角、偏好、快捷入口
+Config Service	管理 Role / Perspective / Shortcut / Route 配置
+Intent Router	识别意图、业务对象、指标、时间范围
+Scope Detector	判断 in_scope / ambiguous / out_of_scope
+Route Resolver	选择 Agent / Workflow / Skill
+Prompt Builder	拼接角色和视角提示词
+MCP Client 改造	调用时带上上下文
+Fallback Handler	越界或 MCP 拒绝后生成替代动作
+Confirm Route API	用户确认后执行 route
+Logging	记录路由、视角、MCP、fallback 全链路日志
+20. 验收标准
+20.1 设计师场景
+Case 1
+
+用户问：
+
+今天素材表现怎么样？
+
+预期：
+
+直接进入素材分析，不触发确认，不调用投放数据。
+Case 2
+
+用户问：
+
+今天总消耗多少？
+
+预期：
+
+系统提示默认按素材侧总消耗理解，并请求确认。
+用户确认后，返回素材侧消耗，并说明统计范围。
+Case 3
+
+用户问：
+
+今天广告账户总消耗多少？
+
+预期：
+
+不直接调用广告账户数据。
+系统说明这是投放视角数据，并提供查看素材侧消耗、切换投放摘要、生成协同需求等选项。
+20.2 投放优化师场景
+Case 1
+
+用户问：
+
+为什么没量？
+
+预期：
+
+直接进入投放异常排查 Workflow。
+Case 2
+
+用户问：
+
+帮我出日报。
+
+预期：
+
+默认生成投放日报，而不是素材日报。
+20.3 老板 / 制作人场景
+
+用户问：
+
+今天怎么样？
+
+预期：
+
+输出经营摘要、风险、建议动作，而不是明细数据堆叠。
+20.4 观察员场景
+
+用户问：
+
+帮我调整投放预算。
+
+预期：
+
+不进入操作流程。
+提示当前为只读观察视角，可查看预算摘要或生成给投放负责人的建议。
+21. 实现难度判断
+
+整体不算难，前提是坚持以下边界：
+
+不重做权限系统
+不把所有指标一次性语义化
+不做复杂后台
+不做复杂审批流
+不让模型自由决定所有路由
+
+真正需要做好的只有三件事：
+
+1. 角色和视角配置清晰
+2. 模糊 / 明确越界判断清晰
+3. 路由结果结构化
+
+第一版可以用配置文件或简单配置表，不一定马上做完整后台管理页面。
+
+22. 企业价值判断
+
+这个方案有明确企业价值，而且用户能感知到。
+
+22.1 用户感知价值
+
+用户会感觉：
+
+这个助手知道我是做什么的
+这个助手不会总让我碰壁
+这个助手会用我的业务语言回答
+这个助手能帮我理解其他岗位，但不会乱给我越界数据
+22.2 管理价值
+
+企业侧可以减少：
+
+错误数据口径
+重复问数
+跨团队沟通成本
+无效 MCP 调用
+权限拒绝带来的差体验
+22.3 产品价值
+
+这会让智投 Chat 从普通问答工具升级为：
+
+角色化业务助手
+
+不是简单地“问什么答什么”，而是：
+
+根据组织角色和业务上下文，给出最合适的服务路径。
+23. 最终推荐方案总结
+
+你可以把方案定成下面这句话：
+
+智投 Chat 通过“角色 + 分析视角 + 用户偏好”实现体验层路由。角色决定默认工作模式，视角决定当前业务口径，用户偏好决定回答风格和跨视角提示。系统对范围内问题直接执行，对模糊跨范围问题先确认，对明确超范围问题引导回可处理范围。MCP 风控只作为最终兜底，不作为产品体验依托。
+
+研发落地时就按这条主线做：
+
+角色上下文
+  ↓
+视角切换
+  ↓
+动态快捷入口
+  ↓
+意图路由
+  ↓
+范围判断
+  ↓
+确认 / 引导 / 执行
+  ↓
+MCP 兜底
+  ↓
+带口径说明的回答
+
+这版设计足够轻，能扩展，也能让企业用户明显感知到价值。

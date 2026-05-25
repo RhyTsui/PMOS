@@ -1,0 +1,545 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-21T05:58:07.707Z",
+  "subprojectId": null,
+  "currentProductVersion": "v1.0",
+  "currentRuntimeBaseline": "v0.7",
+  "currentMode": "do",
+  "currentHighestPriorityLine": "v1.0 non-page closure",
+  "inProgressTasks": [],
+  "latestCheckpoints": [
+    {
+      "label": "PMOS v1.0 非页面待办收口：深拆默认产物、cloud runtime mirror、文档治理真源、release/spec 边界已落地；validate、build:backend、相关单测通过",
+      "taskId": "task-848b188c-d1f7-47a4-a2a8-00336f262af4",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-66de80af-7a2c-422c-bad8-050a2bb0b52a",
+      "timestamp": "2026-05-21T05:56:38.732Z"
+    },
+    {
+      "label": "已找回 ad-intelligence 采集服务骨架与 Seed 关键词设计线索：服务入口在 subprojects/ad-intelligence，关键词设计集中在 实现规划 v2.0 与 素材爬虫 v0.10-v0.12；当前代码只有最小 Express，采集器未实现",
+      "taskId": "task-8e9ea223-84e6-460d-83cc-4225b6fbb8ec",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-823dc2b0-c577-4ca5-bd77-888b2fae01c2",
+      "timestamp": "2026-05-20T01:51:08.604Z"
+    },
+    {
+      "label": "智投 chat Pixso MCP 已恢复：项目内置服务注册到 http://127.0.0.1:3667/mcp；Codex 全局配置可通过 mcp_servers.pixso.url 覆盖确认；validate 与 ad ts-check 通过；本地提交 e91a266。",
+      "taskId": "task-b52e589c-d092-498b-b506-918de94c96a1",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-242efbc3-e1d3-4567-89a5-292e5cdd5695",
+      "timestamp": "2026-05-18T04:05:25.715Z"
+    },
+    {
+      "label": "提交完成：c62ab86，历史 in_progress 已清空至当前任务，Pixso MCP 失效配置已移除，验证 npm run build 与 npm run validate 通过",
+      "taskId": "task-7847fd7c-749d-4987-b5e6-7b36ca0a2080",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-046bb25f-fd42-46c9-b2bd-c43cfef00520",
+      "timestamp": "2026-05-18T03:15:44.389Z"
+    },
+    {
+      "label": "历史 in_progress 待办清理开始：按用户要求清空旧运行态噪声，保留当前提交与 Pixso 修复任务；此清理不等同于逐项重新业务验收",
+      "taskId": "task-7847fd7c-749d-4987-b5e6-7b36ca0a2080",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-9b9ac1c8-2742-42bf-b46e-dbaa142a4144",
+      "timestamp": "2026-05-18T03:02:42.567Z"
+    },
+    {
+      "label": "HTML-first 文档产出策略已落为 active truth source，并明确 Schema/Registry/HTML/SVG/Markdown 边界",
+      "taskId": "task-241b481d-15b5-4271-989e-b9d8b2a6a744",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-e66bc383-170c-4104-b219-0129ac199126",
+      "timestamp": "2026-05-18T02:10:38.785Z"
+    },
+    {
+      "label": "统一联调过程组件与调用来源样式",
+      "taskId": "task-3d167bcc-f777-4826-af2a-af172464c7eb",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-07e286f1-141e-4a75-bfe5-a4c9187ec8c0",
+      "timestamp": "2026-05-17T06:44:33.553Z"
+    },
+    {
+      "label": "巨量应用权限校验因Token或app信息错误临时放行，后续必须恢复真实校验",
+      "taskId": "task-f5fcb8a0-0add-4be2-88f3-4a0c27b6bf46",
+      "contextSnapshot": "task snapshot",
+      "id": "ckpt-62e84a12-50b0-44c6-a9f3-63f336580378",
+      "timestamp": "2026-05-17T02:15:38.362Z"
+    }
+  ],
+  "blockers": {
+    "taskCount": 0,
+    "gateCount": 514,
+    "gateSampleCount": 50,
+    "tasks": [],
+    "gates": [
+      {
+        "taskId": "task-848b188c-d1f7-47a4-a2a8-00336f262af4",
+        "title": "推进 PMOS v1.0 非页面待办收口",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-848b188c-d1f7-47a4-a2a8-00336f262af4",
+        "title": "推进 PMOS v1.0 非页面待办收口",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-8e9ea223-84e6-460d-83cc-4225b6fbb8ec",
+        "title": "找回行业文章采集服务与关键词设计",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-823dc2b0-c577-4ca5-bd77-888b2fae01c2"
+        ]
+      },
+      {
+        "taskId": "task-8e9ea223-84e6-460d-83cc-4225b6fbb8ec",
+        "title": "找回行业文章采集服务与关键词设计",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-8e9ea223-84e6-460d-83cc-4225b6fbb8ec",
+        "title": "找回行业文章采集服务与关键词设计",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-b52e589c-d092-498b-b506-918de94c96a1",
+        "title": "恢复智投 chat Pixso MCP 地址配置",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-b52e589c-d092-498b-b506-918de94c96a1",
+        "title": "恢复智投 chat Pixso MCP 地址配置",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-7847fd7c-749d-4987-b5e6-7b36ca0a2080",
+        "title": "提交当前工作区并清理历史待办与 Pixso MCP 配置",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-7847fd7c-749d-4987-b5e6-7b36ca0a2080",
+        "title": "提交当前工作区并清理历史待办与 Pixso MCP 配置",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-c1c7fea6-11ad-4b21-9281-94ffa3c82e87",
+        "title": "隐藏已自动发起联调后的旧确认表单",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-956ff357-1b45-49aa-930e-01b5838ef012",
+        "title": "排查智投Chat对接连弩SDK上报问题",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-7a02d6f0-9213-461b-8244-dde5737b10de",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-efad7757-6fe1-4c13-9bf9-684ed3b825b3"
+        ]
+      },
+      {
+        "taskId": "task-02f1c788-013b-49cf-ba8d-6124cd780d55",
+        "title": "支持巨量SSE MCP并调整自动联调手动发起链路",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-ba969e0c-491b-4927-80ca-006438c80f7e",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-2a163c88-f5a1-498e-ac53-ba48789564a8",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-08bbcaf2-6418-4858-9ba0-a9a5b600a8f7",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-d133565a-f94a-4b6c-9c06-125d013f7b06",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-dd542e93-5f6a-4299-9547-23653c4b1928"
+        ]
+      },
+      {
+        "taskId": "task-28f62dec-6954-4b30-9c67-1425c3d1cd1d",
+        "title": "接入YokaUI规则并替换项目选择器为组件库原生实现",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-28f62dec-6954-4b30-9c67-1425c3d1cd1d",
+        "title": "接入YokaUI规则并替换项目选择器为组件库原生实现",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-72623e4c-41b4-461a-bd64-8d4eef638c85",
+        "title": "更新智投chat功能设计并拆解设计任务",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-cc40f911-dd25-4dcd-9101-d942508f6719",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-d326604f-3547-497f-a018-aab9b259a400",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-de7739c0-0ecb-4b09-8ebd-be1dc78f6bfc",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-b7b91417-1996-421c-8a07-a89a30eb6927",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-c4551bed-f25d-4025-ade6-c3e537ea2895"
+        ]
+      },
+      {
+        "taskId": "task-2e8de124-c4a3-4b96-b480-be644900446d",
+        "title": "修复智投chat自动联调配置编辑与观测流组件",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-718fbf61-60b3-4ae7-80b9-15e19a7c4d3f"
+        ]
+      },
+      {
+        "taskId": "task-8aa359ab-aebe-4fe3-a634-027833e85c51",
+        "title": "收口智投chat思维链来源合并与指标解释模板",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-8aa359ab-aebe-4fe3-a634-027833e85c51",
+        "title": "收口智投chat思维链来源合并与指标解释模板",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-6c8c1124-1bb1-4883-9403-939331c92913",
+        "title": "收口智投chat后台需求池列表、移除自动报表入口并修复代码卡对比度",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-7c1fffcc-ba31-443d-b5c6-e32a2fdc5f37",
+        "title": "修复智投chat附件输入区与消息编辑交互并补连弩接口文档",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-56290c5a-1c26-44bc-888a-36d8c3dcc4a5",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-3ec0b095-b4a5-48a2-b483-efa1480adb22",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-d6465ebf-d40b-45dd-b64f-dc99a497af33",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-346e560a-bdeb-4862-b26b-68df054ca7d2",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-342cb44d-e3ee-4612-b9e6-b79431aa6a5f",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-0a051eae-cb47-4ef4-9574-868ab7a7869a",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-a490f940-5db8-4867-a360-a5f3aff9210e",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-e4d7d332-d38f-46f1-a580-1b450724db17",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-33738734-a973-4f9b-b7d8-bc01f5ef255a",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-694c7b73-aef3-4194-87eb-f0d437a947a4",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-cdbcca17-4776-47c0-9f6d-95eee8201a9e",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-394dfd0b-bd9a-455a-a353-1fa96effa7cb",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-8e315aec-fc22-4b87-a860-3785befa5a5f",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-f8fce027-c6fc-4a1c-8849-a8ed05ce4648",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-cc3d19c8-16ac-44e2-8bd9-72f61fffc958",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-8128fc6b-8aae-4c56-8a26-a86c4cedc9d6",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-4d3e6a65-8418-4488-8c2f-10aba1165fc6",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-864292d9-b758-4247-a8cd-c1e5b065ba48",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-a423d867-ee95-4ae8-ae67-3305af422b08"
+        ]
+      },
+      {
+        "taskId": "task-b6c8edcf-a498-492f-b64e-a5208d7d8ac4",
+        "title": "深度复盘智投chat今日交付与每日蒸馏机制",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-1ec1da00-4ab9-4342-a5ba-5c7d9b55e9c4",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-97b77a26-2dc2-4960-bb0e-8c1376f5c930",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-991e90f6-eb80-44c4-bdf5-0c59ca6f54d5"
+        ]
+      },
+      {
+        "taskId": "task-8d4ad552-f2f2-40e3-8598-0d7f19fbc7ed",
+        "title": "收口我的资产文件库交互与会话侧栏验收问题",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-273f5805-053d-4802-83c1-5fdbcd3b8b6f",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-52e254bd-d2db-4e5e-8333-629cd3481d1a",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-f741a20d-1ed4-4dbc-9203-20f2c7ccc1d2"
+        ]
+      },
+      {
+        "taskId": "task-eea946a6-bbe3-4817-bdf6-a740f95b9236",
+        "title": "{do} 收口首页新会话按钮、会话头部对齐与我的资产主会话页",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-eea946a6-bbe3-4817-bdf6-a740f95b9236",
+        "title": "{do} 收口首页新会话按钮、会话头部对齐与我的资产主会话页",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-afd3a98e-14c8-43bf-ae3e-c9da5b7d3f48",
+        "title": "{do} 收口首页侧栏布局并将结果检查器改为自动联通动态面板按需展开",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-afd3a98e-14c8-43bf-ae3e-c9da5b7d3f48",
+        "title": "{do} 收口首页侧栏布局并将结果检查器改为自动联通动态面板按需展开",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-d00e9c2f-7427-4ddc-9f56-31bb042c86cd",
+        "title": "{do} 深度收口 /reports 自动报表页会话主线与对话式生成体验",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-d00e9c2f-7427-4ddc-9f56-31bb042c86cd",
+        "title": "{do} 深度收口 /reports 自动报表页会话主线与对话式生成体验",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-af37bc0b-484a-4ae9-bc22-5cb400b34ff1",
+        "title": "继续按官方页回查并纠正 PMChat 剩余组件示例，统一官方矩阵语法并切回浅色优先",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-fed8a1e9-2914-48d9-97d6-dd2c798c5b27",
+        "title": "落地 PMChat Home AI Native Workspace UISchema 与 golden schema",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-2136dd41-7999-4288-823a-705e853d2435"
+        ]
+      },
+      {
+        "taskId": "task-fed8a1e9-2914-48d9-97d6-dd2c798c5b27",
+        "title": "落地 PMChat Home AI Native Workspace UISchema 与 golden schema",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-fed8a1e9-2914-48d9-97d6-dd2c798c5b27",
+        "title": "落地 PMChat Home AI Native Workspace UISchema 与 golden schema",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-ce658b42-a5af-4d5d-9b88-6c1053f9d3c5",
+        "title": "将现有配置接口封装为 HTTP MCP 服务供 agent 调用",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-dffdd306-211a-4693-a4e5-9b6c0815e8c8"
+        ]
+      },
+      {
+        "taskId": "task-2b7311ee-f551-46ec-a670-742f131a2749",
+        "title": "admin视觉收口与自动日报主线",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-e3362446-82fb-4038-b258-b896adcea04e",
+        "title": "整理 PMOS 前端母仓库 Codex CLI 提示词",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-e3362446-82fb-4038-b258-b896adcea04e",
+        "title": "整理 PMOS 前端母仓库 Codex CLI 提示词",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-2f1db68d-8b28-4275-8b1c-622cabaabf05",
+        "title": "补齐管理页到聊天后端的真实配置链路",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-ea15b7ac-82ea-44b9-a5f3-5224a7283146",
+        "title": "构建 PMOS Ant Design X 全能力 chat-first framework",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-bcc35017-af07-43ee-a286-daa8f714ca48"
+        ]
+      },
+      {
+        "taskId": "task-ea15b7ac-82ea-44b9-a5f3-5224a7283146",
+        "title": "构建 PMOS Ant Design X 全能力 chat-first framework",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-ea15b7ac-82ea-44b9-a5f3-5224a7283146",
+        "title": "构建 PMOS Ant Design X 全能力 chat-first framework",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-ef25713c-25bd-489d-bf38-cd220cc41731",
+        "title": "建立 PMOS UI Contract + UISchema + Registry + Golden Schema + Lint + pmos-ui Skill",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-cba06534-c96a-44b6-8a8a-12c9f10844ef",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-0a3636c8-eac9-4159-9fd1-8f0d5370d132"
+        ]
+      },
+      {
+        "taskId": "task-ef25713c-25bd-489d-bf38-cd220cc41731",
+        "title": "建立 PMOS UI Contract + UISchema + Registry + Golden Schema + Lint + pmos-ui Skill",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-ef25713c-25bd-489d-bf38-cd220cc41731",
+        "title": "建立 PMOS UI Contract + UISchema + Registry + Golden Schema + Lint + pmos-ui Skill",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-b265bae3-0111-4e10-b1fd-24630a049d6c",
+        "title": "部署并重构 inbox Coze 编程工程 project_20260512_104656",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-ff1e83a2-6339-48eb-b794-e915416eb4f8"
+        ]
+      },
+      {
+        "taskId": "task-89427ab9-7b77-4625-bd91-ec5217b11348",
+        "title": "部署 Coze Studio 作为前后端开发工具",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-68d7c946-1c5b-4bea-a3a7-05ecc7d14c26",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-a739a9e6-aa62-44d7-a389-c23022fd315c"
+        ]
+      },
+      {
+        "taskId": "task-c362810f-7661-4a43-9d1d-3515a2644b18",
+        "title": "重做 ad 首页为 Coze 风格多轮对话工作台",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-708edea3-e0ec-439e-ad9f-93a25eccc777",
+        "title": "{do} 将 SDD + Superpowers 严格测试机制并入 PMOS 前端与交付主线",
+        "gateId": "asset-backwrite-gate",
+        "reason": "Task is completed but no final-delivery backwrite artifact was written back.",
+        "evidencePaths": [
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-a3c6b2d4-4b61-4181-93b8-7d83a67a1c05",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-053bb4a4-1072-4af7-9873-3ac9e539f130",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-48132256-6c9a-47d6-8549-d9d924c8d23e",
+          "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-282ffb21-9759-45f9-ae31-4666d0378c9f"
+        ]
+      },
+      {
+        "taskId": "task-c81a6cb1-149a-4196-afc6-11f9367b2465",
+        "title": "{do} 全局切换前端默认框架到 x.ant.design 并补完整测试链",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-c81a6cb1-149a-4196-afc6-11f9367b2465",
+        "title": "{do} 全局切换前端默认框架到 x.ant.design 并补完整测试链",
+        "gateId": "design-confirmed-gate",
+        "reason": "Design-relevant task reached delivery state without linked design confirmation evidence.",
+        "evidencePaths": []
+      },
+      {
+        "taskId": "task-fe894635-e7fe-4c0e-9b8d-668b84860180",
+        "title": "{do} 推进 v1.0 八项能力债到统一 runtime 主线并自验收",
+        "gateId": "design-language-ready",
+        "reason": "Design-relevant task reached delivery state without linked DESIGN.md.",
+        "evidencePaths": []
+      }
+    ]
+  },
+  "activeSubprojects": [],
+  "runtime": {
+    "taskSsot": {
+      "total": 381,
+      "active": 0,
+      "inReview": 0,
+      "blocked": 0,
+      "completed": 381
+    },
+    "outbox": {
+      "total": 0,
+      "pending": 0,
+      "completed": 0,
+      "failed": 0,
+      "dropped": 0,
+      "byTargetSystem": [],
+      "byCategory": []
+    },
+    "scheduler": {
+      "total": 2,
+      "dueNow": 0,
+      "autoRetry": 0,
+      "autoRework": 0,
+      "scheduled": 0,
+      "manualOnly": 2,
+      "budgetExhausted": 0,
+      "blocked": 0,
+      "completed": 2
+    },
+    "documentGovernance": {
+      "generatedAt": "2026-05-21T05:55:36.719Z",
+      "entryCount": 15,
+      "activeTopicCount": 15,
+      "issueCount": 0,
+      "summary": "Document governance audit passed with 15 registered truth sources.",
+      "blockingIssues": 0
+    }
+  },
+  "latestReviewSummary": {
+    "evidencePaths": [
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-eef5e46b-199f-4eb0-9b8c-87f21557e0b4",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-a30aaef6-6c7d-4153-af0f-97d6f63cd1d3",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-4423919b-8fac-411b-ab4f-e82bd2e486b9",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-b99c8f5e-9724-4632-8b12-e8473be79c98",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-27f05760-f087-4b33-ba7a-50b4623f29a9",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-80282e92-a743-41f6-a5d3-a17c7a54d44a",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-9c1c2bc4-d137-4079-82e2-da5ed47d6dd2",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-23bd8656-006c-4f30-9419-86e1f3088ec1",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-d93673ab-675e-4139-8ed4-239d6c08204c",
+      "docs/memory/mcp-context/session-state.json#checkpoint:ckpt-22aa6712-a01a-4a36-b020-600aaa4ff6c7"
+    ],
+    "taskCountWithReviewEvidence": 29
+  }
+}

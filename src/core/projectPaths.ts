@@ -346,6 +346,14 @@ export function getDocumentGovernanceAuditPath(subprojectId?: string | null) {
   return prefixProjectPath(getProjectRoot(subprojectId), 'docs/memory/document-governance/latest-audit.json');
 }
 
+export function getPlanArchiveDirectoryPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/plan-archives');
+}
+
+export function getPlanArchiveIndexPath(subprojectId?: string | null) {
+  return prefixProjectPath(getProjectRoot(subprojectId), 'docs/plan-archives/index.json');
+}
+
 export function createPlatformProjectContext(): ProjectContext {
   return {
     subprojectId: null,

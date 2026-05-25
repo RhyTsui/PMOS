@@ -40,6 +40,7 @@ describe('OutboxService and FinalStateValidationService', () => {
     expect(items[0]?.targetCategory).toBe('design');
     const summary = await outbox.buildRuntimeSummary();
     expect(summary.byCategory.some((item) => item.targetCategory === 'design')).toBe(true);
+    expect(summary.retryExhausted).toBe(0);
   });
 
   it('dispatches pending envelopes through adapter routing and writes synthetic receipts', async () => {
@@ -86,6 +87,39 @@ describe('OutboxService and FinalStateValidationService', () => {
     const items = await outbox.listEnvelopes();
     expect(items[0]?.retryCount).toBe(1);
     expect(items[0]?.status).toBe('pending');
+  });
+
+  it('dispatches pending envelopes by category and limit with runtime pointers', async () => {
+    const store = createStore();
+    const outbox = new OutboxService(store);
+
+    await store.write('docs/payloads/design.md', '# Design payload\n');
+    await store.write('docs/payloads/ops.md', '# Ops payload\n');
+    await outbox.enqueue({
+      taskId: 'task-design',
+      entityType: 'frame',
+      entityId: 'frame-1',
+      targetSystem: 'pixso',
+      action: 'publish',
+      payloadRef: 'docs/payloads/design.md',
+    });
+    await outbox.enqueue({
+      taskId: 'task-ops',
+      entityType: 'release',
+      entityId: 'release-1',
+      targetSystem: 'slack',
+      action: 'notify',
+      payloadRef: 'docs/payloads/ops.md',
+    });
+
+    const dispatched = await outbox.dispatchPending(null, { targetCategory: 'design', limit: 1 });
+    expect(dispatched).toHaveLength(1);
+    expect(dispatched[0]?.adapterKey).toBe('design-publish');
+
+    const summary = await outbox.buildRuntimeSummary();
+    expect(summary.completed).toBe(1);
+    expect(summary.pending).toBe(1);
+    expect(summary.nextPending?.targetCategory).toBe('ops');
   });
 
   it('judges task final-state readiness from task ssot evidence', () => {

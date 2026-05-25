@@ -14,19 +14,27 @@ import { ProductAgentService } from '../core/productAgentService.js';
 import { ProductChiefService } from '../core/productChiefService.js';
 import { DocumentationNormalizationService } from '../core/documentationNormalizationService.js';
 import { DocumentGovernanceService } from '../core/documentGovernanceService.js';
+import { PlanArchiveService } from '../core/planArchiveService.js';
+import { CloudMirrorService } from '../core/cloudMirrorService.js';
 import { McpContextSyncService, type CollaborationMode, type ToolIdentity } from '../core/mcpContextSyncService.js';
 import { SkillRegistry } from '../core/skillRegistry.js';
 import { SubprojectPrepService } from '../core/subprojectPrepService.js';
 import { CodexLocalStateService } from '../core/codexLocalStateService.js';
 import { RequirementExcelPoolService } from '../core/requirementExcelPoolService.js';
+import { TaskSsotService } from '../core/taskSsotService.js';
+import { OutboxService } from '../core/outboxService.js';
+import { HermesPolicyService } from '../core/hermesPolicyService.js';
+import { SchedulerRunService } from '../core/schedulerRunService.js';
+import { ProductRepoReleaseService } from '../core/productRepoReleaseService.js';
 import { LlmRouter } from '../llm_router/index.js';
-import type { ProviderCapability } from '../shared/schemas.js';
+import type { PlanArchiveSource, ProviderCapability } from '../shared/schemas.js';
 
 const rootDir = process.env.AI_OS_ROOT ? path.resolve(process.env.AI_OS_ROOT) : process.cwd();
 const store = new FileStore(rootDir);
 const memoryService = new MemoryService(store);
+const planArchiveService = new PlanArchiveService(store);
 const workflowEngine = new WorkflowEngine(store, memoryService);
-const orchestratorRuntime = new OrchestratorRuntime(store, memoryService);
+const orchestratorRuntime = new OrchestratorRuntime(store, memoryService, planArchiveService);
 const providerRegistry = new ProviderRegistry(store);
 const mcpRegistry = new McpRegistry(store);
 const reviewCommittee = new ReviewCommittee();
@@ -40,6 +48,18 @@ const documentationNormalizationService = new DocumentationNormalizationService(
 const documentGovernanceService = new DocumentGovernanceService(store);
 const requirementExcelPoolService = new RequirementExcelPoolService(store, memoryService);
 const mcpContextSync = new McpContextSyncService(rootDir);
+const taskSsotService = new TaskSsotService(store, mcpContextSync, memoryService);
+const outboxService = new OutboxService(store);
+const hermesPolicyService = new HermesPolicyService(store, memoryService);
+const schedulerRunService = new SchedulerRunService(
+  orchestratorRuntime,
+  memoryService,
+  workflowEngine,
+  reviewCommittee,
+  hermesPolicyService,
+);
+const cloudMirrorService = new CloudMirrorService(store);
+const productRepoReleaseService = new ProductRepoReleaseService(store);
 const llmRouter = new LlmRouter(store);
 
 function normalizeSubprojectId(value?: string) {
@@ -73,6 +93,25 @@ function parseOptions(args: string[]) {
   }
 
   return { positional, subprojectId, tool };
+}
+
+function readNamedOption(args: string[], name: string) {
+  const index = args.indexOf(name);
+  return index >= 0 ? args[index + 1] : undefined;
+}
+
+function parsePositiveInt(value?: string | null) {
+  if (!value) return null;
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parsePlanArchiveSource(value?: string | null): PlanArchiveSource {
+  const normalized = value?.trim();
+  if (normalized === 'codex-plan' || normalized === 'workflow-planning' || normalized === 'mcp-context-plan' || normalized === 'manual') {
+    return normalized;
+  }
+  return 'manual';
 }
 
 async function ensureCurrentRun(subprojectId?: string | null) {
@@ -156,6 +195,12 @@ function printUsage() {
     '  npm run cli -- documentation truth-source-list [--subproject <id>]',
     '  npm run cli -- documentation truth-source-upsert <topicKey> <path> [status] [title] [--subproject <id>]',
     '  npm run cli -- documentation truth-source-audit [--subproject <id>]',
+    '  npm run cli -- documentation artifact-flow-check <path1[,path2...]> [require-registered] [--subproject <id>]',
+    '  npm run cli -- plan-archive write --title <title> --source <codex-plan|workflow-planning|mcp-context-plan|manual> --content-file <path> [--thread <id>] [--task <id>] [--subproject <id>]',
+    '  npm run cli -- plan-archive list [--source <source>] [--limit 20] [--subproject <id>]',
+    '  npm run cli -- plan-archive show <archiveId-or-path> [--subproject <id>]',
+    '  npm run cli -- cloud-mirror runtime-status [--subproject <id>]',
+    '  npm run cli -- release readiness-package [versionLabel] [--subproject <id>]',
     '  npm run cli -- requirement-pool export [outputPath] [--subproject <id>]',
     '  npm run cli -- requirement-pool import <inputPath> [--subproject <id>]',
     '  npm run cli -- requirement-pool path [--subproject <id>]',
@@ -686,6 +731,130 @@ async function documentationTruthSourceAudit(subprojectId?: string | null) {
   console.log(JSON.stringify(await documentGovernanceService.audit(subprojectId), null, 2));
 }
 
+async function documentationArtifactFlowCheck(rawPaths?: string, mode?: string, subprojectId?: string | null) {
+  const artifactPaths = (rawPaths ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (artifactPaths.length === 0) {
+    throw new Error('documentation artifact-flow-check requires at least one artifact path.');
+  }
+  console.log(
+    JSON.stringify(
+      await documentGovernanceService.evaluateArtifactFlow({
+        artifactPaths,
+        subprojectId,
+        requireRegistered: mode === 'require-registered',
+        source: 'cli',
+      }),
+      null,
+      2,
+    ),
+  );
+}
+
+async function planArchiveWrite(args: string[], subprojectId?: string | null) {
+  const title = readNamedOption(args, '--title')?.trim();
+  const source = parsePlanArchiveSource(readNamedOption(args, '--source'));
+  const contentFile = readNamedOption(args, '--content-file')?.trim();
+  const thread = readNamedOption(args, '--thread')?.trim() || null;
+  const taskId = readNamedOption(args, '--task')?.trim() || null;
+  const triggerRef = readNamedOption(args, '--trigger-ref')?.trim() || contentFile || null;
+  if (!title) {
+    throw new Error('plan-archive write requires --title.');
+  }
+  if (!contentFile) {
+    throw new Error('plan-archive write requires --content-file.');
+  }
+  const contentPath = path.isAbsolute(contentFile) ? contentFile : path.resolve(rootDir, contentFile);
+  const content = await fs.readFile(contentPath, 'utf8');
+  const result = await planArchiveService.archivePlan({
+    title,
+    content,
+    source,
+    subprojectId,
+    taskId,
+    planThreadId: thread,
+    triggerRef,
+  });
+  if (taskId) {
+    await mcpContextSync.updateState({
+      toolIdentity: 'codex',
+      taskId,
+      newEvent: {
+        toolIdentity: 'codex',
+        kind: 'plan_archived',
+        taskId,
+        content: `Plan archived: ${result.record.path}`,
+      },
+    });
+  }
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function planArchiveList(args: string[], subprojectId?: string | null) {
+  console.log(
+    JSON.stringify(
+      await planArchiveService.listArchives({
+        subprojectId,
+        source: readNamedOption(args, '--source') ? parsePlanArchiveSource(readNamedOption(args, '--source')) : null,
+        limit: parsePositiveInt(readNamedOption(args, '--limit')),
+      }),
+      null,
+      2,
+    ),
+  );
+}
+
+async function planArchiveShow(archiveId?: string, subprojectId?: string | null) {
+  if (!archiveId?.trim()) {
+    throw new Error('plan-archive show requires archiveId or path.');
+  }
+  const archive = await planArchiveService.getArchive(archiveId, subprojectId);
+  if (!archive) {
+    throw new Error(`plan archive not found: ${archiveId}`);
+  }
+  console.log(JSON.stringify(archive, null, 2));
+}
+
+async function cloudMirrorRuntimeStatus(subprojectId?: string | null) {
+  const [mcpContext, taskState, outboxRuntime, schedulerRuntime, documentGovernanceAudit] = await Promise.all([
+    mcpContextSync.getState(),
+    taskSsotService.getState(subprojectId),
+    outboxService.buildRuntimeSummary(subprojectId),
+    schedulerRunService.buildRuntimeSummary(subprojectId),
+    documentGovernanceService.readLatestAudit(subprojectId),
+  ]);
+
+  console.log(
+    JSON.stringify(
+      await cloudMirrorService.writeRuntimeStatus({
+        mcpContext,
+        taskState,
+        outboxRuntime,
+        schedulerRuntime,
+        documentGovernanceAudit,
+        subprojectId,
+      }),
+      null,
+      2,
+    ),
+  );
+}
+
+async function releaseReadinessPackage(versionLabel?: string, subprojectId?: string | null) {
+  console.log(
+    JSON.stringify(
+      await productRepoReleaseService.buildReadinessPackage({
+        versionLabel,
+        subprojectId,
+      }),
+      null,
+      2,
+    ),
+  );
+}
+
 async function requirementPoolExport(outputPath?: string, subprojectId?: string | null) {
   console.log(JSON.stringify(await requirementExcelPoolService.exportWorkbook(outputPath, subprojectId), null, 2));
 }
@@ -813,12 +982,43 @@ async function mcpContextModeSet(rawMode?: string, label?: string, tool?: string
       content: label?.trim() || `switch to ${mode}`,
     },
   });
+  let planArchivePath: string | null = null;
+  if (mode === 'plan') {
+    const title = label?.trim() || 'mcp-context plan session';
+    const result = await planArchiveService.archivePlan({
+      title,
+      content: [
+        `# ${title}`,
+        '',
+        '## Plan Session',
+        '',
+        'This archive was created when PMOS entered plan mode.',
+        '',
+        'The full plan should be written as a later version in the same plan thread when finalized.',
+      ].join('\n'),
+      source: 'mcp-context-plan',
+      taskId: state.currentTaskId,
+      triggerRef: 'mcp-context mode-set plan',
+    });
+    planArchivePath = result.record.path;
+    await mcpContextSync.updateState({
+      toolIdentity,
+      taskId: state.currentTaskId,
+      newEvent: {
+        toolIdentity,
+        kind: 'plan_archived',
+        taskId: state.currentTaskId,
+        content: `Plan archived: ${result.record.path}`,
+      },
+    });
+  }
   console.log(
     JSON.stringify(
       {
         currentMode: state.currentMode,
         lastUpdated: state.lastUpdated,
         lastUpdatedBy: state.lastUpdatedBy,
+        planArchivePath,
       },
       null,
       2,
@@ -1256,6 +1456,36 @@ async function main() {
 
   if (scope === 'documentation' && action === 'truth-source-audit') {
     await documentationTruthSourceAudit(subprojectId);
+    return;
+  }
+
+  if (scope === 'documentation' && action === 'artifact-flow-check') {
+    await documentationArtifactFlowCheck(target, extraName, subprojectId);
+    return;
+  }
+
+  if (scope === 'plan-archive' && action === 'write') {
+    await planArchiveWrite(positional.slice(2), subprojectId);
+    return;
+  }
+
+  if (scope === 'plan-archive' && action === 'list') {
+    await planArchiveList(positional.slice(2), subprojectId);
+    return;
+  }
+
+  if (scope === 'plan-archive' && action === 'show') {
+    await planArchiveShow(target, subprojectId);
+    return;
+  }
+
+  if (scope === 'cloud-mirror' && action === 'runtime-status') {
+    await cloudMirrorRuntimeStatus(subprojectId);
+    return;
+  }
+
+  if (scope === 'release' && action === 'readiness-package') {
+    await releaseReadinessPackage(target, subprojectId);
     return;
   }
 

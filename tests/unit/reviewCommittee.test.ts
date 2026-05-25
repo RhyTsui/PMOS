@@ -60,7 +60,7 @@ describe('ReviewCommittee', () => {
         {
           path: 'docs/integration/run-001.md',
           content:
-            'integration acceptance function-to-api request response error entity field relation open source first build-vs-buy current system state development task breakdown frontend task backend task data task test task risk',
+            'integration acceptance function-to-api api-to-task implementationTasks testTasks request response error entity field relation open source first build-vs-buy current system state development task breakdown frontend task backend task data task test task risk',
         },
       ],
     });
@@ -163,5 +163,46 @@ describe('ReviewCommittee', () => {
     expect(report.gate.blocked).toBe(true);
     expect(report.roles.some((role) => role.role === 'Specialist Activation Review')).toBe(true);
     expect(report.activationTrace?.some((item) => item.role === 'Design Review' && item.status === 'missing')).toBe(true);
+  });
+
+  it('requires api-to-task mapping before backend API implementation can pass', () => {
+    const committee = new ReviewCommittee();
+    const blocked = committee.buildReportForRun({
+      runId: 'run-004',
+      artifactCount: 3,
+      activeStageId: 'backend-api',
+      openSourceEvaluationPresent: true,
+      artifacts: [
+        {
+          path: 'docs/api/api-to-task-run-004.json',
+          content:
+            '{"mappingType":"api-to-task","items":[{"apiId":"api.demo","implementationTasks":["Replace this placeholder"],"testTasks":["TBD"]}]}',
+        },
+        {
+          path: 'docs/api/run-004.md',
+          content: 'function-to-api request response error current system state development task breakdown backend task test task risk',
+        },
+      ],
+    });
+    expect(blocked.gate.blocked).toBe(true);
+
+    const passed = committee.buildReportForRun({
+      runId: 'run-004',
+      artifactCount: 3,
+      activeStageId: 'backend-api',
+      openSourceEvaluationPresent: true,
+      artifacts: [
+        {
+          path: 'docs/api/api-to-task-run-004.json',
+          content:
+            '{"mappingType":"api-to-task","items":[{"apiId":"api.demo","implementationTasks":["Implement handler"],"testTasks":["Add route test"]}]}',
+        },
+        {
+          path: 'docs/api/run-004.md',
+          content: 'function-to-api request response error current system state development task breakdown backend task test task risk',
+        },
+      ],
+    });
+    expect(passed.gate.blocked).toBe(false);
   });
 });

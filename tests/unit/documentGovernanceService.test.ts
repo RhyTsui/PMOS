@@ -92,4 +92,34 @@ describe('DocumentGovernanceService', () => {
     expect(audit.issueCount).toBe(0);
     expect(latestAudit?.summary).toContain('passed');
   });
+
+  it('checks artifact flow against registered truth sources and latest audit', async () => {
+    const store = createStore();
+    await store.write('docs/operations/release.md', '# release');
+    const service = new DocumentGovernanceService(store);
+
+    await service.upsertEntry({
+      topicKey: 'release-package',
+      title: 'Release Package',
+      path: 'docs/operations/release.md',
+      status: 'active',
+    });
+    await service.audit();
+
+    const pass = await service.evaluateArtifactFlow({
+      artifactPaths: ['docs/operations/release.md'],
+      requireRegistered: true,
+      source: 'unit-test',
+    });
+    expect(pass.status).toBe('pass');
+    expect(pass.blocking).toBe(false);
+
+    const block = await service.evaluateArtifactFlow({
+      artifactPaths: ['docs/operations/unregistered.md'],
+      requireRegistered: true,
+      source: 'unit-test',
+    });
+    expect(block.status).toBe('block');
+    expect(block.unregisteredArtifacts).toContain('docs/operations/unregistered.md');
+  });
 });

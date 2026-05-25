@@ -41,8 +41,8 @@ The current focus is:
 ### v1.0
 
 - total tracked tracks: `10`
-- solved: `0`
-- partial: `10`
+- solved: `1`
+- partial: `9`
 - unsolved: `0`
 
 Tracked set:
@@ -99,7 +99,7 @@ The following are already landed and should be treated as `v1.0` baseline assets
    - Notion inbox-digest publication supports both `database` and `page` target mode
    - locally verified `inbox -> background digest -> Notion page` writeback; downstream Dataki sync can consume the published Notion layer
    - project/platform-tag background routing now lands under `docs/context/project/by-tag/`
-   - Dataki downstream auto-refresh is not yet observed on `版本库`; current state remains partial
+   - operator has verified the `Notion -> Dataki` retrieval loop is OK for the current todo; current remaining work is broader default adoption, not live-loop repair
 6. `subproject rollout sample`
    - `ad` has been aligned to the new delivery chain and aiocoding truth-source package
 7. `document governance mechanism baseline`
@@ -120,6 +120,22 @@ The following are already landed and should be treated as `v1.0` baseline assets
    - active PMOS runtime default no longer points at a legacy executor-specific provider alias
    - Anthropic capability is retained only as a generic provider compatibility layer
    - evidence: `docs/operations/claude-to-codex-cutover-and-removal.md`
+10. `non-page v1.0 closure slice`
+   - workflow defaults now require structured decomposition artifacts for `requirement-to-function`, `function-to-api`, and `api-to-task`
+   - stage runners generate draft JSON review packets for those three mapping layers
+   - `ReviewCommittee` now rejects placeholder/TBD structured mapping packets and requires usable `api-to-task` mapping for backend API implementation impact
+   - `Task SSOT` now exposes `requirement-to-function-gate`, `function-to-api-gate`, and `api-to-task-gate` so decomposition is visible in task governance, not only workflow output
+   - `CloudMirrorService` writes governed latest-state mirror objects under `cloud-mirror/runtime-status.json` and `cloud-mirror/runtime-status.md`
+   - CLI/API can generate the runtime mirror through `npm run cli -- cloud-mirror runtime-status` and `GET /api/cloud-mirror/runtime-status`
+   - Scheduler and Task SSOT now tolerate legacy workflow snapshots missing `metadata` or `tasks`, which unblocks runtime mirror generation over historical state
+   - `DocumentGovernanceService.evaluateArtifactFlow`, CLI, and API now check generated/release/handoff artifacts against the truth-source registry and latest audit
+   - `PipelineLauncherService.triggerPlan` owns the actual downstream run-trigger boundary; backend routes now call the service instead of inlining launch logic
+   - `OutboxService` now supports category/limit pending dispatch plus runtime pointers; `SchedulerRunService` now reports due run ids, next run time, and manual-attention runs
+   - `ProductRepoReleaseService` generates `docs/release/product-repo-readiness-package.json` and `.md`
+   - `vitest.config.ts` scopes root Vitest to platform tests and excludes nested `subprojects/**` suites
+   - `cloud-sync-layer-contract.md`, `product-repo-release-readiness.md`, and `pmos-vs-codex-spec-boundary.md` now define the non-page cloud/release/spec boundaries
+   - `pmos-vs-codex-boundary-cleanup-2026-05-21.md` closes the PMOS-vs-Codex boundary todo by mapping product rules to repo truth and classifying local Codex memories as local-only subproject recovery
+   - document governance now registers 19 active truth sources and latest audit passes with `issueCount: 0`
 
 ## Highest-Priority Continuation
 
@@ -128,7 +144,7 @@ The next safe continuation is to build `v1.0` on top of the landed runtime basel
 Priority order:
 
 1. lock the `v1.0` product identity, user map, and acceptance standard
-2. force requirement -> function -> API -> task decomposition across real project work
+2. run real delivery through requirement -> function -> API -> task gates and tune packet quality
 3. deepen specialist-agent enforcement and make review non-optional at workflow stages
    - `reviewCommittee` now emits `activationTrace` with `active / assumed / missing` specialist states instead of a single fake pass state
    - runtime review builders now try to resolve real activated specialist roles from both specialist evidence artifacts and prior workflow review-signal metadata before committee evaluation
@@ -143,12 +159,11 @@ Priority order:
 5. make document lifecycle governance strong enough to stop supplement-document drift
 6. deepen Hermes into broader cross-project default governance and lower-operator unattended closure
 7. make Dataki/system-state grounding default across more projects and more stages
-8. make `inbox -> Notion -> Dataki -> agent retrieval` the default governed knowledge refresh loop
-9. formalize a deployment-ready `PMOS product repo` boundary and stop mixing business subprojects into the public product package
-10. establish a governed `GitHub + Notion` cloud sync layer with `latest-state` mirror objects for ChatGPT retrieval
-11. migrate PMOS product-behavior specs out of codex-local private context and back into PMOS repo truth
-12. finish deployable product packaging, docs, release discipline, and GitHub sharing path
-13. turn the new eight-debt closure slice into defaults instead of optional APIs
+8. extend the verified `inbox -> Notion -> Dataki -> agent retrieval` path into default governed review evidence
+9. verify the deployment-ready `PMOS product repo` export outside this dirty working tree
+10. removed from current active todo by operator instruction: publish the new `cloud-mirror/runtime-status.*` layer through governed `GitHub + Notion` paths for ChatGPT retrieval
+11. finish deployable product packaging, docs, release discipline, and GitHub sharing path
+12. turn the new eight-debt closure slice into defaults instead of optional APIs
    - inject `ContextInjectionBundle` into workflow / specialist / review packets by default
    - upgrade `Pipeline Launcher` from planner to trigger
    - expose `L0-L3`, outbox runtime, and scheduler runtime in operator-facing surfaces

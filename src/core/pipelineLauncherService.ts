@@ -85,4 +85,31 @@ export class PipelineLauncherService {
         } satisfies PipelineLauncherPlan;
       });
   }
+
+  async triggerPlan(input: {
+    task: TaskSsotTask;
+    workflowRun: WorkflowRun;
+    planId: string;
+    resumeRun: (targetStageId: string, reason: string) => Promise<WorkflowRun>;
+  }) {
+    const plan = this.buildPlans(input.task, input.workflowRun).find((item) => item.id === input.planId);
+    if (!plan) {
+      throw new Error(`pipeline launcher plan ${input.planId} not found`);
+    }
+    if (plan.status !== 'ready') {
+      throw new Error(`pipeline launcher plan ${plan.id} is not ready: ${plan.missingInputs.join('; ') || plan.status}`);
+    }
+    const targetStageId = plan.targetStages[0];
+    if (!targetStageId) {
+      throw new Error(`pipeline launcher plan ${plan.id} has no target stage`);
+    }
+
+    const workflowRun = await input.resumeRun(targetStageId, `pipeline-launcher:${plan.id}`);
+    return {
+      taskId: input.task.taskId,
+      plan,
+      targetStageId,
+      workflowRun,
+    };
+  }
 }

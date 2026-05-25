@@ -2,6 +2,7 @@ import { FileStore } from './fileStore.js';
 import { MemoryService } from './memoryService.js';
 import { OutboxService } from './outboxService.js';
 import { GateAttentionService } from './gateAttentionService.js';
+import { PlanArchiveService } from './planArchiveService.js';
 import {
   McpContextSyncService,
   type McpCheckpoint,
@@ -10,6 +11,7 @@ import {
   type TaskNode,
 } from './mcpContextSyncService.js';
 import type {
+  PlanArchiveRecord,
   TaskSsotArtifactLink,
   TaskSsotGateCheck,
   TaskSsotGateEvent,
@@ -38,14 +40,16 @@ export class TaskSsotService {
     private readonly memoryService = new MemoryService(store),
     private readonly outboxService = new OutboxService(store),
     private readonly gateAttentionService = new GateAttentionService(),
+    private readonly planArchiveService = new PlanArchiveService(store),
   ) {}
 
   async getState(subprojectId?: string | null): Promise<TaskSsotState> {
     const mcpState = await this.mcpContextSync.getState();
     const workflowRuns = await this.loadWorkflowRunContexts(subprojectId);
     const outboxEnvelopes = await this.outboxService.listEnvelopes(subprojectId);
+    const planArchives = await this.planArchiveService.listArchives({ subprojectId });
     const current = subprojectId ? this.createEmptyState() : await this.loadPersistedState();
-    const next = this.syncFromMcpContext(current, mcpState, workflowRuns, outboxEnvelopes);
+    const next = this.syncFromMcpContext(current, mcpState, workflowRuns, outboxEnvelopes, planArchives);
     if (!subprojectId && JSON.stringify(next) !== JSON.stringify(current)) {
       await this.store.writeJson(TASK_SSOT_STATE_PATH, next);
     }
@@ -93,13 +97,14 @@ export class TaskSsotService {
     mcpState: McpContextState,
     workflowRuns: WorkflowRunContext[],
     outboxEnvelopes: TaskSsotTask['syncEnvelopes'],
+    planArchives: PlanArchiveRecord[],
   ): TaskSsotState {
     const existingById = new Map(current.tasks.map((task) => [task.taskId, task]));
     const mcpTasks = mcpState.tasks.map((task) => {
       const previous = existingById.get(task.id);
-      return this.syncTask(previous, task, mcpState);
+      return this.syncTask(previous, task, mcpState, planArchives);
     });
-    const workflowTasks = workflowRuns.flatMap(({ run, events }) => this.syncWorkflowRunTasks(run, events, existingById));
+    const workflowTasks = workflowRuns.flatMap(({ run, events }) => this.syncWorkflowRunTasks(run, events, existingById, planArchives));
     const mergedTasks = [...mcpTasks, ...workflowTasks].map((task) => ({
       ...task,
       syncEnvelopes: outboxEnvelopes.filter((envelope) => envelope.taskId === task.taskId),
@@ -148,7 +153,12 @@ export class TaskSsotService {
     return runs.filter((run): run is WorkflowRunContext => run !== null);
   }
 
-  private syncTask(previous: TaskSsotTask | undefined, task: TaskNode, mcpState: McpContextState): TaskSsotTask {
+  private syncTask(
+    previous: TaskSsotTask | undefined,
+    task: TaskNode,
+    mcpState: McpContextState,
+    planArchives: PlanArchiveRecord[],
+  ): TaskSsotTask {
     const checkpoints = mcpState.checkpoints.filter((item) => item.taskId === task.id);
     const latestCheckpoint = checkpoints.at(-1) ?? null;
     const events = mcpState.eventLog.filter((item) => item.taskId === task.id);
@@ -161,7 +171,10 @@ export class TaskSsotService {
     const sourceRef = previous?.sourceRef ?? task.id;
     const currentStage = 'shared-context';
     const continuationBase = this.resolveContinuation(task, latestCheckpoint, latestEvent, previous, mcpState);
-    const artifactLinks = checkpoints.map((checkpoint) => this.toCheckpointArtifact(task.id, checkpoint));
+    const artifactLinks = [
+      ...checkpoints.map((checkpoint) => this.toCheckpointArtifact(task.id, checkpoint)),
+      ...this.toPlanArchiveArtifactLinks(task.id, planArchives),
+    ];
     const gateChecks = this.resolveGateChecks({
       taskId: task.id,
       status,
@@ -170,6 +183,7 @@ export class TaskSsotService {
       latestCheckpoint,
       latestEvent,
       summary,
+      currentStage,
     });
     const gateHistory = this.resolveSharedContextGateHistory(task, checkpoints, gateChecks);
     const continuation = this.attachCurrentAttention(continuationBase, {
@@ -277,14 +291,29 @@ export class TaskSsotService {
     return task.notes ?? latestCheckpoint?.label ?? latestEvent?.content ?? previous?.summary ?? null;
   }
 
-  private syncWorkflowRunTasks(run: WorkflowRun, events: WorkflowEvent[], existingById: Map<string, TaskSsotTask>) {
-    return run.tasks.map((task) => this.syncWorkflowTask(existingById.get(task.id), run, task, events));
+  private syncWorkflowRunTasks(
+    run: WorkflowRun,
+    events: WorkflowEvent[],
+    existingById: Map<string, TaskSsotTask>,
+    planArchives: PlanArchiveRecord[],
+  ) {
+    const tasks = Array.isArray(run.tasks) ? run.tasks : [];
+    return tasks.map((task) => this.syncWorkflowTask(existingById.get(task.id), run, task, events, planArchives));
   }
 
-  private syncWorkflowTask(previous: TaskSsotTask | undefined, run: WorkflowRun, task: WorkflowTask, events: WorkflowEvent[]): TaskSsotTask {
+  private syncWorkflowTask(
+    previous: TaskSsotTask | undefined,
+    run: WorkflowRun,
+    task: WorkflowTask,
+    events: WorkflowEvent[],
+    planArchives: PlanArchiveRecord[],
+  ): TaskSsotTask {
     const stage = run.stages.find((item) => item.id === task.stageId) ?? null;
     const currentOwnerAgentId = stage ? `workflow-role:${stage.ownerRole}` : `workflow-role:${task.ownerRole}`;
-    const artifactLinks = this.toWorkflowArtifactLinks(run, task);
+    const artifactLinks = [
+      ...this.toWorkflowArtifactLinks(run, task),
+      ...this.toPlanArchiveArtifactLinks(task.id, planArchives),
+    ];
     const status = this.mapWorkflowTaskStatus(run, task);
     const summary = task.summary ?? stage?.summary ?? run.executionSummary ?? previous?.summary ?? null;
     const specialistActivationSnapshot = this.resolveWorkflowSpecialistActivation(task, events);
@@ -318,6 +347,7 @@ export class TaskSsotService {
       latestCheckpoint: null,
       latestEvent: null,
       summary,
+      currentStage: task.stageId,
       specialistActivation: specialistActivationSnapshot,
     });
     const gateHistory = this.resolveWorkflowGateHistory(run, task, events, gateChecks);
@@ -408,6 +438,18 @@ export class TaskSsotService {
       })),
     ];
     return links;
+  }
+
+  private toPlanArchiveArtifactLinks(taskId: string, planArchives: PlanArchiveRecord[]): TaskSsotArtifactLink[] {
+    return planArchives
+      .filter((record) => record.taskId === taskId)
+      .map((record) => ({
+        taskId,
+        artifactType: 'plan-archive',
+        artifactId: record.id,
+        artifactPath: record.path,
+        roleInTask: 'upstream-truth' as const,
+      }));
   }
 
   private mapWorkflowTaskStatus(run: WorkflowRun, task: WorkflowTask): TaskSsotStatus {
@@ -501,6 +543,7 @@ export class TaskSsotService {
     latestCheckpoint: McpCheckpoint | null;
     latestEvent: McpContextEvent | null;
     summary: string | null;
+    currentStage?: string | null;
     specialistActivation?: {
       required: boolean;
       activatedRoles: string[];
@@ -530,6 +573,18 @@ export class TaskSsotService {
     const aiWritebackPaths = input.artifactLinks
       .map((artifact) => artifact.artifactPath)
       .filter((artifactPath) => /ai-writeback|writeback|backwrite|回写/u.test(artifactPath));
+    const requirementToFunctionPaths = input.artifactLinks
+      .map((artifact) => artifact.artifactPath)
+      .filter((artifactPath) => /requirement-to-function/u.test(artifactPath));
+    const functionToApiPaths = input.artifactLinks
+      .map((artifact) => artifact.artifactPath)
+      .filter((artifactPath) => /function-to-api/u.test(artifactPath));
+    const apiToTaskPaths = input.artifactLinks
+      .map((artifact) => artifact.artifactPath)
+      .filter((artifactPath) => /api-to-task/u.test(artifactPath));
+    const planArchivePaths = input.artifactLinks
+      .filter((artifact) => artifact.artifactType === 'plan-archive')
+      .map((artifact) => artifact.artifactPath);
     const taskContext = [
       input.summary ?? '',
       input.latestCheckpoint?.label ?? '',
@@ -538,6 +593,14 @@ export class TaskSsotService {
     ].join(' ');
     const designRelevant = /design|ui|visual|interaction|prototype|figma|pixso|html|schema|设计|视觉|交互|原型/u.test(taskContext);
     const aiWritebackRelevant = /writeback|backwrite|ai-writeback|回写/u.test(taskContext);
+
+    const planningRelevant = /plan|planning|roadmap|规划|计划/u.test(taskContext);
+    const isDeliveryState = input.status === 'completed' || input.status === 'ready_for_delivery';
+    const requiresRequirementToFunction =
+      input.currentStage === 'requirements-document' || /requirements-document|requirement-to-function/u.test(taskContext);
+    const requiresFunctionToApi =
+      input.currentStage === 'functional-specification' || /functional-specification|function-to-api/u.test(taskContext);
+    const requiresApiToTask = input.currentStage === 'backend-api' || /backend-api|api-to-task/u.test(taskContext);
 
     const checks: TaskSsotTask['gateChecks'] = [
       {
@@ -571,6 +634,24 @@ export class TaskSsotService {
       },
       {
         taskId: input.taskId,
+        gateId: 'plan-archive-gate',
+        status:
+          planArchivePaths.length > 0
+            ? 'pass'
+            : planningRelevant && isDeliveryState
+              ? 'block'
+              : 'warn',
+        reason:
+          planArchivePaths.length > 0
+            ? 'Plan archive is linked to the task.'
+            : planningRelevant && isDeliveryState
+              ? 'Planning-relevant task reached delivery state without a linked plan archive.'
+              : 'No plan archive is linked yet.',
+        evidencePaths: planArchivePaths,
+        checkedAt,
+      },
+      {
+        taskId: input.taskId,
         gateId: 'asset-backwrite-gate',
         status:
           finalDeliveryPaths.length > 0 || (workingOutputPaths.length > 0 && input.status !== 'completed' && input.status !== 'ready_for_delivery')
@@ -594,6 +675,54 @@ export class TaskSsotService {
         checkedAt,
       },
     ];
+
+    if (requiresRequirementToFunction || requirementToFunctionPaths.length > 0) {
+      checks.push({
+        taskId: input.taskId,
+        gateId: 'requirement-to-function-gate',
+        status: requirementToFunctionPaths.length > 0 ? 'pass' : isDeliveryState || input.status === 'in_review' ? 'block' : 'warn',
+        reason:
+          requirementToFunctionPaths.length > 0
+            ? 'Requirement-to-function mapping artifact is linked to the task.'
+            : isDeliveryState || input.status === 'in_review'
+              ? 'Requirement stage cannot close or enter review without requirement-to-function mapping.'
+              : 'Requirement-to-function mapping is not linked yet.',
+        evidencePaths: requirementToFunctionPaths,
+        checkedAt,
+      });
+    }
+
+    if (requiresFunctionToApi || functionToApiPaths.length > 0) {
+      checks.push({
+        taskId: input.taskId,
+        gateId: 'function-to-api-gate',
+        status: functionToApiPaths.length > 0 ? 'pass' : isDeliveryState || input.status === 'in_review' ? 'block' : 'warn',
+        reason:
+          functionToApiPaths.length > 0
+            ? 'Function-to-api mapping artifact is linked to the task.'
+            : isDeliveryState || input.status === 'in_review'
+              ? 'Functional specification cannot close or enter review without function-to-api mapping.'
+              : 'Function-to-api mapping is not linked yet.',
+        evidencePaths: functionToApiPaths,
+        checkedAt,
+      });
+    }
+
+    if (requiresApiToTask || apiToTaskPaths.length > 0) {
+      checks.push({
+        taskId: input.taskId,
+        gateId: 'api-to-task-gate',
+        status: apiToTaskPaths.length > 0 ? 'pass' : isDeliveryState || input.status === 'in_review' ? 'block' : 'warn',
+        reason:
+          apiToTaskPaths.length > 0
+            ? 'API-to-task mapping artifact is linked to the task.'
+            : isDeliveryState || input.status === 'in_review'
+              ? 'Backend API stage cannot close or enter review without api-to-task mapping.'
+              : 'API-to-task mapping is not linked yet.',
+        evidencePaths: apiToTaskPaths,
+        checkedAt,
+      });
+    }
 
     if (designRelevant || designLanguagePaths.length > 0) {
       checks.push({
@@ -827,6 +956,18 @@ export class TaskSsotService {
     if (/review|gate|评审/u.test(normalized)) {
       return 'review-convergence-gate';
     }
+    if (/requirement-to-function/u.test(normalized)) {
+      return 'requirement-to-function-gate';
+    }
+    if (/function-to-api/u.test(normalized)) {
+      return 'function-to-api-gate';
+    }
+    if (/api-to-task/u.test(normalized)) {
+      return 'api-to-task-gate';
+    }
+    if (/plan archive|plan-archive|planning|roadmap|规划|计划/u.test(normalized)) {
+      return 'plan-archive-gate';
+    }
     if (/truth|ssot|requirement|version|真源|需求/u.test(normalized)) {
       return 'project-truth-gate';
     }
@@ -845,6 +986,18 @@ export class TaskSsotService {
     }
     if (event.artifactPath && /ai-writeback|writeback|backwrite|回写/u.test(event.artifactPath)) {
       return 'ai-writeback-confirmation';
+    }
+    if (event.artifactPath && /requirement-to-function/u.test(event.artifactPath)) {
+      return 'requirement-to-function-gate';
+    }
+    if (event.artifactPath && /function-to-api/u.test(event.artifactPath)) {
+      return 'function-to-api-gate';
+    }
+    if (event.artifactPath && /api-to-task/u.test(event.artifactPath)) {
+      return 'api-to-task-gate';
+    }
+    if (event.artifactPath && /plan-archive|plan-archives|planning|roadmap|规划|计划/u.test(event.artifactPath)) {
+      return 'plan-archive-gate';
     }
     if (event.kind === 'artifact_written' || event.kind === 'stage_completed') {
       return 'asset-backwrite-gate';
@@ -931,12 +1084,15 @@ export class TaskSsotService {
 
   private toCheckpointArtifact(taskId: string, checkpoint: McpCheckpoint) {
     const label = checkpoint.label.toLowerCase();
-    const roleInTask: TaskSsotTask['artifactLinks'][number]['roleInTask'] =
+    let roleInTask: TaskSsotTask['artifactLinks'][number]['roleInTask'] =
       /review|gate|评审/u.test(label)
         ? 'review-evidence'
         : /baseline|requirement|version|truth|ssot|demand|需求|真源/u.test(label)
           ? 'upstream-truth'
           : 'working-output';
+    if (/final-delivery|delivered|release|closed|closure|completed|完成|通过|已落地|落地|收口/u.test(label)) {
+      roleInTask = 'final-delivery';
+    }
 
     return {
       taskId,

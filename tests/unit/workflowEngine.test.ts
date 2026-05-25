@@ -61,6 +61,13 @@ describe('WorkflowEngine', () => {
     expect(definition.stages[5]?.capability).toBe('multimodal');
     expect(definition.stages[8]?.capability).toBe('review');
     expect(definition.stages.every((stage) => stage.requiredOutputs.length > 0)).toBe(true);
+
+    const requirementsStage = definition.stages.find((stage) => stage.id === 'requirements-document');
+    const functionalStage = definition.stages.find((stage) => stage.id === 'functional-specification');
+    const backendStage = definition.stages.find((stage) => stage.id === 'backend-api');
+    expect(requirementsStage?.requiredOutputs.some((output) => output.path.includes('requirement-to-function-'))).toBe(true);
+    expect(functionalStage?.requiredOutputs.some((output) => output.path.includes('function-to-api-'))).toBe(true);
+    expect(backendStage?.requiredOutputs.some((output) => output.path.includes('api-to-task-'))).toBe(true);
   });
 
   it('creates and advances a real run', async () => {

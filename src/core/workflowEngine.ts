@@ -83,6 +83,11 @@ export class WorkflowEngine {
               required: true,
             },
             {
+              path: prefixProjectPath(projectRoot, 'docs/review/requirement-to-function-*.json'),
+              kind: 'json',
+              required: true,
+            },
+            {
               path: prefixProjectPath(projectRoot, 'docs/review/requirements-*.json'),
               kind: 'json',
               required: true,
@@ -107,6 +112,11 @@ export class WorkflowEngine {
             {
               path: prefixProjectPath(projectRoot, 'docs/functional/*.md'),
               kind: 'document',
+              required: true,
+            },
+            {
+              path: prefixProjectPath(projectRoot, 'docs/review/function-to-api-*.json'),
+              kind: 'json',
               required: true,
             },
             {
@@ -225,6 +235,11 @@ export class WorkflowEngine {
             {
               path: prefixProjectPath(projectRoot, 'docs/backend-api/*.md'),
               kind: 'document',
+              required: true,
+            },
+            {
+              path: prefixProjectPath(projectRoot, 'docs/review/api-to-task-*.json'),
+              kind: 'json',
               required: true,
             },
             {

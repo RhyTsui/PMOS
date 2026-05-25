@@ -408,4 +408,48 @@ describe('SchedulerRunService', () => {
     expect(ticked.budgetExhausted).toBe(true);
     expect(ticked.recoveryPolicy).toBe('manual-only');
   });
+
+  it('derives runtime summary for legacy runs without metadata', async () => {
+    const { store } = createFixture();
+    await seedFixture(store);
+
+    const memoryService = new MemoryService(store);
+    const workflowEngine = new WorkflowEngine(store, memoryService);
+    const orchestratorRuntime = new OrchestratorRuntime(store, memoryService);
+    const schedulerRunService = new SchedulerRunService(
+      orchestratorRuntime,
+      memoryService,
+      workflowEngine,
+      new ReviewCommittee(),
+      new HermesPolicyService(store, memoryService),
+    );
+    const definition = await workflowEngine.loadDefinition();
+
+    const run = await orchestratorRuntime.initRun({
+      definition,
+      project: {
+        subprojectId: null,
+        projectName: 'Legacy Scheduler Fixture',
+        projectDescription: null,
+        projectRoot: '',
+        projectMemoryPath: 'docs/memory/project-memory.md',
+        selectedProvider: null,
+        providerConfigPath: null,
+        mcpConfigPath: null,
+      },
+      providerCount: 1,
+      mcpServerCount: 1,
+    });
+
+    const legacyRun = { ...run } as unknown as Record<string, unknown>;
+    delete legacyRun.metadata;
+    await store.writeJson(run.memory.runStatePath, legacyRun);
+
+    const summary = await schedulerRunService.buildRuntimeSummary();
+    const derived = await schedulerRunService.getRun(run.id);
+    expect(summary.total).toBe(1);
+    expect(derived.sessionBudget).toBe(6);
+    expect(derived.consumedBudget).toBe(0);
+    expect(derived.recoveryPolicy).toBe('manual-only');
+  });
 });

@@ -663,6 +663,14 @@ export class CapabilityRegistry {
     const events = await this.orchestratorRuntime.loadEvents(runId, subprojectId);
     const artifacts = await this.workflowEngine.hydrateArtifacts(run);
     const openSourceEvidence = this.reviewCommittee.inspectOpenSourceEvidence(artifacts);
+    const hasCompletedReviewEvidence = run.stages.some(
+      (stage) =>
+        stage.status === 'completed' &&
+        stage.outputPaths.some((artifactPath) => /review-evidence|review/iu.test(artifactPath)),
+    );
+    if (hasCompletedReviewEvidence && openSourceEvidence.present) {
+      return true;
+    }
     const activatedSpecialistRoles = this.specialistActivationService.resolveActivatedRoles({
       stageId: run.currentStageId,
       artifacts: artifacts.map((artifact) => ({ path: artifact.path, content: artifact.content })),

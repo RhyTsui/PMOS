@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-21T07:06:21.076Z",
+  "versionLabel": "v1.0-non-page-slice",
+  "subprojectId": null,
+  "status": "candidate",
+  "validationCommands": [
+    "npm run validate",
+    "npm run build:backend",
+    "npm test"
+  ],
+  "parkedTracks": [
+    "pmos-page-unified-entry"
+  ],
+  "productFiles": [
+    "src/",
+    "tests/",
+    "docs/operations/current-version-progress.md",
+    "docs/operations/v1.0-gap-list.md",
+    "docs/operations/product-repo-release-readiness.md",
+    "cloud-mirror/runtime-status.json",
+    "cloud-mirror/runtime-status.md"
+  ],
+  "releaseNotes": null,
+  "acceptance": [
+    "Product-core files are separated from business subproject changes.",
+    "Validation commands are declared and rerunnable.",
+    "Document governance and runtime mirror artifacts are part of the package.",
+    "Parked tracks are explicit and do not masquerade as completed release scope."
+  ]
+}

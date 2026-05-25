@@ -22,6 +22,13 @@ type UpsertDocumentTruthSourceInput = {
   note?: string | null;
 };
 
+type ArtifactFlowCheckInput = {
+  artifactPaths: string[];
+  subprojectId?: string | null;
+  requireRegistered?: boolean;
+  source?: string | null;
+};
+
 export class DocumentGovernanceService {
   constructor(private readonly store: FileStore) {}
 
@@ -156,6 +163,53 @@ export class DocumentGovernanceService {
       return null;
     }
     return this.store.readJson<DocumentGovernanceAudit>(auditPath);
+  }
+
+  async evaluateArtifactFlow(input: ArtifactFlowCheckInput) {
+    const subprojectId = input.subprojectId ?? null;
+    const registry = await this.loadRegistry(subprojectId);
+    const latestAudit = await this.readLatestAudit(subprojectId);
+    const artifactPaths = [...new Set(input.artifactPaths.map((item) => this.normalizePath(item)).filter(Boolean))];
+    const registeredPaths = new Set(registry.entries.map((entry) => entry.path));
+    const activeRegisteredPaths = new Set(registry.entries.filter((entry) => entry.status === 'active').map((entry) => entry.path));
+    const registeredArtifactPaths = artifactPaths.filter((artifactPath) => registeredPaths.has(artifactPath));
+    const unregisteredArtifacts = artifactPaths.filter((artifactPath) => !registeredPaths.has(artifactPath));
+    const missingRegisteredArtifacts: string[] = [];
+
+    for (const artifactPath of activeRegisteredPaths) {
+      if (!(await this.store.exists(artifactPath))) {
+        missingRegisteredArtifacts.push(artifactPath);
+      }
+    }
+
+    const latestAuditBlockCount = latestAudit?.issues.filter((issue) => issue.severity === 'block').length ?? 0;
+    const requireRegistered = input.requireRegistered ?? false;
+    const blocking =
+      (requireRegistered && unregisteredArtifacts.length > 0) ||
+      missingRegisteredArtifacts.length > 0 ||
+      latestAuditBlockCount > 0;
+    const status = blocking ? 'block' : unregisteredArtifacts.length > 0 || (latestAudit?.issueCount ?? 0) > 0 ? 'warn' : 'pass';
+
+    return {
+      generatedAt: new Date().toISOString(),
+      subprojectId,
+      source: input.source ?? 'artifact-flow-check',
+      artifactCount: artifactPaths.length,
+      registeredArtifactCount: registeredArtifactPaths.length,
+      unregisteredArtifacts,
+      missingRegisteredArtifacts,
+      latestAuditIssueCount: latestAudit?.issueCount ?? 0,
+      latestAuditBlockCount,
+      requireRegistered,
+      blocking,
+      status,
+      summary:
+        status === 'pass'
+          ? `Artifact flow passed for ${artifactPaths.length} artifact(s).`
+          : status === 'block'
+            ? `Artifact flow blocked by ${unregisteredArtifacts.length} unregistered artifact(s), ${missingRegisteredArtifacts.length} missing registered artifact(s), and ${latestAuditBlockCount} audit block(s).`
+            : `Artifact flow has warnings for ${unregisteredArtifacts.length} unregistered artifact(s) and ${latestAudit?.issueCount ?? 0} audit issue(s).`,
+    };
   }
 
   private async loadRegistry(subprojectId?: string | null) {
