@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getDemoPrompt, updateDemoPrompt } from '@/lib/demo-data';
+import { getPrompt, updatePrompt } from '@/lib/prompt-store';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const prompt = getDemoPrompt(id);
+  const prompt = await getPrompt(id);
   if (!prompt) return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
   return NextResponse.json(prompt);
 }
@@ -17,7 +17,7 @@ export async function PUT(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const prompt = updateDemoPrompt(id, body);
+  const prompt = await updatePrompt(id, body);
   if (!prompt) return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
   return NextResponse.json(prompt);
 }

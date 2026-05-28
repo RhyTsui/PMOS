@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getDemoPromptVersions } from '@/lib/demo-data';
+import { listPromptVersions } from '@/lib/prompt-store';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  return NextResponse.json(getDemoPromptVersions(id));
+  return NextResponse.json(await listPromptVersions(id));
 }

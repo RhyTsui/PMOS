@@ -69,6 +69,7 @@ interface BubbleItem {
   missingFields: MissingField[];
   messageId: string;
   agent?: string;
+  runtimeState?: Record<string, unknown>;
   rawMessage: Message;
 }
 
@@ -2032,8 +2033,12 @@ function MissingFieldPanel({
 
 function collectSourceRefs(message: Message): SourceRefView[] {
   const meta = message.metadata || {};
+  const evidenceBundle = meta.evidence_bundle && typeof meta.evidence_bundle === 'object'
+    ? meta.evidence_bundle as Record<string, unknown>
+    : undefined;
   const raw = [
     meta.source_refs,
+    evidenceBundle?.source_refs,
     meta.sourceRefs,
     meta.sources,
     meta.citations,
@@ -2074,6 +2079,7 @@ function collectSourceRefs(message: Message): SourceRefView[] {
 function collectCapabilities(message: Message): CapabilityRefView[] {
   const debugPayload = getDebugProcessPayload(message);
   const debugLog = collectDebugLogs(debugPayload);
+  const meta = message.metadata || {};
   const calls = message.tool_calls || [];
   const capabilities: CapabilityRefView[] = calls
     .map((call, index) => {
@@ -2096,6 +2102,26 @@ function collectCapabilities(message: Message): CapabilityRefView[] {
       name: '联调日志',
       kind: 'debug_log',
       result: debugLog,
+      status: 'done',
+    });
+  }
+  const executionContext = meta.execution_context || (meta.workflow_result as Record<string, unknown> | undefined)?.execution_context;
+  if (executionContext && typeof executionContext === 'object') {
+    capabilities.push({
+      key: 'execution-context',
+      name: '执行详情',
+      kind: 'execution_context',
+      result: JSON.stringify(executionContext, null, 2),
+      status: 'done',
+    });
+  }
+  const diagnostics = meta.knowledge_diagnostics || (meta.agent_runtime as Record<string, unknown> | undefined)?.knowledge_diagnostics;
+  if (diagnostics && typeof diagnostics === 'object') {
+    capabilities.push({
+      key: 'knowledge-diagnostics',
+      name: '知识库诊断',
+      kind: 'diagnostics',
+      result: JSON.stringify(diagnostics, null, 2),
       status: 'done',
     });
   }
@@ -3822,16 +3848,69 @@ function MetricExplanationCard() {
   );
 }
 
+function RuntimeStateBar({ state }: { state?: Record<string, unknown> }) {
+  const c = useThemeColors();
+  if (!state) return null;
+  const currentStage = String(state.current_stage || '');
+  const status = String(state.status || 'running');
+  const dataSourceCount = Number((state as { data_source_count?: unknown }).data_source_count || 0);
+  const labels: Record<string, string> = {
+    understanding: '正在理解问题...',
+    context_loading: '正在整理上下文...',
+    data_fetching: '正在获取广告数据...',
+    analysis: '正在分析异常波动...',
+    diagnosis: '正在定位可能原因...',
+    knowledge_lookup: '正在校验历史规则与案例...',
+    recommendation: '正在整理下一步动作...',
+    response_generation: '正在生成优化建议...',
+    completed: '已完成分析',
+    degraded: '部分信息暂不可用，已继续处理',
+    blocked: '当前处理受阻',
+  };
+  const label = labels[currentStage] || (status === 'completed' ? '已完成分析' : '正在处理...');
+  const tone = status === 'degraded' ? c.warning : status === 'blocked' || status === 'failed' ? c.danger : status === 'completed' ? c.success : c.accent;
+  return (
+    <div
+      style={{
+        marginBottom: 8,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        border: `1px solid ${c.borderFaint}`,
+        background: '#fff',
+        color: c.textSecondary,
+        borderRadius: 999,
+        padding: '5px 10px',
+        fontSize: 12,
+        lineHeight: 1.4,
+      }}
+    >
+      <span style={{ width: 7, height: 7, borderRadius: 999, background: tone, flexShrink: 0 }} />
+      <span>{label}</span>
+      {dataSourceCount > 0 && <span style={{ color: c.textMuted }}>已调用 {dataSourceCount} 个数据源</span>}
+    </div>
+  );
+}
+
 function ResultMessageCard({
   result,
 }: {
   result: WorkflowResult | Record<string, unknown>;
 }) {
   const c = useThemeColors();
-  const summary = typeof result.summary === 'string' ? result.summary : '已生成结果';
+  const businessSummary = result.business_summary && typeof result.business_summary === 'object'
+    ? result.business_summary as Record<string, unknown>
+    : null;
+  const summaryTitle = typeof businessSummary?.title === 'string' ? businessSummary.title : '结果摘要';
+  const summary = typeof businessSummary?.brief === 'string'
+    ? businessSummary.brief
+    : typeof result.summary === 'string' ? result.summary : '已生成结果';
+  const severity = typeof businessSummary?.severity === 'string' ? businessSummary.severity : '';
+  const confidence = typeof businessSummary?.confidence === 'string' ? businessSummary.confidence : '';
+  const businessImpact = typeof businessSummary?.business_impact === 'string' ? businessSummary.business_impact : '';
   const resultType = typeof result.result_type === 'string' ? result.result_type : '';
   const nextActions = Array.isArray(result.next_actions) ? result.next_actions.slice(0, 4) : [];
-  const pendingChecks = Array.isArray(result.pending_checks) ? result.pending_checks.slice(0, 4) : [];
+  const pendingChecks = businessSummary ? [] : Array.isArray(result.pending_checks) ? result.pending_checks.slice(0, 4) : [];
 
   if (resultType === 'debugging_report') {
     const stages = ['需求识别', '资料确认', '发起联调', '过程观测', '结果沉淀'];
@@ -3968,7 +4047,7 @@ function ResultMessageCard({
           <BulbOutlined />
         </div>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>结果摘要</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>{summaryTitle}</div>
           <div style={{ fontSize: 12, color: c.textMuted }}>
             {resultTypeLabelMap[resultType] || '结构化结果'}
           </div>
@@ -3976,12 +4055,25 @@ function ResultMessageCard({
       </div>
 
       <div style={{ fontSize: 14, lineHeight: 1.75, color: c.textBody }}>{summary}</div>
+      {(severity || confidence || businessImpact) && (
+        <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {severity && <span style={{ borderRadius: 999, padding: '4px 8px', background: '#fff', border: `1px solid ${c.borderFaint}`, color: c.textMuted, fontSize: 11 }}>影响等级：{severity}</span>}
+          {confidence && <span style={{ borderRadius: 999, padding: '4px 8px', background: '#fff', border: `1px solid ${c.borderFaint}`, color: c.textMuted, fontSize: 11 }}>置信度：{confidence}</span>}
+          {businessImpact && <span style={{ flexBasis: '100%', color: c.textMuted, fontSize: 12, lineHeight: 1.6 }}>{businessImpact}</span>}
+        </div>
+      )}
 
       {nextActions.length > 0 && (
         <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>建议动作</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {nextActions.map((action, idx) => (
+            {nextActions.map((action, idx) => {
+              const actionLabel = typeof action === 'string'
+                ? action
+                : action && typeof action === 'object' && 'label' in action
+                  ? String((action as Record<string, unknown>).label || '继续处理')
+                  : '继续处理';
+              return (
               <div
                 key={`${String(action)}-${idx}`}
                 style={{
@@ -3993,9 +4085,9 @@ function ResultMessageCard({
                   fontSize: 12,
                 }}
               >
-                {String(action)}
+                {actionLabel}
               </div>
-            ))}
+            )})}
           </div>
         </div>
       )}
@@ -4218,6 +4310,7 @@ export default function ChatContainer({
       missingFields: msg.missing_fields || [],
       messageId: messageKey,
       agent: msg.agent || (msg.routing_decision?.intent_type as string | undefined),
+      runtimeState: (msg.metadata?.runtime_state || (msg.metadata?.workflow_result as Record<string, unknown> | undefined)?.runtime_state) as Record<string, unknown> | undefined,
       rawMessage: msg,
     };
   }), [contextThinkingSteps, messageVersions, messages]);
@@ -4416,6 +4509,8 @@ export default function ChatContainer({
           const ambiguityConfirmPayload = isAi ? getAmbiguityConfirmPayload(item.rawMessage) : null;
           const capabilityFollowUpPayload = isAi ? getCapabilityFollowUpPayload(item.rawMessage) : null;
           const workflowCard = isAi ? getWorkflowCard(item.rawMessage) : null;
+          const semanticResult = isAi ? getResultForMessage(item, currentResult) : null;
+          const usesSemanticLayer = Boolean(item.runtimeState || semanticResult?.business_summary);
           const metricExplainerSchema = isAi
             ? getMetricExplainerSchema(item.rawMessage)
             : null;
@@ -4470,7 +4565,11 @@ export default function ChatContainer({
                     </div>
                   )}
 
-                  {isAi && item.thinkingSteps.length > 0 && (
+                  {isAi && item.runtimeState && (
+                    <RuntimeStateBar state={item.runtimeState} />
+                  )}
+
+                  {isAi && !usesSemanticLayer && item.thinkingSteps.length > 0 && (
                     <ThinkingChain
                       steps={item.thinkingSteps}
                       toolCalls={item.toolCalls}
@@ -4502,7 +4601,7 @@ export default function ChatContainer({
                     />
                   )}
 
-                  {isAi && item.kind === 'assistant' && (capabilities.length > 0 || sourceRefs.length > 0) && (
+                  {isAi && !usesSemanticLayer && item.kind === 'assistant' && (capabilities.length > 0 || sourceRefs.length > 0) && (
                     <UnifiedEvidenceStrip
                       capabilities={capabilities}
                       refs={sourceRefs}
@@ -4523,6 +4622,12 @@ export default function ChatContainer({
                     codeStyle={settings.codeStyle}
                     showLineNumbers={settings.codeLineNumbers}
                   />
+
+                  {isAi && semanticResult && Boolean(semanticResult.business_summary) && (
+                    <div style={{ marginTop: 8 }}>
+                      <ResultMessageCard result={semanticResult} />
+                    </div>
+                  )}
 
                   {isAi && workflowCard && workflowCard.type !== 'legacy_media_debug' && (
                     <WorkflowProcessCard

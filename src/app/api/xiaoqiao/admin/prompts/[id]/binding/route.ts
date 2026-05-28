@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateDemoPromptBinding } from '@/lib/demo-data';
+import { updatePromptBinding } from '@/lib/prompt-store';
 
 export async function PUT(
   request: Request,
@@ -7,6 +7,6 @@ export async function PUT(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const binding = updateDemoPromptBinding(id, body);
+  const binding = await updatePromptBinding(id, body);
   return NextResponse.json(binding);
 }

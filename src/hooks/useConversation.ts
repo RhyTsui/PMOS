@@ -939,11 +939,8 @@ export function useConversation() {
     const trimmed = content.trim();
     if (!trimmed) return;
     const contextualContent = enrichWithConversationContext(trimmed, messages, debugCarryMemory);
-    const baseEffectiveContent = options?.projectContext
-      ? `${trimmed}\n\n[项目上下文]\n${options.projectContext}`
-      : trimmed;
 
-    const effectiveContent = baseEffectiveContent.replace(trimmed, contextualContent);
+    const effectiveContent = contextualContent;
     const nextDebugMemory = extractDebugMemoryFromContent(effectiveContent);
     if (nextDebugMemory) {
       setDebugCarryMemory(prev => ({
@@ -1240,6 +1237,9 @@ export function useConversation() {
             message: trimmed,
             history,
             intent: routing.intent_type,
+            metadata: {
+              projectContext: options?.projectContext,
+            },
           }),
           signal: abortController.signal,
         });
@@ -1258,6 +1258,7 @@ export function useConversation() {
         let currentToolCalls: ToolCallRecord[] = [];
         let currentThinkingSteps: NonNullable<Message['thinking_steps']> = [];
         let currentProcessEvents: AgentProcessEvent[] = [];
+        let currentRuntimeState: Record<string, unknown> | undefined;
         let responseMetadata: Record<string, unknown> | undefined;
         let responseResult: Record<string, unknown> | undefined;
 
@@ -1301,6 +1302,17 @@ export function useConversation() {
                     metadata: {
                       ...(item.metadata || {}),
                       process_events: currentProcessEvents,
+                    },
+                  }
+                  : item));
+              } else if (data.type === 'runtime_state' && data.runtime_state) {
+                currentRuntimeState = data.runtime_state as Record<string, unknown>;
+                setMessages(prev => prev.map(item => item.id === assistantId
+                  ? {
+                    ...item,
+                    metadata: {
+                      ...(item.metadata || {}),
+                      runtime_state: currentRuntimeState,
                     },
                   }
                   : item));
@@ -1459,6 +1471,7 @@ export function useConversation() {
           process_events: currentProcessEvents.length > 0 ? currentProcessEvents : undefined,
           metadata: {
             ...(responseMetadata || {}),
+            ...(currentRuntimeState ? { runtime_state: currentRuntimeState } : {}),
             ...(currentProcessEvents.length > 0 ? { process_events: currentProcessEvents } : {}),
             ...(responseResult ? { workflow_result: responseResult } : {}),
           },

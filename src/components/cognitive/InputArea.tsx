@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tooltip, notification } from 'antd';
-import { ArrowUp, File as FileIcon, FileText, ImageIcon, Keyboard, Loader2, Mic, Paperclip, PlayCircle, Table, X } from 'lucide-react';
+import { File as FileIcon, FileText, ImageIcon, Keyboard, Loader2, Mic, Paperclip, PlayCircle, Table, X } from 'lucide-react';
 import type { AgentType, AttachmentRecord, AttachmentKind } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -42,6 +42,7 @@ interface InputAreaProps {
   onRemoveAttachment?: (attachmentId: string) => void;
   onRetryAttachment?: (attachmentId: string) => void;
   onPreviewAttachment?: (attachment: AttachmentRecord) => void;
+  isSending?: boolean;
 }
 
 const attachmentIconMap: Record<AttachmentKind, typeof FileIcon> = {
@@ -79,6 +80,7 @@ export default function InputArea({
   onRemoveAttachment,
   onRetryAttachment,
   onPreviewAttachment,
+  isSending = false,
 }: InputAreaProps) {
   const c = useThemeColors();
   const isMobile = useIsMobile();
@@ -89,12 +91,15 @@ export default function InputArea({
   const [focused, setFocused] = useState(false);
   const [pasteFileHint, setPasteFileHint] = useState<string | null>(null);
   const [mobileInputMode, setMobileInputMode] = useState<'voice' | 'text'>(isMobile ? 'voice' : 'text');
+  const [localSending, setLocalSending] = useState(false);
 
   const activeColor = c.accent;
 
   const isMobileVoiceMode = isMobile && mobileInputMode === 'voice' && !value.trim();
   const canSubmit = !disabled;
   const hasContent = value.trim().length > 0;
+  const sending = isSending || localSending;
+  const sendButtonState = sending ? 'processing' : hasContent ? 'ready' : 'empty';
 
   const resizeTextarea = useCallback(() => {
     const element = textareaRef.current;
@@ -106,6 +111,7 @@ export default function InputArea({
   const submitMessage = useCallback(() => {
     const payload = value.trim();
     if (!payload || disabled) return;
+    setLocalSending(true);
     onSend(payload);
     setValue('');
     if (isMobile) {
@@ -115,7 +121,14 @@ export default function InputArea({
       resizeTextarea();
       textareaRef.current?.focus();
     });
+    window.setTimeout(() => setLocalSending(false), 60000);
   }, [disabled, isMobile, onSend, resizeTextarea, value]);
+
+  useEffect(() => {
+    if (isSending) {
+      setLocalSending(false);
+    }
+  }, [isSending]);
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0 && onFileUpload) {
@@ -547,23 +560,29 @@ export default function InputArea({
               type="button"
               onClick={submitMessage}
               disabled={!canSubmit}
+              data-composer-state={sendButtonState}
+              aria-busy={sendButtonState === 'processing'}
               aria-label="发送"
               style={{
                 width: 36,
                 height: 36,
                 borderRadius: 999,
-                border: `1px solid ${hasContent ? c.accent : c.borderFaint}`,
-                background: hasContent ? c.accent : c.bgCard,
-                color: hasContent ? '#fff' : c.textMuted,
+                border: `1px solid ${sendButtonState !== 'empty' ? c.accent : c.borderFaint}`,
+                background: sendButtonState !== 'empty' ? c.accent : c.bgCard,
+                color: sendButtonState !== 'empty' ? '#fff' : c.textMuted,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: hasContent ? `0 0 16px ${c.accentGlow}` : 'none',
+                boxShadow: 'none',
+                filter: 'none',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
               }}
             >
-              <ArrowUp size={16} />
+              <span
+                aria-hidden="true"
+                className={`xiaoqiao-send-glyph ${sendButtonState === 'processing' ? 'is-processing' : 'is-arrow'}`}
+              />
             </button>
           </div>
 

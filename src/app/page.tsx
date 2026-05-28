@@ -1754,6 +1754,7 @@ function WorkspaceContent() {
                   onRemoveAttachment={handleRemoveAttachment}
                   onRetryAttachment={handleRetryAttachment}
                   onPreviewAttachment={(attachment) => message.info(attachment.summary || attachment.name)}
+                  isSending={isTyping}
                 />
               </div>
             )}

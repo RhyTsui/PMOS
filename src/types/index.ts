@@ -105,6 +105,49 @@ export interface AgentProcessEvent {
   };
 }
 
+export type RuntimeStage =
+  | 'understanding'
+  | 'context_loading'
+  | 'data_fetching'
+  | 'analysis'
+  | 'diagnosis'
+  | 'knowledge_lookup'
+  | 'recommendation'
+  | 'response_generation';
+
+export interface RuntimeState {
+  current_stage: RuntimeStage | 'completed' | 'degraded' | 'blocked';
+  completed_stages: RuntimeStage[];
+  status: 'running' | 'completed' | 'degraded' | 'blocked' | 'failed';
+  started_at: string;
+  duration_ms?: number;
+}
+
+export interface BusinessSummary {
+  title: string;
+  brief: string;
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  confidence: 'low' | 'medium' | 'high';
+  business_impact?: string;
+}
+
+export interface AiNextAction {
+  label: string;
+  type: 'ask_user' | 'open_panel' | 'run_tool' | 'create_task' | 'confirm' | 'handoff';
+  intent: string;
+  action: string;
+  risk_level: 'low' | 'medium' | 'high';
+  auto_executable: boolean;
+}
+
+export interface AnswerPolicy {
+  verbosity: 'concise' | 'normal' | 'detailed';
+  evidence_visibility: 'hidden' | 'summary' | 'expanded';
+  reasoning_visibility: 'internal' | 'debug' | 'user';
+  confidence_policy: 'always' | 'show_when_low' | 'hidden';
+  fallback_strategy: 'soft_degrade' | 'block' | 'ask_user';
+}
+
 export interface SkillContract {
   skill_id: string;
   name: string;
@@ -302,8 +345,16 @@ export interface WorkflowResult {
   created_at: string;
   // 前端扩展 (兼容)
   kind: IntentType;
-  next_actions: string[];
+  next_actions: string[] | AiNextAction[];
   pending_checks: string[];
+  answer?: string;
+  business_summary?: BusinessSummary;
+  runtime_state?: RuntimeState;
+  answer_policy?: AnswerPolicy;
+  evidence_bundle?: Record<string, unknown>;
+  execution_context?: Record<string, unknown>;
+  agent_runtime?: Record<string, unknown>;
+  reasoning_artifacts?: Record<string, unknown>;
 }
 
 /** 证据对象 (数据对象真源 §8) */
@@ -1107,6 +1158,7 @@ export interface PromptConfig {
   applicable_agents?: string[];
   applicable_models?: string[];
   enabled?: boolean;
+  content?: string;
 }
 
 /** 提示词版本 (提示词管理设计 §3.2) */

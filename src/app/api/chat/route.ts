@@ -17,13 +17,20 @@ import { listMcpServers } from '@/lib/mcp-server-store';
 import { findMetricExplainerByQuestion } from '@/lib/metric-explainer-store';
 import { buildTrackingLinkCardPayload, buildTrackingLinkRequestContext } from '@/lib/tracking-link-service';
 import { attachProcessEventsToDonePayload, processEventsFromSsePayload } from '@/lib/agent-runtime';
-import type { AgentProcessEvent, McpServerConfig, McpToolConfig } from '@/types';
+import { getActivePromptContent } from '@/lib/prompt-store';
+import type { AgentProcessEvent, AiNextAction, AnswerPolicy, BusinessSummary, McpServerConfig, McpToolConfig, RuntimeStage, RuntimeState } from '@/types';
 import type { MetricExplainerUISchema } from '@/features/metric-explainer/schemas/metricExplainerSchema';
 
 interface ChatRequestBody {
   message: string;
   history?: Array<{ role: string; content: string }>;
   intent?: string;
+  projectContext?: string;
+  metadata?: {
+    projectContext?: string;
+    project_context?: string;
+    [key: string]: unknown;
+  };
 }
 
 interface KnowledgeSearchItem {
@@ -35,6 +42,20 @@ interface KnowledgeSearchItem {
 
 interface KnowledgeBaseItem {
   id?: string;
+}
+
+interface KnowledgeSearchResult {
+  items: KnowledgeSearchItem[];
+  warning?: string;
+  resolvedCount?: number;
+  diagnostics?: {
+    stage: 'credentials' | 'list' | 'search' | 'success';
+    listEndpoint?: string;
+    searchEndpoint?: string;
+    knowledgeBaseIds?: string[];
+    status?: number;
+    message?: string;
+  };
 }
 
 type IntentType = 'help' | 'demand' | 'diagnosis' | 'debugging' | 'monitor' | 'material-analysis' | 'forecast' | 'general';
@@ -109,7 +130,109 @@ ${message}
 如果你补齐模型服务配置，我可以继续给出正式分析结果。`;
 }
 
-function buildStructuredResult(intent: IntentType, summary: string): Record<string, unknown> {
+function getDefaultAnswerPolicy(): AnswerPolicy {
+  return {
+    verbosity: 'concise',
+    evidence_visibility: 'hidden',
+    reasoning_visibility: 'internal',
+    confidence_policy: 'show_when_low',
+    fallback_strategy: 'soft_degrade',
+  };
+}
+
+function createRuntimeState(
+  currentStage: RuntimeState['current_stage'],
+  startedAt: number,
+  completedStages: RuntimeStage[] = [],
+  status: RuntimeState['status'] = 'running',
+): RuntimeState {
+  return {
+    current_stage: currentStage,
+    completed_stages: completedStages,
+    status,
+    started_at: new Date(startedAt).toISOString(),
+    duration_ms: status === 'running' ? undefined : Date.now() - startedAt,
+  };
+}
+
+function runtimeStateLabel(state: RuntimeState): string {
+  const labels: Record<RuntimeState['current_stage'], string> = {
+    understanding: '正在理解问题...',
+    context_loading: '正在整理上下文...',
+    data_fetching: '正在获取广告数据...',
+    analysis: '正在分析异常波动...',
+    diagnosis: '正在定位可能原因...',
+    knowledge_lookup: '正在校验历史规则与案例...',
+    recommendation: '正在整理下一步动作...',
+    response_generation: '正在生成优化建议...',
+    completed: '已完成分析',
+    degraded: '部分信息暂不可用，已继续处理',
+    blocked: '当前处理受阻',
+  };
+  return labels[state.current_stage] || '正在处理...';
+}
+
+function pushRuntimeState(
+  push: (payload: unknown) => void,
+  currentStage: RuntimeState['current_stage'],
+  startedAt: number,
+  completedStages: RuntimeStage[] = [],
+  status: RuntimeState['status'] = 'running',
+): RuntimeState {
+  const state = createRuntimeState(currentStage, startedAt, completedStages, status);
+  push({
+    type: 'runtime_state',
+    runtime_state: state,
+    label: runtimeStateLabel(state),
+  });
+  return state;
+}
+
+function buildBusinessSummary(intent: IntentType, answer: string, fallback = '已完成处理'): BusinessSummary {
+  const text = answer.replace(/[#>*`_\-\d.\s]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const firstSentence = text.split(/[。！？!?]/).find(Boolean)?.trim() || fallback;
+  const titleMap: Record<IntentType, string> = {
+    help: '帮助说明',
+    demand: '需求整理',
+    diagnosis: '排查结论',
+    debugging: '联调进展',
+    monitor: '监控结果',
+    'material-analysis': '素材分析',
+    forecast: '预测分析',
+    general: '处理结果',
+  };
+  const severity: BusinessSummary['severity'] = /高风险|严重|阻断|失败|异常/.test(answer) ? 'high' : /降级|暂不可用|待确认/.test(answer) ? 'medium' : 'info';
+  return {
+    title: titleMap[intent],
+    brief: firstSentence.slice(0, 120),
+    severity,
+    confidence: /不确定|待确认|暂不可用|降级/.test(answer) ? 'medium' : 'high',
+    business_impact: /异常|差异|失败|阻断/.test(answer) ? '可能影响当前问题的判断或后续执行，需要继续确认。' : undefined,
+  };
+}
+
+function buildDefaultActions(intent: IntentType, answer: string): AiNextAction[] {
+  if (/补充|待确认|缺少|需要/.test(answer)) {
+    return [{
+      label: '补充信息',
+      type: 'ask_user',
+      intent,
+      action: 'collect_missing_context',
+      risk_level: 'low',
+      auto_executable: false,
+    }];
+  }
+  return [{
+    label: '查看来源与执行详情',
+    type: 'open_panel',
+    intent,
+    action: 'open_evidence_detail',
+    risk_level: 'low',
+    auto_executable: false,
+  }];
+}
+
+function buildStructuredResult(intent: IntentType, summary: string, runtimeState?: RuntimeState): Record<string, unknown> {
   const resultTypeMap: Record<IntentType, string> = {
     help: 'help_answer',
     demand: 'demand_form',
@@ -121,13 +244,18 @@ function buildStructuredResult(intent: IntentType, summary: string): Record<stri
     general: 'help_answer',
   };
 
+  const businessSummary = buildBusinessSummary(intent, summary);
   return {
     task_id: `task-${Date.now()}`,
     result_type: resultTypeMap[intent],
-    summary: summary.slice(0, 80),
+    answer: summary,
+    summary: businessSummary.brief,
+    business_summary: businessSummary,
+    runtime_state: runtimeState,
+    answer_policy: getDefaultAnswerPolicy(),
     confidence: 'medium',
     structured_payload: {},
-    next_actions: [],
+    next_actions: buildDefaultActions(intent, summary),
     pending_checks: [],
     created_at: new Date().toISOString(),
     kind: intent,
@@ -1948,6 +2076,8 @@ function buildServicePlan(intent: IntentType, message: string): {
   steps: ServiceStep[];
   sources: SourceRefPayload[];
 } | null {
+  const compactMessage = message.trim();
+  if (compactMessage.length <= 1) return null;
   const costQuestion = isCostQuestion(message);
   const activationDiffQuestion = isActivationDiffQuestion(message);
   const conversionDiffMetric = getConversionDiffMetric(message);
@@ -2775,26 +2905,50 @@ async function resolveKnowledgeBaseIds(
 async function searchKnowledge(
   query: string,
   modelServiceConfig: Awaited<ReturnType<typeof getModelServiceConfig>>,
-): Promise<{ items: KnowledgeSearchItem[]; warning?: string; resolvedCount?: number }> {
+): Promise<KnowledgeSearchResult> {
+  const listEndpoint = getKnowledgeBasesEndpoint(modelServiceConfig);
+  const searchEndpoint = getKnowledgeSearchEndpoint(modelServiceConfig);
   if (!hasConfiguredKnowledgeCredentials(modelServiceConfig)) {
-    return { items: [] };
+    return {
+      items: [],
+      diagnostics: {
+        stage: 'credentials',
+        listEndpoint,
+        searchEndpoint,
+        message: 'knowledge credentials are not configured',
+      },
+    };
   }
 
   let knowledgeBaseIds: string[];
   try {
     knowledgeBaseIds = await resolveKnowledgeBaseIds(modelServiceConfig);
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       items: [],
       warning: error instanceof Error && error.name === 'AbortError'
         ? '知识库列表获取超过 4 秒，已跳过本轮检索，继续使用 MCP 和模型推理。'
-        : `知识库列表获取失败：${error instanceof Error ? error.message : String(error)}`,
+        : `知识库列表获取失败：${message}`,
+      diagnostics: {
+        stage: 'list',
+        listEndpoint,
+        searchEndpoint,
+        message,
+      },
     };
   }
   if (!knowledgeBaseIds.length) {
     return {
       items: [],
       warning: '当前 API Key 下没有可访问的知识库，本次未启用知识检索。',
+      diagnostics: {
+        stage: 'list',
+        listEndpoint,
+        searchEndpoint,
+        knowledgeBaseIds,
+        message: 'no accessible knowledge bases',
+      },
     };
   }
 
@@ -2802,7 +2956,7 @@ async function searchKnowledge(
   const timer = setTimeout(() => controller.abort(), 6000);
   let response: Response;
   try {
-    response = await fetch(getKnowledgeSearchEndpoint(modelServiceConfig), {
+    response = await fetch(searchEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -2816,12 +2970,20 @@ async function searchKnowledge(
       cache: 'no-store',
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       items: [],
       warning: error instanceof Error && error.name === 'AbortError'
         ? '知识库检索超过 6 秒，已跳过本轮检索，继续使用 MCP 和模型推理。'
-        : `知识库检索失败：${error instanceof Error ? error.message : String(error)}`,
+        : `知识库检索失败：${message}`,
       resolvedCount: knowledgeBaseIds.length,
+      diagnostics: {
+        stage: 'search',
+        listEndpoint,
+        searchEndpoint,
+        knowledgeBaseIds,
+        message,
+      },
     };
   } finally {
     clearTimeout(timer);
@@ -2837,12 +2999,28 @@ async function searchKnowledge(
       items: [],
       warning: data.error?.message || `知识库检索失败（HTTP ${response.status}）`,
       resolvedCount: knowledgeBaseIds.length,
+      diagnostics: {
+        stage: 'search',
+        listEndpoint,
+        searchEndpoint,
+        knowledgeBaseIds,
+        status: response.status,
+        message: data.error?.message || `HTTP ${response.status}`,
+      },
     };
   }
 
   return {
     items: (data.data || []).slice(0, 5),
     resolvedCount: knowledgeBaseIds.length,
+    diagnostics: {
+      stage: 'success',
+      listEndpoint,
+      searchEndpoint,
+      knowledgeBaseIds,
+      status: response.status,
+      message: 'ok',
+    },
   };
 }
 
@@ -2870,6 +3048,11 @@ function buildSystemPrompt(knowledgeItems: KnowledgeSearchItem[]): string {
 10. 当用户询问激活数、注册数、付费数等统计口径时，回答必须覆盖：埋点位置、上报事件、关键上报字段、上报方、上报后的计算过程、可能歧义、不同报表差异。知识库未提供具体字段时，要明确说明“等待知识库补充”，但仍给出应检查的字段类别。
 11. 回答要主动做文本优化：把原始工具结果改写成面向发行同学可读的结论、依据和动作。
 12. 如果流程、链路、排查路径适合画图，请输出一个 \`\`\`mermaid 代码块，使用 flowchart TD 展示。
+
+补充约束：
+- 正文直接给结果，不要单独输出“结果摘要”“已识别条件”“参数说明”。
+- 当前项目范围由页面右上角项目选择器提供，不要在正文重复强调 APPID、app_id 或项目 ID；只有用户明确问项目标识时才说明。
+- 如果用户只输入单字或信息不足，不要直接查数，先用一句话请用户补充要查的指标、日期或动作。
 
 Agent / Skill / MCP 工作流要求：
 - 先思考再执行：在输出正文前，必须先完成意图推理、能力检查、必要参数提取、知识或工具可用性判断。
@@ -2923,6 +3106,8 @@ export async function POST(request: NextRequest) {
     message,
     history = [],
     intent: providedIntent,
+    projectContext,
+    metadata,
   } = (await request.json()) as ChatRequestBody;
 
   const frontendParams = {
@@ -2933,9 +3118,27 @@ export async function POST(request: NextRequest) {
   const intent: IntentType = (providedIntent as IntentType | undefined) || routeUserIntent(message).intent_type;
   const conversationId = request.headers.get('x-conversation-id') || undefined;
   const modelServiceConfig = await getModelServiceConfig();
+  const hiddenProjectContext = [
+    metadata?.projectContext,
+    metadata?.project_context,
+    projectContext,
+  ].find((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  const responsePrompt = await getActivePromptContent('response_prompt', '', intent);
+  const summaryPrompt = await getActivePromptContent('summary_prompt', '', intent);
+  const evidencePrompt = await getActivePromptContent('evidence_prompt', '', intent);
+  const toolExplainPrompt = await getActivePromptContent('tool_explain_prompt', '', intent);
   const metricExplainerSchema = intent === 'help' && isMetricExplanationOnly(message)
     ? await findMetricExplainerByQuestion(message)
     : null;
+  const projectContextPrompt = typeof hiddenProjectContext === 'string' && hiddenProjectContext.trim()
+    ? `当前项目范围来自页面右上角项目选择器：${hiddenProjectContext.trim()}。只把它作为查询参数使用，不要在正文里重复强调 APPID 或项目 ID。`
+    : '';
+  const promptConfigMetadata = {
+    response_prompt: responsePrompt.prompt ? { id: responsePrompt.prompt.id, version: responsePrompt.prompt.current_version, name: responsePrompt.prompt.name } : undefined,
+    summary_prompt: summaryPrompt.prompt ? { id: summaryPrompt.prompt.id, version: summaryPrompt.prompt.current_version, name: summaryPrompt.prompt.name } : undefined,
+    evidence_prompt: evidencePrompt.prompt ? { id: evidencePrompt.prompt.id, version: evidencePrompt.prompt.current_version, name: evidencePrompt.prompt.name } : undefined,
+    tool_explain_prompt: toolExplainPrompt.prompt ? { id: toolExplainPrompt.prompt.id, version: toolExplainPrompt.prompt.current_version, name: toolExplainPrompt.prompt.name } : undefined,
+  };
 
   if (!hasConfiguredModelCredentials(modelServiceConfig)) {
     const fallbackAnswer = buildFallbackAnswer(intent, message);
@@ -2945,13 +3148,15 @@ export async function POST(request: NextRequest) {
         const processEvents: AgentProcessEvent[] = [];
         const push = (payload: unknown) => pushChatSsePayload(controller, encoder, payload, processEvents);
         const startedAt = Date.now();
+        pushRuntimeState(push, 'understanding', startedAt);
         push({ type: 'phase', phase: 'generating' });
         push({ type: 'route', intent, hasThinking: false, toolsUsed: [] });
         push(buildThinkingStep('agent-route', '识别处理路径', `已进入${getIntentDisplayName(intent)}处理路径`, 'completed', startedAt, { message }, { intent, intent_label: getIntentDisplayName(intent) }));
         push(buildThinkingStep('model-fallback', '生成兜底回复', '模型服务未配置，返回本地可执行建议', 'completed', startedAt));
         push({ type: 'error', error: '正式模型服务未配置，当前返回本地兜底结果。' });
         push({ type: 'content', content: fallbackAnswer });
-        const result = buildStructuredResult(intent, fallbackAnswer);
+        const finalRuntimeState = pushRuntimeState(push, 'degraded', startedAt, ['understanding', 'response_generation'], 'degraded');
+        const result = buildStructuredResult(intent, fallbackAnswer, finalRuntimeState);
         if (metricExplainerSchema) {
           result.structured_payload = {
             metric_explainer: metricExplainerSchema,
@@ -2961,10 +3166,14 @@ export async function POST(request: NextRequest) {
         push({
           type: 'done',
           result,
-          metadata: metricExplainerSchema ? {
-            metric_explainer_schema: metricExplainerSchema,
-            source_refs: metricSchemaToSourceRefs(metricExplainerSchema),
-          } : undefined,
+          metadata: {
+            ...(metricExplainerSchema ? {
+              metric_explainer_schema: metricExplainerSchema,
+              source_refs: metricSchemaToSourceRefs(metricExplainerSchema),
+            } : {}),
+            runtime_state: finalRuntimeState,
+            prompt_config: promptConfigMetadata,
+          },
         });
         controller.close();
       },
@@ -2982,7 +3191,9 @@ export async function POST(request: NextRequest) {
   if (metricExplainerSchema && intent === 'help') {
     const answer = buildMetricExplainerAnswer(metricExplainerSchema);
     const metricSourceRefs = metricSchemaToSourceRefs(metricExplainerSchema);
-    const result = buildStructuredResult(intent, answer);
+    const metricStartedAt = Date.now();
+    const finalRuntimeState = createRuntimeState('completed', metricStartedAt, ['understanding', 'knowledge_lookup', 'response_generation'], 'completed');
+    const result = buildStructuredResult(intent, answer, finalRuntimeState);
     result.structured_payload = {
       metric_explainer: metricExplainerSchema,
       source_refs: metricSourceRefs,
@@ -2994,6 +3205,7 @@ export async function POST(request: NextRequest) {
         const processEvents: AgentProcessEvent[] = [];
         const push = (payload: unknown) => pushChatSsePayload(controller, encoder, payload, processEvents);
         const startedAt = Date.now();
+        pushRuntimeState(push, 'understanding', startedAt);
         push({ type: 'phase', phase: 'thinking' });
         push({ type: 'route', intent, hasThinking: true, toolsUsed: ['metric_explainer_skill'] });
         push(buildThinkingStep('agent-route', '识别处理路径', '已识别为指标口径解释问题，进入指标解释器', 'completed', startedAt, { message }, { intent, answer_type: metricExplainerSchema.answer_type }));
@@ -3038,13 +3250,18 @@ export async function POST(request: NextRequest) {
           }),
         });
         push({ type: 'phase', phase: 'generating' });
+        pushRuntimeState(push, 'response_generation', startedAt, ['understanding', 'knowledge_lookup']);
         push({ type: 'content', content: answer });
+        const doneRuntimeState = pushRuntimeState(push, 'completed', startedAt, ['understanding', 'knowledge_lookup', 'response_generation'], 'completed');
+        result.runtime_state = doneRuntimeState;
         push({
           type: 'done',
           result,
           metadata: {
             metric_explainer_schema: metricExplainerSchema,
             source_refs: metricSourceRefs,
+            runtime_state: doneRuntimeState,
+            prompt_config: promptConfigMetadata,
           },
         });
         controller.close();
@@ -3080,6 +3297,7 @@ export async function POST(request: NextRequest) {
         let ambiguityOutcome: Awaited<ReturnType<typeof attemptAmbiguityClarification>> | null = null;
         let capabilityDiscoveryOutcome: Awaited<ReturnType<typeof attemptCapabilityDiscovery>> | null = null;
         const servicePlan = buildServicePlan(intent, message);
+        pushRuntimeState(push, 'understanding', startedAt);
 
         await cozeLoopTracer.traceable(async (rootSpan) => {
           cozeLoopTracer.setInput(rootSpan, buildChatTraceInput(message, {
@@ -3090,6 +3308,7 @@ export async function POST(request: NextRequest) {
 
           push({ type: 'phase', phase: 'thinking' });
           const routeStartedAt = Date.now();
+          pushRuntimeState(push, 'context_loading', startedAt, ['understanding']);
           push(buildThinkingStep('agent-route', '识别处理路径', '正在判断问题类型和处理方式', 'loading', routeStartedAt, { message, history_count: history.length }));
 
           await cozeLoopTracer.traceable(async (agentSpan) => {
@@ -3136,6 +3355,7 @@ export async function POST(request: NextRequest) {
           }, { name: 'xiaoqiao.zhitou.agent', type: SpanKind.Tool });
 
           if (servicePlan) {
+            pushRuntimeState(push, 'data_fetching', startedAt, ['understanding', 'context_loading']);
             pushDebugWorkbenchEvent(push, servicePlan, intent, message);
             for (const step of servicePlan.steps) {
               if (closed) return;
@@ -3265,13 +3485,22 @@ export async function POST(request: NextRequest) {
               if (debugFinalAnswer) {
                 push({ type: 'content', content: debugFinalAnswer });
               }
-              const result = buildStructuredResult(intent, debugFinalAnswer);
+              const finalRuntimeState = pushRuntimeState(
+                push,
+                hasUnavailableMcpStep(servicePlan) ? 'degraded' : 'completed',
+                startedAt,
+                ['understanding', 'context_loading', 'data_fetching', 'analysis', 'response_generation'],
+                hasUnavailableMcpStep(servicePlan) ? 'degraded' : 'completed',
+              );
+              const result = buildStructuredResult(intent, debugFinalAnswer, finalRuntimeState);
               push({
                 type: 'done',
                 result,
                 metadata: {
                   process_events: processEvents,
                   debug_component_only: true,
+                  runtime_state: finalRuntimeState,
+                  prompt_config: promptConfigMetadata,
                 },
               });
               return;
@@ -3361,8 +3590,11 @@ export async function POST(request: NextRequest) {
               if (blockedAnswer) {
                 push({ type: 'content', content: blockedAnswer });
               }
-              const result = buildStructuredResult(intent, blockedAnswer);
+              const finalRuntimeState = pushRuntimeState(push, 'blocked', startedAt, ['understanding', 'context_loading', 'data_fetching'], 'blocked');
+              const result = buildStructuredResult(intent, blockedAnswer, finalRuntimeState);
               result.structured_payload = { source_refs: sourceRefs };
+              result.evidence_bundle = { source_refs: sourceRefs };
+              result.execution_context = { service_plan: servicePlan };
               push({
                 type: 'done',
                 result,
@@ -3370,6 +3602,10 @@ export async function POST(request: NextRequest) {
                   source_refs: sourceRefs,
                   process_events: processEvents,
                   blocked_by_mcp: true,
+                  runtime_state: finalRuntimeState,
+                  evidence_bundle: { source_refs: sourceRefs },
+                  execution_context: { service_plan: servicePlan },
+                  prompt_config: promptConfigMetadata,
                 },
               });
               return;
@@ -3385,6 +3621,7 @@ export async function POST(request: NextRequest) {
             capabilityDiscoveryOutcome = await attemptCapabilityDiscovery(push, message, intent, routeStartedAt);
             return;
           }
+          pushRuntimeState(push, 'knowledge_lookup', startedAt, ['understanding', 'context_loading', ...(servicePlan ? ['data_fetching' as RuntimeStage] : [])]);
           finalKnowledgeResult = await cozeLoopTracer.traceable(async (toolSpan) => {
             const toolStartedAt = Date.now();
             push(buildThinkingStep('knowledge_search', '查询知识库', '确认可访问知识库并检索相关片段', 'loading', toolStartedAt, { query: truncate(message, 1000), provider: 'weknora' }));
@@ -3433,6 +3670,7 @@ export async function POST(request: NextRequest) {
               cozeLoopTracer.setOutput(retrievalSpan, {
                 status: retrievalResult.warning ? 'partial' : 'success',
                 resolved_knowledge_base_count: retrievalResult.resolvedCount || 0,
+                diagnostics: retrievalResult.diagnostics,
                 retrieved_count: rawRetrievalResult.items.length,
                 accepted_count: relevance.accepted.length,
                 rejected_count: relevance.rejected.length,
@@ -3454,6 +3692,7 @@ export async function POST(request: NextRequest) {
                   rejected_reason: 'low relevance; not used as answer evidence',
                   top_results: topResults,
                   warning: retrievalResult.warning || '',
+                  diagnostics: retrievalResult.diagnostics,
                 },
               ));
               return retrievalResult;
@@ -3465,6 +3704,7 @@ export async function POST(request: NextRequest) {
               returned_items: result.items.length,
               resolved_knowledge_base_count: result.resolvedCount || 0,
               warning: result.warning || '',
+              diagnostics: result.diagnostics,
               relevance_policy: 'accepted snippets only; low relevance snippets are rejected and not cited',
             };
             push({
@@ -3503,7 +3743,8 @@ export async function POST(request: NextRequest) {
               knowledgeBaseCount: 0,
             });
             push({ type: 'phase', phase: 'generating' });
-            const result = buildStructuredResult(intent, '');
+            const finalRuntimeState = pushRuntimeState(push, 'blocked', startedAt, ['understanding', 'context_loading'], 'blocked');
+            const result = buildStructuredResult(intent, '', finalRuntimeState);
             result.structured_payload = {
               confirmation_needed: true,
               confirmation: {
@@ -3523,6 +3764,8 @@ export async function POST(request: NextRequest) {
                 confirmation_hint: ambiguityConfirmOutcome.payload.hint,
                 confirmation_options: ambiguityConfirmOutcome.payload.options,
                 process_events: processEvents,
+                runtime_state: finalRuntimeState,
+                prompt_config: promptConfigMetadata,
               },
             });
             return;
@@ -3530,6 +3773,11 @@ export async function POST(request: NextRequest) {
 
           const messages = [
             { role: 'system' as const, content: buildSystemPrompt(finalKnowledgeResult.items) },
+            ...(responsePrompt.content ? [{ role: 'system' as const, content: `后台回答提示词：\n${responsePrompt.content}` }] : []),
+            ...(summaryPrompt.content ? [{ role: 'system' as const, content: `摘要生成要求：\n${summaryPrompt.content}` }] : []),
+            ...(evidencePrompt.content ? [{ role: 'system' as const, content: `证据展示要求：\n${evidencePrompt.content}` }] : []),
+            ...(toolExplainPrompt.content ? [{ role: 'system' as const, content: `工具结果解释要求：\n${toolExplainPrompt.content}` }] : []),
+            ...(projectContextPrompt ? [{ role: 'system' as const, content: projectContextPrompt }] : []),
             ...(servicePlan ? [{ role: 'system' as const, content: buildServiceExecutionContext(servicePlan) }] : []),
             ...history.map(item => ({ role: item.role as 'user' | 'assistant', content: item.content })),
             { role: 'user' as const, content: message },
@@ -3548,11 +3796,14 @@ export async function POST(request: NextRequest) {
           });
 
           if (finalKnowledgeResult.warning) {
-            push({ type: 'error', error: finalKnowledgeResult.warning });
+            const softKnowledgeNotice = '知识库暂不可用，已继续用可用信息回答。';
+            fullResponse += `${softKnowledgeNotice}\n\n`;
+            push({ type: 'content', content: `${softKnowledgeNotice}\n\n` });
           }
 
           await cozeLoopTracer.traceable(async (llmSpan) => {
             const llmStartedAt = Date.now();
+            pushRuntimeState(push, 'response_generation', startedAt, ['understanding', 'context_loading', ...(servicePlan ? ['data_fetching' as RuntimeStage] : []), 'knowledge_lookup']);
             push(buildThinkingStep('model-generate', '生成回答', '正在组织结论、依据和下一步建议', 'loading', llmStartedAt, { model: modelName, intent, knowledge_hits: finalKnowledgeResult.items.length }));
             cozeLoopTracer.setInput(llmSpan, {
               model: modelName,
@@ -3618,7 +3869,8 @@ export async function POST(request: NextRequest) {
           });
           push({ type: 'phase', phase: 'generating' });
           push({ type: 'content', content: followUpNeeded ? '' : capabilityOutcome.summary });
-          const result = buildStructuredResult(intent, followUpNeeded ? '' : capabilityOutcome.summary);
+          const finalRuntimeState = pushRuntimeState(push, followUpNeeded ? 'blocked' : 'completed', startedAt, ['understanding', 'context_loading'], followUpNeeded ? 'blocked' : 'completed');
+          const result = buildStructuredResult(intent, followUpNeeded ? '' : capabilityOutcome.summary, finalRuntimeState);
           result.structured_payload = {
             ...(followUpNeeded ? {
               confirmation_needed: true,
@@ -3665,6 +3917,8 @@ export async function POST(request: NextRequest) {
                   : [],
               } : {}),
               process_events: processEvents,
+              runtime_state: finalRuntimeState,
+              prompt_config: promptConfigMetadata,
             },
           });
           return;
@@ -3724,7 +3978,14 @@ export async function POST(request: NextRequest) {
             }),
           });
         }
-        const result = buildStructuredResult(intent, fullResponse || '已完成处理');
+        const finalRuntimeState = pushRuntimeState(
+          push,
+          finalKnowledgeResult.warning ? 'degraded' : 'completed',
+          startedAt,
+          ['understanding', 'context_loading', ...(servicePlan ? ['data_fetching' as RuntimeStage] : []), 'knowledge_lookup', 'response_generation'],
+          finalKnowledgeResult.warning ? 'degraded' : 'completed',
+        );
+        const result = buildStructuredResult(intent, fullResponse || '已完成处理', finalRuntimeState);
         result.structured_payload = {
           source_refs: sourceRefs,
           ...(metricExplainerSchema ? { metric_explainer: metricExplainerSchema } : {}),
@@ -3735,6 +3996,36 @@ export async function POST(request: NextRequest) {
             resolvedCount: finalKnowledgeResult.resolvedCount || 0,
           },
         };
+        result.evidence_bundle = {
+          source_refs: sourceRefs,
+          knowledge_base: {
+            provider: 'WeKnora',
+            address: knowledgeBaseAddress,
+            dataset: getKnowledgeBaseId(modelServiceConfig) || '',
+            resolvedCount: finalKnowledgeResult.resolvedCount || 0,
+          },
+        };
+        result.execution_context = {
+          project_context_present: Boolean(hiddenProjectContext),
+          service_plan: servicePlan ? {
+            skill: servicePlan.skill.name,
+            steps: servicePlan.steps.map(step => ({
+              key: step.key,
+              label: step.label,
+              kind: step.kind,
+              input: step.input,
+              output: step.output,
+            })),
+          } : undefined,
+        };
+        result.agent_runtime = {
+          process_events: processEvents,
+          knowledge_diagnostics: finalKnowledgeResult.diagnostics,
+          prompt_config: promptConfigMetadata,
+        };
+        result.reasoning_artifacts = {
+          tool_summary: toolSummary,
+        };
 
         push({
           type: 'done',
@@ -3742,6 +4033,15 @@ export async function POST(request: NextRequest) {
           metadata: {
             source_refs: sourceRefs,
             ...(metricExplainerSchema ? { metric_explainer_schema: metricExplainerSchema } : {}),
+            business_summary: result.business_summary,
+            next_actions: result.next_actions,
+            runtime_state: finalRuntimeState,
+            answer_policy: result.answer_policy,
+            evidence_bundle: result.evidence_bundle,
+            execution_context: result.execution_context,
+            agent_runtime: result.agent_runtime,
+            knowledge_diagnostics: finalKnowledgeResult.diagnostics,
+            prompt_config: promptConfigMetadata,
             knowledge_base: {
               provider: 'WeKnora',
               address: knowledgeBaseAddress,
@@ -3758,7 +4058,15 @@ export async function POST(request: NextRequest) {
           : `处理失败：${messageText}`;
 
         push({ type: 'error', error: fallbackAnswer });
-        push({ type: 'done', result: buildStructuredResult(intent, fallbackAnswer) });
+        const finalRuntimeState = pushRuntimeState(push, 'blocked', startedAt, ['understanding'], 'failed');
+        push({
+          type: 'done',
+          result: buildStructuredResult(intent, fallbackAnswer, finalRuntimeState),
+          metadata: {
+            runtime_state: finalRuntimeState,
+            prompt_config: promptConfigMetadata,
+          },
+        });
       } finally {
         closed = true;
         controller.close();

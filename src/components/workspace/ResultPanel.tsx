@@ -196,9 +196,11 @@ export function ResultPanel({
         {result.next_actions.length > 0 && (
           <SectionCard title="下一步建议" icon={<ArrowRight className="w-4 h-4" />}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {result.next_actions.map((action, idx) => (
+              {result.next_actions.map((action, idx) => {
+                const actionLabel = typeof action === 'string' ? action : action.label;
+                return (
                 <div
-                  key={`${action}-${idx}`}
+                  key={`${actionLabel}-${idx}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -210,9 +212,9 @@ export function ResultPanel({
                   }}
                 >
                   <ChevronRight className="w-4 h-4" style={{ color: c.accent }} />
-                  <span style={{ color: c.textBody, fontSize: 13, lineHeight: 1.6 }}>{action}</span>
+                  <span style={{ color: c.textBody, fontSize: 13, lineHeight: 1.6 }}>{actionLabel}</span>
                 </div>
-              ))}
+              )})}
             </div>
           </SectionCard>
         )}

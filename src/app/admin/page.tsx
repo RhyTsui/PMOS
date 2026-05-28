@@ -393,7 +393,50 @@ const scopeLabels: Record<string, string> = {
   routing: '路由层',
   workflow: '工作流层',
   clarification: '追问层',
+  route_prompt: '路由层',
+  response_prompt: '回答层',
+  summary_prompt: '摘要层',
+  evidence_prompt: '证据层',
+  card_prompt: '卡片层',
+  followup_prompt: '追问层',
+  tool_explain_prompt: '工具解释层',
 };
+
+function buildPromptBindings(prompt: Record<string, unknown>): PromptConfig['bindings'] {
+  const binding = prompt.binding && typeof prompt.binding === 'object' ? prompt.binding as Record<string, unknown> : {};
+  return [
+    binding.agent ? { target_type: 'agent', target_name: String(binding.agent), enabled: true } : null,
+    binding.workflow ? { target_type: 'workflow', target_name: String(binding.workflow), enabled: true } : null,
+    binding.tool ? { target_type: 'tool', target_name: String(binding.tool), enabled: true } : null,
+  ].filter((item): item is PromptConfig['bindings'][number] => Boolean(item));
+}
+
+function buildPromptView(prompt: Record<string, unknown>, versions: Array<Record<string, unknown>> = []): PromptConfig {
+  const scope = String(prompt.scope || (prompt.binding as Record<string, unknown> | undefined)?.workflow || prompt.category || 'response_prompt');
+  const currentVersion = Number(prompt.current_version || 1);
+  return {
+    id: String(prompt.id || ''),
+    name: String(prompt.name || '未命名提示词'),
+    scope,
+    intent_type: Array.isArray(prompt.applicable_workflows) ? String(prompt.applicable_workflows[0] || scope) : scope,
+    status: prompt.status === 'archived' ? 'archived' : prompt.status === 'draft' ? 'draft' : 'active',
+    version: `v${currentVersion}`,
+    updated_at: String(prompt.updated_at || ''),
+    description: String(prompt.expectation || prompt.name || ''),
+    binding_count: buildPromptBindings(prompt).length,
+    content: String(prompt.content || ''),
+    variables: [],
+    versions: versions.length > 0
+      ? versions.map((item) => ({
+          version: `v${String(item.version || '')}`,
+          created_at: String(item.created_at || ''),
+          status: Number(item.version) === currentVersion ? 'active' : 'archived',
+          summary: String(item.change_note || '历史版本'),
+        }))
+      : [{ version: `v${currentVersion}`, created_at: String(prompt.updated_at || ''), status: 'active', summary: '当前版本' }],
+    bindings: buildPromptBindings(prompt),
+  };
+}
 
 type DetailTab = 'content' | 'versions' | 'bindings';
 type AdminTab = 'service-config' | 'chat-display' | 'prompts' | 'skills' | 'feature-switches' | 'auto-debug-config' | 'demand-pool' | 'mcp-config';
@@ -685,6 +728,8 @@ export default function AdminPage() {
   const [detailTab, setDetailTab] = useState<DetailTab>('content');
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [promptItems, setPromptItems] = useState<PromptConfig[]>([]);
+  const [promptLoading, setPromptLoading] = useState(false);
 
   // Auto-debug config state
   const [dbgSearchTerm, setDbgSearchTerm] = useState('');
@@ -701,13 +746,34 @@ export default function AdminPage() {
   const [switchStates, setSwitchStates] = useState<Record<string, boolean>>({});
   const [selectedSwitchKey, setSelectedSwitchKey] = useState<string | null>(null);
 
-  const filtered = MOCK_PROMPTS.filter((p) => {
+  const filtered = promptItems.filter((p) => {
     const matchSearch = p.name.includes(searchTerm) || p.description.includes(searchTerm);
     const matchScope = filterScope === 'all' || p.scope === filterScope;
     return matchSearch && matchScope;
   });
 
-  const selectedPrompt = MOCK_PROMPTS.find(p => p.id === selectedPromptId) || null;
+  const selectedPrompt = promptItems.find(p => p.id === selectedPromptId) || null;
+
+  const loadPrompts = async () => {
+    setPromptLoading(true);
+    try {
+      const prompts = await xiaoqiaoApi.getPrompts();
+      const views = await Promise.all(prompts.map(async (prompt) => {
+        const versions = await xiaoqiaoApi.getPromptVersions(prompt.id).catch(() => []);
+        return buildPromptView(prompt as unknown as Record<string, unknown>, versions as unknown as Array<Record<string, unknown>>);
+      }));
+      setPromptItems(views);
+      if (!views.find(item => item.id === selectedPromptId)) {
+        setSelectedPromptIdRaw(views[0]?.id || null);
+      }
+    } finally {
+      setPromptLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadPrompts();
+  }, []);
 
   const setAdminTab = (tab: AdminTab) => {
     setAdminTabRaw(tab);
@@ -738,8 +804,12 @@ export default function AdminPage() {
   };
 
   const handleSaveEdit = () => {
-    setIsEditing(false);
-    // In real implementation, would save to backend
+    if (!selectedPrompt) return;
+    void (async () => {
+      await xiaoqiaoApi.updatePrompt(selectedPrompt.id, { content: editContent });
+      await loadPrompts();
+      setIsEditing(false);
+    })();
   };
 
   // Auto-debug config helpers
@@ -874,6 +944,8 @@ export default function AdminPage() {
           onSaveEdit={handleSaveEdit}
           onCancelEdit={() => setIsEditing(false)}
           filtered={filtered}
+          allPrompts={promptItems}
+          promptLoading={promptLoading}
           selectedPrompt={selectedPrompt}
         />
       )}
@@ -1052,7 +1124,7 @@ function PromptManagementTab({
   searchTerm, setSearchTerm, filterScope, setFilterScope,
   selectedPromptId, setSelectedPromptId, detailTab, setDetailTab,
   isEditing, editContent, setEditContent, onStartEdit, onSaveEdit, onCancelEdit,
-  filtered, selectedPrompt,
+  filtered, allPrompts, promptLoading, selectedPrompt,
 }: {
   searchTerm: string;
   setSearchTerm: (v: string) => void;
@@ -1069,6 +1141,8 @@ function PromptManagementTab({
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   filtered: PromptConfig[];
+  allPrompts: PromptConfig[];
+  promptLoading: boolean;
   selectedPrompt: PromptConfig | null;
 }) {
   return (
@@ -1090,10 +1164,13 @@ function PromptManagementTab({
           <div className="space-y-1">
             <div className="text-[10px] text-[#6b7c93] uppercase tracking-wider mb-2 px-2">分类筛选</div>
             {[
-              { key: 'all', label: '全部', count: MOCK_PROMPTS.length },
-              { key: 'routing', label: '路由层', count: MOCK_PROMPTS.filter(p => p.scope === 'routing').length },
-              { key: 'workflow', label: '工作流层', count: MOCK_PROMPTS.filter(p => p.scope === 'workflow').length },
-              { key: 'clarification', label: '追问层', count: MOCK_PROMPTS.filter(p => p.scope === 'clarification').length },
+              { key: 'all', label: '全部', count: allPrompts.length },
+              { key: 'route_prompt', label: '路由层', count: allPrompts.filter(p => p.scope === 'route_prompt').length },
+              { key: 'response_prompt', label: '回答层', count: allPrompts.filter(p => p.scope === 'response_prompt').length },
+              { key: 'summary_prompt', label: '摘要层', count: allPrompts.filter(p => p.scope === 'summary_prompt').length },
+              { key: 'evidence_prompt', label: '证据层', count: allPrompts.filter(p => p.scope === 'evidence_prompt').length },
+              { key: 'followup_prompt', label: '追问层', count: allPrompts.filter(p => p.scope === 'followup_prompt').length },
+              { key: 'tool_explain_prompt', label: '工具解释层', count: allPrompts.filter(p => p.scope === 'tool_explain_prompt').length },
             ].map(({ key, label, count }) => (
               <button
                 key={key}
@@ -1164,7 +1241,7 @@ function PromptManagementTab({
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-[#6b7c93] text-sm">没有匹配的提示词</div>
+            <div className="text-center py-12 text-[#6b7c93] text-sm">{promptLoading ? '正在读取提示词...' : '没有匹配的提示词'}</div>
           )}
         </div>
       </div>
