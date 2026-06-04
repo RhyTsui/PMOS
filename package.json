@@ -7,6 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "preinstall": "npx only-allow pnpm",
     "lint": "eslint",
+    "check:ai-chat-guardrails": "node ../../scripts/check-ai-chat-guardrails.cjs",
     "ui:guardrail": "node ../../scripts/check-ad-ui-guardrail.cjs",
     "validate:ad-ui": "npm run ts-check && npm run ui:guardrail",
     "daily:distill": "node ../../scripts/daily-distill.cjs",
