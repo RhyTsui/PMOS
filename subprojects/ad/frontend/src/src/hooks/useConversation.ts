@@ -1,10 +1,15 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, type SetStateAction } from 'react';
+import { flushSync } from 'react-dom';
 import { useAgent } from './useAgent';
 import { xiaoqiaoApi } from '@/lib/api';
 import { routeUserIntent } from '@/lib/intent-router';
 import { thinkingStepFromProcessEvent, toolCallFromProcessEvent } from '@/lib/agent-runtime';
+import { buildBusinessContextSnapshot } from '@/lib/conversation-context';
+import { resolveSlots } from '@/lib/slot-resolver';
+import { decodeReportActionEnvelope } from '@/lib/report-action-envelope';
+import { resolveChatAnswerMessage } from '@/lib/chat-answer-message-catalog';
 import type {
   AgentProcessEvent,
   CallChainData,
@@ -15,6 +20,7 @@ import type {
   Message,
   MessageType,
   MemoryEntry,
+  ProjectBinding,
 } from '@/types';
 
 let messageCounter = 0;
@@ -30,8 +36,47 @@ type DebugCarryMemory = {
   updated_at?: string;
 };
 
+type ProjectLoadStatus = 'loading' | 'ready' | 'failed';
+
+type CurrentProjectMetadata = {
+  appId?: string | number;
+  appName?: string;
+  appAlias?: string;
+  source?: string;
+  selectedAt?: string;
+};
+
+type SendMessageOptions = {
+  projectContext?: string;
+  currentProject?: CurrentProjectMetadata | null;
+  projectLoadStatus?: ProjectLoadStatus;
+  attachmentIds?: string[];
+};
+
 const MEMORY_USER_ID = 'user-001';
 const DEBUG_MEMORY_KEY = 'zhitou-chat-debug-context';
+
+function extractAppIdFromProjectContext(projectContext?: string): string {
+  return /(?:APPID|appId|app_id|project_id|projectId|应用ID|项目ID)[:：=\s]+([A-Za-z0-9_-]+)/i.exec(projectContext || '')?.[1] || '';
+}
+
+function buildProjectContextDebug(options?: SendMessageOptions) {
+  const projectContext = options?.projectContext || '';
+  const projectContextAppId = extractAppIdFromProjectContext(projectContext);
+  const currentProjectAppId = options?.currentProject?.appId ? String(options.currentProject.appId) : '';
+  return {
+    projectLoadStatus: options?.projectLoadStatus,
+    selectedProject: options?.currentProject ? {
+      appId: options.currentProject.appId,
+      appName: options.currentProject.appName,
+    } : null,
+    projectContextTextEmpty: !projectContext.trim(),
+    metadataProjectContextPresent: Boolean(projectContext.trim()),
+    warnings: projectContextAppId && currentProjectAppId && projectContextAppId !== currentProjectAppId
+      ? [`currentProject.appId(${currentProjectAppId}) 与 projectContext(${projectContextAppId}) 不一致，后端仍按原 projectContext 链路解析。`]
+      : [],
+  };
+}
 
 function parseDebugMemory(entry?: Pick<MemoryEntry, 'content'> | null): DebugCarryMemory {
   if (!entry?.content) return {};
@@ -82,11 +127,12 @@ async function persistDebugMemory(memory: DebugCarryMemory, sourceConversationId
 function intentToAgent(intent: IntentType): AgentType {
   const mapping: Partial<Record<IntentType, AgentType>> = {
     help: 'help',
+    report_query: 'report',
     demand: 'demand',
     diagnosis: 'diagnosis',
     debugging: 'debugging',
+    get_delivery_packages: 'delivery',
     monitor: 'monitoring',
-    'material-analysis': 'material',
     forecast: 'prediction',
     general: 'hub',
   };
@@ -98,83 +144,55 @@ function detectIntent(content: string): {
   is_business_related: boolean;
   workflow_level: 'light' | 'heavy';
 } {
-  const lower = content.toLowerCase();
-
-  if (/(新增媒体|新媒体|媒体对接|接入媒体|对接文档|监测链接|需求表单|需求池|回传对接)/.test(lower)) {
-    return { intent_type: 'demand', is_business_related: true, workflow_level: 'heavy' };
-  }
-  if (/(立即联调|开始联调|扫码联调|联调地址|联调文档|巨量|wuyanlan@dobest\.com)/.test(lower)) {
-    return { intent_type: 'debugging', is_business_related: true, workflow_level: 'heavy' };
-  }
-
-  if (/(差距|不一致|异常|对不上|缺失|gap|排查|问题|为什么|偏差)/.test(lower)) {
-    return { intent_type: 'diagnosis', is_business_related: true, workflow_level: 'heavy' };
-  }
-  if (/(联调|测试|回传|调试|debug|验证|准备)/.test(lower)) {
-    return { intent_type: 'debugging', is_business_related: true, workflow_level: 'heavy' };
-  }
-  if (/(需求|接入|对接|新媒|配置|事件映射|埋点)/.test(lower)) {
-    return { intent_type: 'demand', is_business_related: true, workflow_level: 'heavy' };
-  }
-  if (/(什么|怎么|如何|哪个系统|在哪|口径|指标|解释|说明)/.test(lower)) {
-    return { intent_type: 'help', is_business_related: true, workflow_level: 'light' };
-  }
-  if (/(监控|延迟|上报|归因监控|回推)/.test(lower)) {
-    return { intent_type: 'monitor', is_business_related: true, workflow_level: 'light' };
-  }
-  if (/(预测|roi|ltv|回本|测算)/.test(lower)) {
-    return { intent_type: 'forecast', is_business_related: true, workflow_level: 'light' };
-  }
-
-  return { intent_type: 'general', is_business_related: false, workflow_level: 'light' };
+  void content;
+  return { intent_type: 'report_query', is_business_related: true, workflow_level: 'light' };
 }
 
 function isMediaDemand(content: string): boolean {
-  return /(新增媒体|新媒体|媒体对接|接入媒体|对接文档|监测链接|回传对接|318\s*媒体|318媒体)/i.test(content);
-}
-
-function isLegacyMediaDebug(content: string): boolean {
-  return /(巨量|穿山甲|抖音|今日头条|小米|网易有道|UC头条).*(联调|测试|验证)|(?:联调|测试|验证).*(巨量|穿山甲|抖音|今日头条|小米|网易有道|UC头条)|wuyanlan@dobest\.com/i.test(content);
+  void content;
+  return false;
 }
 
 function isDebugExecutionStart(content: string): boolean {
-  return /^发起联调[:：]/i.test(content.trim());
+  void content;
+  return false;
 }
 
 function isReportComposerIntent(content: string): boolean {
-  const text = content.trim();
-  const hasReportGoal = /(日报|周报|月报|报表|拼表|取数|查数|数据表|消耗日报|广告消耗)/i.test(text);
-  const hasScheduleOrBuild = /(每天|每日|上午|下午|定时|发送|创建|生成|立即获取|截图|excel|模板|指标|维度|小闪|知识库)/i.test(text);
-  return hasReportGoal && hasScheduleOrBuild;
+  void content;
+  return false;
 }
 
-function isMonitorTaskIntent(content: string): boolean {
-  const text = content.trim();
-  const hasMonitorGoal = /(监控|告警|报警|提醒|阈值|超过\s*\d+\s*分钟|回传延迟|callback.*delay|postback.*delay)/i.test(text);
-  const hasMonitorObject = /(巨量|穿山甲|抖音|回传|归因|延迟|分钟|媒体)/i.test(text);
-  return hasMonitorGoal && hasMonitorObject;
-}
-
-function isBroadAnomalyInspectionIntent(content: string): boolean {
-  const text = content.trim();
-  const hasBroadCheck = /(看看|看下|检查|巡检|有没有|是否有|有什么|哪些).*(投放|广告|项目).*(异常|问题|波动)|投放.*异常|广告.*异常/i.test(text);
-  const hasTime = /(昨天|昨日|今天|今日|近\s*\d+\s*天|过去\s*\d+\s*天)/i.test(text);
-  const hasSpecificDiff = /(不一致|对不上|差异|少了|多了|缺口|预期值|媒体ID|账户ID|指标[:：]|APPID[:：])/i.test(text);
-  return hasBroadCheck && hasTime && !hasSpecificDiff;
+function workflowCardFromProcessEvents(events: AgentProcessEvent[]): Record<string, unknown> | undefined {
+  void events;
+  return undefined;
 }
 
 function extractProjectContext(content: string): string {
+  const readableMatched = content.match(/\[项目上下文\]\s*([\s\S]*)$/);
+  if (readableMatched?.[1]?.trim()) return readableMatched[1].trim();
   const matched = content.match(/\[项目上下文\]\s*([\s\S]*)$/);
   return matched?.[1]?.trim() || '使用顶部项目选择器中的当前项目范围';
 }
 
 function extractProjectNameFromContext(content: string): string {
+  const readableContextName = /项目范围：([^(\n]+)/.exec(content)?.[1]?.trim();
+  if (readableContextName && readableContextName !== '全部项目' && readableContextName !== '未选择项目') return readableContextName;
   const contextName = /项目范围：([^(\n]+)/.exec(content)?.[1]?.trim();
   if (contextName && contextName !== '全部项目') return contextName;
   return '';
 }
 
 function extractDebugAppName(content: string): string {
+  const readableContextName = /项目范围：([^(\n]+)/.exec(content)?.[1]?.trim();
+  if (readableContextName && readableContextName !== '全部项目' && readableContextName !== '未选择项目') {
+    return readableContextName;
+  }
+  const readableBeforeContext = content.split('[项目上下文]')[0] || content;
+  const readableTarget = /(?:联调|自动联调)\s*([\u4e00-\u9fa5A-Za-z0-9:_-]{2,}?)(?=\s*(?:安卓|Android|android|iOS|ios|苹果|鸿蒙|Harmony|app|APP|巨量|穿山甲|抖音|今日头条|快手|腾讯|广点通|$))/i.exec(readableBeforeContext)?.[1]?.trim();
+  if (readableTarget && !/^(一个|看看|立即|开始|发起)$/.test(readableTarget)) return readableTarget;
+  const readableReverseTarget = /([\u4e00-\u9fa5A-Za-z0-9:_-]{2,}?)(?=\s*(?:安卓|Android|android|iOS|ios|苹果|鸿蒙|Harmony)?\s*(?:巨量|穿山甲|抖音|今日头条|快手|腾讯|广点通)\s*(?:联调|测试|验证|调试))/i.exec(readableBeforeContext)?.[1]?.trim();
+  if (readableReverseTarget && !/^(请|帮我|我要|开始|发起|看下)$/.test(readableReverseTarget)) return readableReverseTarget;
   const currentApp = /当前应用=([^\n]+)/.exec(content)?.[1]?.trim();
   if (currentApp) return currentApp;
 
@@ -219,8 +237,10 @@ function enrichWithConversationContext(content: string, messages: Message[], per
   const carry = extractDebugCarryContext(messages, persistedMemory);
   const appSwitch = extractCurrentAppSwitch(trimmed);
   const isEllipticalSwitch = /(换|改|还是|这个|那个|安卓|Android|iOS|ios|app|APP)/i.test(trimmed) && !/(联调|排查|监控|报表|对接)/i.test(trimmed);
-  if (!carry.hasDebugContext || !appSwitch || !isEllipticalSwitch) return trimmed;
-  return [
+  if (!carry.hasDebugContext || !appSwitch || !isEllipticalSwitch) {
+    return trimmed;
+  }
+  const withDebugContext = [
     trimmed,
     '',
     '[多轮上下文]',
@@ -231,6 +251,7 @@ function enrichWithConversationContext(content: string, messages: Message[], per
     `当前终端=${appSwitch.platform || '沿用上一轮'}`,
     '系统动作=继续自动联调前置校验，切换应用后重新确认项目、媒体、应用共享、验收状态和数据上报记录',
   ].join('\n');
+  return withDebugContext;
 }
 
 function extractDebugMemoryFromContent(content: string): DebugCarryMemory | null {
@@ -673,8 +694,94 @@ function buildReportComposerMessage(convId: string, content: string): Message {
   };
 }
 
+function buildAutomationTaskMessage(convId: string, content: string): Message {
+  const id = nextMessageId();
+  const isWeekly = /周报|每周|周一/i.test(content);
+  const isMonthly = /月报|每月/i.test(content);
+  const isGameDaily = /日报|每日|每天|游戏项目|项目日报/i.test(content) && !isWeekly && !isMonthly;
+  const metrics = isGameDaily
+    ? ['消耗', '现金消耗', '激活数', '注册数', '注册率', '激活成本', '注册成本', '次留率', '首日新充人数', '首日新充金额', '首日付费率', '首日ARPPU', '首日ROI', 'iOS自然量扣除口径']
+    : /ROI|roi/i.test(content) ? ['消耗', '激活', 'ROI'] : ['消耗', '激活'];
+  const dimensions = isGameDaily
+    ? ['项目总数据', '广告量', '媒体', '应用类型', '媒体×应用类型', '团队', '团队×应用类型', '团队×媒体', '团队×媒体×应用类型']
+    : /标签/.test(content) ? ['媒体', '账户', '广告标签'] : ['媒体', '账户'];
+  const frequency = isWeekly ? 'weekly' : isMonthly ? 'monthly' : 'daily';
+  const deliveryTime = /10:00|10\s*点/.test(content) ? '10:00' : '09:00';
+
+  return {
+    id,
+    message_id: id,
+    conversation_id: convId,
+    role: 'assistant',
+    message_type: 'assistant_reply' as MessageType,
+    created_at: new Date().toISOString(),
+    timestamp: Date.now(),
+    agent: 'help',
+    intent_type: 'help',
+    content: '请确认这次自动化任务需要的维度、指标和执行时间。确认后我会创建任务。',
+    thinking_steps: [
+      {
+        key: 'automation_task_intent',
+        label: '识别自动化任务',
+        content: '识别到用户希望创建一个固定周期的数据整理任务，需要先确认维度、指标和执行时间。',
+        status: 'completed',
+      },
+      {
+        key: 'automation_capability_check',
+        label: '检查可用能力',
+        content: '自动化任务、报表取数和任务记录能力可承接当前需求。',
+        status: 'completed',
+      },
+      {
+        key: 'automation_option_extract',
+        label: '提取候选项',
+        content: `候选维度：${dimensions.join('、')}；候选指标：${metrics.join('、')}；周期：${frequency}；时间：${deliveryTime}。`,
+        status: 'completed',
+      },
+      {
+        key: 'automation_wait_confirm',
+        label: '等待确认',
+        content: '确认维度、指标和执行时间后，再创建自动化任务。',
+        status: 'completed',
+      },
+    ],
+    tool_calls: [
+      {
+        name: '自动化任务 Skill',
+        kind: 'skill',
+        display_name: '自动化任务',
+        arguments: JSON.stringify({ task: '确认维度、指标和执行时间' }),
+        result: '可承接',
+        status: 'done',
+      },
+    ],
+    metadata: {
+      workflow_card: {
+        type: 'report_composer',
+        status: 'template_review',
+        title: '自动化任务确认',
+        sourceText: content,
+        intakeModes: ['选择维度', '选择指标', '确认时间'],
+        template: {
+          name: isWeekly ? '投放周报' : isMonthly ? '投放月报' : isGameDaily ? '游戏项目投放日报' : '投放日报',
+          metrics,
+          dimensions,
+          timeRange: isWeekly ? '最近 7 天' : isMonthly ? '上个自然月' : '前一日',
+          frequency,
+          deliveryTime,
+          deliveryTargets: [],
+        },
+        metricIssues: [],
+      },
+    },
+  };
+}
+
 function buildMediaDemandMessage(convId: string, content: string): Message {
   const id = nextMessageId();
+  const isTrackingPostback = /监测|回传|监测链接|归因|事件映射/i.test(content);
+  const isCollect = /采集|报表|数据源|行业数据|商业数据/i.test(content);
+  const hasDocument = /文档|docx?|pdf|链接|附件|上传/i.test(content);
   return {
     id,
     message_id: id,
@@ -686,30 +793,54 @@ function buildMediaDemandMessage(convId: string, content: string): Message {
     agent: 'demand',
     intent_type: 'demand',
     content: [
-      '## 新增媒体对接需要先完成需求表单',
+      `## ${isTrackingPostback ? '监测回传对接' : isCollect ? '采集对接' : '对接需求'}需要先确认文档和目标`,
       '',
-      '我已把这次输入识别为新增媒体对接需求。接下来不直接给建议，需要先完成必填依赖校验。',
+      hasDocument
+        ? '我会先解析你提供的对接文档，检查文档内容和这次需求是否匹配。'
+        : '请先提供对接文档或关键说明，我再继续校验需求是否可直接配置。',
       '',
-      '### 必填依赖',
-      '- 媒体名称与平台归属',
-      '- 对接文档或回传说明',
-      '- 监测链接参数规则',
-      '- 可回传事件类型',
-      '- 回传验收方式',
+      '### 需要确认',
+      isCollect
+        ? '- 采集对象、字段口径、更新频率、样例数据和验收方式'
+        : '- 监测链接参数规则、可回传事件、归因口径、验收方式和特殊操作',
+      '- 涉及的媒体、项目、应用或包体范围',
+      '- 是否已有可用配置或需要新增配置',
       '',
-      '表单提交后会先做校验：通过则提示可以立即去后台创建监测链接；如果需要特殊处理，会生成需求并记录到需求池，链接可先行创建，后续联调时间会继续通知。',
+      isTrackingPostback
+        ? '如果文档没有特殊操作，我会调用配置能力完成监测回传配置，随后用户可以立即创建监测链接。'
+        : '如果当前能力未覆盖，我会记录成明确的指标或对接需求，并继续追问开发所需字段。',
     ].join('\n'),
     thinking_steps: [
-      { label: '识别需求', content: '判断为新增媒体对接，进入需求 Agent 必经流程。', status: 'completed' },
-      { label: '依赖校验', content: '需要先收齐对接文档、监测链接规则、事件清单和验收方式。', status: 'completed' },
-      { label: '下一步', content: '生成结构化表单，支持保存到代办并从右侧继续处理。', status: 'completed' },
+      { label: '识别需求', content: isCollect ? '判断为采集对接需求。' : isTrackingPostback ? '判断为监测回传对接需求。' : '判断为对接需求。', status: 'completed' },
+      { label: '检查文档', content: hasDocument ? '已检测到文档线索，下一步解析文档并校验字段。' : '暂未检测到文档，需要先补充文档或关键说明。', status: hasDocument ? 'completed' : 'loading' },
+      { label: '匹配能力', content: isTrackingPostback ? '无特殊操作时可进入配置能力和监测链接创建。' : '若现有工具未覆盖，会转为指标或对接需求记录。', status: 'completed' },
+    ],
+    tool_calls: [
+      {
+        name: 'demand.document_parse',
+        kind: 'skill',
+        display_name: '对接文档解析',
+        arguments: JSON.stringify({ has_document: hasDocument, demand_type: isCollect ? '采集对接' : isTrackingPostback ? '监测回传对接' : '对接需求' }),
+        result: hasDocument ? '等待解析文档内容' : '等待用户提供文档',
+        status: hasDocument ? 'running' : 'pending',
+      },
+      ...(isTrackingPostback ? [{
+        name: 'config_mcp.postback_config_upsert',
+        kind: 'mcp' as const,
+        display_name: '配置能力',
+        arguments: JSON.stringify({ when: '文档无特殊操作且字段齐全' }),
+        result: '待文档校验后调用',
+        status: 'pending' as const,
+      }] : []),
     ],
     metadata: {
       workflow_card: {
         type: 'media_onboarding',
-        status: 'missing_dependencies',
-        title: '新增媒体对接',
+        status: hasDocument ? 'document_review' : 'missing_dependencies',
+        title: isTrackingPostback ? '监测回传对接' : isCollect ? '采集对接' : '对接需求',
         sourceText: content,
+        demandType: isCollect ? 'data_collection' : isTrackingPostback ? 'tracking_postback' : 'integration',
+        canAutoConfigure: isTrackingPostback,
       },
       source_refs: [
         {
@@ -790,15 +921,13 @@ function buildLegacyDebugMessage(convId: string, content = ''): Message {
 
 interface OceanEngineAppCheckResult {
   ok: boolean;
-  status: 'matched' | 'not_found' | 'empty_result' | 'missing_account_id' | 'missing_advertiser_id' | 'failed' | 'not_configured';
+  status: 'matched' | 'not_found' | 'empty_result' | 'missing_account_id' | 'missing_advertiser_id' | 'failed' | 'not_configured' | 'blocked';
   message: string;
   tool?: string;
   server?: string;
   latency_ms?: number;
   checked_count?: number;
   matched_count?: number;
-  temporary_pass?: boolean;
-  temporary_reason?: string;
   matched_apps?: Array<{
     app_id?: string;
     app_name: string;
@@ -897,8 +1026,8 @@ function withOceanEngineAppCheck(message: Message, check: OceanEngineAppCheckRes
     : '';
   const content = failed
     ? `应用权限校验未通过：${check.message}${candidateText}`
-    : check.temporary_pass
-      ? `应用权限校验已临时放行，可以继续发起自动联调。\n\n临时放行原因：${check.temporary_reason || check.message}`
+    : check.status === 'blocked'
+      ? `应用权限校验已阻断，需要先处理后再继续。\n\n阻断原因：${check.message}`
       : '应用权限校验已通过，可以继续发起自动联调。';
   const checkStep = {
     key: 'mcp_oceanengine_app_list',
@@ -906,7 +1035,6 @@ function withOceanEngineAppCheck(message: Message, check: OceanEngineAppCheckRes
     content: [
       `工具：${check.tool || 'tools_app_management_android_app_list_v2'}`,
       `结果：${check.message}`,
-      check.temporary_pass ? `临时放行：${check.temporary_reason || '巨量 MCP 当前不可用，先按用户要求放行该环节'}` : '',
       typeof check.checked_count === 'number' ? `检查应用数：${check.checked_count}` : '',
       typeof check.matched_count === 'number' ? `匹配应用数：${check.matched_count}` : '',
       candidates.length > 0 ? `候选应用：${candidates.map(app => app.app_name).join('、')}` : '',
@@ -1017,7 +1145,262 @@ export interface AgentMeta {
   phase?: 'thinking' | 'tool_calling' | 'generating' | 'done';
 }
 
-export function useConversation() {
+export type TurnUiStatus =
+  | 'idle'
+  | 'submitting'
+  | 'assistant_pending'
+  | 'streaming'
+  | 'tool_running'
+  | 'finalizing'
+  | 'completed'
+  | 'degraded'
+  | 'blocked'
+  | 'empty'
+  | 'skipped'
+  | 'cancel_requested'
+  | 'cancelled'
+  | 'failed';
+
+const PLACEHOLDER_CONVERSATION_TITLES = new Set(['新对话', '新会话', '新對話', '未命名会话']);
+
+function shouldShowConversation(conversation: Conversation, projectBinding?: ProjectBinding) {
+  if (!projectBinding || projectBinding.project_refs.length === 0) return true;
+  if (!conversation.project_binding || conversation.project_binding.project_refs.length === 0) return true;
+  return projectBinding.project_refs.some((ref) => conversation.project_binding?.project_refs.includes(ref));
+}
+
+function isPlaceholderConversation(conversation: Conversation): boolean {
+  return Number(conversation.message_count || 0) === 0
+    && PLACEHOLDER_CONVERSATION_TITLES.has(String(conversation.title || '').trim());
+}
+
+function filterPlaceholderConversations(conversations: Conversation[], activeConversationId?: string | null): Conversation[] {
+  let keptInactivePlaceholder = false;
+  return conversations.filter((conversation) => {
+    if (!isPlaceholderConversation(conversation)) return true;
+    if (activeConversationId && conversation.conversation_id === activeConversationId) return true;
+    if (!activeConversationId && !keptInactivePlaceholder) {
+      keptInactivePlaceholder = true;
+      return true;
+    }
+    return false;
+  });
+}
+
+function extractStatus(value: unknown): string {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function statusFromRecord(value: unknown, key: string): string {
+  if (!value || typeof value !== 'object') return '';
+  return extractStatus((value as Record<string, unknown>)[key]);
+}
+
+function resolveFinalTurnUiStatus(
+  responseMetadata?: Record<string, unknown>,
+  workflowResult?: Record<string, unknown> | null,
+  responseResult?: Record<string, unknown>,
+): TurnUiStatus {
+  const runtimeState = responseMetadata?.runtime_state && typeof responseMetadata.runtime_state === 'object'
+    ? responseMetadata.runtime_state as Record<string, unknown>
+    : null;
+  const candidates = [
+    extractStatus(responseMetadata?.turn_ui_status),
+    extractStatus(responseMetadata?.status),
+    extractStatus(runtimeState?.status),
+    statusFromRecord(workflowResult, 'status'),
+    statusFromRecord(workflowResult, 'result_status'),
+    statusFromRecord(workflowResult, 'workflow_state'),
+    statusFromRecord(responseResult, 'status'),
+    statusFromRecord(responseResult, 'result_status'),
+  ].filter(Boolean);
+
+  if (candidates.some((status) => status === 'failed' || status === 'failure' || status === 'error')) return 'failed';
+  if (candidates.some((status) => status === 'cancelled' || status === 'canceled')) return 'cancelled';
+  if (candidates.some((status) => status === 'blocked')) return 'blocked';
+  if (candidates.some((status) => status === 'empty')) return 'empty';
+  if (candidates.some((status) => status === 'skipped')) return 'skipped';
+  if (candidates.some((status) => status === 'degraded' || status === 'partial')) return 'degraded';
+  return 'completed';
+}
+
+function extractListPayload<T>(payload: unknown, keys: string[]): T[] {
+  const visited = new Set<unknown>();
+  const preferredKeys = [
+    ...keys,
+    'records',
+    'rows',
+    'result',
+    'results',
+    'payload',
+    'message_list',
+    'messageList',
+    'conversation_list',
+    'conversationList',
+  ];
+
+  const walk = (value: unknown, depth: number): unknown[] => {
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (!value || typeof value !== 'object' || depth > 5 || visited.has(value)) return [];
+    visited.add(value);
+
+    const record = value as Record<string, unknown>;
+    for (const key of preferredKeys) {
+      const found = walk(record[key], depth + 1);
+      if (found.length > 0) return found;
+    }
+
+    for (const nested of Object.values(record)) {
+      const found = walk(nested, depth + 1);
+      if (found.length > 0) return found;
+    }
+
+    return [];
+  };
+
+  return walk(payload, 0) as T[];
+}
+
+function stringifyMessageContent(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) {
+    return value
+      .map(item => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          const record = item as Record<string, unknown>;
+          return stringifyMessageContent(record.text || record.content || record.value);
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join('\n');
+  }
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return stringifyMessageContent(record.text || record.content || record.value || record.markdown);
+  }
+  return '';
+}
+
+function normalizeConversationPayload(item: Conversation): Conversation {
+  const record = item as Conversation & Record<string, unknown>;
+  const conversationId = String(
+    record.conversation_id ||
+    record.conversationId ||
+    record.conversationID ||
+    record.conv_id ||
+    record.convId ||
+    record.id ||
+    '',
+  );
+  const now = new Date().toISOString();
+  return {
+    ...item,
+    conversation_id: conversationId,
+    user_id: String(record.user_id || record.userId || ''),
+    title: String(record.title || record.name || record.summary || '新会话'),
+    status: String(record.status || '普通对话') as Conversation['status'],
+    started_at: String(record.started_at || record.startedAt || record.created_at || record.createdAt || now),
+    updated_at: String(record.updated_at || record.updatedAt || record.last_message_at || record.lastMessageAt || now),
+    last_message_at: String(record.last_message_at || record.lastMessageAt || record.updated_at || record.updatedAt || now),
+    current_mode: (record.current_mode || record.currentMode || 'natural-chat') as Conversation['current_mode'],
+    message_count: Number(record.message_count || record.messageCount || record.messages_count || record.messagesCount || 0),
+  };
+}
+
+function normalizeHistoryMessagePayload(item: Message, conversationId: string): Message {
+  const record = item as Message & Record<string, unknown>;
+  const id = String(record.message_id || record.messageId || record.messageID || record.id || `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const rawRole = String(record.role || record.sender || record.author || record.from || record.type || record.message_role || record.messageRole || '').toLowerCase();
+  const role: Message['role'] = rawRole.includes('assistant') || rawRole.includes('ai') || rawRole.includes('bot')
+    ? 'assistant'
+    : rawRole.includes('system')
+      ? 'system'
+      : 'user';
+  const createdAt = String(record.created_at || record.createdAt || record.time || record.timestamp || new Date().toISOString());
+  const content = stringifyMessageContent(
+    record.content ||
+    record.text ||
+    record.message ||
+    record.answer ||
+    record.reply ||
+    record.response ||
+    record.question ||
+    record.query ||
+    record.content_text ||
+    record.contentText ||
+    record.message_content ||
+    record.messageContent,
+  );
+  return {
+    ...item,
+    id,
+    message_id: id,
+    conversation_id: String(record.conversation_id || record.conversationId || record.conversationID || conversationId),
+    role,
+    content,
+    message_type: (record.message_type || record.messageType || (role === 'assistant' ? 'assistant_reply' : 'user_input')) as MessageType,
+    created_at: createdAt,
+    timestamp: typeof record.timestamp === 'number'
+      ? record.timestamp
+      : new Date(createdAt).getTime() || Date.now(),
+  };
+}
+
+const ACTIVE_CONVERSATION_STORAGE_KEY = 'zhitou-chat-active-conversation-id';
+
+function readStoredActiveConversationId(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const value = window.localStorage.getItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+    return value && value.trim() ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistActiveConversationId(conversationId: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (conversationId) {
+      window.localStorage.setItem(ACTIVE_CONVERSATION_STORAGE_KEY, conversationId);
+    } else {
+      window.localStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+    }
+  } catch {
+    // localStorage 不可用时不影响会话主流程。
+  }
+}
+
+function getMessageStableKey(message: Message): string {
+  return String(message.message_id || message.id);
+}
+
+function sortMessagesByCreatedAt(messages: Message[]): Message[] {
+  return [...messages].sort((a, b) => {
+    const first = new Date(a.created_at).getTime() || a.timestamp || 0;
+    const second = new Date(b.created_at).getTime() || b.timestamp || 0;
+    return first - second;
+  });
+}
+
+function mergeHistoryMessages(currentMessages: Message[], historyMessages: Message[]): Message[] {
+  const nextByKey = new Map<string, Message>();
+  for (const message of historyMessages) {
+    nextByKey.set(getMessageStableKey(message), message);
+  }
+  for (const message of currentMessages) {
+    const key = getMessageStableKey(message);
+    if (!nextByKey.has(key)) {
+      nextByKey.set(key, message);
+    }
+  }
+  return sortMessagesByCreatedAt([...nextByKey.values()]);
+}
+
+export function useConversation(currentProjectBinding?: ProjectBinding) {
   const {
     currentAgent,
     setCurrentAgent,
@@ -1025,10 +1408,12 @@ export function useConversation() {
     missingFields,
   } = useAgent();
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Message[]>>({});
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [runningConversationIds, setRunningConversationIds] = useState<string[]>([]);
   const [agentMeta, setAgentMeta] = useState<Map<string, AgentMeta>>(new Map());
   const [currentRouting, setCurrentRouting] = useState<{
     intent_type: IntentType;
@@ -1038,11 +1423,54 @@ export function useConversation() {
   const [callChainData, setCallChainData] = useState<CallChainData | null>(null);
   const [debugCarryMemory, setDebugCarryMemory] = useState<DebugCarryMemory>({});
   const abortControllerRef = useRef<AbortController | null>(null);
+  const activeTurnRef = useRef<{ conversationId: string; assistantId: string; requestId: string } | null>(null);
+  const cancelledTurnIdsRef = useRef<Set<string>>(new Set());
   const skipNextLoadRef = useRef<string | null>(null);
+  const skipTitleUpdateRef = useRef<string | null>(null);
   const activeConversationIdRef = useRef<string | null>(null);
+  const latestMessageLoadRef = useRef<string | null>(null);
+  const restoredActiveConversationRef = useRef(false);
+  const messages = useMemo(
+    () => (activeConversationId ? messagesByConversation[activeConversationId] || [] : []),
+    [activeConversationId, messagesByConversation],
+  );
+
+  const setConversationMessages = useCallback((conversationId: string, updater: SetStateAction<Message[]>) => {
+    setMessagesByConversation(prev => {
+      const current = prev[conversationId] || [];
+      const next = typeof updater === 'function'
+        ? (updater as (value: Message[]) => Message[])(current)
+        : updater;
+      return { ...prev, [conversationId]: next };
+    });
+  }, []);
+
+  const clearConversationMessages = useCallback((conversationId: string | null) => {
+    if (!conversationId) return;
+    setMessagesByConversation(prev => {
+      if (!(conversationId in prev)) return prev;
+      const next = { ...prev };
+      delete next[conversationId];
+      return next;
+    });
+  }, []);
+
+  const moveConversationMessages = useCallback((fromConversationId: string, toConversationId: string) => {
+    if (fromConversationId === toConversationId) return;
+    setMessagesByConversation(prev => {
+      const sourceMessages = prev[fromConversationId] || [];
+      const targetMessages = prev[toConversationId] || [];
+      const movedMessages = sourceMessages.map(item => ({ ...item, conversation_id: toConversationId }));
+      const next = { ...prev, [toConversationId]: mergeHistoryMessages(targetMessages, movedMessages) };
+      delete next[fromConversationId];
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     activeConversationIdRef.current = activeConversationId;
+    if (!restoredActiveConversationRef.current && !activeConversationId) return;
+    persistActiveConversationId(activeConversationId);
   }, [activeConversationId]);
 
   useEffect(() => {
@@ -1050,27 +1478,73 @@ export function useConversation() {
   }, []);
 
   const refreshConversations = useCallback(async (options: { activateFirst?: boolean } = {}) => {
-    const list = await xiaoqiaoApi.getConversations();
-    setConversations(list);
-    if (options.activateFirst && !activeConversationIdRef.current && list[0]) {
-      activeConversationIdRef.current = list[0].conversation_id;
-      setActiveConversationId(list[0].conversation_id);
+    try {
+      const payload = await xiaoqiaoApi.getConversations({
+        limit: 30,
+        project_refs: currentProjectBinding?.project_refs,
+      });
+      const list = extractListPayload<Conversation>(payload, ['data', 'items', 'list', 'conversations'])
+        .map(normalizeConversationPayload)
+        .filter(item => item.conversation_id)
+        .filter((item) => shouldShowConversation(item, currentProjectBinding));
+      const visibleList = filterPlaceholderConversations(list, activeConversationIdRef.current);
+      setConversations(visibleList);
+      if (options.activateFirst && !activeConversationIdRef.current && visibleList[0]) {
+        activeConversationIdRef.current = visibleList[0].conversation_id;
+        setActiveConversationId(visibleList[0].conversation_id);
+      }
+      return visibleList;
+    } catch (error) {
+      console.error('refreshConversations failed', error);
+      return [];
     }
-    return list;
-  }, []);
+  }, [currentProjectBinding]);
 
   const loadMessages = useCallback(async (conversationId: string) => {
-    const nextMessages = await xiaoqiaoApi.getMessages(conversationId);
-    setMessages(nextMessages);
-  }, []);
+    latestMessageLoadRef.current = conversationId;
+    setIsLoadingMessages(true);
+    try {
+      const payload = await xiaoqiaoApi.getMessages(conversationId, { limit: 30 });
+      if (latestMessageLoadRef.current !== conversationId) return;
+      const loadedMessages = extractListPayload<Message>(payload, ['data', 'items', 'list', 'messages'])
+        .map(item => normalizeHistoryMessagePayload(item, conversationId))
+        .filter(item => item.content || item.message_type !== 'user_input');
+      setConversationMessages(conversationId, prev => mergeHistoryMessages(prev, loadedMessages));
+    } catch (error) {
+      if (latestMessageLoadRef.current !== conversationId) return;
+      const missingConversation = error instanceof Error && /404|not found|conversation not found/i.test(error.message);
+      if (missingConversation) {
+        console.debug('Selected conversation messages not found; keeping selection until conversation list refresh confirms removal', error);
+        return;
+      }
+      console.error('loadMessages failed', error);
+      // 不清空已有消息，避免加载失败时跳转到空态页。
+      // 如果原本就没有消息（首次加载失败），ChatContainer 的渲染容错会处理。
+    } finally {
+      if (latestMessageLoadRef.current === conversationId) {
+        setIsLoadingMessages(false);
+      }
+    }
+  }, [setConversationMessages]);
 
   useEffect(() => {
-    void refreshConversations({ activateFirst: true });
+    const storedConversationId = readStoredActiveConversationId();
+    restoredActiveConversationRef.current = true;
+    if (!storedConversationId || activeConversationIdRef.current) return;
+    activeConversationIdRef.current = storedConversationId;
+    skipNextLoadRef.current = storedConversationId;
+    setActiveConversationId(storedConversationId);
+    setIsLoadingMessages(true);
+    void loadMessages(storedConversationId);
+  }, [loadMessages]);
+
+  useEffect(() => {
+    void refreshConversations();
   }, [refreshConversations]);
 
   useEffect(() => {
     if (!activeConversationId) {
-      setMessages([]);
+      if (activeTurnRef.current) return;
       return;
     }
     if (skipNextLoadRef.current === activeConversationId) {
@@ -1080,36 +1554,82 @@ export function useConversation() {
     void loadMessages(activeConversationId);
   }, [activeConversationId, loadMessages]);
 
-  const ensureConversation = useCallback(async (content: string) => {
-    if (activeConversationId) {
-      return activeConversationId;
+  const ensureConversation = useCallback(async (_content?: string) => {
+    // 优先使用 ref（始终是最新值），避免 async IIFE 中闭包陈旧导致重复创建会话。
+    // flushSync 已将 activeConversationIdRef.current 设为 optimistic ID，
+    // 此处检测到 optimistic 前缀则创建真实会话替代。
+    const refId = activeConversationIdRef.current;
+    if (refId && !refId.startsWith('optimistic-')) {
+      return refId;
     }
-    const conversation = await xiaoqiaoApi.createConversation({ title: content });
-    setConversations(prev => [conversation, ...prev]);
+    const conversation = await xiaoqiaoApi.createConversation({
+      title: '新对话',
+      project_binding: currentProjectBinding,
+    });
     skipNextLoadRef.current = conversation.conversation_id;
     activeConversationIdRef.current = conversation.conversation_id;
     setActiveConversationId(conversation.conversation_id);
+    setConversations(prev => filterPlaceholderConversations(
+      shouldShowConversation(conversation, currentProjectBinding) ? [conversation, ...prev] : prev,
+      conversation.conversation_id,
+    ));
     return conversation.conversation_id;
-  }, [activeConversationId]);
+  }, [currentProjectBinding]);
 
   const createConversation = useCallback(async (title?: string) => {
-    const conversation = await xiaoqiaoApi.createConversation({ title: title || '新对话' });
-    setConversations(prev => [conversation, ...prev]);
+    const conversation = await xiaoqiaoApi.createConversation({
+      title: title || '新对话',
+      project_binding: currentProjectBinding,
+    });
     skipNextLoadRef.current = conversation.conversation_id;
     activeConversationIdRef.current = conversation.conversation_id;
     setActiveConversationId(conversation.conversation_id);
-    setMessages([]);
+    setConversations(prev => filterPlaceholderConversations(
+      shouldShowConversation(conversation, currentProjectBinding) ? [conversation, ...prev] : prev,
+      conversation.conversation_id,
+    ));
+    setConversationMessages(conversation.conversation_id, []);
     setCurrentResult(null);
     setCallChainData(null);
     void refreshConversations();
     return conversation;
-  }, [refreshConversations]);
+  }, [refreshConversations, currentProjectBinding, setConversationMessages]);
 
-  const selectConversation = useCallback((conversationId: string) => {
-    activeConversationIdRef.current = conversationId;
-    setActiveConversationId(conversationId);
+  const startBlankConversation = useCallback(() => {
+    activeConversationIdRef.current = null;
+    skipNextLoadRef.current = null;
+    skipTitleUpdateRef.current = null;
+    setActiveConversationId(null);
+    setIsLoadingMessages(false);
     setCurrentResult(null);
     setCallChainData(null);
+  }, []);
+
+  const selectConversation = useCallback((conversationId: string) => {
+    skipNextLoadRef.current = conversationId;
+    skipTitleUpdateRef.current = null;
+    activeConversationIdRef.current = conversationId;
+    setActiveConversationId(conversationId);
+    setIsLoadingMessages(true);
+    setCurrentResult(null);
+    setCallChainData(null);
+    void loadMessages(conversationId);
+  }, [loadMessages]);
+
+  const markConversationRunning = useCallback((conversationId: string) => {
+    setRunningConversationIds(prev => (prev.includes(conversationId) ? prev : [...prev, conversationId]));
+    setConversations(prev => prev.map(item => (
+      item.conversation_id === conversationId ? { ...item, status: '执行中' } : item
+    )));
+    void xiaoqiaoApi.updateConversation(conversationId, { status: '执行中' }).catch(() => undefined);
+  }, []);
+
+  const clearConversationRunning = useCallback((conversationId: string) => {
+    setRunningConversationIds(prev => prev.filter(item => item !== conversationId));
+    setConversations(prev => prev.map(item => (
+      item.conversation_id === conversationId ? { ...item, status: '普通对话' } : item
+    )));
+    void xiaoqiaoApi.updateConversation(conversationId, { status: '普通对话' }).catch(() => undefined);
   }, []);
 
   const renameConversation = useCallback(async (conversationId: string, title: string) => {
@@ -1122,19 +1642,29 @@ export function useConversation() {
     setConversations(prev => {
       const next = prev.filter(item => item.conversation_id !== conversationId);
       if (activeConversationId === conversationId) {
-        activeConversationIdRef.current = next[0]?.conversation_id || null;
-        setActiveConversationId(next[0]?.conversation_id || null);
-        setMessages([]);
+        activeConversationIdRef.current = null;
+        setActiveConversationId(null);
+        setIsLoadingMessages(false);
         setCurrentResult(null);
         setCallChainData(null);
       }
       return next;
     });
-  }, [activeConversationId]);
+    clearConversationMessages(conversationId);
+  }, [activeConversationId, clearConversationMessages]);
 
-  const sendMessage = useCallback((content: string, targetConversationId?: string, options?: { projectContext?: string }) => {
+  const sendMessage = useCallback((content: string, targetConversationId?: string, options?: SendMessageOptions) => {
     const trimmed = content.trim();
     if (!trimmed) return;
+    const reportAction = decodeReportActionEnvelope(trimmed);
+    const visibleContent = reportAction?.action === 'select_entity_candidate'
+      ? `已按“${String(reportAction.params?.candidateName || reportAction.label.replace(/^选择\s*/, '')).trim()}”继续查询`
+      : reportAction?.label || trimmed;
+    const businessContext = buildBusinessContextSnapshot(messages, options?.projectContext);
+    const projectContextDebug = buildProjectContextDebug(options);
+    if (typeof window !== 'undefined') {
+      console.debug('[ChatProjectContext]', projectContextDebug);
+    }
     const contextualContent = enrichWithConversationContext(trimmed, messages, debugCarryMemory);
     const baseEffectiveContent = options?.projectContext
       ? `${trimmed}\n\n[项目上下文]\n${options.projectContext}`
@@ -1152,56 +1682,253 @@ export function useConversation() {
       }));
     }
 
+    const firstRouting = routeUserIntent(effectiveContent);
+    const slotState = resolveSlots({
+      intentType: firstRouting.intent_type,
+      message: effectiveContent,
+      businessContext,
+    });
+    const routing = routeUserIntent(effectiveContent, { businessContext, slotState });
+    const targetExists = Boolean(targetConversationId && conversations.some(item => item.conversation_id === targetConversationId));
+    // 优先使用 ref（始终是最新值），避免 conversations state 尚未加载时误判为不存在
+    const refId = activeConversationIdRef.current;
+    const refIsReal = Boolean(refId && !refId.startsWith('optimistic-'));
+    const activeExists = refIsReal || Boolean(activeConversationId && conversations.some(item => item.conversation_id === activeConversationId));
+    const optimisticConversationId = targetExists
+      ? targetConversationId!
+      : refIsReal
+        ? refId!
+        : activeExists
+          ? activeConversationId!
+          : `optimistic-${Date.now()}`;
+    const fallbackUserId = nextMessageId();
+    const assistantId = nextMessageId();
+    const requestId = `turn-${assistantId}-${Date.now()}`;
+    const buildFallbackUserMessage = (conversationId: string): Message => ({
+      id: fallbackUserId,
+      message_id: fallbackUserId,
+      conversation_id: conversationId,
+      role: 'user',
+      content: visibleContent,
+      message_type: 'user_input' as MessageType,
+      created_at: new Date().toISOString(),
+      timestamp: Date.now(),
+    });
+    const normalizeMessage = (message: unknown, fallback: Message): Message => {
+      if (!message || typeof message !== 'object') return fallback;
+      const next = message as Partial<Message>;
+      const id = next.id || next.message_id || fallback.id;
+      return {
+        ...fallback,
+        ...next,
+        id,
+        message_id: next.message_id || id,
+        conversation_id: next.conversation_id || fallback.conversation_id,
+        role: next.role || fallback.role,
+        content: typeof next.content === 'string' ? next.content : fallback.content,
+        message_type: next.message_type || fallback.message_type,
+        created_at: next.created_at || fallback.created_at,
+        timestamp: next.timestamp || fallback.timestamp,
+      };
+    };
+    const fallbackUserMessage = buildFallbackUserMessage(optimisticConversationId);
+    const optimisticConversation: Conversation | null = !activeExists && !targetExists && !refIsReal
+      ? {
+        conversation_id: optimisticConversationId,
+        user_id: 'local',
+        title: visibleContent,
+        status: '普通对话',
+        started_at: fallbackUserMessage.created_at,
+        updated_at: fallbackUserMessage.created_at,
+        last_message_at: fallbackUserMessage.created_at,
+        current_mode: 'natural-chat',
+        project_binding: currentProjectBinding,
+        message_count: 1,
+      }
+      : null;
+    const assistantMessage: Message = {
+      id: assistantId,
+      message_id: assistantId,
+      conversation_id: optimisticConversationId,
+      role: 'assistant',
+      content: '',
+      message_type: 'assistant_reply' as MessageType,
+      created_at: new Date().toISOString(),
+      timestamp: Date.now(),
+      agent: routing.is_business_related ? intentToAgent(routing.intent_type) : undefined,
+      intent_type: routing.is_business_related ? routing.intent_type : undefined,
+      thinking: '',
+      tool_calls: [],
+      metadata: {
+        turn_ui_status: 'assistant_pending' satisfies TurnUiStatus,
+        turn_status_label: '正在理解问题...',
+        turn_request_id: requestId,
+      },
+    };
+
+    activeTurnRef.current = { conversationId: optimisticConversationId, assistantId, requestId };
+    cancelledTurnIdsRef.current.delete(requestId);
+    flushSync(() => {
+      if (!activeExists && !targetExists && !refIsReal) {
+        skipNextLoadRef.current = optimisticConversationId;
+        activeConversationIdRef.current = optimisticConversationId;
+        setActiveConversationId(optimisticConversationId);
+        if (optimisticConversation) {
+          setConversations(prev => [optimisticConversation, ...filterPlaceholderConversations(prev, optimisticConversationId)]);
+        }
+      }
+      setIsTyping(true);
+      setConversationMessages(optimisticConversationId, prev => [...prev, fallbackUserMessage, assistantMessage]);
+      if (typeof window !== 'undefined') {
+        const phase0 = (window as unknown as { __phase0?: { marks?: Record<string, number> } }).__phase0;
+        if (phase0?.marks) {
+          phase0.marks.localUserMessageCommittedAt = performance.now();
+        }
+      }
+    });
+    setAgentMeta(prev => {
+      const next = new Map(prev);
+      next.set(assistantId, { phase: 'thinking', toolCalls: [] });
+      return next;
+    });
+
+    let pendingConversationId: string | null = optimisticConversationId;
     void (async () => {
-      const routing = routeUserIntent(effectiveContent);
-      let convId = targetConversationId || await ensureConversation(trimmed);
-      rememberDebugContext(effectiveContent, convId);
-      let userMessage: Message;
+      let convId = optimisticConversationId;
+      const setActiveConversationMessages = (updater: SetStateAction<Message[]>) => {
+        setConversationMessages(convId, updater);
+      };
+      const isTurnCancelled = () => cancelledTurnIdsRef.current.has(requestId)
+        || activeTurnRef.current?.requestId !== requestId;
+      const updateTurnStatus = (status: TurnUiStatus, label?: string) => {
+        setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
+          ? {
+            ...item,
+            metadata: {
+              ...(item.metadata || {}),
+              turn_ui_status: status,
+              ...(label ? { turn_status_label: label } : {}),
+            },
+          }
+          : item));
+      };
       try {
-        userMessage = await xiaoqiaoApi.sendMessage(convId, {
-          content: trimmed,
+        // ensureConversation 内部通过 activeConversationIdRef.current 判断：
+        // - 如果是真实 ID → 直接返回（不重复创建）
+        // - 如果是 optimistic-xxx → 创建真实会话替代
+        // 这避免了闭包陈旧导致的重复创建会话 BUG
+        convId = targetExists ? targetConversationId! : await ensureConversation(visibleContent);
+        if (isTurnCancelled()) {
+          setIsTyping(false);
+          return;
+        }
+        activeTurnRef.current = { conversationId: convId, assistantId, requestId };
+        pendingConversationId = convId;
+        if (convId !== optimisticConversationId) {
+          moveConversationMessages(optimisticConversationId, convId);
+        }
+        rememberDebugContext(effectiveContent, convId);
+        markConversationRunning(convId);
+      } catch (error) {
+        updateTurnStatus('failed', '发送失败');
+        setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
+          ? { ...item, content: '发送失败，请稍后重试。' }
+          : item));
+        setIsTyping(false);
+        activeTurnRef.current = null;
+        throw error;
+      }
+
+      let userMessage: Message = fallbackUserMessage;
+      try {
+        userMessage = normalizeMessage(await xiaoqiaoApi.sendMessage(convId, {
+          content: visibleContent,
           role: 'user',
           message_type: 'user_input',
-        });
+          attachments: options?.attachmentIds || [],
+        }), fallbackUserMessage);
+        setActiveConversationMessages(prev => prev.map(item => item.id === fallbackUserId ? userMessage : item));
       } catch (error) {
         const missingConversation = error instanceof Error && /404|not found/i.test(error.message);
         if (!missingConversation) throw error;
         const conversation = await xiaoqiaoApi.createConversation({ title: '新对话' });
         convId = conversation.conversation_id;
-        setConversations(prev => [conversation, ...prev.filter(item => item.conversation_id !== conversation.conversation_id)]);
+        activeTurnRef.current = { conversationId: convId, assistantId, requestId };
+        pendingConversationId = convId;
+        setConversations(prev => shouldShowConversation(conversation, currentProjectBinding)
+          ? [conversation, ...prev.filter(item => item.conversation_id !== conversation.conversation_id)]
+          : prev.filter(item => item.conversation_id !== conversation.conversation_id));
         skipNextLoadRef.current = conversation.conversation_id;
         activeConversationIdRef.current = conversation.conversation_id;
         setActiveConversationId(conversation.conversation_id);
-        userMessage = await xiaoqiaoApi.sendMessage(convId, {
-          content: trimmed,
-          role: 'user',
-          message_type: 'user_input',
-        });
+        moveConversationMessages(optimisticConversationId, conversation.conversation_id);
+        setConversations(prev => filterPlaceholderConversations(prev, conversation.conversation_id));
+        try {
+          userMessage = normalizeMessage(await xiaoqiaoApi.sendMessage(convId, {
+            content: visibleContent,
+            role: 'user',
+            message_type: 'user_input',
+            attachments: options?.attachmentIds || [],
+          }), buildFallbackUserMessage(convId));
+          setActiveConversationMessages(prev => prev.map(item => item.id === fallbackUserId ? userMessage : item));
+        } catch (retryError) {
+          const retryMissingConversation = retryError instanceof Error && /404|not found|conversation not found/i.test(retryError.message);
+          if (!retryMissingConversation) throw retryError;
+          console.debug('Persist user message failed after conversation recreate; keeping local message in UI', retryError);
+          userMessage = buildFallbackUserMessage(convId);
+        }
+      }
+      if (isTurnCancelled()) {
+        setIsTyping(false);
+        clearConversationRunning(convId);
+        return;
       }
 
       setCurrentRouting(routing);
       if (routing.is_business_related) {
         setCurrentAgent(intentToAgent(routing.intent_type));
       }
-
-      setMessages(prev => [...prev, userMessage]);
-      const currentConversation = conversations.find(item => item.conversation_id === convId);
+      const currentConversation = conversations.find(item => item.conversation_id === convId) || optimisticConversation || undefined;
+      const currentConversationTitle = currentConversation?.title || (messages.length === 0 ? visibleContent : undefined);
+      const skipTitleUpdate = skipTitleUpdateRef.current === convId;
+      if (skipTitleUpdate) {
+        skipTitleUpdateRef.current = null;
+      }
+      const isPlaceholderTitle =
+        !currentConversationTitle ||
+        currentConversationTitle === '新对话' ||
+        currentConversationTitle === '新会话' ||
+        currentConversationTitle === '新對話' ||
+        currentConversationTitle === '未命名会话' ||
+        currentConversationTitle === visibleContent;
+      const titleMode = messages.length === 0 || isPlaceholderTitle ? 'generate' : 'update';
       const titleNeedsModel =
-        messages.length === 0 &&
-        (!currentConversation ||
-          currentConversation.title === trimmed ||
-          currentConversation.title === '新对话' ||
-          currentConversation.title === '鏂板璇?');
+        !(skipTitleUpdate && messages.length > 0) &&
+        Boolean(currentConversationTitle);
       if (titleNeedsModel) {
         void (async () => {
           try {
+            const latestMessages = [...messages.slice(-5), userMessage].map(item => ({
+              role: item.role,
+              content: item.content,
+            }));
             const { title } = await xiaoqiaoApi.generateConversationTitle(convId, {
-              message: trimmed,
+              message: visibleContent,
               history: messages.map(item => ({ role: item.role, content: item.content })),
+              latest_messages: latestMessages,
+              current_title: currentConversationTitle,
+              topic_summary: {
+                analysis_type: routing.intent_type,
+                core_issue: routing.intent_type,
+              },
+              mode: titleMode,
             });
             const nextTitle = title.trim();
             if (!nextTitle || nextTitle === currentConversation?.title) return;
-            const updated = await xiaoqiaoApi.updateConversation(convId, { title: nextTitle });
+            const updated = await xiaoqiaoApi.updateConversation(convId, {
+              title: nextTitle,
+              normalize_title: false,
+            });
             setConversations(prev => prev.map(item => item.conversation_id === convId ? updated : item));
           } catch {
             // 标题生成不阻塞会话回复。
@@ -1209,343 +1936,23 @@ export function useConversation() {
         })();
       }
       await refreshConversations();
-
-      if (isMonitorTaskIntent(effectiveContent)) {
-        const monitorMessage = buildMonitorTaskMessage(convId, effectiveContent);
-        void xiaoqiaoApi.sendMessage(convId, {
-          content: monitorMessage.content,
-          role: 'assistant',
-          message_type: monitorMessage.message_type,
-          agent: monitorMessage.agent,
-          intent_type: monitorMessage.intent_type,
-          thinking_steps: monitorMessage.thinking_steps,
-          tool_calls: monitorMessage.tool_calls,
-          metadata: monitorMessage.metadata,
-        }).catch(() => undefined);
-        setMessages(prev => [...prev, monitorMessage]);
-        setCurrentAgent('monitoring');
-        setConversationMode('heavy-workflow');
-        setCurrentResult({
-          task_id: `task-${Date.now()}`,
-          result_type: 'monitor_snapshot',
-          summary: '已生成回传延迟监控任务确认卡，等待用户确认创建。',
-          confidence: 'high',
-          structured_payload: monitorMessage.metadata,
-          next_actions: [],
-          pending_checks: ['确认监控条件', '创建监控任务', '异常触发后自动排查'],
-          created_at: new Date().toISOString(),
-          kind: 'monitor',
-        });
+      if (isTurnCancelled()) {
         setIsTyping(false);
+        clearConversationRunning(convId);
         return;
       }
-
-      if (isBroadAnomalyInspectionIntent(effectiveContent)) {
-        const inspectionMessage = buildBroadInspectionMessage(convId, effectiveContent);
-        void xiaoqiaoApi.sendMessage(convId, {
-          content: inspectionMessage.content,
-          role: 'assistant',
-          message_type: inspectionMessage.message_type,
-          agent: inspectionMessage.agent,
-          intent_type: inspectionMessage.intent_type,
-          thinking_steps: inspectionMessage.thinking_steps,
-          tool_calls: inspectionMessage.tool_calls,
-          metadata: inspectionMessage.metadata,
-        }).catch(() => undefined);
-        setMessages(prev => [...prev, inspectionMessage]);
-        setCurrentAgent('monitoring');
-        setConversationMode('heavy-workflow');
-        setCurrentResult({
-          task_id: `task-${Date.now()}`,
-          result_type: 'monitor_snapshot',
-          summary: '已进入项目级投放异常巡检，未发现具体异常前不创建排查表单。',
-          confidence: 'high',
-          structured_payload: inspectionMessage.metadata,
-          next_actions: [],
-          pending_checks: ['项目全链路巡检', '异常项分流', '必要时进入排查'],
-          created_at: new Date().toISOString(),
-          kind: 'monitor',
-        });
-        setIsTyping(false);
-        return;
-      }
-
-      if (routing.intent_type === 'diagnosis' && routing.clarification_needed && routing.missing_fields.length > 0) {
-        const clarificationId = nextMessageId();
-        const clarificationMessage: Message = {
-          id: clarificationId,
-          message_id: clarificationId,
-          conversation_id: convId,
-          role: 'assistant',
-          content: '我可以继续排查，但当前条件还不够。请先补充下面几项信息，我会基于这些条件创建排查记录并继续定位。',
-          message_type: 'clarification' as MessageType,
-          created_at: new Date().toISOString(),
-          timestamp: Date.now(),
-          agent: 'diagnosis',
-          intent_type: 'diagnosis',
-          missing_fields: routing.missing_fields,
-          thinking_steps: [
-            {
-              label: '识别排查意图',
-              content: routing.reason,
-              status: 'completed',
-            },
-            {
-              label: '检查排查条件',
-              content: `缺少 ${routing.missing_fields.map((field) => field.field_label).join('、')}，暂不生成排查结论。`,
-              status: 'completed',
-            },
-          ],
-          metadata: {
-            routing_decision: routing,
-            clarification_type: 'diagnosis_required_slots',
-          },
-        };
-
-        void xiaoqiaoApi.sendMessage(convId, {
-          content: clarificationMessage.content,
-          role: 'assistant',
-          message_type: clarificationMessage.message_type,
-          agent: clarificationMessage.agent,
-          intent_type: clarificationMessage.intent_type,
-          missing_fields: clarificationMessage.missing_fields,
-          thinking_steps: clarificationMessage.thinking_steps,
-          metadata: clarificationMessage.metadata,
-        }).catch(() => undefined);
-        setMessages(prev => [...prev, clarificationMessage]);
-        setCurrentAgent('diagnosis');
-        setConversationMode('heavy-workflow');
-        setCurrentResult({
-          task_id: `task-${Date.now()}`,
-          result_type: 'diagnosis_report',
-          summary: '排查条件不足，等待用户补充必要信息。',
-          confidence: 'medium',
-          structured_payload: {
-            status: 'waiting_for_clarification',
-            missing_fields: routing.missing_fields,
-          },
-          next_actions: [],
-          pending_checks: routing.missing_fields.map((field) => field.field_label),
-          created_at: new Date().toISOString(),
-          kind: 'diagnosis',
-        });
-        setIsTyping(false);
-        return;
-      }
-
-      if (isDebugExecutionStart(trimmed)) {
-        const executionMessage = buildDebugExecutionMessage(convId, trimmed);
-        setMessages(prev => [...prev, executionMessage]);
-        setCurrentAgent('debugging');
-        setConversationMode('heavy-workflow');
-        setCurrentResult(executionMessage.metadata?.workflow_result as Record<string, unknown>);
-        setIsTyping(false);
-        return;
-      }
-
-      if (isReportComposerIntent(effectiveContent)) {
-        const reportMessage = buildReportComposerMessage(convId, effectiveContent);
-        void xiaoqiaoApi.sendMessage(convId, {
-          content: reportMessage.content,
-          role: 'assistant',
-          message_type: reportMessage.message_type,
-          agent: reportMessage.agent,
-          intent_type: reportMessage.intent_type,
-          metadata: reportMessage.metadata,
-        }).catch(() => undefined);
-        setMessages(prev => [...prev, reportMessage]);
-        setCurrentAgent('help');
-        setConversationMode('heavy-workflow');
-        setCurrentResult({
-          task_id: `task-${Date.now()}`,
-          result_type: 'report_composer',
-          summary: '已生成广告消耗日报模板，等待用户确认后查询数据并创建定时报表。',
-          confidence: 'high',
-          structured_payload: reportMessage.metadata,
-          next_actions: [],
-          pending_checks: ['确认报表模板', '查询报表数据', '创建定时报表'],
-          created_at: new Date().toISOString(),
-          kind: 'report',
-        });
-        setIsTyping(false);
-        return;
-      }
-
-      if (isMediaDemand(effectiveContent) || isLegacyMediaDebug(effectiveContent) || /\[多轮上下文\][\s\S]*上一轮意图=自动联调/.test(effectiveContent)) {
-        let flowMessage = isMediaDemand(effectiveContent)
-          ? buildMediaDemandMessage(convId, effectiveContent)
-          : buildLegacyDebugMessage(convId, effectiveContent);
-        let startedDebugTask: DebugAutomationTask | null = null;
-        if (!isMediaDemand(effectiveContent)) {
-          const appCheck = await checkOceanEngineAppPermission(effectiveContent);
-          flowMessage = withOceanEngineAppCheck(flowMessage, appCheck);
-          if (appCheck?.status === 'matched') {
-            try {
-              startedDebugTask = await startDebugTaskAfterAppCheck(convId, effectiveContent, appCheck);
-              if (startedDebugTask) {
-                const startStep = {
-                  key: 'mcp_debug_start_task',
-                  label: '发起自动联调',
-                  content: '',
-                  status: 'completed' as const,
-                  duration_ms: 500,
-                  input: {
-                    project: appCheck.matched_apps?.[0]?.app_name || extractDebugAppName(effectiveContent),
-                    media: '巨量引擎',
-                    terminal: /ios|iOS|苹果/i.test(effectiveContent) ? 'iOS' : 'Android',
-                    targets: ['激活', '注册', '付费', '关键行为'],
-                  },
-                  output: {
-                    task_id: startedDebugTask.id,
-                    status: startedDebugTask.status,
-                    current_stage: startedDebugTask.current_stage,
-                  },
-                };
-                flowMessage = {
-                  ...flowMessage,
-                  content: '',
-                  thinking_steps: [
-                    ...(flowMessage.thinking_steps || []),
-                    startStep,
-                    {
-                      key: 'mcp_debug_watch_steps',
-                      label: '进入联调观测',
-                      content: '已进入 Web、Mobile/Game、回传轮询步骤观测；右侧联调记录会持续展示执行步骤、截图、错误日志和回传结果。',
-                      status: 'loading' as const,
-                      duration_ms: 0,
-                      input: { task_id: startedDebugTask.id },
-                    },
-                  ],
-                  tool_calls: [
-                    ...(flowMessage.tool_calls || []),
-                    {
-                      name: 'debug.start_task',
-                      kind: 'mcp',
-                      display_name: '自动联调 MCP.debug.start_task',
-                      arguments: JSON.stringify({ task_id: startedDebugTask.id }),
-                      result: `已启动：${startedDebugTask.current_stage || startedDebugTask.status}`,
-                      status: 'done',
-                      step_key: 'mcp_debug_start_task',
-                    },
-                    {
-                      name: 'debug.watch_steps',
-                      kind: 'mcp',
-                      display_name: '自动联调 MCP.debug.watch_steps',
-                      arguments: JSON.stringify({ task_id: startedDebugTask.id }),
-                      result: '进入联调步骤观测',
-                      status: 'running',
-                      step_key: 'mcp_debug_watch_steps',
-                    },
-                  ],
-                  metadata: {
-                    ...flowMessage.metadata,
-                    workflow_card: flowMessage.metadata?.workflow_card && typeof flowMessage.metadata.workflow_card === 'object'
-                      ? {
-                        ...flowMessage.metadata.workflow_card,
-                        status: 'running',
-                        debugTask: startedDebugTask,
-                        summary: '已发起自动联调',
-                      }
-                      : flowMessage.metadata?.workflow_card,
-                    workflow_result: {
-                      task_id: startedDebugTask.id,
-                      result_type: 'debug_automation',
-                      summary: '已发起自动联调',
-                      confidence: 'high',
-                      structured_payload: { task: startedDebugTask, appCheck },
-                      next_actions: [],
-                      pending_checks: ['Web端准备', '移动端扫码', '事件回传轮询', '生成联调结论'],
-                      created_at: new Date().toISOString(),
-                      kind: 'debugging',
-                    },
-                  },
-                };
-              }
-            } catch (error: unknown) {
-              const detail = error instanceof Error ? error.message : String(error);
-              flowMessage = {
-                ...flowMessage,
-                content: `应用权限校验已通过，但自动联调发起失败：${detail}`,
-                thinking_steps: [
-                  ...(flowMessage.thinking_steps || []),
-                  {
-                    key: 'mcp_debug_start_task',
-                    label: '发起自动联调',
-                    content: `调用自动联调 MCP 失败：${detail}`,
-                    status: 'error' as const,
-                    duration_ms: 0,
-                  },
-                ],
-              };
-            }
-          }
-        }
-        void xiaoqiaoApi.sendMessage(convId, {
-          content: flowMessage.content,
-          role: 'assistant',
-          message_type: flowMessage.message_type,
-          agent: flowMessage.agent,
-          intent_type: flowMessage.intent_type,
-          missing_fields: flowMessage.missing_fields,
-          thinking_steps: flowMessage.thinking_steps,
-          tool_calls: flowMessage.tool_calls,
-          metadata: flowMessage.metadata,
-        }).catch(() => undefined);
-        setMessages(prev => [...prev, flowMessage]);
-        setCurrentAgent(flowMessage.agent || 'demand');
-        setConversationMode('heavy-workflow');
-        if (isMediaDemand(trimmed)) {
-          setCurrentResult({
-            task_id: `task-${Date.now()}`,
-            result_type: 'demand_form',
-            summary: '已生成新增媒体对接需求表单，等待补齐依赖信息。',
-            confidence: 'high',
-            structured_payload: flowMessage.metadata,
-            next_actions: ['打开结构化表单', '记录到代办', '补齐对接文档'],
-            pending_checks: ['对接文档', '监测链接参数规则', '事件清单', '验收方式'],
-            created_at: new Date().toISOString(),
-            kind: flowMessage.intent_type,
-          });
-        } else {
-          setCurrentResult(
-            startedDebugTask
-              ? (flowMessage.metadata?.workflow_result as Record<string, unknown>)
-              : null,
-          );
-        }
-        setIsTyping(false);
-        return;
-      }
-
-      const assistantId = nextMessageId();
-      const assistantMessage: Message = {
-        id: assistantId,
-        message_id: assistantId,
-        conversation_id: convId,
-        role: 'assistant',
-        content: '',
-        message_type: 'assistant_reply' as MessageType,
-        created_at: new Date().toISOString(),
-        timestamp: Date.now(),
-        agent: routing.is_business_related ? intentToAgent(routing.intent_type) : undefined,
-        intent_type: routing.is_business_related ? routing.intent_type : undefined,
-        thinking: '',
-        tool_calls: [],
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsTyping(true);
-      setAgentMeta(prev => {
-        const next = new Map(prev);
-        next.set(assistantId, { phase: 'thinking', toolCalls: [] });
-        return next;
-      });
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
-      const history = [...messages, userMessage].map(item => ({
+      const history = messages.map(item => ({
         role: item.role,
         content: item.content,
+        createdAt: item.created_at,
+        id: item.id,
+        message_id: item.message_id,
+        intent_type: item.intent_type,
+        metadata: item.metadata,
+        evidence_ids: item.evidence_ids,
       }));
 
       try {
@@ -1556,9 +1963,14 @@ export function useConversation() {
             'x-conversation-id': convId,
           },
           body: JSON.stringify({
-            message: trimmed,
+            message: contextualContent,
             history,
             intent: routing.intent_type,
+            metadata: {
+              projectContext: options?.projectContext,
+              currentProject: options?.currentProject || null,
+              projectContextDebug,
+            },
           }),
           signal: abortController.signal,
         });
@@ -1579,6 +1991,7 @@ export function useConversation() {
         let currentProcessEvents: AgentProcessEvent[] = [];
         let responseMetadata: Record<string, unknown> | undefined;
         let responseResult: Record<string, unknown> | undefined;
+        let serverDoneReceived = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -1592,9 +2005,12 @@ export function useConversation() {
             if (!line.startsWith('data: ')) continue;
             try {
               const data = JSON.parse(line.slice(6));
+              const isServerDoneEvent = data.type === 'done' && (data.termination === 'server_done' || data.termination === 'server_terminated');
+              if (isTurnCancelled() && !isServerDoneEvent) continue;
 
               if (data.type === 'process_event' && data.event) {
                 const event = data.event as AgentProcessEvent;
+                updateTurnStatus('tool_running', event.label || '正在处理...');
                 currentProcessEvents = [
                   ...currentProcessEvents.filter((item) => item.id !== event.id),
                   event,
@@ -1611,7 +2027,8 @@ export function useConversation() {
                     nextToolCall,
                   ];
                 }
-                setMessages(prev => prev.map(item => item.id === assistantId
+                const workflowCard = workflowCardFromProcessEvents(currentProcessEvents);
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                   ? {
                     ...item,
                     process_events: currentProcessEvents,
@@ -1620,12 +2037,14 @@ export function useConversation() {
                     metadata: {
                       ...(item.metadata || {}),
                       process_events: currentProcessEvents,
+                      ...(workflowCard ? { workflow_card: workflowCard } : {}),
                     },
                   }
                   : item));
               } else if (data.type === 'thinking') {
+                updateTurnStatus('assistant_pending', '正在理解问题...');
                 currentThinking += data.content;
-                setMessages(prev => prev.map(item => item.id === assistantId
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                   ? { ...item, thinking: currentThinking }
                   : item));
                 setAgentMeta(prev => {
@@ -1643,10 +2062,11 @@ export function useConversation() {
                   ...currentThinkingSteps.filter((item) => (item.key || item.label) !== (step.key || step.label)),
                   step,
                 ];
-                setMessages(prev => prev.map(item => item.id === assistantId
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                   ? { ...item, thinking_steps: currentThinkingSteps }
                   : item));
               } else if (data.type === 'tool_call') {
+                updateTurnStatus('tool_running', '正在调用能力...');
                 currentToolCalls = [...currentToolCalls, {
                   name: data.name,
                   query: data.query,
@@ -1659,7 +2079,7 @@ export function useConversation() {
                   step_key: data.step_key,
                   status: 'calling',
                 }];
-                setMessages(prev => prev.map(item => item.id === assistantId
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                   ? { ...item, tool_calls: currentToolCalls }
                   : item));
                 setAgentMeta(prev => {
@@ -1686,7 +2106,7 @@ export function useConversation() {
                     }
                     : item,
                 );
-                setMessages(prev => prev.map(item => item.id === assistantId
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                   ? { ...item, tool_calls: currentToolCalls }
                   : item));
                 setAgentMeta(prev => {
@@ -1698,6 +2118,7 @@ export function useConversation() {
                   return next;
                 });
               } else if (data.type === 'phase') {
+                updateTurnStatus(data.phase === 'generating' ? 'finalizing' : 'assistant_pending', data.phase === 'generating' ? '正在整理回答...' : '正在处理...');
                 setAgentMeta(prev => {
                   const next = new Map(prev);
                   next.set(assistantId, {
@@ -1706,18 +2127,28 @@ export function useConversation() {
                   });
                   return next;
                 });
+              } else if (data.type === 'runtime_state' && data.runtime_state) {
+                const runtimeState = data.runtime_state as Record<string, unknown>;
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
+                  ? { ...item, metadata: { ...(item.metadata || {}), runtime_state: runtimeState } }
+                  : item));
               } else if (data.type === 'content') {
+                updateTurnStatus('streaming', '正在生成回答...');
                 accumulated += data.content;
-                setMessages(prev => prev.map(item => item.id === assistantId ? { ...item, content: accumulated } : item));
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId ? { ...item, content: accumulated } : item));
               } else if (data.type === 'route') {
                 if (data.intent && data.intent !== 'general') {
                   setCurrentAgent(intentToAgent(data.intent as IntentType));
                 }
               } else if (data.type === 'error') {
-                setMessages(prev => prev.map(item => item.id === assistantId
+                setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                   ? { ...item, content: data.error || '生成回复时出现错误，请稍后重试。' }
                   : item));
               } else if (data.type === 'done') {
+                if (data.termination === 'server_done' || data.termination === 'server_terminated') {
+                  serverDoneReceived = true;
+                }
+                updateTurnStatus('finalizing', '正在整理回答...');
                 if (data.metadata && typeof data.metadata === 'object') {
                   responseMetadata = data.metadata as Record<string, unknown>;
                   const metadataProcessEvents = Array.isArray(responseMetadata.process_events)
@@ -1726,14 +2157,24 @@ export function useConversation() {
                   if (metadataProcessEvents.length > 0) {
                     currentProcessEvents = metadataProcessEvents;
                   }
-                  setMessages(prev => prev.map(item => item.id === assistantId
-                    ? { ...item, metadata: responseMetadata, process_events: currentProcessEvents }
+                  const workflowCard = workflowCardFromProcessEvents(currentProcessEvents);
+                  setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
+                    ? {
+                      ...item,
+                      metadata: {
+                        ...responseMetadata,
+                        ...(workflowCard ? { workflow_card: workflowCard } : {}),
+                      },
+                      process_events: currentProcessEvents,
+                    }
                     : item));
                 }
                 if (data.result) {
                   responseResult = data.result as Record<string, unknown>;
-                  setCurrentResult(data.result);
-                  setMessages(prev => prev.map(item => item.id === assistantId
+                  if (activeConversationIdRef.current === convId) {
+                    setCurrentResult(data.result);
+                  }
+                  setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
                     ? { ...item, metadata: { ...(item.metadata || {}), workflow_result: responseResult } }
                     : item));
                 }
@@ -1754,8 +2195,48 @@ export function useConversation() {
           }
         }
 
-        const persistedAssistant = await xiaoqiaoApi.sendMessage(convId, {
-          content: accumulated || '未生成有效回复',
+        const workflowResult = responseResult && typeof responseResult === 'object'
+          ? responseResult as Record<string, unknown>
+          : responseMetadata && typeof responseMetadata === 'object' && (responseMetadata as Record<string, unknown>).workflow_result && typeof (responseMetadata as Record<string, unknown>).workflow_result === 'object'
+            ? (responseMetadata as Record<string, unknown>).workflow_result as Record<string, unknown>
+            : null;
+        const structuredFollowUpPayload = workflowResult && typeof workflowResult === 'object'
+          ? workflowResult.structured_payload
+          : undefined;
+        const hasStructuredFollowUp = Boolean(
+          structuredFollowUpPayload && typeof structuredFollowUpPayload === 'object' && (
+            'confirmation_needed' in structuredFollowUpPayload ||
+            'follow_up' in structuredFollowUpPayload ||
+            'follow_up_title' in structuredFollowUpPayload ||
+            'follow_up_fields' in structuredFollowUpPayload
+          ),
+        );
+        const publicWebMetadata = responseMetadata?.response_contract && typeof responseMetadata.response_contract === 'object'
+          ? (responseMetadata.response_contract as Record<string, unknown>)
+          : undefined;
+        const publicWebReasonCode = publicWebMetadata?.metadata && typeof publicWebMetadata.metadata === 'object'
+          ? (publicWebMetadata.metadata as Record<string, unknown>).public_web
+          : undefined;
+        const publicWebReasonCodeText = typeof (publicWebReasonCode as Record<string, unknown>)?.reasonCode === 'string'
+          ? String((publicWebReasonCode as Record<string, unknown>).reasonCode)
+          : '';
+        const publicWebReasonContext = publicWebReasonCode ? (publicWebReasonCode as Record<string, unknown>).reasonContext : undefined;
+        const publicWebFallbackMessage = publicWebReasonCodeText
+          ? resolveChatAnswerMessage(publicWebReasonCodeText, typeof publicWebReasonContext === 'object' ? publicWebReasonContext as Record<string, unknown> : {})
+          : '';
+        const responseContractAnswer = publicWebMetadata?.answer && typeof publicWebMetadata.answer === 'string'
+          ? publicWebMetadata.answer
+          : '';
+        const finalAssistantContent = hasStructuredFollowUp
+          ? ''
+          : (accumulated || publicWebFallbackMessage || responseContractAnswer || '未生成有效回复');
+        if (isTurnCancelled() && !serverDoneReceived) {
+          return;
+        }
+        const finalTurnUiStatus = resolveFinalTurnUiStatus(responseMetadata, workflowResult, responseResult);
+
+        const assistantMessagePayload = {
+          content: finalAssistantContent,
           role: 'assistant',
           message_type: 'assistant_reply',
           agent: routing.is_business_related ? intentToAgent(routing.intent_type) : undefined,
@@ -1768,15 +2249,37 @@ export function useConversation() {
           ],
           tool_calls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
           process_events: currentProcessEvents.length > 0 ? currentProcessEvents : undefined,
-          metadata: {
-            ...(responseMetadata || {}),
-            ...(currentProcessEvents.length > 0 ? { process_events: currentProcessEvents } : {}),
+            metadata: {
+              ...(responseMetadata || {}),
+              turn_ui_status: finalTurnUiStatus,
+              ...(currentProcessEvents.length > 0 ? { process_events: currentProcessEvents } : {}),
+            ...(workflowCardFromProcessEvents(currentProcessEvents) ? { workflow_card: workflowCardFromProcessEvents(currentProcessEvents) } : {}),
+            ...(responseResult ? { workflow_result: responseResult } : {}),
+          },
+        } satisfies Parameters<typeof xiaoqiaoApi.sendMessage>[1];
+        let persistedAssistant: Message | null = null;
+        try {
+          persistedAssistant = await xiaoqiaoApi.sendMessage(convId, assistantMessagePayload);
+        } catch (error) {
+          console.debug('Persist assistant message failed; keeping streamed message in UI', error);
+        }
+        const finalAssistantMessage = normalizeMessage(persistedAssistant, {
+          ...assistantMessage,
+          content: finalAssistantContent,
+          thinking: currentThinking || undefined,
+          thinking_steps: currentThinkingSteps.length > 0 ? currentThinkingSteps : assistantMessage.thinking_steps,
+          tool_calls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
+          process_events: currentProcessEvents.length > 0 ? currentProcessEvents : undefined,
+            metadata: {
+              ...(responseMetadata || {}),
+              ...(currentProcessEvents.length > 0 ? { process_events: currentProcessEvents } : {}),
+            ...(workflowCardFromProcessEvents(currentProcessEvents) ? { workflow_card: workflowCardFromProcessEvents(currentProcessEvents) } : {}),
             ...(responseResult ? { workflow_result: responseResult } : {}),
           },
         });
-        setMessages(prev => prev.map(item => item.id === assistantId
+        setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
           ? {
-            ...persistedAssistant,
+            ...finalAssistantMessage,
             thinking: currentThinking || undefined,
             thinking_steps: currentThinkingSteps.length > 0 ? currentThinkingSteps : currentThinking ? undefined : [
               { label: '识别问题', content: '判断用户意图并选择处理流程。', status: 'completed' },
@@ -1785,15 +2288,22 @@ export function useConversation() {
             ],
             tool_calls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
             process_events: currentProcessEvents.length > 0 ? currentProcessEvents : undefined,
+            content: finalAssistantContent,
             metadata: {
               ...(responseMetadata || {}),
+              turn_ui_status: finalTurnUiStatus,
               ...(currentProcessEvents.length > 0 ? { process_events: currentProcessEvents } : {}),
+              ...(workflowCardFromProcessEvents(currentProcessEvents) ? { workflow_card: workflowCardFromProcessEvents(currentProcessEvents) } : {}),
               ...(responseResult ? { workflow_result: responseResult } : {}),
             },
           }
           : item));
         await refreshConversations();
         setIsTyping(false);
+        clearConversationRunning(convId);
+        if (activeTurnRef.current?.requestId === requestId) {
+          activeTurnRef.current = null;
+        }
 
         if (routing.is_business_related) {
           setConversationMode(routing.workflow_level === 'heavy' ? 'heavy-workflow' : 'light-workflow');
@@ -1811,47 +2321,122 @@ export function useConversation() {
                 created_at: new Date().toISOString(),
                 timestamp: Date.now(),
               };
-              setMessages(prev => [...prev, clarificationMessage]);
+              setActiveConversationMessages(prev => [...prev, clarificationMessage]);
             }, 600);
           }
         }
       } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
+        if (isTurnCancelled() || (error instanceof DOMException && error.name === 'AbortError')) {
+          cancelledTurnIdsRef.current.add(requestId);
+          setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
+            ? {
+              ...item,
+              content: item.content || '已停止生成',
+              metadata: {
+                ...(item.metadata || {}),
+                turn_ui_status: 'cancelled' satisfies TurnUiStatus,
+                turn_status_label: '已停止生成',
+              },
+            }
+            : item));
+          setAgentMeta(prev => {
+            const next = new Map(prev);
+            next.set(assistantId, { ...next.get(assistantId), phase: 'done' });
+            return next;
+          });
+          setIsTyping(false);
+          clearConversationRunning(convId);
+          if (activeTurnRef.current?.requestId === requestId) {
+            activeTurnRef.current = null;
+          }
           return;
         }
 
         setIsTyping(false);
-        setMessages(prev => prev.map(item => item.id === assistantId
-          ? { ...item, content: '抱歉，连接出现问题，请稍后重试。' }
+        clearConversationRunning(convId);
+        setActiveConversationMessages(prev => prev.map(item => item.id === assistantId
+          ? {
+            ...item,
+            content: '抱歉，连接出现问题，请稍后重试。',
+            metadata: {
+              ...(item.metadata || {}),
+              turn_ui_status: 'failed' satisfies TurnUiStatus,
+              turn_status_label: '生成失败',
+            },
+          }
           : item));
       }
-    })();
-  }, [conversations, debugCarryMemory, messages, ensureConversation, missingFields, refreshConversations, setConversationMode, setCurrentAgent]);
+    })().catch((error) => {
+      console.error('sendMessage failed', error);
+      setIsTyping(false);
+      if (pendingConversationId) {
+        clearConversationRunning(pendingConversationId);
+      } else if (targetConversationId) {
+        clearConversationRunning(targetConversationId);
+      }
+    });
+  }, [clearConversationRunning, conversations, debugCarryMemory, ensureConversation, markConversationRunning, messages, missingFields, moveConversationMessages, refreshConversations, setConversationMessages, setConversationMode, setCurrentAgent]);
 
   const deleteMessage = useCallback((messageId: string) => {
-    setMessages(prev => prev.filter(item => item.id !== messageId));
-  }, []);
+    if (!activeConversationIdRef.current) return;
+    setConversationMessages(activeConversationIdRef.current, prev => prev.filter(item => item.id !== messageId));
+  }, [setConversationMessages]);
 
   const cancelStream = useCallback(() => {
+    const activeTurn = activeTurnRef.current;
+    if (activeTurn) {
+      cancelledTurnIdsRef.current.add(activeTurn.requestId);
+      setConversationMessages(activeTurn.conversationId, prev => prev.map(item => item.id === activeTurn.assistantId
+        ? {
+          ...item,
+          content: item.content || '已停止生成',
+          metadata: {
+            ...(item.metadata || {}),
+            turn_ui_status: 'cancel_requested' satisfies TurnUiStatus,
+            turn_status_label: '正在停止生成...',
+          },
+        }
+        : item));
+    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
     setIsTyping(false);
-  }, []);
+    if (activeTurn) {
+      clearConversationRunning(activeTurn.conversationId);
+      window.setTimeout(() => {
+        setConversationMessages(activeTurn.conversationId, prev => prev.map(item => item.id === activeTurn.assistantId
+          ? {
+            ...item,
+            content: item.content || '已停止生成',
+            metadata: {
+              ...(item.metadata || {}),
+              turn_ui_status: 'cancelled' satisfies TurnUiStatus,
+              turn_status_label: '已停止生成',
+            },
+          }
+          : item));
+      }, 0);
+      activeTurnRef.current = null;
+    }
+  }, [clearConversationRunning, setConversationMessages]);
 
   return {
     conversations,
     activeConversationId,
-    activeConversationTitle: conversations.find(item => item.conversation_id === activeConversationId)?.title || '智投chat对话',
+    activeConversationTitle: conversations.find(item => item.conversation_id === activeConversationId)?.title || '小乔智投对话',
     messages,
-    isTyping,
+    isLoadingMessages,
+    isTyping: activeConversationId ? runningConversationIds.includes(activeConversationId) : false,
+    runningConversationIds,
     currentRouting,
     currentAgent,
     currentResult,
     callChainData,
     sendMessage,
     createConversation,
+    startBlankConversation,
     selectConversation,
     renameConversation,
     deleteConversation,

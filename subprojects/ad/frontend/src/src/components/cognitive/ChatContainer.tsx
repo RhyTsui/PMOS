@@ -1,8 +1,8 @@
 ﻿'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ThoughtChain } from '@ant-design/x';
-import { Dropdown, Input, Modal, Tag, Tooltip, message as antMessage, type MenuProps } from 'antd';
+import React, { type ComponentType, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Input, Modal, Tooltip, message as antMessage } from 'antd';
+import { motion } from 'framer-motion';
 import {
   BulbOutlined,
   CheckCircleOutlined,
@@ -21,24 +21,43 @@ import {
   EditOutlined,
   ReloadOutlined,
   SoundOutlined,
+  StarFilled,
+  StarOutlined,
   ThunderboltOutlined,
   UpOutlined,
 } from '@ant-design/icons';
-import type { AgentType, Message, MissingField, WorkflowResult } from '@/types';
-import { thinkingStepFromProcessEvent, toolCallFromProcessEvent } from '@/lib/agent-runtime';
+import type { AgentType, AiNextAction, BusinessSummary, Message, MessageContract, MissingField, WorkflowResult } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
+import { copyTextWithFallback, serializeMessageForCopy } from '@/lib/chat-copy';
+import { formatDisplayValue } from '@/lib/display-format';
 import { AGENT_MAP } from '@/lib/constants';
 import FancyCodeBlock, { type CodeStyle } from '@/components/ui/FancyCodeBlock';
 import type { useChatSettings } from '@/hooks/useChatSettings';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSpeech } from '@/hooks/useSpeech';
 import { IconAsset } from '@/components/ui/IconAsset';
+import { MessageActionBar } from './MessageActionBar';
+import { AmbiguityConfirmCard, type AmbiguityConfirmPayload } from './AmbiguityConfirmCard';
+import { cleanRuntimeLabel } from '@/lib/chat-runtime/runtime-disclosure';
+import { CapabilityFollowUpCard, type CapabilityFollowUpPayload } from './CapabilityFollowUpCard';
+import { decodeReportActionEnvelope, encodeReportActionEnvelope, reportActionLabel } from '@/lib/report-action-envelope';
+import { WelcomeMascotIcon } from './WelcomeMascotIcon';
+import { MessageErrorBoundary } from './MessageErrorBoundary';
+import { MessagePresentationRenderer } from './MessagePresentationRenderer';
+import { buildMessagePresentationResult, extractMessageContract, extractSemanticResult } from './message-presentation';
+import { projectMessagePresentation, type ComposerRecommendation } from './message-presentation-projection';
 import {
   MetricExplainerRenderer,
   isMetricExplainerUISchema,
   type MetricAction,
   type MetricExplainerUISchema,
 } from '@/features/metric-explainer';
+import {
+  DEFAULT_CHAT_DISPLAY_CONFIG,
+  type ChatDisplayConfig,
+} from '@/types/chat-display';
+import type { VizSpec } from '@/types/viz';
+import type { SemanticResultContract } from '@/contracts/semantic/semantic-result-contract';
 
 interface ChatContainerProps {
   messages: Message[];
@@ -50,6 +69,7 @@ interface ChatContainerProps {
   onOpenSourcePanel?: (payload: SourcePanelPayload) => void;
   onEditUserMessage?: (content: string) => void;
   onSubmitFollowUp?: (content: string) => void;
+  onStopGeneration?: () => void;
   contextThinkingSteps?: Array<{ title: string; description?: string }>;
   currentResult?: WorkflowResult | Record<string, unknown> | null;
   chatSettings: ReturnType<typeof useChatSettings>;
@@ -57,6 +77,11 @@ interface ChatContainerProps {
   showSystemPrompt?: boolean;
   onToggleSystemPrompt?: () => void;
   onOpenAgentPanel?: (agent: AgentType) => void;
+  onShareConversation?: (conversationId: string, title?: string) => void;
+  currentConversationTitle?: string;
+  conversationKey?: string | null;
+  chatDisplayConfig?: ChatDisplayConfig;
+  onResultRecommendationsChange?: (items: ComposerRecommendation[]) => void;
 }
 
 type BubbleKind = 'user' | 'assistant' | 'system' | 'clarification' | 'summary';
@@ -66,12 +91,16 @@ interface BubbleItem {
   role: 'ai' | 'user';
   kind: BubbleKind;
   content: string;
-  thinkingSteps: NonNullable<Message['thinking_steps']>;
   toolCalls: NonNullable<Message['tool_calls']>;
   missingFields: MissingField[];
   messageId: string;
   agent?: string;
+  runtimeState?: Record<string, unknown>;
   rawMessage: Message;
+}
+
+function isRenderableMessage(value: unknown): value is Message {
+  return Boolean(value && typeof value === 'object');
 }
 
 interface SourceRefView {
@@ -171,321 +200,168 @@ function stripInlineSourceSection(content: string): string {
   return `${before}\n\n${after.slice(nextHeadingIndex).join('\n')}`.trim();
 }
 
-function getResultForMessage(
-  item: BubbleItem,
-  currentResult?: WorkflowResult | Record<string, unknown> | null,
-) {
-  if (item.role !== 'ai') return null;
-  const embeddedResult = item.rawMessage.metadata?.workflow_result as WorkflowResult | Record<string, unknown> | undefined;
-  const result = embeddedResult || currentResult;
-  if (!result) return null;
-  const taskId = typeof result.task_id === 'string' ? result.task_id : undefined;
-  if (taskId && item.rawMessage.task_id && taskId !== item.rawMessage.task_id) return null;
-  return result;
+function getRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
 }
 
-interface WorkflowCardData {
-  type?: string;
-  status?: string;
-  title?: string;
-  sourceText?: string;
-  media?: string;
-  terminal?: string;
-  metric?: string;
-  threshold?: string;
-  projectContext?: string;
-  notifyTarget?: string;
-  inspectionItems?: Array<{ label: string; status: string; detail: string }>;
-  debugChecks?: Array<{ label: string; status: string; detail: string }>;
-  debugTask?: {
-    id?: string;
-    status?: string;
-    current_stage?: string;
-    mcp_result?: Record<string, unknown>;
-  };
-  accountShared?: boolean;
-  intakeModes?: string[];
-  template?: {
-    name?: string;
-    metrics?: string[];
-    dimensions?: string[];
-    timeRange?: string;
-    frequency?: string;
-    deliveryTime?: string;
-    deliveryTargets?: string[];
-  };
-  metricCatalog?: string[];
-  metricIssues?: string[];
-  dataPreview?: {
-    columns?: string[];
-    rows?: Array<Record<string, string>>;
-  };
-}
-
-interface DebugObservationStep {
-  id: string;
-  order: number;
-  step_no?: string;
-  title: string;
-  stage?: string;
-  status: string;
-  status_label?: string;
-  time?: string;
-  log?: string;
-  sub_steps?: Array<{ id: string; order: number; title: string; status: string }>;
-  screenshots?: string[];
-}
-
-interface DebugObservationData {
-  ok?: boolean;
-  task_id?: string;
-  status?: string;
-  status_label?: string;
-  current_step?: string;
-  phase?: string;
-  error_message?: string;
-  updated_at?: string;
-  steps?: DebugObservationStep[];
-  screenshots?: string[];
-  result?: unknown;
-  raw?: unknown;
-  observation_errors?: string[];
-}
-
-function DebugStepStreamPanel({
-  steps,
-  status,
-  latestStep,
-}: {
-  steps: DebugObservationStep[];
-  status: string;
-  latestStep?: DebugObservationStep;
-}) {
-  const c = useThemeColors();
-  const finalStatus = status.toUpperCase();
-  const [open, setOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const latestItemRef = useRef<HTMLDivElement | null>(null);
-  const groupedSteps = useMemo(() => {
-    const groups: Array<DebugObservationStep & { ids: string[] }> = [];
-    steps.forEach((step) => {
-      const key = `${step.step_no || step.title}-${step.title}`;
-      const existing = groups.find(item => `${item.step_no || item.title}-${item.title}` === key);
-      if (!existing) {
-        groups.push({ ...step, ids: [step.id], screenshots: [...(step.screenshots || [])], sub_steps: [...(step.sub_steps || [])] });
-        return;
-      }
-      existing.ids.push(step.id);
-      existing.status = step.status;
-      existing.status_label = step.status_label || existing.status_label;
-      existing.log = [existing.log, step.log].filter(Boolean).join('\n');
-      existing.screenshots = Array.from(new Set([...(existing.screenshots || []), ...(step.screenshots || [])]));
-      const mergedSubSteps = [...(existing.sub_steps || []), ...(step.sub_steps || [])]
-        .reduce<Array<{ id: string; order: number; title: string; status: string }>>((acc, item) => {
-          const existingSubStep = acc.find(other => other.title === item.title);
-          if (!existingSubStep) {
-            acc.push(item);
-            return acc;
-          }
-          if (/FAIL|ERROR|失败|异常/i.test(item.status)) existingSubStep.status = item.status;
-          else if (/SUCCESS|DONE|OK|COMPLETED|成功/i.test(item.status) || /RUN|PENDING|WAIT/i.test(existingSubStep.status)) existingSubStep.status = item.status;
-          return acc;
-        }, []);
-      existing.sub_steps = mergedSubSteps;
-    });
-    return groups.map((step, index) => ({ ...step, order: index + 1 }));
-  }, [steps]);
-  const latestGroup = latestStep
-    ? groupedSteps.find(step => step.ids?.includes(latestStep.id)) || groupedSteps[groupedSteps.length - 1]
-    : groupedSteps[groupedSteps.length - 1];
-  const completedCount = groupedSteps.filter(step => /SUCCESS|DONE|OK|COMPLETED|成功/i.test(`${step.status} ${step.status_label || ''}`)).length;
-  const failedCount = groupedSteps.filter(step => /FAIL|ERROR|失败|异常/i.test(`${step.status} ${step.status_label || ''}`)).length;
-  useEffect(() => {
-    if (!open) return;
-    latestItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [open, latestGroup?.id, latestGroup?.status]);
-
-  const stepColor = (stepStatus: string) => {
-    const normalized = stepStatus.toUpperCase();
-    if (/SUCCESS|DONE|OK|COMPLETED|成功/.test(normalized)) return '#16a34a';
-    if (/FAIL|ERROR|失败|异常/.test(normalized)) return '#dc2626';
-    if (/INCOMPLETE|UNFINISHED|未完成/.test(normalized)) return '#b45309';
-    if (/RUN|DISPATCH|PENDING|WAIT|执行|等待/.test(normalized)) return '#2563eb';
-    return c.textMuted;
-  };
-  const stepIcon = (stepStatus: string) => {
-    const normalized = stepStatus.toUpperCase();
-    if (/SUCCESS|DONE|OK|COMPLETED|成功/.test(normalized)) return <CheckCircleOutlined />;
-    if (/FAIL|ERROR|失败|异常/.test(normalized)) return <CloseCircleOutlined />;
-    if (/INCOMPLETE|UNFINISHED|未完成/.test(normalized)) return <ClockCircleOutlined />;
-    if (/RUN|DISPATCH|PENDING|WAIT|执行|等待/.test(normalized)) return <LoadingOutlined spin />;
-    return <ClockCircleOutlined />;
-  };
-  const latestSubStep = latestGroup?.sub_steps?.find(step => /RUN|PENDING|WAIT/i.test(step.status))
-    || latestGroup?.sub_steps?.[latestGroup.sub_steps.length - 1];
-  const latestText = latestSubStep?.title || latestGroup?.title || '等待联调步骤回传';
-
-  return (
-    <section style={{ marginBottom: 8, borderRadius: 14, border: `1px solid ${c.borderFaint}`, background: c.bgSection, overflow: 'hidden' }}>
-      <button
-        type="button"
-        onClick={() => setOpen(prev => !prev)}
-        style={{
-          width: '100%',
-          border: 0,
-          background: 'transparent',
-          padding: '8px 12px',
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) auto auto',
-          gap: 10,
-          alignItems: 'center',
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
-      >
-        <span style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-          <ThunderboltOutlined style={{ color: c.accent, fontSize: 10, flexShrink: 0 }} />
-          <span style={{ color: c.textSecondary, fontSize: 10, fontWeight: 400, flexShrink: 0 }}>联调</span>
-          {!/SUCCESS|FINISHED|COMPLETED|FAILED|ERROR/.test(finalStatus) && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-              {[0, 1, 2].map(dot => (
-                <span key={dot} className="typing-dot" style={{ width: 4, height: 4, borderRadius: 4, background: c.accent, display: 'inline-block', animation: `typing-dot 1.2s ease-in-out ${dot * 0.16}s infinite` }} />
-              ))}
-            </span>
-          )}
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: c.textPrimary, fontSize: 10, fontWeight: 650, flexShrink: 0 }}>
-            <span style={{ color: c.textMuted, fontSize: 10, fontWeight: 400 }}>{completedCount}/{groupedSteps.length || 0}</span>
-          </span>
-          <span style={{ color: c.textMuted, fontSize: 10, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {latestText}
-          </span>
-          {failedCount > 0 && <span style={{ color: '#dc2626', fontSize: 10, fontWeight: 500, flexShrink: 0 }}>异常 {failedCount}</span>}
-        </span>
-        <span style={{ color: c.textMuted, fontSize: 10, whiteSpace: 'nowrap' }}>{open ? '收起' : '展开'}</span>
-        <span style={{ color: c.textMuted, fontSize: 10, lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>
-          {open ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
-        </span>
-      </button>
-
-      {open && (
-        <div style={{ borderTop: `1px solid ${c.borderFaint}`, padding: '10px 12px 12px', background: '#fff' }}>
-          {groupedSteps.length > 0 ? (
-            <div style={{ maxHeight: 460, overflowY: 'auto', display: 'grid', gap: 10, paddingRight: 4 }}>
-              {groupedSteps.map((step, index) => {
-                const isLatest = latestGroup?.ids?.includes(step.id) || latestGroup?.id === step.id;
-                const isRunningStep = /RUN|DISPATCH|PENDING|WAIT|执行|等待/i.test(`${step.status} ${step.status_label || ''}`);
-                return (
-                  <div ref={isLatest ? latestItemRef : undefined} key={step.id || `${step.order}-${step.title}`} style={{ display: 'grid', gridTemplateColumns: '26px minmax(0, 1fr)', gap: 9 }}>
-                    <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
-                      <span style={{ width: 22, height: 22, borderRadius: 11, background: '#f3f6fb', color: stepColor(step.status), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>
-                        {stepIcon(step.status)}
-                      </span>
-                      {index < groupedSteps.length - 1 && <span style={{ position: 'absolute', top: 24, bottom: -10, width: 1, background: c.borderFaint }} />}
-                    </div>
-                    <div style={{ minWidth: 0, padding: isLatest ? '8px 10px' : '0 0 2px', borderRadius: 10, background: isLatest ? '#f8fbff' : 'transparent' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <span style={{ color: c.textMuted, fontSize: 10 }}>{step.order}</span>
-                        <span style={{ color: c.textPrimary, fontSize: 10, fontWeight: 650 }}>{step.title}</span>
-                        {isLatest && !/SUCCESS|FAILED|ERROR/.test(`${step.status}`.toUpperCase()) && (
-                          <span style={{ width: 6, height: 6, borderRadius: 3, background: '#2563eb', boxShadow: '0 0 0 4px rgba(37,99,235,.12)' }} />
-                        )}
-                      </div>
-                      {step.sub_steps && step.sub_steps.length > 0 && (
-                        <div style={{ marginTop: 7, display: 'grid', gap: 5 }}>
-                          {step.sub_steps.map((subStep, subIndex) => {
-                            const subStatus = isLatest && subIndex === step.sub_steps!.length - 1 && isRunningStep
-                              ? 'running'
-                              : /RUN|PENDING|WAIT/i.test(subStep.status) ? 'success' : subStep.status;
-                            return (
-                            <div key={`${step.id}-${subStep.id}-${subStep.title}`} style={{ display: 'grid', gridTemplateColumns: '18px minmax(0, 1fr)', gap: 6, alignItems: 'center', color: c.textSecondary, fontSize: 10 }}>
-                              <span style={{ color: stepColor(subStatus), display: 'inline-flex', justifyContent: 'center' }}>{stepIcon(subStatus)}</span>
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subStep.title}</span>
-                            </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                      {step.screenshots && step.screenshots.length > 0 && (
-                        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          {step.screenshots.map((url) => (
-                            <button
-                              key={url}
-                              type="button"
-                              onClick={() => setPreviewImage(url)}
-                              style={{ border: 0, padding: 0, background: 'transparent', cursor: 'zoom-in' }}
-                            >
-                              <img src={url} alt="联调步骤截图" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, border: `1px solid ${c.borderFaint}`, background: '#f8fafc', display: 'block' }} />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div style={{ color: c.textMuted, fontSize: 10, lineHeight: 1.6 }}>
-              已创建联调任务，正在等待执行步骤回传。
-            </div>
-          )}
-        </div>
-      )}
-      <Modal open={Boolean(previewImage)} footer={null} onCancel={() => setPreviewImage('')} width="min(920px, 92vw)" centered>
-        {previewImage && <img src={previewImage} alt="联调步骤截图" style={{ width: '100%', maxHeight: '78vh', objectFit: 'contain', display: 'block' }} />}
-      </Modal>
-    </section>
-  );
-}
-
-function getWorkflowCard(message: Message): WorkflowCardData | null {
-  const raw = message.metadata?.workflow_card;
+function getAmbiguityConfirmPayload(message: Message): AmbiguityConfirmPayload | null {
+  const meta = message.metadata || {};
+  const workflowResult = meta.workflow_result && typeof meta.workflow_result === 'object'
+    ? meta.workflow_result as Record<string, unknown>
+    : null;
+  const payload = workflowResult?.structured_payload && typeof workflowResult.structured_payload === 'object'
+    ? workflowResult.structured_payload as Record<string, unknown>
+    : meta.structured_payload && typeof meta.structured_payload === 'object'
+      ? meta.structured_payload as Record<string, unknown>
+      : null;
+  const raw = payload?.confirmation && typeof payload.confirmation === 'object'
+    ? payload.confirmation as Record<string, unknown>
+    : payload?.confirmation_needed && payload?.confirmation && typeof payload.confirmation === 'object'
+      ? payload.confirmation as Record<string, unknown>
+      : null;
   if (!raw || typeof raw !== 'object') return null;
-  return raw as WorkflowCardData;
+
+  const title = typeof raw.title === 'string' ? raw.title : '先确认对象';
+  const hint = typeof raw.hint === 'string' ? raw.hint : '请先选择一个对象再继续。';
+  const options = Array.isArray(raw.options)
+    ? raw.options
+        .map((item) => {
+          if (!item || typeof item !== 'object') return null;
+          const option = item as Record<string, unknown>;
+          const label = typeof option.label === 'string' ? option.label : '';
+          const prompt = typeof option.prompt === 'string' ? option.prompt : '';
+          return label && prompt ? { label, prompt } : null;
+        })
+        .filter((item): item is { label: string; prompt: string } => Boolean(item))
+    : [];
+  if (!options.length) return null;
+  return { title, hint, options };
+}
+
+function getCapabilityFollowUpPayload(message: Message): CapabilityFollowUpPayload | null {
+  const meta = message.metadata || {};
+  const workflowResult = meta.workflow_result && typeof meta.workflow_result === 'object'
+    ? meta.workflow_result as Record<string, unknown>
+    : null;
+  const payload = workflowResult?.structured_payload && typeof workflowResult.structured_payload === 'object'
+    ? workflowResult.structured_payload as Record<string, unknown>
+    : meta.structured_payload && typeof meta.structured_payload === 'object'
+      ? meta.structured_payload as Record<string, unknown>
+      : null;
+  const followUp = payload && typeof payload === 'object' ? payload.follow_up : undefined;
+  const followUpTitle = payload && typeof payload === 'object' ? payload.follow_up_title : undefined;
+  const followUpHint = payload && typeof payload === 'object' ? payload.follow_up_hint : undefined;
+  const followUpFields = payload && typeof payload === 'object' ? payload.follow_up_fields : undefined;
+  const raw = followUp && typeof followUp === 'object'
+    ? followUp as Record<string, unknown>
+    : (followUpTitle || followUpHint || followUpFields)
+      ? { title: followUpTitle, hint: followUpHint, fields: followUpFields }
+      : null;
+  if (!raw || typeof raw !== 'object') return null;
+
+  const title = typeof raw.title === 'string' ? raw.title : '继续补充信息';
+  const hint = typeof raw.hint === 'string' ? raw.hint : '请先补充缺失信息后继续。';
+  const rawFields = raw.fields;
+  const fields = Array.isArray(rawFields)
+    ? rawFields
+        .map((item: unknown) => {
+          if (!item || typeof item !== 'object') return null;
+          const field = item as Record<string, unknown>;
+          const label = typeof field.label === 'string' ? field.label : '';
+          const prompt = typeof field.prompt === 'string' ? field.prompt : '';
+          return label && prompt ? { label, prompt } : null;
+        })
+        .filter((item): item is { label: string; prompt: string } => Boolean(item))
+    : [];
+  if (!fields.length) return null;
+  return { title, hint, fields };
 }
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const c = useThemeColors();
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      antMessage.success('已复制');
-      setTimeout(() => setCopied(false), 1600);
-    });
+  const handleCopy = useCallback(async () => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+    setCopied(true);
+    resetTimerRef.current = setTimeout(() => setCopied(false), 1800);
+
+    const copyWithFallback = () => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', 'true');
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } finally {
+        document.body.removeChild(textarea);
+      }
+      return ok;
+    };
+
+    try {
+      const copiedByFallback = copyWithFallback();
+      if (!copiedByFallback && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else if (!copiedByFallback && !navigator.clipboard?.writeText) {
+        throw new Error('copy fallback failed');
+      }
+      antMessage.success('复制成功');
+    } catch {
+      setCopied(false);
+      antMessage.warning('复制失败，请手动选择内容复制');
+    }
   }, [text]);
 
   return (
     <Tooltip title={copied ? '已复制' : '复制'}>
       <button
         type="button"
-        onClick={handleCopy}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+        }}
+        onClick={(event) => {
+          event.stopPropagation();
+          void handleCopy();
+        }}
+        aria-label={copied ? '已复制' : '复制'}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'none',
-          border: 'none',
+          background: copied ? 'rgba(21, 127, 84, 0.12)' : 'none',
+          border: copied ? `1px solid rgba(21, 127, 84, 0.22)` : '1px solid transparent',
           cursor: 'pointer',
           color: copied ? c.success : c.textMuted,
-          fontSize: 13,
-          width: 28,
+          fontSize: 12,
+          width: copied ? 58 : 28,
           height: 28,
-          padding: 0,
+          gap: 4,
+          padding: copied ? '0 8px' : 0,
           borderRadius: 10,
           transition: 'all 0.2s',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = c.accentBgFaint;
+          e.currentTarget.style.background = copied ? 'rgba(21, 127, 84, 0.12)' : c.accentBgFaint;
           e.currentTarget.style.color = copied ? c.success : c.accent;
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'none';
+          e.currentTarget.style.background = copied ? 'rgba(21, 127, 84, 0.12)' : 'none';
           e.currentTarget.style.color = copied ? c.success : c.textMuted;
         }}
       >
-        <CopyOutlined />
+        {copied ? <CheckCircleOutlined /> : <CopyOutlined />}
+        {copied ? <span style={{ whiteSpace: 'nowrap' }}>已复制</span> : null}
       </button>
     </Tooltip>
   );
@@ -495,26 +371,41 @@ function MessageActionButton({
   icon,
   label,
   onClick,
+  active = false,
+  activeColor,
+  activeBackground,
+  dataAction,
 }: {
   icon: React.ReactNode;
   label: string;
-  onClick: () => void;
+  onClick: () => unknown;
+  active?: boolean;
+  activeColor?: string;
+  activeBackground?: string;
+  dataAction?: string;
 }) {
   const c = useThemeColors();
+  const highlightColor = activeColor || c.accent;
+  const inactiveBackground = 'none';
+  const activeBg = activeBackground || 'rgba(246, 189, 22, 0.14)';
 
   return (
     <Tooltip title={label}>
       <button
         type="button"
+        aria-label={label}
+        aria-pressed={active}
+        data-message-action={dataAction}
+        data-active={active ? 'true' : 'false'}
         onClick={onClick}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'none',
+          background: active ? activeBg : inactiveBackground,
           border: 'none',
           cursor: 'pointer',
-          color: c.textMuted,
+          color: active ? highlightColor : c.textMuted,
           fontSize: 13,
           width: 28,
           height: 28,
@@ -523,207 +414,17 @@ function MessageActionButton({
           transition: 'all 0.2s',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = c.accentBgFaint;
-          e.currentTarget.style.color = c.accent;
+          e.currentTarget.style.background = active ? activeBg : c.accentBgFaint;
+          e.currentTarget.style.color = active ? highlightColor : c.accent;
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'none';
-          e.currentTarget.style.color = c.textMuted;
+          e.currentTarget.style.background = active ? activeBg : inactiveBackground;
+          e.currentTarget.style.color = active ? highlightColor : c.textMuted;
         }}
       >
         {icon}
       </button>
     </Tooltip>
-  );
-}
-
-function ThinkingChain({
-  steps,
-  toolCalls,
-  codeStyle,
-  showLineNumbers,
-  title = '思维链',
-  defaultExpanded = false,
-}: {
-  steps: NonNullable<Message['thinking_steps']>;
-  toolCalls?: NonNullable<Message['tool_calls']>;
-  codeStyle: CodeStyle;
-  showLineNumbers: boolean;
-  title?: string;
-  defaultExpanded?: boolean;
-}) {
-  const c = useThemeColors();
-  const [expanded, setExpanded] = useState(defaultExpanded);
-  const displayTitle = title && !/[鎬濈淮閾]/.test(title) ? title : '思考过程';
-  const [now, setNow] = useState(Date.now());
-  const [expandedStepKeys, setExpandedStepKeys] = useState<Set<string>>(new Set());
-  useEffect(() => {
-    if (!steps.some((step) => step.status === 'loading')) return undefined;
-    const timer = window.setInterval(() => setNow(Date.now()), 500);
-    return () => window.clearInterval(timer);
-  }, [steps]);
-  const toggleStep = (key: string) => {
-    setExpandedStepKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-  const totalDuration = steps.reduce((sum, step) => sum + (step.duration_ms || 0), 0);
-  const running = steps.some((step) => step.status === 'loading');
-  const items = steps.map((step, index) => {
-    const itemKey = step.key || `${step.label}-${index}`;
-    const relatedTool = toolCalls?.find((tool) =>
-      tool.step_key === step.key ||
-      tool.name === step.key ||
-      tool.name === step.label ||
-      tool.display_name === step.label);
-    const details = [
-      step.input ? `请求：${JSON.stringify(step.input).slice(0, 220)}` : '',
-      step.output ? `返回：${JSON.stringify(step.output).slice(0, 220)}` : '',
-      relatedTool?.arguments ? `参数：${relatedTool.arguments.slice(0, 220)}` : '',
-      relatedTool?.result ? `结果：${relatedTool.result.slice(0, 220)}` : '',
-    ].filter(Boolean);
-    const requestText = step.input
-      ? JSON.stringify(step.input, null, 2)
-      : safeJsonText(relatedTool?.arguments);
-    const responseText = step.output
-      ? JSON.stringify(step.output, null, 2)
-      : safeJsonText(relatedTool?.result);
-    const toolTitle = relatedTool?.display_name || relatedTool?.name || step.label;
-    const hasStepDetail = Boolean(requestText || responseText);
-    const stepExpanded = expandedStepKeys.has(itemKey);
-    const durationSeconds = Math.max(
-      0.1,
-      ((step.status === 'loading' ? now - (step.started_at || Date.now()) : step.duration_ms || 0)) / 1000,
-    ).toFixed(1);
-
-    return {
-      key: itemKey,
-      title: (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-          <span>{index + 1}. {step.label}</span>
-          <span style={{ color: c.textMuted, fontSize: 10, fontWeight: 400 }}>{durationSeconds} 秒</span>
-          {hasStepDetail && (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                toggleStep(itemKey);
-              }}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                padding: 0,
-                color: c.textMuted,
-                cursor: 'pointer',
-                fontSize: 10,
-                lineHeight: 1,
-              }}
-            >
-              {stepExpanded ? '收起' : '展开'}
-            </button>
-          )}
-        </span>
-      ),
-      description: step.content,
-      status: step.status === 'completed' ? 'success' as const : step.status,
-      content: hasStepDetail && stepExpanded ? (
-        <div style={{ display: 'grid', gap: 8, width: '100%', minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: c.textSecondary, fontSize: 10, fontWeight: 650 }}>
-            <CapabilityIcon kind={relatedTool?.kind || step.key} size={10} />
-            <span>{toolTitle}</span>
-          </div>
-          {requestText && (
-            <div style={{ width: '100%', minWidth: 0 }}>
-              <div style={{ marginBottom: 4, color: c.textMuted, fontSize: 10 }}>请求</div>
-              <FancyCodeBlock language="json" codeStyle={codeStyle} showLineNumbers={showLineNumbers}>{requestText}</FancyCodeBlock>
-            </div>
-          )}
-          {responseText && (
-            <div style={{ width: '100%', minWidth: 0 }}>
-              <div style={{ marginBottom: 4, color: c.textMuted, fontSize: 10 }}>返回</div>
-              <FancyCodeBlock language="json" codeStyle={codeStyle} showLineNumbers={showLineNumbers}>{responseText}</FancyCodeBlock>
-            </div>
-          )}
-        </div>
-      ) : undefined,
-    };
-  });
-
-  return (
-    <div
-      style={{
-        marginBottom: 8,
-        borderRadius: 14,
-        border: `1px solid ${c.borderFaint}`,
-        background: c.bgSection,
-        overflow: 'visible',
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => setExpanded((prev) => !prev)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 12px',
-          position: expanded ? 'sticky' : 'static',
-          top: 0,
-          zIndex: 8,
-          background: expanded ? '#fff' : 'transparent',
-          border: 'none',
-          borderBottom: expanded ? `1px solid ${c.borderFaint}` : 'none',
-          cursor: 'pointer',
-          fontSize: 10,
-          color: c.textSecondary,
-        }}
-      >
-        <BulbOutlined style={{ fontSize: 10, color: c.accent }} />
-        <span>{displayTitle}</span>
-        {running && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-            {[0, 1, 2].map((dot) => (
-              <span
-                key={dot}
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: '50%',
-                  background: c.accent,
-                  animation: `typing-dot 1.2s ease-in-out ${dot * 0.16}s infinite`,
-                }}
-              />
-            ))}
-          </span>
-        )}
-        <span style={{ color: c.textMuted }}>{running ? '正在思考' : `完成 ${steps.length} 步`}</span>
-        {totalDuration > 0 && <span style={{ color: c.textMuted }}>{(totalDuration / 1000).toFixed(1)} 秒</span>}
-        <span style={{ marginLeft: 'auto', color: c.textMuted, fontSize: 10 }}>
-          {expanded ? '收起' : '展开'}
-        </span>
-        <span style={{ color: c.textMuted, fontSize: 10 }}>
-          {expanded ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
-        </span>
-      </button>
-      {expanded && (
-        <div style={{ padding: '0 12px 12px' }}>
-          <ThoughtChain
-            items={items}
-            line="dashed"
-            styles={{
-              item: { fontSize: 10 },
-              itemContent: { fontSize: 10 },
-              itemFooter: { color: c.textMuted, fontSize: 10 },
-            }}
-          />
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -759,9 +460,109 @@ function MarkdownRenderer({
     return parts;
   }, [content]);
 
+  const isMarkdownTableLine = (line: string) => {
+    const trimmed = line.trim();
+    return trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.split('|').length >= 4;
+  };
+
+  const isMarkdownTableSeparator = (line: string) => (
+    /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(line.trim())
+  );
+
+  const parseMarkdownTableRow = (line: string) => (
+    line
+      .trim()
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .split('|')
+      .map((cell) => cell.trim())
+  );
+
+  const renderMarkdownTable = (lines: string[], key: string) => {
+    const [headerLine, , ...bodyLines] = lines;
+    const headers = parseMarkdownTableRow(headerLine);
+    const rows = bodyLines.map(parseMarkdownTableRow);
+    return (
+      <div
+        key={key}
+        data-markdown-table-scroll
+        style={{
+          maxWidth: '100%',
+          overflowX: 'auto',
+          overscrollBehaviorX: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          margin: '8px 0 10px',
+          border: `1px solid ${c.borderFaint}`,
+          borderRadius: 12,
+          background: '#fff',
+        }}
+      >
+        <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr>
+              {headers.map((header, headerIndex) => (
+                <th
+                  key={`${key}-h-${headerIndex}`}
+                  style={{
+                    padding: '8px 10px',
+                    borderBottom: `1px solid ${c.borderFaint}`,
+                    background: c.bgSection,
+                    color: c.textSecondary,
+                    fontWeight: 600,
+                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={`${key}-r-${rowIndex}`}>
+                {headers.map((header, cellIndex) => (
+                  <td
+                    key={`${key}-r-${rowIndex}-c-${cellIndex}`}
+                    style={{
+                      padding: '8px 10px',
+                      borderTop: rowIndex === 0 ? 'none' : `1px solid ${c.borderFaint}`,
+                      color: c.textBody,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {formatDisplayValue(row[cellIndex], header)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   const renderText = (text: string) => {
     const lines = text.split('\n');
-    return lines.map((line, index) => {
+    const nodes: React.ReactElement[] = [];
+    let index = 0;
+    while (index < lines.length) {
+      const line = lines[index];
+      if (
+        isMarkdownTableLine(line)
+        && index + 1 < lines.length
+        && isMarkdownTableSeparator(lines[index + 1])
+      ) {
+        const tableLines = [line, lines[index + 1]];
+        index += 2;
+        while (index < lines.length && isMarkdownTableLine(lines[index])) {
+          tableLines.push(lines[index]);
+          index += 1;
+        }
+        nodes.push(renderMarkdownTable(tableLines, `table-${nodes.length}`));
+        continue;
+      }
+
       const normalizedLine = line.replace(/\*\*([^*]+)\*\*/g, '$1');
       const trimmedLine = normalizedLine.trim();
       const rawTrimmedLine = line.trim();
@@ -770,39 +571,49 @@ function MarkdownRenderer({
       <div style={{ height: 1, background: c.borderFaint, margin: '14px 0 12px' }} />
     ) : null;
     const wrapSection = (node: React.ReactElement) => sectionDivider ? (
-      <React.Fragment key={index}>
+      <React.Fragment key={`section-${index}`}>
         {sectionDivider}
         {node}
       </React.Fragment>
     ) : node;
     const boldHeadingMatch = trimmedLine.match(/^\*\*([^*]+)\*\*$/);
     if (boldHeadingMatch) {
-      return wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{boldHeadingMatch[1]}</h2>);
+      nodes.push(wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{boldHeadingMatch[1]}</h2>));
+      index += 1;
+      continue;
     }
 
     const boldLabelMatch = trimmedLine.match(/^\*\*([^*]+)\*\*[:：]\s*(.*)$/);
     if (boldLabelMatch) {
-      return wrapSection(
+      nodes.push(wrapSection(
         <div key={index} style={{ margin: '0 0 8px' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{boldLabelMatch[1]}</div>
           {boldLabelMatch[2] && <div style={{ marginTop: 4, color: c.textSecondary }}>{boldLabelMatch[2]}</div>}
         </div>,
-      );
+      ));
+      index += 1;
+      continue;
     }
 
     if (trimmedLine.startsWith('### ')) {
-      return wrapSection(<h3 key={index} style={{ fontSize: 15, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 4 }}>{trimmedLine.slice(4)}</h3>);
+      nodes.push(wrapSection(<h3 key={index} style={{ fontSize: 15, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 4 }}>{trimmedLine.slice(4)}</h3>));
+      index += 1;
+      continue;
     }
     if (trimmedLine.startsWith('## ')) {
-      return wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{trimmedLine.slice(3)}</h2>);
+      nodes.push(wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{trimmedLine.slice(3)}</h2>));
+      index += 1;
+      continue;
     }
     if (trimmedLine.startsWith('# ')) {
-      return wrapSection(<h1 key={index} style={{ fontSize: 18, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 8 }}>{trimmedLine.slice(2)}</h1>);
+      nodes.push(wrapSection(<h1 key={index} style={{ fontSize: 18, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 8 }}>{trimmedLine.slice(2)}</h1>));
+      index += 1;
+      continue;
     }
 
     const listMatch = trimmedLine.match(/^(\d+)[.、)]\s*(.*)/);
     if (listMatch) {
-      return (
+      nodes.push(
         <div key={index} style={{ display: 'grid', gridTemplateColumns: '22px minmax(0, 1fr)', gap: 8, alignItems: 'start', margin: '3px 0' }}>
           <span
             style={{
@@ -815,7 +626,7 @@ function MarkdownRenderer({
               background: c.accentBgFaint,
               color: c.accent,
               fontSize: 11,
-              fontWeight: 650,
+              fontWeight: 600,
               lineHeight: 1,
             }}
           >
@@ -824,21 +635,28 @@ function MarkdownRenderer({
           <span style={{ color: c.textBody }}>{listMatch[2]}</span>
         </div>
       );
+      index += 1;
+      continue;
     }
 
     if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ') || trimmedLine.startsWith('•')) {
       const content = trimmedLine.startsWith('•') ? trimmedLine.slice(1).trim() : trimmedLine.slice(2);
-      return (
+      nodes.push(
         <div key={index} style={{ display: 'flex', gap: 8 }}>
           <span style={{ color: c.accent }}>•</span>
           <span>{content}</span>
         </div>
       );
+      index += 1;
+      continue;
     }
 
-    if (!trimmedLine) return <div key={index} style={{ height: 8 }} />;
-    return <p key={index} style={{ margin: '2px 0' }}>{normalizedLine}</p>;
-    });
+    nodes.push(!trimmedLine
+      ? <div key={index} style={{ height: 8 }} />
+      : <p key={index} style={{ margin: '2px 0' }}>{normalizedLine}</p>);
+    index += 1;
+    }
+    return nodes;
   };
 
   return (
@@ -927,11 +745,7 @@ function MermaidDiagram({ chart }: { chart: string }) {
   );
 
   return (
-    <div style={{ margin: '10px 0', borderRadius: 14, border: `1px solid ${c.borderFaint}`, background: '#fff', padding: 12 }}>
-      <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: c.textSecondary }}>流程图</div>
-        {nodes.length > 0 && <div style={{ fontSize: 11, color: c.textMuted }}>点击查看大图</div>}
-      </div>
+    <div style={{ margin: '10px 0' }}>
       {nodes.length > 0 ? (
         <>
           <button
@@ -940,7 +754,7 @@ function MermaidDiagram({ chart }: { chart: string }) {
             style={{
               width: '100%',
               border: 'none',
-              background: '#fff',
+              background: 'transparent',
               padding: 0,
               textAlign: 'left',
               cursor: 'zoom-in',
@@ -950,7 +764,7 @@ function MermaidDiagram({ chart }: { chart: string }) {
               style={{
                 borderRadius: 12,
                 border: `1px solid ${c.borderFaint}`,
-                background: '#fbfdff',
+                background: 'transparent',
                 padding: 10,
                 overflow: 'hidden',
               }}
@@ -959,7 +773,6 @@ function MermaidDiagram({ chart }: { chart: string }) {
             </div>
           </button>
           <Modal
-            title="流程图"
             open={open}
             onCancel={() => setOpen(false)}
             footer={null}
@@ -1053,19 +866,17 @@ function MissingFieldPanel({
 
   return (
     <div
+      data-missing-field-text-panel
       style={{
         marginTop: 10,
-        padding: 12,
-        border: `1px solid ${c.borderFaint}`,
-        borderRadius: 14,
-        background: '#fff',
+        padding: '4px 0 0',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, color: c.textPrimary, fontSize: 13, fontWeight: 600 }}>
-        <InfoCircleOutlined style={{ color: c.accent }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, color: c.textPrimary, fontSize: 13, fontWeight: 600 }}>
+        <InfoCircleOutlined style={{ color: c.textMuted }} />
         <span>补充排查条件</span>
       </div>
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div style={{ display: 'grid', gap: 8 }}>
         {fields.slice(0, 6).map((field) => {
           const options = getOptions(field);
           return (
@@ -1076,6 +887,7 @@ function MissingFieldPanel({
               gridTemplateColumns: '88px minmax(0, 1fr)',
               alignItems: 'center',
               gap: 8,
+              padding: '2px 0',
             }}
           >
             <Tooltip title={`${field.why_required} ${field.suggested_question}`}>
@@ -1090,7 +902,7 @@ function MissingFieldPanel({
                 onChange={(event) => setDrafts((prev) => ({ ...prev, [field.field_key]: event.target.value }))}
                 style={{
                   height: 34,
-                  borderRadius: 10,
+                  borderRadius: 8,
                   border: `1px solid ${c.borderFaint}`,
                   background: '#fff',
                   padding: '0 10px',
@@ -1111,7 +923,7 @@ function MissingFieldPanel({
                 placeholder={`填写${field.field_label}`}
                 style={{
                   height: 32,
-                  borderRadius: 10,
+                  borderRadius: 8,
                   border: `1px solid ${c.borderFaint}`,
                   background: '#fff',
                   padding: '0 10px',
@@ -1124,7 +936,7 @@ function MissingFieldPanel({
           </label>
         );
         })}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
           <button
             type="button"
             disabled={hasRequiredMissing}
@@ -1213,19 +1025,7 @@ function collectCapabilities(message: Message): CapabilityRefView[] {
     })
     .filter((item, index, array) => array.findIndex(other => other.name === item.name && other.kind === item.kind) === index)
     .slice(0, 8);
-  const workflowCard = getWorkflowCard(message);
-  const debugTaskId = workflowCard?.type === 'legacy_media_debug' ? workflowCard.debugTask?.id : '';
-  if (!debugTaskId) return capabilities;
-  return [
-    ...capabilities.filter(item => item.kind !== 'debug_log').slice(0, 7),
-    {
-      key: `debug-log-${debugTaskId}`,
-      name: '联调日志',
-      kind: 'debug_log',
-      providerUrl: `/api/xiaoqiao/debug-automation/mcp-observe/${encodeURIComponent(debugTaskId)}`,
-      status: workflowCard?.debugTask?.status || workflowCard?.status,
-    },
-  ].slice(0, 8);
+  return capabilities;
 }
 
 function UnifiedEvidenceStrip({
@@ -1375,7 +1175,7 @@ function SourceReferenceStrip({
       }}
     >
       <InfoCircleOutlined style={{ color: c.accent, fontSize: 13 }} />
-      <span style={{ fontSize: 12, fontWeight: 560, flexShrink: 0 }}>来源</span>
+      <span style={{ fontSize: 12, fontWeight: 500, flexShrink: 0 }}>来源</span>
       <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap', minWidth: 0 }}>
         {refs.map((ref) => {
           const label = ref.sourceType === 'report_mcp'
@@ -1468,874 +1268,194 @@ function CapabilityStrip({
   );
 }
 
-function ReportComposerCard({ data }: { data: WorkflowCardData }) {
-  const c = useThemeColors();
-  const template = data.template || {};
-  const [templateConfirmed, setTemplateConfirmed] = useState(false);
-  const [querying, setQuerying] = useState(false);
-  const [dataColumns, setDataColumns] = useState<string[]>(data.dataPreview?.columns || []);
-  const [dataRows, setDataRows] = useState<Array<Record<string, string>>>(data.dataPreview?.rows || []);
-  const [taskCreated, setTaskCreated] = useState(false);
+type RuntimeDisplayState = 'queued' | 'understanding' | 'context_resolving' | 'capability_matching' | 'entity_resolving' | 'tool_executing' | 'result_composing' | 'final' | 'degraded' | 'blocked' | 'empty' | 'skipped' | 'failed' | 'cancelled';
 
-  const metrics = template.metrics || [];
-  const dimensions = template.dimensions || [];
-  const deliveryTargets = template.deliveryTargets || [];
+const RUNTIME_STATUS_TEXT: Record<RuntimeDisplayState, string> = {
+  queued: '\u5df2\u6536\u5230\u8bf7\u6c42',
+  understanding: '\u6b63\u5728\u7406\u89e3\u8bf7\u6c42',
+  context_resolving: '\u6b63\u5728\u8865\u9f50\u4e0a\u4e0b\u6587',
+  capability_matching: '\u6b63\u5728\u5339\u914d\u80fd\u529b',
+  entity_resolving: '\u6b63\u5728\u8bc6\u522b\u6761\u4ef6',
+  tool_executing: '\u6b63\u5728\u83b7\u53d6\u6570\u636e',
+  result_composing: '\u6b63\u5728\u751f\u6210\u7ed3\u679c',
+  final: '\u5df2\u5b8c\u6210',
+  degraded: '\u5df2\u8fd4\u56de\u5f53\u524d\u53ef\u7528\u7ed3\u679c',
+  blocked: '\u9700\u8981\u8865\u5145\u6761\u4ef6',
+  empty: '\u6682\u65e0\u53ef\u7528\u7ed3\u679c',
+  skipped: '\u65e0\u9700\u6267\u884c',
+  failed: '\u5904\u7406\u5f02\u5e38',
+  cancelled: '\u5df2\u505c\u6b62',
+};
 
-  const runDataQuery = async () => {
-    setQuerying(true);
-    try {
-      const response = await fetch('/api/xiaoqiao/report-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: data.sourceText || '生成广告消耗日报',
-          reportDate: new Date().toISOString().slice(0, 10),
-        }),
-      });
-      const payload = await response.json();
-      const draft = payload?.draft;
-      if (draft?.columns?.length && draft?.rows?.length) {
-        setDataColumns(draft.columns.map(String));
-        setDataRows(draft.rows.slice(0, 8).map((row: Record<string, unknown>) => {
-          const next: Record<string, string> = {};
-          Object.entries(row).forEach(([key, value]) => {
-            next[key] = String(value ?? '');
-          });
-          return next;
-        }));
-        antMessage.success('已生成报表预览');
-      } else {
-        setDataColumns(['日期', '媒体', '账户', '消耗', '数据来源', '状态']);
-        setDataRows([
-          {
-            日期: '待确认查询范围',
-            媒体: '全部',
-            账户: '全部',
-            消耗: '等待智投报表返回',
-            数据来源: '智投报表',
-            状态: '模板已确认',
-          },
-        ]);
-        antMessage.warning('未返回真实报表数据，请确认报表 MCP 是否可用');
-      }
-    } catch {
-      antMessage.error('报表查询失败，请检查报表服务');
-    } finally {
-      setQuerying(false);
-    }
-  };
-
-  const createSchedule = async () => {
-    try {
-      await fetch('/api/xiaoqiao/scheduled-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: template.name || '广告消耗日报',
-          description: '每天 10:00 自动生成并发送广告消耗日报',
-          task_type: 'report',
-          cron_expression: '0 10 * * *',
-          frequency: template.frequency || 'daily',
-          monitor_metrics: metrics,
-          alert_channels: deliveryTargets.length > 0 ? deliveryTargets : ['小闪'],
-          alert_targets: deliveryTargets.length > 0 ? deliveryTargets : ['小闪'],
-          custom_params: {
-            delivery_time: template.deliveryTime || '10:00',
-            dimensions,
-            delivery_targets: deliveryTargets.length > 0 ? deliveryTargets : ['小闪'],
-            metrics,
-            source_text: data.sourceText,
-          },
-          status: 'active',
-        }),
-      });
-      setTaskCreated(true);
-      antMessage.success('已创建每天 10:00 的广告消耗日报任务');
-    } catch {
-      antMessage.error('定时任务创建失败');
-    }
-  };
-
-  const templateRows = [
-    ['报表名称', template.name || '广告消耗日报', '待确认'],
-    ['指标', metrics.join('、') || '消耗', metrics.length > 0 ? '已识别' : '待补充'],
-    ['维度', dimensions.join('、') || '日期、媒体、账户', dimensions.length > 0 ? '已识别' : '待补充'],
-    ['时间范围', template.timeRange || '每天生成前一日数据', '已识别'],
-    ['发送时间', `${template.frequency || '每天'} ${template.deliveryTime || '10:00'}`, '已识别'],
-    ['发送位置', deliveryTargets.join('、') || '小闪', '待确认'],
-  ];
-
-  return (
-    <div
-      style={{
-        marginTop: 10,
-        borderRadius: 14,
-        border: `1px solid ${c.borderFaint}`,
-        background: '#fff',
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}` }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '报表模板确认'}</div>
-            <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>
-              先确认指标和维度，再获取数据、保存模板或创建定时任务。
-            </div>
-          </div>
-          <Tag color={taskCreated ? 'green' : templateConfirmed ? 'blue' : 'default'} style={{ borderRadius: 999, margin: 0 }}>
-            {taskCreated ? '已定时' : templateConfirmed ? '模板已确认' : '待确认'}
-          </Tag>
-        </div>
-      </div>
-
-      <div style={{ padding: 14, display: 'grid', gap: 14 }}>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>可接收的模板来源</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {(data.intakeModes || ['截图提取模板', '上传 Excel 模板', '手动输入模板', '指定系统页面']).map((mode) => (
-              <span
-                key={mode}
-                style={{
-                  borderRadius: 999,
-                  border: `1px solid ${c.borderFaint}`,
-                  padding: '5px 9px',
-                  fontSize: 12,
-                  color: c.textSecondary,
-                  background: '#fff',
-                }}
-              >
-                {mode}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>报表模板</div>
-          <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ color: c.textMuted, textAlign: 'left' }}>
-                  <th style={{ padding: '8px 6px', fontWeight: 600 }}>项目</th>
-                  <th style={{ padding: '8px 6px', fontWeight: 600 }}>当前值</th>
-                  <th style={{ padding: '8px 6px', fontWeight: 600 }}>状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                {templateRows.map(([label, value, status]) => (
-                  <tr key={label} style={{ borderTop: `1px solid ${c.borderFaint}` }}>
-                    <td style={{ padding: '8px 6px', color: c.textSecondary, whiteSpace: 'nowrap' }}>{label}</td>
-                    <td style={{ padding: '8px 6px', color: c.textPrimary }}>{value}</td>
-                    <td style={{ padding: '8px 6px', color: status === '待确认' ? c.warning : c.success, whiteSpace: 'nowrap' }}>{status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>指标校验</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {metrics.map((metric) => (
-              <Tag key={metric} color="green" style={{ borderRadius: 999, margin: 0 }}>{metric} 已存在</Tag>
-            ))}
-            {(data.metricCatalog || []).slice(0, 8).map((metric) => (
-              <Tag key={metric} style={{ borderRadius: 999, margin: 0 }}>{metric}</Tag>
-            ))}
-          </div>
-        </div>
-
-        {dataColumns.length > 0 && (
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>数据预览</div>
-            <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                <thead>
-                  <tr style={{ color: c.textMuted, textAlign: 'left' }}>
-                    {dataColumns.map((column) => (
-                      <th key={column} style={{ padding: '8px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{column}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {dataRows.map((row, rowIndex) => (
-                    <tr key={rowIndex} style={{ borderTop: `1px solid ${c.borderFaint}` }}>
-                      {dataColumns.map((column) => (
-                        <td key={column} style={{ padding: '8px 6px', color: c.textPrimary, whiteSpace: 'nowrap' }}>{row[column] || '-'}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => {
-              setTemplateConfirmed(true);
-              antMessage.success('模板已确认');
-            }}
-            style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
-          >
-            确认模板
-          </button>
-          <button
-            type="button"
-            disabled={!templateConfirmed || querying}
-            onClick={runDataQuery}
-            style={{ border: `1px solid ${templateConfirmed ? c.accentBorder : c.borderFaint}`, background: '#fff', color: templateConfirmed ? c.accent : c.textMuted, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: templateConfirmed ? 'pointer' : 'not-allowed' }}
-          >
-            {querying ? '获取中' : '立即获取数据'}
-          </button>
-          <button
-            type="button"
-            disabled={!templateConfirmed}
-            onClick={createSchedule}
-            style={{ border: `1px solid ${templateConfirmed ? c.accentBorder : c.borderFaint}`, background: '#fff', color: templateConfirmed ? c.accent : c.textMuted, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: templateConfirmed ? 'pointer' : 'not-allowed' }}
-          >
-            创建定时任务
-          </button>
-          <button type="button" onClick={() => antMessage.success('已分享到小闪')} style={{ border: `1px solid ${c.borderFaint}`, background: '#fff', color: c.textSecondary, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}>
-            分享到小闪
-          </button>
-          <button type="button" onClick={() => antMessage.success('已保存到个人知识库')} style={{ border: `1px solid ${c.borderFaint}`, background: '#fff', color: c.textSecondary, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}>
-            保存到知识库
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+function hasAssistantVisibleContent(message: Message): boolean {
+  return message.role === 'assistant' && typeof message.content === 'string' && message.content.trim().length > 0;
 }
 
-function ReportComposerFlowCard({ data }: { data: WorkflowCardData }) {
-  const c = useThemeColors();
-  const template = data.template || {};
-  const metrics = template.metrics || ['消耗'];
-  const dimensions = template.dimensions || ['日期', '媒体', '账户'];
-  const deliveryTargets = template.deliveryTargets || ['小闪'];
-  const metricIssues = data.metricIssues || [];
-  const templateColumns = [...dimensions, ...metrics];
-  const [templateConfirmed, setTemplateConfirmed] = useState(false);
-  const [querying, setQuerying] = useState(false);
-  const [dataReady, setDataReady] = useState(false);
-  const [taskCreated, setTaskCreated] = useState(false);
-  const [dataColumns, setDataColumns] = useState<string[]>([]);
-  const [dataRows, setDataRows] = useState<Array<Record<string, string>>>([]);
+function normalizeRuntimeStatus(message: Message): RuntimeDisplayState {
+  const metadata = message.metadata || {};
+  const runtimeState = metadata.runtime_state && typeof metadata.runtime_state === 'object'
+    ? metadata.runtime_state as Record<string, unknown>
+    : null;
+  const raw = String(metadata.turn_ui_status || runtimeState?.status || '').toLowerCase();
+  if (raw === 'idle' || raw === 'submitting' || raw === 'queued') return hasAssistantVisibleContent(message) ? 'final' : 'queued';
+  if (raw === 'assistant_pending') return 'understanding';
+  if (raw === 'streaming' || raw === 'finalizing') return 'result_composing';
+  if (raw === 'tool_running') return 'tool_executing';
+  if (raw === 'completed' || raw === 'complete' || raw === 'done' || raw === 'success') return 'final';
+  if (raw === 'degraded' || raw === 'partial') return 'degraded';
+  if (raw === 'blocked') return 'blocked';
+  if (raw === 'empty') return 'empty';
+  if (raw === 'cancel_requested' || raw === 'cancelled') return 'cancelled';
+  if (raw === 'failed' || raw === 'error') return 'failed';
+  if (raw === 'skipped') return 'skipped';
 
-  const queryData = async () => {
-    setQuerying(true);
-    try {
-      const response = await fetch('/api/xiaoqiao/report-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: data.sourceText || '生成广告消耗日报',
-          reportDate: new Date().toISOString().slice(0, 10),
-        }),
-      });
-      const payload = await response.json();
-      const draft = payload?.draft;
-      if (draft?.columns?.length && draft?.rows?.length) {
-        setDataColumns(draft.columns.map(String));
-        setDataRows(draft.rows.slice(0, 8).map((row: Record<string, unknown>) => {
-          const next: Record<string, string> = {};
-          Object.entries(row).forEach(([key, value]) => {
-            next[key] = String(value ?? '');
-          });
-          return next;
-        }));
-      } else {
-        setDataColumns(templateColumns);
-        setDataRows([{ 日期: '前一日', 媒体: '全部', 账户: '全部', 消耗: '等待智投报表返回' }]);
-        antMessage.warning('未返回真实报表数据，请确认报表 MCP 是否可用');
-      }
-      setDataReady(true);
-    } catch {
-      antMessage.error('报表查询失败，请检查报表服务');
-    } finally {
-      setQuerying(false);
-    }
-  };
-
-  const createSchedule = async () => {
-    try {
-      await fetch('/api/xiaoqiao/scheduled-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: template.name || '广告消耗日报',
-          description: '每天 10:00 自动生成并发送广告消耗日报',
-          task_type: 'report_generate',
-          cron_expression: '0 10 * * *',
-          frequency: 'daily',
-          monitor_metrics: metrics,
-          alert_channels: deliveryTargets,
-          alert_targets: deliveryTargets,
-          custom_params: {
-            delivery_time: template.deliveryTime || '10:00',
-            dimensions,
-            metrics,
-            delivery_targets: deliveryTargets,
-            source_text: data.sourceText,
-          },
-          status: 'active',
-        }),
-      });
-      setTaskCreated(true);
-      antMessage.success('已创建每天 10:00 的广告消耗日报');
-    } catch {
-      antMessage.error('定时报表创建失败');
-    }
-  };
-
-  const stageItems = [
-    { label: '确认模板', active: templateConfirmed },
-    { label: '查询数据', active: dataReady },
-    { label: '创建定时报表', active: taskCreated },
-  ];
-
-  return (
-    <div style={{ marginTop: 10, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '广告消耗日报'}</div>
-        <Tag color={taskCreated ? 'green' : dataReady ? 'blue' : 'default'} style={{ borderRadius: 999, margin: 0 }}>
-          {taskCreated ? '已创建' : dataReady ? '数据待确认' : templateConfirmed ? '查询中' : '模板待确认'}
-        </Tag>
-      </div>
-
-      <div style={{ padding: 14, display: 'grid', gap: 14 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-          {stageItems.map((stage, index) => (
-            <div
-              key={stage.label}
-              style={{
-                borderRadius: 10,
-                border: `1px solid ${stage.active ? c.accentBorder : c.borderFaint}`,
-                background: stage.active ? c.accentBgFaint : '#fff',
-                color: stage.active ? c.accent : c.textMuted,
-                padding: '8px 10px',
-                fontSize: 12,
-                fontWeight: 620,
-              }}
-            >
-              {index + 1}. {stage.label}
-            </div>
-          ))}
-        </div>
-
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>模板预览</div>
-          <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ color: c.textMuted, textAlign: 'left' }}>
-                  {templateColumns.map((column) => (
-                    <th key={column} style={{ padding: '8px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{column}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderTop: `1px solid ${c.borderFaint}` }}>
-                  {templateColumns.map((column) => (
-                    <td key={column} style={{ padding: '8px 6px', color: c.textMuted, whiteSpace: 'nowrap' }}>
-                      {metrics.includes(column) ? '待查询' : column === '日期' ? '前一日' : '全部'}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div style={{ fontSize: 12, color: metricIssues.length > 0 ? c.warning : c.success }}>
-          {metricIssues.length > 0 ? `指标需要确认：${metricIssues.join('、')}` : '指标校验无误'}
-        </div>
-
-        {dataReady && (
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>查询结果</div>
-            <div style={{ overflowX: 'auto', borderTop: `1px solid ${c.borderFaint}` }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                <thead>
-                  <tr style={{ color: c.textMuted, textAlign: 'left' }}>
-                    {dataColumns.map((column) => (
-                      <th key={column} style={{ padding: '8px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{column}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {dataRows.map((row, rowIndex) => (
-                    <tr key={rowIndex} style={{ borderTop: `1px solid ${c.borderFaint}` }}>
-                      {dataColumns.map((column) => (
-                        <td key={column} style={{ padding: '8px 6px', color: c.textPrimary, whiteSpace: 'nowrap' }}>{row[column] || '-'}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-          {!templateConfirmed && (
-            <button
-              type="button"
-              onClick={() => {
-                setTemplateConfirmed(true);
-                void queryData();
-              }}
-              style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
-            >
-              确认模板并查询数据
-            </button>
-          )}
-          {templateConfirmed && !dataReady && (
-            <span style={{ fontSize: 12, color: c.textMuted }}>{querying ? '正在查询智投报表数据...' : '等待查询结果'}</span>
-          )}
-          {dataReady && !taskCreated && (
-            <>
-              <span style={{ fontSize: 12, color: c.textSecondary }}>请检查数据。无误后可创建每天 10:00 的定时报表。</span>
-              <button
-                type="button"
-                onClick={createSchedule}
-                style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
-              >
-                数据无误，创建定时报表
-              </button>
-            </>
-          )}
-          {taskCreated && (
-            <span style={{ fontSize: 12, color: c.success }}>已创建每天 10:00 发送到{deliveryTargets.join('、') || '小闪'}的广告消耗日报。</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  const runningEvent = message.process_events?.find((event) => event.status === 'running');
+  if (runningEvent?.type === 'capability.checked') return 'capability_matching';
+  if (runningEvent?.type === 'context.prepared') return 'context_resolving';
+  if (runningEvent?.type?.startsWith('mcp.')) return 'tool_executing';
+  if (message.process_events?.length) return 'final';
+  if (hasAssistantVisibleContent(message)) return 'final';
+  return 'queued';
 }
 
-function MonitorTaskFlowCard({ data }: { data: WorkflowCardData }) {
-  const c = useThemeColors();
-  const [creating, setCreating] = useState(false);
-  const [created, setCreated] = useState(false);
-  const conditions = [
-    { label: '项目范围', value: data.projectContext || '顶部项目选择器当前范围' },
-    { label: '媒体', value: data.media || '巨量' },
-    { label: '指标', value: data.metric || '回传延迟' },
-    { label: '阈值', value: data.threshold || '30 分钟' },
-    { label: '通知', value: data.notifyTarget || '站内告警' },
-  ];
-
-  const createTask = async () => {
-    if (creating || created) return;
-    setCreating(true);
-    try {
-      const res = await fetch('/api/xiaoqiao/scheduled-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: data.title || '回传延迟监控',
-          task_type: 'alert_check',
-          status: 'active',
-          frequency: '每 5 分钟',
-          monitor_metrics: ['回传延迟'],
-          alert_conditions: [
-            {
-              metric: 'callback_latency',
-              operator: 'gt',
-              threshold_minutes: Number(String(data.threshold || '30').match(/\d+/)?.[0] || 30),
-            },
-          ],
-          alert_channels: ['站内告警'],
-          custom_params: {
-            project_context: data.projectContext,
-            media: data.media || '巨量',
-            auto_diagnosis: true,
-          },
-        }),
-      });
-      if (!res.ok) throw new Error(`create task failed: ${res.status}`);
-      setCreated(true);
-      antMessage.success('已创建监控任务');
-    } catch {
-      antMessage.error('创建失败，请稍后重试');
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  return (
-    <div style={{ marginTop: 10, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '回传延迟监控'}</div>
-        <Tag color={created ? 'green' : 'blue'} style={{ margin: 0, borderRadius: 999 }}>
-          {created ? '已创建' : '待确认'}
-        </Tag>
-      </div>
-      <div style={{ padding: 14, display: 'grid', gap: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-          {['识别监控意图', '确认监控条件', '触发后自动排查'].map((step, index) => (
-            <div
-              key={step}
-              style={{
-                borderRadius: 10,
-                border: `1px solid ${index === 1 && !created ? c.accentBorder : c.borderFaint}`,
-                background: index === 1 && !created ? c.accentBgFaint : '#fff',
-                color: index === 1 && !created ? c.accent : c.textSecondary,
-                padding: '8px 10px',
-                fontSize: 12,
-                fontWeight: 620,
-              }}
-            >
-              {index + 1}. {step}
-            </div>
-          ))}
-        </div>
-        <div style={{ borderTop: `1px solid ${c.borderFaint}` }}>
-          {conditions.map((item) => (
-            <div
-              key={item.label}
-              style={{ display: 'grid', gridTemplateColumns: '92px minmax(0, 1fr)', gap: 10, padding: '9px 0', borderBottom: `1px solid ${c.borderFaint}`, fontSize: 13 }}
-            >
-              <span style={{ color: c.textMuted }}>{item.label}</span>
-              <span style={{ color: c.textPrimary, fontWeight: 560, wordBreak: 'break-word' }}>{item.value}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 12, color: c.textSecondary, lineHeight: 1.7 }}>
-          告警触发后会自动创建排查上下文，并携带项目、媒体、指标和阈值，不再要求用户重复补充。
-        </div>
-        <div>
-          <button
-            type="button"
-            disabled={creating || created}
-            onClick={createTask}
-            style={{
-              border: 'none',
-              background: created ? c.success : c.accent,
-              color: '#fff',
-              borderRadius: 999,
-              padding: '8px 14px',
-              fontSize: 12,
-              cursor: creating || created ? 'default' : 'pointer',
-            }}
-          >
-            {created ? '监控任务已创建' : creating ? '正在创建...' : '确认并创建监控任务'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+function runtimeStepLabel(message: Message, fallbackLabel?: string): string {
+  const events = message.process_events || [];
+  const running = [...events].reverse().find((event) => event.status === 'running');
+  const latest = [...events].reverse().find((event) => event.label);
+  const runtimeState = message.metadata?.runtime_state && typeof message.metadata.runtime_state === 'object'
+    ? message.metadata.runtime_state as Record<string, unknown>
+    : null;
+  return running?.label
+    || (typeof runtimeState?.label === 'string' ? runtimeState.label : '')
+    || fallbackLabel
+    || latest?.label
+    || '';
 }
 
-function MonitorInspectionFlowCard({ data }: { data: WorkflowCardData }) {
-  const c = useThemeColors();
-  const items = data.inspectionItems?.length ? data.inspectionItems : [
-    { label: '消耗与预算', status: '待接入', detail: '等待智投报表 MCP 返回昨日投放概览。' },
-    { label: '转化与回传', status: '待接入', detail: '等待回传链路 MCP 返回激活、注册、付费健康度。' },
-    { label: '报表调度', status: '待接入', detail: '等待调度状态工具返回昨日报表完成情况。' },
-  ];
-
-  return (
-    <div style={{ marginTop: 10, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{data.title || '投放异常巡检'}</div>
-        <Tag color="blue" style={{ margin: 0, borderRadius: 999 }}>监控巡检</Tag>
-      </div>
-      <div style={{ padding: 14, display: 'grid', gap: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-          {['识别宽泛诉求', '执行监控检查', '异常后转排查'].map((step, index) => (
-            <div
-              key={step}
-              style={{
-                borderRadius: 10,
-                border: `1px solid ${index === 1 ? c.accentBorder : c.borderFaint}`,
-                background: index === 1 ? c.accentBgFaint : '#fff',
-                color: index === 1 ? c.accent : c.textSecondary,
-                padding: '8px 10px',
-                fontSize: 12,
-                fontWeight: 620,
-              }}
-            >
-              {index + 1}. {step}
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'grid', gap: 8 }}>
-          {items.map((item) => (
-            <div
-              key={item.label}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '120px 76px minmax(0, 1fr)',
-                gap: 10,
-                alignItems: 'center',
-                padding: '9px 0',
-                borderBottom: `1px solid ${c.borderFaint}`,
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: c.textPrimary, fontWeight: 600 }}>{item.label}</span>
-              <span style={{ color: item.status === '正常' ? c.success : c.textMuted, fontSize: 12 }}>{item.status}</span>
-              <span style={{ color: c.textSecondary, wordBreak: 'break-word' }}>{item.detail}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 12, color: c.textSecondary, lineHeight: 1.7 }}>
-          这是项目级巡检，不要求先填写具体异常指标。若巡检发现异常，会携带项目、时间、指标和来源自动进入排查；未发现异常时只返回监控结果。
-        </div>
-      </div>
-    </div>
-  );
+function runtimeStepCount(message: Message): number {
+  return Math.max(message.process_events?.length || 0, message.thinking_steps?.length || 0, message.tool_calls?.length || 0);
 }
 
-function WorkflowProcessCard({
-  data,
-  onFollowUpClick,
-  onSubmitFollowUp,
+function runtimeDurationText(message: Message): string {
+  const events = message.process_events || [];
+  const durations = events
+    .map((event) => typeof event.duration_ms === 'number' ? event.duration_ms : 0)
+    .filter((value) => value > 0);
+  const totalMs = durations.length > 0
+    ? durations.reduce((sum, value) => sum + value, 0)
+    : (() => {
+        const started = events
+          .map((event) => Date.parse(event.started_at))
+          .filter((value) => Number.isFinite(value));
+        const completed = events
+          .map((event) => Date.parse(event.completed_at || ''))
+          .filter((value) => Number.isFinite(value));
+        if (!started.length || !completed.length) return 0;
+        return Math.max(...completed) - Math.min(...started);
+      })();
+  if (!totalMs || totalMs < 0) return '';
+  const seconds = totalMs / 1000;
+  return seconds >= 10 ? `${Math.round(seconds)}s` : `${seconds.toFixed(1)}s`;
+}
+
+function shouldShowRuntimeStatusCard(message: Message): boolean {
+  const status = String(message.metadata?.turn_ui_status || '');
+  return Boolean(status || message.process_events?.length || message.thinking_steps?.length || message.tool_calls?.length);
+}
+
+function RuntimeStatusCard({
+  message,
+  label,
+  presentationResult,
+  onOpenDisclosure,
 }: {
-  data: WorkflowCardData;
-  onFollowUpClick?: (text: string) => void;
-  onSubmitFollowUp?: (content: string) => void;
+  message: Message;
+  label?: string;
+  presentationResult: SemanticResultContract | null;
+  onOpenDisclosure?: (message: Message) => void;
 }) {
   const c = useThemeColors();
-  if (data.type === 'report_composer') {
-    return <ReportComposerFlowCard data={data} />;
-  }
-  if (data.type === 'monitor_task') {
-    return <MonitorTaskFlowCard data={data} />;
-  }
-  if (data.type === 'monitor_inspection') {
-    return <MonitorInspectionFlowCard data={data} />;
-  }
-  const isDebug = data.type === 'legacy_media_debug';
-  const [formOpen, setFormOpen] = useState(isDebug);
-  const [submitted, setSubmitted] = useState(false);
-  const [drafts, setDrafts] = useState<Record<string, string>>({
-    media: data.media || '',
-    account: data.accountShared ? '已共享到 wuyanlan@dobest.com' : '',
-  });
-  const autoDebugChecks = Array.isArray(data.debugChecks) ? data.debugChecks : [];
-  const debugTaskId = isDebug ? data.debugTask?.id || '' : '';
-  const [debugObservation, setDebugObservation] = useState<DebugObservationData | null>(null);
-  useEffect(() => {
-    if (!debugTaskId || !(data.status === 'running' || data.status === 'started')) return;
-    let stopped = false;
-    let timer: number | undefined;
-    const load = async () => {
-      try {
-        const response = await fetch(`/api/xiaoqiao/debug-automation/mcp-observe/${encodeURIComponent(debugTaskId)}`);
-        if (!response.ok) return;
-        const payload = await response.json() as DebugObservationData;
-        if (stopped) return;
-        setDebugObservation(payload);
-        timer = window.setTimeout(load, 2500);
-      } catch {
-        if (!stopped) timer = window.setTimeout(load, 4000);
-      }
-    };
-    void load();
-    return () => {
-      stopped = true;
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [debugTaskId, data.status]);
+  if (!shouldShowRuntimeStatusCard(message)) return null;
 
-  if (isDebug && (data.status === 'running' || data.status === 'started')) {
-    const observedSteps = debugObservation?.steps || [];
-    const latestStep = observedSteps[observedSteps.length - 1];
-    return (
-      <DebugStepStreamPanel
-        steps={observedSteps}
-        status={debugObservation?.status || data.status || ''}
-        latestStep={latestStep}
-      />
-    );
-  }
-  if (isDebug && data.status === 'auto_checked') {
-    const checks = autoDebugChecks.length ? autoDebugChecks : [
-      { label: '项目与媒体', status: '已确认', detail: `${data.projectContext || '当前项目'} / ${data.media || '巨量引擎'}` },
-      { label: '应用共享', status: data.accountShared ? '通过' : '未通过', detail: data.accountShared ? '已共享到 wuyanlan@dobest.com' : '未检测到默认账号共享记录' },
-      { label: '验收状态', status: '通过', detail: '联调配置满足当前媒体验收条件' },
-      { label: '数据上报', status: '通过', detail: '数据上报 MCP 已查询到激活/注册记录' },
-    ];
-    const allPassed = checks.every((item) => item.status === '通过' || item.status === '已确认');
-    const failedChecks = checks.filter((item) => item.status !== '通过' && item.status !== '已确认');
-    return (
-      <div style={{ marginTop: 10, borderRadius: 16, border: `1px solid ${c.borderFaint}`, background: c.bgCard, overflow: 'hidden' }}>
-        <div style={{ padding: '12px 14px' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>自动联调校验结果</div>
-          <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
-            {allPassed ? '前置条件通过，可以发起自动联调。' : '前置条件未通过，只展示需要处理的阻塞项。'}
-          </div>
-          {!allPassed && (
-            <div style={{ marginTop: 10, display: 'grid', gap: 8 }}>
-              {failedChecks.map((item) => (
-              <div key={item.label} style={{ display: 'grid', gridTemplateColumns: '94px 56px 1fr', gap: 8, alignItems: 'center', minHeight: 34, fontSize: 12 }}>
-                <span style={{ color: c.textPrimary, fontWeight: 650 }}>{item.label}</span>
-                <span style={{ color: '#b45309', fontWeight: 700 }}>{item.status}</span>
-                <span style={{ color: c.textSecondary, lineHeight: 1.5 }}>{item.detail}</span>
-              </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-  const requiredFields = isDebug
-    ? ['媒体平台', '账号共享状态', '验证事件', '回传查看位置', '测试设备']
-    : ['媒体名称', '对接文档', '监测链接参数', '回传事件', '验收方式'];
-  const debugFieldKeys = ['media', 'account', 'event', 'resultView', 'device'];
-  const hasMissingDebugField = isDebug && debugFieldKeys.some((key) => !drafts[key]?.trim());
-  const submitDebug = () => {
-    const summary = debugFieldKeys
-      .map((key, index) => `${requiredFields[index]}=${drafts[key] || ''}`)
-      .join('；');
-    const prompt = `发起联调：${summary}`;
-    if (onSubmitFollowUp) {
-      onSubmitFollowUp(prompt);
-      return;
-    }
-    onFollowUpClick?.(prompt);
+  const status = normalizeRuntimeStatus(message);
+  const terminal = status === 'final' || status === 'degraded' || status === 'blocked' || status === 'empty' || status === 'failed' || status === 'cancelled' || status === 'skipped';
+  const stepCount = runtimeStepCount(message);
+  const duration = runtimeDurationText(message);
+  const currentLabel = cleanRuntimeLabel(runtimeStepLabel(message, label)) || RUNTIME_STATUS_TEXT[status];
+  const projection = presentationResult
+    ? projectMessagePresentation({ message, result: presentationResult })
+    : null;
+  const hasSideDetails = Boolean(
+    onOpenDisclosure
+      && (message.process_events?.length || message.tool_calls?.length || projection?.sideRegions.length || presentationResult),
+  );
+  const openDisclosure = () => {
+    if (!hasSideDetails || !onOpenDisclosure) return;
+    onOpenDisclosure(message);
   };
+  const completedText = [
+    `\u5df2\u5904\u7406 ${stepCount || 1} \u6b65`,
+    duration ? `\u7528\u65f6 ${duration}` : '',
+  ].filter(Boolean).join(' · ');
+  const displayText = status === 'final'
+    ? completedText
+    : terminal
+      ? RUNTIME_STATUS_TEXT[status]
+      : currentLabel;
+  const textColor = status === 'failed'
+    ? c.danger
+    : status === 'degraded' || status === 'blocked' || status === 'empty'
+      ? c.chat.text.muted
+      : status === 'cancelled' || status === 'skipped'
+      ? c.chat.text.muted
+      : terminal
+        ? c.textSecondary
+        : c.accent;
 
   return (
     <div
+      className="xq-runtime-status-card"
+      data-runtime-status={status}
+      role={hasSideDetails ? 'button' : undefined}
+      tabIndex={hasSideDetails ? 0 : undefined}
       style={{
-        marginTop: 10,
-        borderRadius: 16,
-        border: `1px solid ${c.accentBorder}`,
-        background: c.bgCard,
-        boxShadow: '0 10px 28px rgba(15, 23, 42, 0.05)',
-        overflow: 'hidden',
+        marginBottom: c.chat.spacing.inlineGap,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 10,
+        borderRadius: c.chat.radius.badge,
+        border: `1px solid ${c.chat.border.subtle}`,
+        background: c.chat.surface.status,
+        color: textColor,
+        padding: '6px 10px',
+        fontSize: 12,
+        lineHeight: 1.5,
+        cursor: hasSideDetails ? 'pointer' : 'default',
+      }}
+      onClick={openDisclosure}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openDisclosure();
+        }
       }}
     >
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${c.borderFaint}` }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>
-          {isDebug ? '媒体联调准备' : '新增媒体对接流程'}
-        </div>
-        <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
-          {isDebug
-            ? '确认联调意图、联调能力、联调信息和联调条件后，再发起执行。'
-            : '新增媒体必须先补齐依赖并通过表单校验，再进入创建链接或需求池流程。'}
-        </div>
-      </div>
-
-      <div style={{ padding: '12px 14px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-          {[
-            { label: '收集依赖', active: true },
-            { label: isDebug ? '确认联调信息' : '表单校验', active: submitted || !hasMissingDebugField },
-            { label: isDebug ? '发起联调' : '创建链接/入池', active: submitted },
-          ].map((step, index) => (
-            <div
-              key={step.label}
-              style={{
-                borderRadius: 12,
-                border: `1px solid ${step.active ? c.accentBorder : c.borderFaint}`,
-                background: step.active ? c.accentBgFaint : c.bgSection,
-                padding: '9px 10px',
-                color: step.active ? c.accent : c.textMuted,
-                fontSize: 12,
-                fontWeight: 620,
-              }}
-            >
-              {index + 1}. {step.label}
-            </div>
-          ))}
-        </div>
-
-        {formOpen && (
-          <div style={{ marginTop: 12, borderRadius: 14, background: '#fff', padding: 12, border: `1px solid ${c.borderFaint}` }}>
-            <div style={{ fontSize: 12, fontWeight: 650, color: c.textPrimary, marginBottom: 8 }}>
-              {isDebug ? '联调确认表单' : '结构化表单'}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-              {requiredFields.map((field, index) => {
-                const key = isDebug ? debugFieldKeys[index] : field;
-                return (
-                <label key={field} style={{ display: 'grid', gap: 4, fontSize: 12, color: c.textSecondary }}>
-                  {field}
-                  <input
-                    value={drafts[key] || ''}
-                    onChange={(event) => setDrafts((prev) => ({ ...prev, [key]: event.target.value }))}
-                    placeholder={isDebug && key === 'event' ? '如：激活、注册、付费' : `填写${field}`}
-                    style={{
-                      height: 34,
-                      borderRadius: 10,
-                      border: `1px solid ${c.borderFaint}`,
-                      background: '#fff',
-                      padding: '0 10px',
-                      outline: 'none',
-                    }}
-                  />
-                </label>
-              );})}
-            </div>
-            {submitted && !isDebug && (
-              <div style={{ marginTop: 10, fontSize: 12, color: c.accent, lineHeight: 1.6 }}>
-                表单已校验：当前资料满足基础创建监测链接条件；若后续发现特殊回传规则，会自动生成需求并记录到需求池。
-              </div>
-            )}
-          </div>
-        )}
-
-        <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => setFormOpen((prev) => !prev)}
-            style={{ border: `1px solid ${c.accentBorder}`, background: c.accentBgFaint, color: c.accent, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
-          >
-            {formOpen ? '收起表单' : '打开结构化表单'}
-          </button>
-          {!isDebug && (
-            <>
-              <button
-                type="button"
-                onClick={() => setSubmitted(true)}
-                style={{ border: 'none', background: c.accent, color: '#fff', borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
-              >
-                提交并校验
-              </button>
-              <button
-                type="button"
-                onClick={() => onFollowUpClick?.('记录新增媒体对接为代办，并在右侧继续补齐资料')}
-                style={{ border: `1px solid ${c.borderFaint}`, background: '#fff', color: c.textSecondary, borderRadius: 999, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}
-              >
-                记录到代办
-              </button>
-            </>
-          )}
-          <button
-            type="button"
-            disabled={isDebug && hasMissingDebugField}
-            onClick={() => {
-              if (isDebug) {
-                setSubmitted(true);
-                submitDebug();
-                return;
-              }
-              onFollowUpClick?.('资料已补齐，继续创建监测链接');
-            }}
-            style={{
-              border: `1px solid ${isDebug && hasMissingDebugField ? c.borderFaint : c.accentBorder}`,
-              background: isDebug && hasMissingDebugField ? c.bgSection : c.accent,
-              color: isDebug && hasMissingDebugField ? c.textMuted : '#fff',
-              borderRadius: 999,
-              padding: '7px 12px',
-              fontSize: 12,
-              cursor: isDebug && hasMissingDebugField ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {isDebug ? '发起联调' : '创建监测链接'}
-          </button>
-        </div>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        <span
+          aria-hidden="true"
+          className={!terminal ? 'xq-runtime-pulse' : undefined}
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: 999,
+            background: textColor,
+            flexShrink: 0,
+          }}
+        />
+        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {displayText}
+        </span>
       </div>
     </div>
   );
@@ -2343,156 +1463,87 @@ function WorkflowProcessCard({
 
 function MessageSurface({
   item,
+  presentationResult,
   codeStyle,
   showLineNumbers,
+  onFollowUpClick,
+  onSubmitFollowUp,
+  onOpenDisclosure,
 }: {
   item: BubbleItem;
+  presentationResult: SemanticResultContract | null;
   codeStyle: CodeStyle;
   showLineNumbers: boolean;
+  onFollowUpClick?: (text: string) => void;
+  onSubmitFollowUp?: (content: string) => void;
+  onOpenDisclosure?: (message: Message) => void;
 }) {
   const c = useThemeColors();
   const isAi = item.role === 'ai';
-  const [expanded, setExpanded] = useState(false);
-  const displayContent = isAi ? stripInlineSourceSection(item.content) : item.content;
-  const isLongMessage = displayContent.length > 760 || displayContent.split('\n').length > 12;
-  const shouldFold = isLongMessage && !expanded;
-  const foldedStyle = shouldFold
-    ? {
-        maxHeight: isAi ? 260 : 220,
-        overflow: 'hidden' as const,
-        WebkitMaskImage: 'linear-gradient(180deg, #000 72%, transparent 100%)',
-        maskImage: 'linear-gradient(180deg, #000 72%, transparent 100%)',
-      }
-    : undefined;
-  const foldButton = isLongMessage ? (
-    <button
-      type="button"
-      onClick={() => setExpanded((prev) => !prev)}
-      style={{
-        marginTop: 8,
-        border: `1px solid ${c.borderFaint}`,
-        background: '#fff',
-        color: c.textSecondary,
-        borderRadius: 999,
-        padding: '5px 10px',
-        fontSize: 12,
-        cursor: 'pointer',
-      }}
-    >
-      {expanded ? '收起内容' : '展开全部'}
-    </button>
-  ) : null;
+  const shellRadius = isAi ? c.chat.radius.message : c.chat.radius.section;
+  const shellBorder = isAi ? c.chat.border.subtle : 'transparent';
+  const shellBackground = isAi ? c.chat.surface.assistant : c.chat.surface.user;
+  const turnLabel = typeof item.rawMessage.metadata?.turn_status_label === 'string'
+    ? item.rawMessage.metadata.turn_status_label
+    : '';
+  const hasAssistantContent = item.content.trim().length > 0;
 
-  if (item.kind === 'system') {
+  if (!isAi) {
     return (
-      <div>
-        <div
-          style={{
-            padding: '12px 14px',
-            borderRadius: 16,
-            background: c.bgSection,
-            border: `1px solid ${c.borderFaint}`,
-            color: c.textSecondary,
-            fontSize: 13,
-            lineHeight: 1.75,
-            whiteSpace: 'pre-wrap',
-            ...foldedStyle,
-          }}
-        >
-          {displayContent}
-        </div>
-        {foldButton}
-      </div>
-    );
-  }
-
-  if (item.kind === 'clarification') {
-    return (
-      <div>
-        <div
-          style={{
-            padding: '2px 0',
-            background: 'transparent',
-            border: 'none',
-            wordBreak: 'break-word',
-            ...foldedStyle,
-          }}
-        >
-          <MarkdownRenderer
-            content={displayContent}
-            codeStyle={codeStyle}
-            showLineNumbers={showLineNumbers}
-          />
-        </div>
-        {foldButton}
-      </div>
-    );
-  }
-
-  if (item.kind === 'summary') {
-    return (
-      <div>
-        <div
-          style={{
-            padding: '12px 14px',
-            borderRadius: 16,
-            background: c.bgSection,
-            border: `1px solid ${c.borderFaint}`,
-            color: c.textSecondary,
-            fontSize: 13,
-            lineHeight: 1.75,
-            whiteSpace: 'pre-wrap',
-            ...foldedStyle,
-          }}
-        >
-          {displayContent}
-        </div>
-        {foldButton}
-      </div>
-    );
-  }
-
-  if (isAi) {
-    return (
-      <div>
-        <div
-          style={{
-            padding: '2px 0',
-            background: 'transparent',
-            border: 'none',
-            wordBreak: 'break-word',
-            ...foldedStyle,
-          }}
-        >
-          <MarkdownRenderer
-            content={displayContent}
-            codeStyle={codeStyle}
-            showLineNumbers={showLineNumbers}
-          />
-        </div>
-        {foldButton}
-      </div>
+      <section
+        style={{
+          maxWidth: '72%',
+          marginLeft: 'auto',
+          borderRadius: shellRadius,
+          border: `1px solid ${shellBorder}`,
+          background: shellBackground,
+          padding: '10px 12px',
+          color: c.chat.text.primary,
+          wordBreak: 'break-word',
+          lineHeight: 1.72,
+        }}
+      >
+        <MarkdownRenderer content={visibleChatContent(item.content)} codeStyle={codeStyle} showLineNumbers={showLineNumbers} />
+      </section>
     );
   }
 
   return (
-    <div>
-      <div
-        style={{
-          padding: '10px 16px',
-          borderRadius: '18px 8px 18px 18px',
-          background: `linear-gradient(135deg, ${c.accentBgFaint}, ${c.accentSoft})`,
-          border: `1px solid ${c.accentBorder}`,
-          wordBreak: 'break-word',
-          ...foldedStyle,
-        }}
-      >
-        <div style={{ fontSize: 14, lineHeight: 1.8, color: c.textPrimary, whiteSpace: 'pre-wrap' }}>
-          {displayContent}
-        </div>
+    <section
+      style={{
+        width: '100%',
+        borderRadius: shellRadius,
+        border: `1px solid ${shellBorder}`,
+        background: shellBackground,
+        overflow: 'hidden',
+        boxShadow: c.chat.shadow.panel,
+      }}
+    >
+      <div style={{ padding: presentationResult ? c.chat.spacing.blockGap : 12 }}>
+        <RuntimeStatusCard
+          message={item.rawMessage}
+          label={turnLabel}
+          presentationResult={presentationResult}
+          onOpenDisclosure={onOpenDisclosure}
+        />
+        {presentationResult ? (
+          <div style={{ display: 'grid', gap: c.chat.spacing.sectionGap }}>
+            <MessagePresentationRenderer
+              message={item.rawMessage}
+              result={presentationResult}
+              onFollowUpClick={onFollowUpClick}
+              onSubmitFollowUp={onSubmitFollowUp}
+            />
+          </div>
+        ) : hasAssistantContent ? (
+          <div style={{ display: 'grid', gap: c.chat.spacing.sectionGap }}>
+            <div style={{ padding: '2px 2px 0', wordBreak: 'break-word', lineHeight: 1.75 }}>
+              <MarkdownRenderer content={item.content} codeStyle={codeStyle} showLineNumbers={showLineNumbers} />
+            </div>
+          </div>
+        ) : null}
       </div>
-      {foldButton}
-    </div>
+    </section>
   );
 }
 
@@ -2529,13 +1580,16 @@ function getMetricExplainerSchema(message: Message): MetricExplainerUISchema | n
 function getAgentDisplayName(agent?: string) {
   const names: Record<string, string> = {
     help: '使用帮助',
+    report: '问数分析',
+    report_query: '问数分析',
     diagnosis: '数据排查',
     demand: '需求跟踪',
     debugging: '自动联调',
+    delivery: '验流程',
     monitoring: '监控任务',
-    material: '素材分析',
+    material: '素材',
     prediction: '预测分析',
-    hub: '智投chat',
+    hub: '小乔智投',
   };
   return agent ? names[agent] || AGENT_MAP[agent]?.name || agent : '';
 }
@@ -2557,7 +1611,7 @@ function MetricExplanationCard() {
       <div style={{ display: 'grid' }}>
         {rows.map(([name, meaning, fields]) => (
           <div key={name} style={{ display: 'grid', gridTemplateColumns: '88px minmax(0, 1fr)', gap: 10, padding: '10px 12px', borderBottom: `1px solid ${c.borderFaint}` }}>
-            <div style={{ fontSize: 13, fontWeight: 650, color: c.textPrimary }}>{name}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>{name}</div>
             <div>
               <div style={{ fontSize: 12, color: c.textSecondary, lineHeight: 1.6 }}>{meaning}</div>
               <div style={{ marginTop: 4, fontSize: 11, color: c.textMuted, lineHeight: 1.6 }}>关键字段：{fields}</div>
@@ -2569,207 +1623,297 @@ function MetricExplanationCard() {
   );
 }
 
-function ResultMessageCard({
-  result,
-}: {
-  result: WorkflowResult | Record<string, unknown>;
-}) {
-  const c = useThemeColors();
-  const summary = typeof result.summary === 'string' ? result.summary : '已生成结果';
-  const resultType = typeof result.result_type === 'string' ? result.result_type : '';
-  const nextActions = Array.isArray(result.next_actions) ? result.next_actions.slice(0, 4) : [];
-  const pendingChecks = Array.isArray(result.pending_checks) ? result.pending_checks.slice(0, 4) : [];
-
-  if (resultType === 'debugging_report') {
-    const stages = ['需求识别', '资料确认', '发起联调', '过程观测', '结果沉淀'];
-    const checks = pendingChecks.length > 0 ? pendingChecks : ['媒体账号', '应用包名', '测试设备', '联调地址'];
-    const actions = nextActions.length > 0 ? nextActions : ['发起联调', '补充资料', '人工接管'];
-
-    return (
-      <div
-        style={{
-          borderRadius: 18,
-          border: `1px solid ${c.borderFaint}`,
-          background: c.bgSection,
-          padding: '14px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 10,
-              background: c.accentBg,
-              color: c.accent,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <ThunderboltOutlined />
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>自动联调流程</div>
-            <div style={{ fontSize: 12, color: c.textMuted }}>已进入联调任务承接，右侧可查看执行面板</div>
-          </div>
-        </div>
-
-        <div style={{ fontSize: 14, lineHeight: 1.75, color: c.textBody }}>{summary}</div>
-
-        <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 6 }}>
-          {stages.map((stage, index) => (
-            <div
-              key={stage}
-              style={{
-                borderRadius: 10,
-                border: `1px solid ${index < 2 ? c.accentBorder : c.borderFaint}`,
-                background: index < 2 ? c.accentBgFaint : '#fff',
-                color: index < 2 ? c.accent : c.textMuted,
-                padding: '8px 6px',
-                textAlign: 'center',
-                fontSize: 11,
-                lineHeight: 1.3,
-              }}
-            >
-              {stage}
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>待确认资料</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {checks.slice(0, 4).map((item, idx) => (
-              <span
-                key={`${String(item)}-${idx}`}
-                style={{
-                  borderRadius: 999,
-                  padding: '6px 10px',
-                  background: '#fff',
-                  border: `1px solid ${c.borderFaint}`,
-                  color: c.textSecondary,
-                  fontSize: 12,
-                }}
-              >
-                {String(item)}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {actions.slice(0, 3).map((action, idx) => (
-            <button
-              key={`${String(action)}-${idx}`}
-              type="button"
-              style={{
-                border: `1px solid ${idx === 0 ? c.accentBorder : c.borderFaint}`,
-                background: idx === 0 ? c.accentBg : '#fff',
-                color: idx === 0 ? c.accent : c.textSecondary,
-                borderRadius: 999,
-                padding: '6px 10px',
-                fontSize: 12,
-                cursor: 'pointer',
-              }}
-            >
-              {String(action)}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
+function visibleChatContent(content: string): string {
+  const action = decodeReportActionEnvelope(content.trim());
+  if (!action) return content;
+  if (action.action === 'select_entity_candidate') {
+    const candidateName = typeof action.params?.candidateName === 'string' && action.params.candidateName.trim()
+      ? action.params.candidateName.trim()
+      : action.label.replace(/^选择\s*/, '').trim();
+    return `已按“${candidateName || action.label}”继续查询`;
   }
+  return reportActionLabel(content);
+}
 
-  const resultTypeLabelMap: Record<string, string> = {
-    help_answer: '帮助说明',
-    demand_form: '需求单',
-    diagnosis_report: '问题排查',
-    debugging_report: '自动联调',
-  };
-
+function RuntimeStateBar({ state }: { state?: Record<string, unknown> }) {
+  const c = useThemeColors();
+  if (!state) return null;
+  const label = typeof state.label === 'string' ? state.label : '';
+  if (!label) return null;
+  const status = typeof state.status === 'string' ? state.status : 'running';
+  const done = status === 'completed';
   return (
     <div
       style={{
-        borderRadius: 18,
-        border: `1px solid ${c.borderFaint}`,
-        background: c.bgSection,
-        padding: '14px 14px 12px',
+        marginBottom: 8,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        borderRadius: 999,
+        border: `1px solid ${done ? c.borderFaint : c.accentBorder}`,
+        background: done ? '#fff' : c.accentBgFaint,
+        color: done ? c.textMuted : c.accent,
+        padding: '5px 10px',
+        fontSize: 12,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 999,
+          background: done ? c.textMuted : c.accent,
+        }}
+      />
+      {label}
+    </div>
+  );
+}
+
+type QuickChipsRowProps = {
+  starterItems: Array<{
+    id: string;
+    label: string;
+    prompt: string;
+    agent?: string;
+    openPanel?: boolean;
+    children?: Array<{
+      id: string;
+      label: string;
+      prompt: string;
+      agent?: string;
+      openPanel?: boolean;
+      enabled: boolean;
+      sortOrder: number;
+    }>;
+  }>;
+  compact?: boolean;
+  onOpenAgentPanel?: (agent: AgentType) => void;
+  onFollowUpClick?: (text: string) => void;
+};
+
+export function QuickChipsRow({ starterItems, compact = false, onOpenAgentPanel, onFollowUpClick }: QuickChipsRowProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  // Flatten: take first enabled child from each starter
+  const flatChips = useMemo(() => {
+    const chips: Array<{ id: string; label: string; prompt: string; agent?: string; openPanel?: boolean }> = [];
+    for (const starter of starterItems) {
+      if (starter.children?.length) {
+        const first = starter.children.filter((item) => item.enabled).sort((a, b) => a.sortOrder - b.sortOrder)[0];
+        if (first) {
+          chips.push({ id: first.id, label: first.label, prompt: first.prompt, agent: first.agent, openPanel: first.openPanel });
+        }
+      } else {
+        chips.push({ id: `${starter.id}-default`, label: starter.label, prompt: starter.prompt, agent: starter.agent, openPanel: starter.openPanel });
+      }
+    }
+    return chips;
+  }, [starterItems]);
+
+  const checkArrows = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowLeftArrow(el.scrollLeft > 4);
+    setShowRightArrow(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkArrows, { passive: true });
+    const observer = new ResizeObserver(checkArrows);
+    observer.observe(el);
+    checkArrows();
+    return () => {
+      el.removeEventListener('scroll', checkArrows);
+      observer.disconnect();
+    };
+  }, [checkArrows]);
+
+  const scrollBy = (dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -288 : 288, behavior: 'smooth' });
+  };
+
+  const arrowBaseStyle: React.CSSProperties = {
+    flexShrink: 0,
+    width: 36,
+    height: 35,
+    borderRadius: 20,
+    border: 'none',
+    background: 'transparent',
+    boxShadow: 'none',
+    color: '#566074',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    fontSize: 24,
+    fontWeight: 300,
+    transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms ease, box-shadow 200ms ease, background 200ms ease, opacity 200ms ease',
+  };
+
+  return (
+      <div
+        style={{
+          width: '100%',
+          position: 'relative',
+          minHeight: 44,
+          padding: '0 10px',
+          boxSizing: 'border-box',
+        }}
+      >
+      <div
+        style={{
+          position: 'absolute',
+          left: 10,
+          top: 0,
+          bottom: 0,
+          width: showLeftArrow ? 268 : 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          zIndex: 12,
+          pointerEvents: 'none',
+          height: 35,
+          margin: 'auto 0',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => scrollBy('left')}
+          aria-label="向左滚动"
+          aria-hidden={!showLeftArrow}
+          tabIndex={showLeftArrow ? 0 : -1}
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 10,
-            background: c.accentBg,
-            color: c.accent,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
+            ...arrowBaseStyle,
+            opacity: showLeftArrow ? 1 : 0,
+            pointerEvents: showLeftArrow ? 'auto' : 'none',
+            transform: 'translateY(-4px)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
+            e.currentTarget.style.background = '#F3F4F6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.background = 'transparent';
           }}
         >
-          <BulbOutlined />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>结果摘要</div>
-          <div style={{ fontSize: 12, color: c.textMuted }}>
-            {resultTypeLabelMap[resultType] || '结构化结果'}
-          </div>
-        </div>
+          ‹
+        </button>
       </div>
-
-      <div style={{ fontSize: 14, lineHeight: 1.75, color: c.textBody }}>{summary}</div>
-
-      {nextActions.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>建议动作</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {nextActions.map((action, idx) => (
-              <div
-                key={`${String(action)}-${idx}`}
-                style={{
-                  borderRadius: 999,
-                  padding: '6px 10px',
-                  background: '#fff',
-                  border: `1px solid ${c.borderFaint}`,
-                  color: c.textSecondary,
-                  fontSize: 12,
-                }}
-              >
-                {String(action)}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {pendingChecks.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>待确认</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {pendingChecks.map((item, idx) => (
-              <div
-                key={`${String(item)}-${idx}`}
-                style={{
-                  borderRadius: 12,
-                  padding: '8px 10px',
-                  background: '#fff',
-                  border: `1px solid ${c.borderFaint}`,
-                  color: c.textSecondary,
-                  fontSize: 12,
-                  lineHeight: 1.6,
-                }}
-              >
-                {String(item)}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <div
+        ref={scrollRef}
+        style={{
+          width: '100%',
+          display: 'flex',
+          gap: 8,
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          padding: '2px 0',
+          minWidth: 0,
+          paddingLeft: showLeftArrow ? 328 : 0,
+          paddingRight: showRightArrow ? 176 : 44,
+          maskImage: showLeftArrow
+            ? 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 66px, rgba(0, 0, 0, 1) calc(100% - 122px), rgba(0, 0, 0, 0.92) calc(100% - 82px), rgba(0, 0, 0, 0.28) calc(100% - 48px), rgba(0, 0, 0, 0) 100%)'
+            : 'linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) calc(100% - 122px), rgba(0, 0, 0, 0.92) calc(100% - 82px), rgba(0, 0, 0, 0.28) calc(100% - 48px), rgba(0, 0, 0, 0) 100%)',
+          WebkitMaskImage: showLeftArrow
+            ? 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 66px, rgba(0, 0, 0, 1) calc(100% - 122px), rgba(0, 0, 0, 0.92) calc(100% - 82px), rgba(0, 0, 0, 0.28) calc(100% - 48px), rgba(0, 0, 0, 0) 100%)'
+            : 'linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) calc(100% - 122px), rgba(0, 0, 0, 0.92) calc(100% - 82px), rgba(0, 0, 0, 0.28) calc(100% - 48px), rgba(0, 0, 0, 0) 100%)',
+        }}
+        className="xiaoqiao-chips-scroll"
+      >
+        {flatChips.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => {
+              if (item.openPanel !== false) onOpenAgentPanel?.(item.agent as AgentType);
+              onFollowUpClick?.(item.prompt);
+            }}
+            style={{
+              flexShrink: 0,
+              height: 35,
+              padding: '0 14px',
+              borderRadius: 20,
+              border: '1px solid #E6ECF6',
+              background: '#fff',
+              color: '#666666',
+              fontSize: 14,
+              fontWeight: 400,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              whiteSpace: 'nowrap',
+              transition: 'transform 220ms cubic-bezier(0.4, 0, 0.2, 1), border-color 220ms cubic-bezier(0.4, 0, 0.2, 1), background 220ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.borderColor = '#BBD1FE';
+              e.currentTarget.style.background = '#F5F8FF';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(46, 117, 254, 0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = '#E6ECF6';
+              e.currentTarget.style.background = '#fff';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <span aria-hidden style={{ width: 6, height: 6, borderRadius: '50%', background: '#B1C1FF', flexShrink: 0 }} />
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          right: 12,
+          top: 0,
+          bottom: 0,
+          width: showRightArrow ? 164 : 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          zIndex: 11,
+          pointerEvents: 'none',
+          background: 'linear-gradient(270deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.10) 100%)',
+          height: 35,
+          margin: 'auto 0',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => scrollBy('right')}
+          aria-label="向右滚动"
+          aria-hidden={!showRightArrow}
+          tabIndex={showRightArrow ? 0 : -1}
+          style={{
+            ...arrowBaseStyle,
+            opacity: showRightArrow ? 1 : 0,
+            pointerEvents: showRightArrow ? 'auto' : 'none',
+            transform: 'translateY(-4px)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
+            e.currentTarget.style.background = '#F3F4F6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.background = 'transparent';
+          }}
+        >
+          ›
+        </button>
+      </div>
     </div>
   );
 }
@@ -2783,11 +1927,16 @@ export default function ChatContainer({
   onOpenSourcePanel,
   onEditUserMessage,
   onSubmitFollowUp,
+  onStopGeneration,
   contextThinkingSteps,
-  currentResult,
   chatSettings,
   systemPrompt,
   onOpenAgentPanel,
+  onShareConversation,
+  currentConversationTitle,
+  conversationKey,
+  chatDisplayConfig = DEFAULT_CHAT_DISPLAY_CONFIG,
+  onResultRecommendationsChange,
 }: ChatContainerProps) {
   const c = useThemeColors();
   const isMobile = useIsMobile();
@@ -2798,21 +1947,101 @@ export default function ChatContainer({
   const [editingMessage, setEditingMessage] = useState<BubbleItem | null>(null);
   const [editingDraft, setEditingDraft] = useState('');
   const [messageVersions, setMessageVersions] = useState<Record<string, { items: string[]; active: number }>>({});
+  const [savedKnowledgeMemoryIds, setSavedKnowledgeMemoryIds] = useState<Record<string, string>>({});
+  const [messageFeedback, setMessageFeedback] = useState<Record<string, 'like' | 'dislike'>>({});
+  const [viewportWidth, setViewportWidth] = useState(1280);
+  const [renderFailedMessageIds, setRenderFailedMessageIds] = useState<Set<string>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const lastConversationKeyRef = useRef<string | null | undefined>(undefined);
+  const pendingInitialBottomScrollRef = useRef(false);
+  const wasNearBottomRef = useRef(true);
+  const previousMessagesLengthRef = useRef(0);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length, isTyping]);
+    const syncViewport = () => setViewportWidth(window.innerWidth);
+    syncViewport();
+    window.addEventListener('resize', syncViewport);
+    return () => window.removeEventListener('resize', syncViewport);
+  }, []);
+
+  const effectiveChatDisplayConfig = useMemo<ChatDisplayConfig>(() => ({
+    ...DEFAULT_CHAT_DISPLAY_CONFIG,
+    ...chatDisplayConfig,
+    starters: Array.isArray(chatDisplayConfig.starters) && chatDisplayConfig.starters.length
+      ? chatDisplayConfig.starters
+      : DEFAULT_CHAT_DISPLAY_CONFIG.starters,
+  }), [chatDisplayConfig]);
+
+  // 欢迎语随机选取：后台配置加载完成后更新，之后在组件生命周期内保持稳定
+  const randomWelcomeText = useMemo<string>(() => {
+    const pool = effectiveChatDisplayConfig.welcomeTexts?.length
+      ? effectiveChatDisplayConfig.welcomeTexts
+      : effectiveChatDisplayConfig.welcomeText
+        ? [effectiveChatDisplayConfig.welcomeText]
+        : [];
+    if (!pool.length) return '需要我帮你做什么吗？';
+    const index = Math.floor(Math.random() * pool.length);
+    return pool[index] || '需要我帮你做什么吗？';
+  }, [effectiveChatDisplayConfig.welcomeText, effectiveChatDisplayConfig.welcomeTexts]);
+
+  useLayoutEffect(() => {
+    const nextConversationKey = conversationKey ?? null;
+    if (lastConversationKeyRef.current !== nextConversationKey) {
+      lastConversationKeyRef.current = nextConversationKey;
+      pendingInitialBottomScrollRef.current = Boolean(nextConversationKey);
+    }
+
+    const node = scrollContainerRef.current;
+    if (!node || messages.length === 0) return;
+
+    if (pendingInitialBottomScrollRef.current) {
+      pendingInitialBottomScrollRef.current = false;
+      const scrollToLoadedBottom = () => {
+        const current = scrollContainerRef.current;
+        if (!current) return;
+        current.scrollTop = Math.max(0, current.scrollHeight - current.clientHeight);
+        chatEndRef.current?.scrollIntoView({ block: 'end' });
+        current.scrollTop = Math.max(0, current.scrollHeight - current.clientHeight);
+        setShowScrollBottom(false);
+      };
+      scrollToLoadedBottom();
+      const firstFrame = window.requestAnimationFrame(() => {
+        scrollToLoadedBottom();
+        window.requestAnimationFrame(scrollToLoadedBottom);
+      });
+      const settleTimer = window.setTimeout(scrollToLoadedBottom, 120);
+      const lateSettleTimer = window.setTimeout(scrollToLoadedBottom, 320);
+      return () => {
+        window.cancelAnimationFrame(firstFrame);
+        window.clearTimeout(settleTimer);
+        window.clearTimeout(lateSettleTimer);
+      };
+    }
+
+    const latestMessage = messages[messages.length - 1];
+    const hasNewMessage = messages.length > previousMessagesLengthRef.current;
+    previousMessagesLengthRef.current = messages.length;
+    const shouldFollow = wasNearBottomRef.current || (hasNewMessage && latestMessage?.role === 'user');
+    if (shouldFollow) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      setShowScrollBottom(false);
+    } else {
+      setShowScrollBottom(true);
+    }
+  }, [conversationKey, messages.length, isTyping]);
 
   const handleScroll = useCallback(() => {
     const node = scrollContainerRef.current;
     if (!node) return;
     const distanceToBottom = node.scrollHeight - node.scrollTop - node.clientHeight;
+    wasNearBottomRef.current = distanceToBottom < 120;
     setShowScrollBottom(distanceToBottom > 220);
   }, []);
 
   const scrollToBottom = useCallback(() => {
+    wasNearBottomRef.current = true;
+    setShowScrollBottom(false);
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
@@ -2820,6 +2049,20 @@ export default function ChatContainer({
     if (!onFollowUpClick) return;
     onFollowUpClick(`引用这条消息继续处理：\n${content}`);
   }, [onFollowUpClick]);
+
+  const handleCopyMessage = useCallback(async (message: Message) => {
+    const text = serializeMessageForCopy(message).trim();
+    if (!text) {
+      antMessage.info('当前没有可复制的内容');
+      return;
+    }
+    const result = await copyTextWithFallback(text);
+    if (result.ok) {
+      antMessage.success('已复制');
+    } else {
+      antMessage.error('复制失败，请手动选择文本');
+    }
+  }, []);
 
   const handleRegenerateMessage = useCallback((content: string, isAi: boolean) => {
     if (!onFollowUpClick) return;
@@ -2830,9 +2073,98 @@ export default function ChatContainer({
     );
   }, [onFollowUpClick]);
 
-  const handleSaveToKnowledge = useCallback((message: Message) => {
-    const preview = (message.content || '').replace(/\s+/g, ' ').slice(0, 28);
-    antMessage.success(`已保存到个人知识库待整理区：${preview}${message.content.length > 28 ? '...' : ''}`);
+  const handleToggleSaveToKnowledge = useCallback(async (message: Message) => {
+    const messageId = message.message_id || message.id || `local:${message.conversation_id || conversationKey || 'conversation'}:${message.created_at || message.timestamp || message.content.slice(0, 24)}`;
+    if (!messageId) {
+      antMessage.warning('当前消息缺少标识，暂不能保存到个人知识库');
+      return;
+    }
+
+    const existingMemoryId = savedKnowledgeMemoryIds[messageId];
+    if (existingMemoryId?.startsWith('pending:')) {
+      antMessage.info('正在保存到个人知识库');
+      return;
+    }
+    if (existingMemoryId) {
+      setSavedKnowledgeMemoryIds((prev) => {
+        const next = { ...prev };
+        delete next[messageId];
+        return next;
+      });
+      try {
+        const response = await fetch(`/api/xiaoqiao/memory/${encodeURIComponent(existingMemoryId)}`, { method: 'DELETE' });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.success === false) {
+          throw new Error(payload?.error || 'delete memory failed');
+        }
+        antMessage.success('已取消保存到个人知识库');
+      } catch {
+        setSavedKnowledgeMemoryIds((prev) => ({
+          ...prev,
+          [messageId]: existingMemoryId,
+        }));
+        antMessage.error('取消保存失败，请稍后重试');
+      }
+      return;
+    }
+
+    const optimisticMemoryId = `pending:${messageId}`;
+    setSavedKnowledgeMemoryIds((prev) => ({
+      ...prev,
+      [messageId]: optimisticMemoryId,
+    }));
+    try {
+      const response = await fetch('/api/xiaoqiao/memory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: `chat-message:${messageId}`,
+          content: message.content || '',
+          memory_type: 'context',
+          source: 'agent_summary',
+          source_conversation_id: message.conversation_id,
+          keywords: ['chat-message', messageId, 'saved-knowledge'],
+          business_domain: 'zhitou-chat',
+          importance: 4,
+        }),
+      });
+      const memory = await response.json().catch(() => ({}));
+      if (!response.ok || !memory?.id) {
+        throw new Error(memory?.error || 'create memory failed');
+      }
+      setSavedKnowledgeMemoryIds((prev) => ({
+        ...prev,
+        ...(prev[messageId] === optimisticMemoryId ? { [messageId]: memory.id } : {}),
+      }));
+      if (memory.sync_result?.success === false || memory.sync_result?.status === 'failed') {
+        antMessage.warning('已保存到个人知识库，同步稍后重试');
+      } else {
+        antMessage.success('已保存到个人知识库');
+      }
+    } catch (error) {
+      console.error('save message to knowledge failed', error);
+      setSavedKnowledgeMemoryIds((prev) => {
+        const next = { ...prev };
+        if (next[messageId] === optimisticMemoryId) {
+          delete next[messageId];
+        }
+        return next;
+      });
+      antMessage.error('保存到个人知识库失败，请稍后重试');
+    }
+  }, [conversationKey, savedKnowledgeMemoryIds]);
+
+  const handleMessageFeedback = useCallback((messageId: string, feedback: 'like' | 'dislike') => {
+    setMessageFeedback((prev) => {
+      const next = { ...prev };
+      if (next[messageId] === feedback) {
+        delete next[messageId];
+      } else {
+        next[messageId] = feedback;
+      }
+      return next;
+    });
+    antMessage.success(feedback === 'like' ? '已记录喜欢反馈' : '已记录不喜欢反馈');
   }, []);
 
   const openUserMessageEditor = useCallback((item: BubbleItem) => {
@@ -2905,40 +2237,27 @@ export default function ChatContainer({
     }
   }, [buildSpeechText, playingMessageId, speak, speaking, stopSpeaking, synthesisSupported]);
 
-  const bubbleItems = useMemo<BubbleItem[]>(() => messages.map((msg, index) => {
+  const activeStarterItems = useMemo(() => effectiveChatDisplayConfig.starters
+    .filter((item) => item.enabled)
+    .sort((a, b) => {
+      const preferredOrder = ['delivery', 'anomaly-diagnosis', 'metric-explain', 'business-collaboration', 'data-analysis', 'report-generation', 'market-intel'];
+      const aIndex = preferredOrder.indexOf(a.id);
+      const bIndex = preferredOrder.indexOf(b.id);
+      if (aIndex !== -1 || bIndex !== -1) {
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+      }
+      return a.sortOrder - b.sortOrder;
+    }), [effectiveChatDisplayConfig.starters]);
+
+  const compactWelcome = isMobile || viewportWidth <= 980;
+
+  const renderableMessages = useMemo(() => messages.filter(isRenderableMessage), [messages]);
+
+  const bubbleItems = useMemo<BubbleItem[]>(() => renderableMessages.map((msg, index) => {
+    const isLiveAssistantMessage = msg.role === 'assistant' && index === renderableMessages.length - 1 && isTyping;
     const workflowType = typeof msg.metadata?.workflow_card === 'object'
       ? (msg.metadata.workflow_card as { type?: string }).type
       : undefined;
-    const suppressContextThinking = workflowType === 'legacy_media_debug';
-    const processEvents = Array.isArray(msg.process_events)
-      ? msg.process_events
-      : Array.isArray(msg.metadata?.process_events)
-        ? msg.metadata.process_events as NonNullable<Message['process_events']>
-        : [];
-    const processThinkingSteps = processEvents
-      .filter((event) => event.visibility !== 'debug')
-      .map((event) => thinkingStepFromProcessEvent(event));
-    const processToolCalls = processEvents
-      .map((event) => toolCallFromProcessEvent(event))
-      .filter((event): event is NonNullable<ReturnType<typeof toolCallFromProcessEvent>> => Boolean(event));
-    const ownThinkingSteps = Array.isArray(msg.thinking_steps) && msg.thinking_steps.length > 0
-      ? msg.thinking_steps
-      : processThinkingSteps.length > 0
-        ? processThinkingSteps
-      : msg.thinking
-        ? [{ label: '模型思考', content: String(msg.thinking), status: 'completed' as const }]
-        : [];
-    const thinkingSteps = ownThinkingSteps.length > 0
-      ? ownThinkingSteps
-      : msg.role === 'assistant' && index === messages.length - 1 && !suppressContextThinking
-        ? (contextThinkingSteps ?? []).map((step, stepIndex) => ({
-          key: `context-${stepIndex}`,
-          label: step.title,
-          content: step.description || '',
-          status: 'loading' as const,
-        }))
-        : [];
-
     let kind: BubbleKind = msg.role === 'user' ? 'user' : 'assistant';
     if (msg.role === 'system' || msg.message_type === 'system_notice') kind = 'system';
     if (msg.message_type === 'clarification') kind = 'clarification';
@@ -2953,103 +2272,135 @@ export default function ChatContainer({
       role: msg.role === 'assistant' ? 'ai' : 'user',
       kind,
       content: displayContent,
-      thinkingSteps,
-      toolCalls: msg.tool_calls || processToolCalls,
+      toolCalls: msg.tool_calls || [],
       missingFields: msg.missing_fields || [],
       messageId: messageKey,
       agent: msg.agent || (msg.routing_decision?.intent_type as string | undefined),
+      runtimeState: (msg.metadata?.runtime_state || (msg.metadata?.workflow_result as Record<string, unknown> | undefined)?.runtime_state) as Record<string, unknown> | undefined,
       rawMessage: msg,
     };
-  }), [contextThinkingSteps, messageVersions, messages]);
+  }), [isTyping, messageVersions, renderableMessages]);
 
-  if (messages.length === 0 && !isTyping) {
-    const starterGroups = [
-      {
-        title: '能做什么',
-        items: [
-          { label: '解答', prompt: '帮我解答一个广告投放问题', agent: 'help' as AgentType },
-          { label: '排查', prompt: '帮我排查媒体回传数据不一致的问题', agent: 'diagnosis' as AgentType },
-          { label: '对接', prompt: '帮我整理一个新增媒体对接需求', agent: 'demand' as AgentType },
-          { label: '联调', prompt: '帮我查看联调记录并准备发起联调', agent: 'debugging' as AgentType },
-          { label: '报表', prompt: '帮我创建一个报表定时任务', agent: 'help' as AgentType },
-          { label: '分析', prompt: '帮我分析投放素材和转化表现', agent: 'material' as AgentType },
-          { label: '监控', prompt: '帮我查看监控任务告警', agent: 'monitoring' as AgentType },
-        ],
-      },
-    ];
-    const starterItems: Array<{ label: string; prompt: string; agent: AgentType; disabled?: boolean }> = [
-      { label: '解答', prompt: '请解释注册数、注册设备数和注册账号数的区别', agent: 'help' },
-      { label: '排查', prompt: '请帮我排查媒体消耗异常：媒体ID、账户ID、日期、指标和预期值如下：', agent: 'diagnosis' },
-      { label: '对接', prompt: '请帮我整理一个新增媒体对接需求，需要接入的媒体、数据范围和期望上线时间如下：', agent: 'demand' },
-      { label: '联调', prompt: '请帮我发起自动联调，媒体、应用、事件和联调地址如下：', agent: 'debugging' },
-      { label: '报表', prompt: '请帮我创建一个广告日报定时任务，项目、指标、发送时间和接收人如下：', agent: 'help' },
-      { label: '分析', prompt: '请帮我分析投放素材和转化表现，时间范围、媒体和分析目标如下：', agent: 'material' },
-      { label: '监控', prompt: '请帮我创建一个监控任务，监控对象、指标、阈值和通知方式如下：', agent: 'monitoring' },
-    ];
+  const latestResultRecommendations = useMemo<ComposerRecommendation[]>(() => {
+    const latestAssistant = [...renderableMessages].reverse().find((message) => message.role === 'assistant');
+    if (!latestAssistant) return [];
+    const semanticResult = extractSemanticResult(latestAssistant);
+    const messageContract = extractMessageContract(latestAssistant);
+    const presentationResult = buildMessagePresentationResult({
+      message: latestAssistant,
+      messageContract,
+      semanticResult,
+    });
+    if (!presentationResult) return [];
+    return projectMessagePresentation({
+      message: latestAssistant,
+      result: presentationResult,
+    }).recommendations;
+  }, [renderableMessages]);
 
+  useEffect(() => {
+    onResultRecommendationsChange?.(latestResultRecommendations);
+  }, [latestResultRecommendations, onResultRecommendationsChange]);
+
+  // 消息渲染失败回调：记录失败的消息 ID
+  const handleMessageRenderError = useCallback((messageId: string) => {
+    setRenderFailedMessageIds((prev) => {
+      if (prev.has(messageId)) return prev;
+      const next = new Set(prev);
+      next.add(messageId);
+      return next;
+    });
+  }, []);
+
+  // 当会话切换时，清空渲染失败记录
+  useEffect(() => {
+    setRenderFailedMessageIds(new Set());
+  }, [conversationKey]);
+
+  // 有渲染失败的消息时，不进入空态页
+  if (messages.length === 0 && !isTyping && renderFailedMessageIds.size === 0) {
     return (
       <div
         id="chat-container"
+        className="xiaoqiao-empty-stage chat-empty-scroll-area"
         style={{
+          position: 'relative',
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'flex-start',
-          padding: isMobile ? '18px 20px 120px' : '28px 36px 140px',
+          justifyContent: 'center',
+          minHeight: 0,
+          overflowY: isMobile ? 'hidden' : 'auto',
+          overflowX: 'hidden',
+          padding: compactWelcome ? '20px 14px 80px' : '32px 36px 150px',
         }}
       >
-        <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginTop: isMobile ? 12 : 6, textAlign: 'center' }}>
-            <img
-              src="/zt-chat-logo-clean.png"
-              alt="智投chat"
-              style={{
-                width: isMobile ? 96 : 118,
-                height: 'auto',
-                objectFit: 'contain',
-              }}
-            />
-            <p style={{ margin: 0, maxWidth: 620, fontSize: 14, color: c.textSecondary, lineHeight: 1.75, fontWeight: 400 }}>
-              欢迎使用智投chat，输入问题、需求或联调目标，我会按对话方式继续推进。
-            </p>
-          </div>
-
-          <div style={{ display: 'none' }}>我可以帮你：</div>
-
-          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
-            <section style={{ borderRadius: 16, background: '#f6f7f9', padding: 18, minHeight: 160 }}>
-              <div style={{ fontSize: 16, fontWeight: 680, color: c.textPrimary }}>核心功能</div>
-              <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {starterItems.map((item) => {
-                  const button = (
-                    <button
-                      key={item.label}
-                      type="button"
-                      disabled={item.disabled}
-                      onClick={() => {
-                        if (item.disabled) return;
-                        onOpenAgentPanel?.(item.agent);
-                        onFollowUpClick?.(item.prompt);
-                      }}
-                      style={{
-                        border: `1px solid ${c.borderFaint}`,
-                        background: item.disabled ? '#f1f3f5' : '#fff',
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        color: item.disabled ? c.textMuted : c.textSecondary,
-                        cursor: item.disabled ? 'not-allowed' : 'pointer',
-                        fontSize: 13,
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                  return item.disabled ? <Tooltip key={item.label} title="规划中">{button}</Tooltip> : button;
-                })}
-              </div>
-            </section>
-          </div>
+        <div className="xiaoqiao-empty-particles" aria-hidden="true" />
+        {/* 弥散光晕 - 氛围光效果（散开 + 呼吸动效） */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            bottom: isMobile ? '60px' : 'auto',
+            top: isMobile ? 'auto' : '50%',
+            left: '50%',
+            transform: isMobile ? 'translateX(-50%)' : 'translate(-50%, -50%)',
+            width: isMobile ? '100%' : 1260,
+            height: isMobile ? 306 : 612,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          <div
+            className="xiaoqiao-empty-glow"
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: '50%',
+              background: isMobile
+                ? 'radial-gradient(ellipse at center bottom, rgba(140, 180, 255, 0.5) 0%, rgba(165, 200, 255, 0.22) 50%, transparent 75%)'
+                : 'radial-gradient(ellipse at center, rgba(130, 175, 255, 0.55) 0%, rgba(155, 190, 255, 0.26) 40%, transparent 70%)',
+              filter: 'blur(100px)',
+            }}
+          />
         </div>
+        <motion.div
+          className="xiaoqiao-empty-content-shell"
+          initial={false}
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            maxWidth: compactWelcome ? 760 : 960,
+            margin: '0 auto',
+            padding: 0,
+            transform: compactWelcome ? 'translateY(-70px)' : 'translateY(-152px)',
+          }}
+        >
+          <motion.div
+            initial={false}
+            style={{ display: 'flex', flexDirection: compactWelcome ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', gap: compactWelcome ? 8 : 2, minHeight: compactWelcome ? 184 : 228, textAlign: 'center' }}
+          >
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+              className="xiaoqiao-empty-logo-wrap"
+              style={{ marginRight: 2 }}
+            >
+              <div className="xiaoqiao-empty-logo" style={{ position: 'relative', zIndex: 1 }}>
+                <WelcomeMascotIcon
+                  size={compactWelcome ? 72 : 104}
+                  stageWidth={compactWelcome ? 72 : 104}
+                  stageHeight={compactWelcome ? 72 : 104}
+                />
+              </div>
+            </motion.div>
+            <h1 style={{ margin: compactWelcome ? '0' : '-12px -10px 0 0', fontSize: compactWelcome ? 22 : 28, fontWeight: 500, lineHeight: 1.2, letterSpacing: '-0.01em', color: '#000000', textAlign: compactWelcome ? 'center' : 'left' }}>
+              {randomWelcomeText}
+            </h1>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }
@@ -3065,7 +2416,7 @@ export default function ChatContainer({
         position: 'relative',
         flex: 1,
         overflow: 'auto',
-        padding: isMobile ? '4px 12px 12px' : '4px 20px 20px',
+        padding: `4px ${isMobile ? '18px' : 'clamp(18px, 2.5vw, 20px)'} ${isMobile ? '12px' : '20px'}`,
       }}
     >
       <div
@@ -3082,209 +2433,106 @@ export default function ChatContainer({
           <SystemPromptDisplay prompt={systemPrompt} />
         )}
 
+        {renderFailedMessageIds.size > 0 && (
+          <div
+            style={{
+              borderRadius: 12,
+              border: '1px solid #fde68a',
+              background: '#fffbeb',
+              padding: '12px 14px',
+              fontSize: 13,
+              color: '#92400e',
+              lineHeight: 1.7,
+              marginBottom: 4,
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>
+              ⚠ 部分历史消息无法正常渲染
+            </div>
+            <div style={{ fontSize: 12, color: '#a16207', marginBottom: 6 }}>
+              <div>原因：某条消息格式不兼容（如旧版本插件、自定义卡片类型已下线）。</div>
+              <div style={{ marginTop: 4 }}>你可以：</div>
+              <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                <li>继续查看其他能正常展示的消息</li>
+                <li>尝试「复制原始内容」查看完整对话</li>
+                <li>如反复出现，请联系支持并告知会话 ID</li>
+              </ul>
+            </div>
+            <div style={{ fontSize: 11, color: '#b45309' }}>
+              受影响消息数：{renderFailedMessageIds.size} 条
+            </div>
+          </div>
+        )}
+
         {bubbleItems.map((item, itemIndex) => {
-          const isAi = item.role === 'ai';
-          const showAgentTag = isAi && item.agent && item.kind !== 'system';
-          const showActions = item.kind !== 'system';
-          const sourceRefs = isAi ? collectSourceRefs(item.rawMessage) : [];
-          const capabilities = isAi ? collectCapabilities(item.rawMessage) : [];
-          const workflowCard = isAi ? getWorkflowCard(item.rawMessage) : null;
+        const isAi = item.role === 'ai';
+        const messageId = item.messageId || item.key;
+          const isRunningMessage = item.rawMessage.metadata?.turn_ui_status === 'assistant_pending'
+            || item.rawMessage.metadata?.turn_ui_status === 'streaming'
+            || item.rawMessage.metadata?.turn_ui_status === 'tool_running'
+            || item.rawMessage.metadata?.turn_ui_status === 'finalizing'
+            || item.rawMessage.metadata?.turn_ui_status === 'cancel_requested';
+          const savedToKnowledge = Boolean(savedKnowledgeMemoryIds[messageId]);
+          const feedbackState = messageFeedback[messageId];
+          const messageContract = isAi ? extractMessageContract(item.rawMessage) : null;
+          const semanticResult = isAi ? extractSemanticResult(item.rawMessage) : null;
+          const presentationResult = isAi
+            ? buildMessagePresentationResult({
+                message: item.rawMessage,
+                messageContract,
+                semanticResult,
+              })
+            : null;
           const metricExplainerSchema = isAi
             ? getMetricExplainerSchema(item.rawMessage)
             : null;
-          const handleMetricAction = (action: MetricAction) => {
-            onFollowUpClick?.(`请继续处理：${action.label}`);
-          };
-          const moreActions: MenuProps['items'] = [
-            onFollowUpClick ? {
-              key: 'quote',
-              label: '引用',
-              icon: <CopyOutlined />,
-              onClick: () => handleQuoteMessage(item.content),
-            } : null,
-            {
-              key: 'source',
-              label: '来源',
-              icon: <InfoCircleOutlined />,
-              onClick: () => onOpenSourcePanel?.({ message: item.rawMessage }),
-            },
-            {
-              key: 'save-kb',
-              label: '保存到个人知识库',
-              icon: <IconAsset name="share-plane" size={14} />,
-              onClick: () => handleSaveToKnowledge(item.rawMessage),
-            },
-            {
-              key: 'share-xiaoshan',
-              label: '分享到小闪',
-              icon: <IconAsset name="share-plane" size={14} />,
-              onClick: () => antMessage.success('已分享到小闪'),
-            },
-            {
-              key: 'collapse',
-              label: '收起',
-              icon: <UpOutlined />,
-              onClick: () => undefined,
-            },
-          ].filter(Boolean) as MenuProps['items'];
-
+          const hasRuntimeStatusCard = isAi && shouldShowRuntimeStatusCard(item.rawMessage);
+          const bubbleWidthStyle = isAi
+            ? {
+                width: '100%',
+                maxWidth: isMobile ? '100%' : 980,
+                minWidth: 60,
+              }
+            : {
+                width: '100%',
+                maxWidth: isMobile ? '100%' : 980,
+                minWidth: 60,
+              };
           return (
             <div key={item.key} data-message-surface={item.messageId || item.key} style={{ position: 'relative' }}>
               <div style={{ display: 'flex', gap: isMobile ? 8 : 10, justifyContent: isAi ? 'flex-start' : 'flex-end' }}>
-                <div style={{ maxWidth: isMobile ? '88%' : 760, minWidth: 60 }}>
-                  {showAgentTag && (
-                    <div style={{ marginBottom: 4 }}>
-                      <Tag
-                        color={AGENT_MAP[item.agent!]?.color || 'default'}
-                        style={{ fontSize: 11, borderRadius: 999, margin: 0 }}
-                      >
-                        {workflowCard?.type === 'report_composer' ? '报表任务' : getAgentDisplayName(item.agent)}
-                      </Tag>
-                    </div>
-                  )}
-
-                  {isAi && item.thinkingSteps.length > 0 && (
-                    <ThinkingChain
-                      steps={item.thinkingSteps}
-                      toolCalls={item.toolCalls}
-                      codeStyle={settings.codeStyle}
-                      showLineNumbers={settings.codeLineNumbers}
-                      title="思维链"
-                      defaultExpanded={!settings.autoCollapseThinking}
-                    />
-                  )}
-
-                  {isAi && workflowCard && !(workflowCard.type === 'legacy_media_debug' && workflowCard.status === 'auto_checked') && (
-                    <WorkflowProcessCard
-                      data={workflowCard}
-                      onFollowUpClick={onFollowUpClick}
-                      onSubmitFollowUp={onSubmitFollowUp}
-                    />
-                  )}
-
-                  {isAi && item.kind === 'assistant' && (capabilities.length > 0 || sourceRefs.length > 0) && (
-                    <UnifiedEvidenceStrip
-                      capabilities={capabilities}
-                      refs={sourceRefs}
-                      onOpenCapability={(capability) => onOpenSourcePanel?.({ message: item.rawMessage, capability })}
-                      onOpenSource={(source) => onOpenSourcePanel?.({ message: item.rawMessage, source })}
-                    />
-                  )}
-
-                  {isAi && metricExplainerSchema && (
-                    <MetricExplainerRenderer
-                      schema={metricExplainerSchema}
-                      onAction={handleMetricAction}
-                    />
-                  )}
-
-                  {!(isAi && workflowCard?.type === 'legacy_media_debug' && (workflowCard.status === 'running' || workflowCard.status === 'started')) && (
-                    <MessageSurface
-                      item={item}
-                      codeStyle={settings.codeStyle}
-                      showLineNumbers={settings.codeLineNumbers}
-                    />
-                  )}
-
-                  {false && isAi && item.kind === 'assistant' && (
-                    <SourceReferenceStrip
-                      refs={sourceRefs}
-                      onOpen={(source) => onOpenSourcePanel?.({ message: item.rawMessage, source })}
-                    />
-                  )}
-
-                  <MissingFieldPanel
-                    fields={item.missingFields}
-                    onClick={(field, value) => {
-                      if (!value) {
-                        onFollowUpClick?.(field.suggested_question);
-                        return;
-                      }
-                      const payload = value.includes('=') ? value : `${field.field_label}=${value}`;
-                      const previousUserMessage = [...bubbleItems.slice(0, itemIndex)]
-                        .reverse()
-                        .find((candidate) => candidate.role === 'user')?.content;
-                      const nextQuestion = [
-                        previousUserMessage || '请继续排查当前问题',
-                        `已补充排查条件：${payload}`,
-                        '请结合原问题和已补充条件继续排查。',
-                      ].join('\n\n');
-                      if (onSubmitFollowUp) {
-                        onSubmitFollowUp(nextQuestion);
-                        return;
-                      }
-                      onFollowUpClick?.(nextQuestion);
-                    }}
+                <div style={bubbleWidthStyle}>
+                  <MessageErrorBoundary messageId={messageId} onError={handleMessageRenderError}>
+                  <MessageSurface
+                    item={item}
+                    presentationResult={presentationResult}
+                    codeStyle={settings.codeStyle}
+                    showLineNumbers={settings.codeLineNumbers}
+                    onFollowUpClick={onFollowUpClick}
+                    onSubmitFollowUp={onSubmitFollowUp}
+                    onOpenDisclosure={isAi && onOpenSourcePanel ? (message) => onOpenSourcePanel({ message }) : undefined}
                   />
-
-                  {showActions && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: 4,
-                        flexWrap: 'wrap',
-                        marginTop: 8,
-                        justifyContent: isAi ? 'flex-start' : 'flex-end',
-                        opacity: 0.94,
-                      }}
-                    >
-                      <CopyButton text={item.content} />
-                      {!isAi ? (
-                        onEditUserMessage && (
-                          <MessageActionButton
-                            icon={<EditOutlined />}
-                            label="编辑"
-                            onClick={() => openUserMessageEditor(item)}
-                          />
-                        )
-                      ) : (
-                        <>
-                          {onFollowUpClick && (
-                            <MessageActionButton
-                              icon={<ReloadOutlined />}
-                              label="重新生成"
-                              onClick={() => handleRegenerateMessage(item.content, true)}
-                            />
-                          )}
-                          <MessageActionButton
-                            icon={<LikeOutlined />}
-                            label="喜欢"
-                            onClick={() => antMessage.success('已记录喜欢反馈')}
-                          />
-                          <MessageActionButton
-                            icon={<DislikeOutlined />}
-                            label="不喜欢"
-                            onClick={() => antMessage.info('已记录不喜欢反馈')}
-                          />
-                          <MessageActionButton
-                            icon={playingMessageId === item.messageId ? <PauseCircleOutlined /> : <SoundOutlined />}
-                            label={playingMessageId === item.messageId ? '停止播报' : '语音播报'}
-                            onClick={() => handleSpeakMessage(item.messageId, item.content)}
-                          />
-                          <Dropdown
-                            trigger={['click']}
-                            placement="bottomRight"
-                            menu={{ items: moreActions }}
-                          >
-                            <span>
-                              <MessageActionButton
-                                icon={<MoreOutlined />}
-                                label="更多"
-                                onClick={() => undefined}
-                              />
-                            </span>
-                          </Dropdown>
-                          {devMode && onViewCallChain && (
-                            <MessageActionButton
-                              icon={<CodeOutlined />}
-                              label="调用链"
-                              onClick={onViewCallChain}
-                            />
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
+                  </MessageErrorBoundary>
+                  <MessageActionBar
+                    message={item.rawMessage}
+                    isRunning={isRunningMessage}
+                    onOpenDisclosure={undefined}
+                    onCopy={() => handleCopyMessage(item.rawMessage)}
+                    onRegenerate={isAi && onFollowUpClick ? () => handleRegenerateMessage(item.content, true) : undefined}
+                    onEdit={!isAi && onEditUserMessage ? () => openUserMessageEditor(item) : undefined}
+                    onQuote={onFollowUpClick ? () => handleQuoteMessage(item.content) : undefined}
+                    feedbackState={feedbackState}
+                    onLike={isAi ? () => handleMessageFeedback(messageId, 'like') : undefined}
+                    onDislike={isAi ? () => handleMessageFeedback(messageId, 'dislike') : undefined}
+                    savedToKnowledge={savedToKnowledge}
+                    onToggleSave={isAi ? () => handleToggleSaveToKnowledge(item.rawMessage) : undefined}
+                    isSpeaking={playingMessageId === item.messageId}
+                    onSpeak={isAi ? () => handleSpeakMessage(item.messageId, item.content) : undefined}
+                    onShareConversation={onShareConversation}
+                    currentConversationTitle={currentConversationTitle}
+                    onViewCallChain={onViewCallChain}
+                    devMode={devMode}
+                  />
                   {!isAi && messageVersions[item.messageId || item.key]?.items.length > 1 && (
                     <div
                       style={{
@@ -3303,7 +2551,7 @@ export default function ChatContainer({
                         onClick={() => shiftMessageVersion(item.messageId || item.key, -1)}
                         style={{ border: 'none', background: 'transparent', color: c.textMuted, cursor: 'pointer', padding: 2 }}
                       >
-                        ‹
+                        ?
                       </button>
                       <span>
                         {(messageVersions[item.messageId || item.key]?.active ?? 0) + 1}
@@ -3316,7 +2564,7 @@ export default function ChatContainer({
                         onClick={() => shiftMessageVersion(item.messageId || item.key, 1)}
                         style={{ border: 'none', background: 'transparent', color: c.textMuted, cursor: 'pointer', padding: 2 }}
                       >
-                        ›
+                        ?
                       </button>
                     </div>
                   )}
@@ -3325,25 +2573,6 @@ export default function ChatContainer({
             </div>
           );
         })}
-
-        {isTyping && (
-          <div style={{ display: 'flex', gap: isMobile ? 8 : 10, alignItems: 'flex-end' }}>
-            <div
-              style={{
-                padding: '10px 16px',
-                borderRadius: '8px 18px 18px 18px',
-                background: c.bgCard,
-                border: `1px solid ${c.borderFaint}`,
-              }}
-            >
-              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                <span className="thinking-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent, animation: 'thinking-bounce 1.4s ease-in-out infinite' }} />
-                <span className="thinking-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent, animation: 'thinking-bounce 1.4s ease-in-out 0.2s infinite' }} />
-                <span className="thinking-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent, animation: 'thinking-bounce 1.4s ease-in-out 0.4s infinite' }} />
-              </div>
-            </div>
-          </div>
-        )}
 
         <div ref={chatEndRef} />
       </div>
@@ -3380,6 +2609,23 @@ export default function ChatContainer({
       title="编辑消息"
       okText="重新发送"
       cancelText="取消"
+      rootClassName="xiaoqiao-primary-modal"
+      centered
+      okButtonProps={{
+        style: {
+          background: c.accent,
+          borderColor: c.accent,
+          boxShadow: '0 8px 18px rgba(46, 117, 254, 0.18)',
+          fontWeight: 500,
+        },
+      }}
+      cancelButtonProps={{
+        style: {
+          borderColor: c.borderFaint,
+          color: c.textSecondary,
+          fontWeight: 500,
+        },
+      }}
       onOk={submitEditedUserMessage}
       onCancel={() => {
         setEditingMessage(null);
@@ -3397,4 +2643,6 @@ export default function ChatContainer({
     </>
   );
 }
+
+
 
