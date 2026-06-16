@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { type ComponentType, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Input, Modal, Tooltip, message as antMessage } from 'antd';
@@ -26,7 +26,7 @@ import {
   ThunderboltOutlined,
   UpOutlined,
 } from '@ant-design/icons';
-import type { AgentType, AiNextAction, BusinessSummary, Message, MessageContract, MissingField, WorkflowResult } from '@/types';
+import type { AgentProcessEvent, AgentType, AiNextAction, BusinessSummary, Message, MessageContract, MissingField, WorkflowResult } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
 import { copyTextWithFallback, serializeMessageForCopy } from '@/lib/chat-copy';
 import { formatDisplayValue } from '@/lib/display-format';
@@ -39,6 +39,7 @@ import { IconAsset } from '@/components/ui/IconAsset';
 import { MessageActionBar } from './MessageActionBar';
 import { AmbiguityConfirmCard, type AmbiguityConfirmPayload } from './AmbiguityConfirmCard';
 import { cleanRuntimeLabel } from '@/lib/chat-runtime/runtime-disclosure';
+import { normalizeAnswerMarkdown } from '@/lib/chat-runtime/answer-markdown-normalizer';
 import { CapabilityFollowUpCard, type CapabilityFollowUpPayload } from './CapabilityFollowUpCard';
 import { decodeReportActionEnvelope, encodeReportActionEnvelope, reportActionLabel } from '@/lib/report-action-envelope';
 import { WelcomeMascotIcon } from './WelcomeMascotIcon';
@@ -46,6 +47,8 @@ import { MessageErrorBoundary } from './MessageErrorBoundary';
 import { MessagePresentationRenderer } from './MessagePresentationRenderer';
 import { buildMessagePresentationResult, extractMessageContract, extractSemanticResult } from './message-presentation';
 import { projectMessagePresentation, type ComposerRecommendation } from './message-presentation-projection';
+import { buildMessageDisclosureView } from './messageState';
+import { buildRuntimeDisclosurePresentation, type RuntimeDisclosurePresentation } from '@/contracts/disclosure/runtime-presentation';
 import {
   MetricExplainerRenderer,
   isMetricExplainerUISchema,
@@ -186,24 +189,24 @@ function safeJsonText(value?: string) {
   }
 }
 
-function stripInlineSourceSection(content: string): string {
-  const lines = content.split('\n');
-  const sourceHeadingIndex = lines.findIndex((line) => {
-    const normalized = line.replace(/\*/g, '').replace(/^#+\s*/, '').trim();
-    return /^(关键信息来源|信息来源|来源|参考来源|数据来源)[:：]?$/.test(normalized);
-  });
-  if (sourceHeadingIndex < 0) return content;
-  const before = lines.slice(0, sourceHeadingIndex).join('\n').trimEnd();
-  const after = lines.slice(sourceHeadingIndex + 1);
-  const nextHeadingIndex = after.findIndex((line) => /^#{1,3}\s+/.test(line.trim()));
-  if (nextHeadingIndex < 0) return before;
-  return `${before}\n\n${after.slice(nextHeadingIndex).join('\n')}`.trim();
-}
-
 function getRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? value as Record<string, unknown>
     : null;
+}
+
+function getMessageTraceUrl(message: Message): string {
+  const metadata = getRecord(message.metadata) || {};
+  const workflowResult = getRecord(metadata.workflow_result);
+  const projection = getRecord(metadata.message_runtime_projection)
+    || getRecord(workflowResult?.message_runtime_projection);
+  const traceMeta = getRecord(metadata.trace_meta);
+  const candidates = [
+    projection?.trace_url,
+    metadata.trace_url,
+    traceMeta?.trace_url,
+  ];
+  return candidates.find((value): value is string => typeof value === 'string' && value.trim().length > 0)?.trim() || '';
 }
 
 function getAmbiguityConfirmPayload(message: Message): AmbiguityConfirmPayload | null {
@@ -293,6 +296,7 @@ function CopyButton({ text }: { text: string }) {
 
     const copyWithFallback = () => {
       const textarea = document.createElement('textarea');
+      textarea.name = 'message_copy_buffer';
       textarea.value = text;
       textarea.setAttribute('readonly', 'true');
       textarea.style.position = 'fixed';
@@ -497,7 +501,7 @@ function MarkdownRenderer({
           background: '#fff',
         }}
       >
-        <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 'var(--font-size-body)' }}>
           <thead>
             <tr>
               {headers.map((header, headerIndex) => (
@@ -578,7 +582,7 @@ function MarkdownRenderer({
     ) : node;
     const boldHeadingMatch = trimmedLine.match(/^\*\*([^*]+)\*\*$/);
     if (boldHeadingMatch) {
-      nodes.push(wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{boldHeadingMatch[1]}</h2>));
+      nodes.push(wrapSection(<h2 key={index} className="ui-title" style={{ fontWeight: 700, marginTop: 0, marginBottom: 8 }}>{boldHeadingMatch[1]}</h2>));
       index += 1;
       continue;
     }
@@ -587,8 +591,8 @@ function MarkdownRenderer({
     if (boldLabelMatch) {
       nodes.push(wrapSection(
         <div key={index} style={{ margin: '0 0 8px' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{boldLabelMatch[1]}</div>
-          {boldLabelMatch[2] && <div style={{ marginTop: 4, color: c.textSecondary }}>{boldLabelMatch[2]}</div>}
+          <div className="ui-body" style={{ fontWeight: 700 }}>{boldLabelMatch[1]}</div>
+          {boldLabelMatch[2] && <div className="ui-caption" style={{ marginTop: 4 }}>{boldLabelMatch[2]}</div>}
         </div>,
       ));
       index += 1;
@@ -596,17 +600,17 @@ function MarkdownRenderer({
     }
 
     if (trimmedLine.startsWith('### ')) {
-      nodes.push(wrapSection(<h3 key={index} style={{ fontSize: 15, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 4 }}>{trimmedLine.slice(4)}</h3>));
+      nodes.push(wrapSection(<h3 key={index} className="ui-body" style={{ fontWeight: 700, marginTop: 0, marginBottom: 4 }}>{trimmedLine.slice(4)}</h3>));
       index += 1;
       continue;
     }
     if (trimmedLine.startsWith('## ')) {
-      nodes.push(wrapSection(<h2 key={index} style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 6 }}>{trimmedLine.slice(3)}</h2>));
+      nodes.push(wrapSection(<h2 key={index} className="ui-title" style={{ fontWeight: 700, marginTop: 0, marginBottom: 8 }}>{trimmedLine.slice(3)}</h2>));
       index += 1;
       continue;
     }
     if (trimmedLine.startsWith('# ')) {
-      nodes.push(wrapSection(<h1 key={index} style={{ fontSize: 18, fontWeight: 700, color: c.textPrimary, marginTop: 0, marginBottom: 8 }}>{trimmedLine.slice(2)}</h1>));
+      nodes.push(wrapSection(<h1 key={index} style={{ fontSize: 'var(--font-size-display)', fontWeight: 700, color: 'var(--color-text-title)', marginTop: 0, marginBottom: 8 }}>{trimmedLine.slice(2)}</h1>));
       index += 1;
       continue;
     }
@@ -616,6 +620,7 @@ function MarkdownRenderer({
       nodes.push(
         <div key={index} style={{ display: 'grid', gridTemplateColumns: '22px minmax(0, 1fr)', gap: 8, alignItems: 'start', margin: '3px 0' }}>
           <span
+            className="ui-micro"
             style={{
               width: 20,
               height: 20,
@@ -625,7 +630,6 @@ function MarkdownRenderer({
               justifyContent: 'center',
               background: c.accentBgFaint,
               color: c.accent,
-              fontSize: 11,
               fontWeight: 600,
               lineHeight: 1,
             }}
@@ -660,7 +664,7 @@ function MarkdownRenderer({
   };
 
   return (
-    <div style={{ fontSize: 14, lineHeight: 1.82, color: c.textBody }}>
+    <div className="ui-body" style={{ lineHeight: 1.82 }}>
       {segments.map((segment, index) => {
         if (segment.type === 'code') {
           if (segment.language?.toLowerCase() === 'mermaid') {
@@ -918,6 +922,8 @@ function MissingFieldPanel({
               </select>
             ) : (
               <input
+                id={`missing-field-${field.field_key}`}
+                name={`missing_field_${field.field_key}`}
                 value={drafts[field.field_key] || ''}
                 onChange={(event) => setDrafts((prev) => ({ ...prev, [field.field_key]: event.target.value }))}
                 placeholder={`填写${field.field_label}`}
@@ -1268,11 +1274,127 @@ function CapabilityStrip({
   );
 }
 
+function VersionUpdateNotice() {
+  const c = useThemeColors();
+  const [currentVersion, setCurrentVersion] = useState('');
+  const [nextVersion, setNextVersion] = useState('');
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let disposed = false;
+    const loadVersion = async () => {
+      try {
+        const response = await fetch(`/api/xiaoqiao/runtime-version?t=${Date.now()}`, {
+          cache: 'no-store',
+          credentials: 'include',
+        });
+        const data = await response.json().catch(() => ({}));
+        const version = typeof data.version === 'string' ? data.version.trim() : '';
+        if (!version || disposed) return;
+        setCurrentVersion((previous) => {
+          if (!previous) return version;
+          if (previous !== version) {
+            setNextVersion(version);
+            setVisible(true);
+          }
+          return previous;
+        });
+      } catch {
+        // Version polling should never interrupt chat.
+      }
+    };
+    void loadVersion();
+    const timer = window.setInterval(loadVersion, 30000);
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const reload = async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    } catch {
+      // A cache-busted navigation still loads the latest app shell.
+    } finally {
+      const url = new URL(window.location.href);
+      url.searchParams.set('app_v', nextVersion || currentVersion || String(Date.now()));
+      window.location.replace(url.toString());
+    }
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        top: 16,
+        right: 16,
+        zIndex: 10000,
+        width: 280,
+        borderRadius: 12,
+        border: `1px solid ${c.chat.border.subtle}`,
+        background: c.chat.surface.panel,
+        boxShadow: '0 14px 40px rgba(15, 23, 42, 0.16)',
+        padding: 14,
+        color: c.chat.text.primary,
+      }}
+    >
+      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>发现新版本</div>
+      <div style={{ fontSize: 12, color: c.chat.text.secondary, lineHeight: 1.6, marginBottom: 12 }}>
+        当前页面可能仍在使用旧资源，刷新后可加载最新服务。
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <button
+          type="button"
+          onClick={() => setVisible(false)}
+          style={{
+            border: `1px solid ${c.chat.border.subtle}`,
+            background: c.chat.surface.panel,
+            color: c.chat.text.secondary,
+            borderRadius: 8,
+            padding: '6px 10px',
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          稍后
+        </button>
+        <button
+          type="button"
+          onClick={() => void reload()}
+          style={{
+            border: '1px solid rgba(46,117,254,0.28)',
+            background: c.accent,
+            color: '#fff',
+            borderRadius: 8,
+            padding: '6px 10px',
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          加载新版
+        </button>
+      </div>
+    </div>
+  );
+}
+
 type RuntimeDisplayState = 'queued' | 'understanding' | 'context_resolving' | 'capability_matching' | 'entity_resolving' | 'tool_executing' | 'result_composing' | 'final' | 'degraded' | 'blocked' | 'empty' | 'skipped' | 'failed' | 'cancelled';
 
 const RUNTIME_STATUS_TEXT: Record<RuntimeDisplayState, string> = {
   queued: '\u5df2\u6536\u5230\u8bf7\u6c42',
-  understanding: '\u6b63\u5728\u7406\u89e3\u8bf7\u6c42',
+  understanding: '准备执行',
   context_resolving: '\u6b63\u5728\u8865\u9f50\u4e0a\u4e0b\u6587',
   capability_matching: '\u6b63\u5728\u5339\u914d\u80fd\u529b',
   entity_resolving: '\u6b63\u5728\u8bc6\u522b\u6761\u4ef6',
@@ -1289,6 +1411,11 @@ const RUNTIME_STATUS_TEXT: Record<RuntimeDisplayState, string> = {
 
 function hasAssistantVisibleContent(message: Message): boolean {
   return message.role === 'assistant' && typeof message.content === 'string' && message.content.trim().length > 0;
+}
+
+function runtimePresentationForMessage(message: Message): RuntimeDisclosurePresentation | null {
+  const view = buildMessageDisclosureView({ message });
+  return view ? buildRuntimeDisclosurePresentation(view) : null;
 }
 
 function normalizeRuntimeStatus(message: Message): RuntimeDisplayState {
@@ -1309,17 +1436,24 @@ function normalizeRuntimeStatus(message: Message): RuntimeDisplayState {
   if (raw === 'failed' || raw === 'error') return 'failed';
   if (raw === 'skipped') return 'skipped';
 
-  const runningEvent = message.process_events?.find((event) => event.status === 'running');
+  const processEvents = getMessageProcessEvents(message);
+  const runningEvent = processEvents.find((event) => event.status === 'running');
   if (runningEvent?.type === 'capability.checked') return 'capability_matching';
   if (runningEvent?.type === 'context.prepared') return 'context_resolving';
   if (runningEvent?.type?.startsWith('mcp.')) return 'tool_executing';
-  if (message.process_events?.length) return 'final';
+  if (processEvents.length) return 'final';
   if (hasAssistantVisibleContent(message)) return 'final';
   return 'queued';
 }
 
+function getMessageProcessEvents(message: Message): AgentProcessEvent[] {
+  if (Array.isArray(message.process_events) && message.process_events.length > 0) return message.process_events;
+  const metadataEvents = message.metadata?.process_events;
+  return Array.isArray(metadataEvents) ? metadataEvents as AgentProcessEvent[] : [];
+}
+
 function runtimeStepLabel(message: Message, fallbackLabel?: string): string {
-  const events = message.process_events || [];
+  const events = getMessageProcessEvents(message);
   const running = [...events].reverse().find((event) => event.status === 'running');
   const latest = [...events].reverse().find((event) => event.label);
   const runtimeState = message.metadata?.runtime_state && typeof message.metadata.runtime_state === 'object'
@@ -1333,11 +1467,11 @@ function runtimeStepLabel(message: Message, fallbackLabel?: string): string {
 }
 
 function runtimeStepCount(message: Message): number {
-  return Math.max(message.process_events?.length || 0, message.thinking_steps?.length || 0, message.tool_calls?.length || 0);
+  return Math.max(getMessageProcessEvents(message).length, message.thinking_steps?.length || 0, message.tool_calls?.length || 0);
 }
 
 function runtimeDurationText(message: Message): string {
-  const events = message.process_events || [];
+  const events = getMessageProcessEvents(message);
   const durations = events
     .map((event) => typeof event.duration_ms === 'number' ? event.duration_ms : 0)
     .filter((value) => value > 0);
@@ -1360,7 +1494,7 @@ function runtimeDurationText(message: Message): string {
 
 function shouldShowRuntimeStatusCard(message: Message): boolean {
   const status = String(message.metadata?.turn_ui_status || '');
-  return Boolean(status || message.process_events?.length || message.thinking_steps?.length || message.tool_calls?.length);
+  return Boolean(status || message.metadata?.runtime_state || getMessageProcessEvents(message).length || message.thinking_steps?.length || message.tool_calls?.length);
 }
 
 function RuntimeStatusCard({
@@ -1379,15 +1513,25 @@ function RuntimeStatusCard({
 
   const status = normalizeRuntimeStatus(message);
   const terminal = status === 'final' || status === 'degraded' || status === 'blocked' || status === 'empty' || status === 'failed' || status === 'cancelled' || status === 'skipped';
-  const stepCount = runtimeStepCount(message);
-  const duration = runtimeDurationText(message);
-  const currentLabel = cleanRuntimeLabel(runtimeStepLabel(message, label)) || RUNTIME_STATUS_TEXT[status];
+  const runtimePresentation = runtimePresentationForMessage(message);
+  const primaryRows = runtimePresentation?.primaryRows || [];
+  const runningRow = [...primaryRows].reverse().find((row) => row.status === 'running' || row.status === 'processing' || row.status === 'queued');
+  const latestRow = [...primaryRows].reverse().find((row) => row.title);
+  const presentationDurationMs = primaryRows
+    .map((row) => typeof row.durationMs === 'number' ? row.durationMs : 0)
+    .filter((value) => value > 0)
+    .reduce((sum, value) => sum + value, 0);
+  const stepCount = primaryRows.length || runtimeStepCount(message);
+  const duration = presentationDurationMs > 0
+    ? (presentationDurationMs >= 10000 ? `${Math.round(presentationDurationMs / 1000)}s` : `${(presentationDurationMs / 1000).toFixed(1)}s`)
+    : runtimeDurationText(message);
+  const currentLabel = cleanRuntimeLabel(runningRow?.title || latestRow?.title || runtimeStepLabel(message, label)) || RUNTIME_STATUS_TEXT[status];
   const projection = presentationResult
     ? projectMessagePresentation({ message, result: presentationResult })
     : null;
   const hasSideDetails = Boolean(
     onOpenDisclosure
-      && (message.process_events?.length || message.tool_calls?.length || projection?.sideRegions.length || presentationResult),
+      && (message.metadata?.turn_ui_status || message.metadata?.runtime_state || message.process_events?.length || message.tool_calls?.length || projection?.sideRegions.length || presentationResult || primaryRows.length),
   );
   const openDisclosure = () => {
     if (!hasSideDetails || !onOpenDisclosure) return;
@@ -1400,10 +1544,19 @@ function RuntimeStatusCard({
   const displayText = status === 'final'
     ? completedText
     : terminal
-      ? RUNTIME_STATUS_TEXT[status]
+      ? [RUNTIME_STATUS_TEXT[status], completedText].filter(Boolean).join(' · ')
       : currentLabel;
-  const textColor = status === 'failed'
+  const dotColor = status === 'failed'
     ? c.danger
+    : status === 'degraded' || status === 'blocked' || status === 'empty'
+      ? c.chat.text.muted
+      : status === 'cancelled' || status === 'skipped'
+        ? c.chat.text.muted
+        : terminal
+          ? c.textSecondary
+          : c.accent;
+  const textColor = status === 'failed'
+    ? c.chat.text.muted
     : status === 'degraded' || status === 'blocked' || status === 'empty'
       ? c.chat.text.muted
       : status === 'cancelled' || status === 'skipped'
@@ -1420,19 +1573,25 @@ function RuntimeStatusCard({
       tabIndex={hasSideDetails ? 0 : undefined}
       style={{
         marginBottom: c.chat.spacing.inlineGap,
-        display: 'flex',
+        display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 10,
+        width: 'fit-content',
+        maxWidth: '100%',
         borderRadius: c.chat.radius.badge,
-        border: `1px solid ${c.chat.border.subtle}`,
-        background: c.chat.surface.status,
+        border: `1px solid ${hasSideDetails && !terminal ? 'rgba(46,117,254,0.32)' : 'transparent'}`,
+        background: terminal ? 'transparent' : c.chat.surface.status,
         color: textColor,
         padding: '6px 10px',
         fontSize: 12,
         lineHeight: 1.5,
         cursor: hasSideDetails ? 'pointer' : 'default',
+        boxShadow: hasSideDetails && !terminal ? '0 6px 18px rgba(46, 117, 254, 0.10)' : 'none',
+        transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease',
       }}
+      title={hasSideDetails ? '查看运行过程' : undefined}
+      aria-label={hasSideDetails ? '查看运行过程' : undefined}
       onClick={openDisclosure}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -1442,18 +1601,29 @@ function RuntimeStatusCard({
       }}
     >
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        {(!terminal || status === 'failed') && (
+          <span
+            aria-hidden="true"
+            className={!terminal ? 'xq-runtime-pulse' : undefined}
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 999,
+              background: dotColor,
+              boxShadow: !terminal
+                ? `0 0 0 5px rgba(46, 117, 254, 0.12), 0 0 18px rgba(46, 117, 254, 0.36)`
+                : status === 'failed'
+                  ? `0 0 0 4px rgba(220, 38, 38, 0.12)`
+                  : 'none',
+              flexShrink: 0,
+            }}
+          />
+        )}
         <span
-          aria-hidden="true"
-          className={!terminal ? 'xq-runtime-pulse' : undefined}
-          style={{
-            width: 7,
-            height: 7,
-            borderRadius: 999,
-            background: textColor,
-            flexShrink: 0,
-          }}
-        />
-        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          key={displayText}
+          className={!terminal ? 'xq-runtime-typewriter' : undefined}
+          style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
           {displayText}
         </span>
       </div>
@@ -1481,8 +1651,8 @@ function MessageSurface({
   const c = useThemeColors();
   const isAi = item.role === 'ai';
   const shellRadius = isAi ? c.chat.radius.message : c.chat.radius.section;
-  const shellBorder = isAi ? c.chat.border.subtle : 'transparent';
-  const shellBackground = isAi ? c.chat.surface.assistant : c.chat.surface.user;
+  const shellBorder = isAi ? 'transparent' : 'transparent';
+  const shellBackground = isAi ? 'transparent' : c.chat.surface.user;
   const turnLabel = typeof item.rawMessage.metadata?.turn_status_label === 'string'
     ? item.rawMessage.metadata.turn_status_label
     : '';
@@ -1516,7 +1686,7 @@ function MessageSurface({
         border: `1px solid ${shellBorder}`,
         background: shellBackground,
         overflow: 'hidden',
-        boxShadow: c.chat.shadow.panel,
+        boxShadow: isAi ? 'none' : c.chat.shadow.panel,
       }}
     >
       <div style={{ padding: presentationResult ? c.chat.spacing.blockGap : 12 }}>
@@ -1625,7 +1795,7 @@ function MetricExplanationCard() {
 
 function visibleChatContent(content: string): string {
   const action = decodeReportActionEnvelope(content.trim());
-  if (!action) return content;
+  if (!action) return normalizeAnswerMarkdown(content);
   if (action.action === 'select_entity_candidate') {
     const candidateName = typeof action.params?.candidateName === 'string' && action.params.candidateName.trim()
       ? action.params.candidateName.trim()
@@ -2335,6 +2505,7 @@ export default function ChatContainer({
           padding: compactWelcome ? '20px 14px 80px' : '32px 36px 150px',
         }}
       >
+        <VersionUpdateNotice />
         <div className="xiaoqiao-empty-particles" aria-hidden="true" />
         {/* 弥散光晕 - 氛围光效果（散开 + 呼吸动效） */}
         <div
@@ -2369,34 +2540,31 @@ export default function ChatContainer({
           initial={false}
           style={{
             position: 'relative',
-            zIndex: 1,
+            zIndex: 9,
             width: '100%',
-            maxWidth: compactWelcome ? 760 : 960,
+            maxWidth: 760,
             margin: '0 auto',
             padding: 0,
-            transform: compactWelcome ? 'translateY(-70px)' : 'translateY(-152px)',
+            transform: 'translateY(-200px)',
           }}
         >
           <motion.div
             initial={false}
-            style={{ display: 'flex', flexDirection: compactWelcome ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', gap: compactWelcome ? 8 : 2, minHeight: compactWelcome ? 184 : 228, textAlign: 'center' }}
+            style={{ display: 'flex', flexDirection: compactWelcome ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', gap: compactWelcome ? 8 : 2, minHeight: 184, textAlign: 'center' }}
           >
             <motion.div
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
               className="xiaoqiao-empty-logo-wrap"
-              style={{ marginRight: 2 }}
+              data-testid="xiaoqiao-welcome-icon"
+              style={{ position: 'relative', width: 72, height: 72, flexShrink: 0, marginRight: compactWelcome ? 0 : 2 }}
             >
-              <div className="xiaoqiao-empty-logo" style={{ position: 'relative', zIndex: 1 }}>
-                <WelcomeMascotIcon
-                  size={compactWelcome ? 72 : 104}
-                  stageWidth={compactWelcome ? 72 : 104}
-                  stageHeight={compactWelcome ? 72 : 104}
-                />
+              <div className="xiaoqiao-empty-logo" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <WelcomeMascotIcon size={72} stageWidth={72} stageHeight={72} />
               </div>
             </motion.div>
-            <h1 style={{ margin: compactWelcome ? '0' : '-12px -10px 0 0', fontSize: compactWelcome ? 22 : 28, fontWeight: 500, lineHeight: 1.2, letterSpacing: '-0.01em', color: '#000000', textAlign: compactWelcome ? 'center' : 'left' }}>
+            <h1 style={{ margin: compactWelcome ? 0 : '-12px -10px 0 0', fontSize: 22, fontWeight: 500, lineHeight: 1.2, letterSpacing: 0, color: '#000000', textAlign: compactWelcome ? 'center' : 'left' }}>
               {randomWelcomeText}
             </h1>
           </motion.div>
@@ -2407,6 +2575,7 @@ export default function ChatContainer({
 
   return (
     <>
+    <VersionUpdateNotice />
     <div
       id="chat-container"
       className="conversation-scroll-area"
@@ -2522,16 +2691,17 @@ export default function ChatContainer({
                     onEdit={!isAi && onEditUserMessage ? () => openUserMessageEditor(item) : undefined}
                     onQuote={onFollowUpClick ? () => handleQuoteMessage(item.content) : undefined}
                     feedbackState={feedbackState}
-                    onLike={isAi ? () => handleMessageFeedback(messageId, 'like') : undefined}
-                    onDislike={isAi ? () => handleMessageFeedback(messageId, 'dislike') : undefined}
+                    onLike={undefined}
+                    onDislike={undefined}
                     savedToKnowledge={savedToKnowledge}
                     onToggleSave={isAi ? () => handleToggleSaveToKnowledge(item.rawMessage) : undefined}
                     isSpeaking={playingMessageId === item.messageId}
                     onSpeak={isAi ? () => handleSpeakMessage(item.messageId, item.content) : undefined}
-                    onShareConversation={onShareConversation}
+                    onShareConversation={undefined}
                     currentConversationTitle={currentConversationTitle}
                     onViewCallChain={onViewCallChain}
                     devMode={devMode}
+                    traceUrl={isAi ? getMessageTraceUrl(item.rawMessage) : undefined}
                   />
                   {!isAi && messageVersions[item.messageId || item.key]?.items.length > 1 && (
                     <div
@@ -2643,6 +2813,3 @@ export default function ChatContainer({
     </>
   );
 }
-
-
-
