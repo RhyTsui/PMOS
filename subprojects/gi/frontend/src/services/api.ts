@@ -61,8 +61,8 @@ export interface SystemStatus {
 // ===== API 方法 =====
 export const eventsApi = {
   list: (params?: { eventType?: string; priority?: string }) =>
-    api.get('/evidence-events', { params }),
-  get: (id: string) => api.get(`/evidence-events/${id}`),
+    api.get('/events', { params }),
+  get: (id: string) => api.get(`/events/${id}`),
 };
 
 export const sourcesApi = {
