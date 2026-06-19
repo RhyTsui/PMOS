@@ -49,7 +49,7 @@ export default function DashboardPage() {
           <Card>
             <Statistic
               title="调度器状态"
-              value={status?.scheduler.isRunning ? '运行中' : '已停止'}
+              value={status?.scheduler?.isRunning ? '运行中' : '已停止'}
               prefix={<ThunderboltOutlined />}
               valueStyle={{ color: status?.scheduler.isRunning ? '#3f8600' : '#cf1322' }}
             />
@@ -59,7 +59,7 @@ export default function DashboardPage() {
           <Card>
             <Statistic
               title="定时任务数"
-              value={status?.scheduler.jobCount || 0}
+              value={status?.scheduler?.jobCount || 0}
               prefix={<ClockCircleOutlined />}
             />
           </Card>
@@ -78,7 +78,7 @@ export default function DashboardPage() {
       <Card title="系统状态" style={{ marginTop: 24 }}>
         <p>调度任务：</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {status?.scheduler.jobs.map((job) => (
+          {status?.scheduler?.jobs.map((job) => (
             <Tag key={job} color="blue">{job}</Tag>
           ))}
         </div>
