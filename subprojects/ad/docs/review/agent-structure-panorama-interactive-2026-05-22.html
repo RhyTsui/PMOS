@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小乔智投当前智能体结构交互示意图</title>
+  <style>
+    :root {
+      --bg: #f6f9fc;
+      --ink: #10233f;
+      --muted: #60728a;
+      --line: #b9c8d9;
+      --panel: #ffffff;
+      --soft: #eef5ff;
+      --blue: #175cd3;
+      --cyan: #00a9d6;
+      --purple: #7b61ff;
+      --red: #ff3366;
+      --amber: #ffb800;
+      --green: #00aa66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 280px minmax(720px, 1fr) 360px;
+      min-height: 100vh;
+    }
+    aside, .detail {
+      background: var(--panel);
+      border-color: #dfe8f3;
+      border-style: solid;
+    }
+    aside {
+      border-width: 0 1px 0 0;
+      padding: 24px 18px;
+    }
+    .detail {
+      border-width: 0 0 0 1px;
+      padding: 24px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .controls {
+      margin-top: 24px;
+      display: grid;
+      gap: 10px;
+    }
+    button {
+      cursor: pointer;
+      border: 1px solid #d9e4f0;
+      background: #fff;
+      color: var(--ink);
+      min-height: 38px;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      text-align: left;
+    }
+    button.active {
+      background: #10233f;
+      color: #fff;
+      border-color: #10233f;
+    }
+    .zoom {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .zoom button {
+      text-align: center;
+      flex: 1;
+    }
+    main {
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    .topbar {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid #dfe8f3;
+      background: rgba(255,255,255,.72);
+    }
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--dot);
+    }
+    .canvas {
+      overflow: auto;
+      padding: 28px;
+    }
+    svg {
+      width: calc(1280px * var(--zoom, 1));
+      height: calc(820px * var(--zoom, 1));
+      min-width: 960px;
+      background: linear-gradient(135deg, #f8fbff, #eef7f2);
+      border: 1px solid #dfe8f3;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(16,35,63,.08);
+    }
+    .node rect {
+      fill: #fff;
+      stroke: #d9e4f0;
+      stroke-width: 1.5;
+      transition: .18s;
+    }
+    .node circle {
+      transition: .18s;
+    }
+    .node text {
+      pointer-events: none;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+    .node {
+      cursor: pointer;
+    }
+    .node:hover rect, .node.selected rect {
+      stroke: #10233f;
+      stroke-width: 3;
+      filter: drop-shadow(0 10px 16px rgba(16,35,63,.16));
+    }
+    .node.dim {
+      opacity: .18;
+    }
+    .edge {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 2.5;
+      marker-end: url(#arrow);
+    }
+    .edge.dim {
+      opacity: .16;
+    }
+    .group-label {
+      fill: #60728a;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .title-text {
+      fill: var(--ink);
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .desc-text {
+      fill: var(--muted);
+      font-size: 13px;
+    }
+    .detail h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+    .tag {
+      display: inline-block;
+      margin: 0 8px 8px 0;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #edf4ff;
+      color: #175cd3;
+      font-size: 12px;
+    }
+    .kv {
+      margin-top: 20px;
+      display: grid;
+      gap: 14px;
+    }
+    .kv div {
+      padding: 12px;
+      border: 1px solid #dfe8f3;
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+    .kv b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .kv p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      aside, .detail { border-width: 0 0 1px 0; }
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>智能体全景</h1>
+      <div class="sub">当前清单来自前端 `AGENT_MAP` 与 `AgentDock`，运行关系来自 `AgentProcessEvent` 协议和 P0 Skill 合同。</div>
+      <div class="controls" id="filters">
+        <button class="active" data-filter="all">全部结构</button>
+        <button data-filter="entry">入口与路由</button>
+        <button data-filter="core">核心业务流</button>
+        <button data-filter="special">专项能力</button>
+        <button data-filter="runtime">运行时支撑</button>
+      </div>
+      <div class="zoom">
+        <button id="zoomOut">-</button>
+        <button id="zoomReset">100%</button>
+        <button id="zoomIn">+</button>
+      </div>
+    </aside>
+    <main>
+      <div class="topbar">
+        <div>
+          <strong>小乔智投当前智能体结构示意图</strong>
+          <div class="sub">点击节点查看职责、工具与闭环判断。</div>
+        </div>
+        <div class="legend">
+          <span style="--dot:#10233f">入口</span>
+          <span style="--dot:#175cd3">业务流</span>
+          <span style="--dot:#00aa66">专项</span>
+          <span style="--dot:#ffb800">运行时</span>
+        </div>
+      </div>
+      <div class="canvas">
+        <svg id="map" viewBox="0 0 1280 820" aria-label="小乔智投智能体结构图">
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#b9c8d9"></path>
+            </marker>
+          </defs>
+          <text x="44" y="48" class="group-label">统一入口</text>
+          <text x="390" y="48" class="group-label">核心业务流</text>
+          <text x="910" y="48" class="group-label">专项能力 / 运行时</text>
+
+          <path class="edge" data-link="hub help" d="M248 170 C320 140 340 118 398 118"></path>
+          <path class="edge" data-link="hub report" d="M248 170 C320 170 340 218 398 218"></path>
+          <path class="edge" data-link="hub diagnosis" d="M248 170 C320 210 340 318 398 318"></path>
+          <path class="edge" data-link="hub demand" d="M248 170 C320 250 340 418 398 418"></path>
+          <path class="edge" data-link="hub debugging" d="M248 170 C320 290 340 518 398 518"></path>
+          <path class="edge" data-link="hub delivery" d="M248 170 C650 170 760 118 880 118"></path>
+          <path class="edge" data-link="hub monitoring" d="M248 170 C650 210 760 218 880 218"></path>
+          <path class="edge" data-link="hub material" d="M248 170 C650 250 760 318 880 318"></path>
+          <path class="edge" data-link="hub prediction" d="M248 170 C650 290 760 418 880 418"></path>
+          <path class="edge" data-link="core runtime" d="M700 520 C780 600 860 620 920 620"></path>
+          <path class="edge" data-link="runtime skills" d="M1080 620 C1120 620 1120 710 920 710"></path>
+
+          <g class="node" data-id="hub" data-group="entry" transform="translate(44 100)">
+            <rect width="204" height="140" rx="12"></rect>
+            <circle cx="46" cy="54" r="24" fill="#10233f"></circle>
+            <text x="84" y="50" class="title-text">小乔 hub</text>
+            <text x="84" y="76" class="desc-text">统一对话入口</text>
+            <text x="22" y="112" class="desc-text">接待 / 路由 / 追问 / 汇总</text>
+          </g>
+          <g class="node" data-id="routing" data-group="entry runtime" transform="translate(44 300)">
+            <rect width="204" height="126" rx="12"></rect>
+            <circle cx="46" cy="50" r="22" fill="#60728a"></circle>
+            <text x="84" y="48" class="title-text">路由判断</text>
+            <text x="22" y="88" class="desc-text">意图、工作流、上下文</text>
+          </g>
+
+          <g class="node" data-id="help" data-group="core" transform="translate(398 82)">
+            <rect width="302" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#00a9d6"></circle>
+            <text x="68" y="32" class="title-text">使用帮助 help</text>
+            <text x="68" y="56" class="desc-text">指标解释、路径、规则</text>
+          </g>
+          <g class="node" data-id="report" data-group="core" transform="translate(398 182)">
+            <rect width="302" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#175cd3"></circle>
+            <text x="68" y="32" class="title-text">问数分析 report</text>
+            <text x="68" y="56" class="desc-text">取数、趋势、数据检查</text>
+          </g>
+          <g class="node" data-id="diagnosis" data-group="core" transform="translate(398 282)">
+            <rect width="302" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#ff3366"></circle>
+            <text x="68" y="32" class="title-text">问题排查 diagnosis</text>
+            <text x="68" y="56" class="desc-text">证据链、定位建议</text>
+          </g>
+          <g class="node" data-id="demand" data-group="core" transform="translate(398 382)">
+            <rect width="302" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#7b61ff"></circle>
+            <text x="68" y="32" class="title-text">需求沟通 demand</text>
+            <text x="68" y="56" class="desc-text">回传、映射、配置收口</text>
+          </g>
+          <g class="node" data-id="debugging" data-group="core" transform="translate(398 482)">
+            <rect width="302" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#ffb800"></circle>
+            <text x="68" y="32" class="title-text">广告联调 debugging</text>
+            <text x="68" y="56" class="desc-text">准备项、状态、日志</text>
+          </g>
+
+          <g class="node" data-id="delivery" data-group="special" transform="translate(880 82)">
+            <rect width="306" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#2563eb"></circle>
+            <text x="68" y="32" class="title-text">验交付包 delivery</text>
+            <text x="68" y="56" class="desc-text">可投放包、阻塞项、证据</text>
+          </g>
+          <g class="node" data-id="monitoring" data-group="special" transform="translate(880 182)">
+            <rect width="306" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#00aa66"></circle>
+            <text x="68" y="32" class="title-text">监控告警 monitoring</text>
+            <text x="68" y="56" class="desc-text">运行状态、告警、趋势</text>
+          </g>
+          <g class="node" data-id="material" data-group="special" transform="translate(880 282)">
+            <rect width="306" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#ff6b9d"></circle>
+            <text x="68" y="32" class="title-text">素材分析 material</text>
+            <text x="68" y="56" class="desc-text">创意脚本、素材匹配</text>
+          </g>
+          <g class="node" data-id="prediction" data-group="special" transform="translate(880 382)">
+            <rect width="306" height="74" rx="10"></rect>
+            <circle cx="34" cy="37" r="18" fill="#ffb800"></circle>
+            <text x="68" y="32" class="title-text">广告预测 prediction</text>
+            <text x="68" y="56" class="desc-text">ROI 预测、回本估算</text>
+          </g>
+          <g class="node" data-id="runtime" data-group="runtime" transform="translate(880 560)">
+            <rect width="306" height="112" rx="12"></rect>
+            <circle cx="38" cy="52" r="22" fill="#60728a"></circle>
+            <text x="76" y="42" class="title-text">AgentProcessEvent</text>
+            <text x="76" y="68" class="desc-text">过程事件真源</text>
+            <text x="24" y="98" class="desc-text">Skill / MCP / 来源 / 组件 / 回答</text>
+          </g>
+          <g class="node" data-id="skills" data-group="runtime" transform="translate(398 668)">
+            <rect width="788" height="88" rx="12"></rect>
+            <circle cx="38" cy="44" r="22" fill="#10233f"></circle>
+            <text x="76" y="38" class="title-text">P0 Skill 合同与外部能力</text>
+            <text x="76" y="64" class="desc-text">metric_explainer / spend_diagnosis / postback_discrepancy / report_composer / monitor_alert / oceanengine_debug</text>
+          </g>
+        </svg>
+      </div>
+    </main>
+    <section class="detail">
+      <h2 id="detailTitle">小乔 hub</h2>
+      <div id="detailTags"></div>
+      <div class="kv">
+        <div><b>定位</b><p id="detailRole"></p></div>
+        <div><b>主要能力</b><p id="detailCapability"></p></div>
+        <div><b>闭环判断</b><p id="detailClosure"></p></div>
+      </div>
+    </section>
+  </div>
+  <script>
+    const details = {
+      hub: {
+        title: '小乔 hub',
+        tags: ['entry', 'router', 'default'],
+        role: '广告技术服务的统一对话入口，负责接待、意图识别、路由、追问、汇总和降级。',
+        capability: '承接自由问答入口，按 help、report、demand、diagnosis、debugging、delivery、monitoring、material、prediction 分流。',
+        closure: '清单已落在 AGENT_MAP；真实闭环依赖后端 Agent runtime、Skill 合同、MCP 结果和来源披露。'
+      },
+      routing: {
+        title: '路由判断',
+        tags: ['intent', 'context', 'workflow'],
+        role: '判断业务 / 非业务、广告域、轻 / 重工作流，并准备项目、用户、时间、指标等上下文。',
+        capability: '产出 intent.detected、context.prepared、clarify.requested 等过程事件。',
+        closure: '需要继续把前端局部关键词拦截迁移到后端 Agent runtime。'
+      },
+      help: {
+        title: '使用帮助 help',
+        tags: ['core', 'knowledge', 'web'],
+        role: '负责指标解释、系统入口、规则说明和一般知识问答。',
+        capability: '主要工具：knowledge_search、web_search；必要时升级到重工作流。',
+        closure: '适合轻工作流；复杂策略分析不应直接替代真人判断。'
+      },
+      report: {
+        title: '问数分析 report',
+        tags: ['core', 'report', 'skill'],
+        role: '负责报表取数、趋势图、数据检查和报表模板确认。',
+        capability: '关联 report_composer_skill，结合报表 MCP、定时任务和来源展示。',
+        closure: '需要真实报表 MCP 返回结果，不能用 mock 数据冒充业务事实。'
+      },
+      diagnosis: {
+        title: '问题排查 diagnosis',
+        tags: ['core', 'evidence', 'risk'],
+        role: '负责广告异常、数据 gap、归因、回传和报表异常排查。',
+        capability: '关联 spend_diagnosis_skill、postback_discrepancy_skill，输出结论、证据链、置信度和建议。',
+        closure: '证据不足时必须暴露缺失项，不能强行定责。'
+      },
+      demand: {
+        title: '需求沟通 demand',
+        tags: ['core', 'clarify', 'form'],
+        role: '把模糊需求转成结构化需求，补齐媒体、应用、事件、验收和依赖字段。',
+        capability: '结构化追问、需求字段收集、模板与配置检索。',
+        closure: '可以形成需求草案，但不替代优先级、排期和资源拍板。'
+      },
+      debugging: {
+        title: '广告联调 debugging',
+        tags: ['core', 'integration', 'log'],
+        role: '负责联调准备项检查、执行状态展示、日志和联调报告。',
+        capability: '关联 oceanengine_debug_skill；工具包括 check_prerequisites、execute_debug_step、generate_debug_report。',
+        closure: '高风险自动化动作需要确认，失败时应给出人工接管原因。'
+      },
+      delivery: {
+        title: '验交付包 delivery',
+        tags: ['special', 'package', 'evidence'],
+        role: '负责可投放包、阻塞项、交付证据和验收视图。',
+        capability: '承接 get_delivery_packages 意图，帮助确认交付是否可投放。',
+        closure: '当前是专项能力入口，是否真实闭环取决于交付包数据源接入。'
+      },
+      monitoring: {
+        title: '监控告警 monitoring',
+        tags: ['special', 'alert', 'schedule'],
+        role: '负责运行状态、告警与趋势，承接监控任务创建和异常触发。',
+        capability: '关联 monitor_alert_skill、query_metrics、定时任务和告警条件。',
+        closure: '需要监控配置 MCP 与调度器真实可用。'
+      },
+      material: {
+        title: '素材分析 material',
+        tags: ['special', 'creative', 'asset'],
+        role: '负责创意脚本解析、素材规范检索和相似素材匹配。',
+        capability: '工具包括 parse_creative_script、match_similar_material、knowledge_search。',
+        closure: '当前偏专项能力，真实效果依赖素材库与匹配服务。'
+      },
+      prediction: {
+        title: '广告预测 prediction',
+        tags: ['special', 'forecast', 'roi'],
+        role: '负责 ROI 预测和回本周期估算。',
+        capability: '工具包括 predict_roi、calculate_break_even、预测模型说明检索。',
+        closure: '预测结果必须披露模型、数据窗口和置信边界。'
+      },
+      runtime: {
+        title: 'AgentProcessEvent',
+        tags: ['runtime', 'sse', 'evaluation'],
+        role: '统一思维链、Skill、MCP、知识库、来源、动态组件和回答的过程事件真源。',
+        capability: '前端渲染事件，后端产出事件，评测系统按事件链校验意图、追问、工具调用、来源和闭环。',
+        closure: '协议已定义；后续需要把 P0 case 全部升级到该协议。'
+      },
+      skills: {
+        title: 'P0 Skill 合同与外部能力',
+        tags: ['skill', 'mcp', 'contract'],
+        role: '把稳定业务流程沉淀为可配置、可评测、可绑定 MCP / Tool 的能力单元。',
+        capability: 'P0：metric_explainer、spend_diagnosis、postback_discrepancy、report_composer、monitor_alert、oceanengine_debug。',
+        closure: '每个 Skill 需要输入字段、追问、步骤、输出组件、来源披露和评测用例。'
+      }
+    };
+
+    const nodes = [...document.querySelectorAll('.node')];
+    const edges = [...document.querySelectorAll('.edge')];
+    const title = document.getElementById('detailTitle');
+    const tags = document.getElementById('detailTags');
+    const role = document.getElementById('detailRole');
+    const capability = document.getElementById('detailCapability');
+    const closure = document.getElementById('detailClosure');
+    let currentFilter = 'all';
+    let zoom = 1;
+
+    function renderDetail(id) {
+      const item = details[id] || details.hub;
+      title.textContent = item.title;
+      tags.innerHTML = item.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+      role.textContent = item.role;
+      capability.textContent = item.capability;
+      closure.textContent = item.closure;
+      nodes.forEach(n => n.classList.toggle('selected', n.dataset.id === id));
+    }
+
+    function applyFilter(filter) {
+      currentFilter = filter;
+      nodes.forEach(node => {
+        const groups = node.dataset.group.split(' ');
+        node.classList.toggle('dim', filter !== 'all' && !groups.includes(filter));
+      });
+      edges.forEach(edge => edge.classList.toggle('dim', filter !== 'all' && filter !== 'entry'));
+      document.querySelectorAll('#filters button').forEach(button => {
+        button.classList.toggle('active', button.dataset.filter === filter);
+      });
+    }
+
+    nodes.forEach(node => node.addEventListener('click', () => renderDetail(node.dataset.id)));
+    document.getElementById('filters').addEventListener('click', event => {
+      const button = event.target.closest('button[data-filter]');
+      if (button) applyFilter(button.dataset.filter);
+    });
+    function setZoom(next) {
+      zoom = Math.min(1.6, Math.max(.75, next));
+      document.documentElement.style.setProperty('--zoom', zoom);
+      document.getElementById('zoomReset').textContent = `${Math.round(zoom * 100)}%`;
+    }
+    document.getElementById('zoomIn').addEventListener('click', () => setZoom(zoom + .1));
+    document.getElementById('zoomOut').addEventListener('click', () => setZoom(zoom - .1));
+    document.getElementById('zoomReset').addEventListener('click', () => setZoom(1));
+    renderDetail('hub');
+  </script>
+</body>
+</html>

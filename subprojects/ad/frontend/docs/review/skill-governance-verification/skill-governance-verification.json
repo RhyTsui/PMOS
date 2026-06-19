@@ -1,0 +1,118 @@
+{
+  "kind": "skill-governance-verification",
+  "target": "http://localhost:8002",
+  "startedAt": "2026-06-10T16:54:44.587Z",
+  "status": "ok",
+  "skillStatus": {
+    "total": 23,
+    "enabled": 22,
+    "disabled": 1,
+    "enabledSkills": [
+      {
+        "id": "package_status_query_skill",
+        "name": "包信息与状态"
+      },
+      {
+        "id": "report_data_quality_check_skill",
+        "name": "报表数据异常检查"
+      },
+      {
+        "id": "report_data_quality_check_skill-custom-1779955637788",
+        "name": "报表数据异常检查（副本）"
+      },
+      {
+        "id": "integration_requirement_workflow_skill",
+        "name": "对接需求确认"
+      },
+      {
+        "id": "ads_health_monitor_skill",
+        "name": "监控巡检"
+      },
+      {
+        "id": "delivery_diagnosis_skill",
+        "name": "交付阻塞排查"
+      },
+      {
+        "id": "package_delivery_execution_skill",
+        "name": "投放包交付"
+      },
+      {
+        "id": "preflight_quality_check_skill",
+        "name": "投放前质量保障"
+      },
+      {
+        "id": "industry_news_skill",
+        "name": "行业动态"
+      },
+      {
+        "id": "metric_diff_diagnosis_skill",
+        "name": "指标差异排查"
+      },
+      {
+        "id": "auto_debug_skill",
+        "name": "自动联调"
+      },
+      {
+        "id": "callback-attribution-diagnosis",
+        "name": "APP归因回推问题排查"
+      },
+      {
+        "id": "ranking_signal_analysis_skill",
+        "name": "榜单信号分析"
+      },
+      {
+        "id": "report_template_builder_skill",
+        "name": "报表模板提炼"
+      },
+      {
+        "id": "tracking_link_delivery_skill",
+        "name": "监测链接交付"
+      },
+      {
+        "id": "industry_traffic_analysis_skill",
+        "name": "流量洞察"
+      },
+      {
+        "id": "campaign_performance_overview_skill",
+        "name": "投放效果分析"
+      },
+      {
+        "id": "creative_benchmark_analysis_skill",
+        "name": "行业创意对比"
+      },
+      {
+        "id": "knowledge_answer_skill",
+        "name": "疑问解答"
+      },
+      {
+        "id": "metric_explainer_skill",
+        "name": "指标解释器"
+      },
+      {
+        "id": "metric_requirement_intake_skill",
+        "name": "指标需求确认"
+      },
+      {
+        "id": "scheduled_report_skill",
+        "name": "自动报表"
+      }
+    ],
+    "disabledSkills": [
+      {
+        "id": "report-orchestration",
+        "name": "报表编排与定时任务"
+      }
+    ]
+  },
+  "screenshots": {
+    "governance": "docs/review/skill-governance-verification/skill-governance-iter-1.png",
+    "trigger": "docs/review/skill-governance-verification/skill-trigger-test.png"
+  },
+  "summary": {
+    "total": 23,
+    "enabled": 22,
+    "disabled": 1,
+    "expectedEnabled": 14,
+    "expectedDisabled": 9
+  }
+}

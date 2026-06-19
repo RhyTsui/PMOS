@@ -1,0 +1,85 @@
+{
+  "skill": {
+    "id": "android-attribution-callback-diagnosis",
+    "name": "安卓归因与回推排查",
+    "description": "用于 Android 归因、回推、SDK/API 回传、PAY 未回推、联调失败的诊断型 Skill。",
+    "icon": "🔎",
+    "source": "builtin",
+    "category": "diagnosis",
+    "endpoint_url": "",
+    "transport": "streamable-http",
+    "auth_type": "bearer_token",
+    "auth_config_template": {},
+    "expected_tools": [
+      { "name": "fetch_app_context", "description": "解析应用信息" },
+      { "name": "fetch_media_context", "description": "解析媒体信息" },
+      { "name": "check_base_event_ingestion", "description": "检查基础事件入库" },
+      { "name": "check_attr_preprocess_result", "description": "检查归因预处理结果" },
+      { "name": "check_callback_rule_match", "description": "检查回传规则匹配" }
+    ],
+    "installed": true,
+    "tags": ["P0", "Android", "归因", "回推", "诊断"],
+    "use_cases": ["安卓归因排查", "媒体回推失败", "SDK/API 回传排查"],
+    "sort_order": 10
+  },
+  "contract": {
+    "skill_id": "android-attribution-callback-diagnosis",
+    "name": "安卓归因与回推排查",
+    "description": "用于 Android 媒体归因、回推、SDK/API 回传、PAY 未回推、联调失败和数据准确性复核的诊断型 Skill。",
+    "domain": "ad-attribution-diagnosis",
+    "category": "diagnosis",
+    "priority": "P0",
+    "enabled": true,
+    "version": "2026-05-28.v1",
+    "intent_triggers": ["安卓归因", "Android回推", "SDK回推", "API回推", "PAY未回推", "feedback-res", "804", "回传失败"],
+    "input_schema": {
+      "type": "object",
+      "required": ["app_query", "date_start", "date_end", "event_type"],
+      "properties": {
+        "app_query": { "type": "string" },
+        "media_query": { "type": "string" },
+        "media_id": { "type": "string" },
+        "app_package_type": { "type": "string" },
+        "event_type": { "type": "string" },
+        "date_start": { "type": "string" },
+        "date_end": { "type": "string" },
+        "callback_mode": { "type": "string" },
+        "callback_mode_detail": { "type": "string" },
+        "problem_desc": { "type": "string" }
+      }
+    },
+    "workflow_steps": [
+      { "key": "resolve_app_context", "label": "解析应用信息", "tool_bindings": ["fetch_app_context"] },
+      { "key": "resolve_media_context", "label": "解析媒体信息", "tool_bindings": ["fetch_media_context"] },
+      { "key": "check_base_event_ingestion", "label": "检查基础事件入库", "tool_bindings": ["check_base_event_ingestion"] },
+      { "key": "check_attr_preprocess_result", "label": "检查归因预处理结果", "tool_bindings": ["check_attr_preprocess_result"] },
+      { "key": "check_callback_rule_match", "label": "检查回传规则匹配", "tool_bindings": ["check_callback_rule_match"] }
+    ]
+  },
+  "workflow": {
+    "workflowRef": "android-attribution-callback-diagnosis.workflow",
+    "steps": ["resolve_app_context", "resolve_media_context", "check_base_event_ingestion", "check_attr_preprocess_result", "check_callback_rule_match"]
+  },
+  "prompts": {
+    "diagnosis-role": "你是安卓归因与回推排查助手，只基于证据定位链路和配置问题。"
+  },
+  "golden_cases": {
+    "cases": [
+      "android-attribution-diagnosis-001",
+      "android-attribution-diagnosis-002",
+      "android-attribution-diagnosis-003",
+      "android-attribution-diagnosis-004",
+      "android-attribution-diagnosis-005"
+    ]
+  },
+  "result_contract": {
+    "resultScreenType": "workflow-result"
+  },
+  "runtime_display": {
+    "runtimeDisplayRef": "android-attribution-callback-diagnosis.runtime-display"
+  },
+  "observability": {
+    "observabilityRef": "android-attribution-callback-diagnosis.observability"
+  }
+}
+

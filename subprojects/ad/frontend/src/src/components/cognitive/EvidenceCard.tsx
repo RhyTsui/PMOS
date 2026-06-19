@@ -48,7 +48,7 @@ export function EvidenceCard({ evidence, attachment, compact = false }: Evidence
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '6px 12px',
+          padding: '8px 16px',
           cursor: compact ? 'pointer' : 'default',
           transition: 'background 0.2s',
         }}
@@ -57,34 +57,38 @@ export function EvidenceCard({ evidence, attachment, compact = false }: Evidence
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
       >
         {evidence.step && (
-          <span style={{
-            width: 20,
-            height: 20,
-            borderRadius: '50%',
-            background: c.accentBg,
-            color: c.accent,
-            fontSize: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 500,
-            flexShrink: 0,
-          }}>
+          <span
+            className="ui-micro"
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              background: c.accentBg,
+              color: c.accent,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 500,
+              flexShrink: 0,
+            }}
+          >
             {evidence.step}
           </span>
         )}
         <SourceIcon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textMuted }} />
-        <span style={{ fontSize: 13, color: c.textBody, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{evidence.title}</span>
+        <span className="ui-body" style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{evidence.title}</span>
         <StatusIcon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: statusInfo.color }} />
         {conf && (
-          <span style={{
-            padding: '1px 6px',
-            borderRadius: 4,
-            fontSize: 10,
-            fontWeight: 500,
-            color: conf.color,
-            background: conf.bg,
-          }}>
+          <span
+            className="ui-micro"
+            style={{
+              padding: '1px 6px',
+              borderRadius: 4,
+              fontWeight: 500,
+              color: conf.color,
+              background: conf.bg,
+            }}
+          >
             {conf.label}
           </span>
         )}
@@ -95,22 +99,24 @@ export function EvidenceCard({ evidence, attachment, compact = false }: Evidence
 
       {/* Expanded Content */}
       {expanded && (
-        <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* Detail */}
-          <div style={{ fontSize: 11, color: c.textMuted }}>{evidence.detail || evidence.summary}</div>
+          <div className="ui-micro">{evidence.detail || evidence.summary}</div>
 
           {/* Source */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10, color: c.textMuted }}>来源:</span>
-            <span style={{ fontSize: 10, color: c.textMuted }}>{evidence.source}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="ui-micro">来源:</span>
+            <span className="ui-micro">{evidence.source}</span>
             {evidence.evidence_type && (
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 4,
-                background: c.accentBg,
-                fontSize: 10,
-                color: c.accent,
-              }}>
+              <span
+                className="ui-micro"
+                style={{
+                  padding: '1px 6px',
+                  borderRadius: 4,
+                  background: c.accentBg,
+                  color: c.accent,
+                }}
+              >
                 {evidence.evidence_type}
               </span>
             )}
@@ -121,8 +127,8 @@ export function EvidenceCard({ evidence, attachment, compact = false }: Evidence
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              padding: 6,
+              gap: 8,
+              padding: 8,
               borderRadius: 4,
               background: c.bgCard,
             }}>
@@ -131,16 +137,16 @@ export function EvidenceCard({ evidence, attachment, compact = false }: Evidence
               ) : (
                 <FileText className="w-3.5 h-3.5" style={{ color: c.textMuted }} />
               )}
-              <span style={{ fontSize: 10, color: c.textMuted }}>{attachment.name}</span>
+              <span className="ui-micro">{attachment.name}</span>
               {attachment.summary && (
-                <span style={{ fontSize: 10, color: c.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.summary.slice(0, 50)}</span>
+                <span className="ui-micro" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.summary.slice(0, 50)}</span>
               )}
             </div>
           )}
 
           {/* Timestamp */}
           {evidence.timestamp && (
-            <div style={{ fontSize: 10, color: c.textMuted }}>{evidence.timestamp}</div>
+            <div className="ui-micro">{evidence.timestamp}</div>
           )}
         </div>
       )}

@@ -57,7 +57,7 @@ export interface ModelServiceConfig {
 
 export type PublicWebAuthType = 'none' | 'bearer' | 'api_key_header' | 'api_key_body' | 'custom_headers';
 export type PublicWebSearchMethod = 'GET' | 'POST';
-export type PublicSearchProviderKind = 'legacy' | 'brave' | 'exa' | 'firecrawl' | 'weather' | 'tavily';
+export type PublicSearchProviderKind = 'legacy' | 'brave' | 'exa' | 'firecrawl' | 'weather' | 'tavily' | 'simple_fetch';
 export type PublicSearchProviderCapability = 'search' | 'deep_search' | 'fetch';
 
 export interface PublicSearchProviderConfig {
@@ -210,30 +210,32 @@ const DEFAULT_PUBLIC_WEB_CONFIG: PublicWebConfig = {
 
 function isSyntheticPublicWebHost(host: string): boolean {
   const normalizedHost = host.trim().toLowerCase();
-  if (!normalizedHost) return false;
-  return normalizedHost === 'example.test'
+  return Boolean(normalizedHost) && (
+    normalizedHost === 'example.test'
     || normalizedHost.endsWith('.example.test')
     || normalizedHost === 'localhost'
     || normalizedHost === '127.0.0.1'
-    || normalizedHost === '0.0.0.0';
+    || normalizedHost === '0.0.0.0'
+  );
 }
 
 function isPrivateNetworkHost(host: string): boolean {
   const normalizedHost = host.trim().toLowerCase();
-  if (!normalizedHost) return false;
-  if (normalizedHost === 'localhost') return true;
-  if (/^(127|10)\./.test(normalizedHost)) return true;
-  if (/^192\.168\./.test(normalizedHost)) return true;
   const private172Match = normalizedHost.match(/^172\.(\d{1,2})\./);
-  return Boolean(private172Match && Number(private172Match[1]) >= 16 && Number(private172Match[1]) <= 31);
+  return Boolean(normalizedHost) && (
+    normalizedHost === 'localhost'
+    || /^(127|10)\./.test(normalizedHost)
+    || /^192\.168\./.test(normalizedHost)
+    || Boolean(private172Match && Number(private172Match[1]) >= 16 && Number(private172Match[1]) <= 31)
+  );
 }
 
 function isSelfReferentialPublicWebEndpoint(url: URL): boolean {
   const pathname = url.pathname.replace(/\/+$/, '').toLowerCase();
-  if (pathname !== '/api/xiaoqiao/web-search') return false;
-  if (!isPrivateNetworkHost(url.hostname)) return false;
   const port = url.port || (url.protocol === 'https:' ? '443' : '80');
-  return port === '8002' || port === '3000' || port === '80' || port === '443';
+  return pathname === '/api/xiaoqiao/web-search'
+    && isPrivateNetworkHost(url.hostname)
+    && (port === '8002' || port === '3000' || port === '80' || port === '443');
 }
 
 export function isUnsafePublicWebEndpoint(endpoint: string): boolean {
@@ -362,23 +364,23 @@ function readModelServiceFromPartialRuntimeConfig(raw: string): ModelServiceConf
 
 function normalizeModelProfileConfig(
   input: Partial<ModelProfileConfig> | undefined,
-  fallback: Pick<ModelServiceConfig, 'provider' | 'providerLabel' | 'apiKey' | 'baseUrl' | 'modelBaseUrl' | 'modelName' | 'updatedAt'>,
+  defaults: Pick<ModelServiceConfig, 'provider' | 'providerLabel' | 'apiKey' | 'baseUrl' | 'modelBaseUrl' | 'modelName' | 'updatedAt'>,
   index = 0,
 ): ModelProfileConfig {
   const id = input?.id?.trim() || (index === 0 ? DEFAULT_MODEL_PROFILE_ID : `model-profile-${index + 1}`);
-  const baseUrl = input?.baseUrl?.trim() || fallback.baseUrl || '';
+  const baseUrl = input?.baseUrl?.trim() || defaults.baseUrl || '';
   return {
     id,
     name: input?.name?.trim() || (index === 0 ? '当前默认模型' : `模型 ${index + 1}`),
-    provider: input?.provider || fallback.provider,
-    providerLabel: input?.providerLabel?.trim() || fallback.providerLabel,
-    apiKey: input?.apiKey?.trim() || fallback.apiKey || '',
+    provider: input?.provider || defaults.provider,
+    providerLabel: input?.providerLabel?.trim() || defaults.providerLabel,
+    apiKey: input?.apiKey?.trim() || defaults.apiKey || '',
     baseUrl,
-    modelBaseUrl: input?.modelBaseUrl?.trim() || fallback.modelBaseUrl || baseUrl,
-    modelName: input?.modelName?.trim() || fallback.modelName,
+    modelBaseUrl: input?.modelBaseUrl?.trim() || defaults.modelBaseUrl || baseUrl,
+    modelName: input?.modelName?.trim() || defaults.modelName,
     enabled: typeof input?.enabled === 'boolean' ? input.enabled : true,
     notes: input?.notes?.trim() || '',
-    updatedAt: input?.updatedAt || fallback.updatedAt,
+    updatedAt: input?.updatedAt || defaults.updatedAt,
   };
 }
 
@@ -423,9 +425,14 @@ function normalizeModelServiceConfig(input?: Partial<ModelServiceConfig>): Model
   };
   base.modelProfiles = normalizeModelProfiles(input?.modelProfiles, base);
   const configuredDefaultProfileId = input?.defaultModelProfileId?.trim();
-  base.defaultModelProfileId = base.modelProfiles.some(profile => profile.id === configuredDefaultProfileId)
-    ? configuredDefaultProfileId
-    : base.modelProfiles[0]?.id || DEFAULT_MODEL_PROFILE_ID;
+  const configuredDefaultProfile = base.modelProfiles.find(profile => profile.id === configuredDefaultProfileId);
+  if (configuredDefaultProfile?.enabled) {
+    base.defaultModelProfileId = configuredDefaultProfileId;
+  } else {
+    // 默认 profile 不存在或已禁用，降级到第一个启用的 profile
+    const firstEnabledProfile = base.modelProfiles.find(profile => profile.enabled);
+    base.defaultModelProfileId = firstEnabledProfile?.id || base.modelProfiles[0]?.id || DEFAULT_MODEL_PROFILE_ID;
+  }
   base.routes = normalizeModelRouteConfigs(input?.routes, base);
   return base;
 }
@@ -678,17 +685,41 @@ function resolveModelProfile(
   route?: ModelRouteConfig,
 ): { profile?: ModelProfileConfig; requestedProfileId?: string; warnings: string[] } {
   const profiles = modelService.modelProfiles || [];
+  const isExplicitProfileSelection = Boolean(route?.modelProfileId);
   const requestedProfileId = route?.modelProfileId || modelService.defaultModelProfileId || profiles[0]?.id;
   const warnings: string[] = [];
-  const profile = requestedProfileId
+  let profile = requestedProfileId
     ? profiles.find(item => item.id === requestedProfileId)
     : profiles[0];
+
   if (requestedProfileId && !profile) {
     warnings.push(`Selected model profile "${requestedProfileId}" is not configured.`);
   }
-  if (profile && !profile.enabled) {
-    warnings.push(`Selected model profile "${profile.name}" is disabled.`);
+
+  // profile 不存在或被禁用时的降级策略
+  if (!profile || !profile.enabled) {
+    const fallbackProfile = profiles.find(item => item.enabled);
+    if (isExplicitProfileSelection && profile && !profile.enabled) {
+      // 路由显式选择了被禁用的 profile → 尊重管理员选择，不做降级
+      warnings.push(`Model profile "${profile.name}" is disabled; route will not make real model calls.`);
+    } else if (fallbackProfile && fallbackProfile.id !== profile?.id) {
+      // 默认 profile 被禁用或不存在 → 自动降级到第一个启用的 profile
+      warnings.push(
+        profile
+          ? `Model profile "${profile.name}" is disabled; falling back to "${fallbackProfile.name}".`
+          : `Requested model profile "${requestedProfileId}" not found; falling back to "${fallbackProfile.name}".`,
+      );
+      profile = fallbackProfile;
+    } else if (!profile && !fallbackProfile && profiles.length > 0) {
+      // 没有任何 profile 被找到，且没有启用的 profile，使用第一个
+      profile = profiles[0];
+      warnings.push(`No enabled model profile available; using "${profile.name}" (disabled).`);
+    } else if (profile && !profile.enabled && !fallbackProfile) {
+      // 请求的 profile 被禁用，且没有其他启用的 profile 可用
+      warnings.push(`Model profile "${profile.name}" is disabled and no other enabled profile is available. Model calls will be disabled.`);
+    }
   }
+
   return { profile, requestedProfileId, warnings };
 }
 

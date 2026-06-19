@@ -1,0 +1,167 @@
+审查MCP接入问题有2个：结构化当前项目被丢弃、以及能力发现结果 没有贯通到真实工具选择。它们都会让通用 Chat 更容易走错路径或看起来“有能力但调用不到”。[P1] 把 structured currentProject 传进上下文编译器 — E:\AI\ai- os\subprojects\ad\frontend\src\src\app\api\chat\route.ts:253-260compileChatContext() 只从 metadata.projectContext 的文本里反解项目，却完全忽略了请求里已经带上的 metadata.currentProject 结构化对象。这样一来，前端默认传来的 appId/appName 会在没有文案兜底时被丢掉，后续 buildReportQueryInput() 和项目范围判断只能退回到current_project 或空上下文，项目级问数和实体解析会经常走偏。
+ - [P2] 把 capabilityDecision 贯通到真实工具选择，不要只打日志 —E:\AI\ai-os\subprojects\ad\frontend\src\src\app\api\chat\route.ts:1462-1469这里先用 buildCapabilityManifest() 算了一次capabilityDecision，但真正执行报表时又调用了
+
+executeReportQueryStepWithTrace()，而这个包装器只把 servers/message/baseInput 继续往下传，实际 selector 在
+executeReportQueryStep() 里又从头选了一遍。结果是首轮能力发现、fallbackReason 和 warnings 只停留在事件里，根本没有进入真正的planner/tool selector，等于“看到了能力但没用上”。
+
+
+
+
+请不要把 needTool=true 等价于 report_query。
+当前系统需要引入轻量 ServiceIntent 层，最小枚举如下：
+- general_chat：闲聊和非业务开放对话
+- data_query：用户最终要数、表、趋势、对比、排名、拼表
+- report_delivery：生成日报、定时日报、报表订阅
+- issue_diagnosis：排查数据问题、归因异常、数据对不上、ROI下降原因
+- system_operation：系统配置检查、获取可用包、发起联调、操作状态检查
+- help_qa：系统使用帮助、字段解释、能力说明、配置说明
+- light_requirement：简单需求回答、方案草稿、文档草拟
+修复原则：
+1. report_query/data_query 只能表示“用户最终要数据结果”，不能表示“过程中需要查表”。
+2. issue_diagnosis 可以调用数据 MCP，但其数据查询是 evidence_fetch，不改变主意图。
+3. system_operation 可以调用 workflow MCP，例如获取包列表、发起联调、打印联调过程。
+4. report_delivery 可以复用 data_query 的查询条件并创建定时报表。
+5. help_qa 可以在 active workflow 中作为 interrupt_for_help，回答后恢复原任务。
+6. general_chat 不调用业务 MCP，也不清空 active workflow。
+7. Tool Selection 必须发生在 ServiceIntent + Skill + Capability 之后，而不是只绑定 report_query。
+8. matchesReportQueryRoute 只能识别 data_query/report_delivery，不能劫持 issue_diagnosis、system_operation、help_qa、general_chat。
+
+
+
+
+
+
+
+
+检查从上传文件-解析内容-结合提问-获取数据-保存到我的资产-自动化执行-生成文件-通知用户-打开文件这条服务路径，当前已实现哪些。
+
+2、返回参数现在有点机构化过度了，只需要从一行在代码块里改成展示多行就
+  行。
+
+3/提问：tap近10日的激活数和付费数，好像查都没查直接返回没有查到符合条件的数据。
+[
+  {
+    "name": "编排报表查询",
+    "query": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+    "kind": "skill",
+    "display_name": "编排报表查询",
+    "step_key": "skill.started-1780366482760-nyz39h",
+    "status": "done"
+  },
+  {
+    "name": "get_app_package_cps_detail",
+    "query": "已按项目 10100335查询，但没有查到符合条件的数据。",
+    "arguments": "{}",
+    "result": "{\"status\":\"empty\",\"row_count\":0,\"columns\":[],\"message\":\"已按项目 10100335查询，但没有查到符合条件的数据。\",\"response_payload\":{\"content\":[\"[Truncated]\"],\"isError\":false},\"latency_ms\":243}",
+    "kind": "mcp",
+    "display_name": "get_app_package_cps_detail",
+    "step_key": "mcp.tool_result-1780366484314-f20pgl",
+    "status": "done"
+  }
+]
+
+
+用markdown把解析结果展示出来，
+图片和word也需要支持解析，
+还有粘贴和拖拽文件到输入框也是很重要的。
+不能只传解析摘要，要完整的传给chat，看看怎么设计这个，目标是结合用户初始意图整理出可查询的数据指标 维度 计算范围 口径等。
+获取数据应该和是上传的文件还是用户输入的提问没关系，当前的链路是有关系的?
+当前我的资产还有输入框上传的文件不支持预览，应该点击后弹窗打开文件内容。
+自动化执行只有任务管理，未形成执行闭环，应当支持调度器/worker并真实写入执行逻辑。
+数据查询结果可下载为文件。
+个人中心弹窗的自动化和个人中心用户头像上都同步增加消息“点”示意，如果有自动化任务生成且未读则展示点。没有则不展示。
+
+E:\AI\ai-os\docs\sources\inbox\xiaoqiao_automation_1.0_plan.md
+
+
+问题：
+查看昨天的激活数
+已查到 2026-06-01 至 2026-06-01 的明细结果，指标包含 activation，维度包含 date，字段有 ltv_td14_amount、click_start_total_pay_amount、parent_attr_campaign_id、click_pay_td4_amount，共 200 条数据。
+可能猜测：
+Chat Core 被 Report Query 劫持了
+第一层问题：Intent Router失效
+第二层问题：能力发现失效
+第三层问题：Planner失效
+第四层问题：Skill体系失效
+路由提示词是不是有强制
+Chat OS 缺少 Top Intent Layer
+问数能力反向吞噬Chat能力
+
+
+
+查看近30天的激活趋势
+日趋势结果：invalid_data
+
+
+
+
+1、每次问巨量，现在都要用户确认一遍是巨量广告还是抖音游戏 还是巨量云游戏还是uc头条，这4个选项从哪里来的。
+
+2、另外提问：昨天巨量广告的消耗是多少
+返回：已查到 2026-06-01 至 2026-06-01 的明细结果，指标包含 cost，维度包含 date、media，字段有 ltv_td14_amount、click_start_total_pay_amount、parent_attr_campaign_id、click_pay_td4_amount，共 156 条数据。
+
+3、正在处理中是，返回消息区块下还有一个...的加载示意，应该在消息区的进度提示按钮这里做成动态效果，就不需要下面的...。
+这个...在刷新页面加载会话区时也展示
+
+4、前端bug：提问执行时切换到新会话， 输入框内容的执行中的按钮状态没有变到新会话，还是展示的执行中，点击后把历史执行中的会话暂停了。
+
+5、删除个人中心的知识库按钮及弹窗，管理中心和系统中的知识库服务不变，仅删除个人中心这里的前端展示。然后在底部 大模型名称后面增加一个Dataki的知识库连接状态，也是用绿灯展示连接状态。
+
+
+
+1.消息操作栏 鼠标移入的背景色块的颜色 应该和左侧侧边栏顶部栏等的颜色一致，不应该是蓝色而是灰色。
+
+2.执行结束后，返回消息第一个元素是【日趋势结果  以下内容已按结果、数据和下一步整理。】或者【已整理回答  以下内容已按结果、数据和下一步整理。】这个二级描述好像没什么用，是哪里控制生成的，提示词还是系统代码还是大模型，能否删除？已一级描述是黑色加粗的，用途是什么？谁控制生成的？不同情况还不一样。
+
+3.会话列表：保存到个人知识库，如果已点击保存保存成功了则高亮图标，文案显示为已保存到知识库。
+
+4.重新编辑消息后，展示成？2？，应该是左右切换图标
+
+5.近30天的巨量的每天的激活数趋势
+之前出报表只是可视化有问题，现在是{当前没有可执行的报表能力，已先返回能力缺口说明。}实际也看不到能力缺口。
+
+E:\AI\ai-os\docs\sources\inbox增加了P1 路由治理设计文档.docx，请评估，禁止硬编码逻辑和业务，采用通用chat解决方案，合理运用提示词管理解耦架构设计等分工处理，充分考虑变更影响尤其是已完善的服务，然后优先执行 P1-A：文档与接口契约。这样能把边界先固定下来，再进入只读观测接入。
+
+no_full_coverage是刚才为了避免出现错误使用tool加上的把？
+能不能查数 跟能不能图标展示禁止关联
+
+
+
+
+
+
+路由
+查数
+上传拼表
+自动化
+知识客服
+需求
+包
+排查
+智投页面上下文
+后台设计
+业务域协议
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1621,7 +1621,9 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
     setConversations(prev => prev.map(item => (
       item.conversation_id === conversationId ? { ...item, status: '执行中' } : item
     )));
-    void xiaoqiaoApi.updateConversation(conversationId, { status: '执行中' }).catch(() => undefined);
+    if (!conversationId.startsWith('optimistic-')) {
+      void xiaoqiaoApi.updateConversation(conversationId, { status: '执行中' }).catch(() => undefined);
+    }
   }, []);
 
   const clearConversationRunning = useCallback((conversationId: string) => {
@@ -1629,7 +1631,21 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
     setConversations(prev => prev.map(item => (
       item.conversation_id === conversationId ? { ...item, status: '普通对话' } : item
     )));
-    void xiaoqiaoApi.updateConversation(conversationId, { status: '普通对话' }).catch(() => undefined);
+    if (!conversationId.startsWith('optimistic-')) {
+      void xiaoqiaoApi.updateConversation(conversationId, { status: '普通对话' }).catch(() => undefined);
+    }
+  }, []);
+
+  const transferConversationRunning = useCallback((fromConversationId: string, toConversationId: string) => {
+    if (fromConversationId === toConversationId) return;
+    setRunningConversationIds(prev => {
+      const withoutFrom = prev.filter(item => item !== fromConversationId);
+      return withoutFrom.includes(toConversationId) ? withoutFrom : [...withoutFrom, toConversationId];
+    });
+    setConversations(prev => prev.map(item => (
+      item.conversation_id === toConversationId ? { ...item, status: '执行中' } : item
+    )));
+    void xiaoqiaoApi.updateConversation(toConversationId, { status: '执行中' }).catch(() => undefined);
   }, []);
 
   const renameConversation = useCallback(async (conversationId: string, title: string) => {
@@ -1761,7 +1777,7 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
       tool_calls: [],
       metadata: {
         turn_ui_status: 'assistant_pending' satisfies TurnUiStatus,
-        turn_status_label: '正在理解问题...',
+        turn_status_label: '准备执行',
         turn_request_id: requestId,
       },
     };
@@ -1779,6 +1795,10 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
       }
       setIsTyping(true);
       setConversationMessages(optimisticConversationId, prev => [...prev, fallbackUserMessage, assistantMessage]);
+      setRunningConversationIds(prev => (prev.includes(optimisticConversationId) ? prev : [...prev, optimisticConversationId]));
+      setConversations(prev => prev.map(item => (
+        item.conversation_id === optimisticConversationId ? { ...item, status: '执行中' } : item
+      )));
       if (typeof window !== 'undefined') {
         const phase0 = (window as unknown as { __phase0?: { marks?: Record<string, number> } }).__phase0;
         if (phase0?.marks) {
@@ -1826,6 +1846,7 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
         pendingConversationId = convId;
         if (convId !== optimisticConversationId) {
           moveConversationMessages(optimisticConversationId, convId);
+          transferConversationRunning(optimisticConversationId, convId);
         }
         rememberDebugContext(effectiveContent, convId);
         markConversationRunning(convId);
@@ -1862,6 +1883,7 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
         activeConversationIdRef.current = conversation.conversation_id;
         setActiveConversationId(conversation.conversation_id);
         moveConversationMessages(optimisticConversationId, conversation.conversation_id);
+        transferConversationRunning(optimisticConversationId, conversation.conversation_id);
         setConversations(prev => filterPlaceholderConversations(prev, conversation.conversation_id));
         try {
           userMessage = normalizeMessage(await xiaoqiaoApi.sendMessage(convId, {
@@ -2224,9 +2246,11 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
         const publicWebFallbackMessage = publicWebReasonCodeText
           ? resolveChatAnswerMessage(publicWebReasonCodeText, typeof publicWebReasonContext === 'object' ? publicWebReasonContext as Record<string, unknown> : {})
           : '';
-        const responseContractAnswer = publicWebMetadata?.answer && typeof publicWebMetadata.answer === 'string'
-          ? publicWebMetadata.answer
-          : '';
+        const responseContractAnswer = publicWebMetadata?.answer_markdown && typeof publicWebMetadata.answer_markdown === 'string'
+          ? publicWebMetadata.answer_markdown
+          : (publicWebMetadata?.answer && typeof publicWebMetadata.answer === 'string'
+            ? publicWebMetadata.answer
+            : '');
         const finalAssistantContent = hasStructuredFollowUp
           ? ''
           : (accumulated || publicWebFallbackMessage || responseContractAnswer || '未生成有效回复');
@@ -2371,11 +2395,22 @@ export function useConversation(currentProjectBinding?: ProjectBinding) {
       setIsTyping(false);
       if (pendingConversationId) {
         clearConversationRunning(pendingConversationId);
+        setConversationMessages(pendingConversationId, prev => prev.map(item => item.id === assistantId
+          ? {
+            ...item,
+            content: item.content || '抱歉，连接出现问题，请稍后重试。',
+            metadata: {
+              ...(item.metadata || {}),
+              turn_ui_status: 'failed' satisfies TurnUiStatus,
+              turn_status_label: '生成失败',
+            },
+          }
+          : item));
       } else if (targetConversationId) {
         clearConversationRunning(targetConversationId);
       }
     });
-  }, [clearConversationRunning, conversations, debugCarryMemory, ensureConversation, markConversationRunning, messages, missingFields, moveConversationMessages, refreshConversations, setConversationMessages, setConversationMode, setCurrentAgent]);
+  }, [clearConversationRunning, conversations, debugCarryMemory, ensureConversation, markConversationRunning, messages, missingFields, moveConversationMessages, refreshConversations, setConversationMessages, setConversationMode, setCurrentAgent, transferConversationRunning]);
 
   const deleteMessage = useCallback((messageId: string) => {
     if (!activeConversationIdRef.current) return;

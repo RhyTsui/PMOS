@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-06-19T10:23:32.166Z",
+  "tests": {
+    "MIG-038": {
+      "error": "no textarea"
+    },
+    "MIG-039": {
+      "error": "no textarea"
+    },
+    "MIG-040": {
+      "error": "no textarea"
+    },
+    "MIG-041": {
+      "error": "no textarea"
+    },
+    "MIG-042": {
+      "error": "no textarea"
+    },
+    "MIG-043": {
+      "keywords": [
+        "ROI",
+        "验证",
+        "周报",
+        "巨量"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-044": {
+      "keywords": [
+        "ROI",
+        "验证",
+        "月报",
+        "腾讯"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-045": {
+      "keywords": [
+        "留存",
+        "验证",
+        "次留",
+        "日报"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-046": {
+      "keywords": [
+        "留存",
+        "验证",
+        "周报",
+        "7 日"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-047": {
+      "keywords": [
+        "留存",
+        "验证",
+        "月报",
+        "30 日"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-048": {
+      "keywords": [
+        "iOS",
+        "巨量",
+        "腾讯",
+        "激活",
+        "对比"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-049": {
+      "keywords": [
+        "iOS",
+        "Android",
+        "激活",
+        "对比"
+      ],
+      "hasAnswer": true
+    }
+  }
+}

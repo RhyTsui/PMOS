@@ -300,7 +300,7 @@ export async function runEvaluationCase(body: EvaluationRunRequest) {
       scores: scoreAnswer(answer, expectedKeywords),
       metadata: {
         adapter_version: ADAPTER_VERSION,
-        product: '智投chat',
+        product: '小乔智投',
         external_platform: '连弩测试平台',
         runtime: runtimeMetadata,
         received_metadata: body.metadata || {},

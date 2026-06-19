@@ -1,6 +1,38 @@
 # AD Repository Rules
 
+## Mandatory AI Chat OS 规范入口（本仓库级）
+
+本仓库后续任何涉及通用 Chat 体系（含 `/api/chat` 运行链路、Capability/Intent/Tool/ResponseContract、Prompt/Model/Trace 分层）的任务，默认执行前必须先阅读并遵循以下文档（作为实施前置强约束）：
+
+1. `AGENTS.md`（本文件）
+2. `docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md`
+3. `docs/architecture/governance/ai-chat-implementation-guardrails.md`
+4. `docs/operations/ui-guardrail.md`（涉及前端页交付）
+
+每个任务开始前必须输出：
+
+- 当前问题的真实表现与边界（至少含运行面/控制面/展示面/观测面/配置面归类）
+- 可能根因与影响链路
+- 涉及的架构层级（Request Understanding / Chat Domain / Capability Discovery / MCP / Model Service / Prompt / ResponseContract / Frontend Presentation / Observability / Admin）
+- 硬编码风险识别
+- 是否影响主链路、MCP、模型、Prompt、ResponseContract、Trace
+- 最小修改方案与验证方案
+
+除非任务显式要求只做文档/规范，不应直接改动 runtime 代码再补丁收口。
+
 本文件是 `ad` 子项目的仓库级执行规则。进入本仓库工作的 agent 必须先读本文件，再开始分析、设计、编码或输出页面文案。
+
+## 2026-06-12 通用 Chat 架构治理补充
+
+本仓库当前优先目标是把通用 Chat 底座收敛到 `Planner-first, tool-grounded, contract-guarded`。任何涉及 `/api/chat`、会话页、意图理解、任务规划、能力发现、工具执行、模型调用、提示词、结果契约、Trace、Admin 配置或用户可见页面的任务，必须遵守以下新增硬约束：
+
+- **职责分层不可混写**：Request Understanding 负责结构化理解用户目标与上下文；Task Planner 负责生成候选计划；Plan Arbitrator 负责合并 LLM、IntentOrch、rules/config fallback 候选；Capability Discovery 负责发现候选能力；Execution Policy 负责权限、风险、preflight、fallback 和执行决策；Tool/MCP/API/知识库/公开联网提供事实、证据与动作；Answer Composer 基于证据综合最终回答；ContractSafety 做不可绕过的后置检查；ResponseContract/SemanticResultContract 承载结果契约；Frontend 只做展示和下一步动作；Trace 只做观测审计。
+- **禁止硬编码和业务强耦合**：不得在通用 Chat Core、Prompt、UI renderer、handler 中用广告业务词、媒体名、指标名、报表名、单个客户样例或临时需求写死路由、参数补齐或结果判断。
+- **禁止业务 if/else 路由**：不得用 `includes()`、正则、if/else、switch 针对业务关键词绕过 Request Understanding、Capability Contract、Tool Contract 或 Admin 配置。业务差异必须进入 capability manifest、route rules、tool metadata、metric catalog、prompt/model 配置或受治理 seed。
+- **LLM 用途必须契约化**：LLM 可用于 Request Understanding、Task Planning、Answer Composition、Explanation 和 Rewrite，但必须输出受 schema 校验的契约结果，不得绕过 Tool/MCP/API、Evidence Ledger、ResponseContract 或 ContractSafety。
+- **禁止平行架构和兼容兜底失控**：不得新增 `*OS`、`*Protocol`、`*Schema`、`*Contract` 等平行总体系绕开 Enterprise AI Chat OS；兼容旧字段只能做局部 adapter，必须标明迁移边界和最终收口位置，不能把 fallback 写成长期主路径。
+- **严格编码规范**：所有文档、源码、页面文案、JSON fixture、golden schema 必须以 UTF-8 正常中文提交；禁止提交常见 GBK/UTF-8 错读片段和替换字符（如 U+951B、U+9428、U+6D93、U+7EDB、U+FFFD）。终端显示错读不等于文件本体乱码，但源码/文档文本中真实存在的错码必须修复。
+- **必须审查才能上线**：涉及主链路、前端交付、契约、Prompt、模型、MCP、Trace、Admin 配置的变更，必须先完成影响分析、最小方案、静态验证、真实链路或等价回归验证；每条 case 必须补充非硬编码补测和乱码健康验收，并在最终输出中明确是否可进入下一阶段。
 
 ## 默认语言
 

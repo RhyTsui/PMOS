@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>等待气泡小乔</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --panel: rgba(255, 255, 255, 0.82);
+      --text: #0f1f33;
+      --muted: #5c6a7c;
+      --line: rgba(34, 68, 105, 0.14);
+      --accent: #0978ff;
+      --duration: 4200ms;
+      --stage-a: #f8fbff;
+      --stage-b: #eaf4ff;
+      --stage-c: #ffffff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 42px);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 12%, rgba(94, 180, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 82%, rgba(43, 113, 255, 0.12), transparent 30%),
+        linear-gradient(145deg, #fbfdff 0%, var(--page) 100%);
+    }
+
+    main {
+      width: min(100%, 780px);
+      display: grid;
+      gap: 16px;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: clamp(34px, 6vw, 64px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.92), transparent 26%),
+        radial-gradient(circle at 62% 70%, rgba(58, 151, 255, 0.14), transparent 35%),
+        linear-gradient(150deg, var(--stage-a), var(--stage-b) 56%, var(--stage-c));
+      box-shadow:
+        0 26px 70px rgba(25, 83, 150, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      transition: background 380ms ease, box-shadow 380ms ease, border-color 380ms ease;
+      isolation: isolate;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 7%;
+      z-index: -1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(10, 123, 255, 0.12), transparent 66%);
+      filter: blur(22px);
+      opacity: 0.78;
+      transform: translate3d(0, 10px, 0);
+      animation: atmosphere 7200ms ease-in-out infinite;
+    }
+
+    .stage.dark {
+      --stage-a: #101923;
+      --stage-b: #162b42;
+      --stage-c: #0d141e;
+      --line: rgba(149, 192, 255, 0.18);
+      box-shadow:
+        0 28px 78px rgba(4, 16, 31, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .stage.transparent {
+      --stage-a: transparent;
+      --stage-b: transparent;
+      --stage-c: transparent;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .stage.transparent::before {
+      opacity: 0;
+    }
+
+    .mascot-shell {
+      position: relative;
+      width: min(88%, 590px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      transform-origin: 50% 62%;
+      animation: float var(--duration) cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .mascot-shell::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 69%;
+      left: 50%;
+      width: 47%;
+      height: 8%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(18, 111, 255, 0.32) 0%,
+          rgba(82, 165, 255, 0.22) 42%,
+          rgba(255, 255, 255, 0) 76%);
+      filter: blur(10px);
+      transform: translateX(-50%);
+      animation: shadow var(--duration) cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      pointer-events: none;
+    }
+
+    .mascot-glow {
+      position: absolute;
+      inset: 12%;
+      z-index: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.54), transparent 24%),
+        radial-gradient(circle at 55% 58%, rgba(37, 138, 255, 0.16), transparent 58%);
+      filter: blur(18px);
+      opacity: 0.86;
+      animation: glow var(--duration) ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mascot-stack {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .mascot-shell.is-normal-hover .mascot-stack {
+      animation: hover-perk 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .mascot-shell.is-normal-hover .mascot {
+      filter:
+        drop-shadow(0 24px 24px rgba(16, 86, 168, 0.16))
+        saturate(1.04)
+        brightness(1.02);
+    }
+
+    .mascot {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      visibility: hidden;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: drop-shadow(0 22px 22px rgba(16, 86, 168, 0.12));
+      transform-origin: 50% 56%;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .mascot.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cute-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .mascot-shell.is-normal-hover .cute-layer {
+      opacity: 1;
+    }
+
+    .cute-blush {
+      position: absolute;
+      top: 50.7%;
+      width: 9.4%;
+      height: 4%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center, rgba(255, 118, 175, 0.36), rgba(255, 154, 192, 0.18) 48%, rgba(255, 154, 192, 0) 78%);
+      filter: blur(1.55px);
+      opacity: 0.95;
+      transform: scale(0.94);
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .mascot-shell.is-normal-hover .cute-blush {
+      transform: scale(1.08);
+    }
+
+    .cute-blush.left {
+      left: 36%;
+    }
+
+    .cute-blush.right {
+      left: 55.5%;
+    }
+
+
+    .thinking-bubble {
+      position: absolute;
+      right: 12%;
+      top: 12%;
+      z-index: 2;
+      min-width: clamp(74px, 13vw, 108px);
+      height: clamp(42px, 7vw, 56px);
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid rgba(31, 121, 230, 0.18);
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(235, 247, 255, 0.88));
+      box-shadow:
+        0 16px 30px rgba(29, 97, 170, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transform-origin: 20% 80%;
+      animation: bubble-breathe 3600ms ease-in-out infinite;
+      transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
+      pointer-events: none;
+    }
+
+    .bubble-tail {
+      position: absolute;
+      left: 69%;
+      top: calc(26.8% - 12px);
+      z-index: 2;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(239, 248, 255, 0.74);
+      border: 1px solid rgba(31, 121, 230, 0.13);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        0 8px 16px rgba(28, 103, 185, 0.08);
+      transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
+      pointer-events: none;
+    }
+
+    .bubble-tail::after {
+      content: "";
+      position: absolute;
+      left: -15px;
+      top: 19px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: rgba(239, 248, 255, 0.66);
+      border: 1px solid rgba(31, 121, 230, 0.1);
+    }
+
+    .dot-loader {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dot-loader span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #35a6ff, #0877f2);
+      box-shadow: 0 3px 8px rgba(6, 104, 225, 0.18);
+      opacity: 0.38;
+      transform: translateY(2px) scale(0.8);
+      animation: dot-wait 1200ms ease-in-out infinite;
+    }
+
+    .dot-loader span:nth-child(2) {
+      animation-delay: 160ms;
+    }
+
+    .dot-loader span:nth-child(3) {
+      animation-delay: 320ms;
+    }
+
+    .mouth-bubbles {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      transition: opacity 220ms ease, visibility 220ms ease;
+      pointer-events: none;
+    }
+
+    .mascot-shell.is-normal-hover .thinking-bubble,
+    .mascot-shell.is-normal-hover .bubble-tail,
+    .mascot-shell.is-normal-hover .mouth-bubbles {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .mascot-shell.is-normal-hover .thinking-bubble {
+      transform: translate3d(0, -3px, 0) scale(0.96);
+    }
+
+    .mascot-shell.is-normal-hover .bubble-tail {
+      transform: translate3d(0, -4px, 0) scale(0.86);
+    }
+
+    .mouth-bubbles span {
+      position: absolute;
+      left: 50.5%;
+      top: calc(57.8% - 20px);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(61, 157, 255, 0.38);
+      background:
+        radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.96) 0 18%, transparent 20%),
+        radial-gradient(circle at center, rgba(224, 244, 255, 0.68), rgba(117, 193, 255, 0.18) 62%, rgba(255, 255, 255, 0));
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.7),
+        0 8px 16px rgba(18, 107, 220, 0.12);
+      opacity: 0;
+      transform: translate3d(0, 0, 0) scale(0.45);
+      animation: mouth-bubble 3600ms ease-in-out infinite;
+    }
+
+    .mouth-bubbles span:nth-child(2) {
+      width: 13px;
+      height: 13px;
+      animation-delay: 980ms;
+    }
+
+    .mouth-bubbles span:nth-child(3) {
+      width: 24px;
+      height: 24px;
+      animation-delay: 1900ms;
+    }
+
+    @keyframes cute-twinkle {
+      0%, 100% {
+        transform: scale(0.82);
+        opacity: 0.46;
+      }
+      45% {
+        transform: scale(1.16);
+        opacity: 0.9;
+      }
+    }
+
+    .mascot-shell.paused,
+    .mascot-shell.paused::after,
+    .mascot-shell.paused .mascot-glow,
+    .stage.is-paused::before {
+      animation-play-state: paused;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      }
+      28% {
+        transform: translate3d(0, -15px, 0) rotate(-1.35deg) scale(1.009);
+      }
+      56% {
+        transform: translate3d(0, -24px, 0) rotate(1deg) scale(1.014);
+      }
+      78% {
+        transform: translate3d(0, -10px, 0) rotate(-0.45deg) scale(1.006);
+      }
+    }
+
+    @keyframes shadow {
+      0%, 100% {
+        opacity: 0.94;
+        transform: translateX(-50%) scale(1);
+      }
+      56% {
+        opacity: 0.58;
+        transform: translateX(-50%) scale(0.82);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        opacity: 0.76;
+        transform: scale(0.98);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes atmosphere {
+      0%, 100% {
+        transform: translate3d(-1%, 10px, 0) scale(0.98);
+      }
+      50% {
+        transform: translate3d(1%, -4px, 0) scale(1.04);
+      }
+    }
+
+    @keyframes hover-perk {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      42% {
+        transform: translate3d(0, -5px, 0) scale(1.018);
+      }
+      72% {
+        transform: translate3d(0, 1px, 0) scale(0.996);
+      }
+    }
+
+    @keyframes bubble-breathe {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(0, -5px, 0) scale(1.018);
+      }
+    }
+
+    @keyframes dot-wait {
+      0%, 80%, 100% {
+        opacity: 0.34;
+        transform: translateY(2px) scale(0.82);
+      }
+      38% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1);
+      }
+    }
+
+    @keyframes mouth-bubble {
+      0%, 12% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.45);
+      }
+      24% {
+        opacity: 0.82;
+      }
+      58% {
+        opacity: 0.62;
+        transform: translate3d(28px, -20px, 0) scale(0.94);
+      }
+      82%, 100% {
+        opacity: 0;
+        transform: translate3d(48px, -42px, 0) scale(1.24);
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 14px 34px rgba(28, 74, 128, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    button,
+    select,
+    input[type="range"] {
+      font: inherit;
+    }
+
+    button,
+    select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.92);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 13px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    select:hover {
+      border-color: rgba(9, 120, 255, 0.34);
+      box-shadow: 0 8px 18px rgba(18, 91, 176, 0.08);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.primary {
+      color: #fff;
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #1687ff, #056fe8);
+      box-shadow: 0 10px 22px rgba(9, 120, 255, 0.18);
+    }
+
+    select {
+      padding: 0 12px;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 38px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: min(34vw, 176px);
+      accent-color: var(--accent);
+    }
+
+    .counter {
+      margin-left: auto;
+      min-width: 94px;
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stage::before,
+      .mascot-shell,
+      .mascot-shell::after,
+      .mascot-glow,
+      .thinking-bubble,
+      .dot-loader span,
+      .mouth-bubbles span {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+      }
+
+      main {
+        gap: 12px;
+      }
+
+      .stage {
+        padding: 24px;
+      }
+
+      .mascot-shell {
+        width: min(92%, 520px);
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      button,
+      select,
+      label {
+        flex: 1 1 142px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      .counter {
+        margin-left: 0;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" id="stage" aria-label="等待气泡小乔动画预览">
+      <div class="mascot-shell" id="mascotShell">
+        <div class="mascot-glow" aria-hidden="true"></div>
+        <div class="mascot-stack" id="mascotStack" role="img" aria-label="蓝色透明吉祥物动画帧">
+          <img class="mascot is-active" src="assets/logo_frame_01.png" alt="">
+        </div>
+        <div class="cute-layer" aria-hidden="true">
+          <span class="cute-blush left"></span>
+          <span class="cute-blush right"></span>
+        </div>
+        <div class="thinking-bubble" aria-hidden="true">
+          <div class="dot-loader">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="bubble-tail" aria-hidden="true"></div>
+        <div class="mouth-bubbles" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="动画控制">
+      <button class="primary" id="toggle" type="button" aria-pressed="true">暂停</button>
+      <button id="restart" type="button">重播</button>
+      <label>
+        速度
+        <input id="speed" type="range" min="2600" max="6200" step="200" value="4200">
+      </label>
+      <select id="background" aria-label="背景">
+        <option value="light">浅色背景</option>
+        <option value="dark">深色背景</option>
+        <option value="transparent">透明背景</option>
+      </select>
+      <span class="counter" id="counter">4.2s</span>
+    </section>
+  </main>
+
+  <script>
+    const framePaths = [
+      "assets/logo_frame_01.png",
+      "assets/logo_frame_04.png",
+      "assets/logo_frame_05.png"
+    ];
+
+    const mascotStack = document.querySelector("#mascotStack");
+    const mascotShell = document.querySelector("#mascotShell");
+    const toggle = document.querySelector("#toggle");
+    const restart = document.querySelector("#restart");
+    const speed = document.querySelector("#speed");
+    const background = document.querySelector("#background");
+    const stage = document.querySelector("#stage");
+    const counter = document.querySelector("#counter");
+
+    let playing = true;
+    let watching = false;
+    let frameIndex = 0;
+    let frameStartedAt = performance.now();
+    let rafId = null;
+    let activeFrame = 0;
+
+    const frameElements = framePaths.map((src, index) => {
+      const image = index === 0 ? mascotStack.querySelector("img") : new Image();
+      image.className = `mascot${index === 0 ? " is-active" : ""}`;
+      image.decoding = "async";
+      image.alt = "";
+      image.src = src;
+      image.dataset.frame = String(index);
+      if (index !== 0) mascotStack.appendChild(image);
+      if (image.decode) image.decode().catch(() => {});
+      return image;
+    });
+
+    const boredSequence = [
+      { frame: 1, hold: 4200 }
+    ];
+
+    const boredBlinkSequence = [
+      { frame: 2, hold: 130 },
+      { frame: 1, hold: 240 }
+    ];
+
+    const glanceSequence = [
+      { frame: 0, hold: 4200 }
+    ];
+
+    const boredReturnSequence = [
+      { frame: 1, hold: 260 }
+    ];
+
+    let activeSequence = boredSequence;
+    let nextBlinkDelay = 2600 + Math.random() * 1400;
+
+    function setNextBlinkDelay() {
+      nextBlinkDelay = 2600 + Math.random() * 1800;
+    }
+
+    function frameDuration(index) {
+      const ratio = Number(speed.value) / 4200;
+      return activeSequence[index].hold * ratio;
+    }
+
+    function showFrame(nextFrame) {
+      if (nextFrame === activeFrame) return;
+      frameElements[activeFrame].classList.remove("is-active");
+      activeFrame = nextFrame;
+      frameElements[activeFrame].classList.add("is-active");
+    }
+
+    function startSequence(sequence, shouldWatch) {
+      watching = shouldWatch;
+      activeSequence = sequence;
+      frameIndex = 0;
+      frameStartedAt = performance.now();
+      showFrame(activeSequence[frameIndex].frame);
+    }
+
+    function advanceFrame() {
+      frameIndex += 1;
+
+      if (frameIndex >= activeSequence.length) {
+        if (watching) {
+          frameIndex = activeSequence.length - 1;
+          showFrame(activeSequence[frameIndex].frame);
+          return;
+        }
+
+        activeSequence = boredSequence;
+        frameIndex = 0;
+        frameStartedAt = performance.now();
+        setNextBlinkDelay();
+        showFrame(activeSequence[frameIndex].frame);
+        return;
+      }
+
+      showFrame(activeSequence[frameIndex].frame);
+    }
+
+    function animate(now) {
+      if (playing && !watching && activeSequence === boredSequence && now - frameStartedAt >= nextBlinkDelay) {
+        startSequence(boredBlinkSequence, false);
+      }
+
+      if (playing && now - frameStartedAt >= frameDuration(frameIndex)) {
+        frameStartedAt = now;
+        advanceFrame();
+      }
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function setPlaying(nextPlaying) {
+      playing = nextPlaying;
+      toggle.textContent = playing ? "暂停" : "播放";
+      toggle.setAttribute("aria-pressed", String(playing));
+      mascotShell.classList.toggle("paused", !playing);
+      stage.classList.toggle("is-paused", !playing);
+      frameStartedAt = performance.now();
+    }
+
+    function restartAnimation() {
+      watching = false;
+      activeSequence = boredSequence;
+      frameIndex = 0;
+      mascotShell.classList.remove("is-normal-hover");
+      showFrame(activeSequence[frameIndex].frame);
+      frameStartedAt = performance.now();
+      setNextBlinkDelay();
+      mascotShell.style.animation = "none";
+      mascotShell.offsetHeight;
+      mascotShell.style.animation = "";
+      setPlaying(true);
+    }
+
+    function startGlance() {
+      if (!playing) return;
+      mascotShell.classList.add("is-normal-hover");
+      startSequence(glanceSequence, true);
+    }
+
+    function endGlance() {
+      mascotShell.classList.remove("is-normal-hover");
+      if (!playing) return;
+      startSequence(boredReturnSequence, false);
+    }
+
+    toggle.addEventListener("click", () => setPlaying(!playing));
+    restart.addEventListener("click", restartAnimation);
+    mascotShell.addEventListener("mouseenter", startGlance);
+    mascotShell.addEventListener("mouseleave", endGlance);
+    mascotShell.addEventListener("focusin", startGlance);
+    mascotShell.addEventListener("focusout", endGlance);
+    speed.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+      counter.textContent = `${(Number(speed.value) / 1000).toFixed(1)}s`;
+      frameStartedAt = performance.now();
+    });
+    background.addEventListener("change", () => {
+      stage.className = `stage ${background.value === "light" ? "" : background.value}`.trim();
+      if (!playing) stage.classList.add("is-paused");
+    });
+
+    document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+    showFrame(activeSequence[frameIndex].frame);
+    rafId = requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

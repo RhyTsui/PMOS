@@ -1,22 +1,20 @@
-import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
+import { runtimeDataPath } from './runtime-data-path';
 import type {
-  ReportCellValue,
   ReportDraft,
   ReportDraftStatus,
   ReportExportTarget,
   ReportMetricBinding,
   ReportMetricFormatter,
-  ReportSummaryCard,
   ReportTemplate,
 } from '@/types';
 
 const TEMPLATES_PATH = runtimeDataPath('report-templates.json');
-const LEGACY_TEMPLATES_PATH = legacyDataPath('report-templates.json');
-const DRAFTS_PATH = runtimeDataPath('report-drafts.json');
-const LEGACY_DRAFTS_PATH = legacyDataPath('report-drafts.json');
+const TEMPLATE_RESULTS_PATH = runtimeDataPath('report-template-results.json');
+const LEGACY_TEMPLATES_PATH = TEMPLATES_PATH;
+const LEGACY_TEMPLATE_RESULTS_PATH = TEMPLATE_RESULTS_PATH;
+const LEGACY_DRAFTS_PATH = TEMPLATE_RESULTS_PATH;
 
 interface ReportTemplatesFile {
   templates: ReportTemplate[];
@@ -24,6 +22,26 @@ interface ReportTemplatesFile {
 
 interface ReportDraftsFile {
   drafts: ReportDraft[];
+}
+
+export class ReportDraftGenerationUnavailableError extends Error {
+  readonly code = 'REPORT_DRAFT_REAL_DATA_REQUIRED';
+  readonly status = 409;
+
+  constructor(template: ReportTemplate, reportDate: string) {
+    super(`未找到可用于生成「${template.name}」${reportDate} 报告模板结果的真实数据来源，已停止生成。请先接入真实报表数据或上传可校验的数据文件。`);
+    this.name = 'ReportDraftGenerationUnavailableError';
+  }
+}
+
+export function isReportDraftGenerationUnavailableError(
+  error: unknown,
+): error is ReportDraftGenerationUnavailableError {
+  return error instanceof ReportDraftGenerationUnavailableError
+    || (typeof error === 'object'
+      && error !== null
+      && 'code' in error
+      && (error as { code?: unknown }).code === 'REPORT_DRAFT_REAL_DATA_REQUIRED');
 }
 
 function nowIso(): string {
@@ -51,9 +69,76 @@ function metricBinding(
   };
 }
 
+function sourceBinding(
+  id: string,
+  sourceName: string,
+  reportCode: string,
+  dimension: string,
+  filters: string[],
+): ReportTemplate['sources'][number] {
+  return {
+    id,
+    sourceType: 'mcp_report',
+    sourceName,
+    sourceRef: 'report_mcp',
+    reportCode,
+    dimension,
+    filters,
+  };
+}
+
 function defaultTemplates(): ReportTemplate[] {
   const now = nowIso();
   return [
+    {
+      id: 'report-template-game-project-daily-v06',
+      name: '游戏项目投放日报',
+      description: '按业务日报模板汇总项目总数据、广告量、媒体、应用类型、团队和 iOS 自然量扣除口径，适合每日发行复盘。',
+      scene: '游戏项目每日投放复盘',
+      frequency: 'daily',
+      cronExpression: '0 9 * * *',
+      enabled: true,
+      reviewRequired: true,
+      exportTarget: 'xiaoshan',
+      sources: [
+        sourceBinding('src-game-daily-overview', '项目总数据', 'game_project_daily_overview', 'project', ['time=yesterday']),
+        sourceBinding('src-game-daily-ad-volume', '广告量', 'game_project_ad_volume_daily', 'project', ['time=yesterday']),
+        sourceBinding('src-game-daily-media', '各媒体流量', 'game_project_media_daily', 'media', ['time=yesterday']),
+        sourceBinding('src-game-daily-app-type', '各应用类型流量', 'game_project_app_type_daily', 'app_type', ['time=yesterday']),
+        sourceBinding('src-game-daily-media-app-type', '各媒体各应用类型流量', 'game_project_media_app_type_daily', 'media_app_type', ['time=yesterday']),
+        sourceBinding('src-game-daily-team', '各团队流量', 'game_project_team_daily', 'team', ['time=yesterday']),
+        sourceBinding('src-game-daily-team-app-type', '各团队各应用类型流量', 'game_project_team_app_type_daily', 'team_app_type', ['time=yesterday']),
+        sourceBinding('src-game-daily-team-media', '各团队媒体流量', 'game_project_team_media_daily', 'team_media', ['time=yesterday']),
+        sourceBinding('src-game-daily-team-media-app-type', '各团队各媒体各应用类型流量', 'game_project_team_media_app_type_daily', 'team_media_app_type', ['time=yesterday']),
+      ],
+      metricBindings: [
+        metricBinding('cost', '项目总数据', '消耗', '消耗', 'sum', 'currency'),
+        metricBinding('cash_consumption', '项目总数据', '现金消耗', '现金消耗', 'sum', 'currency'),
+        metricBinding('activation', '广告量', '激活数', '激活数', 'sum', 'integer'),
+        metricBinding('register', '广告量', '注册数', '注册数', 'sum', 'integer'),
+        metricBinding('register_rate', '广告量', '注册率', '注册率', 'avg', 'percent'),
+        metricBinding('activation_cost', '广告量', '激活成本', '激活成本', 'avg', 'currency'),
+        metricBinding('register_cost', '广告量', '注册成本', '注册成本', 'avg', 'currency'),
+        metricBinding('retention_d1', '项目总数据', '次留率', '次留率', 'avg', 'percent'),
+        metricBinding('new_pay_user', '项目总数据', '首日新充人数', '首日新充人数', 'sum', 'integer'),
+        metricBinding('new_pay_amount', '项目总数据', '首日新充金额', '首日新充金额', 'sum', 'currency'),
+        metricBinding('pay_rate', '项目总数据', '首日付费率', '首日付费率', 'avg', 'percent'),
+        metricBinding('arppu', '项目总数据', '首日ARPPU', '首日ARPPU', 'avg', 'currency'),
+        metricBinding('roi', '项目总数据', '首日ROI', '首日ROI', 'avg', 'percent'),
+        metricBinding('ios_organic_deducted_cost', '扣除 iOS 自然量', '扣除iOS自然量后消耗', '扣除iOS自然量后消耗', 'sum', 'currency'),
+        metricBinding('ios_organic_undeducted_cost', '不扣除 iOS 自然量', '不扣除iOS自然量消耗', '不扣除iOS自然量消耗', 'sum', 'currency'),
+        metricBinding('ios_share_deducted_cost', '扣除 iOS 分成比例', '扣除iOS分成后消耗', '扣除iOS分成后消耗', 'sum', 'currency'),
+      ],
+      narrativeFocus: [
+        '先看项目总数据和广告量，确认昨日整体消耗、激活、注册和首日 ROI。',
+        '按媒体、应用类型、团队逐层下钻，定位流量结构变化。',
+        '同时展示扣除 iOS 自然量、不扣除 iOS 自然量、扣除 iOS 分成比例三套口径，避免复盘时混用。',
+        '若发现空值、异常波动或口径缺失，先进入数据异常检查，不直接输出结论。',
+      ],
+      createdBy: 'system',
+      createdAt: now,
+      updatedAt: now,
+    },
     {
       id: 'report-template-daily-ops',
       name: '经营总览报表',
@@ -190,7 +275,7 @@ function normalizeTemplate(input: Partial<ReportTemplate>): ReportTemplate {
 function normalizeDraft(input: Partial<ReportDraft>): ReportDraft {
   const now = nowIso();
   return {
-    id: input.id || `report-draft-${Date.now()}`,
+    id: input.id || `report-template-${Date.now()}`,
     templateId: input.templateId || '',
     templateName: input.templateName || '未命名模板',
     reportDate: input.reportDate || now.slice(0, 10),
@@ -230,7 +315,7 @@ async function writeTemplatesFile(file: ReportTemplatesFile): Promise<void> {
 }
 
 async function readDraftsFile(): Promise<ReportDraftsFile> {
-  for (const draftsPath of [DRAFTS_PATH, LEGACY_DRAFTS_PATH]) {
+  for (const draftsPath of [TEMPLATE_RESULTS_PATH, LEGACY_TEMPLATE_RESULTS_PATH, LEGACY_DRAFTS_PATH]) {
     try {
       const raw = await readFile(draftsPath, 'utf8');
       const parsed = JSON.parse(raw) as Partial<ReportDraftsFile>;
@@ -245,8 +330,8 @@ async function readDraftsFile(): Promise<ReportDraftsFile> {
 }
 
 async function writeDraftsFile(file: ReportDraftsFile): Promise<void> {
-  await mkdir(path.dirname(DRAFTS_PATH), { recursive: true });
-  await writeFile(DRAFTS_PATH, JSON.stringify(file, null, 2), 'utf8');
+  await mkdir(path.dirname(TEMPLATE_RESULTS_PATH), { recursive: true });
+  await writeFile(TEMPLATE_RESULTS_PATH, JSON.stringify(file, null, 2), 'utf8');
 }
 
 export async function listReportTemplates(): Promise<ReportTemplate[]> {
@@ -309,132 +394,7 @@ export async function updateReportDraft(id: string, patch: Partial<ReportDraft>)
 }
 
 export async function createReportDraftFromTemplate(template: ReportTemplate, reportDate: string): Promise<ReportDraft> {
-  const file = await readDraftsFile();
-  const draft = normalizeDraft(generateDraft(template, reportDate));
-  file.drafts = [draft, ...file.drafts.filter(item => item.id !== draft.id)].slice(0, 50);
-  await writeDraftsFile(file);
-  return draft;
-}
-
-function generateDraft(template: ReportTemplate, reportDate: string): Partial<ReportDraft> {
-  const rows = buildRows(template, reportDate);
-  const columns = ['主体', ...template.metricBindings.map(binding => binding.columnKey)];
-  const summaryCards = buildSummaryCards(template.metricBindings, rows);
-  const focusEntity = String(rows[0]?.主体 || '重点主体');
-  const totalCost = summaryCards.find(card => card.label === '总消耗')?.value;
-  const totalCash = summaryCards.find(card => card.label === '现金消耗')?.value;
-  const totalRoi = summaryCards.find(card => card.label === 'ROI')?.value;
-  const weakestRoiRow = rows
-    .filter(row => typeof row.ROI === 'number')
-    .sort((a, b) => Number(a.ROI) - Number(b.ROI))[0];
-
-  return {
-    id: `report-draft-${Date.now()}`,
-    templateId: template.id,
-    templateName: template.name,
-    reportDate,
-    status: 'draft',
-    reviewRequired: template.reviewRequired,
-    exportTarget: template.exportTarget,
-    summary: `${template.name} 已生成待复核草稿，覆盖 ${rows.length} 个主体，当前建议优先关注 ${focusEntity}。`,
-    narrative: [
-      `本次报表基于“${template.scene}”场景生成，重点跟踪 ${template.metricBindings.map(item => item.metricLabel).join('、')}。`,
-      `当前总消耗 ${formatForNarrative(totalCost)}，现金消耗 ${formatForNarrative(totalCash)}，整体 ROI ${formatForNarrative(totalRoi)}。`,
-      weakestRoiRow
-        ? `${String(weakestRoiRow.主体)} 的 ROI 相对偏低，建议优先检查现金消耗、投放目标与素材承接。`
-        : '当前未识别到明显异常主体，建议按模板重点项逐一复核。',
-      template.narrativeFocus.length
-        ? `建议复核重点：${template.narrativeFocus.join('；')}。`
-        : '建议复核重点：预算进度、现金消耗和低效主体。',
-    ],
-    columns,
-    rows,
-    summaryCards,
-    sourceSnapshots: template.sources.map(source => ({
-      sourceName: source.sourceName,
-      sourceRef: source.sourceRef,
-      reportCode: source.reportCode,
-      status: source.sourceRef.includes('internal') ? 'mock' : 'ready',
-      note: source.sourceRef.includes('internal')
-        ? '当前使用本地示例数据生成，接通真实报表服务后可替换。'
-        : '已纳入本次报表聚合范围。',
-    })),
-    generatedAt: nowIso(),
-  };
-}
-
-function buildRows(template: ReportTemplate, reportDate: string): Record<string, ReportCellValue>[] {
-  const dimension = template.sources[0]?.dimension || 'account';
-  const dimensionValues = dimension === 'media'
-    ? ['巨量引擎', '抖音', '快手']
-    : dimension === 'project'
-      ? ['项目 A', '项目 B', '项目 C']
-      : ['账户 A', '账户 B', '账户 C'];
-
-  return dimensionValues.map((entity, index) => {
-    const row: Record<string, ReportCellValue> = { 主体: entity };
-    for (const binding of template.metricBindings) {
-      row[binding.columnKey] = generateMetricValue(binding.metricKey, entity, reportDate, index);
-    }
-    return row;
-  });
-}
-
-function generateMetricValue(metricKey: string, entity: string, reportDate: string, index: number): number {
-  const seed = parseInt(createHash('md5').update(`${metricKey}:${entity}:${reportDate}:${index}`).digest('hex').slice(0, 8), 16);
-  switch (metricKey) {
-    case 'cost':
-      return 10000 + (seed % 180000);
-    case 'cash_consumption':
-      return 8000 + (seed % 150000);
-    case 'budget':
-      return 50000 + (seed % 300000);
-    case 'budget_progress':
-      return Number((0.35 + (seed % 55) / 100).toFixed(2));
-    case 'impression':
-      return 300000 + (seed % 800000);
-    case 'click':
-      return 12000 + (seed % 50000);
-    case 'conversion':
-      return 500 + (seed % 5000);
-    case 'cpa':
-      return Number((30 + (seed % 120)).toFixed(2));
-    case 'roi':
-      return Number((0.6 + (seed % 180) / 100).toFixed(2));
-    default:
-      return seed % 1000;
-  }
-}
-
-function buildSummaryCards(bindings: ReportMetricBinding[], rows: Record<string, ReportCellValue>[]): ReportSummaryCard[] {
-  return bindings.slice(0, 4).map(binding => {
-    const values = rows.map(row => Number(row[binding.columnKey] || 0)).filter(value => Number.isFinite(value));
-    let value = 0;
-    if (binding.aggregation === 'avg' || binding.aggregation === 'latest') {
-      value = values.length ? Number((values.reduce((sum, item) => sum + item, 0) / values.length).toFixed(2)) : 0;
-    } else {
-      value = values.reduce((sum, item) => sum + item, 0);
-    }
-    return {
-      label: binding.metricLabel,
-      value: formatMetricValue(value, binding.formatter),
-      formatter: binding.formatter,
-      trend: value > 0 ? 'up' : 'stable',
-    };
-  });
-}
-
-function formatMetricValue(value: number, formatter: ReportMetricFormatter): number | string {
-  if (formatter === 'currency') return `¥${Math.round(value).toLocaleString('zh-CN')}`;
-  if (formatter === 'percent') return `${Math.round(value * 100)}%`;
-  if (formatter === 'integer') return Math.round(value).toLocaleString('zh-CN');
-  if (formatter === 'decimal') return value.toFixed(2);
-  return String(value);
-}
-
-function formatForNarrative(value: number | string | undefined): string {
-  if (value === undefined || value === null || value === '') return '--';
-  return String(value);
+  throw new ReportDraftGenerationUnavailableError(template, reportDate);
 }
 
 export function buildXiaoshanReportMarkdown(draft: ReportDraft): string {

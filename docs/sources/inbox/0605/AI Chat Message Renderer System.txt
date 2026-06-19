@@ -1,0 +1,241 @@
+避免做成“一堆孤立组件”。正确目标是：先定义消息渲染组件体系与 registry，再把 Markdown、表格、图表、表单、文件、Runtime、Evidence 等都注册为统一 renderer。单独做一套AI Chat Message Renderer System，不要只叫“图表组件”或“消息组件”。它本质是：SemanticResultContract
+  -> regions[]
+  -> componentBinding
+  -> renderer registry
+  -> 具体渲染组件
+
+
+一、必须设计的组件大类
+1. Markdown / 文本结果组件
+用于普通回答、解释、总结、方案输出。
+包括：
+MarkdownResultRenderer
+RichTextRenderer
+CodeBlockRenderer
+QuoteRenderer
+ChecklistRenderer
+LongTextCollapseRenderer
+
+可以基于 react-markdown / remark / rehype；Ant Design X 也已经有 AI interface 和 X Markdown 方向，可以作为基础参考。
+
+
+
+2. Data Visualization 组件
+用于问数、报表、趋势、归因、路径分析。
+包括：
+MetricCardRenderer
+KpiGroupRenderer
+LineChartRenderer
+BarChartRenderer
+PieChartRenderer
+AreaChartRenderer
+StackedBarRenderer
+FunnelRenderer
+SankeyRenderer
+PathAnalysisRenderer
+HeatmapRenderer
+ScatterRenderer
+GeoMapRenderer
+CohortRenderer
+TrendInsightRenderer
+建议底层优先用 ECharts，因为图表类型多、交互强，也支持大数据和渐进渲染。
+
+
+3. Table / Grid 组件
+这是广告数据场景的核心。
+包括：
+SimpleTableRenderer
+DataGridRenderer
+PivotTableRenderer
+ComparisonTableRenderer
+MetricBreakdownTableRenderer
+VirtualizedTableRenderer
+EditableTableRenderer
+TableWithChartLinkageRenderer
+
+底层建议：
+TanStack Table + TanStack Virtual
+TanStack Table 是 headless table，可以保留你自己的样式体系；虚拟化要配 TanStack Virtual 或 react-window。
+
+4. Excel / 文件预览组件
+不是只做 Excel，还要做 Artifact 预览体系。
+包括：
+ExcelPreviewRenderer
+CsvPreviewRenderer
+JsonPreviewRenderer
+PdfPreviewRenderer
+ImagePreviewRenderer
+FileCardRenderer
+AttachmentListRenderer
+DownloadExportRenderer
+
+Excel 类建议先支持：
+xlsx / csv 预览
+sheet 切换
+冻结首行首列
+列宽自适应
+分页
+导出
+
+5. Form / Action 组件
+用于 AI 追问、参数确认、任务配置、权限申请。
+包括：
+DynamicFormRenderer
+ParameterConfirmRenderer
+DateRangePickerRenderer
+DimensionMetricSelectorRenderer
+FilterBuilderRenderer
+PermissionRequestRenderer
+ApprovalConfirmRenderer
+TaskScheduleFormRenderer
+
+这类组件必须接入统一：ActionContract，不能每个表单自己定义提交协议。
+
+6. AI Runtime 组件
+用于展示 AI 怎么执行，不是业务结果本身。
+包括：
+RuntimeTimelineRenderer
+AgentStepRenderer
+ToolCallCardRenderer
+WorkflowTraceRenderer
+StreamingStateRenderer
+RetryRecoveryRenderer
+ApprovalWaitingRenderer
+RuntimeErrorRenderer
+
+这类组件接：RuntimeDisplayProtocol，不要直接塞进业务结果协议里。
+
+
+7. Evidence / Source / Trust 组件
+这是企业级 AI Chat 很关键。
+包括：
+EvidencePanelRenderer
+SourceListRenderer
+ConfidenceBadgeRenderer
+FreshnessBadgeRenderer
+DataLineageRenderer
+RiskNoticeRenderer
+SensitiveDataMaskRenderer
+AIInferenceLabelRenderer
+
+所有结论、洞察、风险建议都要能挂：evidenceRefs / sourceRefs
+
+
+8. Business Result Card 组件
+用于把业务结果卡片化。
+包括：
+ReportResultCardRenderer
+MetricExplainerCardRenderer
+DiagnosisResultCardRenderer
+AttributionResultCardRenderer
+CampaignInsightCardRenderer
+TaskResultCardRenderer
+DecisionCardRenderer
+NextActionCardRenderer
+
+这些不是新协议，只是不同：componentBinding下的 renderer。
+
+9. Workflow / Task 组件
+用于自动化任务、日报、联调、排查流程。
+包括：
+WorkflowProgressRenderer
+TaskStatusRenderer
+StepListRenderer
+ChecklistProgressRenderer
+RunResultRenderer
+ScheduleStatusRenderer
+ReviewGateRenderer
+
+10. Asset / Media 组件
+广告投放场景非常需要。
+包括：
+CreativeAssetCardRenderer
+VideoPreviewRenderer
+ImageGalleryRenderer
+MaterialComparisonRenderer
+CreativeTagRenderer
+AssetLineageRenderer
+
+11. Empty / Error / Fallback 组件
+必须有，不然前端会炸。
+包括：
+UnknownBindingFallbackRenderer
+InvalidContractRenderer
+PermissionDeniedRenderer
+EmptyResultRenderer
+InsufficientDataRenderer
+RendererErrorBoundary
+LoadingSkeletonRenderer
+
+二、建议第一版注册这些 binding
+不用一次做太细，第一版建议先注册 12 个：
+const defaultComponentBindings = [
+  "markdown-result",
+  "data-visualization",
+  "data-table",
+  "metric-card",
+  "form",
+  "asset-reference",
+  "ai-runtime",
+  "workflow-trace",
+  "evidence-panel",
+  "source-list",
+  "decision-card",
+  "fallback"
+]
+
+然后每个 binding 内部再分具体 renderer，例如：
+componentBinding = "data-visualization"
+region.data.chartType = "line" | "bar" | "pie" | "sankey"
+不要把每一种图表都注册成顶层 binding，否则 registry 会膨胀。
+
+
+三、推荐开源底座
+可以先部署开源框架，但要明确它们只是“底座”，不是你的协议。
+
+建议：
+基础 UI：Ant Design / Ant Design X
+Markdown：Ant Design X Markdown 或 react-markdown
+图表：ECharts
+表格：TanStack Table + TanStack Virtual
+虚拟列表：react-virtuoso 或 TanStack Virtual
+表单：Ant Design Form + JSON Schema Form 思路
+文件预览：SheetJS / PDF viewer / 自研 ArtifactPreview
+
+Ant Design 是企业级 React UI 库，Ant Design X 更贴 AI interface 场景；ECharts 适合复杂图表；TanStack Table 适合 headless 数据表格。
+
+四、正确实施顺序
+1. 定义 ComponentBinding 分类
+2. 建 createComponentRegistry()
+3. 注册 fallback renderer
+4. 注册 markdown-result
+5. 注册 data-table
+6. 注册 data-visualization
+7. 注册 form/action
+8. 注册 evidence/source
+9. 注册 ai-runtime/workflow-trace
+10. 接入 SemanticResultContract validation
+11. 接入 golden examples 回归
+12. 再逐步美化组件样式
+
+你可以先部署开源框架和定义组件样式需求，但不要先写大量业务组件。先把
+contract -> registry -> renderer -> fallback -> telemetry这条链路跑通。
+
+
+
+结论
+做的不是普通组件库，而是：AI Chat OS Message Renderer Registry
+它包括：
+Markdown
+Data Visualization
+Table/Grid
+Excel/File Preview
+Form/Action
+AI Runtime
+Workflow Trace
+Evidence/Source
+Business Result Card
+Asset/Media
+Fallback/Error
+
+第一版先做 10～12 个顶层 binding，后续按业务扩展 renderer。

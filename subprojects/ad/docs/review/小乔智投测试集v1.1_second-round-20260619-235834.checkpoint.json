@@ -1,0 +1,155 @@
+{
+  "timestamp": "2026-06-19T16:14:56.055Z",
+  "selectedCaseIds": [
+    "MIG-050",
+    "MIG-051",
+    "MIG-052",
+    "MIG-053",
+    "MIG-054",
+    "MIG-055",
+    "MIG-056",
+    "MIG-057",
+    "MIG-058",
+    "MIG-059",
+    "MIG-060"
+  ],
+  "total": 11,
+  "passCount": 2,
+  "failCount": 4,
+  "blockedCount": 0,
+  "errorCount": 0,
+  "results": [
+    {
+      "caseId": "MIG-050",
+      "scene": "广告报表-多维度交叉-MDIM-F001",
+      "prompt": "指间2026-01-01 IOS应用类型+巨量+广告投放部 全天激活数、累计45日roi、第45日roi、3日设备留存数、3日注册留存数、4日首日付费留存数、按时段19点-20点的首日注册设备数、按天截止到20点的首日付费账号数 分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：84 累计45日roi：47.65% 第45日roi：0.06% 2周roi：26.17% 第2周roi:12.7% 累计2月ROI：51.26% 第2月ROI: 18.81% 3日设备留存率：44.05% 3日注册留存率：49.37% 4日首日付费留存数：50% 按时段19点-20点的首日注册设备数：9 按天截止到20点的首日付费账号数：10\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按天",
+      "note": "",
+      "verdict": "失败",
+      "reason": "缺少有效 response_contract",
+      "answer": "summarizeValue is not defined",
+      "intentType": "",
+      "contractStatus": "failed",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "failed",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 20,
+        "hasGroundedExecution": false
+      },
+      "elapsed": "195.6"
+    },
+    {
+      "caseId": "MIG-051",
+      "scene": "广告报表-多维度交叉-MDIM-F002",
+      "prompt": "指间2026-02-01 IOS应用类型+自然量+广告投放部 全天激活数、3日设备留存数、3日注册留存数、4日首日付费留存数分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：459 3日设备留存率：39.87% 3日注册留存率：41.12% 4日首日付费留存数：69.39%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按周",
+      "note": "",
+      "verdict": "失败",
+      "reason": "缺少有效 response_contract",
+      "answer": "我还不能直接完成这类请求，请补充目标、范围或要使用的数据来源，我会按可用能力继续处理。",
+      "intentType": "debugging",
+      "contractStatus": "not_configured",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "not_configured",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 9,
+        "hasGroundedExecution": false
+      },
+      "elapsed": "13.9"
+    },
+    {
+      "caseId": "MIG-052",
+      "scene": "广告报表-多维度交叉-MDIM-F003",
+      "prompt": "指间2026-01-01那一周 IOS应用类型+巨量+广告投放部 总激活数、2周roi、第2周roi、3日设备留存数、3日注册留存数、4日首日付费留存数 分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：716 2周roi：26.17% 第2周roi:12.7% 3日设备留存率：47.63% 3日注册留存率：49.50% 4日首日付费留存数：67.07%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按月",
+      "note": "",
+      "verdict": "失败",
+      "reason": "缺少有效 response_contract",
+      "answer": "当前候选工具还不能直接完成这次查询，已整理能力缺口。\n\n已记录本次问题，执行详情中可查看 Case。",
+      "intentType": "report_query",
+      "contractStatus": "missing_input",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "missing_input",
+        "sourceRefCount": 1,
+        "evidenceRefCount": 1,
+        "toolCallTraceCount": 1,
+        "processEventCount": 20,
+        "hasGroundedExecution": true
+      },
+      "elapsed": "185.0"
+    },
+    {
+      "caseId": "MIG-053",
+      "scene": "广告报表-多维度交叉-MDIM-F004",
+      "prompt": "查询指间2026年1月1号广告投放部的总激活数、2日roi、第2日roi 、3日设备留存数、3日注册留存数、4日首日付费留存数在应用类型维度的分布情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表细分+按天",
+      "note": "",
+      "verdict": "失败",
+      "reason": "缺少有效 response_contract",
+      "answer": "当前候选工具还不能直接完成这次查询，已整理能力缺口。\n\n已记录本次问题，执行详情中可查看 Case。",
+      "intentType": "report_query",
+      "contractStatus": "missing_input",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "missing_input",
+        "sourceRefCount": 1,
+        "evidenceRefCount": 1,
+        "toolCallTraceCount": 1,
+        "processEventCount": 20,
+        "hasGroundedExecution": true
+      },
+      "elapsed": "178.0"
+    },
+    {
+      "caseId": "MIG-054",
+      "scene": "广告报表-多维度交叉-MDIM-F005",
+      "prompt": "查询指间2026年1月1号那一周广告媒体总激活数、2周roi 、第2周roi、3日设备留存数、3日注册留存数、4日首日付费留存数在团队的分布情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表细分+按周",
+      "note": "",
+      "verdict": "通过",
+      "reason": "合理追问",
+      "answer": "还需要确认项目后才能继续查询。",
+      "intentType": "report_query",
+      "contractStatus": "missing_input",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "missing_input",
+        "sourceRefCount": 2,
+        "evidenceRefCount": 1,
+        "toolCallTraceCount": 3,
+        "processEventCount": 21,
+        "hasGroundedExecution": true
+      },
+      "elapsed": "203.2"
+    },
+    {
+      "caseId": "MIG-055",
+      "scene": "广告报表-多维度交叉-MDIM-F006",
+      "prompt": "查询指间2025年12月1号那一月广告媒体的总激活数、2月累计roi 、第2月roi、3日设备留存数、3日注册留存数、4日首日付费留存数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：总激活数：30584 2月累计roi: 57.39% 第2月roi: 21.79 3日设备留存率 36.73 3日注册留存数：41.14% 4日首日付费留存数：59.02%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表细分+按月",
+      "note": "",
+      "verdict": "通过",
+      "reason": "合理追问",
+      "answer": "还需要确认项目后才能继续查询。",
+      "intentType": "report_query",
+      "contractStatus": "missing_input",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "missing_input",
+        "sourceRefCount": 2,
+        "evidenceRefCount": 1,
+        "toolCallTraceCount": 3,
+        "processEventCount": 21,
+        "hasGroundedExecution": true
+      },
+      "elapsed": "201.2"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "timestamp": "2026-06-19T16:51:58.441Z",
+  "selectedCaseIds": [
+    "MIG-051"
+  ],
+  "total": 1,
+  "passCount": 1,
+  "failCount": 0,
+  "blockedCount": 0,
+  "errorCount": 0,
+  "results": [
+    {
+      "caseId": "MIG-051",
+      "scene": "广告报表-多维度交叉-MDIM-F002",
+      "prompt": "指间2026-02-01 IOS应用类型+自然量+广告投放部 全天激活数、3日设备留存数、3日注册留存数、4日首日付费留存数分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：459 3日设备留存率：39.87% 3日注册留存率：41.12% 4日首日付费留存数：69.39%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按周",
+      "note": "",
+      "verdict": "通过",
+      "reason": "包含数据内容且契约证据完整",
+      "answer": "2026-02-01，激活数为 293，注册成本为 70.04 元。",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 3,
+        "evidenceRefCount": 3,
+        "toolCallTraceCount": 6,
+        "processEventCount": 24,
+        "processEventSummary": [
+          {
+            "index": 8,
+            "type": "stage.ended",
+            "label": "多工具编排未覆盖",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "当前多工具编排没有拆解出可执行子查询，继续尝试常规报表查询。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "语义框架候选需要校正：文本具备结构化查数信号（semanticTask=execute_workflow），进入问数链路。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "mcp.tool_result",
+            "label": "匹配终端",
+            "status": "success",
+            "toolName": "get_dict_zt_rpt_os_type",
+            "summary": "dictionary matched: 终端系统 ios,ios-h5,IOS",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "mcp.tool_error",
+            "label": "查询报表数据",
+            "status": "error",
+            "toolName": "get_zt_ad_retention_report",
+            "summary": "查询参数映射异常，系统未能完成查询。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "mcp.tool_result",
+            "label": "调用数据能力",
+            "status": "success",
+            "toolName": "get_zt_ad_day_report",
+            "summary": "已查到 2026-02-01 至 2026-02-01 的明细结果，共 1 条数据。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "存在需要注意的数据口径或匹配风险。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 19,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query；另有 1 个非阻断提醒。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 20,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 21,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 22,
+            "type": "ui.component_rendered",
+            "label": "生成数据表：",
+            "status": "success",
+            "toolName": "",
+            "summary": "已生成结构化数据表。",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 23,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "已查到 2026-02-01 至 2026-02-01 的明细结果，共 1 条数据。",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "221.5"
+    }
+  ]
+}

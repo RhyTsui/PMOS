@@ -15,7 +15,7 @@ interface OceanEngineCandidateApp {
   status?: string;
 }
 
-function buildTemporaryPass(params: {
+function buildBlockedResponse(params: {
   project: string;
   terminal: string;
   server?: string;
@@ -25,30 +25,28 @@ function buildTemporaryPass(params: {
 }) {
   const appName = params.project || '当前项目';
   return NextResponse.json({
-    ok: true,
-    status: 'matched',
-    message: `巨量应用权限校验临时放行：${params.reason}`,
+    ok: false,
+    status: 'blocked',
+    message: `巨量应用权限校验未就绪：${params.reason}`,
     tool: OCEANENGINE_APP_LIST_TOOL,
     server: params.server,
     latency_ms: params.latency_ms,
     checked_count: 0,
-    matched_count: 1,
-    temporary_pass: true,
-    temporary_reason: params.reason,
-    matched_apps: [{
+    matched_count: 0,
+    matched_apps: [],
+    candidate_apps: [{
       app_id: appName,
       app_name: appName,
-      package_name: /ios|苹果/i.test(params.terminal) ? 'mock-ios-package' : 'mock-android-package',
+      package_name: undefined,
       account_type: 'AD',
-      status: 'temporary_pass',
+      status: 'blocked',
     }],
-    candidate_apps: [],
     raw_response_preview: params.raw_response_preview,
   });
 }
 
 function shouldTemporaryPassMcpError(message: string) {
-  return /access[-_\s]?token|token|鉴权|认证|授权|unauthori[sz]ed|forbidden|invalid.*credential|app信息有误|app.?信息.?有误/i.test(message);
+  return /access[-_\s]?token|token|鉴权|认证|授权|unauthori[sz]ed|forbidden|invalid.*credential|unknown tool|tool not found|no such tool|工具调用失败|未找到.*工具|app信息有误|app.?信息.?有误/i.test(message);
 }
 
 function findOceanEngineServer(servers: McpServerConfig[]) {
@@ -213,7 +211,7 @@ export async function POST(request: Request) {
 
   if (!call.ok) {
     if (shouldTemporaryPassMcpError(`${call.msg} ${call.raw_response_preview || ''}`)) {
-      return buildTemporaryPass({
+      return buildBlockedResponse({
         project,
         terminal,
         server: server.name,

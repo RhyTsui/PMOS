@@ -1,0 +1,60 @@
+{
+  "testId": "MIG-001",
+  "round": 2,
+  "date": "2026-06-17",
+  "scenario": "天气查询",
+  "input": "南京本周日天气如何",
+  "expectedOutcome": "联网搜索天气信息",
+  "capabilityDomains": ["Chat Runtime", "Public Web Search", "LLM 意图理解", "SSE 流式渲染"],
+  "acceptanceResults": {
+    "pageLoad": { "status": "PASS" },
+    "instantUserMessage": { "status": "PASS" },
+    "aiResponse": { "status": "FAIL", "note": "120s 超时，SSE 流在模型响应前关闭" },
+    "sseContract": { "status": "FAIL", "note": "SSE 未被测试脚本捕获，POST /api/chat 返回 200 但 stream closed" },
+    "noNegation": { "status": "PASS", "note": "AI 未返回'没有联网能力'等否定表述" },
+    "refreshReplay": { "status": "FAIL", "note": "AI 响应未渲染，刷新后无内容" },
+    "consoleErrors": { "status": "FAIL", "note": "1 个 401 错误 (model-service-config)" },
+    "mojibakeScan": { "status": "PASS" },
+    "neighborTest": { "status": "PASS", "note": "'北京今天天气怎么样' 补测通过" }
+  },
+  "overallResult": "INCONCLUSIVE",
+  "needsFix": true,
+  "rootCauses": [
+    {
+      "id": "RC1",
+      "severity": "HIGH",
+      "description": "模型 429 速率限制",
+      "detail": "qwen3.7-plus 模型调用配额耗尽。服务器日志：429 You exceeded your current quota。SSE 流在模型返回前关闭：SSE push skipped after stream closed",
+      "fix": "等待模型配额恢复后复测；或增加配额"
+    },
+    {
+      "id": "RC2",
+      "severity": "MEDIUM",
+      "description": "对话存储 404 竞态条件",
+      "detail": "对话创建后写入文件，但 getConversation 读取时内存缓存未同步。首次 404 后系统自动创建新对话重试（自愈机制工作正常）",
+      "fix": "readConversationIndex 应在 readStore 之后使用内存缓存，确保一致性"
+    },
+    {
+      "id": "RC3",
+      "severity": "LOW",
+      "description": "Scope Key 分裂",
+      "detail": "存储路径从 acct-dobest.com-xuyun 变为 acct-xuyun，历史对话不可见",
+      "fix": "检查 scope key 生成逻辑是否一致"
+    },
+    {
+      "id": "RC4",
+      "severity": "MEDIUM",
+      "description": "71MB conversations.json 导致性能问题",
+      "detail": "存储文件过大，可能导致 server 崩溃（V8 fatal error）和解析缓慢",
+      "fix": "实现存储分页或归档机制"
+    }
+  ],
+  "notVerified": [
+    "public-web / 联网搜索能力是否正常工作（需模型配额恢复后复测）",
+    "天气查询的完整 SSE 响应契约（content/done/tool_call 等事件）"
+  ],
+  "modifiedFiles": [],
+  "commitHash": null,
+  "nextAction": "等待模型配额恢复后复测 MIG-001，验证 public-web 联网搜索能力",
+  "nextCase": "MIG-002 (新闻解读)"
+}

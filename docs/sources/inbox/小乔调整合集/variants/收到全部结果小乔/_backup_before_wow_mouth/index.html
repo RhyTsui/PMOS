@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>收到全部结果小乔</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --panel: rgba(255, 255, 255, 0.82);
+      --text: #0f1f33;
+      --muted: #5c6a7c;
+      --line: rgba(34, 68, 105, 0.14);
+      --accent: #0978ff;
+      --duration: 2800ms;
+      --stage-a: #f8fbff;
+      --stage-b: #eaf4ff;
+      --stage-c: #ffffff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 42px);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 12%, rgba(94, 180, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 82%, rgba(43, 113, 255, 0.12), transparent 30%),
+        linear-gradient(145deg, #fbfdff 0%, var(--page) 100%);
+    }
+
+    main {
+      width: min(100%, 780px);
+      display: grid;
+      gap: 16px;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: clamp(34px, 6vw, 64px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.92), transparent 26%),
+        radial-gradient(circle at 62% 70%, rgba(58, 151, 255, 0.14), transparent 35%),
+        linear-gradient(150deg, var(--stage-a), var(--stage-b) 56%, var(--stage-c));
+      box-shadow:
+        0 26px 70px rgba(25, 83, 150, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      transition: background 380ms ease, box-shadow 380ms ease, border-color 380ms ease;
+      isolation: isolate;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 7%;
+      z-index: -1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(10, 123, 255, 0.12), transparent 66%);
+      filter: blur(22px);
+      opacity: 0.78;
+      transform: translate3d(0, 10px, 0);
+      animation: atmosphere 7200ms ease-in-out infinite;
+    }
+
+    .stage.dark {
+      --stage-a: #101923;
+      --stage-b: #162b42;
+      --stage-c: #0d141e;
+      --line: rgba(149, 192, 255, 0.18);
+      box-shadow:
+        0 28px 78px rgba(4, 16, 31, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .stage.transparent {
+      --stage-a: transparent;
+      --stage-b: transparent;
+      --stage-c: transparent;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .stage.transparent::before {
+      opacity: 0;
+    }
+
+    .mascot-shell {
+      position: relative;
+      width: min(88%, 590px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      transform-origin: 50% 62%;
+      animation: happy-pop var(--duration) cubic-bezier(0.34, 1.4, 0.42, 1) infinite;
+      will-change: transform;
+    }
+
+    .mascot-shell::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 69%;
+      left: 50%;
+      width: 47%;
+      height: 8%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(18, 111, 255, 0.32) 0%,
+          rgba(82, 165, 255, 0.22) 42%,
+          rgba(255, 255, 255, 0) 76%);
+      filter: blur(10px);
+      transform: translateX(-50%);
+      animation: happy-shadow var(--duration) cubic-bezier(0.34, 1.4, 0.42, 1) infinite;
+      pointer-events: none;
+    }
+
+    .happy-mouth {
+      position: absolute;
+      left: 48.75%;
+      top: 50.9%;
+      z-index: 2;
+      width: 3.7%;
+      height: 4.6%;
+      border-radius: 28% 28% 46% 46% / 18% 18% 58% 58%;
+      overflow: hidden;
+      background: linear-gradient(180deg, #083bb9 0%, #072b95 58%, #001d72 100%);
+      box-shadow:
+        inset 0 2px 3px rgba(255, 255, 255, 0.14),
+        0 0 0 1px rgba(255, 255, 255, 0.92),
+        0 5px 10px rgba(4, 55, 160, 0.12);
+      transform-origin: center top;
+      animation: mouth-happy 1800ms ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .happy-mouth::after {
+      content: "";
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: -2%;
+      height: 42%;
+      border-radius: 999px 999px 0 0;
+      background: #2aa6ff;
+    }
+
+    .sparkles {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .sparkles span {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background:
+        radial-gradient(circle, #fffdf5 0 16%, #ffe28a 17% 34%, rgba(255, 226, 138, 0.05) 58%);
+      clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0 50%, 39% 38%);
+      opacity: 0;
+      animation: sparkle-pop 2600ms ease-in-out infinite;
+    }
+
+    .sparkles span:nth-child(1) {
+      left: 22%;
+      top: 16%;
+      width: 54px;
+      height: 54px;
+      animation-delay: 180ms;
+    }
+
+    .sparkles span:nth-child(2) {
+      right: 29%;
+      top: 14%;
+      width: 8px;
+      height: 26px;
+      border-radius: 999px;
+      clip-path: none;
+      background: linear-gradient(180deg, rgba(17, 125, 255, 0.72), rgba(17, 125, 255, 0.18));
+      transform: rotate(22deg);
+      animation: ray-pop 2400ms ease-in-out infinite;
+      animation-delay: 0ms;
+    }
+
+    .sparkles span:nth-child(3) {
+      right: 23.5%;
+      top: 18.5%;
+      width: 9px;
+      height: 29px;
+      border-radius: 999px;
+      clip-path: none;
+      background: linear-gradient(180deg, rgba(17, 125, 255, 0.58), rgba(17, 125, 255, 0.16));
+      transform: rotate(48deg);
+      animation: ray-pop 2400ms ease-in-out infinite;
+      animation-delay: 180ms;
+    }
+
+    .sparkles span:nth-child(4) {
+      right: 19.5%;
+      top: 26%;
+      width: 10px;
+      height: 33px;
+      border-radius: 999px;
+      clip-path: none;
+      background: linear-gradient(180deg, rgba(17, 125, 255, 0.45), rgba(17, 125, 255, 0.12));
+      transform: rotate(70deg);
+      animation: ray-pop 2400ms ease-in-out infinite;
+      animation-delay: 360ms;
+    }
+
+    .sparkles span:nth-child(5) {
+      left: 35%;
+      top: 19%;
+      width: 14px;
+      height: 14px;
+      animation-delay: 980ms;
+    }
+
+    .mascot-glow {
+      position: absolute;
+      inset: 12%;
+      z-index: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.54), transparent 24%),
+        radial-gradient(circle at 55% 58%, rgba(37, 138, 255, 0.16), transparent 58%);
+      filter: blur(18px);
+      opacity: 0.86;
+      animation: glow var(--duration) ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mascot-stack {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .mascot {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      visibility: hidden;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: drop-shadow(0 22px 22px rgba(16, 86, 168, 0.12));
+      transform-origin: 50% 56%;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .mascot.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cute-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: none;
+      pointer-events: none;
+    }
+
+    .cute-blush {
+      position: absolute;
+      top: 50.4%;
+      width: 8.4%;
+      height: 3.4%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(255, 154, 192, 0.3), rgba(255, 154, 192, 0));
+      filter: blur(1.2px);
+      opacity: 0.86;
+    }
+
+    .cute-blush.left {
+      left: 36.2%;
+    }
+
+    .cute-blush.right {
+      left: 57%;
+    }
+
+
+    @keyframes cute-twinkle {
+      0%, 100% {
+        transform: scale(0.82);
+        opacity: 0.46;
+      }
+      45% {
+        transform: scale(1.16);
+        opacity: 0.9;
+      }
+    }
+
+    .mascot-shell.paused,
+    .mascot-shell.paused::after,
+    .mascot-shell.paused .mascot-glow,
+    .stage.is-paused::before {
+      animation-play-state: paused;
+    }
+
+    @keyframes happy-pop {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      }
+      22% {
+        transform: translate3d(0, -18px, 0) rotate(-1.2deg) scale(1.018);
+      }
+      40% {
+        transform: translate3d(0, -9px, 0) rotate(0.8deg) scale(1.006);
+      }
+      64% {
+        transform: translate3d(0, -15px, 0) rotate(0.35deg) scale(1.014);
+      }
+    }
+
+    @keyframes happy-shadow {
+      0%, 100% {
+        opacity: 0.86;
+        transform: translateX(-50%) scale(1);
+      }
+      24%, 64% {
+        opacity: 0.56;
+        transform: translateX(-50%) scale(0.78);
+      }
+    }
+
+    @keyframes mouth-happy {
+      0%, 100% {
+        transform: scaleY(0.96);
+      }
+      50% {
+        transform: scaleY(1.08);
+      }
+    }
+
+    @keyframes sparkle-pop {
+      0%, 100% {
+        opacity: 0;
+        transform: translate3d(0, 8px, 0) scale(0.5) rotate(0deg);
+      }
+      24% {
+        opacity: 0.9;
+      }
+      52% {
+        opacity: 0.72;
+        transform: translate3d(0, -10px, 0) scale(1.08) rotate(45deg);
+      }
+      76% {
+        opacity: 0;
+        transform: translate3d(0, -16px, 0) scale(0.72) rotate(90deg);
+      }
+    }
+
+    @keyframes ray-pop {
+      0%, 100% {
+        opacity: 0.32;
+        filter: blur(0.2px);
+      }
+      46% {
+        opacity: 0.9;
+        filter: blur(0);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        opacity: 0.76;
+        transform: scale(0.98);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes atmosphere {
+      0%, 100% {
+        transform: translate3d(-1%, 10px, 0) scale(0.98);
+      }
+      50% {
+        transform: translate3d(1%, -4px, 0) scale(1.04);
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 14px 34px rgba(28, 74, 128, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    button,
+    select,
+    input[type="range"] {
+      font: inherit;
+    }
+
+    button,
+    select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.92);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 13px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    select:hover {
+      border-color: rgba(9, 120, 255, 0.34);
+      box-shadow: 0 8px 18px rgba(18, 91, 176, 0.08);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.primary {
+      color: #fff;
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #1687ff, #056fe8);
+      box-shadow: 0 10px 22px rgba(9, 120, 255, 0.18);
+    }
+
+    select {
+      padding: 0 12px;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 38px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: min(34vw, 176px);
+      accent-color: var(--accent);
+    }
+
+    .counter {
+      margin-left: auto;
+      min-width: 94px;
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stage::before,
+      .mascot-shell,
+      .mascot-shell::after,
+      .mascot-glow,
+      .happy-mouth,
+      .sparkles span {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+      }
+
+      main {
+        gap: 12px;
+      }
+
+      .stage {
+        padding: 24px;
+      }
+
+      .mascot-shell {
+        width: min(92%, 520px);
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      button,
+      select,
+      label {
+        flex: 1 1 142px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      .counter {
+        margin-left: 0;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" id="stage" aria-label="收到全部结果小乔动画预览">
+      <div class="mascot-shell" id="mascotShell">
+        <div class="mascot-glow" aria-hidden="true"></div>
+        <div class="mascot-stack" id="mascotStack" role="img" aria-label="蓝色透明吉祥物动画帧">
+          <img class="mascot is-active" src="assets/logo_frame_01.png" alt="">
+        </div>
+        <div class="cute-layer" aria-hidden="true">
+          <span class="cute-blush left"></span>
+          <span class="cute-blush right"></span>
+        </div>
+        <div class="happy-mouth" aria-hidden="true"></div>
+        <div class="sparkles" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="动画控制">
+      <button class="primary" id="toggle" type="button" aria-pressed="true">暂停</button>
+      <button id="restart" type="button">重播</button>
+      <label>
+        速度
+        <input id="speed" type="range" min="1800" max="4600" step="200" value="2800">
+      </label>
+      <select id="background" aria-label="背景">
+        <option value="light">浅色背景</option>
+        <option value="dark">深色背景</option>
+        <option value="transparent">透明背景</option>
+      </select>
+      <span class="counter" id="counter">2.8s</span>
+    </section>
+  </main>
+
+  <script>
+    const framePaths = [
+      "assets/logo_frame_01.png",
+      "assets/logo_frame_04.png",
+      "assets/logo_frame_05.png"
+    ];
+
+    const mascotStack = document.querySelector("#mascotStack");
+    const mascotShell = document.querySelector("#mascotShell");
+    const toggle = document.querySelector("#toggle");
+    const restart = document.querySelector("#restart");
+    const speed = document.querySelector("#speed");
+    const background = document.querySelector("#background");
+    const stage = document.querySelector("#stage");
+    const counter = document.querySelector("#counter");
+
+    let playing = true;
+    let activeFrame = 0;
+    let hoverIntent = false;
+    let sequenceTimer = null;
+    let blinkTimer = null;
+
+    const frameElements = framePaths.map((src, index) => {
+      const image = index === 0 ? mascotStack.querySelector("img") : new Image();
+      image.className = `mascot${index === 0 ? " is-active" : ""}`;
+      image.decoding = "async";
+      image.alt = "";
+      image.src = src;
+      image.dataset.frame = String(index);
+      if (index !== 0) mascotStack.appendChild(image);
+      if (image.decode) image.decode().catch(() => {});
+      return image;
+    });
+
+    function showFrame(nextFrame) {
+      if (nextFrame === activeFrame) return;
+      frameElements[activeFrame].classList.remove("is-active");
+      activeFrame = nextFrame;
+      frameElements[activeFrame].classList.add("is-active");
+    }
+
+    function playSequence(sequence, holdLast = false) {
+      clearTimeout(sequenceTimer);
+      let index = 0;
+
+      function step() {
+        const item = sequence[index];
+        showFrame(item.frame);
+        index += 1;
+
+        if (index >= sequence.length) {
+          if (holdLast) return;
+          return;
+        }
+
+        sequenceTimer = setTimeout(step, item.hold);
+      }
+
+      step();
+    }
+
+    function scheduleBlink() {
+      clearTimeout(blinkTimer);
+      blinkTimer = setTimeout(() => {
+        if (playing && !hoverIntent) {
+          playSequence([
+            { frame: 1, hold: 130 },
+            { frame: 0, hold: 160 }
+          ]);
+        }
+        scheduleBlink();
+      }, 6200 + Math.random() * 3600);
+    }
+
+    function startSquint() {
+      hoverIntent = true;
+      if (!playing) return;
+      playSequence([
+        { frame: 1, hold: 150 },
+        { frame: 2, hold: 220 }
+      ], true);
+    }
+
+    function endSquint() {
+      hoverIntent = false;
+      if (!playing) return;
+      playSequence([
+        { frame: 1, hold: 150 },
+        { frame: 0, hold: 180 }
+      ]);
+    }
+
+    function setPlaying(nextPlaying) {
+      playing = nextPlaying;
+      toggle.textContent = playing ? "暂停" : "播放";
+      toggle.setAttribute("aria-pressed", String(playing));
+      mascotShell.classList.toggle("paused", !playing);
+      stage.classList.toggle("is-paused", !playing);
+      if (playing) scheduleBlink();
+    }
+
+    function restartAnimation() {
+      clearTimeout(sequenceTimer);
+      clearTimeout(blinkTimer);
+      hoverIntent = false;
+      showFrame(0);
+      mascotShell.style.animation = "none";
+      mascotShell.offsetHeight;
+      mascotShell.style.animation = "";
+      setPlaying(true);
+    }
+
+    toggle.addEventListener("click", () => setPlaying(!playing));
+    restart.addEventListener("click", restartAnimation);
+    mascotShell.addEventListener("mouseenter", startSquint);
+    mascotShell.addEventListener("mouseleave", endSquint);
+    mascotShell.addEventListener("focusin", startSquint);
+    mascotShell.addEventListener("focusout", endSquint);
+    speed.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+      counter.textContent = `${(Number(speed.value) / 1000).toFixed(1)}s`;
+    });
+    background.addEventListener("change", () => {
+      stage.className = `stage ${background.value === "light" ? "" : background.value}`.trim();
+      if (!playing) stage.classList.add("is-paused");
+    });
+
+    document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+    scheduleBlink();
+  </script>
+</body>
+</html>

@@ -25,39 +25,61 @@
 
 优先阅读以下文档：
 
-1. [小乔智投-交付总控-2026-05-08.md](./docs/小乔智投-交付总控-2026-05-08.md)
-2. [小乔智投-前置文档评审委员会清单-2026-05-08.md](./docs/小乔智投-前置文档评审委员会清单-2026-05-08.md)
-3. [小乔智投-开发任务拆解与技术评审-2026-05-08.md](./docs/小乔智投-开发任务拆解与技术评审-2026-05-08.md)
-4. [小乔智投-v0.7-rollout-to-aiocoding-2026-05-09.md](./docs/小乔智投-v0.7-rollout-to-aiocoding-2026-05-09.md)
+1. [ENTERPRISE_AI_CHAT_OS_SPEC.md](./docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md)
+2. [00_SPEC_INDEX.md](./docs/architecture/00_SPEC_INDEX.md)
+3. [MASTER_SPEC.md](./MASTER_SPEC.md)
+4. [NEXT_IMPLEMENTATION_PLAN.md](./NEXT_IMPLEMENTATION_PLAN.md)
+5. [智投Chat-前端自主渲染与色彩字体系统-2026-05-27.md](./docs/review/智投Chat-前端自主渲染与色彩字体系统-2026-05-27.md)
+6. [data-visualization-ux.md](./docs/architecture/interaction-system/data-visualization-ux.md)
+7. [ui-guardrail.md](./docs/operations/ui-guardrail.md)
+8. [小乔智投-交付总控-2026-05-08.md](./docs/小乔智投-交付总控-2026-05-08.md)
+9. [小乔智投-前置文档评审委员会清单-2026-05-08.md](./docs/小乔智投-前置文档评审委员会清单-2026-05-08.md)
+10. [小乔智投-开发任务拆解与技术评审-2026-05-08.md](./docs/小乔智投-开发任务拆解与技术评审-2026-05-08.md)
+11. [小乔智投-v0.7-rollout-to-aiocoding-2026-05-09.md](./docs/小乔智投-v0.7-rollout-to-aiocoding-2026-05-09.md)
+12. [小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md](./docs/小乔智投-autonomous-delivery-run-测试方案-2026-05-09.md)
 
-5. [灏忎箶鏅烘姇-autonomous-delivery-run-娴嬭瘯鏂规-2026-05-09.md](./docs/灏忎箶鏅烘姇-autonomous-delivery-run-娴嬭瘯鏂规-2026-05-09.md)
+## Execution Layer
+
+正式三层入口：
+
+```text
+Enterprise AI Chat OS
+  -> docs/architecture/00_SPEC_INDEX.md
+  -> docs/architecture/01_EXECUTION_LAYER_INDEX.md
+  -> frontend/src/src/contracts/{validation,adapters,observability,examples,__tests__}
+```
 
 ## Backend
 
-在 `subprojects/ad/` 下：
+> **注意：** Python 后端 (`src/ad/`) 为历史遗留原型（Ads Flow Insight PoC），当前主链路全部在 Next.js API Routes，无需启动 Python 后端。
+
+如需运行旧原型（不推荐）：
 
 ```bash
 pip install -e .
 ad
 ```
 
-后端默认运行在 `http://127.0.0.1:8021`。
-
 ## Frontend
 
-在 `subprojects/ad/frontend/` 下：
+在 `subprojects/ad/frontend/src/` 下：
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-前端默认运行在 `http://127.0.0.1:5180`。
+前端默认运行在 `http://0.0.0.0:8002`。
 
 ## 当前前端要求
 
 - 企业系统基础组件：`Ant Design`
 - 会话/Chat 组件：`Ant Design X`
+- 企业级 AI Chat OS 以 `docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md` 为顶层地图；Unified Semantic Contract 是最终业务结果的唯一语义渲染协议，Runtime Display Protocol 是运行态展示协议
+- 二级规范索引以 `docs/architecture/00_SPEC_INDEX.md` 为准；前端 contract 类型真源位于 `frontend/src/src/contracts`
+- 会话结果按 SemanticResultContract / Result / Timeline / MessagePart 协议自主渲染，不从自然语言正文反推业务状态
+- Data Visualization UX、AI Runtime UI、AI Trust UX 都是 Enterprise AI Chat OS 下的子域，不得新增平行总协议
+- 字体、色彩、背景、Ant Design token 和硬编码治理以 2026-05-27 设计系统文档为准
 - 禁用默认 `hero + summary-card + explanation-first` 工作台骨架
 - 必须围绕真实业务对象、真实任务状态、真实结果结构建页面
 
@@ -66,3 +88,6 @@ npm run dev
 - 原有旧口径、乱码口径、示意性交付文档不得继续作为新开发真源
 - 旧文档如仍需保留，按 `superseded / archived` 视角看待
 - 后续修改优先回写原真源，不再新增同义补丁文档
+
+
+

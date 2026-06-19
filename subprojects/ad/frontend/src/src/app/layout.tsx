@@ -1,18 +1,25 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inspector } from 'react-dev-inspector';
-import Script from 'next/script';
 import { ThemeProvider } from '@/hooks/useTheme';
 import AntdProvider from '@/components/AntdProvider';
 import './globals.css';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
+
 export const metadata: Metadata = {
   title: {
-    default: '智投chat',
-    template: '智投chat-%s',
+    default: '小乔智投',
+    template: '小乔智投-%s',
   },
   description: '广告业务需求端到端直接交付。',
   keywords: [
-    '智投chat',
+    '小乔智投',
     '广告智能',
     '广告优化',
     '数据排查',
@@ -24,14 +31,13 @@ export const metadata: Metadata = {
   generator: 'XiaoQiao',
   icons: {
     icon: [
-      { url: '/favicon.ico', type: 'image/x-icon' },
-      { url: '/brand-icon.png', type: 'image/png' },
+      { url: '/favicon-light-scheme.png', type: 'image/png', media: '(prefers-color-scheme: light)' },
+      { url: '/favicon-dark-scheme.png', type: 'image/png', media: '(prefers-color-scheme: dark)' },
     ],
-    shortcut: '/favicon.ico',
-    apple: '/brand-icon.png',
+    apple: '/brand-icon-light.png',
   },
   openGraph: {
-    title: '智投chat',
+    title: '小乔智投',
     description: '广告业务需求端到端直接交付。',
     locale: 'zh_CN',
     type: 'website',
@@ -52,10 +58,6 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className="antialiased">
-        <Script
-          src="https://mcp.figma.com/mcp/html-to-design/capture.js"
-          strategy="afterInteractive"
-        />
         <ThemeProvider>
           <AntdProvider>
             {isDev && <Inspector />}

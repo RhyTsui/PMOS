@@ -1,0 +1,63 @@
+[
+  {
+    "rowIndex": 2,
+    "id": "MIG-000",
+    "scenario": "连通",
+    "prompt": "你好",
+    "keyPoint": "LLM理解+简单回应",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+    "durationMs": 88073,
+    "traceId": "zt-chat-1781353553745-wdbznd",
+    "sourceCount": 0,
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "IntentOrch 候选",
+      "开放式回答仲裁",
+      "路由观测"
+    ],
+    "runtimeStatus": "degraded"
+  },
+  {
+    "rowIndex": 3,
+    "id": "MIG-001",
+    "scenario": "天气",
+    "prompt": "南京本周日天气如何",
+    "keyPoint": "联网搜索",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "未配置公共网页能力，当前无法直接外部检索。",
+    "durationMs": 13991,
+    "traceId": "zt-chat-1781353643499-s6duhn",
+    "sourceCount": 0,
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "检查联网查询能力",
+      "路由观测"
+    ],
+    "runtimeStatus": "degraded"
+  },
+  {
+    "rowIndex": 4,
+    "id": "MIG-002",
+    "scenario": "新闻解读",
+    "prompt": "最近有哪些游戏上线",
+    "keyPoint": "联网搜索",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "未配置公共网页能力，当前无法直接外部检索。",
+    "durationMs": 14898,
+    "traceId": "zt-chat-1781353657074-7xpvet",
+    "sourceCount": 0,
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "检查联网查询能力",
+      "路由观测"
+    ],
+    "runtimeStatus": "degraded"
+  }
+]

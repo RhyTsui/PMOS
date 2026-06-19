@@ -2,7 +2,6 @@ import type { Message } from '@/types';
 
 export type ExportFormat =
   | 'markdown'
-  | 'markdown-thinking'
   | 'notion'
   | 'obsidian'
   | 'word'
@@ -18,18 +17,17 @@ export interface ExportFormatOption {
 }
 
 export const EXPORT_FORMATS: ExportFormatOption[] = [
-  { key: 'markdown', label: 'Markdown', description: '导出纯消息内容的标准 Markdown', icon: '📝', ext: 'md' },
-  { key: 'markdown-thinking', label: 'Markdown（含过程）', description: '导出消息并保留推理与工具调用', icon: '🧠', ext: 'md' },
-  { key: 'notion', label: 'Notion', description: '导出适合粘贴到 Notion 的消息内容', icon: '📚', ext: 'md' },
-  { key: 'obsidian', label: 'Obsidian', description: '导出适合知识库沉淀的消息记录', icon: '🔮', ext: 'md' },
+  { key: 'markdown', label: 'Markdown', description: '导出消息内容与工具调用', icon: '📝', ext: 'md' },
+  { key: 'notion', label: 'Notion', description: '导出适合粘贴到 Notion 的结构化内容', icon: '📘', ext: 'md' },
+  { key: 'obsidian', label: 'Obsidian', description: '导出适合知识库整理的笔记内容', icon: '🪄', ext: 'md' },
   { key: 'word', label: 'Word', description: '导出消息内容为 Word 文档', icon: '📄', ext: 'docx' },
-  { key: 'xiaoshan', label: '小闪', description: '导出适合笔记整理的消息格式', icon: '⚡', ext: 'md' },
+  { key: 'xiaoshan', label: '小闪', description: '导出适合笔记整理的消息格式', icon: '✦', ext: 'md' },
   { key: 'csv', label: 'Excel / CSV', description: '导出结构化消息表格', icon: '📊', ext: 'csv' },
 ];
 
 function formatTime(ts: number | string): string {
-  const d = typeof ts === 'string' ? new Date(ts) : new Date(ts);
-  return d.toLocaleString('zh-CN', { hour12: false });
+  const value = typeof ts === 'string' ? new Date(ts) : new Date(ts);
+  return value.toLocaleString('zh-CN', { hour12: false });
 }
 
 function sanitizeFilename(name: string): string {
@@ -37,52 +35,34 @@ function sanitizeFilename(name: string): string {
 }
 
 function extractToolCallSummary(tc: NonNullable<Message['tool_calls']>[number]): string {
-  let args = '';
   try {
-    if (tc.arguments) {
-      const parsed = JSON.parse(tc.arguments);
-      args = Object.entries(parsed)
-        .map(([k, v]) => `${k}: ${String(v).substring(0, 80)}`)
-        .join(', ');
-    }
+    if (!tc.arguments) return '';
+    const parsed = JSON.parse(tc.arguments);
+    return Object.entries(parsed)
+      .map(([key, value]) => `${key}: ${String(value).substring(0, 80)}`)
+      .join(', ');
   } catch {
-    args = (tc.arguments || '').substring(0, 100);
+    return (tc.arguments || '').substring(0, 100);
   }
-  return args;
 }
 
-function messageToMarkdown(msg: Message, includeThinking: boolean): string {
+function messageToMarkdown(msg: Message): string {
   const lines: string[] = [];
   const time = formatTime(msg.timestamp || msg.created_at);
-  const roleLabel = msg.role === 'user' ? '用户' : '智投chat';
+  const roleLabel = msg.role === 'user' ? '用户' : '小乔智投';
 
   lines.push(`### ${roleLabel}  _${time}_\n`);
 
-  if (includeThinking && msg.role === 'assistant') {
-    if (msg.thinking) {
-      lines.push('<details>\n<summary>推理过程</summary>\n');
-      lines.push(msg.thinking);
-      lines.push('\n</details>\n');
-    }
-    if (msg.thinking_steps && msg.thinking_steps.length > 0) {
-      lines.push('<details>\n<summary>推理步骤</summary>\n');
-      msg.thinking_steps.forEach((step) => {
-        const icon = step.status === 'completed' ? '✓' : step.status === 'error' ? '✕' : '•';
-        lines.push(`${icon} **${step.label}**: ${step.content}`);
-      });
-      lines.push('\n</details>\n');
-    }
-    if (msg.tool_calls && msg.tool_calls.length > 0) {
-      lines.push('<details>\n<summary>工具调用</summary>\n');
-      msg.tool_calls.forEach((tc) => {
-        const statusIcon = tc.status === 'completed' ? '✓' : tc.status === 'error' ? '✕' : '•';
-        lines.push(`**${tc.name}** ${statusIcon}`);
-        const args = extractToolCallSummary(tc);
-        if (args) lines.push(`- 参数: ${args}`);
-        if (tc.result) lines.push(`- 结果: ${tc.result.substring(0, 200)}`);
-      });
-      lines.push('\n</details>\n');
-    }
+  if (msg.tool_calls && msg.tool_calls.length > 0) {
+    lines.push('<details>\n<summary>工具调用</summary>\n');
+    msg.tool_calls.forEach((tc) => {
+      const statusIcon = tc.status === 'completed' ? '✅' : tc.status === 'error' ? '❌' : '⏳';
+      lines.push(`**${tc.name}** ${statusIcon}`);
+      const args = extractToolCallSummary(tc);
+      if (args) lines.push(`- 参数: ${args}`);
+      if (tc.result) lines.push(`- 结果: ${tc.result.substring(0, 200)}`);
+    });
+    lines.push('\n</details>\n');
   }
 
   lines.push(msg.content || '');
@@ -90,15 +70,15 @@ function messageToMarkdown(msg: Message, includeThinking: boolean): string {
   return lines.join('\n');
 }
 
-export function exportMarkdown(messages: Message[], title: string, includeThinking: boolean): string {
+export function exportMarkdown(messages: Message[], title: string): string {
   const lines: string[] = [
     `# ${title}\n`,
-    `> 导出时间: ${formatTime(Date.now())} | 格式: ${includeThinking ? 'Markdown（含过程）' : 'Markdown'}\n`,
+    `> 导出时间: ${formatTime(Date.now())} | 格式: Markdown\n`,
     '---\n',
   ];
 
   messages.forEach((msg) => {
-    lines.push(messageToMarkdown(msg, includeThinking));
+    lines.push(messageToMarkdown(msg));
   });
 
   return lines.join('\n');
@@ -113,21 +93,15 @@ export function exportNotion(messages: Message[], title: string): string {
 
   messages.forEach((msg) => {
     const time = formatTime(msg.timestamp || msg.created_at);
-    const roleLabel = msg.role === 'user' ? '用户' : '智投chat';
+    const roleLabel = msg.role === 'user' ? '用户' : '小乔智投';
 
     lines.push(`## ${roleLabel}\n`);
     lines.push(`_时间：${time}_\n`);
 
-    if (msg.thinking) {
-      lines.push('> **推理过程**\n>');
-      msg.thinking.split('\n').forEach((line) => lines.push(`> ${line}`));
-      lines.push('');
-    }
-
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       lines.push('<details>\n<summary>工具调用详情</summary>\n');
       msg.tool_calls.forEach((tc) => {
-        lines.push(`- **${tc.name}** ${tc.status === 'completed' ? '✓' : '•'}`);
+        lines.push(`- **${tc.name}** ${tc.status === 'completed' ? '✅' : '⏳'}`);
         if (tc.result) lines.push(`  \`${tc.result.substring(0, 150)}\``);
       });
       lines.push('\n</details>\n');
@@ -141,7 +115,7 @@ export function exportNotion(messages: Message[], title: string): string {
 }
 
 export function exportObsidian(messages: Message[], title: string): string {
-  const tags = ['#智投chat', '#对话导出'];
+  const tags = ['#小乔智投', '#对话导出'];
   const dateStr = new Date().toISOString().split('T')[0];
   const agentTypes = new Set<string>();
 
@@ -156,7 +130,7 @@ export function exportObsidian(messages: Message[], title: string): string {
     `date: ${dateStr}`,
     `tags: [${[...tags, ...agentTypes].join(', ')}]`,
     'type: conversation',
-    'source: 智投chat',
+    'source: 小乔智投',
     '---',
   ].join('\n');
 
@@ -164,21 +138,15 @@ export function exportObsidian(messages: Message[], title: string): string {
 
   messages.forEach((msg) => {
     const time = formatTime(msg.timestamp || msg.created_at);
-    const roleLabel = msg.role === 'user' ? '用户' : '智投chat';
+    const roleLabel = msg.role === 'user' ? '用户' : '小乔智投';
 
     lines.push(`## ${roleLabel}`);
     lines.push(`*${time}*\n`);
 
-    if (msg.thinking) {
-      lines.push('> [!thinking] 推理过程');
-      msg.thinking.split('\n').forEach((line) => lines.push(`> ${line}`));
-      lines.push('');
-    }
-
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       lines.push('> [!tool] 工具调用');
       msg.tool_calls.forEach((tc) => {
-        const status = tc.status === 'completed' ? '✓' : '•';
+        const status = tc.status === 'completed' ? '✅' : '⏳';
         lines.push(`> **${tc.name}** ${status}`);
         if (tc.result) lines.push(`> \`${tc.result.substring(0, 150)}\``);
       });
@@ -196,7 +164,7 @@ export function exportXiaoshan(messages: Message[], title: string): string {
   const lines: string[] = [
     `# ${title}`,
     '',
-    '@source 智投chat',
+    '@source 小乔智投',
     `@date ${formatTime(Date.now())}`,
     '@type 对话记录',
     '',
@@ -206,17 +174,11 @@ export function exportXiaoshan(messages: Message[], title: string): string {
 
   messages.forEach((msg) => {
     const time = formatTime(msg.timestamp || msg.created_at);
-    lines.push(`## ${msg.role === 'user' ? '用户' : '智投chat'} · ${time}\n`);
-
-    if (msg.thinking) {
-      lines.push('%%thinking');
-      lines.push(msg.thinking);
-      lines.push('%%\n');
-    }
+    lines.push(`## ${msg.role === 'user' ? '用户' : '小乔智投'} · ${time}\n`);
 
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       msg.tool_calls.forEach((tc) => {
-        lines.push(`%%tool ${tc.name} ${tc.status === 'completed' ? '✓' : '•'}`);
+        lines.push(`%%tool ${tc.name} ${tc.status === 'completed' ? '✅' : '⏳'}`);
         if (tc.result) lines.push(tc.result.substring(0, 200));
         lines.push('%%\n');
       });
@@ -232,15 +194,14 @@ export function exportXiaoshan(messages: Message[], title: string): string {
 }
 
 export function exportCSV(messages: Message[]): string {
-  const headers = ['序号', '角色', '时间', '内容摘要', '是否含推理', '工具调用', '意图', 'Agent'];
+  const headers = ['序号', '角色', '时间', '内容摘要', '是否含工具调用', '工具调用', '意图', 'Agent'];
   const rows: string[][] = [];
 
   messages.forEach((msg, i) => {
     const content = (msg.content || '').replace(/[\n\r]/g, ' ').substring(0, 500);
-    const thinking = msg.thinking ? '是' : '否';
     const toolCalls = msg.tool_calls && msg.tool_calls.length > 0
       ? msg.tool_calls.map((tc) => tc.name).join('; ')
-      : '无';
+      : '';
     const intent = msg.intent_type || msg.routing_decision?.intent_type || '';
     const agent = msg.agent || '';
 
@@ -249,7 +210,7 @@ export function exportCSV(messages: Message[]): string {
       msg.role === 'user' ? '用户' : '助手',
       formatTime(msg.timestamp || msg.created_at),
       `"${content.replace(/"/g, '""')}"`,
-      thinking,
+      msg.tool_calls && msg.tool_calls.length > 0 ? '是' : '否',
       `"${toolCalls.replace(/"/g, '""')}"`,
       intent,
       String(agent),
@@ -277,7 +238,7 @@ export async function exportWord(messages: Message[], title: string): Promise<Bl
     new Paragraph({
       children: [
         new TextRun({
-          text: `导出时间: ${formatTime(Date.now())} | 来源: 智投chat`,
+          text: `导出时间: ${formatTime(Date.now())} | 来源: 小乔智投`,
           size: 18,
           color: '888888',
           italics: true,
@@ -296,7 +257,7 @@ export async function exportWord(messages: Message[], title: string): Promise<Bl
       new Paragraph({
         children: [
           new TextRun({
-            text: isUser ? '用户' : '智投chat',
+            text: isUser ? '用户' : '小乔智投',
             bold: true,
             size: 24,
             color: isUser ? '0066CC' : '009966',
@@ -312,25 +273,9 @@ export async function exportWord(messages: Message[], title: string): Promise<Bl
       }),
     );
 
-    if (msg.thinking) {
-      children.push(
-        new Paragraph({
-          children: [new TextRun({ text: '推理过程', bold: true, size: 20, color: '666666' })],
-          spacing: { before: 100 },
-        }),
-      );
-      children.push(
-        new Paragraph({
-          children: [new TextRun({ text: msg.thinking.substring(0, 1000), size: 18, color: '888888', italics: true })],
-          indent: { left: 400 },
-          spacing: { after: 100 },
-        }),
-      );
-    }
-
     if (msg.tool_calls && msg.tool_calls.length > 0) {
       msg.tool_calls.forEach((tc) => {
-        const status = tc.status === 'completed' ? '✓' : '•';
+        const status = tc.status === 'completed' ? '✅' : '⏳';
         children.push(
           new Paragraph({
             children: [new TextRun({ text: `工具调用 ${tc.name} ${status}`, bold: true, size: 20 })],
@@ -349,10 +294,10 @@ export async function exportWord(messages: Message[], title: string): Promise<Bl
       });
     }
 
-    (msg.content || '').split('\n').filter(Boolean).forEach((p) => {
+    (msg.content || '').split('\n').filter(Boolean).forEach((paragraph) => {
       children.push(
         new Paragraph({
-          children: [new TextRun({ text: p, size: 22 })],
+          children: [new TextRun({ text: paragraph, size: 22 })],
           spacing: { after: 80 },
         }),
       );
@@ -385,34 +330,24 @@ export async function doExport(
   const safeTitle = sanitizeFilename(title);
 
   switch (format) {
-    case 'markdown': {
-      saveAs(new Blob([exportMarkdown(messages, title, false)], { type: 'text/markdown;charset=utf-8' }), `${safeTitle}.md`);
+    case 'markdown':
+      saveAs(new Blob([exportMarkdown(messages, title)], { type: 'text/markdown;charset=utf-8' }), `${safeTitle}.md`);
       break;
-    }
-    case 'markdown-thinking': {
-      saveAs(new Blob([exportMarkdown(messages, title, true)], { type: 'text/markdown;charset=utf-8' }), `${safeTitle}_thinking.md`);
-      break;
-    }
-    case 'notion': {
+    case 'notion':
       saveAs(new Blob([exportNotion(messages, title)], { type: 'text/markdown;charset=utf-8' }), `${safeTitle}_notion.md`);
       break;
-    }
-    case 'obsidian': {
+    case 'obsidian':
       saveAs(new Blob([exportObsidian(messages, title)], { type: 'text/markdown;charset=utf-8' }), `${safeTitle}.md`);
       break;
-    }
-    case 'word': {
+    case 'word':
       saveAs(await exportWord(messages, title), `${safeTitle}.docx`);
       break;
-    }
-    case 'xiaoshan': {
+    case 'xiaoshan':
       saveAs(new Blob([exportXiaoshan(messages, title)], { type: 'text/markdown;charset=utf-8' }), `${safeTitle}_xiaoshan.md`);
       break;
-    }
-    case 'csv': {
+    case 'csv':
       saveAs(new Blob([exportCSV(messages)], { type: 'text/csv;charset=utf-8' }), `${safeTitle}.csv`);
       break;
-    }
     default:
       throw new Error(`Unknown export format: ${format}`);
   }

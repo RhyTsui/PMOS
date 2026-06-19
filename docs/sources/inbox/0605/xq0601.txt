@@ -1,0 +1,116 @@
+ card待验收
+
+
+
+1.提问后 过了很久才展示对话消息，改了2次没有被解决，请先分析这个原因，不会是因为没有重启服务吧
+
+2.BusinessSummaryCard 未消费字段
+字段 business_summary 已存在但未被消费
+warn
+{
+  "source": "message_contract.business_summary",
+
+  "reason": "business_summary is missing or empty",
+  "regionType": "summary",
+  "componentBinding": "decision-card"
+}
+这个问题不会是因为没有重启服务吧，还是本身组件就缺失，列出当前已注册好的组件清单。
+
+3.E:\AI\ai-os\docs\sources\inbox\AI广告系统_右侧侧边栏Trace产品改造方案_10分版.docx  根据这个需求文档，分析当前既有架构、需求、设计和实施。看看哪些可以采纳提升，可查看请求和返回参数是我的P0需求。
+
+
+4.对接知识库的key自动获取
+E:\AI\ai-os\docs\sources\inbox\get_user_api_key.py
+管理员账号：
+可管理中心配置
+管理员密码：
+可管理中心配置
+调用case：
+python get_user_api_key.py --base-url https://dataki.dobest.com --admin-email admin@xiao
+qiao.com --admin-password asdf1234 --target-name 徐韵
+
+
+5.左侧侧边栏之前有定义 会话如果加载中则在标题上层最右边占位展示加载动效，鼠标移入展示操作图标。现在这个动效不见了。移动端或窄屏时悬浮折叠图标是点示意的这个不变。
+
+6.上传excle，根据模板取数这个用户场景，目前缺少文件解析过程，错误调用工具。
+
+7.上传文件时的图标应该和我的资产类型图标一样彩色的。
+
+8.执行中时 消息返回区域不需要展示{停止生成}按钮，会话框里要保持执行中的状态用户可以在这里取消这是chat常见规范。而操作栏当前被放在了返回的消息区里面
+，应该是在消息区下面，用图标展示，现在代表折叠更多图标点击也没反应，之前是有复制、重试、点赞、收藏、引用功能的，并且过程与依据也要做观测图标，不要这种按钮。而发送消息下面同样有操作栏和对应的功能，包括复制、重新编辑的图标操作完整功能。上次修改这里被改坏了请回顾。
+
+用这个测试集来测一轮，看看有几个通过的，生成测试文档.excle，标注每一条不通过 不通过原因，需要优化的地方。禁止直接修改系统，而是根据测试结果进行汇总分析，结合系统现状和总纲架构，再整理出迭代plan。
+
+
+
+对接知识库的key自动获取
+E:\AI\ai-os\docs\sources\inbox\get_user_api_key.py
+管理员账号：
+admin@xiaoqiao.com
+管理员密码：
+asdf1234
+调用case：
+python get_user_api_key.py --base-url https://dataki.dobest.com --admin-email admin@xiao
+qiao.com --admin-password asdf1234 --target-name 徐韵
+
+
+4、上传拼表
+
+5、自动化
+
+6、知识客服
+
+7、需求
+
+8、包
+
+9、排查
+
+10、智投页面上下文
+
+11、后台设计
+Enterprise AI Chat Operating Platform
+AI Chat OS Control Plane=AI Runtime + Capability + Knowledge + Prompt + Workflow + Governance + Observability
+
+AI Chat OS Admin Console
+│
+├─ Runtime Control Plane
+├─ Capability Management
+├─ Prompt & Policy Management
+├─ Knowledge & Memory
+├─ Workflow & Agent
+├─ Semantic Contract Governance
+├─ Evaluation & Observability
+├─ Security & Permission
+├─ Data & Report Domain
+├─ User & Workspace
+├─ Frontend Rendering Governance
+└─ Operations & Release
+
+12、业务域协议（Domain Protocol）
+report_query 只是第一层意图；进入报表域后，还要继续细分：趋势、汇总、排名、对比、诊断、路径等子语义；这些子语义最终决定：数据结构、能力选择、screenType、regions、componentBinding 和 UI。
+Report Domain = 任务编排域 Sub Intent / Analysis View = 可组合视图，不要把问数细分做成单选意图树，要做成“主目标 + 多分析视图组合”的报表域编排模型
+Top Intent：判断大方向
+Report Domain：进入问数/分析域
+Primary Goal：判断主目标
+Analysis Views：多选组合
+Execution Plan：编排多个分析块
+SemanticResultContract：按 regions 展示结果
+
+问数业务域协议
+docs/architecture/request-understanding/report-domain/
+├─ report-domain-protocol.md
+├─ report-sub-intents.md
+├─ trend-analysis-contract.md
+├─ ranking-analysis-contract.md
+├─ comparison-analysis-contract.md
+├─ diagnosis-analysis-contract.md
+├─ chart-selection-policy.md
+└─ report-screentype-mapping.md
+代码
+contracts/report-domain/
+├─ report-sub-intent.ts
+├─ trend-analysis-contract.ts
+├─ ranking-analysis-contract.ts
+├─ report-screentype.ts
+└─ chart-selection-policy.ts

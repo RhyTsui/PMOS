@@ -1,0 +1,23 @@
+
+{conversation_id: "conv-1780054569062", user_id: "acct-xuyun", title: "巨量首日ROI对比",…}
+conversation_id
+: 
+"conv-1780054569062"
+last_message_at
+: 
+"2026-05-29T11:36:15.351Z"
+message_count
+: 
+1
+started_at
+: 
+"2026-05-29T11:36:09.062Z"
+title
+: 
+"巨量首日ROI对比"
+updated_at
+: 
+"2026-05-29T11:36:19.667Z"
+user_id
+: 
+"acct-xuyun"

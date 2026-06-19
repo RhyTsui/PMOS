@@ -29,6 +29,7 @@ import type {
 import { EvidenceCardGroup } from '@/components/cognitive/EvidenceCard';
 import { MissingFieldsCard } from '@/components/cognitive/MissingFieldsCard';
 import { useThemeColors } from '@/hooks/useTheme';
+import { reportActionLabel } from '@/lib/report-action-envelope';
 
 interface ResultPanelProps {
   result: WorkflowResult | null;
@@ -38,6 +39,14 @@ interface ResultPanelProps {
   onFollowUpClick?: (question: string) => void;
   onUpgradeWorkflow?: (target: string) => void;
   isCollapsed?: boolean;
+}
+
+function safeArray<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeRecord<T>(value: unknown): T {
+  return value && typeof value === 'object' ? value as T : {} as T;
 }
 
 function SectionCard({
@@ -114,6 +123,10 @@ export function ResultPanel({
   isCollapsed = false,
 }: ResultPanelProps) {
   const c = useThemeColors();
+  const safeMissingFields = safeArray(missingFields);
+  const safeAttachments = safeArray(attachments);
+  const nextActions = safeArray(result?.next_actions);
+  const pendingChecks = safeArray(result?.pending_checks);
 
   if (isCollapsed) return null;
 
@@ -138,6 +151,9 @@ export function ResultPanel({
       </div>
     );
   }
+
+  result.next_actions = safeArray(result.next_actions);
+  result.pending_checks = safeArray(result.pending_checks);
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: c.bgMain }}>
@@ -196,9 +212,15 @@ export function ResultPanel({
         {result.next_actions.length > 0 && (
           <SectionCard title="下一步建议" icon={<ArrowRight className="w-4 h-4" />}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {result.next_actions.map((action, idx) => (
+              {result.next_actions.map((action, idx) => {
+                const label = typeof action === 'string'
+                  ? reportActionLabel(action)
+                  : action && typeof action === 'object' && 'label' in action
+                    ? String((action as { label?: unknown }).label || '')
+                    : String(action || '');
+                return (
                 <div
-                  key={`${action}-${idx}`}
+                  key={`${label}-${idx}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -210,9 +232,9 @@ export function ResultPanel({
                   }}
                 >
                   <ChevronRight className="w-4 h-4" style={{ color: c.accent }} />
-                  <span style={{ color: c.textBody, fontSize: 13, lineHeight: 1.6 }}>{action}</span>
+                  <span style={{ color: c.textBody, fontSize: 13, lineHeight: 1.6 }}>{label}</span>
                 </div>
-              ))}
+              );})}
             </div>
           </SectionCard>
         )}
@@ -288,6 +310,9 @@ function HelpSummary({
   onUpgradeWorkflow?: (target: string) => void;
 }) {
   const c = useThemeColors();
+  if (!result) return null;
+  result.source_refs = safeArray(result.source_refs);
+  result.next_actions = safeArray(result.next_actions);
 
   return (
     <>
@@ -377,6 +402,7 @@ function HelpSummary({
 
 function DiagnosisSummary({ result }: { result: DiagnosisResult }) {
   const c = useThemeColors();
+  if (!result) return null;
 
   return (
     <>
@@ -400,6 +426,8 @@ function DiagnosisSummary({ result }: { result: DiagnosisResult }) {
 
 function DemandSummary({ result }: { result: DemandResult }) {
   const c = useThemeColors();
+  if (!result) return null;
+  result.form = safeRecord(result.form);
 
   return (
     <>
@@ -428,6 +456,9 @@ function DemandSummary({ result }: { result: DemandResult }) {
 }
 
 function DebuggingSummary({ result }: { result: DebuggingResult }) {
+  if (!result) return null;
+  result.readiness_items = safeArray(result.readiness_items);
+
   return (
     <>
       <SectionCard title="当前进展" icon={<Wrench className="w-4 h-4" />}>

@@ -1,0 +1,520 @@
+{
+  "batch": "runtime-smoke-no-browser-20260614",
+  "stamp": "20260614-140235",
+  "summary": {
+    "REVIEW": 4,
+    "PASS": 1
+  },
+  "total": 5,
+  "completed": 5,
+  "offset": 0,
+  "limit": 5,
+  "caseTimeoutMs": 120000,
+  "results": [
+    {
+      "rowIndex": 2,
+      "id": "MIG-000",
+      "scenario": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 23816,
+      "answer": "你好！我是小乔智投通用 AI 助手。我可以协助你查询投放数据（如消耗、ROI和转化表现）、定位数据异常和风险点，以及处理广告联调自动化等相关工作。请问今天有什么我可以帮你的？",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 3,
+      "id": "MIG-001",
+      "scenario": "天气",
+      "prompt": "南京本周日天气如何",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11557,
+      "answer": "当前：28°C，体感 29°C，Partly cloudy，湿度 51%。\n  - 预报：2026-06-14：19-30°C，Patchy rain nearby；\n  - 2026-06-15：20-30°C，Patchy rain nearby；\n  - 2026-06-16：22-30°C，Patchy rain nearby",
+      "sourceCount": 1,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "source.attached",
+        "route_observation"
+      ],
+      "runtimeStatus": "success",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "external_service",
+        "composer_name": "public_web_grounded_answer",
+        "provider": "configured_web_search",
+        "summary": "已检测到明显公共网页检索意图。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "南京本周日天气如何",
+          "warnings": [],
+          "reasonCode": "public_web.need_detected",
+          "reasonContext": {
+            "topic": "南京本周日天气如何",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何",
+                "purpose": "primary"
+              },
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "verification"
+              },
+              {
+                "query": "南京本周日天气如何 official latest",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": false
+        }
+      }
+    },
+    {
+      "rowIndex": 4,
+      "id": "MIG-002",
+      "scenario": "新闻解读",
+      "prompt": "最近有哪些游戏上线",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 15573,
+      "answer": "1 天前&ensp;·&ensp;国际 · 军事 非洲“厂歌”何以跨海爆红 “以为是世界杯主题曲，没想到是一首厂歌。\n  - ”最近，一首来自赞比亚中资铜矿的《谦比希 …",
+      "sourceCount": 1,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "source.attached",
+        "route_observation"
+      ],
+      "runtimeStatus": "success",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "external_service",
+        "composer_name": "public_web_grounded_answer",
+        "provider": "configured_web_search",
+        "summary": "消息模板不可识别，请稍后再试。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "public_web_qa",
+          "sourceRequired": true,
+          "sanitizedQuery": "最近有哪些游戏上线",
+          "warnings": [],
+          "reasonCode": "public_web.default_general_lookup",
+          "reasonContext": {
+            "topic": "最近有哪些游戏上线",
+            "policy": "llm",
+            "confidence": 0.72
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "unknown",
+            "authority_need": "multi_source_consensus",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "deep",
+            "source_policy": "multi_source_consensus",
+            "query_strategy": "cross_source_compare",
+            "redaction_policy": "none",
+            "reasons": [
+              "high_risk_or_consensus_needed"
+            ],
+            "queries": [
+              {
+                "query": "最近有哪些游戏上线",
+                "purpose": "primary"
+              },
+              {
+                "query": "最近有哪些游戏上线 latest official sources",
+                "purpose": "verification"
+              },
+              {
+                "query": "最近有哪些游戏上线 source comparison",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": false
+        }
+      }
+    },
+    {
+      "rowIndex": 5,
+      "id": "MIG-003",
+      "scenario": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 35885,
+      "answer": "您提供的链接 https://open.oceanengine.com/labels/7 本身就是巨量引擎开放平台的文档中心页面。在巨量引擎开放平台中，监测与回传相关的文档通常位于“数据回传”、“转化回传”或“广告监测”等文档分类下。您可以直接访问该链接，并在页面左侧的导航目录或顶部的标签页中，寻找“数据回传”、“事件管理”或“广告监测”等相关模块。如果您需要查找特定媒体的具体回传配置，可以在文档中搜索对应媒体的名称，或进入媒体对接相关章节查看。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问巨量媒体监测回传文档的具体位置，属于路径和说明类问题，符合 help 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 28,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 28,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 6,
+      "id": "MIG-004",
+      "scenario": "行业知识问答",
+      "prompt": "腾讯iOS要接sdk吗",
+      "keyPoint": "知识库 联网搜索",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 32348,
+      "answer": "当前知识库中暂未检索到关于“腾讯iOS媒体是否需要接入SDK”的确切说明。由于iOS端受苹果隐私政策影响，各媒体在iOS端的接入方式（如SDK、API回传或第三方归因）可能存在差异。建议您明确具体的媒体名称（如腾讯广告）或业务场景，以便进一步检索最新的官方接入文档或提供准确解答。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问腾讯媒体在iOS端是否需要接入SDK，属于接入条件、配置说明及能力支持范围的咨询，匹配 help 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 1
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 2,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

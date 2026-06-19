@@ -15,6 +15,8 @@ export default function SkillManager() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'builtin' | 'custom'>('all');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
+  const [editEndpointUrl, setEditEndpointUrl] = useState('');
   const [addForm, setAddForm] = useState({ name: '', description: '', endpoint_url: '', category: 'other' as McpSkillCategory, transport: 'streamable-http' as const, auth_type: 'none' as const });
 
   const loadSkills = useCallback(async () => {
@@ -22,7 +24,7 @@ export default function SkillManager() {
     try {
       const data = await apiFetch<McpSkill[]>('/api/xiaoqiao/skills');
       setSkills(data);
-    } catch { /* demo mode fallback */ }
+    } catch { /* local fallback */ }
     setLoading(false);
   }, []);
 
@@ -38,6 +40,30 @@ export default function SkillManager() {
   const handleUninstall = async (id: string) => {
     try {
       await apiFetch<McpSkill>(`/api/xiaoqiao/skills/${id}/uninstall`, { method: 'POST' });
+      loadSkills();
+    } catch { /* ignore */ }
+  };
+
+  const beginEdit = (skill: McpSkill) => {
+    setEditingSkillId(skill.id);
+    setEditEndpointUrl(skill.endpoint_url || '');
+  };
+
+  const cancelEdit = () => {
+    setEditingSkillId(null);
+    setEditEndpointUrl('');
+  };
+
+  const handleSaveEdit = async (skill: McpSkill) => {
+    const endpoint_url = editEndpointUrl.trim();
+    if (!endpoint_url) return;
+    try {
+      await apiFetch<McpSkill>(`/api/xiaoqiao/skills/${skill.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint_url }),
+      });
+      cancelEdit();
       loadSkills();
     } catch { /* ignore */ }
   };
@@ -140,6 +166,34 @@ export default function SkillManager() {
                 </span>
               </div>
               <p style={{ fontSize: 12, color: c.textMuted, margin: '4px 0', lineHeight: 1.5 }}>{skill.description}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, fontSize: 11, color: c.textSubtle }}>
+                <span>MCP 地址</span>
+                <span style={{ fontFamily: 'var(--font-mono)', wordBreak: 'break-all', color: c.textMuted }}>{skill.endpoint_url || '未配置'}</span>
+              </div>
+              {editingSkillId === skill.id && (
+                <div style={{ padding: 8, marginBottom: 8, borderRadius: 6, border: `1px solid ${c.accentBorder}`, background: c.bgElevated }}>
+                  <input
+                    value={editEndpointUrl}
+                    onChange={e => setEditEndpointUrl(e.target.value)}
+                    placeholder="输入 MCP 地址"
+                    style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: `1px solid ${c.borderFaint}`, background: c.inputBg, color: c.textPrimary, fontSize: 12, marginBottom: 8, outline: 'none' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                    <button
+                      onClick={() => handleSaveEdit(skill)}
+                      style={{ padding: '3px 10px', borderRadius: 4, border: 'none', background: c.accent, color: '#fff', fontSize: 11, cursor: 'pointer' }}
+                    >
+                      保存
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      style={{ padding: '3px 10px', borderRadius: 4, border: `1px solid ${c.borderFaint}`, background: 'transparent', color: c.textMuted, fontSize: 11, cursor: 'pointer' }}
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              )}
               {skill.use_cases.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
                   {skill.use_cases.map((uc, i) => (
@@ -148,6 +202,12 @@ export default function SkillManager() {
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                <button
+                  onClick={() => (editingSkillId === skill.id ? cancelEdit() : beginEdit(skill))}
+                  style={{ padding: '3px 10px', borderRadius: 4, border: `1px solid ${c.borderFaint}`, background: 'transparent', color: c.textMuted, fontSize: 11, cursor: 'pointer' }}
+                >
+                  {editingSkillId === skill.id ? '收起' : '编辑地址'}
+                </button>
                 {skill.installed ? (
                   <button
                     onClick={() => handleUninstall(skill.id)}

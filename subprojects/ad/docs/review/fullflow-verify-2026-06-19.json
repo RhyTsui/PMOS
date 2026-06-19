@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-06-19T04:47:49.527Z",
+  "sseEventCounts": {
+    "runtime_state": 3,
+    "phase": 1,
+    "process_event": 11,
+    "route": 1,
+    "content": 1,
+    "done": 1
+  },
+  "hasDone": true,
+  "hasContent": true,
+  "hasRoute": true,
+  "doneAnswer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+  "contentText": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+  "isBlocked": false,
+  "contractStatus": "degraded",
+  "processLabels": [
+    "请求准备阶段完成",
+    "进入意图理解阶段",
+    "确定路由",
+    "信息源仲裁",
+    "意图理解阶段完成",
+    "进入候选规划阶段",
+    "IntentOrch 候选",
+    "开放式回答仲裁",
+    "路由观测",
+    "候选规划阶段完成",
+    "进入工具执行阶段"
+  ],
+  "title": "小乔智投",
+  "titleAfterRefresh": "小乔智投",
+  "consoleErrors": 1,
+  "pageErrors": 0
+}

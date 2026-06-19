@@ -1,0 +1,90 @@
+{
+  "screenId": "zhitou-chat-v0.2-entry",
+  "screenType": "ai-chat-workbench-entry",
+  "version": "v0.2",
+  "lastUpdatedAt": "2026-05-19",
+  "layout": {
+    "desktop": "会话工作台空态首屏，顶部保留项目选择器，主区展示欢迎语与纵向快捷任务入口。",
+    "mobile": "快捷任务竖排展示；右侧证据区在窄屏使用全屏抽屉，不占用主会话空间。"
+  },
+  "regions": [
+    {
+      "id": "welcome",
+      "name": "欢迎语",
+      "purpose": "告诉用户可以输入问题、需求或操作任务，系统会按对话方式继续推进。",
+      "contentRules": [
+        "使用用户语言，不解释内部工程链路。",
+        "不默认猜项目；需要项目上下文时由后续流程引导选择。"
+      ]
+    },
+    {
+      "id": "starter-prompts",
+      "name": "快捷任务入口",
+      "purpose": "把高频任务收敛成标准提问模板，用户点击后直接进入对话流程。",
+      "items": [
+        "包体检查",
+        "数据排查",
+        "效果分析",
+        "创意沉淀",
+        "采集对接",
+        "使用帮助"
+      ],
+      "interactionRules": [
+        "每行一个入口，按钮旁展示任务描述。",
+        "点击后写入完整提问模板，不只写入口名称。",
+        "入口可独立配置是否打开右侧任务面板。",
+        "欢迎语、快捷示例标题、快捷示例按钮和任务标题均由后台配置。"
+      ]
+    },
+    {
+      "id": "process-layers",
+      "name": "过程分层",
+      "purpose": "保持思维链、联调、调用与来源、正文结果的职责分离。",
+      "rules": [
+        "进行中不输出最终结果正文。",
+        "成功正文只展示结论和可交付结果。",
+        "失败正文只展示最后失败步骤、原因和建议下一步。"
+      ]
+    },
+    {
+      "id": "right-panel",
+      "name": "证据查看",
+      "purpose": "承接日志、来源、记录和展开详情。",
+      "rules": [
+        "只展示主标题，不展示副标题或说明文案。",
+        "移动端使用全屏抽屉，避免挤压会话主流程。"
+      ]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "title": "小乔智投 Ant Design X 默认规范",
+      "path": "subprojects/ad/docs/小乔智投-Ant-Design-X默认规范-2026-05-09.md"
+    },
+    {
+      "title": "UI Guardrail",
+      "path": "subprojects/ad/docs/operations/ui-guardrail.md"
+    },
+    {
+      "title": "现有首屏视觉参考",
+      "path": "subprojects/ad/docs/review/xiaoqiao-new-chat-round4.png"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "title": "用户 v0.2 首屏交互要求",
+      "scope": "欢迎语、快捷入口、过程分层、右侧侧边栏、移动端规则"
+    }
+  ],
+  "recommendedActions": [
+    "先验证空会话首屏入口是否一行一个按钮。",
+    "再验证点击入口是否写入完整模板。",
+    "最后验证右侧来源面板无副标题且移动端不遮挡主会话。"
+  ],
+  "states": {
+    "empty": "展示欢迎语与快捷任务入口。",
+    "loading": "进入思维链或对应过程组件，不提前输出最终正文。",
+    "error": "正文只展示失败原因和下一步建议。",
+    "permission": "需要项目上下文时提示先选择项目，不默认猜测。"
+  }
+}

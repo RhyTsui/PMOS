@@ -1,0 +1,176 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #0b1020;
+  color: #e8ecf3;
+  line-height: 1.65;
+}
+
+a {
+  color: #8fd3ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.hero {
+  background: linear-gradient(135deg, #121a33 0%, #10182e 55%, #0c1429 100%);
+  border: 1px solid #223055;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.hero h1,
+.hero h2,
+h1,
+h2,
+h3 {
+  margin: 0 0 12px;
+  line-height: 1.25;
+}
+
+.muted {
+  color: #a7b2cc;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.card {
+  background: #111930;
+  border: 1px solid #243355;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 0;
+}
+
+.nav a,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #182341;
+  border: 1px solid #2a3a60;
+  color: #dce7ff;
+}
+
+.section {
+  margin-top: 22px;
+  background: #0f1730;
+  border: 1px solid #223055;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+th,
+td {
+  border: 1px solid #2a3a60;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+th {
+  background: #16213f;
+  text-align: left;
+}
+
+tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+pre {
+  overflow: auto;
+  padding: 16px;
+  border-radius: 14px;
+  background: #09101f;
+  border: 1px solid #20304f;
+  color: #dce7ff;
+  white-space: pre;
+}
+
+code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+ul,
+ol {
+  margin-top: 10px;
+  padding-left: 22px;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.toc {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.toc a {
+  display: block;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #141e39;
+  border: 1px solid #25365c;
+}
+
+.small {
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #1b2b55;
+  border: 1px solid #2e4a84;
+  color: #d8e7ff;
+  font-size: 12px;
+  margin-right: 6px;
+}
+
+.warning {
+  color: #ffdca8;
+}
+
+.ok {
+  color: #9ff0c4;
+}
+

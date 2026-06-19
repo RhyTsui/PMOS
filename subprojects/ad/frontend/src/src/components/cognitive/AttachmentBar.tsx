@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Paperclip, X, Upload, FileText, ImageIcon, Table, File, CheckCircle, Loader2, PlayCircle } from 'lucide-react';
 import type { AttachmentRecord, AttachmentKind, AttachmentStatus } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
+import { AssetPreview } from './AssetPreview';
 
 interface AttachmentBarProps {
   attachments: AttachmentRecord[];
@@ -78,7 +79,7 @@ export function AttachmentBar({ attachments, onUpload, onRemove, onRetry, onPrev
             multiple
             style={{ display: 'none' }}
             onChange={handleFileInput}
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.log"
+            accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.log"
           />
         </label>
         <span style={{ fontSize: 10, color: c.textSubtle }}>支持图片、文档、表格、日志</span>
@@ -121,7 +122,15 @@ export function AttachmentBar({ attachments, onUpload, onRemove, onRetry, onPrev
                 onMouseEnter={e => { if (!isFailed) e.currentTarget.style.background = c.bgElevated; }}
                 onMouseLeave={e => { if (!isFailed) e.currentTarget.style.background = 'transparent'; }}
               >
-                <IconComp className="w-4 h-4 flex-shrink-0" style={{ color: c.textMuted }} />
+                <span style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0, display: 'inline-flex' }}>
+                  {(att.kind === 'image' || att.kind === 'video') && (att.preview_image_url || att.preview_url) ? (
+                    <AssetPreview kind={att.kind} previewUrl={att.preview_image_url || att.preview_url} thumbnailStatus={att.thumbnail_status} />
+                  ) : (
+                    <span style={{ width: '100%', height: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: c.bgElevated }}>
+                      <IconComp className="w-4 h-4" style={{ color: c.textMuted }} />
+                    </span>
+                  )}
+                </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, color: c.textBody, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>

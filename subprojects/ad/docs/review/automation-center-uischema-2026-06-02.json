@@ -1,0 +1,114 @@
+{
+  "screenId": "xiaoqiao-automation-center",
+  "screenType": "ai-task-automation-center",
+  "version": "v0.2",
+  "lastUpdatedAt": "2026-06-02",
+  "layout": {
+    "desktop": "Left navigation remains available; the main area shows automation tasks, recent runs, templates, and result-driven creation actions.",
+    "mobile": "Single-column task flow; detail and editor use modals with stacked fields and actions."
+  },
+  "regions": [
+    {
+      "id": "automation-header",
+      "name": "Automation entry",
+      "purpose": "Help users manage reports and analysis that are generated automatically on a chosen schedule.",
+      "componentBinding": "workspace shell + Ant Design actions",
+      "states": ["ready", "loading", "permission_denied"],
+      "recommendedActions": ["create_from_current_result", "create_in_chat", "create_manually"]
+    },
+    {
+      "id": "configured-tasks",
+      "name": "Configured tasks",
+      "purpose": "Show tasks that will generate reports or analysis, and let users run, pause, resume, edit, or open the latest run.",
+      "componentBinding": "task cards + action buttons",
+      "states": ["ready", "empty", "loading", "error"],
+      "requiredFields": ["name", "description", "frequency", "last_run_at", "status", "recent_executions"]
+    },
+    {
+      "id": "create-from-result",
+      "name": "Create from current result",
+      "purpose": "When a user has just asked for data, carry the result summary, metrics, and dimensions into the scheduled report editor.",
+      "componentBinding": "workspace action + task editor modal",
+      "states": ["ready", "fallback"],
+      "requiredFields": ["result_summary", "metrics", "dimensions"],
+      "dataPolicy": "Read current data directly; do not ask the user to confirm data freshness."
+    },
+    {
+      "id": "task-editor",
+      "name": "Create or edit task",
+      "purpose": "Collect task name, description, cadence, run time, metrics, dimensions, and notification preferences.",
+      "componentBinding": "Ant Design modal + form controls",
+      "states": ["draft", "saving", "error"],
+      "requiredFields": ["name", "frequency", "run_time", "monitor_metrics", "dimension", "notification_policy"]
+    },
+    {
+      "id": "run-records",
+      "name": "Recent runs",
+      "purpose": "Show generated results, status, and time, and let users open run details.",
+      "componentBinding": "execution list + detail modal",
+      "states": ["ready", "empty", "error"],
+      "requiredFields": ["task_name", "result_summary", "started_at", "status"],
+      "evidenceRefs": ["automation-execution-store", "generated-asset"]
+    },
+    {
+      "id": "execution-detail",
+      "name": "Run detail",
+      "purpose": "Show step timeline, errors, input, output, result file, and retry actions for a run.",
+      "componentBinding": "Ant Design modal + timeline + action buttons",
+      "states": ["success", "partial", "failed", "cancelled"],
+      "requiredFields": ["step_runs", "failure_category", "retry_reason", "artifact_url"]
+    },
+    {
+      "id": "notification-policy",
+      "name": "Notification settings",
+      "purpose": "Let users choose whether completion and abnormal results should notify them, and who should receive the reminder.",
+      "componentBinding": "Ant Design form controls",
+      "states": ["enabled", "disabled"],
+      "requiredFields": ["on_success", "on_failure", "targets"]
+    },
+    {
+      "id": "templates",
+      "name": "Task templates",
+      "purpose": "Let users start common report, table merge, and tag analysis tasks from reusable prompts.",
+      "componentBinding": "prompt cards",
+      "states": ["ready", "empty"],
+      "recommendedActions": ["open_in_chat"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "title": "Ant Design X default rules",
+      "path": "docs/小乔智投-Ant-Design-X默认规范-2026-05-09.md"
+    },
+    {
+      "title": "UI Guardrail",
+      "path": "docs/operations/ui-guardrail.md"
+    },
+    {
+      "title": "Existing first-screen UISchema used as visual baseline",
+      "path": "docs/review/智投chat-v0.2-首页入口-uischema-2026-05-19.json"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "title": "Scheduled report and automation task design",
+      "path": "docs/design-v1/08-定时报表与自动化任务系统设计.md"
+    }
+  ],
+  "recommendedActions": [
+    "Create a scheduled report from the current data answer.",
+    "Run a task immediately and save the result file to assets.",
+    "Open run details to inspect steps, errors, inputs, and outputs.",
+    "Retry failed runs and keep a failure case snapshot."
+  ],
+  "statePolicy": {
+    "empty": "Show a clear empty state and template entry.",
+    "loading": "Show loading rows while tasks are being read.",
+    "error": "Keep the user's draft and show a retryable error message.",
+    "permission": "Only show tasks and runs available to the current user."
+  },
+  "copyGuardrail": {
+    "forbiddenTerms": ["子项目", "聚合", "主链", "schema", "mock", "接口"],
+    "allowedTone": "Product language and user language"
+  }
+}

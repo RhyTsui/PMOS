@@ -1,0 +1,232 @@
+{
+  "batch": "runtime-full-no-browser-20260615-rest",
+  "stamp": "20260615-131525",
+  "summary": {
+    "REVIEW": 2
+  },
+  "total": 73,
+  "completed": 2,
+  "offset": 34,
+  "limit": null,
+  "caseTimeoutMs": 0,
+  "results": [
+    {
+      "rowIndex": 36,
+      "id": "MIG-020",
+      "scenario": "广告报表-语义理解-SEM-025",
+      "prompt": "指间山海 - 国内2026-05-01~2026-05-07哪个媒体的激活成本最低",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量广告\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11049,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：字段名: channel,字段说明: 渠道ID,来源: 原有,是否必含: 必含\n字段名: login_from,字段说明: 场景值,来源: 原有,是否必含: 条件必含\n字段名: h5_param,字段说明: 广告参数，包含活动,广告等信息,来源: 原有,是否必含: 非必含\n分类:...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户要求查询特定游戏在指定时间范围内按媒体维度的激活成本数据，属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 37,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 37,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 37,
+      "id": "MIG-021",
+      "scenario": "广告报表-语义理解-SEM-026",
+      "prompt": "指间山海 - 国内激活数最多的三个媒体",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 TapTap 苹果\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10589,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：字段名: channel,字段说明: 渠道ID,来源: 原有,是否必含: 必含\n字段名: login_from,字段说明: 场景值,来源: 原有,是否必含: 条件必含\n字段名: h5_param,字段说明: 广告参数，包含活动,广告等信息,来源: 原有,是否必含: 非必含\n分类:...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定项目（指间山海）的媒体维度激活数据，并找出排名前三的媒体，属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 31,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 31,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

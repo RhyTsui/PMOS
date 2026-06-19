@@ -1,0 +1,33 @@
+{
+  "batch": "runtime-failfix-integration-20260615b",
+  "stamp": "20260615-151639",
+  "summary": {
+    "REVIEW": 1
+  },
+  "total": 1,
+  "completed": 1,
+  "offset": 106,
+  "limit": 1,
+  "caseTimeoutMs": 0,
+  "results": [
+    {
+      "rowIndex": 129,
+      "id": "MIG-000",
+      "scenario": "",
+      "prompt": "发起联调",
+      "keyPoint": "查看联调状态和步骤截图记录",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 178,
+      "answer": "需要登录后才能执行这类内部操作。请在当前浏览器完成登录后重试，我会按你的权限继续处理。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    }
+  ]
+}

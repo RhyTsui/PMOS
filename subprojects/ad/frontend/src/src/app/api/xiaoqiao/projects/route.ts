@@ -1,215 +1,248 @@
 import { NextResponse } from 'next/server';
-import { getProjectServiceConfig, hasConfiguredProjectService } from '@/lib/runtime-config';
+import {
+  AUTH_TOKEN_COOKIE,
+  type AuthProjectItem,
+  getAiadProjectList,
+  getAiadMemberInfo,
+  getCurrentUser,
+  getProjectListEndpoint,
+  getUserIdFromToken,
+  normalizeAuthProject,
+} from '@/lib/auth-service';
 
 interface ProjectApiItem {
   app_id?: string | number;
+  appId?: string | number;
   app_name?: string;
+  appName?: string;
   app_alias?: string;
+  appAlias?: string;
   app_en_name?: string;
+  appEnName?: string;
   app_status?: string | number;
-  app_type?: string | number;
-  studio_id?: string | number;
-  studio_name?: string;
-  department_id?: string | number;
-  department_name?: string;
-  develop_department_id?: string | number;
-  develop_department_name?: string;
-  segment?: string;
-  is_deleted?: string | number;
+  appStatus?: string | number;
+  status?: string | number;
   icon?: string;
+  app_type?: string | number | Array<{ code?: string; name?: string } | string>;
+  app_types?: string | number | Array<{ code?: string; name?: string } | string>;
+  appType?: Array<{ code?: string; name?: string } | string>;
+  project_type?: string | number;
+  category?: string;
+  industry?: string;
+  biz_type?: string;
+  game_type?: string;
+  is_game?: boolean | string | number;
+  is_current?: boolean | string | number;
 }
 
-interface ProjectPageInfo {
-  page?: number;
-  page_size?: number;
-  total_number?: number;
-  total_page?: number;
-}
-
-interface ProjectListResponse {
-  source: string;
-  projects: ReturnType<typeof normalize>[];
-  page_info: ProjectPageInfo & {
-    returned_number: number;
-    fetched_all: boolean;
+function normalize(item: ProjectApiItem): ProjectApiItem {
+  const appId = item.app_id ?? item.appId;
+  const appName = item.app_name ?? item.appName ?? item.app_alias ?? item.appAlias ?? item.app_en_name ?? item.appEnName;
+  const appAlias = item.app_alias ?? item.appAlias;
+  const appEnName = item.app_en_name ?? item.appEnName;
+  const appStatus = item.app_status ?? item.appStatus ?? item.status;
+  const appType = item.app_type ?? item.appType ?? item.app_types;
+  return {
+    app_id: appId,
+    app_name: appName || appAlias || appEnName || `项目 ${appId || ''}`.trim(),
+    app_alias: appAlias,
+    app_en_name: appEnName,
+    app_status: appStatus,
+    icon: item.icon,
+    app_type: appType,
+    project_type: item.project_type,
+    category: item.category,
+    industry: item.industry,
+    biz_type: item.biz_type,
+    game_type: item.game_type,
+    is_game: item.is_game,
+    is_current: item.is_current,
   };
 }
 
-let projectListCache: {
-  key: string;
-  expiresAt: number;
-  response: ProjectListResponse;
-} | null = null;
+function matchesProjectKeyword(item: ProjectApiItem, keyword: string) {
+  if (!keyword) return true;
+  const normalizedKeyword = keyword.trim().toLowerCase();
+  if (!normalizedKeyword) return true;
+  const joined = [
+    item.app_id,
+    item.appId,
+    item.app_name,
+    item.appName,
+    item.app_alias,
+    item.appAlias,
+    item.app_en_name,
+    item.appEnName,
+    item.app_type,
+    item.appType,
+    item.app_types,
+    item.project_type,
+    item.category,
+    item.industry,
+    item.biz_type,
+    item.game_type,
+  ]
+    .filter((value) => value !== undefined && value !== null && String(value).trim())
+    .map((value) => String(value).toLowerCase())
+    .join(' ');
+  return joined.includes(normalizedKeyword);
+}
 
-function pickList(payload: unknown): ProjectApiItem[] {
+function memberAppsToProjects(apps?: Array<Record<string, unknown>> | null): ProjectApiItem[] {
+  if (!Array.isArray(apps)) return [];
+  return apps.map((app) => ({
+    app_id: (app.code ?? app.id ?? app.app_id ?? app.appId) as string | number | undefined,
+    app_name: (app.name ?? app.app_name ?? app.appName ?? app.app_alias ?? app.appAlias ?? app.app_en_name ?? app.appEnName) as string | undefined,
+    app_alias: app.app_alias as string | undefined,
+    app_en_name: app.app_en_name as string | undefined,
+    app_status: (app.status ?? app.app_status) as string | number | undefined,
+    icon: app.icon as string | undefined,
+    is_current: app.is_current as boolean | string | number | undefined,
+  }));
+}
+
+function extractProjectListPayload(payload: unknown): ProjectApiItem[] {
   if (Array.isArray(payload)) return payload as ProjectApiItem[];
   if (!payload || typeof payload !== 'object') return [];
-  const data = (payload as Record<string, unknown>).data;
+  const record = payload as Record<string, unknown>;
+  const data = record.data;
   if (Array.isArray(data)) return data as ProjectApiItem[];
   if (data && typeof data === 'object') {
-    const list = (data as Record<string, unknown>).list || (data as Record<string, unknown>).items || (data as Record<string, unknown>).data;
-    if (Array.isArray(list)) return list as ProjectApiItem[];
+    const dataRecord = data as Record<string, unknown>;
+    for (const key of ['list', 'records', 'items', 'apps', 'projects', 'rows']) {
+      if (Array.isArray(dataRecord[key])) return dataRecord[key] as ProjectApiItem[];
+    }
   }
-  const list = (payload as Record<string, unknown>).list || (payload as Record<string, unknown>).items;
-  return Array.isArray(list) ? list as ProjectApiItem[] : [];
+  for (const key of ['list', 'records', 'items', 'apps', 'projects', 'rows']) {
+    if (Array.isArray(record[key])) return record[key] as ProjectApiItem[];
+  }
+  return [];
 }
 
-function pickPageInfo(payload: unknown): ProjectPageInfo {
-  if (!payload || typeof payload !== 'object') return {};
-  const root = payload as Record<string, unknown>;
-  const data = root.data;
-  const pageInfo = data && typeof data === 'object'
-    ? (data as Record<string, unknown>).page_info
-    : root.page_info;
-  if (!pageInfo || typeof pageInfo !== 'object') return {};
-  const source = pageInfo as Record<string, unknown>;
+function mergeProjects(projectGroups: ProjectApiItem[][]): ProjectApiItem[] {
+  const map = new Map<string, ProjectApiItem>();
+  projectGroups.flat().forEach((item) => {
+    const normalized = normalize(item);
+    const id = String(normalized.app_id ?? '').trim();
+    if (!id) return;
+    const existing = map.get(id);
+    map.set(id, {
+      ...normalized,
+      ...existing,
+      is_current: existing?.is_current || normalized.is_current,
+    });
+  });
+  return [...map.values()];
+}
+
+function toAuthProject(item: ProjectApiItem): AuthProjectItem | null {
+  const normalized = normalize(item);
+  if (normalized.app_id === undefined || normalized.app_id === null) return null;
   return {
-    page: Number(source.page) || undefined,
-    page_size: Number(source.page_size) || undefined,
-    total_number: Number(source.total_number) || undefined,
-    total_page: Number(source.total_page) || undefined,
+    app_id: normalized.app_id,
+    app_name: String(normalized.app_name || normalized.app_alias || normalized.app_en_name || `APPID ${normalized.app_id}`),
+    app_alias: normalized.app_alias,
+    app_en_name: normalized.app_en_name,
+    app_status: normalized.app_status,
+    status: normalized.status === undefined ? undefined : String(normalized.status),
+    icon: normalized.icon,
+    app_type: Array.isArray(normalized.app_type)
+      ? normalized.app_type.map((type) => (typeof type === 'string' ? type : type.name || type.code || '')).filter(Boolean)
+      : normalized.app_type,
+    is_current: Boolean(normalized.is_current),
   };
 }
 
-function normalize(item: ProjectApiItem) {
-  return {
-    app_id: item.app_id,
-    app_name: item.app_name || item.app_alias || item.app_en_name || `项目 ${item.app_id || ''}`.trim(),
-    app_alias: item.app_alias,
-    app_en_name: item.app_en_name,
-    app_status: item.app_status,
-    app_type: item.app_type,
-    studio_id: item.studio_id,
-    studio_name: item.studio_name,
-    department_id: item.department_id,
-    department_name: item.department_name,
-    develop_department_id: item.develop_department_id,
-    develop_department_name: item.develop_department_name,
-    segment: item.segment,
-    is_deleted: item.is_deleted,
-    icon: item.icon,
-  };
-}
+function readToken(request: Request): string {
+  const rawToken = request.headers.get('cookie')
+    ?.split(';')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(`${AUTH_TOKEN_COOKIE}=`))
+    ?.slice(AUTH_TOKEN_COOKIE.length + 1);
 
-function isGameProject(item: ReturnType<typeof normalize>) {
-  const appType = String(item.app_type ?? '').trim();
-  return !appType || appType === '1' || appType === '游戏';
-}
-
-function isExcludedStudioProject(item: ReturnType<typeof normalize>) {
-  const studioText = [
-    item.studio_name,
-    item.department_name,
-    item.develop_department_name,
-  ].filter(Boolean).join(' ');
-  return /烽火|烽火工作室/i.test(studioText);
-}
-
-async function fetchProjectPage(baseUrl: string, configToken: string, requestParams: URLSearchParams, page: number, pageSize: number) {
-  const params = new URLSearchParams(requestParams);
-  params.set('access_token', configToken);
-  params.set('page', String(page));
-  params.set('page_size', String(pageSize));
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
-  const response = await fetch(`${baseUrl}?${params.toString()}`, {
-    headers: { Accept: 'application/json' },
-    cache: 'no-store',
-    signal: controller.signal,
-  }).finally(() => clearTimeout(timer));
-  if (!response.ok) throw new Error(`Project API ${response.status}`);
-  return response.json();
+  return rawToken ? decodeURIComponent(rawToken).replace(/^Bearer\s+/i, '').trim() : '';
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const config = await getProjectServiceConfig();
+  const token = readToken(request);
+  const pageSize = searchParams.get('page_size') || '50';
+  const shouldReturnAll = searchParams.get('all') === 'true' || pageSize === 'all';
   const appName = searchParams.get('app_name');
   const appId = searchParams.get('app_id');
-  const page = Number(searchParams.get('page') || '1') || 1;
-  const pageSize = Math.min(Number(searchParams.get('page_size') || '100') || 100, 100);
-  const shouldFetchAll = searchParams.get('all') !== 'false';
-  const params = new URLSearchParams();
-  if (appName) params.set('app_name', appName);
-  if (appId) params.set('app_id', appId);
-  params.set('status', searchParams.get('status') || 'all');
-  for (const key of ['include_origin_mapping', 'app_status', 'origin_id', 'segment']) {
-    const value = searchParams.get(key);
-    if (value) params.set(key, value);
-  }
-  const requestedAppType = searchParams.get('app_type');
-  if (requestedAppType && requestedAppType !== 'all') {
-    params.set('app_type', requestedAppType);
+  const keyword = searchParams.get('keyword') || searchParams.get('q') || '';
+
+  if (!token) {
+    return NextResponse.json({ source: 'auth-required', projects: [] }, { status: 401 });
   }
 
   try {
-    if (!hasConfiguredProjectService(config)) {
-      throw new Error('Project API config is disabled or missing token');
-    }
+    const userId = getUserIdFromToken(token);
+    const [currentUser, projectListPayload, memberInfo] = await Promise.all([
+      getCurrentUser(token).catch(() => null),
+      getAiadProjectList(token).catch(() => null),
+      userId ? getAiadMemberInfo(token, userId).catch(() => null) : Promise.resolve(null),
+    ]);
 
-    const baseUrl = config.apiBaseUrl.replace(/\/$/, '');
-    const cacheKey = `${baseUrl}?${params.toString()}&page=${page}&page_size=${pageSize}&all=${shouldFetchAll}`;
-    if (projectListCache && projectListCache.key === cacheKey && projectListCache.expiresAt > Date.now()) {
-      return NextResponse.json(projectListCache.response);
-    }
+    const currentProject = currentUser?.user.current || currentUser?.user.previous || null;
+    const projectList = extractProjectListPayload(projectListPayload);
+    const userProjects: ProjectApiItem[] = (currentUser?.user.projects || []).map((item) => ({
+      app_id: item.app_id,
+      app_name: item.app_name,
+      app_alias: item.app_alias,
+      app_en_name: item.app_en_name,
+      app_status: item.app_status || item.status,
+      icon: item.icon,
+      app_type: item.app_type || item.app_types,
+      is_current: item.is_current,
+    }));
+    const memberProjects = memberAppsToProjects(memberInfo?.apps as Array<Record<string, unknown>> | null);
+    const projectsSource = mergeProjects([
+      projectList,
+      currentProject ? [currentProject] : [],
+      userProjects,
+      memberProjects,
+    ]);
 
-    const firstPayload = await fetchProjectPage(baseUrl, config.apiToken, params, page, pageSize);
-    const firstPageInfo = pickPageInfo(firstPayload);
-    const totalPage = shouldFetchAll ? Math.min(firstPageInfo.total_page || 1, 100) : 1;
-    const payloads = [firstPayload];
+    const projectItems = projectsSource
+      .filter((item) => item.app_id || item.appId)
+      .filter((item) => matchesProjectKeyword(item, keyword))
+      .filter((item) => (appName ? matchesProjectKeyword(item, appName) : true))
+      .filter((item) => (appId ? String(item.app_id ?? item.appId) === String(appId) : true));
 
-    if (shouldFetchAll && totalPage > page) {
-      const remainingPages = Array.from({ length: totalPage - page }, (_, index) => page + index + 1);
-      const remainingPayloads = await Promise.all(
-        remainingPages.map((nextPage) => fetchProjectPage(baseUrl, config.apiToken, params, nextPage, pageSize)),
-      );
-      payloads.push(...remainingPayloads);
-    }
+    const resolvedCurrent = currentProject
+      || projectItems.find((item) => item.is_current)
+      || projectItems[0]
+      || null;
 
-    const seen = new Set<string>();
-    const projects = payloads
-      .flatMap(pickList)
-      .map(normalize)
-      .filter((item) => {
-        if (!item.app_id) return false;
-        if (!isGameProject(item)) return false;
-        if (isExcludedStudioProject(item)) return false;
-        const key = String(item.app_id);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    if (projects.length > 0) {
-      const responsePayload: ProjectListResponse = {
-        source: baseUrl,
-        projects,
-        page_info: {
-          ...firstPageInfo,
-          returned_number: projects.length,
-          fetched_all: shouldFetchAll,
-        },
+    const projects = projectItems.map((item) => {
+      const normalized = normalize(item);
+      return {
+        ...normalized,
+        is_current: normalized.is_current || String(normalized.app_id) === String(resolvedCurrent?.app_id),
       };
-      projectListCache = {
-        key: cacheKey,
-        expiresAt: Date.now() + 5 * 60 * 1000,
-        response: responsePayload,
-      };
-      return NextResponse.json(responsePayload);
-    }
+    });
+
+    const limit = Number(pageSize);
+    const pageProjects = !shouldReturnAll && Number.isFinite(limit) && limit > 0
+      ? projects.slice(0, limit)
+      : projects;
+
+    const current = resolvedCurrent ? toAuthProject(resolvedCurrent) : null;
+    const normalizedProjects = pageProjects
+      .map((item) => toAuthProject(item))
+      .filter((item): item is AuthProjectItem => Boolean(item));
+
+    return NextResponse.json({
+      source: 'aiad-production-project-list',
+      project_list_endpoint: getProjectListEndpoint(),
+      current: current ? normalizeAuthProject(current) : null,
+      total: projects.length,
+      returned: pageProjects.length,
+      projects: normalizedProjects.map((item) => normalizeAuthProject(item)),
+    });
   } catch (error) {
-    console.warn('Project API unavailable', error);
+    console.warn('Authenticated project list unavailable', error);
+    return NextResponse.json({ source: 'auth-error', projects: [] }, { status: 401 });
   }
-
-  return NextResponse.json({
-    source: 'fallback',
-    projects: [
-      {
-        app_id: 12701,
-        app_name: '项目 12701',
-        app_alias: '默认项目',
-        app_status: 'unknown',
-      },
-    ],
-  });
 }

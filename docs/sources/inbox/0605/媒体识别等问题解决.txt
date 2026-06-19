@@ -1,0 +1,275 @@
+ 还不能直接查数：缺少媒体平台编号。  这个在知识库和tool里好像都有 是不能理解“巨量”2个
+字吗？› 不要加补丁 要在总纲架构下 深入分析缺陷，系统性解决根本问题
+
+
+• Proposed Plan
+
+
+  # 媒体编号问题的根因修复：从词识别走向能力编排
+
+  ## Summary
+
+  当前问题不是“系统不认识巨量”，而是能力发现、能力依赖、输入归一化、执行前置条件混在了
+  一起。
+  表面上看是“缺少媒体平台编号”，本质上是系统没有把这条链明确建模为：
+
+  用户表达 -> 媒体名称识别 -> 媒体表能力归一化 -> 产出标准编号 -> 报表能力消费编号 ->
+  结果组装
+
+  也就是说，问题不在单个词典或单个 MCP，而在总纲下缺少一层可解释、可验证的能力编排图。
+
+  ## Key Changes
+
+  - 把“媒体表工具”提升为标准化能力节点
+      - 它不是报表能力的附属，也不是简单字典查找。
+      - 它的职责是把“巨量 / 腾讯 / 快手”这类人类可读名称，归一成 MCP 可消费的标准标
+        识。
+      - 它必须声明输入、输出、前置条件、失败态，不能只靠关键词命中。
+  - 把报表工具的输入边界收紧
+      - 报表工具只消费标准标识，不再接受中文媒体名这类业务表述。
+      - 这样可以避免把“名称识别失败”误判成“报表能力缺失”。
+      - 也避免把兜底逻辑藏进报表执行阶段，导致排查困难。
+  - 把路由从“规则命中”改成“依赖满足”
+      - 现在的问题是：系统先识别到了媒体，再直接进入报表预检，最后发现没有编号就阻断。
+      - 正确做法是：先判断是否存在“媒体归一化能力”，如果存在，先执行它；只有它产出了标
+        准编号，报表能力才有资格进入下一步。
+      - 这不是媒体专属逻辑，而是所有“名称 -> 标识”类能力都应遵守的通用规则。
+      - 应拆成三层：
+          - 语义层：是否识别出媒体、终端、项目等维度
+          - 归一层：是否有能力把名称转成标准标识
+          - 执行层：报表工具的输入是否齐全
+      - 这样“缺少媒体平台编号”就会被准确定位成“归一能力未完成”，而不是“整体查数不可
+        用”。
+  - 把路由观测改成可回放链路
+      - 必须记录：
+          - 识别到了什么
+          - 调用了哪一个归一化能力
+          - 归一化输出是什么
+          - 哪一步满足了报表工具依赖
+          - 如果中断，中断在哪个依赖节点
+      - 这样才能排查“是没识别、没匹配、没返回标准输出，还是报表能力本身有问题”。
+
+  ## Test Plan
+
+  - “看下巨量近 30 天素材消耗和 ROI 趋势”
+      - 应先走媒体归一化能力，再走报表能力。
+      - 不能直接把“巨量”传给报表 MCP。
+  - “巨量”已识别，但媒体表工具不可用
+      - 应明确提示“媒体归一化能力不可用”，而不是笼统说“缺少媒体平台编号”。
+  - 媒体表工具存在，但返回结果里没有标准编号
+      - 应区分为“归一化输出不符合预期”，而不是当成用户没说清楚。
+  - 终端、账号、包名、团队等同类维度
+      - 统一复用同一套能力依赖与归一化机制，不能各自长出一套私有逻辑。
+
+  ## Assumptions
+
+  - 总纲是唯一权威架构，旧的报表规则、槽位规则、词典规则都应收敛到“请求理解 + 能力编
+    排”之下。
+  - 媒体表工具是一个标准归一化能力，不是报表能力的一部分。
+  - 报表能力只接受标准化后的输入，不接受中文别名或业务自然语言。
+  - 这次的修复目标是通用架构，不做媒体场景的单点特例。
+已思考几秒
+
+这个排查结论方向是对的，但要再校准一句：不是“巨量两个字不理解”，而是“识别、归一、依赖满足、能力调用”没有被拆成独立链路。
+
+你上传的排查 Prompt 其实已经有这个要求：如果用户提供的是媒体名称、简称或模糊描述，例如“腾讯”“巨量”，要先完成应用解析，再单独调用 fetch_media_context 解析目标媒体；如果返回候选，还要让用户确认，确认前不能继续调用依赖 media_id 的后续工具。
+
+所以根因不是知识库有没有“巨量”，也不是 tool 里有没有媒体表，而是系统没有把下面这条链做成总纲下的通用能力编排：
+
+自然语言实体
+→ EntityResolution
+→ NormalizationCapability
+→ 标准业务标识
+→ CapabilityPreflight
+→ Tool Invocation
+应该怎么定性
+
+不要叫“媒体编号补丁”。
+
+应该叫：
+
+Entity Resolution & Identifier Normalization
+实体解析与标准标识归一化
+
+这是通用能力，不只服务媒体，也服务：
+
+游戏名 → app_id
+媒体名 → media_id
+账户名 → account_id
+素材名 → material_id
+广告计划名 → campaign_id
+包名 → app_package_id
+团队名 → team_id
+正确架构修改
+
+在总纲下补一个模块：
+
+Request Understanding System
+└─ Entity Resolution & Identifier Normalization
+   ├─ EntityDetection
+   ├─ Dictionary / Alias Match
+   ├─ Normalization Capability
+   ├─ Candidate Selection
+   ├─ Identifier Contract
+   └─ Resolution Trace
+
+核心原则：
+
+1. 用户可以说“巨量”。
+2. 报表 / 排查 tool 不直接消费“巨量”。
+3. 系统必须先把“巨量”归一成标准 media_id。
+4. 如果归一能力存在，就先调用归一能力。
+5. 如果归一能力不存在，要提示“媒体归一化能力不可用”。
+6. 如果归一结果多候选，要让用户选择。
+7. 如果归一结果没有标准编号，要报“归一化输出不合规”，不是报“用户没填媒体编号”。
+不能怎么改
+
+不要这样修：
+
+if query.includes("巨量") media_id = xxx
+
+也不要这样修：
+
+在提示词里写：巨量就是某某编号
+
+这都是补丁。
+
+应该怎么落地
+1. 架构修改
+
+新增通用对象：
+
+EntityResolution {
+  entityType: "media" | "app" | "campaign" | "material" | "account"
+  rawText: string
+  normalizedId?: string
+  normalizedName?: string
+  confidence: number
+  status: "resolved" | "needs_user_selection" | "not_found" | "capability_unavailable"
+  candidates?: Array<{
+    id: string
+    name: string
+    confidence: number
+  }>
+}
+2. 能力编排修改
+
+报表或排查能力声明：
+
+requiredIdentifiers: ["media_id", "app_id"]
+
+如果用户只给了：
+
+media_query = 巨量
+
+系统必须先寻找：
+
+capabilityType = entity.normalization
+entityType = media
+
+比如当前排查 MCP 里的：
+
+fetch_media_context
+
+它应该被注册成：
+
+media_context.resolve
+
+而不是报表工具的内部步骤。
+
+3. Prompt 修改
+
+Prompt 只保留原则，不写死编号：
+
+当用户提供媒体名称、简称或模糊描述时，不得直接把自然语言媒体名传给下游报表或排查工具。
+必须先触发媒体归一化能力，获得标准 media_id 后再继续执行。
+4. 代码修改
+
+在执行前增加：
+
+IdentifierDependencyResolver
+
+链路：
+
+UserRequirementContract
+→ detect requiredIdentifiers
+→ check resolved identifiers
+→ call normalization capability if needed
+→ update ProjectResolution / EntityResolution
+→ CapabilityPreflight
+5. 配置修改
+
+后台增加：
+
+Entity Normalization Capability
+
+配置项：
+
+media_context.resolve
+app_context.resolve
+campaign_context.resolve
+material_context.resolve
+account_context.resolve
+
+每个能力声明：
+
+input: raw name / query / context
+output: standard id / name / candidates
+failure states
+这次问题的准确错误提示应该是什么
+
+当前提示：
+
+缺少媒体平台编号
+
+不够准确。
+
+应该按状态区分：
+
+1. 用户没有提供媒体信息：
+   需要补充媒体平台或媒体编号。
+
+2. 用户提供了“巨量”，但没有执行归一化：
+   已识别到媒体名称“巨量”，但尚未完成标准媒体编号解析。
+
+3. 归一化能力不存在：
+   当前未接入媒体归一化能力，无法将“巨量”转换为标准 media_id。
+
+4. 归一化返回多候选：
+   找到多个可能的媒体，请选择一个后继续。
+
+5. 归一化输出不合规：
+   媒体解析工具未返回标准 media_id，请检查 MCP 输出协议。
+需要补的 golden cases
+1. “巨量近30天ROI趋势”
+   期望：先 media_context.resolve，再 report capability。
+
+2. “腾讯 PAY 回推失败”
+   期望：先 app_context.resolve，再 media_context.resolve，再 attribution diagnosis workflow。
+
+3. 用户直接给 media_id
+   期望：不调用媒体归一化，直接进入 preflight。
+
+4. “巨量”归一化能力不可用
+   期望：提示归一能力不可用，不说用户缺媒体编号。
+
+5. 归一化返回多个候选
+   期望：进入 needs_user_selection，不继续调用报表。
+
+6. 归一化返回无 media_id
+   期望：报输出不合规，不进入报表工具。
+最终结论
+
+这不是“巨量识别失败”，而是：
+
+Entity Resolution 和 Capability Dependency 没有进入统一编排链路。
+
+你的 Proposed Plan 可以采纳，但建议把标题从：
+
+媒体编号问题的根因修复
+
+升级为：
+
+实体解析与标准标识归一化机制治理方案
+
+这样它就不是媒体场景补丁，而是总纲下的通用架构能力。

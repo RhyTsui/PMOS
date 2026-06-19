@@ -1,0 +1,70 @@
+{
+  "screenId": "xiaoqiao.personal-knowledge.dialog",
+  "screenType": "user-settings-dialog",
+  "layout": {
+    "desktop": "centered modal, 520px wide, opened from personal center",
+    "mobile": "single column modal with the same status and action order"
+  },
+  "regions": [
+    {
+      "id": "personal-knowledge-status",
+      "componentBinding": "settings-status",
+      "description": "Show that the personal knowledge base is built in for the signed-in user.",
+      "sourceRefs": ["src-current-personal-center-dialog"],
+      "evidenceRefs": ["ev-dataki-admin-key-resolution"]
+    },
+    {
+      "id": "personal-knowledge-action",
+      "componentBinding": "action-button",
+      "description": "Open dataki.dobest.com in a new browser tab.",
+      "sourceRefs": ["src-dataki-public-entry"],
+      "evidenceRefs": ["ev-no-user-key-input"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "id": "src-current-personal-center-dialog",
+      "type": "code",
+      "title": "Current XiaoQiao personal center knowledge dialog",
+      "path": "frontend/src/src/app/page.tsx"
+    },
+    {
+      "id": "src-dataki-public-entry",
+      "type": "external",
+      "title": "Dataki personal knowledge base entry",
+      "url": "https://dataki.dobest.com"
+    },
+    {
+      "id": "src-ui-guardrail",
+      "type": "doc",
+      "title": "AD UI Guardrail",
+      "path": "docs/operations/ui-guardrail.md"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "ev-dataki-admin-key-resolution",
+      "type": "implementation",
+      "description": "User KEY is resolved by backend on first login and stored in the user information table."
+    },
+    {
+      "id": "ev-no-user-key-input",
+      "type": "copy-rule",
+      "description": "The user-visible dialog does not ask the user to paste or manage Dataki KEY."
+    }
+  ],
+  "lastUpdatedAt": "2026-06-01",
+  "recommendedActions": [
+    {
+      "id": "open-personal-knowledge",
+      "label": "打开个人知识库",
+      "target": "https://dataki.dobest.com"
+    }
+  ],
+  "states": {
+    "empty": "Not used. Personal knowledge base is built in.",
+    "loading": "Show the built-in entry while backend status loads.",
+    "error": "Show a short status message without asking the user for a KEY.",
+    "permission": "Require sign-in before showing the dialog."
+  }
+}

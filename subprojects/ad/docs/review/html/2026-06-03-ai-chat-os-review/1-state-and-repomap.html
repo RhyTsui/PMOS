@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1. 当前代码状态 + Repo Map</title>
+  <link rel="stylesheet" href="./review.css" />
+</head>
+<body>
+  <div class="shell">
+    <div class="hero">
+      <h1>1. 当前代码状态 + Repo Map</h1>
+      <p class="muted">本页对应 review 的第一部分：先确认当前代码状态，再建立全仓库执行链路地图。</p>
+      <div class="nav">
+        <a href="./index.html">总入口</a>
+        <a href="./2-source-of-truth-and-diagrams.html">下一页：总纲索引 + 架构图</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>1.1 当前代码状态</h2>
+      <table>
+        <tr><th>项目</th><th>结果</th></tr>
+        <tr><td>当前分支</td><td><code>feature/xuyun_init</code></td></tr>
+        <tr><td>当前 HEAD</td><td><code>ee1da8241b16297d7dd5f0d46b5314da54fe097d</code></td></tr>
+        <tr><td>最近提交</td><td><code>fix: P0.6 tool-first runtime and presentation boundary</code></td></tr>
+        <tr><td>是否存在未提交变更</td><td>是</td></tr>
+        <tr><td>未提交变更</td><td>仅新增文档 <code>docs/review/会话沉淀-2026-06-03-Admin控制台菜单治理审查报告.md</code></td></tr>
+        <tr><td>报告基准</td><td>以当前 <code>HEAD</code> + 当前 worktree 为准</td></tr>
+        <tr><td>P0.6 判定</td><td><span class="warning">未封版实现</span>，不直接作为稳定架构结论</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>1.2 这次提交的真实范围</h2>
+      <p>这次 P0.6 的改动主要集中在以下文件：</p>
+      <ul>
+        <li><code>frontend/src/src/app/api/chat/route.ts</code></li>
+        <li><code>frontend/src/src/lib/capability-orchestration.ts</code></li>
+        <li><code>frontend/src/src/lib/report-query-orchestrator.ts</code></li>
+        <li><code>frontend/src/src/lib/request-understanding.ts</code></li>
+        <li><code>frontend/src/src/contracts/request-understanding/user-requirement-contract.ts</code></li>
+        <li><code>frontend/src/scripts/route-runtime-golden.ts</code></li>
+        <li><code>frontend/src/package.json</code></li>
+      </ul>
+      <p>本质上不是全栈重构，而是：</p>
+      <ul>
+        <li>把 request understanding 的 <code>serviceIntent</code> 补进路由 metadata。</li>
+        <li>把问数 runtime 的 blocking / clarification / outcome 结构化。</li>
+        <li>收缩 capability / runtime 的若干前置硬编码条件。</li>
+        <li>补上 route runtime golden 脚本。</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>1.3 Repo Map</h2>
+      <h3>Chat Runtime</h3>
+      <ul>
+        <li><code>/api/chat</code> 主入口：<code>frontend/src/src/app/api/chat/route.ts</code></li>
+        <li>request understanding：<code>frontend/src/src/lib/request-understanding.ts</code></li>
+        <li>intent router：<code>frontend/src/src/lib/intent-router.ts</code></li>
+        <li>route decision：<code>frontend/src/src/lib/route-decision-observation.ts</code></li>
+        <li>context compiler：<code>frontend/src/src/lib/context-compiler.ts</code></li>
+        <li>report query runtime：<code>frontend/src/src/lib/report-query-orchestrator.ts</code></li>
+        <li>capability discovery：<code>frontend/src/src/lib/capability-orchestration.ts</code></li>
+        <li>tool planner：<code>frontend/src/src/lib/report-query-orchestrator.ts</code></li>
+        <li>MCP 调用：<code>frontend/src/src/lib/mcp-discovery.ts</code></li>
+        <li>response contract：<code>frontend/src/src/lib/response-contract.ts</code></li>
+        <li>semantic result contract：<code>frontend/src/src/contracts/semantic/semantic-result-contract.ts</code></li>
+        <li>message presentation / renderer：<code>frontend/src/src/components/cognitive/message-presentation.ts</code>、<code>message-presentation-projection.ts</code>、<code>MessagePresentationRenderer.tsx</code></li>
+      </ul>
+
+      <h3>Admin / Control Plane</h3>
+      <ul>
+        <li>admin 页面：<code>frontend/src/src/app/admin/page.tsx</code></li>
+        <li>prompt 管理：<code>frontend/src/src/app/api/xiaoqiao/admin/prompts/*</code></li>
+        <li>intent route rules：<code>frontend/src/src/app/api/xiaoqiao/admin/intent-route-rules/route.ts</code></li>
+        <li>entity resolution：<code>frontend/src/src/app/api/xiaoqiao/admin/entity-resolution-config/route.ts</code></li>
+        <li>report-query-policy：<code>frontend/src/src/app/api/xiaoqiao/admin/report-query-policy/route.ts</code></li>
+        <li>capability override：<code>frontend/src/src/app/api/xiaoqiao/admin/report-capability-overrides/route.ts</code></li>
+        <li>MCP servers：<code>frontend/src/src/app/api/xiaoqiao/admin/mcp-servers/*</code></li>
+        <li>feature switches：<code>frontend/src/src/app/api/xiaoqiao/admin/feature-switches/*</code></li>
+        <li>workflow：<code>frontend/src/src/app/api/xiaoqiao/admin/automation-templates/*</code>、<code>report-drafts/*</code>、<code>report-template-results/*</code></li>
+        <li>skills / skill contracts：<code>frontend/src/src/app/api/xiaoqiao/skills/*</code>、<code>frontend/src/src/app/api/xiaoqiao/skill-contracts/*</code></li>
+        <li>users / workspace / project scope：<code>frontend/src/src/app/api/xiaoqiao/auth/*</code>、<code>frontend/src/src/lib/user-scope.ts</code></li>
+        <li>operation logs：<code>frontend/src/src/app/api/xiaoqiao/admin/operation-logs/route.ts</code></li>
+      </ul>
+
+      <h3>Capability / MCP</h3>
+      <ul>
+        <li>MCP server store：<code>frontend/src/src/lib/mcp-server-store.ts</code></li>
+        <li>MCP tool list：<code>frontend/src/src/lib/mcp-discovery.ts</code></li>
+        <li>capability manifest：<code>frontend/src/src/lib/report-capability-manifest.ts</code></li>
+        <li>capability override：<code>frontend/src/src/lib/report-capability-override-store.ts</code></li>
+        <li>report capability manifest API：<code>frontend/src/src/app/api/xiaoqiao/admin/report-capability-manifest/route.ts</code></li>
+        <li>tool selector / input builder：<code>frontend/src/src/lib/report-query-orchestrator.ts</code></li>
+        <li>tool result normalizer：<code>frontend/src/src/lib/mcp-tool-output-adapter.ts</code></li>
+      </ul>
+
+      <h3>Prompt / Policy</h3>
+      <ul>
+        <li>prompt-store：<code>frontend/src/src/lib/prompt-store.ts</code></li>
+        <li>managed-prompt-seeds：<code>frontend/src/src/lib/managed-prompt-seeds.ts</code></li>
+        <li>prompt-runtime-policy：<code>frontend/src/src/lib/prompt-runtime-policy.ts</code></li>
+      </ul>
+    </div>
+
+    <div class="footer-nav">
+      <a class="pill" href="./index.html">← 返回总入口</a>
+      <a class="pill" href="./2-source-of-truth-and-diagrams.html">下一页 →</a>
+    </div>
+  </div>
+</body>
+</html>
+

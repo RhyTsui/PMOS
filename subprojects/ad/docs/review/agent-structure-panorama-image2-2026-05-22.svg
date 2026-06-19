@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160" role="img" aria-labelledby="title desc">
+  <title id="title">小乔智投当前智能体结构全景图 image2 高清版</title>
+  <desc id="desc">展示小乔统一入口、核心业务流智能体、专项能力智能体、Agent 运行时协议、P0 Skill、MCP 与知识来源之间的关系。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7fafc"/>
+      <stop offset="52%" stop-color="#eef5ff"/>
+      <stop offset="100%" stop-color="#f8fbf7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#0b1f3a" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .title{font:700 72px "Microsoft YaHei",Arial,sans-serif;fill:#10233f}
+      .subtitle{font:400 30px "Microsoft YaHei",Arial,sans-serif;fill:#5f7189}
+      .section{font:700 34px "Microsoft YaHei",Arial,sans-serif;fill:#10233f}
+      .label{font:700 28px "Microsoft YaHei",Arial,sans-serif;fill:#10233f}
+      .small{font:400 22px "Microsoft YaHei",Arial,sans-serif;fill:#5f7189}
+      .tiny{font:400 19px "Microsoft YaHei",Arial,sans-serif;fill:#6b7c93}
+      .chip{font:700 19px "Microsoft YaHei",Arial,sans-serif;fill:#fff}
+      .card{fill:#fff;stroke:#dfe9f5;stroke-width:2;filter:url(#shadow)}
+      .soft{fill:#f7fbff;stroke:#d9e6f5;stroke-width:2}
+      .line{fill:none;stroke:#b8c7d9;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+      .line2{fill:none;stroke:#8aa4c3;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+    <marker id="arrow" markerWidth="16" markerHeight="16" refX="12" refY="8" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L14,8 L2,14 Z" fill="#8aa4c3"/>
+    </marker>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+
+  <text x="160" y="145" class="title">小乔智投当前智能体结构全景图</text>
+  <text x="160" y="205" class="subtitle">来源：ad/frontend/src/src/lib/constants.ts、AgentDock.tsx、types/index.ts、智投 Chat Agent 运行时协议 MVP。生成日期：2026-05-22。</text>
+
+  <rect x="160" y="280" width="760" height="1500" rx="26" class="card"/>
+  <text x="220" y="355" class="section">统一入口</text>
+  <rect x="250" y="455" width="580" height="250" rx="28" fill="#10233f"/>
+  <circle cx="340" cy="580" r="54" fill="#00d9ff"/>
+  <text x="430" y="545" class="label" fill="#fff">小乔 hub</text>
+  <text x="430" y="590" class="small" fill="#bcd1e8">统一对话入口</text>
+  <text x="430" y="635" class="small" fill="#bcd1e8">负责接待、意图识别、路由与追问</text>
+  <rect x="250" y="790" width="580" height="170" rx="20" class="soft"/>
+  <text x="295" y="850" class="label">路由判断</text>
+  <text x="295" y="895" class="small">业务 / 非业务、广告域、轻 / 重工作流</text>
+  <text x="295" y="935" class="small">输出 intent.detected 与 context.prepared</text>
+  <rect x="250" y="1035" width="580" height="230" rx="20" class="soft"/>
+  <text x="295" y="1095" class="label">共享工作对象</text>
+  <text x="295" y="1140" class="small">Conversation、Task、TaskContext</text>
+  <text x="295" y="1180" class="small">Evidence、Attachment、WorkflowResult</text>
+  <text x="295" y="1220" class="small">CaseRecord 与历史沉淀</text>
+  <rect x="250" y="1340" width="580" height="250" rx="20" class="soft"/>
+  <text x="295" y="1400" class="label">边界</text>
+  <text x="295" y="1445" class="small">不在证据不足时强行定责</text>
+  <text x="295" y="1485" class="small">高风险动作需要确认与审计</text>
+  <text x="295" y="1525" class="small">能力缺失时显式返回缺失项</text>
+
+  <rect x="1040" y="280" width="1320" height="1500" rx="26" class="card"/>
+  <text x="1100" y="355" class="section">核心业务流智能体</text>
+  <text x="1100" y="405" class="small">AgentDock 当前前 6 个：hub、help、report、diagnosis、demand、debugging。</text>
+
+  <g transform="translate(1110 500)">
+    <rect width="560" height="190" rx="22" fill="#ffffff" stroke="#b9def6" stroke-width="3"/>
+    <circle cx="70" cy="95" r="42" fill="#00d9ff"/>
+    <text x="140" y="78" class="label">使用帮助 help</text>
+    <text x="140" y="122" class="small">指标解释、系统路径、规则说明</text>
+    <text x="140" y="158" class="tiny">主要工具：knowledge_search / web_search</text>
+  </g>
+  <g transform="translate(1740 500)">
+    <rect width="560" height="190" rx="22" fill="#ffffff" stroke="#a8c8ff" stroke-width="3"/>
+    <circle cx="70" cy="95" r="42" fill="#175cd3"/>
+    <text x="140" y="78" class="label">问数分析 report</text>
+    <text x="140" y="122" class="small">报表取数、趋势图、数据检查</text>
+    <text x="140" y="158" class="tiny">关联 Skill：report_composer_skill</text>
+  </g>
+  <g transform="translate(1110 770)">
+    <rect width="560" height="190" rx="22" fill="#ffffff" stroke="#f4a8bb" stroke-width="3"/>
+    <circle cx="70" cy="95" r="42" fill="#ff3366"/>
+    <text x="140" y="78" class="label">问题排查 diagnosis</text>
+    <text x="140" y="122" class="small">证据链、结论、定位建议</text>
+    <text x="140" y="158" class="tiny">关联 Skill：spend / postback diagnosis</text>
+  </g>
+  <g transform="translate(1740 770)">
+    <rect width="560" height="190" rx="22" fill="#ffffff" stroke="#c7b5ff" stroke-width="3"/>
+    <circle cx="70" cy="95" r="42" fill="#7b61ff"/>
+    <text x="140" y="78" class="label">需求沟通 demand</text>
+    <text x="140" y="122" class="small">回传接入、事件映射、配置收口</text>
+    <text x="140" y="158" class="tiny">结构化追问与需求字段补齐</text>
+  </g>
+  <g transform="translate(1110 1040)">
+    <rect width="560" height="190" rx="22" fill="#ffffff" stroke="#ffd274" stroke-width="3"/>
+    <circle cx="70" cy="95" r="42" fill="#ffb800"/>
+    <text x="140" y="78" class="label">广告联调 debugging</text>
+    <text x="140" y="122" class="small">准备项检查、执行状态、日志</text>
+    <text x="140" y="158" class="tiny">关联 Skill：oceanengine_debug_skill</text>
+  </g>
+  <g transform="translate(1740 1040)">
+    <rect width="560" height="190" rx="22" fill="#ffffff" stroke="#c9d6e6" stroke-width="3"/>
+    <circle cx="70" cy="95" r="42" fill="#10233f"/>
+    <text x="140" y="78" class="label">小乔 hub</text>
+    <text x="140" y="122" class="small">接待、路由、汇总、降级</text>
+    <text x="140" y="158" class="tiny">当前默认入口，默认 Agent 为 help</text>
+  </g>
+
+  <rect x="1100" y="1350" width="1200" height="260" rx="22" fill="#f7fbff" stroke="#d9e6f5" stroke-width="2"/>
+  <text x="1150" y="1420" class="label">核心职责映射</text>
+  <text x="1150" y="1470" class="small">接待、判断、解释、排查、需求收口、联调推进、记录沉淀。</text>
+  <text x="1150" y="1510" class="small">这些职责由 hub 统一承接，再按意图路由给业务智能体与 Skill。</text>
+  <text x="1150" y="1550" class="small">当前闭环状态：产品机制已成形，真实能力仍依赖 Skill 合同、MCP 接入与评测补齐。</text>
+
+  <rect x="2480" y="280" width="1200" height="1500" rx="26" class="card"/>
+  <text x="2540" y="355" class="section">专项能力与运行时支撑</text>
+  <g transform="translate(2540 465)">
+    <rect width="500" height="170" rx="22" fill="#ffffff" stroke="#9dc5ff" stroke-width="3"/>
+    <circle cx="62" cy="85" r="38" fill="#2563eb"/>
+    <text x="125" y="70" class="label">验交付包 delivery</text>
+    <text x="125" y="112" class="small">可投放包、阻塞项、交付证据</text>
+  </g>
+  <g transform="translate(3120 465)">
+    <rect width="500" height="170" rx="22" fill="#ffffff" stroke="#95efc2" stroke-width="3"/>
+    <circle cx="62" cy="85" r="38" fill="#00aa66"/>
+    <text x="125" y="70" class="label">监控告警 monitoring</text>
+    <text x="125" y="112" class="small">运行状态、告警与趋势</text>
+  </g>
+  <g transform="translate(2540 705)">
+    <rect width="500" height="170" rx="22" fill="#ffffff" stroke="#ffc2d7" stroke-width="3"/>
+    <circle cx="62" cy="85" r="38" fill="#ff6b9d"/>
+    <text x="125" y="70" class="label">素材分析 material</text>
+    <text x="125" y="112" class="small">创意脚本与素材匹配</text>
+  </g>
+  <g transform="translate(3120 705)">
+    <rect width="500" height="170" rx="22" fill="#ffffff" stroke="#ffd274" stroke-width="3"/>
+    <circle cx="62" cy="85" r="38" fill="#ffb800"/>
+    <text x="125" y="70" class="label">广告预测 prediction</text>
+    <text x="125" y="112" class="small">ROI 预测与回本估算</text>
+  </g>
+
+  <rect x="2540" y="1010" width="1080" height="290" rx="22" fill="#f7fbff" stroke="#d9e6f5" stroke-width="2"/>
+  <text x="2590" y="1078" class="label">AgentProcessEvent 运行时真源</text>
+  <text x="2590" y="1125" class="small">intent.detected → context.prepared → clarify.requested</text>
+  <text x="2590" y="1165" class="small">skill.selected / skill.started / skill.step / skill.finished</text>
+  <text x="2590" y="1205" class="small">mcp.tool_call / knowledge.search / source.attached / answer.final</text>
+  <text x="2590" y="1245" class="small">前端渲染事件，后端产出事件，评测按事件链校验闭环。</text>
+
+  <rect x="2540" y="1380" width="1080" height="260" rx="22" fill="#fff" stroke="#d9e6f5" stroke-width="2"/>
+  <text x="2590" y="1445" class="label">P0 Skill 合同</text>
+  <text x="2590" y="1495" class="small">metric_explainer、spend_diagnosis、postback_discrepancy</text>
+  <text x="2590" y="1535" class="small">report_composer、monitor_alert、oceanengine_debug</text>
+  <text x="2590" y="1575" class="small">每个 Skill 需定义输入、追问、步骤、MCP / Tool、输出、来源与评测用例。</text>
+
+  <path class="line2" d="M830 580 C980 580 980 600 1110 600" marker-end="url(#arrow)"/>
+  <path class="line2" d="M830 580 C980 700 980 865 1110 865" marker-end="url(#arrow)"/>
+  <path class="line2" d="M830 580 C980 790 980 1135 1110 1135" marker-end="url(#arrow)"/>
+  <path class="line2" d="M2300 600 C2420 600 2420 550 2540 550" marker-end="url(#arrow)"/>
+  <path class="line2" d="M2300 865 C2420 920 2420 1110 2540 1110" marker-end="url(#arrow)"/>
+  <path class="line2" d="M2300 1135 C2420 1250 2420 1490 2540 1490" marker-end="url(#arrow)"/>
+
+  <rect x="160" y="1870" width="3520" height="160" rx="24" fill="#10233f"/>
+  <text x="220" y="1940" class="label" fill="#fff">当前结构判断</text>
+  <text x="220" y="1990" class="small" fill="#c7d7eb">智能体清单已在前端配置中明确，运行时事件协议已定义；要达到真实闭环，还需要持续补齐 P0 Skill 合同、MCP 真实调用、来源披露与连弩评测用例。</text>
+</svg>

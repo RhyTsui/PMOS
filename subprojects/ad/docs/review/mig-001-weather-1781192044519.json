@@ -1,0 +1,127 @@
+{
+  "caseId": "MIG-001",
+  "scenario": "天气",
+  "input": "南京本周日天气如何",
+  "expected": "联网搜索",
+  "runId": "mig-001-weather-1781192044519",
+  "conversationId": "conv-1781192048072",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-001-weather-1781192044519.png",
+  "api": {
+    "conversationStatus": 200,
+    "messagesStatus": 200,
+    "title": "南京本周日天气",
+    "userMessageId": "msg-1781192056808-7knyis",
+    "assistantMessageId": "msg-1781192074646-ieen2w",
+    "traceId": "zt-chat-1781192062565-y4lp4z",
+    "hasResponseContract": true,
+    "hasSemanticResult": true,
+    "hasBusinessSummary": false,
+    "hasAnswerMarkdown": true,
+    "sourceCount": 1,
+    "toolCallCount": 2,
+    "webEventCount": 2,
+    "processEventCount": 4,
+    "pendingProcessEventCount": 0
+  },
+  "page": {
+    "runtimeCardVisible": true,
+    "replayRuntimeVisible": true,
+    "traceMenuItemVisible": false,
+    "promptButtonVisible": true,
+    "runtimeToggleCloseHealthy": false,
+    "rightPanelWidth": 0,
+    "disclosurePreview": "运行过程\n意图路由\n进入help链路。\n查询公开来源\n1.3s\nJSON\n南京本周日天气如何 - 公开天气预报\n整理公开来源\nJSON\n运行日志\n提示词",
+    "replayPreview": "南京本周日天气\n请选择项目\n\n南京本周日天气如何\n\n已处理 4 步 · 用时 1.3s\n当前：22°C，体感 24°C，Smoky haze，湿度 83%。\n预报：2026-06-11：22-35°C，Sunny；\n2026-06-12：23-35°C，Sunny；\n2026-06-13：22-28°C，Sunny\n大模型检测中\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。"
+  },
+  "network": {
+    "failedRequests": [],
+    "badResponses": [],
+    "unexpectedBadResponses": [],
+    "chatResponseCount": 1
+  },
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: ready, selectedProject: Object, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected",
+      "location": {
+        "url": "http://10.236.14.27:8002/_next/static/chunks/262dd_next_dist_dbb8d7b1._.js",
+        "lineNumber": 2297,
+        "columnNumber": 27
+      }
+    }
+  ],
+  "mojibakeFindings": [],
+  "acceptance": {
+    "pageHealthy": true,
+    "apiReadbackHealthy": true,
+    "replayHealthy": true,
+    "titleHealthy": true,
+    "networkHealthy": true,
+    "consoleHealthy": true,
+    "noMojibake": true,
+    "disclosureHealthy": true,
+    "answerLayoutHealthy": true,
+    "traceButtonHealthy": false,
+    "promptButtonHealthy": true,
+    "runtimeToggleCloseHealthy": false,
+    "rightPanelWidthHealthy": false
+  },
+  "failureReason": "traceButtonHealthy, runtimeToggleCloseHealthy, rightPanelWidthHealthy",
+  "fixPoints": [],
+  "riskNotes": [],
+  "passed": false
+}

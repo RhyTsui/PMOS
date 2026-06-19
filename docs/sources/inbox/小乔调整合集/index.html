@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小乔调整合集</title>
+  <style>
+    :root {
+      --page: #f4f8fd;
+      --ink: #102033;
+      --muted: #627185;
+      --line: rgba(31, 77, 126, 0.14);
+      --panel: rgba(255, 255, 255, 0.78);
+      --blue: #0b78ff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(72, 169, 255, 0.16), transparent 32%),
+        radial-gradient(circle at 86% 80%, rgba(38, 113, 255, 0.1), transparent 28%),
+        linear-gradient(145deg, #fbfdff, var(--page));
+    }
+
+    main {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 34px 0 44px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: 0;
+    }
+
+    .summary {
+      max-width: 520px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #0a63d8;
+      background: rgba(255, 255, 255, 0.74);
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 42px rgba(26, 82, 146, 0.1);
+      backdrop-filter: blur(18px);
+    }
+
+    .stage {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.94), transparent 26%),
+        radial-gradient(circle at 60% 72%, rgba(58, 151, 255, 0.14), transparent 36%),
+        linear-gradient(150deg, #f8fbff, #eaf4ff 58%, #ffffff);
+    }
+
+    .stage iframe {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 820px;
+      height: 820px;
+      border: 0;
+      background: transparent;
+      transform-origin: top left;
+    }
+
+    .content {
+      padding: 14px 14px 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .scenario {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .tag {
+      display: inline-flex;
+      margin-top: 12px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(11, 120, 255, 0.09);
+      color: #075fc8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      main {
+        width: min(100% - 24px, 520px);
+        padding-top: 22px;
+      }
+
+      header {
+        display: block;
+      }
+
+      .badge {
+        display: inline-flex;
+        margin-top: 14px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>小乔调整合集</h1>
+        <p class="summary">六种已确认方向放在一起，方便比较状态、语气和适合出现的产品场景。</p>
+      </div>
+      <div class="badge">6 个当前形态</div>
+    </header>
+
+    <section class="grid" aria-label="小乔形态">
+      <article class="card">
+        <div class="stage">
+          <iframe title="基础状态小乔" src="variants/基础版本/index.html"></iframe>
+        </div>
+        <div class="content">
+          <h2>基础状态</h2>
+          <p class="scenario">适合默认空闲、普通陪伴、页面常驻入口、没有明确任务状态时使用。</p>
+          <span class="tag">默认 / 常驻</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="stage">
+          <iframe title="打瞌睡小乔" src="variants/打瞌睡小乔/index.html"></iframe>
+        </div>
+        <div class="content">
+          <h2>打瞌睡</h2>
+          <p class="scenario">适合长时间无操作、用户离开一会儿、低活跃等待、深夜模式里的轻松反馈。</p>
+          <span class="tag">空闲 / 低活跃</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="stage">
+          <iframe title="等待气泡小乔" src="variants/等待气泡小乔/index.html"></iframe>
+        </div>
+        <div class="content">
+          <h2>等待气泡</h2>
+          <p class="scenario">适合请求处理中、加载中、正在思考、排队等待、模型生成结果前的状态。</p>
+          <span class="tag">加载 / 思考中</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="stage">
+          <iframe title="收到全部结果小乔" src="variants/收到全部结果小乔/index.html"></iframe>
+        </div>
+        <div class="content">
+          <h2>收到全部结果</h2>
+          <p class="scenario">适合任务完成、全部结果返回、同步成功、生成完成、可查看最终内容时使用。</p>
+          <span class="tag">完成 / 惊喜</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="stage">
+          <iframe title="认真分析小乔" src="variants/认真分析小乔/index.html"></iframe>
+        </div>
+        <div class="content">
+          <h2>认真分析</h2>
+          <p class="scenario">适合检索资料、推理分析、读取文件、分析数据、处理复杂问题时使用。</p>
+          <span class="tag">检索 / 分析</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="stage">
+          <iframe title="遇到错误小乔" src="variants/遇到错误小乔/index.html"></iframe>
+        </div>
+        <div class="content">
+          <h2>遇到错误</h2>
+          <p class="scenario">适合失败、异常、结果不可用、需要用户重试或重新确认输入时使用。</p>
+          <span class="tag">错误 / 重试</span>
+        </div>
+      </article>
+    </section>
+
+  </main>
+  <script>
+    const previewSize = 820;
+
+    function scalePreviews() {
+      document.querySelectorAll(".stage").forEach((stage) => {
+        const frame = stage.querySelector("iframe");
+        const scale = stage.clientWidth / previewSize;
+        frame.style.transform = `scale(${scale})`;
+      });
+    }
+
+    window.addEventListener("resize", scalePreviews);
+    window.addEventListener("load", scalePreviews);
+    scalePreviews();
+  </script>
+</body>
+</html>

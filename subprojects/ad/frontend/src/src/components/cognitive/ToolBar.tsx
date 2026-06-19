@@ -67,7 +67,7 @@ export function ToolBar({ activeAgent, calledTools = [] }: ToolBarProps) {
                 <span style={{ color: isCalled ? c.accent : c.textSubtle, display: 'flex' }}>
                   <IconComponent className="w-3 h-3" />
                 </span>
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{tool.name}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{tool.name}</span>
                 {isCalled && (
                   <span style={{
                     marginLeft: 2, width: 6, height: 6,

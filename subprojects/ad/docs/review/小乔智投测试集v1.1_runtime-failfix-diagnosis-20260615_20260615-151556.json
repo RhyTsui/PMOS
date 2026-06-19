@@ -1,0 +1,33 @@
+{
+  "batch": "runtime-failfix-diagnosis-20260615",
+  "stamp": "20260615-151556",
+  "summary": {
+    "PASS": 1
+  },
+  "total": 1,
+  "completed": 1,
+  "offset": 104,
+  "limit": 1,
+  "caseTimeoutMs": 0,
+  "results": [
+    {
+      "rowIndex": 106,
+      "id": "MIG-FBK-017",
+      "scenario": "查数转诊断",
+      "prompt": "为什么三国杀移动版昨天ROI突然下降？",
+      "keyPoint": "1、识别为异常诊断，不只返回 ROI 数字。\r\n2、查询 ROI、消耗、激活、注册、付费等关键指标并做对比。\r\n3、按媒体、应用类型、团队等维度定位波动来源。\r\n4、输出可能原因、证据和下一步排查动作。",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 169,
+      "answer": "需要登录后才能查询内部数据并继续诊断。请在当前浏览器完成登录后重试，我会按你的项目权限查看指标变化、定位可能原因。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    }
+  ]
+}

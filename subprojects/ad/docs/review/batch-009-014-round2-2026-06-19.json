@@ -1,0 +1,65 @@
+{
+  "timestamp": "2026-06-19T05:54:10.278Z",
+  "tests": {
+    "MIG-009": {
+      "input": "看下近 7 天的日报数据",
+      "keywords": [
+        "日报",
+        "数据",
+        "7 天"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-010": {
+      "input": "巨量 iOS 创新的投放效果，带自然量",
+      "keywords": [
+        "巨量",
+        "iOS",
+        "投放",
+        "自然量"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-011": {
+      "input": "查一下直播包的数据",
+      "keywords": [
+        "直播",
+        "数据"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-012": {
+      "input": "三国杀小游戏 鸿蒙端的数据",
+      "keywords": [
+        "三国杀",
+        "鸿蒙",
+        "数据"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-013": {
+      "input": "查询近 7 日数据",
+      "keywords": [
+        "7 日",
+        "数据",
+        "查询"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-014": {
+      "input": "查询近 30 日趋势、分日",
+      "keywords": [
+        "30 日",
+        "趋势",
+        "分日"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    }
+  }
+}

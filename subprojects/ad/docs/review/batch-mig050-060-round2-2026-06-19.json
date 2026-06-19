@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-06-19T10:31:48.435Z",
+  "tests": {
+    "MIG-050": {
+      "keywords": [
+        "激活",
+        "留存",
+        "IOS",
+        "巨量"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-051": {
+      "keywords": [
+        "激活",
+        "留存",
+        "自然量",
+        "IOS"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-052": {
+      "keywords": [
+        "激活",
+        "周",
+        "巨量"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-053": {
+      "keywords": [
+        "激活",
+        "留存",
+        "1 月"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-054": {
+      "keywords": [
+        "激活",
+        "留存",
+        "周"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-055": {
+      "keywords": [
+        "激活",
+        "月",
+        "12 月"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-056": {
+      "keywords": [
+        "激活",
+        "注册",
+        "消耗",
+        "付费"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-057": {
+      "keywords": [
+        "激活",
+        "注册",
+        "消耗",
+        "小时"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-059": {
+      "keywords": [
+        "2 月",
+        "数据"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-060": {
+      "keywords": [
+        "2027",
+        "未来",
+        "数据"
+      ],
+      "hasAnswer": true
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "contractType": "semantic-result",
+  "version": "1.0.0",
+  "resultId": "golden-ai-trust-001",
+  "screenType": "analysis-result",
+  "title": "预算调整建议",
+  "createdAt": "2026-05-28T00:00:00.000Z",
+  "producer": { "kind": "agent", "name": "budget-analysis-agent", "version": "1.0.0" },
+  "regions": [
+    {
+      "id": "budget-recommendation",
+      "type": "insight",
+      "componentBinding": "decision-card",
+      "title": "建议降低低效 Campaign 预算",
+      "data": {
+        "recommendation": "将 Campaign B 的预算下调 15%，并观察 48 小时。",
+        "riskLevel": "medium",
+        "confidence": { "level": "medium", "score": 0.74, "basis": "mixed" },
+        "reasoningSummary": "Campaign B 的 CPA 连续三天高于账户均值，且转化量没有同步增长。"
+      },
+      "evidenceRefs": ["ev-cpa-above-average", "ev-conversion-flat"],
+      "sourceRefs": ["src-campaign-performance"],
+      "actions": [
+        {
+          "id": "approve-budget-change",
+          "type": "approve",
+          "intent": "risky",
+          "label": "确认调整预算",
+          "confirm": {
+            "required": true,
+            "title": "确认预算调整",
+            "description": "该操作会影响 Campaign B 的投放预算。",
+            "riskLevel": "medium",
+            "consequences": ["预算下调 15%", "可能影响曝光量"]
+          },
+          "audit": { "required": true, "eventName": "budget_change_approved", "riskCategory": "budget" },
+          "evidenceRefs": ["ev-cpa-above-average", "ev-conversion-flat"],
+          "sourceRefs": ["src-campaign-performance"]
+        }
+      ]
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "ev-cpa-above-average",
+      "type": "metric-value",
+      "title": "CPA 高于均值",
+      "summary": "Campaign B CPA 连续三天高于账户均值。",
+      "sourceRefIds": ["src-campaign-performance"],
+      "confidence": { "level": "medium", "basis": "calculation" },
+      "freshness": { "status": "fresh", "asOf": "2026-05-27T23:59:59.000Z" }
+    },
+    {
+      "id": "ev-conversion-flat",
+      "type": "chart-observation",
+      "title": "转化量持平",
+      "summary": "预算消耗增长但转化量未同步增长。",
+      "sourceRefIds": ["src-campaign-performance"],
+      "confidence": { "level": "medium", "basis": "source" },
+      "freshness": { "status": "fresh", "asOf": "2026-05-27T23:59:59.000Z" }
+    }
+  ],
+  "sourceRefs": [
+    {
+      "id": "src-campaign-performance",
+      "type": "warehouse-query",
+      "title": "Campaign performance query",
+      "retrievedAt": "2026-05-28T00:00:00.000Z",
+      "reliability": { "level": "trusted" }
+    }
+  ]
+}

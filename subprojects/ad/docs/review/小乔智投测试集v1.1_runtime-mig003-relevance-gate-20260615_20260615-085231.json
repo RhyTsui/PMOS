@@ -1,0 +1,97 @@
+{
+  "batch": "runtime-mig003-relevance-gate-20260615",
+  "stamp": "20260615-085231",
+  "summary": {
+    "REVIEW": 1
+  },
+  "total": 1,
+  "completed": 1,
+  "offset": 3,
+  "limit": 1,
+  "caseTimeoutMs": 180000,
+  "results": [
+    {
+      "rowIndex": 5,
+      "id": "MIG-003",
+      "scenario": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11629,
+      "answer": "- 2025年8月8日&ensp;·&ensp;二、SSL与TLS加密协议的演进 HTTPS的安全性依赖于SSL（Secure Sockets Layer）和TLS（Transport Layer Security）协议。\n  - 这两者的关系常被混淆，以下是一些关键点： 1. SSL安全协 …\n- 2025年1月20日&ensp;·&ensp;HTTPS目前是网站标配，否则浏览器会提示链接不安全，同HTTP相比比，HTTPS提供安全通信，具体原因是多了个“S”层，或者说SSL层 [Secure Sockets Layer]，现在一般都是TLS …",
+      "sourceCount": 2,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "source.attached",
+        "source.attached",
+        "route_observation"
+      ],
+      "runtimeStatus": "success",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "external_service",
+        "composer_name": "public_web_grounded_answer",
+        "provider": "configured_web_search",
+        "summary": "已检测到明显公共网页检索意图。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+          "warnings": [],
+          "reasonCode": "public_web.need_detected",
+          "reasonContext": {
+            "topic": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "not_relevant",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "shallow",
+            "source_policy": "stable_reference",
+            "query_strategy": "background_reference",
+            "redaction_policy": "none",
+            "reasons": [
+              "generic_public_evidence_needed"
+            ],
+            "queries": [
+              {
+                "query": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+                "purpose": "primary"
+              },
+              {
+                "query": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体 reference",
+                "purpose": "background"
+              }
+            ]
+          },
+          "model_fallback_used": false
+        }
+      }
+    }
+  ]
+}

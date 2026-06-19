@@ -1,0 +1,34 @@
+diff --git a/dist/ai/ai.js b/dist/ai/ai.js
+index df9c62351289a1ad0ed3509a412dc3fb19fe24bb..54aa9d18bc2fb7bcea145c9fe1da11cce7af6b60 100644
+--- a/dist/ai/ai.js
++++ b/dist/ai/ai.js
+@@ -222,7 +222,8 @@ export class AI {
+         }
+         try {
+             // Simple HTTP request test
+-            const response = await fetch('https://api.openai.com/v1/models', {
++            const testBaseEndpoint = (this.config?.endpoint || 'https://api.openai.com/v1').replace(/\/$/, '');
++            const response = await fetch(`${testBaseEndpoint}/models`, {
+                 headers: {
+                     'Authorization': `Bearer ${this.config.apiKey}`,
+                     'Content-Type': 'application/json',
+@@ -649,7 +650,8 @@ export class AI {
+      * Call OpenAI API
+      */
+     async callOpenAI(query, apiKey, model) {
+-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
++        const baseEndpoint = (this.config?.endpoint || 'https://api.openai.com/v1').replace(/\/$/, '');
++        const response = await fetch(`${baseEndpoint}/chat/completions`, {
+             method: 'POST',
+             headers: {
+                 'Authorization': `Bearer ${apiKey}`,
+@@ -1122,7 +1124,8 @@ export class AI {
+             requestBody.functions = options.functions;
+             requestBody.function_call = options.functionCall || 'auto';
+         }
+-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
++        const baseEndpoint = (this.config?.endpoint || 'https://api.openai.com/v1').replace(/\/$/, '');
++        const response = await fetch(`${baseEndpoint}/chat/completions`, {
+             method: 'POST',
+             headers: {
+                 'Authorization': `Bearer ${apiKey}`,

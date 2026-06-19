@@ -98,7 +98,7 @@ const STARTER_LANES = [
   '需求整理',
   '指标确认',
   '模板推荐',
-  '草稿生成',
+  '模板生成',
   '人工复核',
   '导出前检查',
 ];
@@ -160,7 +160,7 @@ function InlinePanel({
 
   return (
     <div style={style}>
-      <div style={{ marginBottom: 8, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
+      <div style={{ marginBottom: 8, fontSize: 11, letterSpacing: 0, textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
         {title}
       </div>
       {children}
@@ -183,7 +183,7 @@ function buildProgress(analysis: ReportRequirementAnalysis | null, draft: Report
       detail: analysis ? (analysis.unclearMetrics.length || analysis.unimplementedMetrics.length ? '仍有待确认项' : '可直接继续生成') : '等待识别',
     },
     {
-      title: '草稿生成',
+      title: '模板生成',
       done: Boolean(draft),
       detail: draft ? draft.templateName : '尚未生成',
     },
@@ -210,7 +210,7 @@ function getIntakeModeText(mode?: ReportRequirementAnalysis['intakeMode']) {
 
 export default function ReportsPage() {
   useEffect(() => {
-    document.title = '智投chat-报表';
+    document.title = '小乔智投-报表';
   }, []);
 
   const [templates, setTemplates] = useState<ReportTemplate[]>([]);
@@ -219,7 +219,7 @@ export default function ReportsPage() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: '这里是自动报表服务。你可以直接描述报表需求，也可以上传截图或文件。我会在当前会话里完成需求整理、指标确认、模板推荐、草稿生成、人工复核提醒，以及导出前检查。',
+      content: '这里是自动报表服务。你可以直接描述报表需求，也可以上传截图或文件。我会在当前会话里完成需求整理、指标确认、模板推荐、模板生成、人工复核提醒，以及导出前检查。',
     },
   ]);
   const [analysis, setAnalysis] = useState<ReportRequirementAnalysis | null>(null);
@@ -318,7 +318,7 @@ export default function ReportsPage() {
       setPageMessage('当前还没有可生成的报表需求，请先在对话里确认模板和指标。');
       return;
     }
-    await submitRequirement(`请基于当前需求生成 ${analysis.suggestedTemplateName || '报表'} 草稿，并补充人工复核说明。`);
+    await submitRequirement(`请基于当前需求生成 ${analysis.suggestedTemplateName || '报表'} 模板结果，并补充人工复核说明。`);
   };
 
   const handleReview = async () => {
@@ -330,7 +330,7 @@ export default function ReportsPage() {
       });
       setDrafts((prev) => prev.map((item) => (item.id === next.id ? next : item)));
       setSelectedDraftId(next.id);
-      setPageMessage('报表草稿已标记为已复核，可以继续导出。');
+      setPageMessage('报告模板已标记为已复核，可以继续导出。');
     } catch {
       setPageMessage('更新复核状态失败。');
     }
@@ -414,7 +414,7 @@ export default function ReportsPage() {
                     </Tag>
                   </div>
                   <Paragraph style={{ margin: '6px 0 0', color: '#5f6f86', maxWidth: 780 }}>
-                    围绕一条会话主线完成需求整理、指标确认、模板推荐、草稿生成和导出前检查，不回退成后台卡片墙。
+                    围绕一条会话主线完成需求整理、指标确认、模板推荐、模板生成和导出前检查，不回退成后台卡片墙。
                   </Paragraph>
                 </div>
               </div>
@@ -435,7 +435,7 @@ export default function ReportsPage() {
 
           {pageMessage && (
             <div style={{ padding: 14, borderBottom: '1px solid rgba(16,35,63,0.08)' }}>
-              <Alert type="info" showIcon message={pageMessage} style={{ borderRadius: 16 }} />
+              <Alert type="info" showIcon title={pageMessage} style={{ borderRadius: 16 }} />
             </div>
           )}
 
@@ -515,13 +515,13 @@ export default function ReportsPage() {
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: '#10233f' }}>会话主线</div>
                     <div style={{ marginTop: 4, fontSize: 12, color: '#6b7c93' }}>
-                      需求整理、指标确认、草稿生成和复核动作都围绕当前对话推进。
+                      需求整理、指标确认、模板生成和复核动作都围绕当前对话推进。
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <Tag bordered={false} color="processing">{analysis?.suggestedTemplateName || '等待模板判断'}</Tag>
                     <Tag bordered={false} color={selectedDraft ? 'success' : 'default'}>
-                      {selectedDraft ? `草稿 ${getDraftStatusText(selectedDraft.status)}` : '还没有草稿'}
+                      {selectedDraft ? `模板 ${getDraftStatusText(selectedDraft.status)}` : '还没有模板'}
                     </Tag>
                     <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 999, border: '1px solid rgba(16,35,63,0.08)', background: '#fff', color: '#355070', fontSize: 12 }}>
                       <CalendarDays size={14} />
@@ -541,7 +541,7 @@ export default function ReportsPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(280px, 0.7fr)', gap: 12, marginBottom: 16 }}>
                       <InlinePanel title="先说你的报表目标" tone="accent">
                         <div style={{ fontSize: 14, lineHeight: 1.8, color: '#355070' }}>
-                          直接描述对象、时间范围、指标和用途即可，例如“按昨天经营总览模板，生成一版给早会复盘的报表草稿，重点看现金消耗、转化和 ROI”。
+                      直接描述对象、时间范围、指标和用途即可，例如“按昨天经营总览模板，生成一版给早会复盘的报告模板结果，重点看现金消耗、转化和 ROI”。
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
                           {STARTER_LANES.map((item) => (
@@ -618,7 +618,7 @@ export default function ReportsPage() {
                                   </InlinePanel>
                                   <InlinePanel title="下一步">
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13, color: '#355070' }}>
-                                      {(analysis.nextActions.length ? analysis.nextActions : ['确认指标范围', '生成草稿', '人工复核后导出']).slice(0, 3).map((nextAction) => (
+                                      {(analysis.nextActions.length ? analysis.nextActions : ['确认指标范围', '生成模板', '人工复核后导出']).slice(0, 3).map((nextAction) => (
                                         <div key={nextAction}>- {nextAction}</div>
                                       ))}
                                     </div>
@@ -641,7 +641,7 @@ export default function ReportsPage() {
                     onSubmit={() => void submitRequirement()}
                     submitType="enter"
                     loading={submitting}
-                    placeholder="输入报表需求，例如：按昨天经营总览模板，生成一版早会复盘草稿，重点看现金消耗、转化和 ROI。"
+                    placeholder="输入报表需求，例如：按昨天经营总览模板，生成一版早会复盘模板结果，重点看现金消耗、转化和 ROI。"
                     styles={{
                       content: {
                         backgroundColor: 'rgba(255,255,255,0.98)',
@@ -704,12 +704,12 @@ export default function ReportsPage() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       <Tag color="blue">模板：{analysis.suggestedTemplateName || '待确认'}</Tag>
                       <Tag color={analysis.shouldGenerateDraft ? 'success' : 'default'}>
-                        {analysis.shouldGenerateDraft ? '可直接生成草稿' : '建议先补充口径'}
+                        {analysis.shouldGenerateDraft ? '可直接生成模板' : '建议先补充口径'}
                       </Tag>
                     </div>
 
                     <div>
-                      <div style={{ marginBottom: 8, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
+                      <div style={{ marginBottom: 8, fontSize: 11, letterSpacing: 0, textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
                         已识别指标
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -749,7 +749,7 @@ export default function ReportsPage() {
                 )}
               </Section>
 
-              <Section title="当前草稿">
+              <Section title="当前模板">
                 {selectedDraft ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <InlinePanel title={selectedDraft.templateName}>
@@ -766,22 +766,22 @@ export default function ReportsPage() {
                     ))}
                   </div>
                 ) : (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={loading ? '加载中...' : '还没有可展示的草稿'} />
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={loading ? '加载中...' : '还没有可展示的模板'} />
                 )}
               </Section>
 
               <Section title="动作区">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <Button block type="primary" icon={<Sparkles size={16} />} onClick={handleGenerateDraft}>
-                    生成报表草稿
+                    生成报告模板
                   </Button>
                   <Button block icon={<CheckCircle2 size={16} />} onClick={handleReview} disabled={!selectedDraft}>
                     标记人工复核完成
                   </Button>
-                  <Button block icon={<Share2 size={16} />} onClick={() => void submitRequirement('请基于当前草稿生成共享链接，方便其他同事查看。')} disabled={!selectedDraft}>
+                  <Button block icon={<Share2 size={16} />} onClick={() => void submitRequirement('请基于当前模板生成共享链接，方便其他同事查看。')} disabled={!selectedDraft}>
                     生成共享链接
                   </Button>
-                  <Button block icon={<ImageUp size={16} />} onClick={() => void submitRequirement('请为当前草稿生成分享截图，并附上适合汇报的说明。')} disabled={!selectedDraft}>
+                  <Button block icon={<ImageUp size={16} />} onClick={() => void submitRequirement('请为当前模板生成分享截图，并附上适合汇报的说明。')} disabled={!selectedDraft}>
                     生成截图说明
                   </Button>
                   <Button block icon={<Link2 size={16} />} onClick={handleExport} disabled={!selectedDraft}>
@@ -793,7 +793,7 @@ export default function ReportsPage() {
               <Section title="交付状态">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
-                    <div style={{ marginBottom: 8, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
+                    <div style={{ marginBottom: 8, fontSize: 11, letterSpacing: 0, textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
                       可用指标
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -802,16 +802,16 @@ export default function ReportsPage() {
                   </div>
 
                   {shareLink && (
-                    <Alert type="success" showIcon message="共享链接已生成" description={shareLink} style={{ borderRadius: 14 }} />
+                    <Alert type="success" showIcon title="共享链接已生成" description={shareLink} style={{ borderRadius: 14 }} />
                   )}
                   {screenshotHint && (
-                    <Alert type="info" showIcon message="截图说明" description={screenshotHint} style={{ borderRadius: 14 }} />
+                    <Alert type="info" showIcon title="截图说明" description={screenshotHint} style={{ borderRadius: 14 }} />
                   )}
 
                   {drafts.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
-                        最近草稿
+                      <div style={{ fontSize: 11, letterSpacing: 0, textTransform: 'uppercase', color: '#5f6f86', fontWeight: 600 }}>
+                        最近模板
                       </div>
                       {drafts.slice(0, 4).map((draft) => (
                         <button

@@ -1,0 +1,55 @@
+{
+  "testId": "MIG-001",
+  "round": 2,
+  "date": "2026-06-19",
+  "scenario": "天气",
+  "input": "南京本周日天气如何",
+  "expectedOutcome": "联网搜索获取天气数据",
+  "capabilityDomains": ["Chat Runtime", "LLM 意图理解", "联网搜索", "Public Web Provider", "SSE 流式渲染"],
+  "round1Failure": "模型回答说没有联网能力，未触发搜索工具",
+  "acceptanceResults": {
+    "pageLoad": { "status": "PASS", "note": "首页正常加载，新对话启动成功" },
+    "instantUserMessage": { "status": "PASS", "note": "发送后用户消息立即出现在页面上" },
+    "aiResponse": {
+      "status": "PASS",
+      "note": "模型成功调用联网搜索，返回结构化天气信息。用时 10s，3 步处理。"
+    },
+    "searchInvocation": {
+      "status": "PASS",
+      "note": "模型调用了搜索工具，获取中央气象署数据。不再返回'没有联网能力'。第一轮 bug 已修复。"
+    },
+    "responseContent": {
+      "status": "PASS",
+      "weatherKeywords": ["南京", "天气", "温度", "度", "雨", "周日", "星期日", "风力"],
+      "conclusion": "南京本周日（6月21日）天气为雨天",
+      "source": "中央气象署（中国大陆南京天气）",
+      "uncertainty": "多个主要天气网站（百度天气、中国天气网、中国气象局）抓取失败，无法多源交叉验证",
+      "structure": "包含结论、依据摘要、关键来源、不确定性说明"
+    },
+    "noSearchCapabilityPhrases": {
+      "status": "PASS",
+      "note": "响应中未出现'没有联网'、'无法搜索'等否定短语"
+    },
+    "apiResponse": {
+      "status": "PASS",
+      "note": "POST /api/chat 正常返回，2 次 API 调用（新建对话 + 发送消息）"
+    },
+    "refreshReplay": { "status": "PASS", "note": "刷新后用户消息+AI 天气响应+天气关键词均正确保留" },
+    "titleGeneration": { "status": "PASS", "note": "会话标题自动生成'南京本周日天气'，准确反映用户意图" },
+    "consoleErrors": { "status": "WARN", "note": "1 个 console error（非致命，未影响功能）" },
+    "httpErrors": { "status": "WARN", "note": "1 个 HTTP 500（model-service-config 端点，非 chat 链路，不影响天气查询）" },
+    "mojibakeScan": { "status": "PASS", "note": "天气响应文本中文正常，无乱码" }
+  },
+  "overallResult": "PASS",
+  "needsFix": false,
+  "round1BugAnalysis": {
+    "symptom": "模型回答'没有联网能力'，未触发搜索",
+    "rootCause": "第一轮时联网搜索能力未正确接入 Chat Runtime 的工具调用链路。模型在 planner arbitration 阶段未选择 public_web 或 search 工具。",
+    "currentStatus": "已修复。当前版本 planner 正确仲裁并触发搜索工具，成功获取天气数据。",
+    "evidence": "响应包含'已处理 3 步 · 用时 10s'，结论引用中央气象署数据，说明搜索链路已通。"
+  },
+  "modifiedFiles": [],
+  "commitHash": null,
+  "nextCase": "MIG-002 (新闻解读 - 最近有哪些游戏上线)",
+  "screenshots": ["mig001-01-main.png", "mig001-02-typed.png", "mig001-03-sent.png", "mig001-04-response.png", "mig001-05-refresh.png"]
+}

@@ -1,0 +1,241 @@
+ 1. 仓库交接文档
+     /E:/AI/ai-os/subprojects/ad/docs/operations/handoff-2026-05-21-session-restart.md
+  2. 本地 Codex 记忆
+     C:\Users\xuyun\.codex\memories\xiaoqiao-ad-handoff-2026-05-21.md
+
+重启后你可以直接说：
+
+  请读取 docs/operations/handoff-2026-05-21-session-restart.md，按交接记录继续。先不要动代码，先复核当前 git
+  status 和待办优先级。
+
+
+
+
+1.左侧侧边栏-会话列表-鼠标移入会话标题，如果标题超出，tips展示完整会话标题。
+2. 目前系统做了哪些持久化，请深度检查和分析后，和列出问题，以及迭代任务清单，目标是可以上线给种子用户体验，但是可以之后再迭代过重的持久化事项。
+3.数据分析服务目前无法正常使用，MCP在其它客户端都能正常取数问数，请深度检查和分析后，和列出问题，以及迭代任务清单，目标是需要确保问数服务能正常使用，基于当前的tool，能达到10分效果。
+4.Agent 路由问题阻塞严重，各个agent链路现在是靠关键字分发的？缺少推理过程？而且经常会交叉命中推理错误？请深度分析这一产品需求，以行业最佳实践进行产品设计拆解，和我确认再实施。
+5.查数后自动查异常 workflow
+6.统一任务 / 结果模型
+
+禁止改动：左侧侧边栏、会话顶部栏、新会话页、联调组件、右侧侧边栏
+
+
+
+ 2. 当前持久化盘点
+  - 报表草稿仍会生成本地模拟数据：/E:/AI/ai-os/subprojects/ad/frontend/src/src/lib/report-template-store.ts:386，不能作为真实业务结果。
+
+  - JSON 写入改 atomic write：写临时文件再 rename，并加进程内写队列。
+  - 所有 runtime JSON 增加 schema_version、备份和坏文件恢复。
+  - 会话消息分页读取，限制列表接口不要返回全部历史。
+  - 凭据脱敏展示，敏感配置迁移到环境变量或本机 secret 文件。
+  - 增加数据目录健康检查：文件可读写、大小、最近备份、凭据有效期。
+   -处理这个问题，禁止mock数据{报表草稿仍会生成本地模拟数据：/E:/AI/ai-os/subprojects/ad/frontend/src/src/lib/report-template-store.ts:386，不能作为真实业务结果。}
+注：用户隔离等下再处理我在整理方案。
+
+
+
+
+
+
+
+3 用户隔离，当前用户为admin，数据保留给admin，支持员工管理-增删改查员工，角色为管理员和普通用户，可设置员工的项目权限。管理员可查看和操作员工管理和后台管理。提供基础的登录、权限管理前后端。增加账号密码登录页面。admin密码为admin123
+
+
+  4. 问数/MCP 问题
+  当前问数不能稳定达到 10 分，核心不是 MCP 本身不可用，而是本项目的接入层不够生产化。
+
+  关键问题：
+
+  - MCP 调用实现重复：标准实现一套在 /E:/AI/ai-os/subprojects/ad/frontend/src/src/lib/mcp-discovery.ts:454，/api/chat 又
+    内置了一套 /E:/AI/ai-os/subprojects/ad/frontend/src/src/app/api/chat/route.ts:1765。两套协议、错误解析、鉴权、SSE 支
+    持不一致。
+  - /api/chat 的 MCP 调用基本按 streamable-http POST 走，SSE MCP 的 endpoint resolve 逻辑没有复用标准实现，容易出现“其他
+    客户端可用，这里不可用”。
+  - 报表工具选择有硬编码：报表步骤优先选 get_ads_report/get_zt_hour_report/query_report，见 /E:/AI/ai-os/subprojects/ad/
+    frontend/src/src/app/api/chat/route.ts:1934。ROI 问题可能被错误打到小时报表，而不是 get_zt_ad_roi_report。
+  - 参数适配太粗：adaptReportToolInput 只填通用 appId/startDate/endDate/metrics，没有按具体 tool schema 补
+    promotionSource/dataType/timeType 等必填参数。
+  - Tool 描述要求“先调 get_current_time、list_all_apps”，当前链路没有稳定执行这个前置 tool chain，而是绕到项目服务解析
+    appId。
+  - 当前项目服务 token 从配置看已过期，可能导致 resolveProjectAppId 返回空，进而报表 MCP 参数缺 appId。
+  - 数据异常检查在 plan 里有一步，但只是步骤声明：/E:/AI/ai-os/subprojects/ad/frontend/src/src/app/api/chat/
+    route.ts:3052，没有把 tool 返回 payload 结构化接入空表、字段缺失、日期缺口、异常波动判断。
+  - 当前正文生成仍依赖模型整合，缺少“正文数值必须来自 tool 返回”的强约束和校验。
+
+  问数 P0 任务清单：
+
+  - 删除 /api/chat 私有 MCP 调用，统一走 mcp-discovery.callMcpTool。
+  - 增加 Report Tool Registry：按问题类型选择 hour/daily/roi/retention/material，禁止固定打小时报表。
+  - 为每个报表 tool 写 schema adapter：明确必填、默认值、前置工具、不可猜参数。
+  - 实现 tool chain：get_current_time -> list_all_apps -> 字典类 tool -> 业务报表 tool。
+  - 修复项目 token 过期检测，过期时前端明确提示重新配置，不进入错误查数。
+  - 报表返回后生成 ReportQueryResult 标准结构，正文只能从该结构读数。
+  - 落地 ReportQualityCheck：空表、字段缺失、日期缺口、异常波动、口径风险。
+  - 用 /E:/AI/ai-os/subprojects/ad/docs/operations/v0.6-report-query-test-cases.md:1 做回归验收。
+
+  4. Agent 路由设计拆解
+  是的，现在主要靠关键词和正则分发。核心入口在 /E:/AI/ai-os/subprojects/ad/frontend/src/src/lib/intent-router.ts:214，/
+  api/chat 里还有一套 detectIntent/selectMcpTool，形成双路由。交叉命中很容易发生，比如：
+
+  - “巨量应用列表”会被媒体词命中到联调。
+  - “ROI 怎么样”会被路由到 forecast/prediction，而业务上应先是查数/分析。
+  - “异常波动”可能在 monitor、diagnosis、report query 之间漂移。
+  - 缺少可解释的候选路由评分、置信度阈值、追问策略和历史上下文约束。
+
+  建议产品设计：
+
+  - 第一层：任务类型判定，不直接选人格 Agent。类型包括 ask_data、analyze_anomaly、debug_integration、delivery_package、
+    create_demand、metric_explain、scheduled_report。
+  - 第二层：Slot 抽取，抽项目、媒体、日期、指标、维度、目标动作、证据。
+  - 第三层：Skill Contract 匹配，以能力契约为中心，不以关键词为中心。
+  - 第四层：Tool Plan 生成，明确前置工具、主工具、质量检查、结果组件。
+  - 第五层：置信度与追问，低置信度不硬路由，展示确认选项。
+  - 第六层：可观测，每次路由保存候选、分数、拒绝原因、最终原因，便于回归。
+
+
+是不是这个架构：
+     │  User Request  │
+                    └──────┬─────────┘
+                           │
+                  Intent / Task Parse
+                           │
+          ┌────────────────────────────────┐
+          │ Task Type Classification Layer │
+          └────────────────────────────────┘
+                           │
+                Slot / Context Extract
+                           │
+          ┌────────────────────────────────┐
+          │     Skill Contract Router      │
+          └────────────────────────────────┘
+                           │
+        ┌────────────────────────────────────┐
+        │ Workflow / MCP / Tool Plan Engine  │
+        └────────────────────────────────────┘
+                           │
+                Agent Coordinator Layer
+                           │
+        ┌────────────────────────────────────┐
+        │ UI Components / Result Renderer    │
+        └────────────────────────────────────┘
+Domain = 业务领域
+Task Intent = 用户目标动作
+Skill = 可复用能力
+Workflow = 稳定执行链
+Agent = 交互人格与协调器
+MCP = 工具接口
+
+
+
+  需要你确认后再实施：
+
+  - 是否同意把“Agent”从第一路由对象降级为展示/执行角色，主路由对象改成“业务任务 + Skill Contract”？
+  - P0 是否先覆盖 6 类：查数、查异常、联调、投放包、指标解释、需求沟通协同？
+  - 低置信度时是否允许弹确认卡，而不是直接进入某个 Agent？
+
+  5. 查数后自动查异常 Workflow
+  当前只有意图和步骤壳，未闭环。建议标准链路：
+  自然语言查数 -> 时间/项目/指标补全 -> 报表 MCP -> ReportQueryResult -> ReportQualityCheck -> 异常解释 -> 可追溯来源 ->
+  下一步动作
+
+  P0 检查项：
+
+  - 空返回
+  - 必填指标缺失
+  - 日期不连续
+  - 今日数据延迟
+  - 环比/同比异常波动
+  - 口径不确定
+  - tool 报错或权限失效
+
+  6. 统一任务 / 结果模型
+  当前模型分散：Task、WorkflowResult、DebugAutomationTask、ScheduledTask、ReportDraft、Message.metadata/process_events
+  各自表达一部分。参考 /E:/AI/ai-os/subprojects/ad/frontend/src/src/types/index.ts:247 和 /E:/AI/ai-os/subprojects/ad/
+  frontend/src/src/types/index.ts:294。
+
+  - Task：用户目标，一次可追踪工作。
+  - TaskRun：一次执行，可重试。
+  - Evidence：tool 返回、截图、日志、知识库来源。
+  - Action：用户下一步可执行动作。
+  - QualityCheck：结果质量和风险。
+  确认后我建议先做 P0 顺序：
+
+  1. 问数 MCP 统一调用层
+  2. Report Tool Registry + schema adapter
+  3. 查数后异常检查
+  4. 路由重构设计稿和测试集
+  5. 统一 Task/Result 最小模型落地
+  6. 最后再做侧边栏 tooltip 等禁改区 UI 项。
+
+
+
+
+
+
+3 用户隔离，当前用户为admin，数据保留给admin，支持员工管理-增删改查员工，角色为管理员和普通用户，可设置员工的项目权限。管理员可查看和操作员工管理和后台管理。提供基础的登录、权限管理前后端。增加账号密码登录页面。admin密码为admin123
+
+
+当前会话列表和记录的数据都绑定到超管用户
+超管有后台管理权限，配置的数据和提示词 开关状态都不要改动。
+
+其他用户登录进来默认为空的{会话列表}，空的{我的资产}，其他用户没有后台管理权限。
+
+每个用户登录后都获取对应的项目权限，再加载出项目选择器中的项目列表。
+
+
+
+1.左下角已经有退出登录了，不需要在右上角做一个用户图标和退出登录。 修改一下左下角的退出登录接口，交互原型都不要动。点击左下角弹窗里的退出登录，请求退出登录接口即回到登录页面。
+2.左下角的用户名现在是写死的，改成用户的真实的小闪的用户名
+
+3.左下角弹窗中的管理中心，仅一个用户有权限，可以打印出当前登录了的小闪用户有哪些，然后我指定几个用户id做为管理员，只有管理员有权限查看和管理管理中心。
+
+
+
+
+
+智投不同角色的用户 拥有的报表mcp权限不同。这个怎么处理呢
+如果是设计师 设计师主管角色，默认只有素材权限，没有投放交付，异常排查的权限
+单独做一个创意mcp服务。只有创意数据权限，
+
+记录操作日志。
+企业级还缺哪些。
+
+生成一个10分的满足上述需求的产品设计文档，
+
+
+
+页面一：Agent 编排 Viewer
+
+用途：
+
+设计态检查
+
+位置：
+
+后台管理系统 / AI 配置中心 / Agent 编排审查
+
+展示：
+
+Task Intent
+  -> Slot Extractor
+  -> Skill Contract
+  -> Workflow
+  -> Tool Plan
+  -> MCP Tool
+  -> Result Renderer
+
+用于检查：
+
+这个 Skill 是否缺 Prompt
+这个 Workflow 是否缺 fallback
+这个任务是否会误路由
+这个 Tool 是否缺权限
+这个链路是否缺 QualityCheck
+这个 Agent 是否职责过大
+
+这个页面不一定依赖 Trace。
+它看的是“配置后的编排结构”。
+
+
+

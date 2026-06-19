@@ -1,0 +1,483 @@
+Chat Presentation Layer
+目录：
+docs/architecture/chat-presentation/
+│
+├─ chat-presentation-system.md
+│
+├─ message-surface.md
+│
+├─ ui-schema-contract.md
+│
+├─ presentation-planner.md
+│
+├─ semantic-to-ui-mapping.md
+│
+├─ progressive-disclosure.md
+│
+├─ data-visualization-system.md
+│
+├─ action-surface-system.md
+│
+├─ card-library-spec.md
+│
+├─ streaming-rendering.md
+│
+├─ ai-runtime-experience.md
+│
+└─ trust-and-feedback-patterns.md
+
+正文
+正文=结构化组件，例如：
+┌─────────────────────┐
+│ 注册数              │
+│ 12,345              │
+│ ↑15%                │
+└─────────────────────┘
+
+┌─────────────────────┐
+│ AI结论              │
+│ 本周注册增长明显     │
+└─────────────────────┘
+
+┌─────────────────────┐
+│ 数据表              │
+└─────────────────────┘
+
+┌─────────────────────┐
+│ 推荐动作            │
+└─────────────────────┘
+
+UI Schema
+{
+  "blocks":[
+    {
+      "type":"metric_card"
+    },
+    {
+      "type":"ai_summary"
+    },
+    {
+      "type":"table"
+    }
+  ]
+}
+然后：
+Renderer
+↓
+React
+
+Presentation Layer 需要解决什么
+
+实际上有五大问题。
+1 信息压缩
+当前：
+
+100行内容
+
+用户不看。
+
+应该：
+
+一句结论
+
+展开看细节
+
+例如：
+
+注册数增长15%
+
+[查看原因]
+
+2 渐进式披露
+第一层：
+
+结论
+
+第二层：
+
+关键指标
+
+第三层：
+
+明细
+
+第四层：
+
+原始数据
+而不是：
+
+直接输出3000字
+3 多模态数据展示
+
+企业AI绝大部分是：
+
+指标
+表格
+图表
+状态
+流程
+
+不是纯文本。
+
+因此正文必须支持：
+
+Metric Card
+
+Table
+
+Chart
+
+Timeline
+
+Flow
+
+Status
+
+Action
+4 行动导向
+
+很多AI只会说：
+
+发现问题
+
+结束。
+
+企业AI必须：
+
+发现问题
+
+下一步建议
+
+立即执行
+
+例如：
+
+激活异常
+
+[查看原因]
+
+[开始排查]
+
+[创建Case]
+5 AI运行体验
+
+这是你之前一直在讨论的：
+
+思维链体验
+
+但不要暴露 CoT。
+
+应该是：
+
+正在理解问题
+
+正在匹配能力
+
+正在查询数据
+
+正在生成结果
+
+这种 Runtime UX。
+
+企业Chat正文最终应该长什么样
+
+我建议统一：
+
+Message Surface
+
+├─ Runtime Header
+
+├─ AI Summary
+
+├─ KPI Cards
+
+├─ Visualization
+
+├─ Key Findings
+
+├─ Recommendations
+
+├─ Action Area
+
+├─ Artifact Viewer
+
+└─ Disclosure Entry
+
+例如：
+
+[查询完成]
+
+注册数
+12,345
+↑15%
+
+激活数
+9,876
+↑12%
+
+━━━━━━━━━━
+
+AI发现
+
+1. 注册增长主要来自Android
+
+2. 投放成本下降
+
+━━━━━━━━━━
+
+推荐动作
+
+[查看渠道]
+
+[生成日报]
+
+[继续分析]
+
+━━━━━━━━━━
+
+数据表
+
+━━━━━━━━━━
+
+过程与依据
+下一阶段我建议不要直接做UI
+
+而是先做
+
+Presentation Contract
+
+即：
+
+Semantic Result
+↓
+Presentation Schema
+
+否则未来：
+
+报表查询
+
+监控告警
+
+归因排查
+
+知识问答
+
+联调助手
+
+都会各写各的UI。
+
+最后失控。
+
+所以接下来最合理的路线
+
+已经完成：
+
+Request Understanding
+
+Capability Orchestration
+
+Semantic Layer
+
+Context Layer
+
+MCP Layer
+
+Result Assembly
+
+Disclosure Layer
+
+下一阶段正式进入：
+
+Chat Presentation Layer
+
+优先顺序：
+
+P0
+Presentation Contract
+
+P1
+Message Surface System
+
+P2
+Card Library
+
+P3
+Visualization System
+
+P4
+Runtime Experience
+
+P5
+AI-first Enterprise Chat Design System
+
+这一步做完以后，你的小乔智投就会从：
+
+企业版 ChatGPT
+
+变成：
+
+真正的 AI Native 企业工作台
+
+因为用户看到的将不再是一坨 Markdown，而是围绕业务任务自动组织的信息界面。
+
+
+重点：当前我们的架构应该已经有了类似的设计，我只需要对齐补充即可
+现在这套架构已经有正文渲染链路了，不需要新建一套 Presentation Layer。
+
+当前已有位置是：
+
+Unified Semantic Contract
+→ regions[]
+→ componentBinding
+→ Component Registry
+→ Renderer
+→ 前端自主渲染结果
+
+所以正文部分接下来要做的不是“新增大层”，而是补齐语义结果到组件渲染的标准化细节。
+
+应该补充的位置
+
+在当前目录里重点补这 3 块：
+
+Unified Semantic Contract
+Component Binding / Registry / Renderer
+Frontend Engineering System
+
+不建议再新增一个独立的：
+
+Chat Presentation Layer
+
+否则会和你现有的：
+
+Component Binding / Registry / Renderer
+
+重复。
+
+正文部分要补什么
+
+建议补成：
+
+docs/architecture/unified-semantic-contract/
+├─ semantic-result-contract.md
+├─ region-contract.md                         ← 补
+├─ block-contract.md                          ← 补
+├─ answer-markdown-contract.md                ← 补
+├─ visualization-region-contract.md           ← 补
+├─ action-region-contract.md                  ← 补
+└─ semantic-to-region-assembly.md             ← 补
+
+docs/architecture/component-binding-registry-renderer/
+├─ component-binding-system.md
+├─ component-registry.md
+├─ renderer-contract.md
+├─ message-surface-renderer.md                ← 补
+├─ card-renderer.md                           ← 补
+├─ table-renderer.md                          ← 补
+├─ chart-renderer.md                          ← 补
+├─ action-renderer.md                         ← 补
+├─ empty-state-renderer.md                    ← 补
+└─ renderer-fallback-policy.md                ← 补
+
+docs/architecture/frontend-engineering-system/
+├─ frontend-engineering-system.md
+├─ message-rendering-pipeline.md              ← 补
+├─ streaming-rendering-policy.md              ← 补
+├─ renderer-validation-policy.md              ← 补
+└─ ui-regression-golden-cases.md              ← 补
+正文渲染的核心链路
+
+你现在要明确这条链：
+
+SemanticResultContract
+→ regions[]
+→ blocks[]
+→ componentBinding
+→ renderer.validate()
+→ renderer.render()
+→ Message Surface
+
+其中：
+
+Disclosure Layer
+只负责“过程与依据”
+
+正文渲染
+只负责“结果怎么呈现”
+
+两者不能混。
+
+正文层的关键对象
+
+建议正式定义：
+
+SemanticResultContract {
+  answer_markdown?: string
+  regions: Region[]
+  actions?: ActionContract[]
+  disclosure_ref?: string
+}
+Region {
+  region_id: string
+  region_type:
+    | 'summary'
+    | 'metric_cards'
+    | 'table'
+    | 'chart'
+    | 'insight'
+    | 'recommendation'
+    | 'actions'
+    | 'artifact'
+  title?: string
+  priority: number
+  blocks: Block[]
+  componentBinding: ComponentBinding
+}
+Block {
+  block_id: string
+  block_type:
+    | 'markdown'
+    | 'metric_card'
+    | 'data_table'
+    | 'chart'
+    | 'finding'
+    | 'recommendation'
+    | 'action_group'
+    | 'empty_state'
+  data: unknown
+}
+这次正文补充的目标
+
+不是改 Disclosure，而是解决：
+
+1. AI 正文不能只是一坨 markdown
+2. 结果卡、表格、图表、动作区不能各自抢渲染
+3. answer_markdown、summary、visualizations、actions 要有固定归属
+4. 不允许前端从 raw_result 猜 UI
+5. 不允许每个业务组件私有定义结构
+6. 所有正文内容必须从 SemanticResultContract / regions[] 来
+和 Disclosure 的边界
+
+最终应该是：
+
+正文区域：
+answer_markdown
+summary
+metric cards
+tables
+charts
+insights
+recommendations
+actions
+
+右侧过程与依据：
+execution steps
+sources
+evidence
+field catalog
+quality checks
+raw info
+trace projection
+
+一句话：
+
+Disclosure 解释“为什么可信”；正文渲染负责“结果如何高质量呈现”。

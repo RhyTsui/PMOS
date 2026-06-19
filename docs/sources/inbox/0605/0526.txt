@@ -1,0 +1,234 @@
+inbox增加了2个文档，任务提示词.md   image2图输出要求.md
+
+部署Repomix  开启Review Mode 
+开启Spec   更新统一世界观 协议 战略  UI Runtime 边界 架构 需求 设计
+开启Plan 拆实施阶段
+开启Patch  只修局部
+
+提问：我在广告包的基础上进行分包，区分QQ群用户，这部分会被记录在广告数据里面吗？
+回答：调用报表MCP.get_zt_ad_day_repor取数
+错误说明：这是一个知识问答，涵盖报表计算口径、范围的解释。但是被返回数据了。思维链是{1.识别问数意图，识别到广告包、投放包或验流程诉求，应进入投放包交付流程。}
+
+
+检查会话的消息返回结果是否由提示词控制模板，是否后台可配置。如果要优化如何处理？当前几个问题分别是：不需要展示结果摘
+  要，直接在结果里展示结果就行。其次已识别条件和参数说明不用描述，再就是项目id默认就是右上角项目选择器，不需要再单独强
+  调一遍appid，接着就是知识库为什么会检索失败需要排查。 另外datatype是从哪里来的，来源处应该有传参说明，为什么回复一个
+  日就能查了。
+
+刚说的几个问题都没有生效：右侧侧边栏禁止自动打开且有多个右侧侧边栏叠加的BUG、发送按钮图标自动切换、发送按钮重影问题处
+  理。
+
+代码里的结构化结果卡和内置提示词在控制
+
+知识库失败
+  则发生在后端检索阶段，有超时、无可访问库、接口非 2xx 三种分支
+
+1、消息回答模板当前是硬编码，后台admin/prompts 在 imported/projects 里还是 demo 数据，改为后台提示词控制，接入chat生
+  成链路。这样可以定义结果摘要、来源说明、回答格式。当前后端 imported/projects/src/app/api/chat/route.ts:112 会把回答截
+  断成 summary。
+       前端 imported/projects/src/components/cognitive/ChatContainer.tsx:3831 又读取 result.summary 展示结构化卡片。不
+  知道怎么设计合适。2、已识别条件”和“参数说明这部分来自结构化卡片和流程 payload，是不是应该只在调试/来源/执行详情里保
+  留，避免用户看到“条件解析过程”。
+  3、 项目 ID / APPID 重复
+       右上角项目选择器已经是默认项目范围，但当前发送时会把项目上下文拼进用户消息里，模型容易复述 APPID。相关链路在
+       imported/projects/src/hooks/useConversation.ts:938。
+       优化：项目 ID 改为隐藏 metadata 传给 /api/chat，不要拼进用户正文；系统提示词也加一条“不要在正文重复当前项目
+  ID”。4、 知识库检索失败
+     检索在 imported/projects/src/app/api/chat/route.ts:2775。失败原因主要有：
+      - 知识库地址/API Key 没配；后台是配了的，用户个人key也配了，只是当前系统key复用了001用户的key。
+      - 知识库列表接口超时待确认；
+      - 当前 Key 下没有可访问知识库，实际是有知识库的；
+      - /knowledge-search 超时或返回非成功。
+        后台已有测试入口：/api/xiaoqiao/admin/model-service-config/test，但 chat 里失败只给 warning，不够定位。
+        优化：把失败原因、请求地址、知识库 ID 数量、HTTP 状态写入 trace/执行详情；用户正文只说“知识库暂不可用，已继续用
+        可用信息回答”。具体要再检查一下真实原因。
+  5. datatype 来源
+     当前运行的 imported/projects/src/app/api/chat/route.ts 没有直接生成 datatype。全仓只有 frontend/src/src/lib/report-
+     query-policy-store.ts 里有 dataType: 'total' 和 roi_data_type。
+     所以如果回复里出现 datatype，大概率来自另一套 frontend/src 查数策略或外部 MCP/报表服务返回。需要把工具调用的
+     arguments 和返回来源展示清楚，否则用户看不到它是系统默认值、策略默认值还是外部接口字段。
+
+
+
+ # Chat 回答模板、来源与项目上下文改造计划
+
+  ## Summary
+
+  把 imported/projects 的 chat 生成链路从硬编码提示词改成后台可配置提示词控制。第一版使用本地持久化 prompt store，
+  admin/prompts 编辑后立即影响 /api/chat。
+
+  主对话只展示“用户可读回答 + 短摘要 + 建议动作”。“已识别条件”“参数说明”“tool arguments”“datatype 来源”“知识库失败诊
+  断”统一进入来源/执行详情，不再作为普通用户正文或主卡片内容暴露。
+
+  ## Key Changes
+
+  - 新增本地持久化 prompt store，替换 admin/prompts 当前 demo 内存数据：
+      - 保存位置复用 runtime data 目录风格，类似 runtime-config.json。
+      - GET/POST/PUT /api/xiaoqiao/admin/prompts 读写真实本地配置。
+      - 支持按 workflow/intent 查找启用中的 prompt：help、diagnosis、demand、debugging、general。
+      - 没有配置时使用内置默认 prompt 作为兜底，但不再让 demo 数据成为真源。
+  - 改造 /api/chat 生成链路：
+      - buildSystemPrompt() 拆成“系统基础约束 + 后台 prompt + 知识库上下文 + 项目 metadata 约束”。
+      - 后台 prompt 可控制：回答格式、结果摘要、来源说明规则、是否输出下一步动作。
+      - result.summary 不再用截断正文，也不再为空；改为独立短摘要，优先由模型按 prompt 输出，失败时从正文提取首个有效
+        结论句。
+      - result.structured_payload 只放机器可读数据、来源、执行详情、知识库诊断，不直接驱动主对话展示过程字段。
+  - 调整前端展示职责：
+      - ChatContainer 主消息保留 Markdown 正文。
+      - ResultMessageCard 只展示 summary、next_actions、必要的业务状态，不展示“已识别条件”“参数说明”。
+      - 条件解析、工具参数、MCP 返回、知识库诊断、datatype 来源继续通过右侧来源/执行详情查看。
+      - 主对话中的知识库失败提示统一为：“知识库暂不可用，已继续用可用信息回答。”
+  - 项目上下文改造：
+      - useConversation.ts 不再把右上角项目上下文拼进用户正文。
+      - /api/chat 请求体新增隐藏字段，例如 metadata.projectContext 或 projectContext 保持后端使用，但不进入 message。
+      - 系统提示词保留约束：“当前项目范围只作为查询参数，不要在正文重复 APPID / 项目 ID。”
+      - 历史消息仍保存用户原始输入，不保存拼接后的项目说明。
+  - 知识库失败诊断增强：
+      - searchKnowledge() 每个失败分支都返回统一 diagnostics：stage、listEndpoint、searchEndpoint、
+        knowledgeBaseIds.length、httpStatus、message、timeoutMs。
+      - trace、thinking step、tool_result、metadata 都写入诊断详情。
+      - 用户正文只给降级提示，不展示地址、Key、HTTP 细节。
+      - admin 测试入口和 chat 使用同一套知识库解析/检索 helper，避免测试成功但 chat 失败原因不一致。
+  - datatype 来源追踪：
+      - 不在 /api/chat 内新增 datatype 业务含义。
+      - 工具调用 arguments/result 在执行详情里完整展示来源。
+      - 如果外部 MCP、报表服务或查数策略返回 datatype/dataType/roi_data_type，在执行详情标明来源为“工具入参”“工具返
+        回”或“策略默认值”。
+      - 主对话不复述 datatype，除非用户明确询问字段含义。
+
+  ## Public Interfaces / Types
+
+  - 扩展 PromptConfig：
+      - 增加可选 content 或通过 PromptVersion.content 读取当前版本正文。
+      - binding.workflow 作为 chat 选择 prompt 的主键。
+      - enabled/status=active 共同决定是否参与生成。
+  - 扩展 /api/chat 请求体：
+      - 保留 message/history/intent。
+      - projectContext 作为隐藏上下文继续支持；实现时可迁移到 metadata.projectContext，但保持向后兼容。
+  - 扩展 /api/chat done payload：
+      - result.summary: 面向用户的短摘要。
+      - result.next_actions: 面向用户的建议动作。
+      - metadata.source_refs: 来源列表。
+      - metadata.knowledge_diagnostics: 仅用于来源/执行详情。
+      - metadata.prompt_config: 当前命中的 prompt id/version/name，供排查，不在正文展示。
+
+  ## Test Plan
+
+  - 后台提示词：
+      - 创建/更新 active prompt 后，调用 /api/chat，确认系统 prompt 使用新内容。
+      - 禁用 prompt 后，确认回退到内置默认 prompt。
+      - 重启 dev 服务后，确认 prompt 配置仍保留。
+      - 右侧来源/执行详情仍能看到 tool arguments、tool result、知识库诊断和 prompt 命中信息。
+      - result.summary 为空或模型未产出摘要时，前端展示兜底短摘要，不展示整段截断正文。
+  - 项目上下文：
+      - 选择项目后发送消息，网络请求体包含隐藏项目上下文。
+      - 用户消息内容只保存原始输入。
+      - 模型回答不主动复述 APPID / 项目 ID。
+  - 知识库检索：
+      - 缺配置、列表超时、无知识库、search HTTP 非成功、低相关结果全部覆盖。
+      - 用户正文只展示温和降级提示。
+      - trace/执行详情包含 endpoint、知识库数量、HTTP 状态和失败阶段。
+  - datatype 来源：
+      - 模拟工具入参带 dataType: total，确认只在执行详情出现。
+      - 模拟工具返回带 roi_data_type，确认来源标记正确。
+      - 主回答不把 datatype 当业务结论复述。
+
+  ## Assumptions
+
+  - 第一版提示词真源采用本地持久化，不接外部配置后台。
+  - 主对话保留摘要和建议动作；条件、参数、执行过程只放来源/执行详情。
+  - 不改变模型服务、知识库服务、MCP 服务的外部协议，只增强本地编排、追踪和展示。
+
+
+
+
+输出架构分层+summary 独立生成+projectContext 隐藏化+diagnostics 下沉+知识库失败温和降级+LLM输出 ≠ UI展示中间加语义层
+1、是否还有其它提示词是硬编码的，是否要一起做到后台提示词控制 待确定
+2、另外提示词应该做分层控制吧，比如
+1. route prompt
+2. response prompt
+3. summary prompt
+4. evidence prompt
+5. card prompt
+6. followup prompt
+7. tool explain prompt
+
+3、LLM 应该单独生成 summary，但summary 不应该只是字符串太浅，应该做成业务摘要对象：summary: {
+  title,
+  brief,
+  severity,
+  confidence,
+  business_impact
+}
+4、ext_actions 未来要结构化AI Action Layer，否则动作无法进入自动执行系统：next_actions: [
+  {
+    label,
+    type,
+    intent,
+    action,
+    risk_level,
+    auto_executable
+  }
+]
+
+5、structured_payload 命名不够高级，structured_payload太像临时技术字段，建议这种语义：execution_context
+evidence_bundle
+agent_runtime
+reasoning_artifacts
+
+6、缺少 Answer Policy Layer，即AI UI行为控制层，现在其实已经有：
+summary
+diagnostics
+evidence
+prompt_config
+但还缺：
+Answer Policy：{
+  verbosity: "concise",
+  evidence_visibility: "hidden",
+  reasoning_visibility: "internal",
+  confidence_policy: "show_when_low",
+  fallback_strategy: "soft_degrade"
+}
+
+7、还缺“状态感”，系统状态语义这种轻状态感，不是 trace而是AI工作感知，这是 ChatGPT Deep Research 那种高级体验的重要部分，例如：正在分析...
+已完成数据核验
+已调用2个数据源
+知识库部分降级
+发现高风险异常
+
+总之是建立：AI Runtime Presentation Layer 即AI运行时展示层
+
+
+增加Runtime State Layer可感知的 AI 工作流
+业务语义化
+阶段化
+轻量化
+runtime_state: {
+  current_stage,
+  completed_stages,
+  status,
+  started_at,
+  duration_ms
+}
+通用 AI Workflow Stages：
+[
+  "understanding",
+  "context_loading",
+  "data_fetching",
+  "analysis",
+  "diagnosis",
+  "knowledge_lookup",
+  "recommendation",
+  "response_generation"
+]
+状态生命周期：
+用户发送--正在理解问题...
+MCP调用--正在获取广告数据...
+数据分析--正在分析异常波动...
+知识库--正在校验历史规则与案例...
+生成回答--正在生成优化建议...
+完成--已完成分析
+
+主对话只显示：正文、summary、next_actions
+顶部状态栏只显示轻量 runtime state。
+右侧Evidence / Execution Detail。

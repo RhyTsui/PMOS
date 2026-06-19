@@ -1,12 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getDemoDebugResult } from '@/lib/demo-data';
+import {
+  DebugAutomationServiceError,
+  normalizeDebugResult,
+  requestDebugAutomationService,
+} from '@/lib/real-debug-automation-service';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const result = getDemoDebugResult(id);
-  if (!result) return NextResponse.json({ error: 'Result not found' }, { status: 404 });
-  return NextResponse.json(result);
+  try {
+    const [task, result] = await Promise.all([
+      requestDebugAutomationService(`/tasks/${encodeURIComponent(id)}`).catch(() => null),
+      requestDebugAutomationService(`/tasks/${encodeURIComponent(id)}/result`),
+    ]);
+    return NextResponse.json(normalizeDebugResult(result, id, task));
+  } catch (error) {
+    if (error instanceof DebugAutomationServiceError) {
+      return NextResponse.json(error.body, { status: error.status });
+    }
+    return NextResponse.json({ error: 'get debug automation result failed' }, { status: 502 });
+  }
 }

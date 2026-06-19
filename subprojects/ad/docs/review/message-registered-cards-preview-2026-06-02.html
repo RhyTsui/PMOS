@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>消息卡片预览</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --line: rgba(148, 163, 184, 0.24);
+      --line-strong: rgba(100, 116, 139, 0.24);
+      --text: #172033;
+      --muted: #657184;
+      --body: #344256;
+      --blue: #4f7cff;
+      --green: #16a34a;
+      --amber: #b7791f;
+      --red: #dc2626;
+      --teal: #0f766e;
+      --violet: #7c3aed;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,247,249,0.96)),
+        radial-gradient(circle at 16% 0%, rgba(20, 184, 166, 0.10), transparent 30%),
+        radial-gradient(circle at 92% 10%, rgba(245, 158, 11, 0.10), transparent 28%);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      padding: 0 2px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+      font-weight: 760;
+      color: var(--text);
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .summary {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.82);
+      color: var(--body);
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 24px 0 12px;
+      font-size: 14px;
+      font-weight: 720;
+      color: var(--text);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .card-shell {
+      min-width: 0;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.84);
+    }
+
+    .card-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 720;
+      color: var(--text);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .dot.green { background: var(--green); }
+    .dot.amber { background: #d97706; }
+    .dot.red { background: var(--red); }
+    .dot.teal { background: var(--teal); }
+    .dot.violet { background: var(--violet); }
+
+    .binding {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      color: #475569;
+      border: 1px solid rgba(100,116,139,0.22);
+      background: #f8fafc;
+      border-radius: 999px;
+      padding: 4px 7px;
+      white-space: nowrap;
+    }
+
+    .preview {
+      padding: 12px;
+    }
+
+    .message-card {
+      margin-top: 0;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 12px;
+    }
+
+    .message-card.soft {
+      background: var(--surface-soft);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .row-start {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .headline {
+      font-size: 13px;
+      font-weight: 720;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .eyebrow {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .text {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--body);
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #475569;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .tag.green { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+    .tag.blue { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+    .tag.amber { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+    .tag.red { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+
+    .kv-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 96px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .kv-label { color: var(--muted); }
+    .kv-value {
+      color: var(--body);
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .mini-title {
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 720;
+      color: var(--text);
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .list-item {
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+    }
+
+    .list-title {
+      font-size: 13px;
+      font-weight: 680;
+      color: var(--text);
+    }
+
+    .list-desc {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .md {
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .md-bar {
+      padding: 9px 11px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      background: #f8fafc;
+    }
+
+    .md-body {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--body);
+      line-height: 1.7;
+    }
+
+    .code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    .chart {
+      height: 210px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 10px;
+    }
+
+    .plot {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background:
+        linear-gradient(to right, rgba(148,163,184,0.16) 1px, transparent 1px) 0 0 / 25% 100%,
+        linear-gradient(to top, rgba(148,163,184,0.16) 1px, transparent 1px) 0 0 / 100% 25%,
+        #fff;
+      overflow: hidden;
+    }
+
+    .line-svg {
+      position: absolute;
+      inset: 12px 12px 20px 34px;
+      width: calc(100% - 46px);
+      height: calc(100% - 32px);
+    }
+
+    .axis {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--teal);
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .runtime-status {
+      color: var(--green);
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--body);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      cursor: default;
+    }
+
+    button.primary {
+      border-color: rgba(79, 124, 255, 0.28);
+      background: rgba(79, 124, 255, 0.10);
+      color: #315fd6;
+    }
+
+    .status-card {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .status-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid currentColor;
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    .side-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .placeholder {
+      border-style: dashed;
+      background: rgba(255,255,255,0.58);
+    }
+
+    .foot {
+      margin-top: 22px;
+      padding: 14px 2px 0;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 820px) {
+      .page { width: min(100vw - 20px, 720px); padding-top: 18px; }
+      .top { grid-template-columns: 1fr; }
+      .summary { justify-content: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+      .kv { grid-template-columns: 82px 1fr; }
+      .kv .tag { grid-column: 2; width: max-content; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <div>
+        <h1>消息卡片预览</h1>
+        <div class="subtitle">整理当前消息展示链路已注册的卡片样式，包含主消息卡片、结果承接、来源、过程、状态和占位项。绑定名保留为代码标识，便于和实现对照。</div>
+      </div>
+      <div class="summary">
+        <span class="pill">消息渲染器：13 项</span>
+        <span class="pill">默认绑定：15 项</span>
+        <span class="pill">更新日期：2026-06-02</span>
+      </div>
+    </header>
+
+    <div class="section-title">
+      <span>主消息卡片</span>
+      <span class="binding">MessagePresentationRenderer</span>
+    </div>
+    <section class="grid">
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot teal"></span>Markdown 结果</div>
+          <span class="binding">markdown-result</span>
+        </div>
+        <div class="preview">
+          <div class="md">
+            <div class="md-bar">日趋势结果</div>
+            <div class="md-body">
+              <div>已按日期整理最近 30 天的核心指标，下面展示主要结论和可继续查看的明细。</div>
+              <div class="code">metrics: activation<br />dimension: date<br />granularity: day</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot green"></span>结果摘要</div>
+          <span class="binding">decision-card</span>
+        </div>
+        <div class="preview">
+          <section class="message-card soft">
+            <div class="row">
+              <div>
+                <div class="headline">已生成趋势结果</div>
+                <div class="eyebrow">业务摘要</div>
+              </div>
+              <div class="tag-row">
+                <span class="tag blue">info</span>
+                <span class="tag green">high</span>
+              </div>
+            </div>
+            <div class="text">近 30 天数据已返回，可查看日粒度变化和明细数据。</div>
+            <div class="hint">建议继续查看异常日期或导出明细。</div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot amber"></span>能力缺口</div>
+          <span class="binding">decision-card / capability_gap</span>
+        </div>
+        <div class="preview">
+          <section class="message-card soft">
+            <div class="headline">暂时无法直接完成这次查询</div>
+            <div class="text">已识别到查询条件，但当前数据能力还不能完整执行本次查询。</div>
+            <div class="mini-title">已识别的查询条件</div>
+            <div class="kv-list">
+              <div class="kv"><span class="kv-label">查询目标</span><span class="kv-value">trend</span><span class="tag green">已识别</span></div>
+              <div class="kv"><span class="kv-label">时间范围</span><span class="kv-value">last_30_days</span><span class="tag green">已识别</span></div>
+              <div class="kv"><span class="kv-label">筛选条件</span><span class="kv-value">media: 巨量</span><span class="tag green">已识别</span></div>
+            </div>
+            <div class="mini-title">还缺少的条件</div>
+            <div class="text"><strong>date</strong>：当前还不能满足这项输出要求，需要补齐能力后继续。</div>
+            <div class="button-row">
+              <button>检查数据能力配置</button>
+              <button>使用可用视图承接结果</button>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot blue"></span>数据视图</div>
+          <span class="binding">data-visualization</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="chart">
+              <div class="plot">
+                <svg class="line-svg" viewBox="0 0 320 150" preserveAspectRatio="none" aria-hidden="true">
+                  <polyline points="0,118 42,102 84,108 126,74 168,82 210,46 252,58 320,28" fill="none" stroke="#0f766e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                  <polyline points="0,128 42,118 84,122 126,96 168,100 210,80 252,83 320,68" fill="none" stroke="#4f7cff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".78" />
+                </svg>
+                <div class="axis"><span>05-04</span><span>05-12</span><span>05-20</span><span>06-02</span></div>
+              </div>
+              <div class="legend"><span><i></i>activation</span><span><i style="background:#4f7cff"></i>register</span></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <span>过程与行动</span>
+      <span class="binding">runtime / workflow / action</span>
+    </div>
+    <section class="grid">
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot green"></span>执行状态</div>
+          <span class="binding">ai-runtime</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="row">
+              <div>
+                <div class="headline">检查可用能力</div>
+                <div class="eyebrow">运行状态</div>
+              </div>
+              <span class="tag green runtime-status">已完成</span>
+            </div>
+            <div class="text">检查可用能力：已完成<br />结果：已找到可执行能力，展示方式将降级</div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot violet"></span>步骤追踪</div>
+          <span class="binding">workflow-trace</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="headline">处理过程</div>
+            <div class="list">
+              <div class="row-start">
+                <span class="dot green" style="margin-top:7px"></span>
+                <div><div class="list-title">识别问数意图</div><div class="list-desc">已进入自然语言问数链路。</div></div>
+              </div>
+              <div class="row-start">
+                <span class="dot green" style="margin-top:7px"></span>
+                <div><div class="list-title">准备查询上下文</div><div class="list-desc">读取当前项目范围和可用报表工具。</div></div>
+              </div>
+              <div class="row-start">
+                <span class="dot amber" style="margin-top:7px"></span>
+                <div><div class="list-title">生成结果展示</div><div class="list-desc">已按可用视图承接数据。</div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot blue"></span>下一步</div>
+          <span class="binding">action-bar</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="headline">下一步</div>
+            <div class="button-row">
+              <button class="primary">查看明细</button>
+              <button>导出结果</button>
+              <button>继续追问异常日期</button>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot teal"></span>过程入口</div>
+          <span class="binding">disclosure-panel</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="status-card">
+              <span class="status-icon" style="color:var(--blue)"></span>
+              <div>
+                <div class="headline">过程与依据</div>
+                <div class="side-note">详细过程与依据请从消息右侧面板查看。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <span>来源与资产</span>
+      <span class="binding">evidence / source / asset</span>
+    </div>
+    <section class="grid">
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot green"></span>依据列表</div>
+          <span class="binding">evidence-panel</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="headline">依据</div>
+            <div class="list">
+              <div class="list-item">
+                <div class="list-title">报表返回数据</div>
+                <div class="list-desc">200 条日趋势数据，已通过字段完整性检查。</div>
+              </div>
+              <div class="list-item">
+                <div class="list-title">查询参数</div>
+                <div class="list-desc">时间范围、指标、筛选条件均已记录在执行详情中。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot teal"></span>来源列表</div>
+          <span class="binding">source-list</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="headline">来源</div>
+            <div class="list">
+              <div class="list-item">
+                <div class="list-title">业务报表工具</div>
+                <div class="list-desc">返回趋势数据和字段目录。</div>
+              </div>
+              <div class="list-item">
+                <div class="list-title">实体字典</div>
+                <div class="list-desc">用于匹配媒体、项目、账号等筛选对象。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot violet"></span>资产引用</div>
+          <span class="binding">asset-reference</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="headline">趋势截图</div>
+            <div class="hint">用于和本次查询结果对照的用户截图。</div>
+            <div class="list-item" style="margin-top:10px">
+              <div class="list-title">photo_2026-06-02_19-46-42.jpg</div>
+              <div class="list-desc">已作为当前会话附件记录。</div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot blue"></span>表单输入</div>
+          <span class="binding">form-input</span>
+        </div>
+        <div class="preview">
+          <section class="message-card placeholder">
+            <div class="headline">补充条件</div>
+            <div class="hint">默认 registry 已注册，消息区暂无专属卡片实现。</div>
+            <div class="button-row"><button>选择候选项</button><button>确认条件</button></div>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <span>状态卡片</span>
+      <span class="binding">permission / empty / error / feedback</span>
+    </div>
+    <section class="grid">
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot amber"></span>权限提示</div>
+          <span class="binding">permission-gate</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="status-card">
+              <span class="status-icon" style="color:var(--amber)"></span>
+              <div>
+                <div class="headline">权限受限</div>
+                <div class="side-note">当前内容受权限限制，无法直接查看。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>空状态</div>
+          <span class="binding">empty-state</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="status-card">
+              <span class="status-icon" style="color:var(--muted)"></span>
+              <div>
+                <div class="headline">暂无内容</div>
+                <div class="side-note">当前区域没有可展示内容。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot red"></span>错误状态</div>
+          <span class="binding">error-state</span>
+        </div>
+        <div class="preview">
+          <section class="message-card">
+            <div class="status-card">
+              <span class="status-icon" style="color:var(--red)"></span>
+              <div>
+                <div class="headline">渲染失败</div>
+                <div class="side-note">该区域在当前状态下无法渲染。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+
+      <article class="card-shell">
+        <div class="card-head">
+          <div class="card-title"><span class="dot violet"></span>反馈面板</div>
+          <span class="binding">feedback-panel</span>
+        </div>
+        <div class="preview">
+          <section class="message-card placeholder">
+            <div class="headline">反馈</div>
+            <div class="hint">默认 registry 已注册，消息区暂无专属卡片实现。</div>
+            <div class="button-row"><button>结果有帮助</button><button>需要调整</button></div>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <footer class="foot">
+      来源：`frontend/src/src/components/cognitive/MessagePresentationRenderer.tsx` 与 `frontend/src/src/contracts/renderer/default-renderers.ts`。此页面是静态预览，不会调用真实工具或渲染 React 组件。
+    </footer>
+  </main>
+</body>
+</html>

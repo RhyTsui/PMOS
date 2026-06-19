@@ -1,0 +1,51 @@
+查看当前项目最近 7 天投放数据，找出异常波动的日期、指标、媒体或账户，并说明可能原因。
+
+
+问数分析
+已完成分析
+
+思维链
+生成回复
+展开
+
+调用与来源
+2 个调用 / 0 个来源
+展开
+结果
+已取回 7 行数据。
+
+本次取数
+•
+数据来源：报表MCP.get_zt_ad_day_report
+•
+时间：2026-05-21 至 2026-05-27
+•
+指标：activation、register、payment
+•
+维度：date、media、account
+•
+粒度：按日
+•
+能力清单：report-manifest:2026-05-26T19:01:37.145Z:5:72
+查询条件
+•
+当前项目：10100001
+数据预览
+1
+composite_ltv30_reg_cnt=null；composite_effective_d1_rate=0.621875；composite_reg_cost=28.336603741894503；roi16_rate=null；w_roi2_rate=null；roi5_pay_amount=null；composite_ltv120_pay_amount=null；composite_ltv15_reg_cnt=null
+2
+composite_ltv30_reg_cnt=null；composite_effective_d1_rate=0.8111622866431861；composite_reg_cost=42.4635458812621；roi16_rate=null；w_roi2_rate=0；roi5_pay_amount=null；composite_ltv120_pay_amount=null；composite_ltv15_reg_cnt=null
+3
+composite_ltv30_reg_cnt=null；composite_effective_d1_rate=0.8038709677419354；composite_reg_cost=45.252657148600576；roi16_rate=null；w_roi2_rate=0；roi5_pay_amount=null；composite_ltv120_pay_amount=null；composite_ltv15_reg_cnt=null
+4
+composite_ltv30_reg_cnt=null；composite_effective_d1_rate=0.8237837837837838；composite_reg_cost=42.26998711205996；roi16_rate=null；w_roi2_rate=0.0510675262049808；roi5_pay_amount=null；composite_ltv120_pay_amount=null；composite_ltv15_reg_cnt=null
+5
+composite_ltv30_reg_cnt=null；composite_effective_d1_rate=0.8340798045602605；composite_reg_cost=40.69113824665143；roi16_rate=null；w_roi2_rate=0.09328427968206972；roi5_pay_amount=18630；composite_ltv120_pay_amount=null；composite_ltv15_reg_cnt=null
+收起内容
+数据查询结果
+结构化结果
+已取回 7 行数据。
+可基于当前结果继续追问、对比或导出。
+建议动作
+继续追问维度
+导出结果

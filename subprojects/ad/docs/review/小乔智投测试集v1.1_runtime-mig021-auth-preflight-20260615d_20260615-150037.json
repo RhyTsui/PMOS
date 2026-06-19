@@ -1,0 +1,33 @@
+{
+  "batch": "runtime-mig021-auth-preflight-20260615d",
+  "stamp": "20260615-150037",
+  "summary": {
+    "REVIEW": 1
+  },
+  "total": 1,
+  "completed": 1,
+  "offset": 35,
+  "limit": 1,
+  "caseTimeoutMs": 60000,
+  "results": [
+    {
+      "rowIndex": 37,
+      "id": "MIG-021",
+      "scenario": "广告报表-语义理解-SEM-026",
+      "prompt": "指间山海 - 国内激活数最多的三个媒体",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 TapTap 苹果\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 157,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+variables:
+  VERSION: 0.1.0
+  IMAGE_REPO: sjb-storage-registry.cn-hangzhou.cr.aliyuncs.com/aiad/aiad-xiaoqiao
+
+stages:
+  - quality
+  - docker-build
+  - deploy
+
+encoding_guardrail:
+  stage: quality
+  script:
+    - node scripts/check-text-encoding.cjs --scope=tracked
+  tags:
+    - shell
+  only:
+    changes:
+      - frontend/src/**/*
+      - src/**/*
+      - scripts/**/*
+      - docs/**/*
+      - schemas/**/*
+      - AGENTS.md
+      - README.md
+      - .gitlab-ci.yml
+      - .editorconfig
+      - .gitattributes
+
+# ====================
+# Frontend (Next.js)
+# ====================
+
+docker_build_frontend:
+  stage: docker-build
+  script:
+    - export DOCKER_BUILDKIT=1
+    - docker build --pull -f frontend/src/Dockerfile -t "$IMAGE_REPO-frontend":"$VERSION-$CI_PIPELINE_ID" ./frontend/src
+    - docker push "$IMAGE_REPO-frontend":"$VERSION-$CI_PIPELINE_ID"
+  tags:
+    - shell
+  only:
+    changes:
+      - frontend/src/**/*
+  dependencies:
+    - encoding_guardrail
+
+deploy_frontend:
+  stage: deploy
+  script:
+    #- ~/new_ansible_deploy_setimage.py -n "aiad-xiaoqiao-frontend" -v "${VERSION}-$CI_PIPELINE_ID"
+    - curl "http://ykops.dc.yokagames.com/receive/deploy/?name=aiad-xiaoqiao-frontend&env=pre&idc=hz&&tag=${VERSION}-$CI_PIPELINE_ID"
+  tags:
+    - shell
+  only:
+    changes:
+      - frontend/src/**/*
+  dependencies:
+    - docker_build_frontend
+
+
+# ====================
+# Backend
+# ====================
+
+docker_build_backend:
+  stage: docker-build
+  script:
+    - export DOCKER_BUILDKIT=1
+    - docker build --pull -f Dockerfile.backend -t "$IMAGE_REPO-backend":"$VERSION-$CI_PIPELINE_ID" .
+    - docker push "$IMAGE_REPO-backend":"$VERSION-$CI_PIPELINE_ID"
+  tags:
+    - shell
+  only:
+    changes:
+      - src/**/*
+      - pyproject.toml
+      - Dockerfile.backend
+  dependencies:
+    - encoding_guardrail
+
+deploy_backend:
+  stage: deploy
+  script:
+    #- ~/new_ansible_deploy_setimage.py -n "aiad-xiaoqiao-backend" -v "${VERSION}-$CI_PIPELINE_ID"
+    - curl "http://ykops.dc.yokagames.com/receive/deploy/?name=aiad-xiaoqiao-backend&env=pre&idc=hz&&tag=${VERSION}-$CI_PIPELINE_ID"
+  tags:
+    - shell
+  only:
+    changes:
+      - src/**/*
+      - pyproject.toml
+      - Dockerfile.backend
+  dependencies:
+    - docker_build_backend
+

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2. 总纲架构索引 + 真实架构图</title>
+  <link rel="stylesheet" href="./review.css" />
+</head>
+<body>
+  <div class="shell">
+    <div class="hero">
+      <h1>2. 总纲架构索引 + 真实架构图</h1>
+      <p class="muted">本页对应 review 的第二部分：先列总纲，再按总纲对照当前实现，并给出七张架构图。</p>
+      <div class="nav">
+        <a href="./index.html">总入口</a>
+        <a href="./1-state-and-repomap.html">上一页：当前状态 + Repo Map</a>
+        <a href="./3-config-maps-and-module-responsibility.html">下一页：配置真源 + 模块职责</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>2.1 总纲架构索引清单</h2>
+      <table>
+        <tr>
+          <th>架构域</th>
+          <th>总纲文档 / 子文档</th>
+          <th>代码实现</th>
+          <th>运行时</th>
+          <th>后台入口</th>
+          <th>测试 / Golden</th>
+          <th>当前状态</th>
+        </tr>
+        <tr><td>Runtime</td><td><code>docs/architecture/runtime/runtime-display-protocol.md</code></td><td><code>contracts/runtime/*</code>、<code>trace.ts</code></td><td>是</td><td>否</td><td>是</td><td>implemented</td></tr>
+        <tr><td>Request Understanding</td><td><code>docs/architecture/request-understanding/route-governance-p1.md</code></td><td><code>request-understanding.ts</code>、<code>intent-router.ts</code></td><td>是</td><td>部分</td><td>是</td><td>partial</td></tr>
+        <tr><td>Context Compiler</td><td><code>ENTERPRISE_AI_CHAT_OS_SPEC.md</code></td><td><code>context-compiler.ts</code></td><td>是</td><td>间接</td><td>间接</td><td>implemented</td></tr>
+        <tr><td>Domain Protocol</td><td>总纲 + orchestrator patch</td><td><code>advertising-domain-pack.ts</code>、<code>entity-resolution-config-store.ts</code>、<code>metric/dimension catalog</code></td><td>是</td><td>是</td><td>是</td><td>partial</td></tr>
+        <tr><td>Capability Orchestration</td><td><code>02_ORCHESTRATION_LAYER_INDEX.md</code></td><td><code>capability-orchestration.ts</code>、<code>report-capability-manifest.ts</code></td><td>是</td><td>是</td><td>是</td><td>partial</td></tr>
+        <tr><td>Skill</td><td><code>docs/architecture/skills/*</code></td><td><code>skill-orchestration.ts</code>、<code>skill-contract-store.ts</code></td><td>是</td><td>是</td><td>是</td><td>partial</td></tr>
+        <tr><td>MCP Tool</td><td>总纲 + orchestration index</td><td><code>mcp-server-store.ts</code>、<code>mcp-discovery.ts</code></td><td>是</td><td>是</td><td>部分</td><td>partial</td></tr>
+        <tr><td>Prompt Governance</td><td><code>prompt-runtime-contract.md</code></td><td><code>prompt-store.ts</code>、<code>prompt-runtime-policy.ts</code>、<code>managed-prompt-seeds.ts</code></td><td>是</td><td>是</td><td>是</td><td>drifted</td></tr>
+        <tr><td>Knowledge / Memory</td><td>memory / project docs</td><td><code>user-memory-store.ts</code>、<code>conversation-context.ts</code></td><td>是</td><td>部分</td><td>少量</td><td>partial</td></tr>
+        <tr><td>Workflow</td><td>workflow docs</td><td><code>workflow-task-store.ts</code>、<code>workflow-engine.ts</code>、<code>automation-*</code></td><td>是</td><td>是</td><td>少量</td><td>partial</td></tr>
+        <tr><td>Semantic Contract</td><td><code>semantic-result-contract.md</code></td><td><code>contracts/semantic/*</code>、<code>result-assembly/*</code></td><td>是</td><td>否</td><td>是</td><td>implemented</td></tr>
+        <tr><td>Runtime Display Protocol</td><td><code>runtime-display-protocol.md</code></td><td><code>contracts/runtime/*</code></td><td>是</td><td>否</td><td>是</td><td>implemented</td></tr>
+        <tr><td>Component Registry</td><td><code>component-registry-renderer.md</code>、<code>registry-spec.md</code></td><td><code>contracts/renderer/*</code></td><td>是</td><td>否</td><td>是</td><td>implemented</td></tr>
+        <tr><td>Admin Control Plane</td><td><code>00_SPEC_INDEX.md</code></td><td><code>app/admin/page.tsx</code>、<code>app/api/xiaoqiao/admin/*</code></td><td>是</td><td>是</td><td>部分</td><td>drifted</td></tr>
+        <tr><td>Evaluation / Observability</td><td><code>audit-telemetry.md</code></td><td><code>trace.ts</code>、<code>route-decision-observation.ts</code>、<code>scripts/*</code></td><td>是</td><td>是</td><td>是</td><td>implemented</td></tr>
+        <tr><td>Security / Permission</td><td>semantic contract / trust UX</td><td><code>admin-access-store.ts</code>、<code>auth-service.ts</code>、<code>user-scope.ts</code></td><td>是</td><td>部分</td><td>少量</td><td>partial</td></tr>
+        <tr><td>Frontend Rendering Governance</td><td><code>message-rendering-architecture.md</code></td><td><code>message-presentation.ts</code>、<code>message-presentation-projection.ts</code>、<code>MessagePresentationRenderer.tsx</code></td><td>是</td><td>否</td><td>是</td><td>partial</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>2.2 当前真实系统总览图</h2>
+      <pre>flowchart LR
+  User[User] --> Frontend[Frontend]
+  Frontend --> ChatAPI[/api/chat/route.ts/]
+  ChatAPI --> CC[Context Compiler]
+  ChatAPI --> RU[Request Understanding]
+  RU --> RD[RouteDecision]
+  RD --> DS[DomainSignals]
+  RD --> SK[Skill Selector]
+  SK --> CO[Capability Discovery / Preflight]
+  CO --> TP[Tool Planner]
+  TP --> MX[MCP / Workflow Execution]
+  MX --> RA[Result Adapter]
+  RA --> SRC[SemanticResultContract]
+  RA --> RC[ResponseContract]
+  SRC --> Renderer[Renderer]
+  RC --> Renderer</pre>
+    </div>
+
+    <div class="section">
+      <h2>2.3 Chat Runtime 详细调用图</h2>
+      <pre>flowchart TD
+  A[request-understanding] --> B[intent-route-rules]
+  A --> C[intent-router]
+  A --> D[capability-orchestration]
+  D --> E[report-query-orchestrator]
+  E --> F[response-contract]
+  E --> G[message presentation]
+  E --> H[report-query runtime]
+  H --> I[MCP / Workflow]
+  I --> J[SemanticResultContract]
+  J --> G
+  G --> K[MessagePresentationRenderer]
+  A --> L[route-decision-observation]
+  L --> M[process_events / metadata]</pre>
+    </div>
+
+    <div class="section">
+      <h2>2.4 Admin Control Plane 配置加载图</h2>
+      <pre>flowchart LR
+  AdminUI[Admin UI] --> Routes[API routes]
+  Routes --> RuntimeJSON[runtime JSON / seed / store]
+  RuntimeJSON --> Loader[runtime loader]
+  Loader --> Chat[/api/chat 使用点]</pre>
+    </div>
+
+    <div class="section">
+      <h2>2.5 Prompt 生效链路图</h2>
+      <pre>flowchart LR
+  PromptAdmin[prompt admin] --> PromptConfigs[prompt configs]
+  PromptConfigs --> PromptStore[prompt-store]
+  PromptStore --> Cache[cache]
+  Cache --> ActivePrompt[active prompt]
+  ActivePrompt --> ChatUse[route/runtime 使用点]</pre>
+    </div>
+
+    <div class="section">
+      <h2>2.6 Capability / MCP 链路图</h2>
+      <pre>flowchart TD
+  A[MCP server config] --> B[tool list]
+  B --> C[capability manifest]
+  C --> D[capabilityDecision]
+  D --> E[selectReportTool / tool planner]
+  E --> F[MCP call]</pre>
+    </div>
+
+    <div class="section">
+      <h2>2.7 前端展示链路图</h2>
+      <pre>flowchart LR
+  A[ResponseContract / SemanticResultContract] --> B[projection]
+  B --> C[main message surface]
+  B --> D[right panel]
+  B --> E[registered cards]</pre>
+    </div>
+
+    <div class="section">
+      <h2>2.8 Route Governance / Observation 图</h2>
+      <pre>flowchart TD
+  A[clientIntent] --> B[backend RouteDecision]
+  B --> C[route observation]
+  B --> D[actual execution]
+  C --> E[actual execution 对比]
+  D --> F[process_events / metadata]</pre>
+    </div>
+
+    <div class="footer-nav">
+      <a class="pill" href="./1-state-and-repomap.html">← 上一页</a>
+      <a class="pill" href="./3-config-maps-and-module-responsibility.html">下一页 →</a>
+    </div>
+  </div>
+</body>
+</html>

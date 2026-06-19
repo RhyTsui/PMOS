@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>认真分析小乔</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --panel: rgba(255, 255, 255, 0.82);
+      --text: #0f1f33;
+      --muted: #5c6a7c;
+      --line: rgba(34, 68, 105, 0.14);
+      --accent: #0978ff;
+      --duration: 3400ms;
+      --stage-a: #f8fbff;
+      --stage-b: #eaf4ff;
+      --stage-c: #ffffff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 42px);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 12%, rgba(94, 180, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 82%, rgba(43, 113, 255, 0.12), transparent 30%),
+        linear-gradient(145deg, #fbfdff 0%, var(--page) 100%);
+    }
+
+    main {
+      width: min(100%, 780px);
+      display: grid;
+      gap: 16px;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: clamp(34px, 6vw, 64px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.92), transparent 26%),
+        radial-gradient(circle at 62% 70%, rgba(58, 151, 255, 0.14), transparent 35%),
+        linear-gradient(150deg, var(--stage-a), var(--stage-b) 56%, var(--stage-c));
+      box-shadow:
+        0 26px 70px rgba(25, 83, 150, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      transition: background 380ms ease, box-shadow 380ms ease, border-color 380ms ease;
+      isolation: isolate;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 7%;
+      z-index: -1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(10, 123, 255, 0.12), transparent 66%);
+      filter: blur(22px);
+      opacity: 0.78;
+      transform: translate3d(0, 10px, 0);
+      animation: atmosphere 7200ms ease-in-out infinite;
+    }
+
+    .stage.dark {
+      --stage-a: #101923;
+      --stage-b: #162b42;
+      --stage-c: #0d141e;
+      --line: rgba(149, 192, 255, 0.18);
+      box-shadow:
+        0 28px 78px rgba(4, 16, 31, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .stage.transparent {
+      --stage-a: transparent;
+      --stage-b: transparent;
+      --stage-c: transparent;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .stage.transparent::before {
+      opacity: 0;
+    }
+
+    .mascot-shell {
+      position: relative;
+      width: min(88%, 590px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      transform-origin: 50% 62%;
+      animation: float var(--duration) cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .mascot-shell::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 69%;
+      left: 50%;
+      width: 47%;
+      height: 8%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(18, 111, 255, 0.32) 0%,
+          rgba(82, 165, 255, 0.22) 42%,
+          rgba(255, 255, 255, 0) 76%);
+      filter: blur(10px);
+      transform: translateX(-50%);
+      animation: shadow var(--duration) cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      pointer-events: none;
+    }
+
+    .mascot-glow {
+      position: absolute;
+      inset: 12%;
+      z-index: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.54), transparent 24%),
+        radial-gradient(circle at 55% 58%, rgba(37, 138, 255, 0.16), transparent 58%);
+      filter: blur(18px);
+      opacity: 0.86;
+      animation: glow var(--duration) ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mascot-stack {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .mascot {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      visibility: hidden;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: drop-shadow(0 22px 22px rgba(16, 86, 168, 0.12));
+      transform-origin: 50% 56%;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .mascot.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cute-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: none;
+      pointer-events: none;
+    }
+
+    .cute-blush {
+      position: absolute;
+      top: 51%;
+      width: 7.6%;
+      height: 3%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(255, 154, 192, 0.2), rgba(255, 154, 192, 0));
+      filter: blur(1.2px);
+      opacity: 0.7;
+    }
+
+    .cute-blush.left {
+      left: 36.9%;
+    }
+
+    .cute-blush.right {
+      left: 56.2%;
+    }
+
+
+    .analysis-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .focus-glasses {
+      position: absolute;
+      left: 32.9%;
+      top: 39.6%;
+      width: 35.2%;
+      height: 14.2%;
+      filter:
+        drop-shadow(0 4px 7px rgba(6, 58, 139, 0.16))
+        drop-shadow(0 1px 0 rgba(255, 255, 255, 0.72));
+      transform-origin: 50% 58%;
+      animation: glasses-focus 4800ms ease-in-out infinite;
+      transition: transform 260ms ease, filter 260ms ease;
+    }
+
+    .lens {
+      position: absolute;
+      top: 6%;
+      width: 34%;
+      aspect-ratio: 1 / 0.82;
+      border: 3px solid rgba(5, 61, 166, 0.76);
+      border-radius: 48% 48% 46% 46%;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.46), transparent 22%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(62, 163, 255, 0.05));
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.48),
+        0 0 0 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .lens.left {
+      left: 4%;
+    }
+
+    .lens.right {
+      right: 4%;
+    }
+
+    .bridge {
+      position: absolute;
+      left: 43.2%;
+      top: 43%;
+      width: 13.6%;
+      height: 8%;
+      border-radius: 999px;
+      background: rgba(5, 61, 166, 0.76);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36);
+    }
+
+    .temple {
+      position: absolute;
+      top: 42%;
+      width: 14%;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(5, 61, 166, 0.58);
+    }
+
+    .temple.left {
+      left: -8%;
+      transform: rotate(-11deg);
+    }
+
+    .temple.right {
+      right: -8%;
+      transform: rotate(11deg);
+    }
+
+    .document-chip {
+      position: absolute;
+      left: 60.8%;
+      top: 57.4%;
+      width: 15.8%;
+      height: 11.2%;
+      border: 1px solid rgba(37, 111, 218, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow:
+        0 12px 24px rgba(26, 93, 176, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78);
+      transform: rotate(5deg);
+      animation: document-read 5200ms ease-in-out infinite;
+    }
+
+    .document-chip span {
+      position: absolute;
+      left: 18%;
+      width: 64%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(13, 104, 229, 0.22);
+    }
+
+    .document-chip span:nth-child(1) {
+      top: 28%;
+    }
+
+    .document-chip span:nth-child(2) {
+      top: 48%;
+      width: 50%;
+    }
+
+    .document-chip span:nth-child(3) {
+      top: 68%;
+      width: 58%;
+    }
+
+    .mascot-shell.is-focusing .focus-glasses {
+      transform: translate3d(0, -1.5%, 0) scale(1.025);
+      filter:
+        drop-shadow(0 5px 8px rgba(6, 58, 139, 0.2))
+        drop-shadow(0 1px 0 rgba(255, 255, 255, 0.78));
+    }
+
+    @keyframes cute-twinkle {
+      0%, 100% {
+        transform: scale(0.82);
+        opacity: 0.46;
+      }
+      45% {
+        transform: scale(1.16);
+        opacity: 0.9;
+      }
+    }
+
+    .mascot-shell.paused,
+    .mascot-shell.paused::after,
+    .mascot-shell.paused .mascot-glow,
+    .stage.is-paused::before {
+      animation-play-state: paused;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      }
+      28% {
+        transform: translate3d(0, -15px, 0) rotate(-1.35deg) scale(1.009);
+      }
+      56% {
+        transform: translate3d(0, -24px, 0) rotate(1deg) scale(1.014);
+      }
+      78% {
+        transform: translate3d(0, -10px, 0) rotate(-0.45deg) scale(1.006);
+      }
+    }
+
+    @keyframes shadow {
+      0%, 100% {
+        opacity: 0.94;
+        transform: translateX(-50%) scale(1);
+      }
+      56% {
+        opacity: 0.58;
+        transform: translateX(-50%) scale(0.82);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        opacity: 0.76;
+        transform: scale(0.98);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes atmosphere {
+      0%, 100% {
+        transform: translate3d(-1%, 10px, 0) scale(0.98);
+      }
+      50% {
+        transform: translate3d(1%, -4px, 0) scale(1.04);
+      }
+    }
+
+    @keyframes glasses-focus {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+      48% {
+        transform: translate3d(0, -1.1%, 0) rotate(-0.7deg);
+      }
+    }
+
+    @keyframes document-read {
+      0%, 100% {
+        opacity: 0.62;
+        transform: translate3d(0, 0, 0) rotate(5deg);
+      }
+      50% {
+        opacity: 0.9;
+        transform: translate3d(0, -5px, 0) rotate(3deg);
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 14px 34px rgba(28, 74, 128, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    button,
+    select,
+    input[type="range"] {
+      font: inherit;
+    }
+
+    button,
+    select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.92);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 13px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    select:hover {
+      border-color: rgba(9, 120, 255, 0.34);
+      box-shadow: 0 8px 18px rgba(18, 91, 176, 0.08);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.primary {
+      color: #fff;
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #1687ff, #056fe8);
+      box-shadow: 0 10px 22px rgba(9, 120, 255, 0.18);
+    }
+
+    select {
+      padding: 0 12px;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 38px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: min(34vw, 176px);
+      accent-color: var(--accent);
+    }
+
+    .counter {
+      margin-left: auto;
+      min-width: 94px;
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stage::before,
+      .mascot-shell,
+      .mascot-shell::after,
+      .mascot-glow,
+      .focus-glasses,
+      .document-chip {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+      }
+
+      main {
+        gap: 12px;
+      }
+
+      .stage {
+        padding: 24px;
+      }
+
+      .mascot-shell {
+        width: min(92%, 520px);
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      button,
+      select,
+      label {
+        flex: 1 1 142px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      .counter {
+        margin-left: 0;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" id="stage" aria-label="认真分析小乔动画预览">
+      <div class="mascot-shell" id="mascotShell">
+        <div class="mascot-glow" aria-hidden="true"></div>
+        <div class="mascot-stack" id="mascotStack" role="img" aria-label="戴小眼镜的认真分析小乔动画帧">
+          <img class="mascot is-active" src="assets/logo_frame_01.png" alt="">
+        </div>
+        <div class="cute-layer" aria-hidden="true">
+          <span class="cute-blush left"></span>
+          <span class="cute-blush right"></span>
+        </div>
+        <div class="analysis-layer" aria-hidden="true">
+          <div class="focus-glasses">
+            <span class="temple left"></span>
+            <span class="lens left"></span>
+            <span class="bridge"></span>
+            <span class="lens right"></span>
+            <span class="temple right"></span>
+          </div>
+          <div class="document-chip">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="动画控制">
+      <button class="primary" id="toggle" type="button" aria-pressed="true">暂停</button>
+      <button id="restart" type="button">重播</button>
+      <label>
+        速度
+        <input id="speed" type="range" min="2200" max="5600" step="200" value="3400">
+      </label>
+      <select id="background" aria-label="背景">
+        <option value="light">浅色背景</option>
+        <option value="dark">深色背景</option>
+        <option value="transparent">透明背景</option>
+      </select>
+      <span class="counter" id="counter">3.4s</span>
+    </section>
+  </main>
+
+  <script>
+    const framePaths = [
+      "assets/logo_frame_01.png",
+      "assets/logo_frame_04.png",
+      "assets/logo_frame_05.png"
+    ];
+
+    const mascotStack = document.querySelector("#mascotStack");
+    const mascotShell = document.querySelector("#mascotShell");
+    const toggle = document.querySelector("#toggle");
+    const restart = document.querySelector("#restart");
+    const speed = document.querySelector("#speed");
+    const background = document.querySelector("#background");
+    const stage = document.querySelector("#stage");
+    const counter = document.querySelector("#counter");
+
+    let playing = true;
+    let mode = "idle";
+    let frameIndex = 0;
+    let frameStartedAt = performance.now();
+    let rafId = null;
+    let activeFrame = 0;
+    let nextBlinkDelay = 5200;
+    let hovering = false;
+
+    const frameElements = framePaths.map((src, index) => {
+      const image = index === 0 ? mascotStack.querySelector("img") : new Image();
+      image.className = `mascot${index === 0 ? " is-active" : ""}`;
+      image.decoding = "async";
+      image.alt = "";
+      image.src = src;
+      image.dataset.frame = String(index);
+      if (index !== 0) mascotStack.appendChild(image);
+      if (image.decode) image.decode().catch(() => {});
+      return image;
+    });
+
+    const blinkSequence = [
+      { frame: 1, hold: 180 },
+      { frame: 0, hold: 260 }
+    ];
+
+    const squintInSequence = [
+      { frame: 1, hold: 170 },
+      { frame: 2, hold: 260 }
+    ];
+
+    const squintOutSequence = [
+      { frame: 1, hold: 170 },
+      { frame: 0, hold: 220 }
+    ];
+
+    let activeSequence = blinkSequence;
+
+    function setNextBlinkDelay() {
+      nextBlinkDelay = Number(speed.value) * 1.55 + Math.random() * 2200;
+    }
+
+    function frameDuration(index) {
+      return activeSequence[index].hold;
+    }
+
+    function showFrame(nextFrame) {
+      if (nextFrame === activeFrame) return;
+      frameElements[activeFrame].classList.remove("is-active");
+      activeFrame = nextFrame;
+      frameElements[activeFrame].classList.add("is-active");
+    }
+
+    function startSequence(nextMode, sequence) {
+      if (mode === nextMode) return;
+      mode = nextMode;
+      activeSequence = sequence;
+      frameIndex = 0;
+      frameStartedAt = performance.now();
+      showFrame(activeSequence[frameIndex].frame);
+    }
+
+    function startBlink() {
+      if (mode !== "idle" || hovering) return;
+      startSequence("blink", blinkSequence);
+    }
+
+    function advanceFrame() {
+      frameIndex += 1;
+
+      if (frameIndex >= activeSequence.length) {
+        if (mode === "squint-in" && hovering) {
+          frameIndex = activeSequence.length - 1;
+          showFrame(2);
+          return;
+        }
+
+        mode = "idle";
+        activeSequence = blinkSequence;
+        frameIndex = 0;
+        frameStartedAt = performance.now();
+        setNextBlinkDelay();
+        showFrame(0);
+        return;
+      }
+
+      showFrame(activeSequence[frameIndex].frame);
+    }
+
+    function animate(now) {
+      if (playing && mode === "idle" && now - frameStartedAt >= nextBlinkDelay) {
+        startBlink();
+      }
+
+      if (playing && now - frameStartedAt >= frameDuration(frameIndex)) {
+        frameStartedAt = now;
+        advanceFrame();
+      }
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function setPlaying(nextPlaying) {
+      playing = nextPlaying;
+      toggle.textContent = playing ? "暂停" : "播放";
+      toggle.setAttribute("aria-pressed", String(playing));
+      mascotShell.classList.toggle("paused", !playing);
+      stage.classList.toggle("is-paused", !playing);
+      frameStartedAt = performance.now();
+    }
+
+    function restartAnimation() {
+      hovering = false;
+      mode = "idle";
+      activeSequence = blinkSequence;
+      frameIndex = 0;
+      mascotShell.classList.remove("is-focusing");
+      showFrame(0);
+      frameStartedAt = performance.now();
+      setNextBlinkDelay();
+      mascotShell.style.animation = "none";
+      mascotShell.offsetHeight;
+      mascotShell.style.animation = "";
+      setPlaying(true);
+    }
+
+    function startSquint() {
+      hovering = true;
+      mascotShell.classList.add("is-focusing");
+      if (!playing) return;
+      startSequence("squint-in", squintInSequence);
+    }
+
+    function endSquint() {
+      hovering = false;
+      mascotShell.classList.remove("is-focusing");
+      if (!playing) return;
+      startSequence("squint-out", squintOutSequence);
+    }
+
+    toggle.addEventListener("click", () => setPlaying(!playing));
+    restart.addEventListener("click", restartAnimation);
+    mascotShell.addEventListener("mouseenter", startSquint);
+    mascotShell.addEventListener("mouseleave", endSquint);
+    mascotShell.addEventListener("focusin", startSquint);
+    mascotShell.addEventListener("focusout", endSquint);
+    speed.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+      counter.textContent = `${(Number(speed.value) / 1000).toFixed(1)}s`;
+      frameStartedAt = performance.now();
+      setNextBlinkDelay();
+    });
+    background.addEventListener("change", () => {
+      stage.className = `stage ${background.value === "light" ? "" : background.value}`.trim();
+      if (!playing) stage.classList.add("is-paused");
+    });
+
+    document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+    setNextBlinkDelay();
+    rafId = requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

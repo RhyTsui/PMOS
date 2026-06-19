@@ -1,0 +1,69 @@
+[
+  {
+    "rowIndex": 2,
+    "id": "MIG-000",
+    "scenario": "连通",
+    "prompt": "你好",
+    "keyPoint": "LLM理解+简单回应",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "你好！我是小乔智投通用 AI 助手。我可以帮你查询广告数据报表、分析素材与创意表现、检查联调配置等。请问今天有什么我可以帮你的？",
+    "durationMs": 39842,
+    "traceId": "zt-chat-1781354036469-b0rt7f",
+    "sourceCount": 0,
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "IntentOrch 候选",
+      "开放式回答仲裁",
+      "路由观测"
+    ],
+    "runtimeStatus": "completed"
+  },
+  {
+    "rowIndex": 3,
+    "id": "MIG-001",
+    "scenario": "天气",
+    "prompt": "南京本周日天气如何",
+    "keyPoint": "联网搜索",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "当前：24°C，体感 26°C，Partly cloudy，湿度 57%。\n  - 预报：2026-06-13：21-27°C，Partly Cloudy ；\n  - 2026-06-14：20-29°C，Patchy rain nearby；\n  - 2026-06-15：21-30°C，Patchy rain nearby",
+    "durationMs": 73952,
+    "traceId": "zt-chat-1781354075014-j76q4x",
+    "sourceCount": 1,
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "查询公开来源",
+      "整理公开来源",
+      "挂载来源：南京本周日天气如何 official - 公开天气预报",
+      "公开来源候选",
+      "IntentOrch 候选",
+      "开放式回答仲裁",
+      "路由观测"
+    ],
+    "runtimeStatus": "degraded"
+  },
+  {
+    "rowIndex": 4,
+    "id": "MIG-002",
+    "scenario": "新闻解读",
+    "prompt": "最近有哪些游戏上线",
+    "keyPoint": "联网搜索",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n基于当前问题，我先给出低置信回答：这类问题需要结合具体作品、角色、场景或发布时间确认；如果你能补充出现位置、截图或上下文，我可以继续帮你缩小范围。",
+    "durationMs": 65262,
+    "traceId": "zt-chat-1781354149816-9fyy4f",
+    "sourceCount": 0,
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "查询公开来源",
+      "整理公开来源",
+      "路由观测"
+    ],
+    "runtimeStatus": "degraded"
+  }
+]

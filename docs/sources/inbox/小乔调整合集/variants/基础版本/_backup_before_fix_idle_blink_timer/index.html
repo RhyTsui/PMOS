@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>透明吉祥物动画</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --panel: rgba(255, 255, 255, 0.82);
+      --text: #0f1f33;
+      --muted: #5c6a7c;
+      --line: rgba(34, 68, 105, 0.14);
+      --accent: #0978ff;
+      --duration: 3400ms;
+      --stage-a: #f8fbff;
+      --stage-b: #eaf4ff;
+      --stage-c: #ffffff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 42px);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 12%, rgba(94, 180, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 82%, rgba(43, 113, 255, 0.12), transparent 30%),
+        linear-gradient(145deg, #fbfdff 0%, var(--page) 100%);
+    }
+
+    main {
+      width: min(100%, 780px);
+      display: grid;
+      gap: 16px;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: clamp(34px, 6vw, 64px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.92), transparent 26%),
+        radial-gradient(circle at 62% 70%, rgba(58, 151, 255, 0.14), transparent 35%),
+        linear-gradient(150deg, var(--stage-a), var(--stage-b) 56%, var(--stage-c));
+      box-shadow:
+        0 26px 70px rgba(25, 83, 150, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      transition: background 380ms ease, box-shadow 380ms ease, border-color 380ms ease;
+      isolation: isolate;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 7%;
+      z-index: -1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(10, 123, 255, 0.12), transparent 66%);
+      filter: blur(22px);
+      opacity: 0.78;
+      transform: translate3d(0, 10px, 0);
+      animation: atmosphere 7200ms ease-in-out infinite;
+    }
+
+    .stage.dark {
+      --stage-a: #101923;
+      --stage-b: #162b42;
+      --stage-c: #0d141e;
+      --line: rgba(149, 192, 255, 0.18);
+      box-shadow:
+        0 28px 78px rgba(4, 16, 31, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .stage.transparent {
+      --stage-a: transparent;
+      --stage-b: transparent;
+      --stage-c: transparent;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .stage.transparent::before {
+      opacity: 0;
+    }
+
+    .mascot-shell {
+      position: relative;
+      width: min(88%, 590px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      transform-origin: 50% 62%;
+      animation: float var(--duration) cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .mascot-shell::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 69%;
+      left: 50%;
+      width: 47%;
+      height: 8%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(18, 111, 255, 0.32) 0%,
+          rgba(82, 165, 255, 0.22) 42%,
+          rgba(255, 255, 255, 0) 76%);
+      filter: blur(10px);
+      transform: translateX(-50%);
+      animation: shadow var(--duration) cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      pointer-events: none;
+    }
+
+    .mascot-glow {
+      position: absolute;
+      inset: 12%;
+      z-index: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.54), transparent 24%),
+        radial-gradient(circle at 55% 58%, rgba(37, 138, 255, 0.16), transparent 58%);
+      filter: blur(18px);
+      opacity: 0.86;
+      animation: glow var(--duration) ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mascot-stack {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .mascot-shell.is-hovering .mascot-stack {
+      animation: hover-perk 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .mascot-shell.is-hovering .mascot {
+      filter:
+        drop-shadow(0 24px 24px rgba(16, 86, 168, 0.16))
+        saturate(1.04)
+        brightness(1.02);
+    }
+
+    .happy-mouth {
+      position: absolute;
+      left: 48.75%;
+      top: 50.9%;
+      z-index: 2;
+      width: 3.7%;
+      height: 4.6%;
+      border-radius: 28% 28% 46% 46% / 18% 18% 58% 58%;
+      overflow: hidden;
+      background: linear-gradient(180deg, #083bb9 0%, #072b95 58%, #001d72 100%);
+      box-shadow:
+        inset 0 2px 3px rgba(255, 255, 255, 0.14),
+        0 0 0 1px rgba(255, 255, 255, 0.92),
+        0 5px 10px rgba(4, 55, 160, 0.12);
+      transform-origin: center top;
+      animation: mouth-happy 1800ms ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .happy-mouth::after {
+      content: "";
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: -2%;
+      height: 42%;
+      border-radius: 999px 999px 0 0;
+      background: #2aa6ff;
+    }
+
+    .sparkles {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .sparkles span {
+      position: absolute;
+      left: 22%;
+      top: 16%;
+      width: 54px;
+      height: 54px;
+      opacity: 0;
+      background:
+        radial-gradient(circle, #fffdf5 0 16%, #ffe28a 17% 34%, rgba(255, 226, 138, 0.05) 58%);
+      clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0 50%, 39% 38%);
+      animation: sparkle-pop 2600ms ease-in-out infinite;
+      animation-delay: 180ms;
+    }
+
+    .mascot-shell.is-hovering .happy-mouth {
+      animation: mouth-hover 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .cute-face {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: none;
+      pointer-events: none;
+    }
+
+    .blush,
+    .eye-gloss,
+    .eye-sparkle {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .blush {
+      width: 10.5%;
+      height: 5.2%;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at 50% 50%,
+          rgba(255, 136, 169, 0.48) 0%,
+          rgba(255, 164, 191, 0.28) 42%,
+          rgba(255, 171, 201, 0) 76%);
+      filter: blur(3px);
+      mix-blend-mode: multiply;
+      opacity: 0.68;
+    }
+
+    .blush.left {
+      left: 38.6%;
+      top: 51.5%;
+      transform: translate(-50%, -50%) rotate(-8deg);
+    }
+
+    .blush.right {
+      left: 60.9%;
+      top: 51.5%;
+      transform: translate(-50%, -50%) rotate(8deg);
+    }
+
+    .eye-gloss {
+      width: 5.2%;
+      height: 6.4%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 26% 18%, rgba(255, 255, 255, 0.98) 0 12%, transparent 13%),
+        radial-gradient(circle at 72% 78%, rgba(138, 212, 255, 0.38) 0 12%, transparent 13%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(118, 201, 255, 0.18) 46%, transparent 72%);
+      filter: blur(0.5px);
+      opacity: 0.56;
+      mix-blend-mode: screen;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .eye-gloss.left {
+      left: 42.4%;
+      top: 45.2%;
+    }
+
+    .eye-gloss.right {
+      left: 58%;
+      top: 45.2%;
+    }
+
+    .eye-sparkle {
+      width: 1.7%;
+      height: 1.7%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow:
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 18px rgba(139, 215, 255, 0.46);
+      opacity: 0.88;
+      animation: sparkle var(--duration) ease-in-out infinite;
+    }
+
+    .eye-sparkle.left {
+      left: 41.2%;
+      top: 43.6%;
+    }
+
+    .eye-sparkle.right {
+      left: 56.8%;
+      top: 43.6%;
+      animation-delay: 220ms;
+    }
+
+    .mascot-shell[data-frame="1"] .eye-gloss,
+    .mascot-shell[data-frame="1"] .eye-sparkle,
+    .mascot-shell[data-frame="2"] .eye-gloss,
+    .mascot-shell[data-frame="2"] .eye-sparkle {
+      opacity: 0.12;
+      transform: translate(-50%, -50%) scaleY(0.35);
+    }
+
+    .mascot {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      visibility: hidden;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: drop-shadow(0 22px 22px rgba(16, 86, 168, 0.12));
+      transform-origin: 50% 56%;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .mascot.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mascot-shell.paused,
+    .mascot-shell.paused::after,
+    .mascot-shell.paused .mascot-glow,
+    .stage.is-paused::before {
+      animation-play-state: paused;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      }
+      28% {
+        transform: translate3d(0, -13px, 0) rotate(-1.15deg) scale(1.006);
+      }
+      56% {
+        transform: translate3d(0, -21px, 0) rotate(0.85deg) scale(1.011);
+      }
+      78% {
+        transform: translate3d(0, -8px, 0) rotate(-0.35deg) scale(1.004);
+      }
+    }
+
+    @keyframes shadow {
+      0%, 100% {
+        opacity: 0.94;
+        transform: translateX(-50%) scale(1);
+      }
+      56% {
+        opacity: 0.58;
+        transform: translateX(-50%) scale(0.82);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        opacity: 0.76;
+        transform: scale(0.98);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes atmosphere {
+      0%, 100% {
+        transform: translate3d(-1%, 10px, 0) scale(0.98);
+      }
+      50% {
+        transform: translate3d(1%, -4px, 0) scale(1.04);
+      }
+    }
+
+    @keyframes hover-perk {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      42% {
+        transform: translate3d(0, -5px, 0) scale(1.018);
+      }
+      72% {
+        transform: translate3d(0, 1px, 0) scale(0.996);
+      }
+    }
+
+    @keyframes mouth-happy {
+      0%, 100% {
+        transform: scaleY(0.96);
+      }
+      50% {
+        transform: scaleY(1.08);
+      }
+    }
+
+    @keyframes mouth-hover {
+      0%, 100% {
+        transform: scale(1);
+      }
+      42% {
+        transform: translateY(1px) scale(1.18, 1.08);
+      }
+      72% {
+        transform: translateY(0) scale(0.96, 1.03);
+      }
+    }
+
+    @keyframes sparkle-pop {
+      0%, 100% {
+        opacity: 0;
+        transform: translate3d(0, 8px, 0) scale(0.5) rotate(0deg);
+      }
+      24% {
+        opacity: 0.9;
+      }
+      52% {
+        opacity: 0.72;
+        transform: translate3d(0, -10px, 0) scale(1.08) rotate(45deg);
+      }
+      76% {
+        opacity: 0;
+        transform: translate3d(0, -16px, 0) scale(0.72) rotate(90deg);
+      }
+    }
+
+    @keyframes sparkle {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(0.88);
+        opacity: 0.74;
+      }
+      45% {
+        transform: translate(-50%, -50%) scale(1.18);
+        opacity: 1;
+      }
+      72% {
+        transform: translate(-50%, -50%) scale(0.94);
+        opacity: 0.82;
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 14px 34px rgba(28, 74, 128, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    button,
+    select,
+    input[type="range"] {
+      font: inherit;
+    }
+
+    button,
+    select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.92);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 13px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    select:hover {
+      border-color: rgba(9, 120, 255, 0.34);
+      box-shadow: 0 8px 18px rgba(18, 91, 176, 0.08);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.primary {
+      color: #fff;
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #1687ff, #056fe8);
+      box-shadow: 0 10px 22px rgba(9, 120, 255, 0.18);
+    }
+
+    select {
+      padding: 0 12px;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 38px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: min(34vw, 176px);
+      accent-color: var(--accent);
+    }
+
+    .counter {
+      margin-left: auto;
+      min-width: 94px;
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stage::before,
+      .mascot-shell,
+      .mascot-shell::after,
+      .mascot-glow {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+      }
+
+      main {
+        gap: 12px;
+      }
+
+      .stage {
+        padding: 24px;
+      }
+
+      .mascot-shell {
+        width: min(92%, 520px);
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      button,
+      select,
+      label {
+        flex: 1 1 142px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      .counter {
+        margin-left: 0;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" id="stage" aria-label="透明吉祥物动画预览">
+      <div class="mascot-shell" id="mascotShell" data-frame="0">
+        <div class="mascot-glow" aria-hidden="true"></div>
+        <div class="mascot-stack" id="mascotStack" role="img" aria-label="蓝色透明吉祥物动画帧">
+          <img class="mascot is-active" src="assets/logo_frame_01.png" alt="">
+        </div>
+        <div class="cute-face" aria-hidden="true">
+          <span class="blush left"></span>
+          <span class="blush right"></span>
+          <span class="eye-gloss left"></span>
+          <span class="eye-gloss right"></span>
+          <span class="eye-sparkle left"></span>
+          <span class="eye-sparkle right"></span>
+        </div>
+        <div class="happy-mouth" aria-hidden="true"></div>
+        <div class="sparkles" aria-hidden="true">
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="动画控制">
+      <button class="primary" id="toggle" type="button" aria-pressed="true">暂停</button>
+      <button id="restart" type="button">重播</button>
+      <label>
+        速度
+        <input id="speed" type="range" min="2200" max="5600" step="200" value="3400">
+      </label>
+      <select id="background" aria-label="背景">
+        <option value="light">浅色背景</option>
+        <option value="dark">深色背景</option>
+        <option value="transparent">透明背景</option>
+      </select>
+      <span class="counter" id="counter">3.4s</span>
+    </section>
+  </main>
+
+  <script>
+    const framePaths = [
+      "assets/logo_frame_01.png",
+      "assets/logo_frame_04.png",
+      "assets/logo_frame_05.png"
+    ];
+
+    const mascotStack = document.querySelector("#mascotStack");
+    const mascotShell = document.querySelector("#mascotShell");
+    const toggle = document.querySelector("#toggle");
+    const restart = document.querySelector("#restart");
+    const speed = document.querySelector("#speed");
+    const background = document.querySelector("#background");
+    const stage = document.querySelector("#stage");
+    const counter = document.querySelector("#counter");
+
+    let playing = true;
+    let mode = "idle";
+    let frameIndex = 0;
+    let frameStartedAt = performance.now();
+    let rafId = null;
+    let activeFrame = 0;
+    let nextBlinkDelay = 2600 + Math.random() * 1800;
+    let hovering = false;
+
+    const frameElements = framePaths.map((src, index) => {
+      const image = index === 0 ? mascotStack.querySelector("img") : new Image();
+      image.className = `mascot${index === 0 ? " is-active" : ""}`;
+      image.decoding = "async";
+      image.alt = "";
+      image.src = src;
+      image.dataset.frame = String(index);
+      if (index !== 0) mascotStack.appendChild(image);
+      if (image.decode) image.decode().catch(() => {});
+      return image;
+    });
+
+    const blinkSequence = [
+      { frame: 1, hold: 130 },
+      { frame: 0, hold: 240 }
+    ];
+
+    const squintInSequence = [
+      { frame: 1, hold: 130 },
+      { frame: 2, hold: 220 }
+    ];
+
+    const squintOutSequence = [
+      { frame: 1, hold: 120 },
+      { frame: 0, hold: 190 }
+    ];
+
+    let activeSequence = blinkSequence;
+
+    function setNextBlinkDelay() {
+      nextBlinkDelay = 2600 + Math.random() * 1800;
+    }
+
+    function frameDuration(index) {
+      return activeSequence[index].hold;
+    }
+
+    function showFrame(nextFrame) {
+      if (nextFrame === activeFrame) return;
+      frameElements[activeFrame].classList.remove("is-active");
+      activeFrame = nextFrame;
+      frameElements[activeFrame].classList.add("is-active");
+      mascotShell.dataset.frame = String(nextFrame);
+    }
+
+    function startSequence(nextMode, sequence) {
+      if (mode === nextMode) return;
+      mode = nextMode;
+      activeSequence = sequence;
+      frameIndex = 0;
+      frameStartedAt = performance.now();
+      showFrame(activeSequence[frameIndex].frame);
+    }
+
+    function startBlink() {
+      if (mode !== "idle" || hovering) return;
+      startSequence("blink", blinkSequence);
+    }
+
+    function advanceFrame() {
+      frameIndex += 1;
+
+      if (frameIndex >= activeSequence.length) {
+        if (mode === "squint-in" && hovering) {
+          frameIndex = activeSequence.length - 1;
+          showFrame(2);
+          return;
+        }
+
+        mode = "idle";
+        activeSequence = blinkSequence;
+        frameIndex = 0;
+        frameStartedAt = performance.now();
+        setNextBlinkDelay();
+        showFrame(0);
+        return;
+      }
+
+      showFrame(activeSequence[frameIndex].frame);
+    }
+
+    function animate(now) {
+      if (playing && mode === "idle" && now - frameStartedAt >= nextBlinkDelay) {
+        startBlink();
+      }
+
+      if (playing && now - frameStartedAt >= frameDuration(frameIndex)) {
+        frameStartedAt = now;
+        advanceFrame();
+      }
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function setPlaying(nextPlaying) {
+      playing = nextPlaying;
+      toggle.textContent = playing ? "暂停" : "播放";
+      toggle.setAttribute("aria-pressed", String(playing));
+      mascotShell.classList.toggle("paused", !playing);
+      stage.classList.toggle("is-paused", !playing);
+      frameStartedAt = performance.now();
+    }
+
+    function restartAnimation() {
+      hovering = false;
+      mode = "idle";
+      activeSequence = blinkSequence;
+      frameIndex = 0;
+      showFrame(0);
+      frameStartedAt = performance.now();
+      setNextBlinkDelay();
+      mascotShell.style.animation = "none";
+      mascotShell.offsetHeight;
+      mascotShell.style.animation = "";
+      setPlaying(true);
+    }
+
+    function startSquint() {
+      hovering = true;
+      mascotShell.classList.add("is-hovering");
+      if (!playing) return;
+      startSequence("squint-in", squintInSequence);
+    }
+
+    function endSquint() {
+      hovering = false;
+      mascotShell.classList.remove("is-hovering");
+      if (!playing) return;
+      startSequence("squint-out", squintOutSequence);
+    }
+
+    toggle.addEventListener("click", () => setPlaying(!playing));
+    restart.addEventListener("click", restartAnimation);
+    mascotShell.addEventListener("mouseenter", startSquint);
+    mascotShell.addEventListener("mouseleave", endSquint);
+    mascotShell.addEventListener("focusin", startSquint);
+    mascotShell.addEventListener("focusout", endSquint);
+    speed.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+      counter.textContent = `${(Number(speed.value) / 1000).toFixed(1)}s`;
+      frameStartedAt = performance.now();
+      setNextBlinkDelay();
+    });
+    background.addEventListener("change", () => {
+      stage.className = `stage ${background.value === "light" ? "" : background.value}`.trim();
+      if (!playing) stage.classList.add("is-paused");
+    });
+
+    document.documentElement.style.setProperty("--duration", `${speed.value}ms`);
+    setNextBlinkDelay();
+    rafId = requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+[
+  {
+    "rowIndex": 3,
+    "id": "MIG-001",
+    "scenario": "天气",
+    "prompt": "南京本周日天气如何",
+    "keyPoint": "联网搜索",
+    "status": "REVIEW",
+    "reason": "未命中关键点，需人工复核",
+    "answer": "当前：23°C，体感 25°C，Cloudy ，湿度 69%。\n  - 预报：2026-06-14：19-29°C，Patchy rain nearby；\n  - 2026-06-15：21-28°C，Patchy rain nearby；\n  - 2026-06-16：22-30°C，Patchy rain nearby",
+    "durationMs": 106723,
+    "traceId": "zt-chat-1781368247030-w2xhdb",
+    "sourceCount": 1,
+    "sourceRefs": [
+      {
+        "id": "web-1-54f0b2ab",
+        "title": "南京本周日天气如何 official - 公开天气预报",
+        "source": "wttr.in",
+        "url": "https://wttr.in/Nanjing",
+        "description": "当前：23°C，体感 25°C，Cloudy ，湿度 69%。 预报：2026-06-14：19-29°C，Patchy rain nearby；2026-06-15：21-28°C，Patchy rain nearby；2026-06-16：22-30°C，Patchy rain nearby"
+      }
+    ],
+    "eventLabels": [
+      "确定路由",
+      "信息源仲裁",
+      "查询公开来源",
+      "整理公开来源",
+      "挂载来源：南京本周日天气如何 official - 公开天气预报",
+      "公开来源候选",
+      "IntentOrch 候选",
+      "开放式回答仲裁",
+      "路由观测"
+    ],
+    "events": [
+      {
+        "type": "intent.detected",
+        "label": "确定路由",
+        "status": "success",
+        "summary": "进入general链路。",
+        "output": {
+          "clientIntent": "general_chat",
+          "resolvedIntent": "general",
+          "serviceIntent": "general_chat",
+          "ignoredClientIntentReason": "client_intent_conflict:general_chat->general",
+          "routeEvidence": {
+            "routeIntent": "general",
+            "userRequirementTask": "general",
+            "reportRouteMatch": false,
+            "reportContinuation": false,
+            "reportContinuationClassification": null,
+            "routeReason": "未命中明确业务链路，保持普通对话。"
+          },
+          "matchedRules": [],
+          "selectedSkill": null,
+          "capabilityDecision": null,
+          "isReportQuery": false,
+          "toolPurpose": "none",
+          "warnings": [
+            "client_intent_conflict:general_chat->general"
+          ]
+        },
+        "sourceRefs": []
+      },
+      {
+        "type": "planner.arbitrated",
+        "label": "信息源仲裁",
+        "status": "success",
+        "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+        "output": {
+          "policy": "planner_first_tool_grounded_contract_guarded",
+          "stage": "route_arbitration",
+          "selected_source": "public_web",
+          "priority_order": [
+            "mcp_api",
+            "knowledge",
+            "public_web",
+            "model_only",
+            "clarify"
+          ],
+          "candidates": [
+            {
+              "source": "internal_capability",
+              "status": "not_evaluated",
+              "priority": 1,
+              "role": "not_applicable",
+              "evidence_required": false,
+              "reasons": [],
+              "metadata": {}
+            },
+            {
+              "source": "knowledge",
+              "status": "not_evaluated",
+              "priority": 2,
+              "role": "verification",
+              "evidence_required": false,
+              "reasons": [
+                "knowledge_not_collected_in_this_stage"
+              ],
+              "metadata": {
+                "status": "not_collected_in_route_arbitration",
+                "hit_count": 0
+              }
+            },
+            {
+              "source": "public_web",
+              "status": "candidate",
+              "priority": 3,
+              "role": "primary_answer",
+              "evidence_required": true,
+              "confidence": 0.9,
+              "reasons": [
+                "public_web.need_detected"
+              ],
+              "metadata": {
+                "capability_type": "web_search",
+                "fact_need": {
+                  "answer_shape": "how_to",
+                  "fact_visibility": "public",
+                  "authority_need": "official_source",
+                  "freshness_need": "live",
+                  "sensitivity": "none",
+                  "consequence_risk": "high",
+                  "ambiguity": []
+                },
+                "provider_eligibility": {
+                  "provider": "public_web",
+                  "eligible": true,
+                  "role": "primary_answer",
+                  "reasons": [
+                    "provider_authority_profile_matched"
+                  ],
+                  "rejectedBy": []
+                },
+                "search_plan": {
+                  "allowed": true,
+                  "role": "primary_answer",
+                  "depth": "standard",
+                  "source_policy": "official_first",
+                  "query_strategy": "official_domain_discovery",
+                  "redaction_policy": "none",
+                  "reasons": [
+                    "fresh_official_source_needed"
+                  ],
+                  "queries": [
+                    {
+                      "query": "南京本周日天气如何 official",
+                      "purpose": "primary"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "source": "intentorch",
+              "status": "candidate",
+              "priority": 4,
+              "role": "context",
+              "reasons": [
+                "intentorch_is_planner_candidate_not_execution_authority"
+              ]
+            },
+            {
+              "source": "context",
+              "status": "candidate",
+              "priority": 5,
+              "role": "context",
+              "reasons": [
+                "project_context_available",
+                "context_can_fill_empty_slots_but_not_override_current_turn"
+              ]
+            }
+          ],
+          "rejected_authorities": [
+            "public_web_direct_route_override",
+            "intentorch_direct_tool_selection",
+            "prompt_keyword_routing",
+            "model_only_without_evidence_for_external_facts"
+          ],
+          "public_web_decision": "candidate_only",
+          "final_authority": "plan_arbitrator_then_contract_safety"
+        },
+        "sourceRefs": []
+      },
+      {
+        "type": "web.search",
+        "label": "查询公开来源",
+        "status": "success",
+        "summary": "已完成公开信息查询。",
+        "output": {
+          "source_count": 1,
+          "raw_source_count": 1,
+          "rejected_source_count": 0,
+          "min_relevance_score": 0.12,
+          "providerLabel": "Public Web Provider",
+          "fact_need": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "provider_eligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "search_plan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "primary"
+              }
+            ]
+          }
+        },
+        "sourceRefs": [
+          {
+            "title": "南京本周日天气如何 official - 公开天气预报",
+            "source": "wttr.in",
+            "url": "https://wttr.in/Nanjing",
+            "snippet": "当前：23°C，体感 25°C，Cloudy ，湿度 69%。 预报：2026-06-14：19-29°C，Patchy rain nearby；2026-06-15：21-28°C，Patchy rain nearby；2026-06-16：22-30°C，Patchy rain nearby"
+          }
+        ]
+      },
+      {
+        "type": "web.result",
+        "label": "整理公开来源",
+        "status": "success",
+        "summary": "已获取 1 条公开来源。",
+        "output": {
+          "source_count": 1,
+          "raw_source_count": 1,
+          "rejected_source_count": 0,
+          "min_relevance_score": 0.12,
+          "retrievedAt": "2026-06-13T16:31:04.297Z",
+          "providerLabel": "Public Web Provider",
+          "fact_need": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "provider_eligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "search_plan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "primary"
+              }
+            ]
+          }
+        },
+        "sourceRefs": [
+          {
+            "title": "南京本周日天气如何 official - 公开天气预报",
+            "source": "wttr.in",
+            "url": "https://wttr.in/Nanjing",
+            "snippet": "当前：23°C，体感 25°C，Cloudy ，湿度 69%。 预报：2026-06-14：19-29°C，Patchy rain nearby；2026-06-15：21-28°C，Patchy rain nearby；2026-06-16：22-30°C，Patchy rain nearby"
+          }
+        ]
+      },
+      {
+        "type": "source.attached",
+        "label": "挂载来源：南京本周日天气如何 official - 公开天气预报",
+        "status": "success",
+        "summary": "来源取自wttr.in",
+        "output": {
+          "source_type": "web_search",
+          "report_name": "",
+          "source": "wttr.in",
+          "url": "https://wttr.in/Nanjing"
+        },
+        "sourceRefs": [
+          {
+            "title": "南京本周日天气如何 official - 公开天气预报",
+            "source": "wttr.in",
+            "url": "https://wttr.in/Nanjing",
+            "snippet": ""
+          }
+        ]
+      },
+      {
+        "type": "web.result",
+        "label": "公开来源候选",
+        "status": "success",
+        "summary": "公开来源已作为候选证据进入通用回答链路。",
+        "output": {
+          "decision": "continue_to_answer_composer",
+          "evidence_role": "candidate_evidence",
+          "public_web_status": "success",
+          "source_count": 1,
+          "reason_code": "public_web.need_detected",
+          "source_required": true,
+          "result_reason": "已获取 1 条公开来源。",
+          "fact_need": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "provider_eligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "search_plan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "primary"
+              }
+            ]
+          }
+        },
+        "sourceRefs": []
+      },
+      {
+        "type": "intent_orch.candidate",
+        "label": "IntentOrch 候选",
+        "status": "rejected",
+        "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+        "output": {
+          "candidate": {
+            "source": "intentorch",
+            "status": "failed",
+            "duration_ms": 1843,
+            "parsed_intent_count": 0,
+            "tool_selection_count": 0,
+            "suggested_tools": [],
+            "risk_flags": [
+              "candidate_unavailable"
+            ],
+            "error": "intentorch_timeout"
+          },
+          "arbitration_summary": {
+            "selected_composer": "chat_answer_composer",
+            "evidence_mode_hint": "mixed_context",
+            "evidence_need": "recommended",
+            "candidate_sources": [
+              "request_understanding",
+              "intentorch",
+              "knowledge",
+              "public_web"
+            ],
+            "risk_flags": [
+              "candidate_unavailable",
+              "knowledge_no_hit",
+              "public_web_requires_composer_arbitration",
+              "intentorch_failed"
+            ],
+            "rejected_authorities": [
+              "intentorch_direct_tool_selection",
+              "prompt_keyword_routing",
+              "raw_context_dump"
+            ],
+            "final_authority": "contract_safety"
+          }
+        },
+        "sourceRefs": []
+      },
+      {
+        "type": "model.step",
+        "label": "开放式回答仲裁",
+        "status": "success",
+        "summary": "已汇总 请求理解、IntentOrch、内部知识库、公开联网 候选；证据模式：混合上下文证据；上下文采纳 6 项、淘汰 2 项；风险标记 4 项。",
+        "output": {
+          "planner_candidates": [
+            {
+              "source": "request_understanding",
+              "intent_type": "general",
+              "confidence": "low",
+              "service_intent": "general_chat",
+              "reason": "未命中明确业务链路，保持普通对话。"
+            },
+            {
+              "source": "intentorch",
+              "status": "failed",
+              "parsed_intent_count": 0,
+              "tool_selection_count": 0,
+              "suggested_tool_names": [],
+              "suggested_tool_confidences": [],
+              "risk_flags": [
+                "candidate_unavailable"
+              ],
+              "duration_ms": 1843,
+              "error": "intentorch_timeout"
+            },
+            {
+              "source": "knowledge",
+              "status": "no_hit",
+              "available": true,
+              "hit_count": 0,
+              "knowledge_base_count": 5,
+              "evidence_role": "not_applicable",
+              "freshness": "unknown",
+              "risk_flags": [
+                "knowledge_no_hit"
+              ]
+            },
+            {
+              "source": "public_web",
+              "status": "success",
+              "capability_type": "web_search",
+              "reason_code": "public_web.need_detected",
+              "source_count": 1,
+              "source_required": true,
+              "confidence": 0.9,
+              "evidence_role": "candidate_evidence",
+              "risk_flags": [
+                "public_web_requires_composer_arbitration"
+              ]
+            }
+          ],
+          "arbitration_summary": {
+            "selected_composer": "chat_answer_composer",
+            "evidence_mode_hint": "mixed_context",
+            "evidence_need": "recommended",
+            "candidate_sources": [
+              "request_understanding",
+              "intentorch",
+              "knowledge",
+              "public_web"
+            ],
+            "risk_flags": [
+              "candidate_unavailable",
+              "knowledge_no_hit",
+              "public_web_requires_composer_arbitration",
+              "intentorch_failed"
+            ],
+            "rejected_authorities": [
+              "intentorch_direct_tool_selection",
+              "prompt_keyword_routing",
+              "raw_context_dump"
+            ],
+            "final_authority": "contract_safety"
+          },
+          "context_selection": {
+            "memory": {
+              "selected_count": 2,
+              "rejected_count": 0,
+              "policy": {
+                "strategy": "generic_relevance_decay_importance",
+                "limit": 8,
+                "min_score": 0.16,
+                "query_terms": 17,
+                "candidate_count": 2
+              },
+              "selected_ids": [
+                "mem-1781186524618-7eivo6",
+                "mem-1780365991813-flv1v7"
+              ],
+              "selected": [
+                {
+                  "id": "mem-1781186524618-7eivo6",
+                  "source": "memory",
+                  "score": 0.847,
+                  "reasons": "[Truncated]",
+                  "updatedAt": "2026-06-11T14:02:04.618Z"
+                },
+                {
+                  "id": "mem-1780365991813-flv1v7",
+                  "source": "memory",
+                  "score": 0.213,
+                  "reasons": "[Truncated]",
+                  "updatedAt": "2026-06-02T02:06:31.813Z"
+                }
+              ],
+              "rejected": []
+            },
+            "recent_conversations": {
+              "selected_count": 4,
+              "rejected_count": 2,
+              "policy": {
+                "strategy": "generic_relevance_decay_importance",
+                "limit": 4,
+                "min_score": 0.16,
+                "query_terms": 17,
+                "candidate_count": 6
+              },
+              "selected_ids": [
+                "conv-1781336548459",
+                "conv-1781320104939",
+                "conv-1781320013444",
+                "conv-1781317181379"
+              ],
+              "selected": [
+                {
+                  "id": "conv-1781336548459",
+                  "source": "recent_conversation",
+                  "score": 0.24,
+                  "reasons": "[Truncated]",
+                  "updatedAt": "2026-06-13T11:20:19.940Z"
+                },
+                {
+                  "id": "conv-1781320104939",
+                  "source": "recent_conversation",
+                  "score": 0.24,
+                  "reasons": "[Truncated]",
+                  "updatedAt": "2026-06-13T05:30:34.332Z"
+                },
+                {
+                  "id": "conv-1781320013444",
+                  "source": "recent_conversation",
+                  "score": 0.24,
+                  "reasons": "[Truncated]",
+                  "updatedAt": "2026-06-13T03:07:37.714Z"
+                },
+                {
+                  "id": "conv-1781317181379",
+                  "source": "recent_conversation",
+                  "score": 0.24,
+                  "reasons": "[Truncated]",
+                  "updatedAt": "2026-06-13T03:04:34.620Z"
+                }
+              ],
+              "rejected": [
+                {
+                  "id": "conv-1781319666087",
+                  "source": "recent_conversation",
+                  "score": 0.24,
+                  "reasons": "[Truncated]",
+                  "reason_codes": "recency:1|has_content"
+                },
+                {
+                  "id": "conv-1781253926494",
+                  "source": "recent_conversation",
+                  "score": 0.24,
+                  "reasons": "[Truncated]",
+                  "reason_codes": "recency:1|has_content"
+                }
+              ]
+            }
+          }
+        },
+        "sourceRefs": []
+      },
+      {
+        "type": "route_observation",
+        "label": "路由观测",
+        "status": "success",
+        "summary": "路由观测通过：预期 general_chat，实际 general_chat，无阻断差异。",
+        "output": {
+          "mode": "observe_only",
+          "decisionId": "zt-chat-1781368247030-w2xhdb:route-observation",
+          "traceId": "zt-chat-1781368247030-w2xhdb",
+          "clientIntent": "general_chat",
+          "serviceIntent": "general_chat",
+          "resolvedIntent": "general_chat",
+          "primaryDeliverable": "chat_answer",
+          "decisionAuthority": {
+            "clientIntent": "hint_only",
+            "prompt": "evidence_only",
+            "domainSignals": "evidence_only",
+            "routeRules": "decision_support",
+            "backendRouteDecision": "authoritative"
+          },
+          "routeEvidence": [
+            {
+              "source": "client_hint",
+              "key": "body.intent",
+              "value": "general_chat",
+              "reason": "Client hint only."
+            },
+            {
+              "source": "route_rule",
+              "key": "route.intent_type",
+              "value": "general",
+              "reason": "未命中明确业务链路，保持普通对话。"
+            },
+            {
+              "source": "fallback_policy",
+              "key": "matches_report_query_route",
+              "value": false
+            },
+            {
+              "source": "conversation_state",
+              "key": "report_continuation",
+              "value": false
+            },
+            {
+              "source": "context",
+              "key": "user_requirement.task",
+              "value": "general"
+            }
+          ],
+          "domainSignals": [],
+          "matchedRules": [],
+          "routeRulesGovernance": [],
+          "skillSelection": {
+            "candidateSkills": [],
+            "readiness": "blocked",
+            "missingInputs": [],
+            "warnings": []
+          },
+          "toolPurpose": "none",
+          "isReportQuery": false,
+          "confidence": 0.35,
+          "needsClarification": false,
+          "warnings": [
+            {
+              "code": "client_intent_conflict",
+              "message": "客户端提示与后端路由不一致：general_chat->general。",
+              "severity": "warning"
+            },
+            {
+              "code": "public_web_candidate_continues_to_composer",
+              "message": "公开联网结果已作为候选证据进入通用回答链路。",
+              "severity": "info"
+            }
+          ],
+          "promptRuntime": {
+            "available": true,
+            "activePromptId": "route_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": false,
+            "contentHash": "3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6",
+            "conflicts": [],
+            "conflictWarnings": [],
+            "slots": {
+              "route_prompt": {
+                "activePromptId": "route_prompt",
+                "activePromptVersion": "1",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "response_prompt": {
+                "activePromptId": "response_prompt",
+                "activePromptVersion": "1",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "7911b04dc727ee205009aa5a64a6c5669f9c4d75734ec3d43f3447d25ae63d0d",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "evidence_prompt": {
+                "activePromptId": "evidence_prompt",
+                "activePromptVersion": "1",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "99c70f0485bd9c779fa94e2e67da7902568a05c864b0d7f052e8f1df8936f65c",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "card_prompt": {
+                "activePromptId": "card_prompt",
+                "activePromptVersion": "1",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "963778bbe5757cd558bdeab4c924f5122885576e8f8ba05f55ce544a772d6873",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "followup_prompt": {
+                "activePromptId": "followup_prompt",
+                "activePromptVersion": "1",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "d8808c1feb9d3598be5b72dc2b8e534a4436eb2aaf59a93d995716b78c9d5dc9",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "tool_explain_prompt": {
+                "activePromptId": "tool_explain_prompt",
+                "activePromptVersion": "1",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "bdd400c089b87c900da7b1e71e812dc5e6137a013fe642b785c4a81a3ba6c838",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "report_query_route_prompt": {
+                "activePromptId": "report_query_route_prompt",
+                "activePromptVersion": "6",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "beaf91a3b5251d7126e7bb772b8ec93ba0de3defa65655e1957e00590bafed7e",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "report_query_answer_prompt": {
+                "activePromptId": "report_query_answer_prompt",
+                "activePromptVersion": "4",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "25ee3aa8e2046c0d12d7fb484fd175969dbc76884d8bda41450c5cb76d813860",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "report_query_visual_prompt": {
+                "activePromptId": "report_query_visual_prompt",
+                "activePromptVersion": "4",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "dde3cfb5c53645c2e48a6e337abbbbb2ca25f87a0d3bcbe5251800e2d28a6cd4",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              },
+              "report_query_evidence_prompt": {
+                "activePromptId": "report_query_evidence_prompt",
+                "activePromptVersion": "4",
+                "promptSource": "runtime",
+                "seedFallbackUsed": false,
+                "cacheHit": false,
+                "contentHash": "de2e497ff966cb6ca214a4e01e4cdb31ae6de5d968795a303c57aaa48ed3360f",
+                "conflicts": "[Truncated]",
+                "conflictWarnings": "[Truncated]"
+              }
+            }
+          },
+          "governanceConflicts": [],
+          "createdAt": "2026-06-13T16:32:31.893Z",
+          "actualExecution": {
+            "actualServiceIntent": "general_chat",
+            "actualIsReportQuery": false,
+            "actualToolPurpose": "none"
+          },
+          "mismatches": []
+        },
+        "sourceRefs": []
+      }
+    ],
+    "runtimeStatus": "degraded",
+    "runtimeSteps": []
+  }
+]

@@ -1,0 +1,282 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7fbff"/>
+      <stop offset="0.55" stop-color="#f4f7fb"/>
+      <stop offset="1" stop-color="#fff7ee"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f6fff"/>
+      <stop offset="1" stop-color="#00a6ff"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00a88f"/>
+      <stop offset="1" stop-color="#42c36f"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff8a3d"/>
+      <stop offset="1" stop-color="#ffbf47"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6f5bff"/>
+      <stop offset="1" stop-color="#b45cff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#123459" flood-opacity="0.13"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 16 16" refX="14" refY="8" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
+      <path d="M2 2 L14 8 L2 14 Z" fill="#3d5a7a"/>
+    </marker>
+    <style>
+      .font { font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif; }
+      .title { font-size: 82px; font-weight: 800; fill: #10243f; letter-spacing: 0; }
+      .subtitle { font-size: 34px; font-weight: 500; fill: #5b6f87; }
+      .section-title { font-size: 40px; font-weight: 800; fill: #152942; }
+      .section-sub { font-size: 24px; font-weight: 500; fill: #60748a; }
+      .card-title { font-size: 30px; font-weight: 800; fill: #172b44; }
+      .card-text { font-size: 22px; font-weight: 500; fill: #52687e; }
+      .small { font-size: 19px; font-weight: 500; fill: #60748a; }
+      .tag { font-size: 20px; font-weight: 700; fill: #ffffff; }
+      .lane { fill: #ffffff; stroke: #d9e4f2; stroke-width: 2; rx: 34; filter: url(#shadow); }
+      .card { fill: #ffffff; stroke: #dfe8f4; stroke-width: 2; rx: 24; }
+      .soft { fill: #f8fbff; stroke: #dfebf7; stroke-width: 2; rx: 20; }
+      .line { stroke: #3d5a7a; stroke-width: 5; fill: none; marker-end: url(#arrow); }
+      .thin-line { stroke: #b9c8da; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #9fb0c3; stroke-width: 4; stroke-dasharray: 12 12; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+
+  <g class="font">
+    <text x="160" y="160" class="title">小乔智投最新产品架构图</text>
+    <text x="160" y="220" class="subtitle">AI 投放服务台：从用户目标到真实能力执行、证据沉淀、结果交付与持续治理的端到端闭环</text>
+    <text x="3140" y="155" class="small">image2 高清版 · 2026-06-11</text>
+
+    <g transform="translate(160 300)">
+      <rect class="lane" width="3520" height="380"/>
+      <text x="42" y="62" class="section-title">一、对用户提供的端到端服务</text>
+      <text x="42" y="104" class="section-sub">所有服务都以会话承接，输出结论、证据、产物和下一步动作</text>
+
+      <g transform="translate(42 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#blue)"/>
+        <text x="28" y="58" class="card-title">问答解释</text>
+        <text x="28" y="98" class="card-text">规则、口径、流程说明</text>
+        <text x="28" y="132" class="card-text">知识引用 + 模型组织</text>
+      </g>
+
+      <g transform="translate(472 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#green)"/>
+        <text x="28" y="58" class="card-title">数据分析</text>
+        <text x="28" y="98" class="card-text">投放表现、趋势、归因</text>
+        <text x="28" y="132" class="card-text">工具优先 + 证据账本</text>
+      </g>
+
+      <g transform="translate(902 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#orange)"/>
+        <text x="28" y="58" class="card-title">报表生成</text>
+        <text x="28" y="98" class="card-text">日报、诊断、分析包</text>
+        <text x="28" y="132" class="card-text">任务执行 + 产物交付</text>
+      </g>
+
+      <g transform="translate(1332 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#purple)"/>
+        <text x="28" y="58" class="card-title">联调排障</text>
+        <text x="28" y="98" class="card-text">状态检查、异常定位</text>
+        <text x="28" y="132" class="card-text">步骤披露 + 失败归一</text>
+      </g>
+
+      <g transform="translate(1762 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#blue)"/>
+        <text x="28" y="58" class="card-title">资产处理</text>
+        <text x="28" y="98" class="card-text">文件、素材、结果包</text>
+        <text x="28" y="132" class="card-text">引用、复用、继续处理</text>
+      </g>
+
+      <g transform="translate(2192 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#green)"/>
+        <text x="28" y="58" class="card-title">需求与 Case</text>
+        <text x="28" y="98" class="card-text">需求沉淀、异常记录</text>
+        <text x="28" y="132" class="card-text">编号、责任人、进度</text>
+      </g>
+
+      <g transform="translate(2622 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#orange)"/>
+        <text x="28" y="58" class="card-title">审批动作</text>
+        <text x="28" y="98" class="card-text">高风险操作前确认</text>
+        <text x="28" y="132" class="card-text">权限、审批、审计</text>
+      </g>
+
+      <g transform="translate(3052 140)">
+        <rect class="card" width="390" height="180"/>
+        <rect x="0" y="0" width="390" height="12" rx="6" fill="url(#purple)"/>
+        <text x="28" y="58" class="card-title">草稿创作</text>
+        <text x="28" y="98" class="card-text">文案、方案、总结</text>
+        <text x="28" y="132" class="card-text">标记为模型生成</text>
+      </g>
+    </g>
+
+    <g transform="translate(160 740)">
+      <rect class="lane" width="3520" height="720"/>
+      <text x="42" y="62" class="section-title">二、一次请求的运行链路</text>
+      <text x="42" y="104" class="section-sub">先理解目标，再发现能力；事实与动作走工具，模型只做语义组织、追问和解释</text>
+
+      <g transform="translate(70 165)">
+        <rect class="soft" width="300" height="130"/>
+        <text x="30" y="52" class="card-title">用户请求</text>
+        <text x="30" y="88" class="card-text">问题、需求、任务</text>
+      </g>
+      <path class="line" d="M390 230 H510"/>
+
+      <g transform="translate(530 142)">
+        <rect class="card" width="360" height="176"/>
+        <text x="28" y="48" class="card-title">Request Understanding</text>
+        <text x="28" y="86" class="card-text">识别目标、约束、上下文</text>
+        <text x="28" y="120" class="card-text">发现歧义或缺失信息</text>
+        <text x="28" y="150" class="small">不直接选择工具或补参数</text>
+      </g>
+      <path class="line" d="M910 230 H1020"/>
+
+      <g transform="translate(1040 142)">
+        <rect class="card" width="360" height="176"/>
+        <text x="28" y="48" class="card-title">Capability Discovery</text>
+        <text x="28" y="86" class="card-text">发现可用能力候选</text>
+        <text x="28" y="120" class="card-text">形成可审计选择依据</text>
+        <text x="28" y="150" class="small">来源：知识、MCP、文件、任务等</text>
+      </g>
+      <path class="line" d="M1420 230 H1530"/>
+
+      <g transform="translate(1550 142)">
+        <rect class="card" width="360" height="176"/>
+        <text x="28" y="48" class="card-title">Resolver Chain</text>
+        <text x="28" y="86" class="card-text">意图、能力、工具映射</text>
+        <text x="28" y="120" class="card-text">参数补齐、权限预检</text>
+        <text x="28" y="150" class="small">低置信进入确认</text>
+      </g>
+      <path class="line" d="M1930 230 H2040"/>
+
+      <g transform="translate(2060 142)">
+        <rect class="card" width="360" height="176"/>
+        <text x="28" y="48" class="card-title">Execution Policy</text>
+        <text x="28" y="86" class="card-text">决定执行、追问或降级</text>
+        <text x="28" y="120" class="card-text">风险、权限、失败策略</text>
+        <text x="28" y="150" class="small">tool-first / ask-user / task</text>
+      </g>
+      <path class="line" d="M2440 230 H2550"/>
+
+      <g transform="translate(2570 142)">
+        <rect class="card" width="360" height="176"/>
+        <text x="28" y="48" class="card-title">执行层</text>
+        <text x="28" y="86" class="card-text">MCP / Tool / File / Task</text>
+        <text x="28" y="120" class="card-text">Model 负责解释和总结</text>
+        <text x="28" y="150" class="small">业务失败需归一化</text>
+      </g>
+      <path class="line" d="M2950 230 H3060"/>
+
+      <g transform="translate(3080 142)">
+        <rect class="soft" width="330" height="176"/>
+        <text x="28" y="48" class="card-title">结果交付</text>
+        <text x="28" y="86" class="card-text">结论、证据、动作</text>
+        <text x="28" y="120" class="card-text">产物、任务、披露信息</text>
+        <text x="28" y="150" class="small">回到会话继续处理</text>
+      </g>
+
+      <g transform="translate(530 390)">
+        <rect class="soft" width="2880" height="210"/>
+        <text x="32" y="52" class="card-title">结果组装与前端承接</text>
+        <text x="32" y="96" class="card-text">Evidence Ledger：记录数据源、工具输出、计算、模型推断、产物和任务状态</text>
+        <text x="32" y="136" class="card-text">ResponseContract / SemanticResultContract：统一收口业务结果、动作、证据、产物、任务和展示区域</text>
+        <text x="32" y="176" class="card-text">Frontend Presentation：主消息展示可消费结论；右侧披露展示过程、证据、原始数据和质量检查</text>
+      </g>
+
+      <path class="dash" d="M3235 390 C3235 360 3235 350 3235 328"/>
+      <path class="dash" d="M1970 390 C1970 360 1970 350 1970 328"/>
+    </g>
+
+    <g transform="translate(160 1520)">
+      <rect class="lane" width="1720" height="470"/>
+      <text x="42" y="62" class="section-title">三、能力与事实来源</text>
+      <text x="42" y="104" class="section-sub">来源声明能力边界，不直接决定页面；所有事实进入证据账本</text>
+      <g transform="translate(42 145)">
+        <rect class="card" width="255" height="118"/>
+        <text x="28" y="48" class="card-title">Knowledge</text>
+        <text x="28" y="84" class="card-text">规则、文档、口径</text>
+      </g>
+      <g transform="translate(322 145)">
+        <rect class="card" width="255" height="118"/>
+        <text x="28" y="48" class="card-title">Web</text>
+        <text x="28" y="84" class="card-text">外部公开信息</text>
+      </g>
+      <g transform="translate(602 145)">
+        <rect class="card" width="255" height="118"/>
+        <text x="28" y="48" class="card-title">MCP</text>
+        <text x="28" y="84" class="card-text">真实查询与动作</text>
+      </g>
+      <g transform="translate(882 145)">
+        <rect class="card" width="255" height="118"/>
+        <text x="28" y="48" class="card-title">File</text>
+        <text x="28" y="84" class="card-text">附件解析与引用</text>
+      </g>
+      <g transform="translate(1162 145)">
+        <rect class="card" width="255" height="118"/>
+        <text x="28" y="48" class="card-title">Task</text>
+        <text x="28" y="84" class="card-text">异步、审批、工单</text>
+      </g>
+      <g transform="translate(1442 145)">
+        <rect class="card" width="218" height="118"/>
+        <text x="28" y="48" class="card-title">LLM</text>
+        <text x="28" y="84" class="card-text">总结、追问、草稿</text>
+      </g>
+      <g transform="translate(42 310)">
+        <rect class="soft" width="1618" height="100"/>
+        <text x="28" y="42" class="card-text">统一要求：sourceId、权限、输入输出契约、证据策略、失败语义、配置版本</text>
+        <text x="28" y="75" class="small">禁止用工具可达代表业务成功；空结果、权限不足、未配置、部分成功必须明确说明</text>
+      </g>
+    </g>
+
+    <g transform="translate(1960 1520)">
+      <rect class="lane" width="1720" height="470"/>
+      <text x="42" y="62" class="section-title">四、治理与观测闭环</text>
+      <text x="42" y="104" class="section-sub">能力接入、路由规则、模型提示词、证据策略和上线回归由控制面管理</text>
+
+      <g transform="translate(42 145)">
+        <rect class="card" width="360" height="118"/>
+        <text x="28" y="48" class="card-title">Admin 控制面</text>
+        <text x="28" y="84" class="card-text">能力开关、权限、版本</text>
+      </g>
+      <g transform="translate(442 145)">
+        <rect class="card" width="360" height="118"/>
+        <text x="28" y="48" class="card-title">Route Rules</text>
+        <text x="28" y="84" class="card-text">候选能力与策略治理</text>
+      </g>
+      <g transform="translate(842 145)">
+        <rect class="card" width="360" height="118"/>
+        <text x="28" y="48" class="card-title">Model / Prompt</text>
+        <text x="28" y="84" class="card-text">版本、用途、表达风格</text>
+      </g>
+      <g transform="translate(1242 145)">
+        <rect class="card" width="420" height="118"/>
+        <text x="28" y="48" class="card-title">Evaluation</text>
+        <text x="28" y="84" class="card-text">golden 集、灰度、回归</text>
+      </g>
+
+      <g transform="translate(42 310)">
+        <rect class="soft" width="1618" height="100"/>
+        <text x="28" y="42" class="card-text">Observability / Trace：记录理解、发现、解析、执行、模型、证据、结果组装和配置版本</text>
+        <text x="28" y="75" class="small">Trace fail-open：观测失败不影响用户请求成功语义，但必须留下降级记录</text>
+      </g>
+    </g>
+
+    <g transform="translate(160 2040)">
+      <rect x="0" y="-42" width="3520" height="72" rx="20" fill="#10243f" opacity="0.92"/>
+      <text x="32" y="5" class="tag">架构原则：职责分层 · 工具优先 · 契约优先 · 证据默认归档 · 主消息与过程披露分离 · 配置治理而非硬编码</text>
+    </g>
+  </g>
+</svg>

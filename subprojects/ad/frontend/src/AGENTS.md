@@ -18,62 +18,174 @@
 - **Core**: React 19
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS 4 + CSS Variables
-- **Charts**: Recharts
+- **UI 体系**: Ant Design 6 + Ant Design X（会话/Chat 默认真源）
+- **Charts**: Recharts + @ant-design/plots
 - **Icons**: Lucide React
-- **AI/Agent**: coze-coding-dev-sdk (LLM + Knowledge + Web Search)
-- **LLM Model**: doubao-seed-1-8-251228 (Agent-optimized)
+- **LLM**: 通过 Model Service 层路由（model-router / model-use-case-runtime）
+- **Runtime**: Node.js + tsx (dev) / tsup (prod)
 
 ## Project Structure
 ```
 src/
 ├── app/
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Main workspace (full-screen chat + collapsible panels)
-│   ├── admin/page.tsx     # Admin management page (5 tabs: prompts/switches/debug-config/demand/mcp)
-│   ├── globals.css        # Global styles + XiaoQiao theme
+│   ├── layout.tsx              # Root layout + 字体加载
+│   ├── page.tsx                # Main workspace (全屏对话 + 可折叠面板)
+│   ├── admin/page.tsx          # Admin 管理页 (8 tabs: prompts/switches/mcp/demand/intent-route/entity-resolution/operation-logs/workflow)
+│   ├── login/                  # 登录页（客户端动态加载登录 SDK）
+│   ├── reports/                # 报表页
+│   ├── security/               # 安全相关
+│   ├── globals.css             # Global styles + XiaoQiao theme + CSS tokens
 │   └── api/
-│       ├── chat/route.ts  # POST /api/chat - LLM streaming + knowledge + web search + MCP tools
-│       └── xiaoqiao/      # BFF API routes (30 endpoints, demo mode returns mock data)
-│           ├── workspace/route.ts
-│           ├── conversations/             # CRUD + messages + attachments
-│           ├── tasks/                      # CRUD + results + context + evidence
-│           ├── admin/                      # prompts/switches/debug-config/demand-pool/mcp-servers
-│           └── debug-automation/tasks/     # CRUD + start/pause/resume/takeover/steps/result
+│       ├── chat/route.ts       # POST /api/chat — Chat 主链路（SSE + Intent Router + Planner + 能力编排 + 模型调用）
+│       └── xiaoqiao/           # BFF API routes (21 endpoints)
+│           ├── conversations/          # 会话 CRUD + messages + attachments
+│           ├── tasks/                  # 任务 CRUD + results + context + evidence
+│           ├── workspace/              # 工作台视图
+│           ├── automation-executions/  # 自动化执行
+│           ├── automations/            # 自动化模板
+│           ├── attachments/            # 附件管理
+│           ├── chat-display-config/    # 会话展示配置
+│           ├── memory/                 # 用户记忆
+│           ├── notifications/          # 通知
+│           ├── project-icon/           # 项目图标
+│           ├── projects/               # 项目管理
+│           ├── query-table/            # 数据查询
+│           ├── recommendations/        # 推荐
+│           ├── report-session/         # 问数会话
+│           ├── runtime-version/        # 运行时版本
+│           ├── scheduled-tasks/        # 定时任务
+│           ├── skill-contracts/        # Skill 契约管理
+│           ├── skills/                 # Skill 列表
+│           └── web-search/             # 公开联网搜索
 ├── components/
-│   ├── cognitive/         # Conversation Hub components
-│   │   ├── ChatContainer.tsx     # Main chat area with welcome cards
-│   │   ├── Header.tsx            # Minimal header (logo + title + admin link)
-│   │   ├── InputArea.tsx         # X-style input: quick tags + tool/agent selectors + textarea
-│   │   ├── MessageBubble.tsx     # Message with thinking fold + tool call tags
-│   │   ├── ContextSummaryBar.tsx # Session/task context summary strip
-│   │   ├── MissingFieldsCard.tsx # Missing fields card with fill-in entry
-│   │   ├── AttachmentBar.tsx     # Attachment upload bar with status management
-│   │   └── EvidenceCard.tsx      # Evidence item card with source references
-│   ├── workspace/         # Workspace panel components
-│   │   ├── ResultPanel.tsx       # Structured result area (4 result schemas + evidence)
-│   │   └── TaskSidebar.tsx       # History task sidebar
-│   ├── agents/            # Agent panel components
-│   │   ├── AdAssistantPanel.tsx  # 使用帮助 (Help)
-│   │   ├── DiagnosisPanel.tsx    # 问题排查 (Diagnosis)
-│   │   ├── AnalysisPanel.tsx     # 对话式分析 (Analysis)
-│   │   ├── IntegrationPanel.tsx  # 广告联调 (Integration)
-│   │   ├── MonitoringPanel.tsx   # 监控大屏 (Monitoring)
-│   │   ├── PostbackPanel.tsx     # 回传配置 (Postback)
-│   │   └── PredictionPanel.tsx   # 广告预测 (Prediction)
-│   └── ui/                # Custom UI components
-│       ├── CodeBlock.tsx
-│       ├── GlassPanel.tsx
-│       ├── MetricCard.tsx
-│       └── StatusBadge.tsx
+│   ├── cognitive/              # 会话区核心组件
+│   │   ├── ChatContainer.tsx          # 主对话区 + 欢迎页卡片
+│   │   ├── Header.tsx                 # 顶部（logo + 标题 + admin 入口）
+│   │   ├── InputArea.tsx              # Ant Design X 风格输入区
+│   │   ├── MessageBubble.tsx          # 消息气泡（思维链折叠 + 工具调用标签）
+│   │   ├── MessagePresentationRenderer.tsx  # MessagePart 渲染
+│   │   ├── MessageDisclosureDrawer.tsx      # 披露抽屉
+│   │   ├── DataVizRenderer.tsx              # 数据可视化渲染
+│   │   ├── ContextSummaryBar.tsx            # 会话/任务上下文摘要
+│   │   ├── MissingFieldsCard.tsx            # 缺字段卡片
+│   │   ├── AttachmentBar.tsx                # 附件上传
+│   │   ├── EvidenceCard.tsx                 # 证据卡片
+│   │   ├── CallChainPanel.tsx               # 调用链面板
+│   │   ├── CapabilityFollowUpCard.tsx       # 能力追问卡片
+│   │   ├── AmbiguityConfirmCard.tsx         # 歧义确认卡片
+│   │   ├── AssetPreview.tsx / Modal.tsx     # 资产预览
+│   │   ├── ContextEditDrawer.tsx            # 上下文编辑
+│   │   ├── ExportMenu.tsx                   # 导出菜单
+│   │   ├── ToolBar.tsx                      # 工具栏
+│   │   ├── AgentDock.tsx                    # Agent Dock
+│   │   ├── ComposerMotionLab.tsx            # 输入区动效
+│   │   ├── WelcomeMascotIcon.tsx            # 欢迎吉祥物
+│   │   └── MessageErrorBoundary.tsx         # 消息错误边界
+│   ├── admin/                  # 管理后台 Tab 组件
+│   │   ├── IntentRouteRulesTab.tsx          # 意图路由规则
+│   │   ├── OrchestrationGovernanceTab.tsx   # 编排治理
+│   │   ├── EntityResolutionConfigTab.tsx    # 实体解析配置
+│   │   ├── RoleProfileManagementTab.tsx     # 角色配置
+│   │   ├── UserManagementTab.tsx            # 用户管理
+│   │   ├── WorkflowManagementTab.tsx        # 工作流管理
+│   │   ├── OperationLogsTab.tsx             # 操作日志
+│   │   └── PublicWebConfigTab.tsx           # 公开联网配置
+│   ├── agents/                 # Agent 面板
+│   │   ├── AutoDebugWorkbench.tsx         # 自动联调工作台
+│   │   └── MonitoringPanel.tsx            # 监控大屏
+│   ├── workspace/              # 工作区面板
+│   │   ├── ResultPanel.tsx                # 结构化结果区
+│   │   ├── TaskSidebar.tsx                # 历史任务
+│   │   ├── MemoryPanel.tsx                # 记忆面板
+│   │   ├── ScheduledTaskPanel.tsx         # 定时任务
+│   │   └── SkillManager.tsx               # Skill 管理
+│   ├── ui/                     # 基础 UI 组件 (button/card/dialog/form/input/select/table/tabs...)
+│   ├── login/                  # 登录页组件
+│   └── yokaui/                 # 游卡 UI 组件
+├── contracts/                  # ★ 前端契约类型真源（68 文件）
+│   ├── semantic/               # Unified Semantic Contract (semantic-result / action / evidence / source)
+│   ├── runtime/                # Runtime Display Protocol
+│   ├── disclosure/             # Disclosure Contract + builders + validators
+│   ├── renderer/               # Component Registry / Renderer / default-renderers
+│   ├── validation/             # 契约校验器 (semantic-result / action / evidence / renderer-data / runtime-display / report-trend)
+│   ├── request-understanding/  # 请求理解 (entity-resolution / fact-need / route-decision / user-requirement / info-source-arbitration)
+│   ├── planner/                # Planner 计划契约
+│   ├── retrieval/              # 检索层契约
+│   ├── model-service/          # 模型服务 (llm-output / model-route / model-use-case-registry / prompt-variable)
+│   ├── automation/             # 自动化 (agent-runtime-task / automation-task / mcp-workflow-status / operation-safety / task-artifact)
+│   ├── business-semantics/     # 业务语义 (dataset-authority / dimension-catalog / metric-catalog)
+│   ├── capability/             # 能力发现 (capability-gap / capability-manifest)
+│   ├── mcp/                    # MCP 工具适配
+│   ├── observability/          # 可观测性 (routing-trace / telemetry)
+│   ├── presentation/           # 消息展示 (message-contract-field-bindings)
+│   ├── public-web/             # 公开联网 (source-grounding)
+│   ├── result-assembly/        # 结果组装 (semantic-result-assembly)
+│   ├── skills/                 # Skill 契约（按业务域拆分，如 callback-attribution-diagnosis/）
+│   └── examples/               # 示例
 ├── hooks/
-│   ├── useAgent.tsx       # Agent context (API-driven: workspace, tasks, results, evidence)
-│   └── useConversation.ts # Conversation management with SSE streaming
-├── lib/
-│   ├── api.ts             # Unified API client (apiFetch + typed methods + demo/service mode)
-│   ├── demo-data.ts       # Demo mock data + getter functions (used by BFF routes in demo mode)
-│   └── constants.ts       # Agent configs (AGENT_MAP, AGENT_TOOLS, AGENT_ICONS)
+│   ├── useAgent.tsx            # Agent context
+│   └── useConversation.ts      # Conversation management with SSE streaming
+├── lib/                        # ★ 运行时模块（120+ 文件）
+│   ├── api.ts                  # Unified API client
+│   ├── constants.ts            # Agent configs
+│   │
+│   │ # --- Orchestration Layer ---
+│   ├── intent-router.ts        # 意图路由
+│   ├── intent-route-engine.ts  # 路由引擎
+│   ├── intent-route-rules.ts   # 路由规则
+│   ├── intent-orch-enhancer.ts # 意图编排增强
+│   ├── planner-orchestrator.ts # 计划编排器
+│   ├── planner-contract-validator.ts  # 计划契约校验
+│   ├── capability-orchestration.ts    # 能力编排
+│   ├── skill-orchestration.ts         # Skill 编排
+│   ├── context-engine.ts              # 上下文编译
+│   ├── context-compiler.ts            # 上下文编译器
+│   ├── slot-resolver.ts               # 参数补齐
+│   ├── entity-resolution.ts           # 实体解析
+│   ├── fact-need-reasoner.ts          # 事实需求推理
+│   ├── information-source-arbitration.ts  # 信息源仲裁
+│   ├── request-understanding.ts       # 请求理解
+│   ├── request-understanding-merge.ts # 请求理解合并
+│   │
+│   │ # --- Execution Layer ---
+│   ├── mcp-discovery.ts               # MCP 协议发现
+│   ├── mcp-server-store.ts            # MCP 服务存储
+│   ├── mcp-tool-output-adapter.ts     # MCP 工具输出适配
+│   ├── model-router.ts                # 模型路由
+│   ├── model-resilience.ts            # 模型容错 (breaker)
+│   ├── model-use-case-runtime.ts      # 模型用例运行时
+│   ├── search-orchestrator.ts         # 搜索编排
+│   ├── search-provider-adapter.ts     # 搜索适配
+│   ├── public-web-runtime.ts          # 公开联网运行时
+│   ├── weather-search-provider.ts     # 天气搜索
+│   ├── workflow-engine.ts             # 工作流引擎
+│   ├── workflow-task-store.ts          # 工作流任务存储
+│   ├── report-query-orchestrator.ts   # 问数编排
+│   ├── report-agent.ts                # 问数 Agent
+│   ├── callback-attribution-diagnosis-orchestration.ts  # 回传归因诊断
+│   │
+│   │ # --- Result & Presentation ---
+│   ├── response-contract.ts           # 结果契约派生
+│   ├── semantic-result-compaction.ts  # 语义结果压缩
+│   ├── runtime-event-display.ts       # 运行时事件展示
+│   ├── display-format.ts              # 展示格式
+│   │
+│   │ # --- Persistence & Config ---
+│   ├── conversation-store.ts          # 会话持久化
+│   ├── conversation-context.ts        # 会话上下文
+│   ├── attachment-store.ts            # 附件存储
+│   ├── user-memory-store.ts           # 用户记忆
+│   ├── runtime-config.ts              # 运行时配置
+│   ├── feature-switch-store.ts        # 功能开关
+│   ├── prompt-store.ts                # 提示词存储
+│   ├── managed-prompt-seeds.ts        # 提示词种子
+│   ├── contract-safety.ts             # 契约安全检查
+│   ├── trace.ts                       # Trace 追踪
+│   └── ...                            # 其他 80+ 模块
+├── features/                   # 功能模块
+├── renderers/                  # 渲染器
 └── types/
-    └── index.ts           # TypeScript type definitions (matching real business objects)
+    └── index.ts                # TypeScript type definitions
 ```
 
 ## Core Business Flows (四条核心业务流)
@@ -139,43 +251,37 @@ src/
 
 ## API Resources (接口真源)
 
-### 第一阶段最小接口集
-1. `POST /api/v1/xiaoqiao/conversations` - 创建会话
-2. `POST /api/v1/xiaoqiao/conversations/{id}/messages` - 发送消息 (统一入口)
-3. `GET /api/v1/xiaoqiao/tasks` - 获取任务列表
-4. `GET /api/v1/xiaoqiao/tasks/{id}` - 获取单个任务
-5. `GET /api/v1/xiaoqiao/tasks/{id}/results` - 获取任务结果
-6. `GET /api/v1/xiaoqiao/workspace` - 获取工作台视图
+所有 BFF 路由均在 `app/api/xiaoqiao/` 下，前缀为 `/api/xiaoqiao/`。
 
-### 会话支撑接口
-7. `POST /api/v1/xiaoqiao/conversations/{id}/attachments` - 上传附件
-8. `GET /api/v1/xiaoqiao/tasks/{id}/context` - 获取任务上下文
-9. `PUT /api/v1/xiaoqiao/tasks/{id}/context` - 更新任务上下文
-10. `GET /api/v1/xiaoqiao/tasks/{id}/evidence` - 获取证据链
+### Chat 主链路
+- `POST /api/chat` — Chat 主入口（SSE 流式 + Intent Router + Planner + 能力编排 + 模型调用 + MCP 工具）
 
-### 管理接口
-11. `GET /api/v1/xiaoqiao/admin/prompts` - 提示词列表
-12. `GET /api/v1/xiaoqiao/admin/prompts/{id}` - 提示词详情
-13. `POST /api/v1/xiaoqiao/admin/prompts` - 新建提示词
-14. `PUT /api/v1/xiaoqiao/admin/prompts/{id}` - 编辑提示词
-15. `GET /api/v1/xiaoqiao/admin/prompts/{id}/versions` - 版本历史
-16. `PUT /api/v1/xiaoqiao/admin/prompts/{id}/binding` - 绑定配置
-17. `GET /api/v1/xiaoqiao/admin/feature-switches` - 功能开关列表
-18. `PUT /api/v1/xiaoqiao/admin/feature-switches/{key}` - 更新开关
+### 会话与任务
+- `/api/xiaoqiao/conversations` — 会话 CRUD + messages + attachments
+- `/api/xiaoqiao/tasks` — 任务 CRUD + results + context + evidence
+- `/api/xiaoqiao/workspace` — 工作台视图
+- `/api/xiaoqiao/attachments` — 附件管理
+- `/api/xiaoqiao/memory` — 用户记忆
 
-### 自动联调专项接口 (自动联调实施方案 §6)
-19. `POST /api/v1/xiaoqiao/debug-automation/tasks` - 创建自动联调任务
-20. `POST /api/v1/xiaoqiao/debug-automation/tasks/{id}/start` - 启动执行
-21. `POST /api/v1/xiaoqiao/debug-automation/tasks/{id}/pause` - 暂停执行
-22. `POST /api/v1/xiaoqiao/debug-automation/tasks/{id}/resume` - 恢复执行
-23. `POST /api/v1/xiaoqiao/debug-automation/tasks/{id}/takeover` - 人工接管
-24. `GET /api/v1/xiaoqiao/debug-automation/tasks` - 任务列表
-25. `GET /api/v1/xiaoqiao/debug-automation/tasks/{id}` - 任务详情
-26. `GET /api/v1/xiaoqiao/debug-automation/tasks/{id}/steps` - 步骤列表
-27. `GET /api/v1/xiaoqiao/debug-automation/tasks/{id}/result` - 执行结果
-28. `GET /api/v1/xiaoqiao/admin/debug-automation/configs` - 配置列表
-29. `POST /api/v1/xiaoqiao/admin/debug-automation/configs` - 新建配置
-30. `PUT /api/v1/xiaoqiao/admin/debug-automation/configs/{id}` - 编辑配置
+### 自动化
+- `/api/xiaoqiao/automations` — 自动化模板 CRUD
+- `/api/xiaoqiao/automation-executions` — 自动化执行
+
+### 问数与搜索
+- `/api/xiaoqiao/report-session` — 问数会话
+- `/api/xiaoqiao/query-table` — 数据查询
+- `/api/xiaoqiao/web-search` — 公开联网搜索
+
+### 配置与管理
+- `/api/xiaoqiao/chat-display-config` — 会话展示配置
+- `/api/xiaoqiao/skill-contracts` — Skill 契约管理
+- `/api/xiaoqiao/skills` — Skill 列表
+- `/api/xiaoqiao/scheduled-tasks` — 定时任务
+- `/api/xiaoqiao/projects` — 项目管理
+- `/api/xiaoqiao/project-icon` — 项目图标
+- `/api/xiaoqiao/recommendations` — 推荐
+- `/api/xiaoqiao/notifications` — 通知
+- `/api/xiaoqiao/runtime-version` — 运行时版本
 
 ## Management Pages (管理页)
 
@@ -193,40 +299,33 @@ src/
 
 ## Design System
 
-### Colors (Deep Space Theme)
-- Primary: `#0A0E1A` (Deep Space)
-- Accent: `#00D9FF` (Tech Cyan)
-- Success: `#00FF88`
-- Warning: `#FFB800`
-- Danger: `#FF3366`
+> 当前设计系统真源：`docs/review/智投Chat-前端自主渲染与色彩字体系统-2026-05-27.md`
+> Visual System 规范：`docs/architecture/visual-system/`
+> 色彩 token：`lib/zhitou-chat-colors.ts` + `globals.css` CSS 变量 + Ant Design token
 
-### Animations
-- Breathing: 3s ease-in-out infinite
-- Fade-in-up: 400ms ease-out
-
-### Font Stack
-- UI: Inter, PingFang SC, Microsoft YaHei, Noto Sans SC
-- Data/Mono: JetBrains Mono
+色彩、字体、图标、间距、动效均通过上述真源管理，禁止新增硬编码色值。
 
 ## Mock Contract Strategy
 
-- Demo/Service mode switch via `XIAOQIAO_MODE` env var (default: `demo`)
-- **Demo mode**: BFF routes return mock data from `lib/demo-data.ts` (fully functional demo)
-- **Service mode**: BFF routes proxy to real backend API (`XIAOQIAO_API_BASE` env var)
-- Frontend uses `lib/api.ts` typed client, which calls BFF routes via relative paths
-- All 30 API endpoints are implemented as BFF routes in `app/api/xiaoqiao/`
-- MCP server configs are loaded into chat route as dynamic tools
-- Current stage defaults to demo; switch to service mode when backend is ready
+- Chat 主链路 (`/api/chat`) 直接对接 LLM + MCP + Skill 能力层
+- BFF 路由 (`/api/xiaoqiao/*`) 提供会话、任务、配置等管理接口
+- 运行时配置通过 `lib/runtime-config.ts` 管理
+- MCP 服务通过 `lib/mcp-server-store.ts` + `lib/mcp-discovery.ts` 动态发现和调用
+- 模型路由通过 `lib/model-router.ts` + `lib/model-use-case-runtime.ts` 管理
 
 ## Development Commands
 
 ```bash
-pnpm install    # Install dependencies
-pnpm dev       # Start development server (port 5000)
-pnpm lint      # Run ESLint
-pnpm ts-check  # Run TypeScript type check
-pnpm build     # Build for production
-pnpm start     # Start production server
+pnpm install              # 安装依赖
+pnpm dev                  # 启动开发服务器 (port 8002)
+pnpm lint                 # ESLint
+pnpm ts-check             # TypeScript 类型检查
+pnpm build                # 生产构建 (next build + tsup)
+pnpm start                # 生产服务
+pnpm validate:ad-ui       # UI 门禁（migration gate + rule debt + ts-check + guardrail）
+pnpm test:report-query    # 问数链路自测
+pnpm test:chat-runtime-regression  # Chat 运行时回归
+pnpm check:encoding       # 编码检查（防乱码）
 ```
 
 ## Notes

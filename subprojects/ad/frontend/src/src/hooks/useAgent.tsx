@@ -58,6 +58,7 @@ interface AgentContextType {
 }
 
 const AgentContext = createContext<AgentContextType | null>(null);
+const POST_FIRST_SCREEN_LOAD_DELAY_MS = 2500;
 
 export function AgentProvider({ children }: { children: ReactNode }) {
   const [workspace, setWorkspace] = useState<WorkspaceResponse | null>(null);
@@ -71,11 +72,11 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const [attachments, setAttachments] = useState<AttachmentRecord[]>([]);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [missingFields, setMissingFields] = useState<MissingField[]>([]);
-  const [currentAgent, setCurrentAgent] = useState<AgentType>('help');
+  const [currentAgent, setCurrentAgent] = useState<AgentType>('report');
   const [uiState, setUiState] = useState<UIState>({
     isSidebarOpen: false,
     isAgentPanelOpen: false,
-    activeAgent: 'help',
+    activeAgent: 'report',
     activeTaskId: null,
     showResultPanel: true,
     showTaskSidebar: false,
@@ -83,10 +84,22 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 
   // ── Load workspace on mount ──
   useEffect(() => {
-    apiFetch<WorkspaceResponse>('/workspace')
-      .then(data => setWorkspace(data))
-      .catch(() => {/* fallback: workspace stays null */})
-      .finally(() => setWorkspaceLoading(false));
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      apiFetch<WorkspaceResponse>('/workspace')
+        .then(data => {
+          if (!cancelled) setWorkspace(data);
+        })
+        .catch(() => {/* fallback: workspace stays null */})
+        .finally(() => {
+          if (!cancelled) setWorkspaceLoading(false);
+        });
+    }, POST_FIRST_SCREEN_LOAD_DELAY_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, []);
 
   // ── Load tasks on mount ──
@@ -98,7 +111,12 @@ export function AgentProvider({ children }: { children: ReactNode }) {
       .finally(() => setTasksLoading(false));
   }, []);
 
-  useEffect(() => { refreshTasks(); }, [refreshTasks]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      refreshTasks();
+    }, POST_FIRST_SCREEN_LOAD_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [refreshTasks]);
 
   // ── Set active task: load context/results/evidence ──
   const setActiveTask = useCallback((task: Task | null) => {

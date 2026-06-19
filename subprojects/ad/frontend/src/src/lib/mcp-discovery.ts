@@ -5,6 +5,11 @@ export interface McpDiscoveryInput {
   transport?: McpServerConfig['transport'];
   auth_type: McpAuthType;
   auth_config: Record<string, string>;
+  tool_policy?: {
+    allowedTools?: string[];
+    blockedTools?: string[];
+    fallbackPolicy?: 'allow' | 'deny';
+  };
 }
 
 export interface McpDiscoveryResult {
@@ -24,6 +29,114 @@ export interface McpToolCallResult {
   result?: unknown;
   raw_response_preview?: string;
   server_info?: Record<string, unknown>;
+  policy_blocked?: boolean;
+  security_blocked?: boolean;
+  execution_contract?: {
+    request_id?: string;
+    requires_execution: boolean;
+    execution_confidence: 'high' | 'medium' | 'low';
+    route_intent?: string;
+    route_reason?: string;
+    expected_capability_id?: string;
+    expected_tool_name?: string;
+  };
+  error_code?: string;
+}
+
+export interface McpToolCallOptions {
+  request_id?: string;
+  execution_contract?: {
+    request_id?: string;
+    requires_execution: boolean;
+    execution_confidence: 'high' | 'medium' | 'low';
+    route_intent?: string;
+    route_reason?: string;
+    expected_capability_id?: string;
+    expected_tool_name?: string;
+  };
+  tool_policy?: {
+    allowedTools?: string[];
+    blockedTools?: string[];
+    fallbackPolicy?: 'allow' | 'deny';
+  };
+  timeout_ms?: number;
+}
+
+interface ToolCallPolicy {
+  allowedTools: Set<string>;
+  blockedTools: Set<string>;
+  fallbackPolicy: 'allow' | 'deny';
+}
+
+function safeLower(value: unknown): string {
+  return String(value || '').trim().toLowerCase();
+}
+
+function parseToolList(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw
+      .map(item => safeLower(item))
+      .filter(Boolean);
+  }
+  if (typeof raw === 'string') {
+    return raw
+      .split(/[,;| \n\r\t]+/)
+      .map(item => item.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function buildToolPolicy(input: McpDiscoveryInput, overrides?: McpToolCallOptions['tool_policy']): ToolCallPolicy {
+  const fallbackPolicy = overrides?.fallbackPolicy || input.tool_policy?.fallbackPolicy || 'allow';
+  const allowedTools = new Set([
+    ...parseToolList(overrides?.allowedTools),
+    ...parseToolList(input.tool_policy?.allowedTools),
+  ]);
+  const blockedTools = new Set([
+    ...parseToolList(overrides?.blockedTools),
+    ...parseToolList(input.tool_policy?.blockedTools),
+  ]);
+  return { allowedTools, blockedTools, fallbackPolicy };
+}
+
+function isToolAllowed(toolName: string, policy: ToolCallPolicy): { blocked: boolean; reason?: string } {
+  const normalized = safeLower(toolName);
+  if (!normalized) return { blocked: false };
+  if (policy.blockedTools.size && policy.blockedTools.has(normalized)) {
+    return { blocked: true, reason: `tool ${toolName} is blocked by policy` };
+  }
+  if (!policy.allowedTools.size && policy.fallbackPolicy === 'allow') {
+    return { blocked: false };
+  }
+  if (policy.allowedTools.size > 0 && !policy.allowedTools.has(normalized)) {
+    return { blocked: true, reason: `tool ${toolName} is denied by allowlist policy` };
+  }
+  if (policy.allowedTools.size === 0 && policy.fallbackPolicy === 'deny') {
+    return { blocked: true, reason: 'policy requires explicit allowlist but no tool was allowed' };
+  }
+  return { blocked: false };
+}
+
+function isSecurityFailureMessage(message: string): boolean {
+  const normalized = String(message || '').toLowerCase();
+  return /401|403|forbidden|unauthor|token|expiry|expired|authentication|未授权|鉴权|鉴定|签名|签名校验|签名.*失效|权限/.test(normalized);
+}
+
+function attachExecutionContract(
+  result: Omit<McpToolCallResult, 'execution_contract'>,
+  options?: McpToolCallOptions,
+): McpToolCallResult {
+  if (!options?.execution_contract && !options?.request_id) return result as McpToolCallResult;
+  return {
+    ...result,
+    execution_contract: options.execution_contract || {
+      request_id: options.request_id,
+      requires_execution: true,
+      execution_confidence: 'medium',
+    },
+  } as McpToolCallResult;
 }
 
 interface JsonRpcEnvelope {
@@ -49,7 +162,7 @@ function buildHeaders(input: McpDiscoveryInput): Record<string, string> {
   };
 
   if (input.auth_type === 'oauth2') {
-    throw new Error('当前连通测试不支持直接使用 OAuth Client ID 和密钥。请先在服务方完成账号授权，再填写可访问的 Endpoint 或 Access-Token。');
+    throw new Error('当前连通测试不支持直接使用 OAuth Client ID 和密钥。请先在服务方完成账号授权，再填写可访问的 Endpoint 和 Access-Token。');
   }
 
   if (input.auth_type === 'bearer_token' && input.auth_config?.token) {
@@ -59,6 +172,10 @@ function buildHeaders(input: McpDiscoveryInput): Record<string, string> {
     headers['X-API-Key'] = input.auth_config.api_key;
   } else if (input.auth_type === 'access_token' && input.auth_config?.access_token) {
     headers['Access-Token'] = input.auth_config.access_token;
+  }
+  const cookie = input.auth_config?.cookie || input.auth_config?.Cookie || input.auth_config?.aiad_jwt;
+  if (cookie) {
+    headers.Cookie = cookie.includes('=') ? cookie : `aiad_jwt=${cookie}`;
   }
   if (input.auth_config?.tool_range) {
     headers['Tool-Range'] = input.auth_config.tool_range;
@@ -146,7 +263,7 @@ async function resolveSseMessageEndpoint(
     }
 
     if (!response.body) {
-      throw new Error('SSE 响应没有可读取的事件流');
+      throw new Error('SSE 响应没有可读取的事件流。');
     }
 
     reader = response.body.getReader();
@@ -383,7 +500,7 @@ export async function discoverMcpServer(input: McpDiscoveryInput): Promise<McpDi
     return {
       ok: false,
       msg: message.includes('abort')
-        ? '连接超时(8s)，请检查服务地址是否正确且可达'
+        ? '连接超时(8s)，请检查服务地址是否正确且可达。'
         : `网络错误: ${message}`,
       latency_ms: Date.now() - startTime,
       tools: [],
@@ -451,15 +568,42 @@ export async function callMcpTool(
   input: McpDiscoveryInput,
   toolName: string,
   args: Record<string, unknown>,
+  options?: McpToolCallOptions,
 ): Promise<McpToolCallResult> {
   const startTime = Date.now();
   const transport = input.transport || 'streamable-http';
+  const effectiveOptions: McpToolCallOptions = options ?? {};
+  const policy = buildToolPolicy(input, effectiveOptions.tool_policy);
+  const toolPolicyCheck = isToolAllowed(toolName, policy);
+  const withContract = (result: Omit<McpToolCallResult, 'execution_contract'>): McpToolCallResult =>
+    attachExecutionContract(result, effectiveOptions);
+  const isSecurity = (message: string) => isSecurityFailureMessage(message);
 
   if (!input.endpoint_url) {
-    return { ok: false, msg: '缺少 Endpoint URL', latency_ms: 0 };
+    return withContract({
+      ok: false,
+      msg: '缺少 Endpoint URL',
+      latency_ms: 0,
+      security_blocked: true,
+    });
   }
   if (transport === 'stdio') {
-    return { ok: false, msg: '后台暂不支持 stdio MCP 调用，请使用 SSE 或 streamable-http。', latency_ms: 0 };
+    return withContract({
+      ok: false,
+      msg: '后台暂不支持 stdio MCP 调用，请使用 SSE 或 streamable-http。',
+      latency_ms: 0,
+      security_blocked: true,
+    });
+  }
+  if (toolPolicyCheck.blocked) {
+    return withContract({
+      ok: false,
+      msg: toolPolicyCheck.reason || `tool ${toolName} is blocked by policy`,
+      latency_ms: Date.now() - startTime,
+      policy_blocked: true,
+      security_blocked: false,
+      error_code: 'tool_not_allowed',
+    });
   }
 
   const headers = buildHeaders(input);
@@ -473,12 +617,13 @@ export async function callMcpTool(
       ssePreview = resolved.rawText;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      return {
+      return withContract({
         ok: false,
         msg: message.includes('abort') ? 'SSE 连接超时(8s)' : `SSE 连接失败: ${message}`,
         latency_ms: Date.now() - startTime,
         raw_response_preview: ssePreview,
-      };
+        security_blocked: isSecurity(message),
+      });
     }
   }
 
@@ -495,26 +640,35 @@ export async function callMcpTool(
     }, 8000);
 
     if (!init.response.ok) {
-      return {
+      const message = `HTTP ${init.response.status}: ${init.rawText.slice(0, 200)}`;
+      return withContract({
         ok: false,
-        msg: `HTTP ${init.response.status}: ${init.rawText.slice(0, 200)}`,
+        msg: message,
         latency_ms: Date.now() - startTime,
         raw_response_preview: init.rawText.slice(0, 300),
-      };
+        security_blocked: isSecurity(message),
+      });
     }
     if (!init.envelope) {
-      return {
+      const message = '响应不是标准 MCP JSON-RPC 格式';
+      return withContract({
         ok: false,
-        msg: '响应不是标准 MCP JSON-RPC 格式',
+        msg: message,
         latency_ms: Date.now() - startTime,
         raw_response_preview: init.rawText.slice(0, 300),
-      };
+        security_blocked: isSecurity(message),
+      });
     }
     if (init.envelope.error) {
       const message = typeof init.envelope.error === 'string'
         ? init.envelope.error
         : init.envelope.error.message || '未知 MCP 错误';
-      return { ok: false, msg: `MCP 初始化失败: ${message}`, latency_ms: Date.now() - startTime };
+      return withContract({
+        ok: false,
+        msg: `MCP 初始化失败: ${message}`,
+        latency_ms: Date.now() - startTime,
+        security_blocked: isSecurity(message),
+      });
     }
 
     const sessionId = init.response.headers.get(MCP_SESSION_HEADER);
@@ -533,43 +687,47 @@ export async function callMcpTool(
         name: toolName,
         arguments: args,
       },
-    }, 12000);
+    }, effectiveOptions.timeout_ms || 30000);
 
     if (!call.response.ok) {
-      return {
+      const message = `HTTP ${call.response.status}: ${call.rawText.slice(0, 200)}`;
+      return withContract({
         ok: false,
-        msg: `HTTP ${call.response.status}: ${call.rawText.slice(0, 200)}`,
+        msg: message,
         latency_ms: Date.now() - startTime,
         raw_response_preview: call.rawText.slice(0, 300),
-      };
+        security_blocked: isSecurity(message),
+      });
     }
     if (call.envelope?.error) {
       const message = typeof call.envelope.error === 'string'
         ? call.envelope.error
         : call.envelope.error.message || '未知 MCP 错误';
-      return {
+      return withContract({
         ok: false,
         msg: `MCP 工具调用失败: ${message}`,
         latency_ms: Date.now() - startTime,
         raw_response_preview: call.rawText.slice(0, 300),
-      };
+        security_blocked: isSecurity(message),
+      });
     }
 
-    return {
+    return withContract({
       ok: true,
       msg: '调用成功',
       latency_ms: Date.now() - startTime,
       result: call.envelope?.result,
       raw_response_preview: ssePreview || call.rawText.slice(0, 300),
       server_info: init.envelope.result?.serverInfo as Record<string, unknown> | undefined,
-    };
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    return {
+    return withContract({
       ok: false,
       msg: message.includes('abort') ? '调用超时' : `网络错误: ${message}`,
       latency_ms: Date.now() - startTime,
-    };
+      security_blocked: isSecurity(message),
+    });
   }
 }
 
@@ -640,3 +798,4 @@ async function listAllTools(
 
   return tools;
 }
+

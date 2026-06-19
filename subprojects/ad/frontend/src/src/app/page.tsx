@@ -1,18 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dropdown, Modal, message, type MenuProps } from 'antd';
+import dynamic from 'next/dynamic';
+import { App, Dropdown, Modal, Select, type MenuProps } from 'antd';
 import {
+  BarChart3,
+  CalendarClock,
+  ChevronDown,
   CheckCircle2,
+  Clock3,
+  Copy,
   Download,
   Ellipsis,
   FileSpreadsheet,
   FileText,
   Link2,
   MapPin,
-  PanelRightClose,
-  PanelRightOpen,
-  PlayCircle,
+  Play,
   Search,
   Trash2,
   Upload,
@@ -21,354 +25,106 @@ import {
 import { AgentProvider, useAgent } from '@/hooks/useAgent';
 import { useConversation } from '@/hooks/useConversation';
 import { useSpeech } from '@/hooks/useSpeech';
-import ChatContainer, { type SourcePanelPayload } from '@/components/cognitive/ChatContainer';
+import type { SourcePanelPayload } from '@/components/cognitive/ChatContainer';
+import { QuickChipsRow } from '@/components/cognitive/ChatContainer';
 import InputArea from '@/components/cognitive/InputArea';
+import type { ComposerRecommendation } from '@/components/cognitive/message-presentation-projection';
+import { AssetPreview } from '@/components/cognitive/AssetPreview';
 import { TaskSidebar } from '@/components/workspace/TaskSidebar';
 import { ContextEditDrawer } from '@/components/cognitive/ContextEditDrawer';
-import { AutoDebugWorkbench } from '@/components/agents/AutoDebugWorkbench';
 import { IconAsset } from '@/components/ui/IconAsset';
 import FancyCodeBlock from '@/components/ui/FancyCodeBlock';
-import YkProjectSelect from '@/components/yokaui/YkProjectSelect';
+import ProjectSelectorCombo, { resolveProjectFromTarget, type CurrentProjectMetadata } from '@/components/yokaui/ProjectSelectorCombo';
 import { useChatSettings } from '@/hooks/useChatSettings';
 import { useThemeColors } from '@/hooks/useTheme';
 import { useIsMobile } from '@/hooks/use-mobile';
-import type { AgentType, AttachmentRecord, Message, WorkflowResult } from '@/types';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { DEFAULT_CHAT_DISPLAY_CONFIG, type ChatDisplayConfig } from '@/types/chat-display';
+import { buildConversationShareUrl } from '@/lib/share-link';
+import { automationApi, automationExecutionApi, conversationApi, notificationApi, scheduledTaskApi } from '@/lib/api';
+import type { AgentType, AttachmentRecord, AttachmentInsight, AutomationNotification, AutomationTemplateConfig, Message, MissingField, ProjectBinding, ScheduleFrequency, ScheduledTask, ScheduledTaskExecution, WorkflowResult } from '@/types';
+import { ResultPanel } from '@/components/workspace/ResultPanel';
+import { buildMessageDisclosureView } from '@/components/cognitive/messageState';
+import { MessageDisclosureDrawer } from '@/components/cognitive/MessageDisclosureDrawer';
+import { AssetPreviewModal, type AssetPreviewModalAsset } from '@/components/cognitive/AssetPreviewModal';
+import { DebugLogPanel } from '@/components/workspace/DebugLogPanel';
+import { AutomationModals } from '@/components/workspace/AutomationModals';
+import { AssetsCenter } from '@/components/workspace/AssetsCenter';
+import { AutomationCenter } from '@/components/workspace/AutomationCenter';
+import { OpenedAssetPreview } from '@/components/workspace/OpenedAssetPreview';
+import {
+  type WorkspaceView, type AssetCategory, type AssetSourceFilter, type AssetFormatFilter,
+  type AutomationTab, type ProjectContextLoadStatus,
+  type AssetRecord, type AutomationTemplate, type AutomationRunRecord, type AutomationTaskDraft,
+  type ConversationSearchHit,
+  CHAT_WORKSPACE_BACKGROUND, WORKSPACE_VIEW_STORAGE_KEY,
+  ASSET_SOURCE_FILTERS, ASSET_FORMAT_FILTERS, ASSET_LIBRARY,
+  FALLBACK_AUTOMATION_TEMPLATES, AUTOMATION_TABS,
+  AUTOMATION_FREQUENCY_OPTIONS, AUTOMATION_RUN_TIME_OPTIONS,
+  AUTOMATION_METRIC_OPTIONS, AUTOMATION_DIMENSION_OPTIONS, AUTOMATION_TYPE_LABELS,
+  mapAutomationTemplate, splitAutomationList, joinAutomationList,
+  runTimeFromCronExpression, buildAutomationCronExpression, isTimeAwareFrequency,
+  normalizeProjectRef, resolveProjectBindingRef, normalizeProjectBindingSignature,
+  buildProjectBinding, buildProjectContextText, extractExplicitProjectTarget,
+  isProjectBoundObjectVisible, shouldWaitForProjectContext,
+  asRecord, buildAutomationDraftFromResult, getExecutionStatusLabel, formatJsonPreview,
+  getAssetFileName, getAssetTypeLabel, isPreviewSupported, getAssetPreview,
+  getAttachmentCategory, getAttachmentFormat, attachmentToAsset, inferAttachmentKind,
+  validateUploadFile, canvasToBlob, getKnowledgeSourceDetails,
+  getInitialWorkspaceView, getResultMissingFields,
+  FilterSelect, LoadingSkeletonRows, SharedConversationLoadingPanel,
+  MAX_UPLOAD_FILES, createImageThumbnail, createVideoCover,
+} from '@/lib/page-helpers';
 
-type WorkspaceView = 'chat' | 'assets';
-type AssetCategory = 'image' | 'link' | 'video' | 'file';
-type AssetSourceFilter = 'all' | 'uploaded' | 'generated';
-type AssetFormatFilter = 'all' | 'image' | 'document' | 'spreadsheet' | 'slides' | 'pdf';
 
-interface AssetRecord {
-  id: string;
-  title: string;
-  category: AssetCategory;
-  format: string;
-  summary: string;
-  source: string;
-  updatedAt: string;
-  conversationId: string;
-  anchorText: string;
-  previewTone: string;
-  previewSupported?: boolean;
-  thumbnailStatus?: 'generated' | 'generating' | 'unsupported';
-  thumbnailUrl?: string;
-  thumbnailPrompt?: string;
-}
+const ChatContainer = dynamic(() => import('@/components/cognitive/ChatContainer'), {
+  ssr: false,
+  loading: () => (
+    <div
+      data-chat-container-loading="true"
+      style={{
+        flex: 1,
+        minHeight: 0,
+      }}
+    />
+  ),
+});
 
-interface ConversationSearchHit {
-  conversation_id: string;
-  title: string;
-  updated_at: string;
-  matchCount: number;
-  snippets: string[];
-}
 
-interface ProjectOption {
-  app_id: string | number;
-  app_name: string;
-  app_alias?: string;
-  app_en_name?: string;
-  app_status?: string | number;
-  icon?: string;
-  source?: string;
-}
-
-const ALL_PROJECT_VALUE = '__all__';
 
 function SharePlaneIcon({ size = 17 }: { size?: number }) {
   return <IconAsset name="share-plane" size={size} />;
 }
 
-function DebugLogPanel({ endpoint }: { endpoint?: string }) {
-  const [logText, setLogText] = useState('正在同步联调日志...');
-
-  useEffect(() => {
-    if (!endpoint) {
-      setLogText('暂无日志');
-      return undefined;
-    }
-    let stopped = false;
-    let timer: number | undefined;
-    const shortTime = (value?: string) => {
-      if (!value) return '--:--:--';
-      const match = value.match(/(\d{2}):(\d{2}):(\d{2})/);
-      return match ? `${match[1]}:${match[2]}:${match[3]}` : value;
-    };
-    const formatLogs = (payload: { steps?: Array<{ title?: string; time?: string; log?: string }> }) => {
-      const rows = (payload.steps || []).flatMap((step) => {
-        const lines = String(step.log || '').split('\n').map(line => line.trim()).filter(Boolean);
-        return lines.map((line) => `${shortTime(step.time)}  ${step.title || '联调'}  ${line
-          .replace(/^\d{4}-\d{2}-\d{2}\s+/, '')
-          .replace(/^\d{2}:\d{2}:\d{2}[,.]\d+\s+/, '')}`);
-      });
-      return rows.length > 0 ? rows.join('\n') : '暂无日志';
-    };
-    const load = async () => {
-      try {
-        const response = await fetch(endpoint);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const payload = await response.json();
-        if (stopped) return;
-        setLogText(formatLogs(payload));
-        timer = window.setTimeout(load, 2500);
-      } catch (error) {
-        if (!stopped) {
-          setLogText(`日志同步失败：${error instanceof Error ? error.message : '未知错误'}`);
-          timer = window.setTimeout(load, 4000);
-        }
-      }
-    };
-    void load();
-    return () => {
-      stopped = true;
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [endpoint]);
-
-  return (
-    <FancyCodeBlock language="log" codeStyle="fancy" showLineNumbers fontSize={10}>
-      {logText}
-    </FancyCodeBlock>
+function hasRuntimeDisclosureDetails(message: Message | null | undefined): boolean {
+  if (!message || message.role !== 'assistant') return false;
+  const metadata = message.metadata && typeof message.metadata === 'object' ? message.metadata as Record<string, unknown> : {};
+  const workflowResult = metadata.workflow_result && typeof metadata.workflow_result === 'object'
+    ? metadata.workflow_result as Record<string, unknown>
+    : {};
+  const messageContract = metadata.message_contract && typeof metadata.message_contract === 'object'
+    ? metadata.message_contract as Record<string, unknown>
+    : {};
+  return Boolean(
+    (Array.isArray(message.process_events) && message.process_events.length > 0)
+      || (Array.isArray(metadata.process_events) && metadata.process_events.length > 0)
+      || (Array.isArray(message.tool_calls) && message.tool_calls.length > 0)
+      || (Array.isArray(metadata.tool_calls) && metadata.tool_calls.length > 0)
+      || metadata.message_runtime_projection
+      || workflowResult.message_runtime_projection
+      || messageContract.message_runtime_projection
+      || metadata.runtime_state
   );
 }
 
-const ASSET_SOURCE_FILTERS: Array<{ key: AssetSourceFilter; label: string }> = [
-  { key: 'all', label: '全部来源' },
-  { key: 'uploaded', label: '已上传' },
-  { key: 'generated', label: '已生成' },
-];
 
-const ASSET_FORMAT_FILTERS: Array<{ key: AssetFormatFilter; label: string }> = [
-  { key: 'all', label: '全部类型' },
-  { key: 'image', label: '图片' },
-  { key: 'document', label: '文档' },
-  { key: 'spreadsheet', label: '电子表格' },
-  { key: 'slides', label: '演示文稿' },
-  { key: 'pdf', label: 'PDF' },
-];
 
-const ASSET_LIBRARY: AssetRecord[] = [
-  {
-    id: 'asset-001',
-    title: '安卓回传联调说明',
-    category: 'file',
-    format: 'Word',
-    summary: '包含回传链路、字段映射、验收口径和常见异常处理说明。',
-    source: '会话沉淀',
-    updatedAt: '今天',
-    conversationId: 'conv_004',
-    anchorText: '联调准备清单',
-    previewTone: '#4f7cff',
-  },
-  {
-    id: 'asset-002',
-    title: '投放日报模板',
-    category: 'file',
-    format: 'Excel',
-    summary: '用于汇总分媒体消耗、转化、归因和异常监控结果。',
-    source: 'AI 生成',
-    updatedAt: '今天',
-    conversationId: 'conv_001',
-    anchorText: '巨量激活报表',
-    previewTone: '#16a34a',
-  },
-  {
-    id: 'asset-003',
-    title: 'SKAN 归因口径说明',
-    category: 'file',
-    format: 'PDF',
-    summary: '沉淀版本差异、回传窗口、媒体限制和投放注意事项。',
-    source: '知识沉淀',
-    updatedAt: '昨天',
-    conversationId: 'conv_003',
-    anchorText: 'SKAN 归因口径',
-    previewTone: '#ef4444',
-  },
-  {
-    id: 'asset-004',
-    title: '高价值事件素材图',
-    category: 'image',
-    format: 'PNG',
-    summary: '用于复核埋点和投放素材是否与事件命名一致。',
-    source: '上传图片',
-    updatedAt: '昨天',
-    conversationId: 'conv_002',
-    anchorText: '高价值事件素材图',
-    previewTone: '#0ea5e9',
-  },
-  {
-    id: 'asset-005',
-    title: '媒体平台排查录屏',
-    category: 'video',
-    format: 'MP4',
-    summary: '展示异常重现过程、操作路径和控制台日志定位过程。',
-    source: '会话产物',
-    updatedAt: '2 天前',
-    conversationId: 'conv_001',
-    anchorText: '异常重现过程',
-    previewTone: '#7c3aed',
-  },
-  {
-    id: 'asset-006',
-    title: '企业账户白名单入口',
-    category: 'link',
-    format: '链接',
-    summary: '可直接进入白名单配置页，方便在会话里发起排查和复核。',
-    source: '外部链接',
-    updatedAt: '3 天前',
-    conversationId: 'conv_005',
-    anchorText: '白名单配置页',
-    previewTone: '#f59e0b',
-  },
-  {
-    id: 'asset-007',
-    title: '自动联调结果归档',
-    category: 'file',
-    format: 'PDF',
-    summary: '会话中生成的联调结论、修复建议和来源引用归档文件。',
-    source: 'AI 生成',
-    updatedAt: '3 天前',
-    conversationId: 'conv_004',
-    anchorText: '联调结论归档',
-    previewTone: '#ef4444',
-  },
-  {
-    id: 'asset-008',
-    title: '渠道投放素材库',
-    category: 'image',
-    format: 'JPG',
-    summary: '近期投放使用的素材预览和落地页截图，便于交叉核对。',
-    source: '上传图片',
-    updatedAt: '5 天前',
-    conversationId: 'conv_002',
-    anchorText: '投放素材预览',
-    previewTone: '#0ea5e9',
-  },
-  {
-    id: 'asset-009',
-    title: '项目排查 SOP',
-    category: 'file',
-    format: 'Word',
-    summary: '沉淀问题排查流程、证据要求、升级条件和结果回写规范。',
-    source: '知识沉淀',
-    updatedAt: '1 周前',
-    conversationId: 'conv_001',
-    anchorText: '排查流程',
-    previewTone: '#4f7cff',
-  },
-  {
-    id: 'asset-010',
-    title: '投放监控看板',
-    category: 'link',
-    format: '链接',
-    summary: '跳转到实时监控看板，适合在会话中引用数据和截图。',
-    source: '外部链接',
-    updatedAt: '1 周前',
-    conversationId: 'conv_005',
-    anchorText: '实时监控看板',
-    previewTone: '#f59e0b',
-  },
-  {
-    id: 'asset-011',
-    title: '归因异常样例视频',
-    category: 'video',
-    format: 'MP4',
-    summary: '典型归因偏差案例与修复前后效果对比视频。',
-    source: '会话产物',
-    updatedAt: '1 周前',
-    conversationId: 'conv_001',
-    anchorText: '归因偏差案例',
-    previewTone: '#7c3aed',
-  },
-  {
-    id: 'asset-012',
-    title: '文件写入权限清单',
-    category: 'file',
-    format: 'Excel',
-    summary: '列出当前支持写入和生成的 Word、Excel、PDF 资产范围。',
-    source: '权限清单',
-    updatedAt: '1 周前',
-    conversationId: 'conv_002',
-    anchorText: '文件写入权限',
-    previewTone: '#16a34a',
-  },
-];
-
-function getAssetFileName(asset: AssetRecord) {
-  if (asset.format === '链接') return asset.title;
-  return asset.title.includes('.') ? asset.title : `${asset.title}.${asset.format.toLowerCase()}`;
-}
-
-function getAssetTypeLabel(asset: AssetRecord) {
-  if (asset.category === 'image') return '图片';
-  if (asset.category === 'video') return '视频';
-  if (asset.category === 'link') return '链接';
-  return asset.format;
-}
-
-function isPreviewSupported(asset: AssetRecord) {
-  return asset.previewSupported ?? (asset.category === 'image' || asset.category === 'video');
-}
-
-function getAssetPreview(asset: AssetRecord) {
-  if ((asset.category === 'image' || asset.category === 'video') && asset.thumbnailUrl) {
-    return (
-      <img src={asset.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-    );
-  }
-
-  if (asset.category === 'image' || asset.category === 'video') {
-    const status = asset.thumbnailStatus || 'generated';
-    return (
-      <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${asset.previewTone}, ${asset.category === 'video' ? '#111827' : '#dbeafe'})`, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-        {asset.category === 'video' ? <PlayCircle size={18} /> : <span style={{ width: 18, height: 18, borderRadius: 6, border: '1px solid rgba(255,255,255,0.72)' }} />}
-        {status === 'generating' && <span style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.36)' }} />}
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ width: '100%', height: '100%', background: '#f3f4f6', color: asset.previewTone, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {asset.category === 'link' ? <Link2 size={17} /> : asset.format === 'Excel' ? <FileSpreadsheet size={17} /> : <FileText size={17} />}
-    </div>
-  );
-}
-
-function getKnowledgeSourceDetails(message: Message | null): Array<{ title: string; source?: string; url?: string; prompt?: string }> {
-  const meta = message?.metadata || {};
-  const rawRefs = [meta.source_refs, meta.sourceRefs, meta.sources, meta.citations]
-    .find((item) => Array.isArray(item)) as unknown[] | undefined;
-  const refs = (rawRefs || []).map((item) => {
-    if (typeof item === 'string') return { title: item };
-    if (item && typeof item === 'object') {
-      const obj = item as Record<string, unknown>;
-      return {
-        title: String(obj.title || obj.name || obj.source || obj.id || '知识库来源'),
-        source: obj.source ? String(obj.source) : undefined,
-        url: obj.url ? String(obj.url) : undefined,
-        prompt: obj.prompt ? String(obj.prompt) : undefined,
-      };
-    }
-    return null;
-  }).filter((item): item is { title: string; source?: string; url?: string; prompt?: string } => Boolean(item));
-
-  const knowledge = meta.knowledge_base;
-  if (knowledge && typeof knowledge === 'object') {
-    const obj = knowledge as Record<string, unknown>;
-    refs.unshift({
-      title: String(obj.provider || '知识库'),
-      source: obj.dataset ? `知识库 ID：${String(obj.dataset)}` : undefined,
-      url: obj.address ? String(obj.address) : undefined,
-    });
-  }
-
-  return refs;
-}
 
 function WorkspaceContent() {
+  const { message } = App.useApp();
   const c = useThemeColors();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const [viewportWidth, setViewportWidth] = useState(1440);
   const {
     activeTaskContext,
@@ -383,18 +139,29 @@ function WorkspaceContent() {
     conversationMode,
   } = useAgent();
 
+  const [projectContextText, setProjectContextText] = useState('项目范围：未选择项目');
+  const [projectContextLoadStatus, setProjectContextLoadStatus] = useState<ProjectContextLoadStatus>('loading');
+  const [currentProject, setCurrentProject] = useState<CurrentProjectMetadata | null>(null);
+  const [currentProjectId, setCurrentProjectId] = useState<string | number | null>(null);
+  const currentProjectRef = useMemo(() => normalizeProjectRef(currentProject), [currentProject]);
+  const currentProjectBinding = useMemo(() => buildProjectBinding(currentProject), [currentProject]);
+
   const {
     conversations,
     activeConversationId,
+    runningConversationIds,
     messages,
+    isLoadingMessages,
     isTyping,
     sendMessage,
+    cancelStream,
     createConversation,
+    startBlankConversation,
     selectConversation,
     renameConversation,
     deleteConversation,
     currentResult,
-  } = useConversation();
+  } = useConversation(currentProjectBinding);
 
   const chatSettings = useChatSettings();
   const { speak, stopSpeaking, speaking, synthesisSupported } = useSpeech();
@@ -403,6 +170,12 @@ function WorkspaceContent() {
   const [showContextDrawer, setShowContextDrawer] = useState(false);
   const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(false);
   const [sourcePanelPayload, setSourcePanelPayload] = useState<SourcePanelPayload | null>(null);
+  const [sourcePanelMessageId, setSourcePanelMessageId] = useState<string | null>(null);
+  const [sharedConversationId, setSharedConversationId] = useState<string | null>(null);
+  const [sharedConversationTitle, setSharedConversationTitle] = useState('');
+  const [sharedConversationMessages, setSharedConversationMessages] = useState<Message[]>([]);
+  const [sharedConversationBlocked, setSharedConversationBlocked] = useState(false);
+  const [sharedConversationLoading, setSharedConversationLoading] = useState(false);
   const [sidebarDrawerOpen, setSidebarDrawerOpen] = useState(false);
   const [sidebarDrawerVisible, setSidebarDrawerVisible] = useState(false);
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>('chat');
@@ -414,6 +187,27 @@ function WorkspaceContent() {
   const [assetSearch, setAssetSearch] = useState('');
   const [hoveredAssetId, setHoveredAssetId] = useState<string | null>(null);
   const [openedAsset, setOpenedAsset] = useState<AssetRecord | null>(null);
+  const [uploadedAssetAttachments, setUploadedAssetAttachments] = useState<AttachmentRecord[]>([]);
+  const [automationTab, setAutomationTab] = useState<AutomationTab>('configured');
+  const [automationTasks, setAutomationTasks] = useState<ScheduledTask[]>([]);
+  const [automationTemplates, setAutomationTemplates] = useState<AutomationTemplate[]>([]);
+  const [automationLoading, setAutomationLoading] = useState(false);
+  const [automationUnreadCount, setAutomationUnreadCount] = useState(0);
+  const [openedAutomationRun, setOpenedAutomationRun] = useState<AutomationRunRecord | null>(null);
+  const [editingAutomationTask, setEditingAutomationTask] = useState<ScheduledTask | null>(null);
+  const [creatingAutomationTask, setCreatingAutomationTask] = useState(false);
+  const [automationTaskDraft, setAutomationTaskDraft] = useState<AutomationTaskDraft>({
+    name: '',
+    description: '',
+    frequency: 'daily',
+    run_time: '09:00',
+    cron_expression: '',
+    monitor_metrics: '',
+    dimension: '',
+    notify_on_failure: true,
+    notify_on_success: true,
+    alert_targets: '',
+  });
   const [composerDraft, setComposerDraft] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -421,33 +215,258 @@ function WorkspaceContent() {
   const [searchResults, setSearchResults] = useState<ConversationSearchHit[]>([]);
   const [activeSidePanel, setActiveSidePanel] = useState<AgentType | null>(null);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
-  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | number>(12701);
-  const [followedProjectIds, setFollowedProjectIds] = useState<Array<string | number>>([]);
+  const [rightPanelDismissed, setRightPanelDismissed] = useState(true);
+  const [chatDisplayConfig, setChatDisplayConfig] = useState<ChatDisplayConfig>(DEFAULT_CHAT_DISPLAY_CONFIG);
+  const [resultRecommendations, setResultRecommendations] = useState<ComposerRecommendation[]>([]);
+  const [personalKnowledgeOpen, setPersonalKnowledgeOpen] = useState(false);
+  const [personalKnowledgeAccessUrl, setPersonalKnowledgeAccessUrl] = useState('https://dataki.dobest.com');
+  const [personalKnowledgeStatus, setPersonalKnowledgeStatus] = useState<'success' | 'failed' | 'skipped' | undefined>();
+  const [personalKnowledgeMessage, setPersonalKnowledgeMessage] = useState('');
   const lastSpokenMessageIdRef = useRef<string | null>(null);
+  const assetUploadInputRef = useRef<HTMLInputElement>(null);
+
+  const activeStarterItems = useMemo(() => chatDisplayConfig.starters
+    .filter((item) => item.enabled)
+    .sort((a, b) => {
+      const preferredOrder = ['delivery', 'anomaly-diagnosis', 'metric-explain', 'business-collaboration', 'data-analysis', 'report-generation', 'market-intel'];
+      const aIndex = preferredOrder.indexOf(a.id);
+      const bIndex = preferredOrder.indexOf(b.id);
+      if (aIndex !== -1 || bIndex !== -1) {
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+      }
+      return a.sortOrder - b.sortOrder;
+    }), [chatDisplayConfig.starters]);
+
+  const [modelRuntimeStatus, setModelRuntimeStatus] = useState({
+    connected: false,
+    loading: true,
+    modelName: '检测中',
+  });
+
+  useEffect(() => {
+    let active = true;
+    const loadModelStatus = async () => {
+      try {
+        const response = await fetch('/api/xiaoqiao/admin/model-service-config', {
+          credentials: 'include',
+        });
+        if (!response.ok) throw new Error(`unexpected status ${response.status}`);
+        const config = await response.json() as {
+          enabled?: boolean;
+          apiKey?: string;
+          baseUrl?: string;
+          modelBaseUrl?: string;
+          modelName?: string;
+        };
+        const connected = Boolean(
+          config.enabled &&
+          config.apiKey &&
+          config.baseUrl &&
+          config.modelBaseUrl &&
+          config.modelName,
+        );
+        if (!active) return;
+        setModelRuntimeStatus({
+          connected,
+          loading: false,
+          modelName: config.modelName?.trim() || '未接通',
+        });
+      } catch {
+        if (!active) return;
+        setModelRuntimeStatus({
+          connected: false,
+          loading: false,
+          modelName: '未接通',
+        });
+      }
+    };
+    const timer = window.setTimeout(() => {
+      void loadModelStatus();
+    }, 2500);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   const activeResult = currentResult || agentResult;
-  const showDebugPanel = workspaceView === 'chat' && !isMobile && (
-    activeSidePanel === 'debugging' ||
-    activeResult?.result_type === 'debugging_report'
+  const showSourcePanel = workspaceView === 'chat' && !!sourcePanelPayload;
+  const showCenteredComposer = !sharedConversationId && workspaceView === 'chat' && messages.length === 0 && !isTyping;
+  const visibleMessages = useMemo(
+    () => (sharedConversationId ? sharedConversationMessages : messages),
+    [sharedConversationId, sharedConversationMessages, messages],
+  );
+  const activePanelMessage = useMemo(() => {
+    if (!sourcePanelPayload) return null;
+    const searchId = sourcePanelMessageId
+      || sourcePanelPayload.message?.message_id
+      || sourcePanelPayload.message?.id
+      || null;
+    const matchedMessage = searchId
+      ? visibleMessages.find((message) => (message.message_id || message.id) === searchId)
+      : null;
+    if (matchedMessage) return matchedMessage;
+    const latestRuntimeMessage = [...visibleMessages].reverse().find(hasRuntimeDisclosureDetails);
+    return latestRuntimeMessage || sourcePanelPayload.message;
+  }, [sourcePanelMessageId, sourcePanelPayload, visibleMessages]);
+  const canViewRawDisclosure = Boolean(
+    user?.admin_access?.is_super_admin
+      || user?.admin_access?.can_operate_admin
+      || user?.admin_access?.can_view_admin,
+  );
+  const disclosureView = useMemo(
+    () => {
+      if (!showSourcePanel) return null;
+      return buildMessageDisclosureView({
+        message: activePanelMessage || null,
+        source: sourcePanelPayload?.source ? { ...sourcePanelPayload.source } : null,
+        capability: sourcePanelPayload?.capability ? { ...sourcePanelPayload.capability } : null,
+        permissions: {
+          canViewRaw: canViewRawDisclosure,
+          canViewFull: canViewRawDisclosure,
+          redactionLevel: canViewRawDisclosure ? 'none' : 'partial',
+        },
+      });
+    },
+    [canViewRawDisclosure, showSourcePanel, sourcePanelPayload, activePanelMessage],
   );
   const activeConversation = useMemo(
     () => conversations.find((item) => item.conversation_id === activeConversationId) || null,
     [activeConversationId, conversations],
   );
+  const topBarTitle = sharedConversationId
+    ? '这是已分享的 小乔智投 对话副本'
+    : workspaceView === 'assets'
+      ? '我的资产'
+      : workspaceView === 'automation'
+        ? '自动化'
+        : activeConversation?.title || '';
+
+  useEffect(() => {
+    setResultRecommendations([]);
+  }, [activeConversationId, workspaceView]);
+
+  useEffect(() => {
+    if (sharedConversationId) return;
+    const nextProjectRef = resolveProjectBindingRef(activeConversation?.project_binding);
+    if (!nextProjectRef) return;
+    setCurrentProjectId((current) => (String(current ?? '') === nextProjectRef ? current : nextProjectRef));
+  }, [activeConversation?.project_binding, sharedConversationId]);
+
+  useEffect(() => {
+    if (sharedConversationId || !activeConversationId) return;
+    if (activeConversationId.startsWith('optimistic-')) return;
+    if (!currentProject || currentProjectId === null) return;
+    if (String(currentProject.appId ?? '') !== String(currentProjectId)) return;
+    const nextBinding = buildProjectBinding(currentProject);
+    if (!nextBinding) return;
+    if (normalizeProjectBindingSignature(activeConversation?.project_binding) === normalizeProjectBindingSignature(nextBinding)) return;
+    void conversationApi.update(activeConversationId, { project_binding: nextBinding }).catch(() => undefined);
+  }, [activeConversation?.project_binding, activeConversationId, currentProject, currentProjectId, sharedConversationId]);
+
+  const reloadUploadedAssets = useCallback(async () => {
+    try {
+      const response = await fetch('/api/xiaoqiao/attachments', { cache: 'no-store' });
+      if (!response.ok) throw new Error(await response.text());
+      const items = await response.json() as AttachmentRecord[];
+      setUploadedAssetAttachments(Array.isArray(items) ? items : []);
+    } catch {
+      setUploadedAssetAttachments([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    setSharedConversationId(params.get('sharedConversationId'));
+    setSharedConversationTitle(params.get('sharedConversationTitle') || '');
+    setWorkspaceView(getInitialWorkspaceView());
+  }, []);
+
+  useEffect(() => {
+    if (workspaceView !== 'assets') return;
+    void reloadUploadedAssets();
+  }, [reloadUploadedAssets, workspaceView]);
+
+  const loadPersonalKnowledgeConfig = useCallback(async () => {
+    try {
+      const response = await fetch('/api/xiaoqiao/personal-knowledge/config', { cache: 'no-store' });
+      if (!response.ok) throw new Error(await response.text());
+      const config = await response.json() as {
+        enabled?: boolean;
+        accessUrl?: string;
+        lastTestStatus?: 'success' | 'failed' | 'skipped';
+        lastTestMessage?: string;
+      };
+      setPersonalKnowledgeAccessUrl(config.accessUrl || 'https://dataki.dobest.com');
+      setPersonalKnowledgeStatus(config.lastTestStatus);
+      setPersonalKnowledgeMessage(config.lastTestMessage || (config.enabled ? '已内置个人知识库' : ''));
+    } catch {
+      setPersonalKnowledgeMessage('暂时无法读取个人知识库状态');
+    }
+  }, []);
+
+  const openPersonalKnowledgeConfig = useCallback(() => {
+    setPersonalKnowledgeOpen(true);
+    void loadPersonalKnowledgeConfig();
+  }, [loadPersonalKnowledgeConfig]);
+
+  const hasRunningConversation = useMemo(
+    () => runningConversationIds.length > 0,
+    [runningConversationIds],
+  );
+  const isCurrentConversationRunning = useMemo(
+    () => Boolean(
+      activeConversationId && runningConversationIds.includes(activeConversationId),
+    ),
+    [activeConversationId, runningConversationIds],
+  );
   const latestAssistantMessage = useMemo(
     () => [...messages].reverse().find((item) => item.role === 'assistant' && item.content.trim()),
     [messages],
   );
+  const activeResultRef = useRef(activeResult);
   const isCompactLayout = isMobile || viewportWidth < 1200;
-  const showSourcePanel = workspaceView === 'chat' && !!sourcePanelPayload;
   const pageSidePadding = isCompactLayout ? 20 : 30;
-  const isCurrentConversationEmpty = workspaceView === 'chat'
-    && messages.length === 0
-    && (activeConversation?.message_count || 0) === 0
-    && attachments.length === 0
-    && referencedAssets.length === 0
-    && !currentResult;
+
+  const closeRightPanel = useCallback(() => {
+    setSourcePanelPayload(null);
+    setSourcePanelMessageId(null);
+    setActiveSidePanel(null);
+    setRightPanelCollapsed(false);
+    setRightPanelDismissed(true);
+  }, []);
+
+  const switchWorkspaceView = useCallback((nextView: WorkspaceView) => {
+    setWorkspaceView(nextView);
+    if (typeof window === 'undefined') return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete('sharedConversationId');
+    url.searchParams.delete('sharedConversationTitle');
+    if (nextView === 'chat') {
+      url.searchParams.delete('view');
+    } else {
+      url.searchParams.set('view', nextView);
+    }
+    try {
+      if (nextView === 'chat') {
+        window.localStorage.removeItem(WORKSPACE_VIEW_STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(WORKSPACE_VIEW_STORAGE_KEY, nextView);
+      }
+    } catch {
+      // localStorage 不可用时只保持当前页面状态。
+    }
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }, []);
+
+  useEffect(() => {
+    if (activeResultRef.current !== activeResult) {
+      activeResultRef.current = activeResult;
+      setRightPanelDismissed(true);
+    }
+  }, [activeResult]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -459,54 +478,16 @@ function WorkspaceContent() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/xiaoqiao/projects')
-      .then((res) => res.json())
-      .then((payload: { projects?: ProjectOption[]; source?: string }) => {
-        if (cancelled) return;
-        const projects = Array.isArray(payload.projects) ? payload.projects : [];
-        setProjectOptions(projects.map((project) => ({ ...project, source: payload.source })));
+    fetch('/api/xiaoqiao/chat-display-config', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((config: ChatDisplayConfig | null) => {
+        if (!cancelled && config) setChatDisplayConfig(config);
       })
-      .catch(() => {
-        if (!cancelled) {
-          setProjectOptions([{ app_id: 12701, app_name: '项目 12701', app_alias: '默认项目', source: 'fallback' }]);
-        }
-      });
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem('zhitou-chat-followed-projects');
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        setFollowedProjectIds(parsed.filter((item): item is string | number => (
-          typeof item === 'string' || typeof item === 'number'
-        )));
-      }
-    } catch {
-      // ignore malformed local state
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('zhitou-chat-followed-projects', JSON.stringify(followedProjectIds));
-  }, [followedProjectIds]);
-
-  const selectedProject = useMemo(
-    () => projectOptions.find((project) => String(project.app_id) === String(selectedProjectId)) || null,
-    [projectOptions, selectedProjectId],
-  );
-
-  const projectContextText = useMemo(() => {
-    if (selectedProjectId === ALL_PROJECT_VALUE) return '项目范围：全部项目';
-    if (selectedProject) return `项目范围：${selectedProject.app_name}(APPID:${selectedProject.app_id})`;
-    return '项目范围：当前项目';
-  }, [selectedProject, selectedProjectId]);
 
   useEffect(() => {
     if (sidebarDrawerOpen) {
@@ -523,6 +504,101 @@ function WorkspaceContent() {
     window.setTimeout(() => setSidebarDrawerOpen(false), 320);
   }, []);
 
+  const clearSharedConversationMode = useCallback(() => {
+    setSharedConversationId(null);
+    setSharedConversationTitle('');
+    setSharedConversationMessages([]);
+    setSharedConversationBlocked(false);
+    setSharedConversationLoading(false);
+  }, []);
+
+  const handleShareConversationLink = useCallback(async (conversationId: string, title?: string) => {
+    const shareUrl = buildConversationShareUrl(conversationId, title || activeConversation?.title || '当前会话');
+    if (!shareUrl) {
+      message.info('当前环境暂不支持复制链接');
+      return;
+    }
+
+    const tryClipboardApi = async () => {
+      if (!navigator?.clipboard?.writeText) return false;
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const tryLegacyCopy = () => {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.name = 'conversation_share_copy_buffer';
+        textarea.value = shareUrl;
+        textarea.setAttribute('readonly', 'true');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '0';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        const ok = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        return ok;
+      } catch {
+        return false;
+      }
+    };
+
+    const copied = (await tryClipboardApi()) || tryLegacyCopy();
+    if (copied) {
+      message.success('链接已复制');
+      return;
+    }
+
+    Modal.info({
+      title: '复制链接',
+      centered: true,
+      content: (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 13, color: c.textSecondary, marginBottom: 10 }}>
+            当前浏览器不支持一键复制，请长按或全选复制下面的链接。
+          </div>
+          <input
+            id="conversation-share-url"
+            name="conversation_share_url"
+            readOnly
+            value={shareUrl}
+            onFocus={(event) => event.currentTarget.select()}
+            style={{
+              width: '100%',
+              height: 40,
+              borderRadius: 10,
+              border: '1px solid #dbe4f0',
+              padding: '0 12px',
+              fontSize: 13,
+              color: c.textPrimary,
+              outline: 'none',
+            }}
+          />
+        </div>
+      ),
+      okText: '关闭',
+    });
+  }, [activeConversation?.title]);
+
+  const shareMenuItems: MenuProps['items'] = useMemo(() => {
+    if (!activeConversationId) return [];
+    return [
+      {
+        key: 'share-xiaoshan',
+        label: '复制链接',
+        icon: <SharePlaneIcon size={14} />,
+        onClick: () => void handleShareConversationLink(activeConversationId, activeConversation?.title || '当前会话'),
+      },
+    ];
+  }, [activeConversationId, activeConversation?.title, handleShareConversationLink]);
+
   useEffect(() => {
     if (!searchOpen) return;
 
@@ -536,7 +612,8 @@ function WorkspaceContent() {
     const timer = window.setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const response = await fetch(`/api/xiaoqiao/conversations/search?q=${encodeURIComponent(keyword)}`);
+        const projectRefs = currentProjectBinding?.project_refs?.join(',') || '';
+        const response = await fetch(`/api/xiaoqiao/conversations/search?q=${encodeURIComponent(keyword)}${projectRefs ? `&project_refs=${encodeURIComponent(projectRefs)}` : ''}`);
         const data = await response.json();
         setSearchResults(Array.isArray(data) ? data : []);
       } catch {
@@ -547,10 +624,79 @@ function WorkspaceContent() {
     }, 220);
 
     return () => window.clearTimeout(timer);
-  }, [searchOpen, searchQuery]);
+  }, [currentProjectBinding, searchOpen, searchQuery]);
+
+  useEffect(() => {
+    if (!sharedConversationId) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    setWorkspaceView('chat');
+    setSharedConversationLoading(true);
+    setSharedConversationBlocked(false);
+    setSharedConversationMessages([]);
+
+    const loadSharedConversation = async () => {
+      try {
+        const [conversationResponse, messagesResponse] = await Promise.all([
+          fetch(`/api/xiaoqiao/conversations/${sharedConversationId}`, { cache: 'no-store' }),
+          fetch(`/api/xiaoqiao/conversations/${sharedConversationId}/messages`, { cache: 'no-store' }),
+        ]);
+
+        if (cancelled) return;
+
+        // 共享链接在浏览器打开时，如果没有登录态，先引导到登录页，登录后回到当前链接。
+        if (conversationResponse.status === 401 || messagesResponse.status === 401) {
+          if (typeof window !== 'undefined') {
+            const redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+            window.location.href = `/login?redirect=${redirect}`;
+          }
+          return;
+        }
+        if (!conversationResponse.ok || !messagesResponse.ok) {
+          setSharedConversationBlocked(true);
+          setSharedConversationMessages([]);
+          return;
+        }
+
+        const conversationPayload = await conversationResponse.json().catch(() => null) as { title?: string } | null;
+        const messagesPayload = await messagesResponse.json().catch(() => []);
+        const nextMessages = Array.isArray(messagesPayload) ? messagesPayload : [];
+        const nextTitle = typeof conversationPayload?.title === 'string' && conversationPayload.title.trim()
+          ? conversationPayload.title
+          : '';
+        if (nextTitle) {
+          setSharedConversationTitle(nextTitle);
+        } else {
+          setSharedConversationTitle((prev) => prev || '已分享的对话');
+        }
+        setSharedConversationMessages(nextMessages);
+      } catch {
+        if (!cancelled) {
+          setSharedConversationBlocked(true);
+          setSharedConversationMessages([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setSharedConversationLoading(false);
+        }
+      }
+    };
+
+    void loadSharedConversation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sharedConversationId]);
 
   useEffect(() => {
     if (!activeConversationId) {
+      replaceAttachments([]);
+      return;
+    }
+    if (activeConversationId.startsWith('optimistic-')) {
       replaceAttachments([]);
       return;
     }
@@ -574,10 +720,31 @@ function WorkspaceContent() {
     };
   }, [activeConversationId, replaceAttachments]);
 
+  useEffect(() => {
+    if (workspaceView !== 'automation') return;
+    let cancelled = false;
+    fetch('/api/xiaoqiao/admin/automation-templates?status=active')
+      .then(async (response) => {
+        if (!response.ok) throw new Error(await response.text());
+        return response.json() as Promise<AutomationTemplateConfig[]>;
+      })
+      .then((items) => {
+        if (!cancelled) {
+          setAutomationTemplates(Array.isArray(items) ? items.map(mapAutomationTemplate) : []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setAutomationTemplates([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceView]);
+
   const handleFollowUpClick = useCallback((question: string) => {
-    setWorkspaceView('chat');
+    switchWorkspaceView('chat');
     setComposerDraft(question);
-  }, []);
+  }, [switchWorkspaceView]);
 
   const handleAgentChange = useCallback((agent: typeof currentAgent) => {
     setCurrentAgent(agent);
@@ -585,35 +752,43 @@ function WorkspaceContent() {
 
   const handleOpenAgentPanel = useCallback((agent: AgentType) => {
     if (!['demand', 'diagnosis', 'debugging'].includes(agent)) return;
-    setWorkspaceView('chat');
+    switchWorkspaceView('chat');
     setSourcePanelPayload(null);
+    setSourcePanelMessageId(null);
+    setRightPanelDismissed(false);
     setCurrentAgent(agent);
+    if (agent === 'debugging') {
+      setActiveSidePanel(null);
+      setRightPanelCollapsed(false);
+      return;
+    }
     setActiveSidePanel(agent);
     setRightPanelCollapsed(false);
-  }, [setCurrentAgent]);
+  }, [setCurrentAgent, switchWorkspaceView]);
 
   const handleCreateConversationRequest = useCallback(async () => {
-    setWorkspaceView('chat');
+    switchWorkspaceView('chat');
     setSourcePanelPayload(null);
+    setSourcePanelMessageId(null);
     setActiveSidePanel(null);
     setRightPanelCollapsed(false);
-    if (isCurrentConversationEmpty) return;
-    await createConversation();
-  }, [createConversation, isCurrentConversationEmpty]);
+    setRightPanelDismissed(true);
+    startBlankConversation();
+  }, [startBlankConversation, switchWorkspaceView]);
 
   const handleUpload = useCallback(async (file: File, sourceType: 'click' | 'drag' | 'paste') => {
-    const kind = file.type.startsWith('image/')
-      ? 'image' as const
-      : file.type.startsWith('video/')
-        ? 'video' as const
-      : file.name.endsWith('.pdf') || file.name.endsWith('.doc') || file.name.endsWith('.docx')
-        ? 'document' as const
-        : file.name.endsWith('.xls') || file.name.endsWith('.xlsx') || file.name.endsWith('.csv')
-          ? 'table' as const
-          : 'log' as const;
-
-    const previewUrl = kind === 'image' || kind === 'video' ? URL.createObjectURL(file) : undefined;
+    const kind = inferAttachmentKind(file);
+    const validationError = validateUploadFile(file);
+    if (validationError) {
+      message.error(validationError);
+      return;
+    }
+    const imagePreview = kind === 'image' ? await createImageThumbnail(file) : null;
+    const videoCover = kind === 'video' ? await createVideoCover(file) : null;
+    const previewBlob = imagePreview?.blob || videoCover?.blob;
+    const previewUrl = previewBlob ? URL.createObjectURL(previewBlob) : undefined;
     const conversationId = activeConversationId || (await createConversation()).conversation_id;
+    const projectBinding = currentProjectBinding;
     const attachmentId = `att-local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const attachment: AttachmentRecord = {
       id: attachmentId,
@@ -622,13 +797,20 @@ function WorkspaceContent() {
       filename: file.name,
       kind,
       type: kind,
-      mime_type: file.type,
+      mime_type: file.type || 'application/octet-stream',
       size: file.size,
       status: 'uploading',
-      source_type: sourceType,
-      created_at: new Date().toISOString(),
+      asset_state: 'draft',
       preview_url: previewUrl,
+      preview_image_url: previewUrl,
+      thumbnail_status: kind === 'image' || kind === 'video' ? (previewUrl ? 'generated' : 'failed') : 'unsupported',
+      media_width: imagePreview?.width || videoCover?.width,
+      media_height: imagePreview?.height || videoCover?.height,
+      duration_ms: videoCover?.durationMs,
       url: previewUrl,
+      source_type: sourceType,
+      project_binding: projectBinding,
+      created_at: new Date().toISOString(),
     };
 
     addAttachment(attachment);
@@ -636,121 +818,79 @@ function WorkspaceContent() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('source_type', sourceType);
+      if (imagePreview?.blob) formData.append('thumbnail', imagePreview.blob, `${file.name}.thumb.webp`);
+      if (videoCover?.blob) formData.append('cover', videoCover.blob, `${file.name}.cover.webp`);
+      if (imagePreview?.width || videoCover?.width) formData.append('media_width', String(imagePreview?.width || videoCover?.width));
+      if (imagePreview?.height || videoCover?.height) formData.append('media_height', String(imagePreview?.height || videoCover?.height));
+      if (videoCover?.durationMs) formData.append('duration_ms', String(videoCover.durationMs));
+      if (projectBinding) formData.append('project_binding', JSON.stringify(projectBinding));
       const response = await fetch(`/api/xiaoqiao/conversations/${conversationId}/attachments`, {
         method: 'POST',
         body: formData,
       });
-
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-
-      addAttachment({ ...attachment, status: 'parsing' });
-      const parsed = await response.json() as AttachmentRecord;
-      removeAttachment(attachmentId);
-      addAttachment({
-        ...parsed,
-        preview_url: previewUrl || parsed.preview_url,
-        url: previewUrl || parsed.url,
-      });
-      message.success(`${file.name} 已上传并解析`);
+      if (!response.ok) throw new Error(await response.text());
+      const saved = await response.json() as AttachmentRecord;
+      replaceAttachments(attachments.map(item => item.id === attachmentId ? saved : item).concat(
+        attachments.some(item => item.id === attachmentId) ? [] : [saved],
+      ));
     } catch {
-      addAttachment({
-        ...attachment,
-        status: 'upload_failed',
-        summary: '上传失败，请重试。',
-      });
-      message.error(`${file.name} 上传失败`);
+      replaceAttachments(attachments.map(item => item.id === attachmentId ? { ...item, status: 'upload_failed' } : item));
     }
-  }, [activeConversationId, addAttachment, createConversation, removeAttachment]);
+  }, [activeConversationId, addAttachment, attachments, createConversation, currentProjectBinding, replaceAttachments]);
+
+  const handleUploadFiles = useCallback((files: FileList | File[], sourceType: 'click' | 'drag' | 'paste' = 'click') => {
+    const items = Array.from(files);
+    if (items.length === 0) return;
+    const availableSlots = Math.max(0, MAX_UPLOAD_FILES - attachments.length);
+    if (availableSlots <= 0) {
+      message.warning(`一次最多上传 ${MAX_UPLOAD_FILES} 个文件。`);
+      return;
+    }
+    const accepted = items.slice(0, availableSlots);
+    if (items.length > availableSlots) {
+      message.warning(`一次最多上传 ${MAX_UPLOAD_FILES} 个文件，已保留前 ${availableSlots} 个。`);
+    }
+    accepted.forEach((file) => {
+      void handleUpload(file, sourceType);
+    });
+  }, [attachments.length, handleUpload]);
+
+  const handleRemoveAttachment = useCallback((attachmentId: string) => {
+    removeAttachment(attachmentId);
+    void fetch(`/api/xiaoqiao/attachments/${attachmentId}`, { method: 'DELETE' }).catch(() => undefined);
+  }, [removeAttachment]);
 
   const handleRetryAttachment = useCallback(async (attachmentId: string) => {
-    const current = attachments.find((item) => item.id === attachmentId);
-    if (current) addAttachment({ ...current, status: 'parsing' });
-
     try {
       const response = await fetch(`/api/xiaoqiao/attachments/${attachmentId}/retry`, { method: 'POST' });
       if (!response.ok) throw new Error(await response.text());
-      const next = await response.json() as AttachmentRecord;
-      addAttachment(next);
-      message.success(`${next.name || '附件'} 已重新解析`);
+      const saved = await response.json() as AttachmentRecord;
+      replaceAttachments(attachments.map(item => item.id === attachmentId ? saved : item));
     } catch {
-      if (current) addAttachment({ ...current, status: 'parse_failed', summary: '重新解析失败，请稍后再试。' });
-      message.error('重新解析失败');
+      replaceAttachments(attachments.map(item => item.id === attachmentId ? { ...item, status: 'parse_failed' } : item));
     }
-  }, [addAttachment, attachments]);
+  }, [attachments, replaceAttachments]);
 
-  const handleRemoveAttachment = useCallback(async (attachmentId: string) => {
-    removeAttachment(attachmentId);
-    await fetch(`/api/xiaoqiao/attachments/${attachmentId}`, { method: 'DELETE' }).catch(() => undefined);
-  }, [removeAttachment]);
-
-  const handleContextSave = useCallback(() => {
-    // 保持既有配置链路不变。
-  }, []);
-
-  const buildSpeechText = useCallback((raw: string) => raw
-    .replace(/```[\s\S]*?```/g, '代码片段已省略。')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/#+\s/g, '')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
-    .replace(/\n{2,}/g, '。')
-    .replace(/\n/g, '，')
-    .trim(), []);
+  const buildSpeechText = useCallback((content: string) => (
+    content.replace(/```[\s\S]*?```/g, '').replace(/\s+/g, ' ').trim().slice(0, 500)
+  ), []);
 
   const handleToggleAutoSpeak = useCallback(() => {
-    setAutoSpeakEnabled((prev) => {
+    setAutoSpeakEnabled(prev => {
       const next = !prev;
       if (!next) stopSpeaking();
       return next;
     });
   }, [stopSpeaking]);
 
-  const handleShareConversation = useCallback(async () => {
-    const shareTitle = activeConversation?.title || '当前会话';
-    const shareText = `${shareTitle} - 智投chat`;
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share && isMobile) {
-        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-        return;
-      }
-
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(`${shareTitle}\n${shareUrl}`);
-        message.success('会话链接已复制');
-        return;
-      }
-
-      message.info('当前环境暂不支持分享');
-    } catch {
-      message.error('分享失败，请稍后重试');
-    }
-  }, [activeConversation?.title, isMobile]);
-
-  const shareMenuItems = useMemo<MenuProps['items']>(() => ([
-    {
-      key: 'copy-link',
-      label: '复制会话链接',
-      icon: <SharePlaneIcon size={14} />,
-      onClick: () => void handleShareConversation(),
-    },
-    {
-      key: 'share-xiaoshan',
-      label: '分享到小闪',
-      icon: <SharePlaneIcon size={14} />,
-      onClick: () => message.success(`已分享到小闪：${activeConversation?.title || '当前会话'}`),
-    },
-    {
-      key: 'save-kb',
-      label: '保存到个人知识库',
-      icon: <SharePlaneIcon size={14} />,
-      onClick: () => message.success(`已保存到个人知识库：${activeConversation?.title || '当前会话'}`),
-    },
-  ]), [activeConversation?.title, handleShareConversation]);
+  const handleContextSave = useCallback((nextContext: Record<string, unknown>) => {
+    const lines = Object.entries(nextContext)
+      .filter(([, value]) => value !== undefined && value !== null && String(value).trim())
+      .map(([key, value]) => `${key}：${String(value)}`);
+    setProjectContextText(lines.length ? lines.join('\n') : '项目范围：未选择项目');
+    setProjectContextLoadStatus('ready');
+    setShowContextDrawer(false);
+  }, []);
 
   const contextThinkingSteps = useMemo(() => {
     const steps: Array<{ title: string; description?: string }> = [];
@@ -777,9 +917,18 @@ function WorkspaceContent() {
     speak(buildSpeechText(latestAssistantMessage.content));
   }, [autoSpeakEnabled, buildSpeechText, isTyping, latestAssistantMessage, speak, synthesisSupported]);
 
+  const assetLibrary = useMemo(() => {
+    const titleByConversation = new Map(conversations.map((item) => [item.conversation_id, item.title]));
+    const uploadedAssets = uploadedAssetAttachments.map((attachment) => (
+      attachmentToAsset(attachment, titleByConversation.get(attachment.conversation_id))
+    ));
+    const next = [...uploadedAssets, ...ASSET_LIBRARY];
+    return next.filter((asset) => isProjectBoundObjectVisible(asset.projectBinding, currentProjectRef));
+  }, [conversations, currentProjectRef, uploadedAssetAttachments]);
+
   const filteredAssets = useMemo(() => {
     const keyword = assetSearch.trim().toLowerCase();
-    return ASSET_LIBRARY.filter((asset) => {
+    return assetLibrary.filter((asset) => {
       if (deletedAssetIds.includes(asset.id)) return false;
       const matchesSource =
         assetSourceFilter === 'all' ||
@@ -788,6 +937,7 @@ function WorkspaceContent() {
       const matchesFormat =
         assetFormatFilter === 'all' ||
         (assetFormatFilter === 'image' && asset.category === 'image') ||
+        (assetFormatFilter === 'video' && asset.category === 'video') ||
         (assetFormatFilter === 'document' && ['Word'].includes(asset.format)) ||
         (assetFormatFilter === 'spreadsheet' && ['Excel'].includes(asset.format)) ||
         (assetFormatFilter === 'slides' && ['PPT', 'PPTX'].includes(asset.format)) ||
@@ -800,12 +950,61 @@ function WorkspaceContent() {
       ].some((value) => value.toLowerCase().includes(keyword));
       return matchesSource && matchesFormat && matchesKeyword;
     });
-  }, [assetFormatFilter, assetSearch, assetSourceFilter, deletedAssetIds]);
+  }, [assetFormatFilter, assetLibrary, assetSearch, assetSourceFilter, deletedAssetIds]);
 
   const selectedAssets = useMemo(
-    () => ASSET_LIBRARY.filter((asset) => selectedAssetIds.includes(asset.id) && !deletedAssetIds.includes(asset.id)),
-    [deletedAssetIds, selectedAssetIds],
+    () => assetLibrary.filter((asset) => selectedAssetIds.includes(asset.id) && !deletedAssetIds.includes(asset.id)),
+    [assetLibrary, deletedAssetIds, selectedAssetIds],
   );
+
+  const automationReportTasks = useMemo(() => (
+    automationTasks.filter((task) => (
+      isProjectBoundObjectVisible(task.project_binding, currentProjectRef) && (
+        task.task_type === 'report_generate' ||
+        ['scheduled_report', 'report', 'table_merge', 'tag_summary'].includes(String(task.custom_params?.automation_type || task.custom_params?.report_type || ''))
+      )
+    ))
+  ), [automationTasks, currentProjectRef]);
+
+  const automationRunRecords = useMemo<AutomationRunRecord[]>(() => (
+    automationReportTasks.flatMap((task) => (
+      task.recent_executions.map((execution) => ({
+        id: `${task.id}-${execution.id}`,
+        task,
+        execution,
+      }))
+    )).sort((a, b) => b.execution.started_at - a.execution.started_at)
+  ), [automationReportTasks]);
+
+  const availableAutomationTemplates = automationTemplates.length > 0 ? automationTemplates : FALLBACK_AUTOMATION_TEMPLATES;
+
+  const reloadAutomationTasks = useCallback(async () => {
+    setAutomationLoading(true);
+    try {
+      const items = await scheduledTaskApi.list({ project_refs: currentProjectBinding?.project_refs });
+      setAutomationTasks(Array.isArray(items) ? items : []);
+    } catch {
+      setAutomationTasks([]);
+    } finally {
+      setAutomationLoading(false);
+    }
+  }, [currentProjectBinding]);
+
+  const reloadAutomationUnreadCount = useCallback(async () => {
+    try {
+      const { unread_count } = await notificationApi.unreadCount();
+      setAutomationUnreadCount(Number.isFinite(unread_count) ? unread_count : 0);
+    } catch {
+      setAutomationUnreadCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (workspaceView !== 'automation') return;
+    void reloadAutomationTasks();
+    void reloadAutomationUnreadCount();
+    void notificationApi.markRead().then(() => setAutomationUnreadCount(0)).catch(() => undefined);
+  }, [reloadAutomationTasks, reloadAutomationUnreadCount, workspaceView]);
 
   const applySelectedAssets = useCallback(async () => {
     const picked = selectedAssets.slice(0, 10);
@@ -814,10 +1013,15 @@ function WorkspaceContent() {
     }
     await createConversation('基于资产的新对话');
     setReferencedAssets(picked);
-    setWorkspaceView('chat');
-  }, [createConversation, selectedAssets]);
+    switchWorkspaceView('chat');
+  }, [createConversation, selectedAssets, switchWorkspaceView]);
 
   const handleDownloadAssets = useCallback((assetsToDownload: AssetRecord[]) => {
+    assetsToDownload
+      .filter((asset) => asset.assetUrl)
+      .forEach((asset) => {
+        window.open(asset.assetUrl, '_blank', 'noopener,noreferrer');
+      });
     const names = assetsToDownload.map((asset) => asset.title).join('、');
     message.success(`已开始下载：${names}`);
   }, []);
@@ -826,11 +1030,244 @@ function WorkspaceContent() {
     setDeletedAssetIds((prev) => Array.from(new Set([...prev, ...assetIds])));
     setSelectedAssetIds((prev) => prev.filter((id) => !assetIds.includes(id)));
     setOpenedAsset((prev) => (prev && assetIds.includes(prev.id) ? null : prev));
+    assetIds
+      .filter((id) => id.startsWith('att-'))
+      .forEach((id) => {
+        void fetch(`/api/xiaoqiao/attachments/${id}`, { method: 'DELETE' }).catch(() => undefined);
+      });
     message.success('已删除选中的资产');
   }, []);
 
+  const handleConfirmDeleteAsset = useCallback((asset: AssetRecord) => {
+    Modal.confirm({
+      title: '删除资产',
+      content: (
+        <div style={{ color: c.textPrimary, fontSize: 14, lineHeight: '22px' }}>
+          这会删除“{getAssetFileName(asset)}”。
+        </div>
+      ),
+      okText: '确认删除',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      centered: true,
+      onOk: () => handleDeleteAssets([asset.id]),
+    });
+  }, [c.textPrimary, handleDeleteAssets]);
+
+  const handleOpenAutomationTemplate = useCallback((template: AutomationTemplate) => {
+    switchWorkspaceView('chat');
+    setComposerDraft(template.prompt);
+  }, [switchWorkspaceView]);
+
+  const handleCreateAutomationInChat = useCallback(() => {
+    switchWorkspaceView('chat');
+    setComposerDraft('我想创建一个自动化报表任务，请先帮我确认项目、周期、指标、维度、筛选条件和输出格式。');
+  }, [switchWorkspaceView]);
+
+  const handleOpenManualAutomationCreate = useCallback(() => {
+    setEditingAutomationTask(null);
+    setCreatingAutomationTask(true);
+    setAutomationTaskDraft({
+      name: '',
+      description: '',
+      frequency: 'daily',
+      run_time: '09:00',
+      cron_expression: '0 9 * * *',
+      monitor_metrics: '消耗、激活、ROI',
+      dimension: '媒体、账户',
+      notify_on_failure: true,
+      notify_on_success: true,
+      alert_targets: '',
+    });
+    const attachmentIds = attachments
+      .filter((item) => item.status === 'parsed' && !item.id.startsWith('att-local-'))
+      .map((item) => item.id);
+    void automationApi.draft({
+      conversation_id: activeConversationId || undefined,
+      attachment_ids: attachmentIds,
+      message: composerDraft || '创建自动化任务',
+    }).then((draft) => {
+      setAutomationTaskDraft({
+        name: draft.name || '',
+        description: draft.description || '',
+        frequency: draft.frequency || 'daily',
+        run_time: runTimeFromCronExpression(draft.cron_expression),
+        cron_expression: draft.cron_expression || '0 9 * * *',
+        monitor_metrics: draft.monitor_metrics.join('、'),
+        dimension: draft.dimensions.join('、'),
+        notify_on_failure: true,
+        notify_on_success: true,
+        alert_targets: draft.alert_targets.join('、'),
+      });
+    }).catch(() => undefined);
+  }, [activeConversationId, attachments, composerDraft]);
+
+  const handleOpenAutomationCreateFromResult = useCallback(() => {
+    const resultDraft = buildAutomationDraftFromResult(activeResult as WorkflowResult | Record<string, unknown> | null, composerDraft);
+    setEditingAutomationTask(null);
+    setCreatingAutomationTask(true);
+    setAutomationTaskDraft({
+      name: resultDraft?.name || '本次问数定时报表',
+      description: resultDraft?.description || '按本次问数结果定时生成报表',
+      frequency: 'daily',
+      run_time: '09:00',
+      cron_expression: '0 9 * * *',
+      monitor_metrics: resultDraft?.monitor_metrics || '消耗、激活、ROI',
+      dimension: resultDraft?.dimension || '媒体、账户',
+      notify_on_failure: true,
+      notify_on_success: true,
+      alert_targets: '',
+    });
+    switchWorkspaceView('automation');
+    setAutomationTab('configured');
+  }, [activeResult, composerDraft, switchWorkspaceView]);
+
+  const handlePauseAutomationTask = useCallback(async (task: ScheduledTask) => {
+    try {
+      const next = await scheduledTaskApi.pause(task.id);
+      setAutomationTasks((prev) => prev.map((item) => item.id === task.id ? next : item));
+      message.success('已暂停');
+    } catch {
+      message.error('暂停失败，请稍后重试');
+    }
+  }, []);
+
+  const handleResumeAutomationTask = useCallback(async (task: ScheduledTask) => {
+    try {
+      const next = await scheduledTaskApi.resume(task.id);
+      setAutomationTasks((prev) => prev.map((item) => item.id === task.id ? next : item));
+      message.success('已开启');
+    } catch {
+      message.error('开启失败，请稍后重试');
+    }
+  }, []);
+
+  const handleRunAutomationTask = useCallback(async (task: ScheduledTask) => {
+    try {
+      setAutomationLoading(true);
+      const result = await scheduledTaskApi.run(task.id);
+      setAutomationTasks((prev) => prev.map((item) => (item.id === task.id ? result.task : item)));
+      await reloadUploadedAssets();
+      await reloadAutomationUnreadCount();
+      if (result.artifact?.url) {
+        window.open(result.artifact.url, '_blank', 'noopener,noreferrer');
+      }
+      message.success('已生成结果文件');
+    } catch {
+      message.error('生成失败，请稍后重试');
+    } finally {
+      setAutomationLoading(false);
+    }
+  }, [reloadAutomationUnreadCount, reloadUploadedAssets]);
+
+  const handleEditAutomationTask = useCallback((task: ScheduledTask) => {
+    setCreatingAutomationTask(false);
+    setEditingAutomationTask(task);
+    setAutomationTaskDraft({
+      name: task.name,
+      description: task.description,
+      frequency: task.frequency,
+      run_time: runTimeFromCronExpression(task.cron_expression),
+      cron_expression: task.cron_expression || buildAutomationCronExpression(task.frequency, '09:00'),
+      monitor_metrics: task.monitor_metrics.join('、'),
+      dimension: String(task.custom_params?.dimension || ''),
+      notify_on_failure: task.notification_policy?.on_failure !== false,
+      notify_on_success: task.notification_policy?.on_success !== false,
+      alert_targets: task.alert_targets.join('、'),
+    });
+  }, []);
+
+  const handleSaveAutomationTask = useCallback(async () => {
+    if (!editingAutomationTask && !creatingAutomationTask) return;
+    const metrics = splitAutomationList(automationTaskDraft.monitor_metrics);
+    const dimension = automationTaskDraft.dimension.trim();
+    const frequency = automationTaskDraft.frequency;
+    const cronExpression = buildAutomationCronExpression(frequency, automationTaskDraft.run_time);
+    const name = automationTaskDraft.name.trim();
+    try {
+      const payload: Partial<ScheduledTask> = {
+        name: name || editingAutomationTask?.name || '自定义自动化报表',
+        description: automationTaskDraft.description.trim(),
+        task_type: 'report_generate' as const,
+        status: editingAutomationTask?.status || 'active',
+        project_binding: editingAutomationTask?.project_binding || currentProjectBinding,
+        cron_expression: cronExpression,
+        frequency,
+        monitor_metrics: metrics,
+        alert_channels: ['in_app'] as ScheduledTask['alert_channels'],
+        alert_targets: splitAutomationList(automationTaskDraft.alert_targets),
+        notification_policy: {
+          on_failure: automationTaskDraft.notify_on_failure,
+          on_success: automationTaskDraft.notify_on_success,
+          on_partial: automationTaskDraft.notify_on_failure,
+          target_scope: automationTaskDraft.alert_targets.trim() ? 'custom' : 'creator',
+        },
+        custom_params: {
+          ...(editingAutomationTask?.custom_params || {}),
+          automation_type: 'scheduled_report',
+          dimension,
+          dimensions: splitAutomationList(dimension),
+          run_time: automationTaskDraft.run_time,
+          data_freshness_policy: 'realtime',
+          source_result_id: String(asRecord(activeResult).result_id || ''),
+        },
+      };
+      const next = editingAutomationTask
+        ? await scheduledTaskApi.update(editingAutomationTask.id, payload)
+        : await scheduledTaskApi.create(payload);
+      setAutomationTasks((prev) => (
+        editingAutomationTask
+          ? prev.map((item) => item.id === next.id ? next : item)
+          : [next, ...prev.filter((item) => item.id !== next.id)]
+      ));
+      setEditingAutomationTask(null);
+      setCreatingAutomationTask(false);
+      message.success(editingAutomationTask ? '已保存' : '已创建自动化任务');
+    } catch {
+      message.error(editingAutomationTask ? '保存失败，请稍后重试' : '创建失败，请稍后重试');
+    }
+  }, [activeResult, automationTaskDraft, creatingAutomationTask, currentProjectBinding, editingAutomationTask]);
+
+  const handleCopyAutomationRun = useCallback(async (record: AutomationRunRecord) => {
+    const metrics = record.task.monitor_metrics.length > 0 ? record.task.monitor_metrics.join('、') : '核心指标';
+    const dimensions = String(record.task.custom_params?.dimension || '媒体、账户');
+    const text = [
+      `${record.task.name}`,
+      record.execution.result_summary,
+      `关注指标：${metrics}`,
+      `拆分维度：${dimensions}`,
+    ].join('\n');
+    try {
+      await navigator.clipboard?.writeText(text);
+      message.success('报表内容已复制');
+    } catch {
+      message.info('当前环境不支持自动复制，请手动选择内容复制');
+    }
+  }, []);
+
+  const handleRetryAutomationRun = useCallback(async (record: AutomationRunRecord) => {
+    try {
+      const execution = await automationExecutionApi.retry(record.execution.id);
+      setAutomationTasks((prev) => prev.map((task) => {
+        if (task.id !== record.task.id) return task;
+        return {
+          ...task,
+          recent_executions: [
+            execution as unknown as ScheduledTaskExecution,
+            ...task.recent_executions.filter((item) => item.id !== execution.id),
+          ].slice(0, 10),
+        };
+      }));
+      await reloadAutomationTasks();
+      await reloadAutomationUnreadCount();
+      message.success('已重新执行');
+    } catch {
+      message.error('重新执行失败，请稍后重试');
+    }
+  }, [reloadAutomationTasks, reloadAutomationUnreadCount]);
+
   const handleLocateAsset = useCallback((asset: AssetRecord) => {
-    setWorkspaceView('chat');
+    switchWorkspaceView('chat');
     setOpenedAsset(null);
     selectConversation(asset.conversationId);
     window.setTimeout(() => {
@@ -838,119 +1275,72 @@ function WorkspaceContent() {
       element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 420);
     message.success(`已打开「${asset.anchorText}」所在会话`);
-  }, [selectConversation]);
-
-  const projectSelectOptions = useMemo(() => [
-    {
-      label: '全部项目',
-      value: ALL_PROJECT_VALUE,
-      icon: '',
-      recent_visit: selectedProjectId === ALL_PROJECT_VALUE,
-      closed: false,
-    },
-    ...projectOptions.map((project, index) => ({
-      label: project.app_name || `APPID ${project.app_id}`,
-      value: project.app_id,
-      icon: project.icon || '',
-      followed: followedProjectIds.some((id) => String(id) === String(project.app_id)),
-      recent_visit: index < 3,
-      closed: false,
-    })),
-  ], [followedProjectIds, projectOptions, selectedProjectId]);
-
-  const renderProjectSelector = () => {
-    const selectedLabel = selectedProjectId === ALL_PROJECT_VALUE
-      ? '全部项目'
-      : selectedProject?.app_name || '当前项目';
-    const selectedProjectIcon = selectedProjectId === ALL_PROJECT_VALUE ? '' : selectedProject?.icon || '';
-    const mobileProjectWidth = messages.length > 0
-      ? 'clamp(150px, calc(100vw - 164px), 210px)'
-      : 'clamp(168px, calc(100vw - 122px), 230px)';
-    return (
-      <YkProjectSelect
-        value={selectedProjectId}
-        options={projectSelectOptions}
-        maxVisibleItems={isMobile ? 5 : undefined}
-        onChange={(value) => {
-          setSelectedProjectId(value === ALL_PROJECT_VALUE ? ALL_PROJECT_VALUE : (Number.isNaN(Number(value)) ? value : Number(value)));
-        }}
-        followedCallback={(item, followed) => {
-          if (item.value === ALL_PROJECT_VALUE) return;
-          setFollowedProjectIds((prev) => {
-            const withoutCurrent = prev.filter((id) => String(id) !== String(item.value));
-            return followed ? [...withoutCurrent, item.value] : withoutCurrent;
-          });
-        }}
-        customShow={(
-          <button
-            type="button"
-            className="project-select-trigger"
-            style={{
-              maxWidth: isMobile ? 'calc(100vw - 112px)' : 360,
-              minWidth: 0,
-              width: isMobile ? mobileProjectWidth : 'fit-content',
-              flexShrink: 1,
-              height: 36,
-              borderRadius: 18,
-              border: '1px solid rgba(15, 23, 42, 0.05)',
-              background: '#fff',
-              boxShadow: 'none',
-              color: c.textPrimary,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: 8,
-              padding: '0 10px 0 7px',
-              fontSize: 13,
-              fontWeight: 400,
-            }}
-            title={projectContextText}
-          >
-            <span
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 8,
-                overflow: 'hidden',
-                flexShrink: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: '#e5e7eb',
-                color: '#4c7dff',
-                fontSize: 11,
-                fontWeight: 600,
-              }}
-            >
-              {selectedProjectIcon ? (
-                <img src={selectedProjectIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : selectedProjectId === ALL_PROJECT_VALUE ? (
-                '全'
-              ) : (
-                '项'
-              )}
-            </span>
-            <span className="project-select-label" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {selectedLabel}
-            </span>
-          </button>
-        )}
-      />
-    );
-  };
+  }, [selectConversation, switchWorkspaceView]);
 
   const handleSendWithAssets = useCallback(async (rawMessage: string) => {
-    if (openedAsset) {
-      const conversation = await createConversation(`关于${openedAsset.title}`);
-      setWorkspaceView('chat');
-      setReferencedAssets([]);
-      setOpenedAsset(null);
-      sendMessage(`[引用资产] ${getAssetFileName(openedAsset)}（${openedAsset.format}）\n\n${rawMessage}`, conversation.conversation_id, { projectContext: projectContextText });
+    const messageText = rawMessage.trim();
+    const explicitProjectTarget = extractExplicitProjectTarget(messageText);
+    const resolvedExplicitProject = explicitProjectTarget
+      ? await resolveProjectFromTarget(explicitProjectTarget)
+      : null;
+    const projectForTurn = resolvedExplicitProject || currentProject;
+    const projectContextForTurn = buildProjectContextText(projectForTurn);
+
+    if (
+      workspaceView === 'chat' &&
+      projectContextLoadStatus === 'loading' &&
+      shouldWaitForProjectContext(messageText, Boolean(projectForTurn))
+    ) {
+      message.info('项目范围还在准备，涉及项目数据的问题请稍后再试');
+      return;
+    }
+    if (
+      workspaceView === 'chat' &&
+      projectContextLoadStatus === 'failed' &&
+      shouldWaitForProjectContext(messageText, Boolean(projectForTurn))
+    ) {
+      message.info(projectContextLoadStatus === 'failed'
+        ? '项目范围加载失败，请刷新或重新选择项目'
+        : '当前信息还在准备，请稍后再试');
+      return;
+    }
+    const committedAttachmentIds = attachments
+      .filter((attachment) => attachment.status === 'parsed')
+      .map((attachment) => attachment.id)
+      .filter((id) => !id.startsWith('att-local-'));
+    if (!messageText && !openedAsset && referencedAssets.length === 0 && committedAttachmentIds.length === 0) {
+      message.info('请先输入内容或添加文件');
       return;
     }
 
-    setWorkspaceView('chat');
+    if (resolvedExplicitProject) {
+      setCurrentProjectId(resolvedExplicitProject.appId ?? null);
+      setCurrentProject(resolvedExplicitProject);
+      setProjectContextText(buildProjectContextText(resolvedExplicitProject));
+      setProjectContextLoadStatus('ready');
+    }
+
+    setSourcePanelPayload(null);
+    setSourcePanelMessageId(null);
+    setActiveSidePanel(null);
+    setRightPanelCollapsed(false);
+    setRightPanelDismissed(true);
+    setResultRecommendations([]);
+
+    if (openedAsset) {
+      const conversation = await createConversation(`关于${openedAsset.title}`);
+      switchWorkspaceView('chat');
+      setReferencedAssets([]);
+      setOpenedAsset(null);
+      sendMessage(`[引用资产] ${getAssetFileName(openedAsset)}（${openedAsset.format}）\n\n${messageText || '请结合此文件继续处理。'}`, conversation.conversation_id, {
+        projectContext: resolvedExplicitProject ? projectContextForTurn : projectContextText,
+        currentProject: resolvedExplicitProject || currentProject,
+        projectLoadStatus: projectContextLoadStatus,
+      });
+      return;
+    }
+
+    switchWorkspaceView('chat');
     const assetPrefix = referencedAssets.length > 0
       ? `${referencedAssets.map((asset) => `[引用资产] ${asset.title}（${asset.format}）`).join('\n')}\n\n`
       : '';
@@ -960,39 +1350,52 @@ function WorkspaceContent() {
         .map((attachment) => `[引用附件] ${attachment.name}：${attachment.summary || '已解析'} `)
         .join('\n')}\n\n`
       : '';
-    sendMessage(`${assetPrefix}${attachmentPrefix}${rawMessage}`, undefined, { projectContext: projectContextText });
+    sendMessage(`${assetPrefix}${attachmentPrefix}${messageText || '请结合这些资料继续处理。'}`, undefined, {
+      projectContext: resolvedExplicitProject ? projectContextForTurn : projectContextText,
+      currentProject: resolvedExplicitProject || currentProject,
+      projectLoadStatus: projectContextLoadStatus,
+      attachmentIds: committedAttachmentIds,
+    });
+    if (committedAttachmentIds.length > 0) {
+      replaceAttachments(attachments.filter((attachment) => !committedAttachmentIds.includes(attachment.id)));
+      window.setTimeout(() => {
+        void reloadUploadedAssets();
+      }, 600);
+    }
     setReferencedAssets([]);
-  }, [attachments, createConversation, openedAsset, projectContextText, referencedAssets, sendMessage]);
+  }, [attachments, createConversation, currentProject, openedAsset, projectContextLoadStatus, projectContextText, referencedAssets, reloadUploadedAssets, replaceAttachments, sendMessage, switchWorkspaceView, workspaceView]);
 
   const renderRightPanel = () => {
     if (workspaceView !== 'chat') return null;
 
-    const collapsedRail = (title: string) => (
+    const collapsedRail = (title: string, onClose?: () => void, showExpand = true) => (
       <aside
         className="flex w-[52px] flex-shrink-0 flex-col items-center"
-        style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard, padding: '12px 8px' }}
+        style={{ background: 'transparent', padding: '12px 8px' }}
       >
-        <button
-          type="button"
-          onClick={() => setRightPanelCollapsed(false)}
-          className="right-panel-icon-button"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
-            border: 'none',
-            background: 'transparent',
-            color: c.textSecondary,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          title={`展开${title}`}
-          aria-label={`展开${title}`}
-        >
-          <PanelRightOpen size={17} />
-        </button>
+        {showExpand && (
+          <button
+            type="button"
+            onClick={() => setRightPanelCollapsed(false)}
+            className="right-panel-icon-button"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 12,
+              border: 'none',
+              background: 'transparent',
+              color: c.textSecondary,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title={`展开${title}`}
+            aria-label={`展开${title}`}
+          >
+            <IconAsset name="sidebar" size={18} />
+          </button>
+        )}
         <div
           style={{
             marginTop: 12,
@@ -1000,11 +1403,35 @@ function WorkspaceContent() {
             textOrientation: 'mixed',
             fontSize: 12,
             color: c.textMuted,
-            letterSpacing: 2,
+            letterSpacing: 0,
           }}
         >
           {title}
         </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="right-panel-icon-button"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 12,
+              border: 'none',
+              background: 'transparent',
+              color: c.textSecondary,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 'auto',
+            }}
+            title={`关闭${title}`}
+            aria-label={`关闭${title}`}
+          >
+            <X size={18} />
+          </button>
+        )}
       </aside>
     );
 
@@ -1028,7 +1455,7 @@ function WorkspaceContent() {
         title={label}
         aria-label={label}
       >
-        <PanelRightClose size={18} />
+        <IconAsset name="sidebar" size={18} />
       </button>
     );
 
@@ -1056,7 +1483,16 @@ function WorkspaceContent() {
       </button>
     );
 
-    const rightPanelClassName = 'right-side-panel flex w-[360px] flex-shrink-0 flex-col';
+    const rightPanelClassName = 'right-side-panel flex flex-shrink-0 flex-col';
+    const rightPanelExpandedStyle = isMobile
+      ? { width: undefined, flexBasis: undefined, maxWidth: undefined, height: undefined, maxHeight: undefined }
+      : { width: '36%', flexBasis: '36%', maxWidth: '60vw', height: undefined, maxHeight: undefined };
+    const rightPanelExecutionExpandedStyle = isMobile
+      ? rightPanelExpandedStyle
+      : { width: 380, flexBasis: 380, maxWidth: 380, height: undefined, maxHeight: undefined };
+    const rightPanelWideExpandedStyle = isMobile
+      ? { width: undefined, flexBasis: undefined, maxWidth: undefined, height: undefined, maxHeight: undefined }
+      : { width: '56%', flexBasis: '56%', maxWidth: '72vw', height: undefined, maxHeight: undefined };
     const rightPanelBodyStyle = {
       flex: 1,
       minWidth: 0,
@@ -1067,300 +1503,143 @@ function WorkspaceContent() {
       overflowWrap: 'anywhere',
     } as const;
 
-    if (showSourcePanel) {
-      const sourceDetails = sourcePanelPayload?.source
-        ? [{
-          title: sourcePanelPayload.source.title,
-          source: sourcePanelPayload.source.source,
-          url: sourcePanelPayload.source.url,
-          prompt: sourcePanelPayload.source.prompt,
-          sourceType: sourcePanelPayload.source.sourceType,
-          detail: sourcePanelPayload.source.detail,
-        }]
-        : getKnowledgeSourceDetails(sourcePanelPayload?.message || null);
-      const capabilityDetails = sourcePanelPayload?.capability;
-      const capabilityUrl = capabilityDetails?.providerUrl;
-      const isWebCapability = capabilityDetails?.kind === 'web_search' && capabilityUrl;
-      const isDebugLog = capabilityDetails?.kind === 'debug_log';
+    const activeWorkflowResult = activeResult && typeof activeResult === 'object' && 'structured_payload' in activeResult
+      ? activeResult as WorkflowResult
+      : null;
+    const activeWorkflowMissingFields = activeWorkflowResult
+      ? (missingFields.length > 0 ? missingFields : getResultMissingFields(activeWorkflowResult))
+      : missingFields;
+
+    if (workspaceView === 'chat' && !rightPanelDismissed && !sourcePanelPayload && !activeSidePanel && activeWorkflowResult) {
       if (rightPanelCollapsed) {
-        if (isMobile) {
-          return (
-            <div
-              style={{
-                position: 'fixed',
-                right: 12,
-                top: 74,
-                zIndex: 42,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                borderRadius: 14,
-                background: '#fff',
-                padding: 6,
-                boxShadow: '0 16px 42px rgba(15, 23, 42, 0.14)',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setRightPanelCollapsed(false)}
-                className="right-panel-icon-button"
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 12,
-                  border: 'none',
-                  background: 'transparent',
-                  color: c.textSecondary,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                title="展开来源"
-                aria-label="展开来源"
-              >
-                <PanelRightOpen size={17} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setSourcePanelPayload(null)}
-                className="right-panel-icon-button"
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 12,
-                  border: 'none',
-                  background: 'transparent',
-                  color: c.textSecondary,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                title="关闭来源"
-                aria-label="关闭来源"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          );
-        }
-        return collapsedRail(isDebugLog ? '日志' : '来源');
+        return collapsedRail('结果');
       }
+
+      return (
+        <aside
+          className={rightPanelClassName}
+          style={{
+            ...rightPanelExpandedStyle,
+            background: 'transparent',
+            position: 'relative',
+          }}
+        >
+          <div style={{ position: 'absolute', top: 10, right: 12, zIndex: 1 }}>
+            {collapseButton()}
+          </div>
+          <div style={{ padding: '14px 16px 10px' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>
+              当前结果
+              </div>
+              <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
+              这里承接当前会话的结论、证据和下一步。
+              </div>
+            </div>
+            <div style={rightPanelBodyStyle}>
+              <ResultPanel
+                result={activeWorkflowResult}
+                attachments={attachments}
+                missingFields={activeWorkflowMissingFields}
+                onMissingFieldClick={(field) => handleFollowUpClick(field.suggested_question)}
+                onFollowUpClick={(question) => setComposerDraft(question)}
+                onUpgradeWorkflow={(target) => setComposerDraft(target)}
+              />
+            </div>
+          </aside>
+      );
+    }
+
+    if (showSourcePanel) {
+      const capabilityDetails = sourcePanelPayload?.capability;
+      const isDebugLog = capabilityDetails?.kind === 'debug_log';
+      const panelTitle = '运行过程';
+      const floatingDisclosurePanel = isCompactLayout;
+
       return (
         <>
-          {isMobile && (
+          {floatingDisclosurePanel && (
             <div
-              onClick={() => setSourcePanelPayload(null)}
+              onClick={closeRightPanel}
               style={{
                 position: 'fixed',
                 inset: 0,
-                zIndex: 39,
-                background: 'rgba(15, 23, 42, 0.16)',
+                zIndex: 79,
+                background: 'transparent',
               }}
             />
           )}
           <aside
-            className={`${rightPanelClassName} ${isMobile ? 'fixed bottom-0 right-0 top-0 z-40 shadow-[0_24px_60px_rgba(15,23,42,0.18)]' : ''}`}
+            className={`${rightPanelClassName} ${floatingDisclosurePanel ? 'fixed z-40' : ''}`}
             style={{
-              borderLeft: `1px solid ${c.borderFaint}`,
-              background: c.bgCard,
-              width: isMobile ? 'min(88vw, 360px)' : isDebugLog ? 'min(560px, 42vw)' : undefined,
-              maxWidth: isMobile ? '88vw' : isDebugLog ? '560px' : undefined,
+              background: floatingDisclosurePanel ? c.bgCard : 'transparent',
+              ...(floatingDisclosurePanel ? {} : rightPanelExecutionExpandedStyle),
+              position: floatingDisclosurePanel ? 'fixed' : undefined,
+              flexGrow: floatingDisclosurePanel ? 0 : undefined,
+              flexBasis: floatingDisclosurePanel ? undefined : rightPanelExecutionExpandedStyle.flexBasis,
+              flexShrink: floatingDisclosurePanel ? 0 : undefined,
+              top: floatingDisclosurePanel ? 0 : undefined,
+              right: floatingDisclosurePanel ? 0 : undefined,
+              bottom: floatingDisclosurePanel ? 0 : undefined,
+              left: floatingDisclosurePanel ? undefined : undefined,
+              width: floatingDisclosurePanel ? 'min(380px, 92vw)' : rightPanelExecutionExpandedStyle.width,
+              maxWidth: floatingDisclosurePanel ? '92vw' : rightPanelExecutionExpandedStyle.maxWidth,
+              height: floatingDisclosurePanel ? undefined : undefined,
+              maxHeight: floatingDisclosurePanel ? undefined : undefined,
+              borderRadius: floatingDisclosurePanel ? 0 : undefined,
+              borderLeft: '0.5px solid rgba(148, 163, 184, 0.28)',
+              boxShadow: floatingDisclosurePanel ? '-18px 0 48px rgba(15, 23, 42, 0.18)' : undefined,
+              zIndex: floatingDisclosurePanel ? 80 : undefined,
             }}
           >
-          <div
-            style={{
-              padding: '14px 16px 10px',
-              borderBottom: `1px solid ${c.borderFaint}`,
-              background: c.bgCard,
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{isDebugLog ? '联调日志' : '来源'}</div>
-              {!isDebugLog && (
-                <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
-                  查看本条回复关联的会话内容、附件和结果摘要。
+            <div
+              style={{
+                padding: '14px 16px 10px',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                borderBottom: '0.5px solid rgba(148, 163, 184, 0.28)',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{panelTitle}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+                {closeButton(closeRightPanel)}
+              </div>
+            </div>
+
+            <div style={rightPanelBodyStyle}>
+              {disclosureView ? (
+                <MessageDisclosureDrawer view={disclosureView} />
+              ) : null}
+
+              {isDebugLog && capabilityDetails?.providerUrl && (
+                <div style={{ marginTop: 12, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary, marginBottom: 8 }}>联调日志</div>
+                  <DebugLogPanel endpoint={capabilityDetails.providerUrl} />
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-              {collapseButton()}
-              {closeButton(() => setSourcePanelPayload(null))}
-            </div>
-          </div>
-
-          <div style={rightPanelBodyStyle}>
-            <div style={{ display: 'grid', gap: 12, marginBottom: 16, minWidth: isDebugLog ? 500 : 320 }}>
-              {capabilityDetails ? (
-                <>
-                  {!isDebugLog && (
-                    <div style={{ border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{capabilityDetails.name}</div>
-                      <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>{capabilityDetails.kind}</div>
-                      {capabilityDetails.providerUrl && <a href={capabilityDetails.providerUrl} target="_blank" rel="noreferrer" style={{ marginTop: 6, display: 'block', color: c.accent, fontSize: 12, wordBreak: 'break-all' }}>{capabilityDetails.providerUrl}</a>}
-                    </div>
-                  )}
-                  {!isDebugLog && capabilityDetails.prompt && <pre style={{ margin: 0, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{capabilityDetails.prompt}</pre>}
-                  {!isDebugLog && capabilityDetails.arguments && <pre style={{ margin: 0, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{capabilityDetails.arguments}</pre>}
-                  {isDebugLog && (
-                    <DebugLogPanel endpoint={capabilityUrl} />
-                  )}
-                  {!isDebugLog && capabilityDetails.result && (
-                    <pre style={{ margin: 0, border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{capabilityDetails.result}</pre>
-                  )}
-                  {isWebCapability && (
-                    <iframe
-                      title={capabilityDetails.name}
-                      src={capabilityUrl}
-                      style={{ width: '100%', minWidth: 520, height: 460, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff' }}
-                    />
-                  )}
-                </>
-              ) : (
-                sourceDetails.length > 0 ? sourceDetails.map((item, index) => (
-                  <div key={`${item.title}-${index}`} style={{ border: `1px solid ${c.borderFaint}`, borderRadius: 14, padding: 12, background: '#fff' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>{item.title}</div>
-                    {item.source && <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>{item.source}</div>}
-                    {item.url && <a href={item.url} target="_blank" rel="noreferrer" style={{ marginTop: 6, display: 'block', color: c.accent, fontSize: 12, wordBreak: 'break-all' }}>{item.url}</a>}
-                    {'prompt' in item && item.prompt && <pre style={{ margin: '10px 0 0', whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{String(item.prompt)}</pre>}
-                    {'detail' in item && item.detail && <div style={{ marginTop: 10, whiteSpace: 'pre-wrap', color: c.textSecondary, fontSize: 12, lineHeight: 1.7 }}>{String(item.detail)}</div>}
-                    {'sourceType' in item && item.sourceType === 'web_search' && item.url && (
-                      <iframe
-                        title={item.title}
-                        src={item.url}
-                        style={{ marginTop: 12, width: '100%', height: 460, border: `1px solid ${c.borderFaint}`, borderRadius: 14, background: '#fff' }}
-                      />
-                    )}
-                  </div>
-                )) : <div style={{ fontSize: 12, color: c.textMuted, lineHeight: 1.7 }}>当前没有可披露的来源信息。</div>
-              )}
-            </div>
-            <div style={{ display: 'none' }}>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 6 }}>关联会话</div>
-              <div
-                style={{
-                  border: `1px solid ${c.borderFaint}`,
-                  borderRadius: 14,
-                  padding: '12px',
-                  background: c.bgSection,
-                }}
-              >
-                <div style={{ fontSize: 14, fontWeight: 600, color: c.textPrimary }}>
-                  {activeConversation?.title || '当前会话'}
-                </div>
-                <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>当前回复引用自本会话上下文。</div>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 6 }}>消息内容</div>
-              <div
-                style={{
-                  border: `1px solid ${c.borderFaint}`,
-                  borderRadius: 14,
-                  padding: '12px',
-                  background: '#fff',
-                  fontSize: 13,
-                  color: c.textSecondary,
-                  lineHeight: 1.75,
-                  whiteSpace: 'pre-wrap',
-                }}
-              >
-                {capabilityDetails ? '当前查看的是一次能力调用。' : sourcePanelPayload?.message.content || '暂无内容'}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>知识库来源</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {sourceDetails.length > 0 ? sourceDetails.map((item, index) => (
-                  <div
-                    key={`${item.title}-${index}`}
-                    style={{
-                      border: `1px solid ${c.borderFaint}`,
-                      borderRadius: 14,
-                      padding: '10px 12px',
-                      background: c.bgSection,
-                    }}
-                  >
-                    <div style={{ fontSize: 13, fontWeight: 650, color: c.textPrimary }}>{item.title}</div>
-                    {item.source && <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>{item.source}</div>}
-                    {item.url && <div style={{ marginTop: 4, fontSize: 12, color: c.accent, wordBreak: 'break-all' }}>{item.url}</div>}
-                  </div>
-                )) : (
-                  <div style={{ fontSize: 12, color: c.textMuted, lineHeight: 1.7 }}>
-                    当前消息没有返回可披露的知识库地址。若本轮使用了知识库检索，请检查模型服务配置中的知识库地址与返回元数据。
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>关联附件</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {attachments.length > 0 ? attachments.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      border: `1px solid ${c.borderFaint}`,
-                      borderRadius: 14,
-                      padding: '10px 12px',
-                      background: c.bgSection,
-                    }}
-                  >
-                    <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>{item.name}</div>
-                    <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>
-                      {item.summary || item.kind}
-                    </div>
-                  </div>
-                )) : (
-                  <div style={{ fontSize: 12, color: c.textMuted }}>暂无可展示的附件来源</div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 12, color: c.textMuted, marginBottom: 8 }}>结果摘要</div>
-              <div
-                style={{
-                  border: `1px solid ${c.borderFaint}`,
-                  borderRadius: 14,
-                  padding: '12px',
-                  background: c.bgSection,
-                  fontSize: 13,
-                  color: c.textSecondary,
-                  lineHeight: 1.75,
-                }}
-              >
-                {typeof activeResult?.summary === 'string' ? activeResult.summary : '当前没有可展示的结果摘要。'}
-              </div>
-            </div>
-            </div>
-          </div>
           </aside>
         </>
       );
     }
 
-    if (currentAgent === 'demand' && activeResult?.result_type === 'demand_form') {
+    if (!rightPanelDismissed && currentAgent === 'demand' && activeResult?.result_type === 'demand_form') {
       const nextActions = Array.isArray(activeResult.next_actions) ? activeResult.next_actions : [];
       const pendingChecks = Array.isArray(activeResult.pending_checks) ? activeResult.pending_checks : [];
       if (rightPanelCollapsed) return collapsedRail('需求待办');
       return (
         <aside
           className={rightPanelClassName}
-          style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard, position: 'relative' }}
+          style={{ ...rightPanelExpandedStyle, background: 'transparent', position: 'relative' }}
         >
           <div style={{ position: 'absolute', top: 10, right: 12, zIndex: 1 }}>
             {collapseButton()}
           </div>
-          <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${c.borderFaint}` }}>
+          <div style={{ padding: '14px 16px 10px' }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>需求代办</div>
             <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
               选择代办后继续当前会话，补齐新增媒体对接所需资料。
@@ -1383,7 +1662,7 @@ function WorkspaceContent() {
                     cursor: 'pointer',
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 650, color: c.textPrimary }}>{String(item)}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>{String(item)}</div>
                   <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>点击后写入输入区继续补充。</div>
                 </button>
               ))}
@@ -1393,30 +1672,45 @@ function WorkspaceContent() {
       );
     }
 
-    if (activeSidePanel && activeSidePanel !== 'debugging' && !isMobile) {
-      const panelMap: Record<string, { title: string; desc: string; actions: string[] }> = {
+    if (!rightPanelDismissed && activeSidePanel && activeSidePanel !== 'debugging') {
+      const panelMap: Record<string, { actions: string[] }> = {
         demand: {
-          title: '需求跟踪',
-          desc: '集中查看已记录的需求、待补充信息和下一步处理动作。',
           actions: ['补充需求信息', '查看需求进展', '继续当前会话'],
         },
         diagnosis: {
-          title: '排查记录',
-          desc: '集中查看问题排查过程、证据线索和需要继续确认的事项。',
           actions: ['补充异常现象', '查看排查线索', '继续当前会话'],
         },
       };
       const panel = panelMap[activeSidePanel] || panelMap.demand;
-      if (rightPanelCollapsed) return collapsedRail(panel.title);
+      const panelTitle = chatDisplayConfig.taskPanelTitle || '任务';
+      if (rightPanelCollapsed) return collapsedRail(panelTitle);
       return (
+        <>
+        {isMobile && (
+          <div
+            onClick={() => setActiveSidePanel(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 79,
+              background: 'transparent',
+            }}
+          />
+        )}
         <aside
-          className={rightPanelClassName}
-          style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard }}
+          className={`${rightPanelClassName} ${isMobile ? 'fixed bottom-0 right-0 top-0 z-40' : ''}`}
+          style={{
+            background: isMobile ? c.bgCard : 'transparent',
+            ...rightPanelExpandedStyle,
+            width: isMobile ? 'min(320px, 86vw)' : rightPanelExpandedStyle.width,
+            maxWidth: isMobile ? '86vw' : rightPanelExpandedStyle.maxWidth,
+            boxShadow: isMobile ? '-3px 0 10px rgba(15, 23, 42, 0.08)' : undefined,
+            zIndex: isMobile ? 80 : undefined,
+          }}
         >
-          <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${c.borderFaint}`, display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+          <div style={{ padding: '14px 16px 10px', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{panel.title}</div>
-              <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>{panel.desc}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>{panelTitle}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
               {collapseButton()}
@@ -1432,298 +1726,59 @@ function WorkspaceContent() {
                   onClick={() => setComposerDraft(item)}
                   style={{ textAlign: 'left', borderRadius: 14, border: `1px solid ${c.borderFaint}`, background: c.bgSection, padding: '12px', color: c.textSecondary, cursor: 'pointer' }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 650, color: c.textPrimary }}>{item}</div>
-                  <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted }}>点击后写入输入区，可继续发起处理。</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>{item}</div>
                 </button>
               ))}
             </div>
           </div>
         </aside>
+        </>
       );
     }
 
-    if (showDebugPanel) {
-      if (rightPanelCollapsed) return collapsedRail('联调记录');
-      return (
-        <div className="right-side-panel" style={{ position: 'relative', flexShrink: 0, overflowX: 'auto' }}>
-          <div style={{ position: 'absolute', top: 10, right: 58, zIndex: 2 }}>
-            {collapseButton()}
-          </div>
-          <AutoDebugWorkbench
-            conversationId={activeConversationId}
-            onOpenContext={() => setShowContextDrawer(true)}
-          />
-        </div>
-      );
-    }
-
-    if (!showDebugPanel) return null;
-
-    return (
-      <aside
-        className="flex w-[360px] flex-shrink-0 flex-col"
-        style={{ borderLeft: `1px solid ${c.borderFaint}`, background: c.bgCard }}
-      >
-        <div
-          style={{
-            padding: '14px 16px 10px',
-            borderBottom: `1px solid ${c.borderFaint}`,
-            background: c.bgCard,
-          }}
-        >
-          <div style={{ fontSize: 14, fontWeight: 700, color: c.textPrimary }}>自动联通动态面板</div>
-          <div style={{ marginTop: 4, fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>
-            仅在自动联调会话中展开，集中展示当前结果、待确认项和后续动作。
-          </div>
-        </div>
-
-        <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
-          <div
-            style={{
-              borderRadius: 16,
-              border: `1px solid ${c.borderFaint}`,
-              background: c.bgSection,
-              padding: '14px',
-            }}
-          >
-            <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: 6 }}>当前状态</div>
-            <div style={{ fontSize: 12, color: c.textMuted, lineHeight: 1.7 }}>
-              {typeof activeResult?.summary === 'string' ? activeResult.summary : '等待本轮自动联调返回结果。'}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ padding: '8px 12px', borderTop: `1px solid ${c.borderFaint}` }}>
-          <button
-            type="button"
-            onClick={() => setShowContextDrawer(true)}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              background: c.accentBg,
-              border: `1px solid ${c.accentBorder}`,
-              borderRadius: 12,
-              color: c.accent,
-              fontSize: 12,
-              cursor: 'pointer',
-              textAlign: 'center',
-            }}
-          >
-            补充本次联调背景
-          </button>
-        </div>
-      </aside>
-    );
+    return null;
   };
 
-  const renderAssetCenter = () => (
-    <div style={{ width: '100%', maxWidth: 1120, margin: '0 auto', padding: `0 ${pageSidePadding}px ${isMobile ? 12 : 18}px`, minHeight: 0 }}>
-      <section style={{ display: 'flex', minHeight: 0, height: '100%', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 12 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, height: 38, width: isMobile ? '100%' : 320, borderRadius: 12, background: '#fff', padding: '0 12px', color: c.textMuted }}>
-            <Search size={15} />
-            <input
-              value={assetSearch}
-              onChange={(event) => setAssetSearch(event.target.value)}
-              placeholder="搜索资料库"
-              style={{ width: '100%', minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: c.textPrimary, fontSize: 13 }}
-            />
-          </label>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            {selectedAssets.length > 0 && (
-              <>
-                <span style={{ fontSize: 13, color: selectedAssets.length > 10 ? '#b45309' : c.textMuted }}>已选 {selectedAssets.length}/10</span>
-                <button type="button" onClick={applySelectedAssets} style={{ height: 34, borderRadius: 12, border: 'none', background: '#111827', color: '#fff', padding: '0 13px', fontSize: 13, cursor: 'pointer' }}>引用并开启对话</button>
-                <button type="button" onClick={() => handleDownloadAssets(selectedAssets)} style={{ height: 34, borderRadius: 12, border: 'none', background: '#f3f4f6', color: c.textSecondary, padding: '0 12px', fontSize: 13, cursor: 'pointer' }}>下载</button>
-                <button type="button" onClick={() => handleDeleteAssets(selectedAssets.map((asset) => asset.id))} style={{ height: 34, borderRadius: 12, border: 'none', background: '#f3f4f6', color: c.textSecondary, padding: '0 12px', fontSize: 13, cursor: 'pointer' }}>删除</button>
-              </>
-            )}
-            <select value={assetSourceFilter} onChange={(event) => setAssetSourceFilter(event.target.value as AssetSourceFilter)} style={{ height: 34, borderRadius: 12, border: 'none', background: '#fff', color: c.textSecondary, padding: '0 10px', fontSize: 13, outline: 'none' }}>
-              {ASSET_SOURCE_FILTERS.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
-            </select>
-            <select value={assetFormatFilter} onChange={(event) => setAssetFormatFilter(event.target.value as AssetFormatFilter)} style={{ height: 34, borderRadius: 12, border: 'none', background: '#fff', color: c.textSecondary, padding: '0 10px', fontSize: 13, outline: 'none' }}>
-              {ASSET_FORMAT_FILTERS.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
-            </select>
-            <button type="button" onClick={() => message.info('上传入口会接入当前会话附件能力')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 34, borderRadius: 12, border: 'none', background: '#f3f4f6', color: c.textSecondary, padding: '0 12px', fontSize: 13, cursor: 'pointer' }}>
-              <Upload size={14} />
-              上传
-            </button>
-          </div>
-        </div>
-
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '30px 46px minmax(0,1fr) 72px 70px 34px' : '34px 48px minmax(220px,1fr) 92px 116px 112px 44px', alignItems: 'center', height: 34, padding: '0 8px', fontSize: 12, color: c.textMuted }}>
-            <span />
-            <span />
-            <span>名称</span>
-            <span>类型</span>
-            {!isMobile && <span>来源</span>}
-            <span>日期</span>
-            <span />
-          </div>
-
-          {filteredAssets.map((asset) => {
-            const checked = selectedAssetIds.includes(asset.id);
-            const hovering = hoveredAssetId === asset.id;
-            const menuItems: MenuProps['items'] = [
-              { key: 'download', label: '下载', icon: <Download size={14} />, onClick: () => handleDownloadAssets([asset]) },
-              { key: 'locate', label: '定位到会话', icon: <MapPin size={14} />, onClick: () => handleLocateAsset(asset) },
-              { key: 'delete', label: '删除', icon: <Trash2 size={14} />, onClick: () => handleDeleteAssets([asset.id]) },
-            ];
-
-            return (
-              <div
-                key={asset.id}
-                onMouseEnter={() => setHoveredAssetId(asset.id)}
-                onMouseLeave={() => setHoveredAssetId(null)}
-                data-asset-anchor={asset.id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '30px 46px minmax(0,1fr) 72px 70px 34px' : '34px 48px minmax(220px,1fr) 92px 116px 112px 44px',
-                  alignItems: 'center',
-                  minHeight: 52,
-                  padding: '4px 8px',
-                  borderRadius: 12,
-                  background: checked ? '#eef4ff' : hovering ? '#f3f4f6' : 'transparent',
-                  transition: 'background 160ms ease',
-                }}
-              >
-                <button
-                  type="button"
-                  aria-label="选择资产"
-                  onClick={() => {
-                    setSelectedAssetIds((prev) => {
-                      if (prev.includes(asset.id)) return prev.filter((id) => id !== asset.id);
-                      if (prev.length >= 10) {
-                        message.warning('最多选择 10 个文件');
-                        return prev;
-                      }
-                      return [...prev, asset.id];
-                    });
-                  }}
-                  style={{ width: 24, height: 24, borderRadius: 8, border: checked ? `1px solid ${c.accent}` : `1px solid ${hovering ? '#d1d5db' : 'transparent'}`, background: checked ? c.accent : '#fff', color: '#fff', opacity: checked || hovering ? 1 : 0, cursor: 'pointer' }}
-                >
-                  {checked && <CheckCircle2 size={14} />}
-                </button>
-
-                <button type="button" onClick={() => setOpenedAsset(asset)} style={{ width: 38, height: 38, overflow: 'hidden', borderRadius: 10, border: 'none', padding: 0, cursor: 'pointer' }}>
-                  {getAssetPreview(asset)}
-                </button>
-
-                <button type="button" onClick={() => setOpenedAsset(asset)} style={{ minWidth: 0, border: 'none', background: 'transparent', padding: '0 8px', textAlign: 'left', cursor: 'pointer' }}>
-                  <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 13, fontWeight: 560, color: c.textPrimary }}>{getAssetFileName(asset)}</div>
-                </button>
-
-                <div style={{ fontSize: 12, color: c.textSecondary }}>{getAssetTypeLabel(asset)}</div>
-                {!isMobile && <div style={{ fontSize: 12, color: c.textMuted }}>{asset.source}</div>}
-                <div style={{ fontSize: 12, color: c.textMuted }}>{asset.updatedAt}</div>
-                <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
-                  <button type="button" onClick={(event) => event.stopPropagation()} style={{ width: 30, height: 30, borderRadius: 10, border: 'none', background: hovering ? '#fff' : 'transparent', color: c.textMuted, opacity: hovering ? 1 : 0, cursor: 'pointer' }} title="更多">
-                    <Ellipsis size={16} />
-                  </button>
-                </Dropdown>
-              </div>
-            );
-          })}
-
-          {filteredAssets.length === 0 && (
-            <div style={{ padding: '34px 0', textAlign: 'center', color: c.textMuted, fontSize: 13 }}>
-              没有找到匹配的资产。
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
-  );
-
-  const renderOpenedAsset = () => {
-    if (!openedAsset) return null;
-
-    const menuItems: MenuProps['items'] = [
-      { key: 'download', label: '下载', icon: <Download size={14} />, onClick: () => handleDownloadAssets([openedAsset]) },
-      { key: 'delete', label: '删除', icon: <Trash2 size={14} />, onClick: () => handleDeleteAssets([openedAsset.id]) },
-    ];
-
-    return (
-      <div style={{ position: 'absolute', inset: 0, zIndex: 18, display: 'flex', flexDirection: 'column', background: '#fff' }}>
-        <div style={{ height: 52, padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${c.borderFaint}` }}>
-          <button type="button" onClick={() => setOpenedAsset(null)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, height: 34, borderRadius: 12, border: 'none', background: 'transparent', color: c.textSecondary, cursor: 'pointer' }}>
-            <X size={17} />
-            <span style={{ fontSize: 13 }}>关闭</span>
-          </button>
-          <div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 14, fontWeight: 600, color: c.textPrimary }}>
-            {getAssetFileName(openedAsset)}
-          </div>
-          <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
-            <button type="button" style={{ width: 34, height: 34, borderRadius: 12, border: 'none', background: 'transparent', color: c.textMuted, cursor: 'pointer' }} title="更多">
-              <Ellipsis size={18} />
-            </button>
-          </Dropdown>
-        </div>
-
-        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: isMobile ? '18px' : '28px 48px 132px' }}>
-          <div style={{ maxWidth: 900, margin: '0 auto' }}>
-            <div style={{ borderRadius: 14, overflow: 'hidden', background: '#f8fafc', minHeight: isPreviewSupported(openedAsset) ? 360 : 240 }}>
-              {!isPreviewSupported(openedAsset) ? (
-                <div style={{ minHeight: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center', color: c.textMuted, fontSize: 14 }}>
-                  文件不支持预览，请尝试下载查看。
-                </div>
-              ) : openedAsset.category === 'image' || openedAsset.category === 'video' ? (
-                <div style={{ height: isMobile ? 280 : 460 }}>
-                  {getAssetPreview(openedAsset)}
-                </div>
-              ) : (
-                <div style={{ padding: isMobile ? 22 : 38 }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 54, height: 54, borderRadius: 14, background: `${openedAsset.previewTone}18`, color: openedAsset.previewTone }}>
-                    {openedAsset.category === 'link' ? <Link2 size={24} /> : openedAsset.format === 'Excel' ? <FileSpreadsheet size={24} /> : <FileText size={24} />}
-                  </div>
-                  <h2 style={{ margin: '22px 0 10px', fontSize: isMobile ? 22 : 28, lineHeight: 1.25, fontWeight: 650, color: c.textPrimary }}>{getAssetFileName(openedAsset)}</h2>
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.8, color: c.textSecondary }}>{openedAsset.summary}</p>
-                  <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
-                    {[
-                      ['文件类型', getAssetTypeLabel(openedAsset)],
-                      ['来源', openedAsset.source],
-                      ['更新时间', openedAsset.updatedAt],
-                      ['所在会话', openedAsset.anchorText],
-                    ].map(([label, value]) => (
-                      <div key={label} style={{ borderRadius: 12, background: '#fff', padding: '12px 14px' }}>
-                        <div style={{ fontSize: 12, color: c.textMuted }}>{label}</div>
-                        <div style={{ marginTop: 5, fontSize: 13, color: c.textPrimary }}>{value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div
       className="flex h-screen overflow-hidden"
-      style={{ background: `linear-gradient(180deg, ${c.bgMain} 0%, ${c.bgSection} 100%)` }}
+      style={{ background: workspaceView === 'chat' && visibleMessages.length > 0 ? '#fff' : CHAT_WORKSPACE_BACKGROUND }}
     >
       {!isCompactLayout && (
         <TaskSidebar
           defaultCollapsed={false}
           conversations={conversations}
-          activeConversationId={activeConversationId}
-          onCreateConversation={handleCreateConversationRequest}
+          activeConversationId={sharedConversationId ? null : activeConversationId}
+          runningConversationIds={runningConversationIds}
+          onCreateConversation={() => {
+            clearSharedConversationMode();
+            switchWorkspaceView('chat');
+            return handleCreateConversationRequest();
+          }}
           onSelectConversation={(conversationId) => {
-            setWorkspaceView('chat');
+            clearSharedConversationMode();
+            switchWorkspaceView('chat');
             selectConversation(conversationId);
           }}
           onRenameConversation={renameConversation}
           onDeleteConversation={(conversationId) => void deleteConversation(conversationId)}
-          onOpenAssetCenter={() => {
-            setSelectedAssetIds(referencedAssets.map((asset) => asset.id));
-            setWorkspaceView('assets');
+          onShareConversation={(conversation) => {
+            void handleShareConversationLink(conversation.conversation_id, conversation.title);
           }}
+          onOpenAssetCenter={() => {
+            clearSharedConversationMode();
+            setSelectedAssetIds(referencedAssets.map((asset) => asset.id));
+            switchWorkspaceView('assets');
+          }}
+          onOpenAutomationCenter={() => {
+            clearSharedConversationMode();
+            switchWorkspaceView('automation');
+            setAutomationTab('configured');
+          }}
+          onOpenPersonalKnowledgeConfig={openPersonalKnowledgeConfig}
           onOpenSearch={() => setSearchOpen(true)}
+          automationUnreadCount={automationUnreadCount}
         />
       )}
 
@@ -1759,32 +1814,54 @@ function WorkspaceContent() {
               floating
               defaultCollapsed={false}
               conversations={conversations}
-              activeConversationId={activeConversationId}
+              activeConversationId={sharedConversationId ? null : activeConversationId}
+              runningConversationIds={runningConversationIds}
               onCreateConversation={async () => {
+                clearSharedConversationMode();
+                switchWorkspaceView('chat');
                 closeSidebarDrawer();
                 await handleCreateConversationRequest();
               }}
               onSelectConversation={(conversationId) => {
-                setWorkspaceView('chat');
+                clearSharedConversationMode();
+                switchWorkspaceView('chat');
                 closeSidebarDrawer();
                 selectConversation(conversationId);
               }}
               onRenameConversation={renameConversation}
               onDeleteConversation={(conversationId) => void deleteConversation(conversationId)}
+              onShareConversation={(conversation) => {
+                void handleShareConversationLink(conversation.conversation_id, conversation.title);
+              }}
               onOpenAssetCenter={() => {
+                clearSharedConversationMode();
                 setSelectedAssetIds(referencedAssets.map((asset) => asset.id));
-                setWorkspaceView('assets');
+                switchWorkspaceView('assets');
+                closeSidebarDrawer();
+              }}
+              onOpenAutomationCenter={() => {
+                clearSharedConversationMode();
+                switchWorkspaceView('automation');
+                setAutomationTab('configured');
+                closeSidebarDrawer();
+              }}
+              onOpenPersonalKnowledgeConfig={() => {
+                openPersonalKnowledgeConfig();
                 closeSidebarDrawer();
               }}
               onOpenSearch={() => setSearchOpen(true)}
+              automationUnreadCount={automationUnreadCount}
               onCloseFloating={closeSidebarDrawer}
             />
           </div>
         </>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div
+          className="xiaoqiao-chat-workspace-bg relative flex min-h-0 flex-1 overflow-hidden"
+          style={{ background: 'transparent' }}
+        >
           <div className="flex min-w-0 flex-1 flex-col">
               <div
                 className="relative flex flex-1 flex-col overflow-hidden"
@@ -1826,10 +1903,28 @@ function WorkspaceContent() {
                         color: c.textSecondary,
                         cursor: 'pointer',
                         flexShrink: 0,
+                        position: 'relative',
                       }}
                       title="打开侧边栏"
+                      aria-label="打开侧边栏"
                     >
                       <IconAsset name="collapse" size={18} />
+                      {hasRunningConversation && (
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            position: 'absolute',
+                            right: 7,
+                            top: 7,
+                            width: 7,
+                            height: 7,
+                            borderRadius: 999,
+                            border: '1px solid #fff',
+                            background: '#2e75FE',
+                            boxShadow: '0 0 0 2px rgba(46,117,254,0.14)',
+                          }}
+                        />
+                      )}
                     </button>
                   )}
                   <div
@@ -1843,60 +1938,48 @@ function WorkspaceContent() {
                       fontSize: 16,
                       fontWeight: 600,
                       color: c.textPrimary,
-                      letterSpacing: '-0.01em',
+                      letterSpacing: 0,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    {workspaceView === 'assets' ? '我的资产' : (activeConversation?.title || '新对话')}
+                    {topBarTitle}
                   </div>
                 </div>
 
                 <div style={{ minWidth: 0, display: isMobile ? 'block' : 'none' }} />
 
-                <div
-                  className="flex items-center justify-end gap-2"
-                  style={{
-                    position: isMobile ? 'absolute' : 'static',
-                    left: isMobile ? 58 : undefined,
-                    right: pageSidePadding,
-                    top: 0,
-                    minWidth: isMobile ? 0 : 'max-content',
-                    maxWidth: isMobile ? `calc(100% - ${pageSidePadding + 58}px)` : undefined,
-                    zIndex: sidebarDrawerOpen ? 20 : 60,
-                  }}
-                >
-                  {workspaceView === 'chat' ? renderProjectSelector() : null}
+                {!sharedConversationId && (
+                  <div
+                    className="flex items-center justify-end gap-2"
+                    style={{
+                      position: isMobile ? 'absolute' : 'static',
+                      left: isMobile ? 58 : undefined,
+                      right: pageSidePadding,
+                      top: 0,
+                      minWidth: isMobile ? 0 : 'max-content',
+                      maxWidth: isMobile ? `calc(100% - ${pageSidePadding + 58}px)` : undefined,
+                      zIndex: sidebarDrawerOpen ? 20 : 60,
+                    }}
+                  >
+                    {workspaceView === 'chat' ? (
+                      <ProjectSelectorCombo
+                        selectedProjectId={currentProjectId}
+                        onContextChange={setProjectContextText}
+                        onProjectLoadStateChange={(state) => {
+                          setProjectContextLoadStatus(state.status);
+                          setProjectContextText(state.contextText);
+                          setCurrentProject(state.currentProject);
+                          setCurrentProjectId(state.currentProject?.appId ?? null);
+                        }}
+                      />
+                    ) : null}
 
-                  {workspaceView === 'chat' && isCompactLayout && (
-                    <button
-                      type="button"
-                      onClick={handleCreateConversationRequest}
-                      className="topbar-icon-button"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 34,
-                        height: 36,
-                        borderRadius: 999,
-                        border: 'none',
-                        background: 'transparent',
-                        color: c.textSecondary,
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                      }}
-                      title="开启新对话"
-                    >
-                      <IconAsset name="plus-circle" size={18} />
-                    </button>
-                  )}
-
-                  {workspaceView === 'chat' && messages.length > 0 && (
-                    <Dropdown menu={{ items: shareMenuItems }} trigger={['click']} placement="bottomRight">
+                    {workspaceView === 'chat' && isCompactLayout && (
                       <button
                         type="button"
+                        onClick={handleCreateConversationRequest}
                         className="topbar-icon-button"
                         style={{
                           display: 'inline-flex',
@@ -1907,84 +1990,380 @@ function WorkspaceContent() {
                           borderRadius: 999,
                           border: 'none',
                           background: 'transparent',
-                          color: c.textSecondary,
+                          color: 'rgb(140, 155, 175)',
                           cursor: 'pointer',
                           flexShrink: 0,
                         }}
-                        title="分享会话"
+                        title="开启新对话"
                       >
-                        <SharePlaneIcon size={17} />
+                        <IconAsset name="plus-circle" size={18} />
                       </button>
-                    </Dropdown>
-                  )}
-                </div>
+                    )}
+
+                    {workspaceView === 'chat' && messages.length > 0 && (
+                      <Dropdown menu={{ items: shareMenuItems }} trigger={['click']} placement="bottomRight">
+                        <button
+                          type="button"
+                          className="topbar-icon-button"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 34,
+                            height: 36,
+                            borderRadius: 999,
+                            border: 'none',
+                            background: 'transparent',
+                            color: 'rgb(140, 155, 175)',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                          }}
+                          title="分享会话"
+                        >
+                          <SharePlaneIcon size={17} />
+                        </button>
+                      </Dropdown>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {workspaceView === 'assets' ? renderAssetCenter() : (
-                <ChatContainer
-                  messages={messages}
-                  isTyping={isTyping}
-                  isStreaming={isTyping}
-                  devMode={false}
-                  onFollowUpClick={handleFollowUpClick}
-                  onViewCallChain={() => undefined}
-                  onOpenSourcePanel={(payload) => {
-                    setSourcePanelPayload(payload);
-                    setRightPanelCollapsed(false);
+              {workspaceView === 'assets' ? (
+                <AssetsCenter
+                  isMobile={isMobile}
+                  pageSidePadding={pageSidePadding}
+                  themeColors={{
+                    textPrimary: c.textPrimary,
+                    textSecondary: c.textSecondary,
+                    textMuted: c.textMuted,
+                    accent: c.accent,
                   }}
-                  onEditUserMessage={(content) => { void handleSendWithAssets(content); }}
-                  onSubmitFollowUp={(content) => { void handleSendWithAssets(content); }}
-                  contextThinkingSteps={contextThinkingSteps}
-                  currentResult={activeResult as WorkflowResult | Record<string, unknown> | null}
-                  chatSettings={chatSettings}
-                  onToggleSystemPrompt={() => setShowSystemPrompt((prev) => !prev)}
-                  showSystemPrompt={showSystemPrompt}
-                  systemPrompt=""
-                  onOpenAgentPanel={handleOpenAgentPanel}
+                  assetSearch={assetSearch}
+                  setAssetSearch={setAssetSearch}
+                  selectedAssets={selectedAssets}
+                  applySelectedAssets={applySelectedAssets}
+                  handleDownloadAssets={handleDownloadAssets}
+                  handleDeleteAssets={handleDeleteAssets}
+                  assetSourceFilter={assetSourceFilter}
+                  setAssetSourceFilter={setAssetSourceFilter}
+                  assetFormatFilter={assetFormatFilter}
+                  setAssetFormatFilter={setAssetFormatFilter}
+                  assetUploadInputRef={assetUploadInputRef}
+                  switchWorkspaceView={switchWorkspaceView}
+                  handleUploadFiles={handleUploadFiles}
+                  filteredAssets={filteredAssets}
+                  selectedAssetIds={selectedAssetIds}
+                  setSelectedAssetIds={setSelectedAssetIds}
+                  hoveredAssetId={hoveredAssetId}
+                  setHoveredAssetId={setHoveredAssetId}
+                  handleLocateAsset={handleLocateAsset}
+                  handleConfirmDeleteAsset={handleConfirmDeleteAsset}
+                  setOpenedAsset={setOpenedAsset}
                 />
+              ) : workspaceView === 'automation' ? (
+                <AutomationCenter
+                  isMobile={isMobile}
+                  pageSidePadding={pageSidePadding}
+                  themeColors={{
+                    textPrimary: c.textPrimary,
+                    textSecondary: c.textSecondary,
+                    textMuted: c.textMuted,
+                  }}
+                  automationTab={automationTab}
+                  setAutomationTab={setAutomationTab}
+                  automationLoading={automationLoading}
+                  automationReportTasks={automationReportTasks}
+                  automationRunRecords={automationRunRecords}
+                  availableAutomationTemplates={availableAutomationTemplates}
+                  setOpenedAutomationRun={setOpenedAutomationRun}
+                  handleRunAutomationTask={handleRunAutomationTask}
+                  handleResumeAutomationTask={handleResumeAutomationTask}
+                  handlePauseAutomationTask={handlePauseAutomationTask}
+                  handleEditAutomationTask={handleEditAutomationTask}
+                  handleOpenAutomationCreateFromResult={handleOpenAutomationCreateFromResult}
+                  handleCreateAutomationInChat={handleCreateAutomationInChat}
+                  handleOpenManualAutomationCreate={handleOpenManualAutomationCreate}
+                  handleOpenAutomationTemplate={handleOpenAutomationTemplate}
+                />
+              ) : (
+                <>
+                  {sharedConversationId && (
+                    <div style={{ width: '100%', padding: `0 ${pageSidePadding}px 8px` }}>
+                      <div
+                        style={{
+                          maxWidth: 900,
+                          margin: '0 auto',
+                          fontSize: 12.5,
+                          color: sharedConversationBlocked ? '#9a3412' : c.textMuted,
+                          lineHeight: '18px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {sharedConversationLoading
+                          ? '正在打开共享对话...'
+                          : sharedConversationBlocked
+                            ? '没有该项目权限，无法查看该会话内容。'
+                            : '这是已分享的 小乔智投 对话副本'}
+                      </div>
+                    </div>
+                  )}
+
+                  {sharedConversationId && sharedConversationLoading ? (
+                    <SharedConversationLoadingPanel isMobile={isMobile} pageSidePadding={pageSidePadding} />
+                  ) : (
+                    <ChatContainer
+                      messages={sharedConversationId ? sharedConversationMessages : messages}
+                      isTyping={sharedConversationId ? false : (isTyping || isLoadingMessages)}
+                      isStreaming={sharedConversationId ? false : isTyping}
+                      devMode={false}
+                      onFollowUpClick={sharedConversationId ? undefined : handleFollowUpClick}
+                      onViewCallChain={() => undefined}
+                      onOpenSourcePanel={(payload) => {
+                        const messageId = payload.message.message_id || payload.message.id || null;
+                        if (sourcePanelPayload && sourcePanelMessageId === messageId) {
+                          setSourcePanelMessageId(null);
+                          setSourcePanelPayload(null);
+                          return;
+                        }
+                        setSourcePanelMessageId(messageId);
+                        setSourcePanelPayload(payload);
+                        setActiveSidePanel(null);
+                        setRightPanelCollapsed(false);
+                        setRightPanelDismissed(false);
+                      }}
+                      onEditUserMessage={sharedConversationId ? undefined : (content) => {
+                        void handleSendWithAssets(content).catch(() => {
+                          message.error('重新发送失败，请稍后重试');
+                        });
+                      }}
+                  onSubmitFollowUp={sharedConversationId ? undefined : (content) => {
+                        void handleSendWithAssets(content).catch(() => {
+                          message.error('发送失败，请稍后重试');
+                        });
+                      }}
+                      onStopGeneration={sharedConversationId ? undefined : cancelStream}
+                      contextThinkingSteps={sharedConversationId ? [] : contextThinkingSteps}
+                      currentResult={sharedConversationId ? null : (activeResult as WorkflowResult | Record<string, unknown> | null)}
+                      chatSettings={chatSettings}
+                      onToggleSystemPrompt={sharedConversationId ? undefined : (() => setShowSystemPrompt((prev) => !prev))}
+                      showSystemPrompt={sharedConversationId ? false : showSystemPrompt}
+                      systemPrompt=""
+                      onOpenAgentPanel={sharedConversationId ? undefined : handleOpenAgentPanel}
+                      onShareConversation={sharedConversationId ? undefined : handleShareConversationLink}
+                      currentConversationTitle={sharedConversationId ? (sharedConversationTitle || '已分享的对话') : (activeConversation?.title || '当前会话')}
+                      conversationKey={sharedConversationId || activeConversationId || null}
+                      chatDisplayConfig={chatDisplayConfig}
+                      onResultRecommendationsChange={sharedConversationId ? undefined : setResultRecommendations}
+                    />
+                  )}
+                </>
               )}
-              {renderOpenedAsset()}
+              <OpenedAssetPreview openedAsset={openedAsset} setOpenedAsset={setOpenedAsset} />
             </div>
 
-            {(workspaceView === 'chat' || openedAsset) && (
-              <div>
-                <InputArea
-                  onSend={handleSendWithAssets}
-                  currentAgent={currentAgent}
-                  onAgentChange={handleAgentChange}
-                  onOpenAgentPanel={handleOpenAgentPanel}
-                  onToggleAutoSpeak={handleToggleAutoSpeak}
-                  autoSpeakEnabled={autoSpeakEnabled || speaking}
-                  onFileUpload={(files) => {
-                    for (let i = 0; i < files.length; i += 1) {
-                      void handleUpload(files[i], 'click');
-                    }
+            {!sharedConversationId && (workspaceView === 'chat' || openedAsset) && (
+              showCenteredComposer ? (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: isMobile ? 'flex-end' : 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    padding: isMobile ? '0 18px 20px' : '0 32px',
+                    pointerEvents: 'none',
+                    zIndex: 8,
                   }}
-                  longTextThreshold={2000}
-                  placeholder={attachments.length > 0 ? '输入提示语，我会结合文件继续处理' : openedAsset ? '询问关于此文件的问题' : '发消息或按住说话'}
-                  hideAgentOptions
-                  referencedAssets={referencedAssets.map((asset) => ({
-                    id: asset.id,
-                    title: asset.title,
-                    type: asset.format,
-                  }))}
-                  onRemoveReferencedAsset={(assetId) => {
-                    setReferencedAssets((prev) => prev.filter((asset) => asset.id !== assetId));
+                >
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: isMobile ? '100%' : 776,
+                      pointerEvents: 'auto',
+                    }}
+                  >
+                    <InputArea
+                      onSend={handleSendWithAssets}
+                      onStopGeneration={cancelStream}
+                      currentAgent={currentAgent}
+                      onAgentChange={handleAgentChange}
+                      disabled={false}
+                      statusHint={workspaceView === 'chat' && projectContextLoadStatus === 'failed'
+                        ? {
+                          type: 'error',
+                          text: '项目范围加载失败，请刷新或重新选择项目。',
+                        }
+                        : undefined}
+                      isSending={isTyping || isCurrentConversationRunning}
+                      onOpenAgentPanel={handleOpenAgentPanel}
+                      onToggleAutoSpeak={handleToggleAutoSpeak}
+                      autoSpeakEnabled={autoSpeakEnabled || speaking}
+                      onFileUpload={(files, sourceType = 'click') => handleUploadFiles(files, sourceType)}
+                      longTextThreshold={2000}
+                      placeholder={
+                        attachments.length > 0
+                          ? '输入提示语，我会结合文件继续处理'
+                          : openedAsset
+                            ? '询问关于此文件的问题'
+                            : isMobile
+                              ? '发消息或按住说话'
+                              : '输入问题、需求或操作任务'
+                      }
+                      hideAgentOptions
+                      referencedAssets={referencedAssets.map((asset) => ({
+                        id: asset.id,
+                        title: asset.title,
+                        type: asset.format,
+                      }))}
+                      onRemoveReferencedAsset={(assetId) => {
+                        setReferencedAssets((prev) => prev.filter((asset) => asset.id !== assetId));
+                      }}
+                      draftValue={composerDraft}
+                      onDraftConsumed={() => setComposerDraft('')}
+                      resultRecommendations={resultRecommendations}
+                      showRecommendations={workspaceView === 'chat'}
+                      recommendationConversationId={activeConversationId || undefined}
+                      recommendationActiveAgent={currentAgent}
+                      recommendationProjectContext={projectContextText}
+                      attachments={attachments}
+                      onRemoveAttachment={handleRemoveAttachment}
+                      onRetryAttachment={handleRetryAttachment}
+                      onPreviewAttachment={(attachment) => message.info(attachment.summary || attachment.name)}
+                    />
+                    <div style={{ marginTop: 14 }}>
+                      <QuickChipsRow
+                        starterItems={activeStarterItems}
+                        onOpenAgentPanel={handleOpenAgentPanel}
+                        onFollowUpClick={handleFollowUpClick}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 8,
+                    padding: isMobile ? '10px 18px calc(env(safe-area-inset-bottom, 0px) + 12px)' : '12px 18px 18px',
+                    flexShrink: 0,
                   }}
-                  draftValue={composerDraft}
-                  onDraftConsumed={() => setComposerDraft('')}
-                  attachments={attachments}
-                  onRemoveAttachment={handleRemoveAttachment}
-                  onRetryAttachment={handleRetryAttachment}
-                  onPreviewAttachment={(attachment) => message.info(attachment.summary || attachment.name)}
-                />
-              </div>
+                >
+                  <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 776, margin: '0 auto' }}>
+                    <InputArea
+                      onSend={handleSendWithAssets}
+                      onStopGeneration={cancelStream}
+                      currentAgent={currentAgent}
+                      onAgentChange={handleAgentChange}
+                      disabled={false}
+                      statusHint={workspaceView === 'chat' && projectContextLoadStatus === 'failed'
+                        ? {
+                          type: 'error',
+                          text: '项目范围加载失败，请刷新或重新选择项目。',
+                        }
+                        : undefined}
+                      isSending={isTyping || isCurrentConversationRunning}
+                      onOpenAgentPanel={handleOpenAgentPanel}
+                      onToggleAutoSpeak={handleToggleAutoSpeak}
+                      autoSpeakEnabled={autoSpeakEnabled || speaking}
+                      onFileUpload={(files, sourceType = 'click') => handleUploadFiles(files, sourceType)}
+                      longTextThreshold={2000}
+                      placeholder={
+                        attachments.length > 0
+                          ? '输入提示语，我会结合文件继续处理'
+                          : openedAsset
+                            ? '询问关于此文件的问题'
+                            : isMobile
+                              ? '发消息或按住说话'
+                              : '输入问题、需求或操作任务'
+                      }
+                      hideAgentOptions
+                      referencedAssets={referencedAssets.map((asset) => ({
+                        id: asset.id,
+                        title: asset.title,
+                        type: asset.format,
+                      }))}
+                      onRemoveReferencedAsset={(assetId) => {
+                        setReferencedAssets((prev) => prev.filter((asset) => asset.id !== assetId));
+                      }}
+                      draftValue={composerDraft}
+                      onDraftConsumed={() => setComposerDraft('')}
+                      resultRecommendations={resultRecommendations}
+                      showRecommendations={workspaceView === 'chat'}
+                      recommendationConversationId={activeConversationId || undefined}
+                      recommendationActiveAgent={currentAgent}
+                      recommendationProjectContext={projectContextText}
+                      attachments={attachments}
+                      onRemoveAttachment={handleRemoveAttachment}
+                      onRetryAttachment={handleRetryAttachment}
+                      onPreviewAttachment={(attachment) => message.info(attachment.summary || attachment.name)}
+                    />
+                    {showCenteredComposer && (
+                      <div style={{ marginTop: 14 }}>
+                        <QuickChipsRow
+                          starterItems={activeStarterItems}
+                          onOpenAgentPanel={handleOpenAgentPanel}
+                          onFollowUpClick={handleFollowUpClick}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
             )}
           </div>
 
           {renderRightPanel()}
         </div>
       </div>
+
+      {/* 底部提示语 - 固定在页面底部 */}
+      {!isMobile && (
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: isCompactLayout ? 0 : 248,
+          right: 0,
+          padding: '10px 0',
+          textAlign: 'center',
+          fontSize: 11,
+          color: '#A7ACBD',
+          background: 'transparent',
+          zIndex: 10,
+          pointerEvents: 'none',
+        }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '2px 10px', pointerEvents: 'auto' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#A7ACBD', whiteSpace: 'nowrap' }}>
+            <span
+              aria-hidden="true"
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: modelRuntimeStatus.connected ? '#22c55e' : '#94a3b8',
+                boxShadow: modelRuntimeStatus.connected
+                  ? '0 0 0 0 rgba(34, 197, 94, 0.45)'
+                  : 'none',
+                animation: modelRuntimeStatus.loading ? 'pulse 1.6s ease-in-out infinite' : 'none',
+              }}
+            />
+            <span>
+              {modelRuntimeStatus.loading
+                ? '大模型检测中'
+                : modelRuntimeStatus.connected
+                  ? modelRuntimeStatus.modelName
+                  : '大模型未接通'}
+            </span>
+          </span>
+          <span style={{ color: '#C0C4D1', whiteSpace: 'nowrap' }}>保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。</span>
+        </div>
+      </div>
+      )}
 
       <ContextEditDrawer
         open={showContextDrawer}
@@ -1993,6 +2372,74 @@ function WorkspaceContent() {
         onClose={() => setShowContextDrawer(false)}
         onSave={handleContextSave}
       />
+      <AutomationModals
+        isMobile={isMobile}
+        themeColors={{
+          textPrimary: c.textPrimary,
+          textSecondary: c.textSecondary,
+          textMuted: c.textMuted,
+        }}
+        openedAutomationRun={openedAutomationRun}
+        setOpenedAutomationRun={setOpenedAutomationRun}
+        handleCopyAutomationRun={handleCopyAutomationRun}
+        handleRetryAutomationRun={handleRetryAutomationRun}
+        editingAutomationTask={editingAutomationTask}
+        creatingAutomationTask={creatingAutomationTask}
+        setEditingAutomationTask={setEditingAutomationTask}
+        setCreatingAutomationTask={setCreatingAutomationTask}
+        automationTaskDraft={automationTaskDraft}
+        setAutomationTaskDraft={setAutomationTaskDraft}
+        automationTemplates={automationTemplates}
+        handleCreateAutomationTask={handleSaveAutomationTask}
+        handleUpdateAutomationTask={handleSaveAutomationTask}
+      />
+
+      <Modal
+        open={personalKnowledgeOpen}
+        onCancel={() => setPersonalKnowledgeOpen(false)}
+        title="个人知识库"
+        footer={null}
+        centered
+        width={520}
+        destroyOnHidden
+      >
+        <div style={{ paddingTop: 6 }}>
+          <p style={{ margin: 0, color: c.textSecondary, fontSize: 13, lineHeight: 1.8 }}>
+            已内置个人知识库，访问地址：dataki.dobest.com
+          </p>
+
+          <div style={{ marginTop: 16, borderRadius: 14, background: '#f8fafc', border: `1px solid ${c.borderFaint}`, padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: c.textPrimary }}>已内置个人知识库</div>
+            <div style={{ marginTop: 6, fontSize: 12, color: c.textMuted, lineHeight: 1.7 }}>
+              访问地址：dataki.dobest.com
+            </div>
+            <button
+              type="button"
+              onClick={() => window.open(personalKnowledgeAccessUrl, '_blank', 'noopener,noreferrer')}
+              style={{ marginTop: 14, height: 34, border: 'none', borderRadius: 10, background: '#111827', color: '#fff', padding: '0 13px', fontSize: 13, cursor: 'pointer' }}
+            >
+              打开个人知识库
+            </button>
+          </div>
+
+          {personalKnowledgeMessage && (
+            <div
+              style={{
+                marginTop: 14,
+                borderRadius: 12,
+                background: personalKnowledgeStatus === 'failed' ? '#fff1f0' : '#f0fdf4',
+                border: `1px solid ${personalKnowledgeStatus === 'failed' ? '#ffd8d3' : '#bbf7d0'}`,
+                color: personalKnowledgeStatus === 'failed' ? '#b42318' : '#047857',
+                padding: '9px 12px',
+                fontSize: 12,
+                lineHeight: 1.6,
+              }}
+            >
+              {personalKnowledgeMessage}
+            </div>
+          )}
+        </div>
+      </Modal>
 
       <Modal
         open={searchOpen}
@@ -2000,6 +2447,7 @@ function WorkspaceContent() {
         footer={null}
         width={640}
         title="搜索历史记录"
+        centered
         destroyOnHidden
       >
         <div style={{ paddingTop: 8 }}>
@@ -2018,6 +2466,8 @@ function WorkspaceContent() {
           >
             <Search size={16} />
             <input
+              id="conversation-search-input"
+              name="conversation_search"
               autoFocus
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -2053,7 +2503,7 @@ function WorkspaceContent() {
                 type="button"
                 onClick={() => {
                   selectConversation(item.conversation_id);
-                  setWorkspaceView('chat');
+                  switchWorkspaceView('chat');
                   setSearchOpen(false);
                 }}
                 style={{
@@ -2086,8 +2536,10 @@ function WorkspaceContent() {
 
 export default function Home() {
   return (
-    <AgentProvider>
-      <WorkspaceContent />
-    </AgentProvider>
+    <AuthProvider>
+      <AgentProvider>
+        <WorkspaceContent />
+      </AgentProvider>
+    </AuthProvider>
   );
 }

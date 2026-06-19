@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cozeLoopTracer, SpanKind } from '@cozeloop/ai';
+import { cozeLoopTracer } from '@cozeloop/ai';
 import { getTraceConfigSync } from '@/lib/trace-config-store';
-import type { TraceConfig } from '@/lib/trace';
+import { buildChatTraceInput, buildStandardTraceInput, buildStandardTraceTags, flushTrace, resetTraceState, type TraceConfig } from '@/lib/trace';
 
 interface TraceTestRequestBody {
   config?: Partial<TraceConfig>;
 }
 
 function mergeConfig(base: TraceConfig, patch?: Partial<TraceConfig>): TraceConfig {
-  return {
-    ...base,
-    ...patch,
-  };
+  return { ...base, ...patch };
 }
 
 export async function POST(request: NextRequest) {
@@ -26,6 +23,8 @@ export async function POST(request: NextRequest) {
   }
 
   const startedAt = Date.now();
+  const localTraceId = `trace-test-${Date.now()}`;
+  let sdkTraceId = '';
 
   try {
     cozeLoopTracer.initialize({
@@ -35,29 +34,48 @@ export async function POST(request: NextRequest) {
     });
 
     await cozeLoopTracer.traceable(async (span) => {
-      cozeLoopTracer.setInput(span, {
-        test: true,
-        service_name: config.serviceName,
-        env: config.env,
-        project_id: config.projectId,
-        app_id: config.appId,
+      sdkTraceId = span.spanContext().traceId;
+      const input = buildStandardTraceInput(buildChatTraceInput('trace test', {
+        trace_id: sdkTraceId,
+        sdk_trace_id: sdkTraceId,
+        local_trace_id: localTraceId,
+        conversation_id: localTraceId,
+        agent_id: 'agent_trace_test',
+      }), {
+        trace_id: sdkTraceId,
+        sdk_trace_id: sdkTraceId,
+        local_trace_id: localTraceId,
+        conversation_id: localTraceId,
+        workflow_name: 'trace_config_test',
       });
+      cozeLoopTracer.setInput(span, input);
+      cozeLoopTracer.setTags(span, buildStandardTraceTags({
+        trace_id: sdkTraceId,
+        sdk_trace_id: sdkTraceId,
+        local_trace_id: localTraceId,
+        conversation_id: localTraceId,
+        workflow_name: 'trace_config_test',
+        span_name: 'trace-config.test',
+        span_type: 'custom',
+      }));
       cozeLoopTracer.setOutput(span, {
         status: 'success',
         message: 'trace test span',
       });
-      return 'ok';
     }, {
-      name: 'xiaoqiao.zhitou.chat',
-      type: SpanKind.Tool,
+      name: 'trace-config.test',
+      type: 'custom',
     });
 
-    cozeLoopTracer.forceFlush();
+    await flushTrace();
 
     return NextResponse.json({
       ok: true,
       latencyMs: Date.now() - startedAt,
-      message: 'Trace 上报测试成功，最小 span 已发送。',
+      message: 'Trace 上报测试成功，标准参数已写入。',
+      trace_id: sdkTraceId || localTraceId,
+      sdk_trace_id: sdkTraceId || localTraceId,
+      local_trace_id: localTraceId,
     });
   } catch (error: unknown) {
     const latencyMs = Date.now() - startedAt;
@@ -69,7 +87,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         latencyMs,
         code: detail.code,
-        message: 'Trace 上报被连弩拒绝：当前 Token 或 Workspace 没有写入权限。',
+        message: 'Trace 上报被拒绝：当前 Token 或 Workspace 没有写入权限。',
       }, { status: 403 });
     }
 
@@ -93,5 +111,6 @@ export async function POST(request: NextRequest) {
     } catch {
       // ignore shutdown errors in test mode
     }
+    resetTraceState();
   }
 }

@@ -1,0 +1,59 @@
+基于已完成的最小修复，继续做项目上下文链路的渐进式加固，禁止大改 Context Compiler、Skill、报表编排和 MCP 选择逻辑。
+
+当前已完成：
+1. ProjectSelectorCombo 增加 loading / ready / failed 状态。
+2. 项目列表加载完成前不再向上同步“未选择项目”。
+3. 加载成功后再同步最终 projectContextText。
+4. page.tsx 接收项目加载状态。
+5. 项目范围未 ready 时发送会提示“正在加载项目范围，请稍后再试”。
+6. 清缓存首轮提问已验证能正常查到 appid。
+
+本轮只做低风险渐进式加固：
+
+A. 增加上下文观测
+1. 在前端发送请求前记录/暴露 debug 信息：
+   - projectLoadStatus
+   - selectedProject appId/appName
+   - projectContextText 是否为空
+   - sendMessage metadata.projectContext
+2. 在 /api/chat trace / rawInfo / disclosure 中增加项目上下文编译摘要：
+   - metadata.projectContext 是否存在
+   - 后端解析出的 appId
+   - compiledContext.businessContext.app 是否存在
+   - appIdSource
+3. 不改变后端 appId 解析主逻辑，只增加可观测性。
+
+B. 完善前端 loading / failed 体验
+1. 项目加载中时，发送按钮 disabled 或点击提示。
+2. 输入区附近显示轻量提示：“正在加载项目范围...”
+3. 项目加载失败时显示：“项目范围加载失败，请刷新或重新选择项目。”
+4. 不改变普通问答、报表、skill 的原有执行链路。
+
+C. 增加结构化 currentProject metadata，但不让后端强依赖
+1. ProjectSelectorCombo 或 page.tsx 在已有 projectContextText 基础上，同时维护 currentProject：
+   {
+     appId,
+     appName,
+     appAlias?,
+     source: 'project_selector',
+     selectedAt
+   }
+2. useConversation.sendMessage 的 metadata 中增加 currentProject。
+3. 保留 metadata.projectContext，不删除、不改后端主逻辑。
+4. 如果 currentProject.appId 和 projectContextText 中解析到的 appId 不一致，只记录 warning，不阻断。
+
+硬性要求：
+1. 不改 compileChatContext 的主解析逻辑。
+2. 不删除 projectContextText 兼容逻辑。
+3. 不改 skill。
+4. 不改 report planner。
+5. 不改 MCP tool 选择。
+6. 不新增第二套上下文服务。
+7. 不破坏已有上下文管理和多轮继承。
+
+验收：
+1. 清缓存首轮提问仍然能查到 appid。
+2. 项目加载未 ready 时不能发送依赖项目范围的问题。
+3. 请求 metadata 中同时包含 projectContextText 和 currentProject。
+4. trace 能看到项目上下文每一跳是否存在。
+5. 无后端主链路行为变化。

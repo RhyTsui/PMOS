@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>小乔智投思维链视觉交互设计图</title>
+  <style>
+    :root {
+      --blue: #2563eb;
+      --blue-soft: #edf4ff;
+      --blue-line: #dbeafe;
+      --text: #10233f;
+      --muted: #6b7a90;
+      --faint: #e8eef7;
+      --bg: #f6f8fc;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --amber: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(37, 99, 235, 0.08), transparent 28%),
+        linear-gradient(180deg, #f8fbff, var(--bg));
+      color: var(--text);
+      font-family: "HarmonyOS Sans", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif;
+      padding: 32px;
+    }
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+    .intro h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+    .intro p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .demo-board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 18px;
+      align-items: start;
+    }
+    .chat-surface {
+      border-radius: 20px;
+      border: 1px solid rgba(219, 231, 249, 0.92);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 16px 44px rgba(28, 57, 108, 0.08);
+      padding: 18px;
+      backdrop-filter: blur(16px);
+    }
+    .bubble {
+      max-width: 760px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--faint);
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(15, 35, 72, 0.06);
+    }
+    .chain {
+      border-radius: 14px;
+      border: 1px solid var(--blue-line);
+      background: var(--blue-soft);
+      overflow: hidden;
+    }
+    .chain-header {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 10px;
+      color: var(--muted);
+      background: linear-gradient(180deg, #f4f8ff, #edf4ff);
+      border-bottom: 1px solid rgba(219, 234, 254, 0.88);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .title {
+      font-weight: 600;
+      color: #48617f;
+      white-space: nowrap;
+    }
+    .latest {
+      min-width: 0;
+      flex: 1;
+      color: #415a77;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .elapsed {
+      font-variant-numeric: tabular-nums;
+      color: #789;
+      white-space: nowrap;
+    }
+    .toggle {
+      color: #789;
+      white-space: nowrap;
+    }
+    .wave {
+      display: inline-flex;
+      gap: 3px;
+      align-items: center;
+    }
+    .wave i {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--blue);
+      opacity: 0.4;
+      animation: wave 1.2s ease-in-out infinite;
+    }
+    .wave i:nth-child(2) { animation-delay: .16s; }
+    .wave i:nth-child(3) { animation-delay: .32s; }
+    @keyframes wave {
+      0%, 80%, 100% { transform: translateY(0); opacity: .35; }
+      40% { transform: translateY(-3px); opacity: 1; }
+    }
+    .chain-body {
+      background: #fff;
+      padding: 10px 12px 12px;
+      max-height: 440px;
+      overflow: auto;
+    }
+    .folded-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #f8fafc;
+      border: 1px solid var(--faint);
+      color: var(--muted);
+      font-size: 10px;
+      margin-bottom: 10px;
+    }
+    .step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 8px;
+      padding: 8px 8px 8px 0;
+    }
+    .step:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 26px;
+      bottom: -4px;
+      width: 1px;
+      background: linear-gradient(var(--faint), transparent);
+    }
+    .dot {
+      width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      margin-top: 1px;
+      background: #fff;
+      border: 1px solid var(--faint);
+      color: var(--muted);
+      z-index: 1;
+    }
+    .done .dot { border-color: rgba(22, 163, 74, .25); color: var(--success); background: #f0fdf4; }
+    .active .dot {
+      border-color: rgba(37, 99, 235, .32);
+      color: var(--blue);
+      background: #eff6ff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .08);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .error .dot { border-color: rgba(220, 38, 38, .28); color: var(--danger); background: #fef2f2; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(37, 99, 235, .08); }
+      50% { box-shadow: 0 0 0 7px rgba(37, 99, 235, .13); }
+    }
+    .step-main {
+      min-width: 0;
+      border-radius: 12px;
+      padding: 0 0 8px;
+    }
+    .active .step-main {
+      padding: 8px 10px;
+      background: linear-gradient(180deg, #f8fbff, #fff);
+      border: 1px solid var(--blue-line);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, .06);
+    }
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text);
+      font-weight: 600;
+      min-width: 0;
+    }
+    .step-title span:nth-child(2) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .duration {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .summary {
+      margin-top: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .progress {
+      position: relative;
+      height: 2px;
+      margin-top: 8px;
+      border-radius: 999px;
+      background: #dbeafe;
+      overflow: hidden;
+    }
+    .progress::after {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 -30%;
+      width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(37, 99, 235, .7), transparent);
+      animation: beam 1.8s ease-in-out infinite;
+    }
+    @keyframes beam {
+      to { transform: translateX(290%); }
+    }
+    .detail-link {
+      margin-top: 7px;
+      font-size: 10px;
+      color: #5f7290;
+    }
+    .side-note {
+      border-radius: 18px;
+      background: rgba(255,255,255,.68);
+      border: 1px solid var(--faint);
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(15, 35, 72, .05);
+    }
+    .side-note h2 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .side-note ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.9;
+    }
+    .collapsed-preview .chain-body { display: none; }
+    .section-title {
+      margin: 4px 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    @media (max-width: 820px) {
+      body { padding: 16px; }
+      .demo-board { grid-template-columns: 1fr; }
+      .chain-body { max-height: 52vh; }
+      .latest { max-width: 46vw; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro">
+      <h1>思维链视觉交互设计图</h1>
+      <p>目标是让用户在折叠时知道当前执行状态，在展开时看清步骤顺序、当前步骤和耗时；技术请求与返回默认收起。</p>
+    </section>
+
+    <section class="demo-board">
+      <div class="chat-surface">
+        <div class="section-title">展开态</div>
+        <div class="bubble">
+          <div class="chain">
+            <div class="chain-header">
+              <span>💡</span>
+              <span class="title">思维链</span>
+              <span class="wave" aria-label="运行中"><i></i><i></i><i></i></span>
+              <span class="latest">调用报表工具获取近 7 天大盘数据</span>
+              <span class="elapsed">01:24</span>
+              <span class="toggle">收起</span>
+            </div>
+            <div class="chain-body">
+              <div class="folded-group">✓ 已完成 6 个早期步骤</div>
+
+              <div class="step done">
+                <div class="dot">✓</div>
+                <div class="step-main">
+                  <div class="step-title"><span>7.</span><span>识别处理路径</span><span class="duration">00:01</span></div>
+                  <div class="summary">已进入看数据处理路径，准备结合项目上下文和报表能力继续查询。</div>
+                </div>
+              </div>
+
+              <div class="step done">
+                <div class="dot">✓</div>
+                <div class="step-main">
+                  <div class="step-title"><span>8.</span><span>查询知识库</span><span class="duration">00:02</span></div>
+                  <div class="summary">已确认指标口径和时间范围，不需要用户额外补充媒体或维度。</div>
+                </div>
+              </div>
+
+              <div class="step active">
+                <div class="dot">•</div>
+                <div class="step-main">
+                  <div class="step-title"><span>9.</span><span>调用报表工具</span><span class="duration">00:18</span></div>
+                  <div class="summary">正在获取近 7 天大盘数据。请求与返回默认收起，避免主视图被技术内容打断。</div>
+                  <div class="progress"></div>
+                  <div class="detail-link">查看请求与返回</div>
+                </div>
+              </div>
+
+              <div class="step">
+                <div class="dot"> </div>
+                <div class="step-main">
+                  <div class="step-title"><span>10.</span><span>检查数据异常</span><span class="duration">等待</span></div>
+                  <div class="summary">报表返回后检查空表、字段缺失、日期缺口和异常波动。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:18px;">折叠态</div>
+        <div class="bubble">
+          <div class="chain collapsed-preview">
+            <div class="chain-header">
+              <span>💡</span>
+              <span class="title">思维链</span>
+              <span class="wave" aria-label="运行中"><i></i><i></i><i></i></span>
+              <span class="latest">调用报表工具获取近 7 天大盘数据</span>
+              <span class="elapsed">01:24</span>
+              <span class="toggle">展开</span>
+            </div>
+            <div class="chain-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-note">
+        <h2>确认点</h2>
+        <ul>
+          <li>标题固定为“思维链”。</li>
+          <li>折叠态展示最新步骤和耗时。</li>
+          <li>展开态只突出一个当前步骤。</li>
+          <li>历史 running 纠偏为已完成。</li>
+          <li>工具请求与返回默认收起。</li>
+          <li>第一版优先 CSS 动效，不扩大依赖。</li>
+        </ul>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# EditorConfig - https://editorconfig.org
+# 统一编辑器行为，确保编码一致性
+
+root = true
+
+# 所有文件默认配置
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# TypeScript / JavaScript
+[*.{ts,tsx,js,jsx,mjs,cjs}]
+indent_size = 2
+
+# JSON
+[*.json]
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# YAML
+[*.{yaml,yml}]
+indent_size = 2
+
+# Shell scripts
+[*.{sh,bash}]
+end_of_line = lf
+
+# Windows batch files (保持 CRLF)
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# PowerShell
+[*.ps1]
+end_of_line = crlf
+
+# 二进制文件 - 不处理
+[*.{png,jpg,jpeg,gif,ico,svg,woff,woff2,ttf,eot,pdf,zip,tar,gz}]
+charset = binary

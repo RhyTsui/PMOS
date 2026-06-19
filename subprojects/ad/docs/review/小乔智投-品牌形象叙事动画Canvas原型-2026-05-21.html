@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>小乔智投品牌形象叙事动画 Canvas 原型</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand: #2563eb;
+      --deep: #0b1f3a;
+      --muted: #5f6f87;
+      --bg: #f6f8fc;
+      --line: rgba(37, 99, 235, 0.14);
+      --panel: rgba(255, 255, 255, 0.78);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "HarmonyOS Sans", "Noto Sans SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--deep);
+      background:
+        radial-gradient(circle at 18% 14%, rgba(37, 99, 235, 0.16), transparent 30%),
+        radial-gradient(circle at 82% 18%, rgba(20, 184, 166, 0.12), transparent 28%),
+        linear-gradient(135deg, #fbfdff 0%, var(--bg) 48%, #edf4ff 100%);
+      overflow-x: hidden;
+    }
+
+    .page {
+      width: min(1200px, calc(100vw - 36px));
+      margin: 0 auto;
+      padding: 34px 0 48px;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 22px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.24;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 740px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #315a96;
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .stage {
+      position: relative;
+      height: min(680px, calc(100vh - 150px));
+      min-height: 560px;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(37, 99, 235, 0.12), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.52));
+      box-shadow: 0 26px 80px rgba(11, 31, 58, 0.13);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    #scene {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .story-panel {
+      position: absolute;
+      left: 22px;
+      top: 22px;
+      width: min(360px, calc(100% - 44px));
+      padding: 14px 16px;
+      border: 1px solid rgba(37, 99, 235, 0.14);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 14px 36px rgba(11, 31, 58, 0.08);
+      backdrop-filter: blur(14px);
+      pointer-events: none;
+    }
+
+    .story-title {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #214675;
+    }
+
+    .story-copy {
+      margin: 0;
+      color: #65758d;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .controls {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    button {
+      border: 1px solid rgba(37, 99, 235, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #315a96;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1), border-color 180ms ease, box-shadow 180ms ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover,
+    button.is-active {
+      transform: translateY(-2px);
+      border-color: rgba(46, 117, 254, 0.48);
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.14);
+    }
+
+    .mode {
+      color: #64748b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .note {
+      margin: 14px 0 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 820px) {
+      .page {
+        width: min(100vw - 24px, 680px);
+        padding-top: 24px;
+      }
+
+      .header,
+      .controls {
+        display: block;
+      }
+
+      .badge {
+        display: inline-block;
+        margin-top: 12px;
+      }
+
+      .stage {
+        min-height: 610px;
+        height: calc(100vh - 120px);
+      }
+
+      .story-panel {
+        left: 16px;
+        top: 16px;
+        width: calc(100% - 32px);
+      }
+
+      .controls {
+        left: 16px;
+        right: 16px;
+      }
+
+      .buttons {
+        margin-bottom: 10px;
+      }
+
+      button {
+        padding: 8px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1>小乔智投品牌形象叙事动画 Canvas 原型</h1>
+        <p class="lead">这版使用 Canvas 2D + requestAnimationFrame。先从真实 logo-icon 生成透明底 Canvas 位图，再基于同一个位图做登场、待机、任务中、成功、阻塞和夏日装扮。</p>
+      </div>
+      <div class="badge">独立原型，不接入线上页面</div>
+    </header>
+
+    <section class="stage" aria-label="小乔智投品牌动画 Canvas">
+      <canvas id="scene"></canvas>
+      <div class="story-panel">
+        <p class="story-title" id="storyTitle">小乔登场</p>
+        <p class="story-copy" id="storyCopy">先还原真实 logo-icon，再让小乔落地，开始陪伴用户处理投放任务。</p>
+      </div>
+      <div class="controls">
+        <div class="buttons" id="buttons">
+          <button type="button" data-mode="intro" class="is-active">登场</button>
+          <button type="button" data-mode="idle">待机</button>
+          <button type="button" data-mode="working">任务中</button>
+          <button type="button" data-mode="success">成功</button>
+          <button type="button" data-mode="blocked">阻塞</button>
+          <button type="button" data-mode="summer">夏日装扮</button>
+        </div>
+        <div class="mode" id="modeLabel">当前：登场动画</div>
+      </div>
+    </section>
+
+    <p class="note">接入建议：如果确认这类方向，下一步可把 Canvas 角色封装为独立 React 组件，只用于欢迎区，不影响左侧侧边栏、会话顶部栏、联调组件或右侧侧边栏。</p>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+    const buttons = document.getElementById('buttons');
+    const storyTitle = document.getElementById('storyTitle');
+    const storyCopy = document.getElementById('storyCopy');
+    const modeLabel = document.getElementById('modeLabel');
+
+    const stories = {
+      intro: ['小乔登场', '先还原真实 logo-icon，再让小乔落地，开始陪伴用户处理投放任务。', '当前：登场动画'],
+      idle: ['待机陪伴', '小乔在区域里巡游、弹跳、观察输入区，保持轻松但不打扰。', '当前：待机巡游'],
+      working: ['任务执行中', '泡泡和光点变成数据轨迹，表达正在调用数据、知识库和工具。', '当前：任务中'],
+      success: ['任务完成', '数据泡泡聚成对勾，小乔跳起庆祝，表示结果可以交付。', '当前：成功反馈'],
+      blocked: ['遇到阻塞', '小乔停下并给出提示气泡，表达还缺信息或服务不可用。', '当前：阻塞提示'],
+      summer: ['夏日装扮', '太阳伞、太阳镜和奶茶出现，用更强的角色感承载品牌亲和力。', '当前：夏日装扮'],
+    };
+
+    const state = {
+      mode: 'intro',
+      t: 0,
+      last: performance.now(),
+      w: 0,
+      h: 0,
+      dpr: 1,
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      ground: 0,
+      squash: 0,
+      direction: 1,
+      mouseX: null,
+      mouseY: null,
+      modeStarted: performance.now(),
+      bubbles: [],
+      particles: [],
+      stars: [],
+      trails: [],
+      confetti: [],
+      shake: 0,
+    };
+
+    const logo = {
+      ready: false,
+      bitmap: null,
+      source: '../../frontend/src/public/brand-icon.png',
+    };
+
+    function loadLogoIcon() {
+      return new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => {
+          const width = image.naturalWidth || image.width;
+          const height = image.naturalHeight || image.height;
+          const offscreen = document.createElement('canvas');
+          offscreen.width = width;
+          offscreen.height = height;
+          const off = offscreen.getContext('2d');
+          off.clearRect(0, 0, width, height);
+          off.drawImage(image, 0, 0, width, height);
+          logo.bitmap = offscreen;
+          logo.ready = true;
+          resolve();
+        };
+        image.onerror = () => resolve();
+        image.src = logo.source;
+      });
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      state.w = rect.width;
+      state.h = rect.height;
+      canvas.width = Math.max(1, Math.floor(rect.width * state.dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * state.dpr));
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      state.ground = state.h * 0.66;
+      if (!state.x) {
+        state.x = state.w * 0.52;
+        state.y = state.ground;
+      }
+    }
+
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      state.modeStarted = performance.now();
+      state.bubbles = [];
+      state.particles = [];
+      state.trails = [];
+      state.confetti = [];
+      state.shake = 0;
+      const story = stories[mode];
+      storyTitle.textContent = story[0];
+      storyCopy.textContent = story[1];
+      modeLabel.textContent = story[2];
+      [...buttons.querySelectorAll('button')].forEach(button => {
+        button.classList.toggle('is-active', button.dataset.mode === mode);
+      });
+
+      if (mode === 'intro') {
+        state.x = state.w * 0.5;
+        state.y = -100;
+        state.vx = 0;
+        state.vy = 0;
+        spawnParticles(90, state.w * 0.5, state.h * 0.34, '#2e75fe');
+      }
+
+      if (mode === 'success') {
+        state.vy = -18;
+        spawnConfetti(90);
+      }
+
+      if (mode === 'blocked') {
+        state.vx = 0;
+        state.shake = 1;
+      }
+
+      if (mode === 'working') {
+        for (let i = 0; i < 18; i += 1) {
+          spawnBubble(state.x + rand(-40, 70), state.y + rand(-60, 20), 'data');
+        }
+      }
+    }
+
+    function spawnParticles(count, x, y, color) {
+      for (let i = 0; i < count; i += 1) {
+        const angle = rand(0, Math.PI * 2);
+        const speed = rand(0.6, 4.2);
+        state.particles.push({
+          x: x + rand(-18, 18),
+          y: y + rand(-18, 18),
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: rand(40, 120),
+          maxLife: 120,
+          r: rand(1.4, 4.2),
+          color,
+        });
+      }
+    }
+
+    function spawnBubble(x, y, kind = 'bubble') {
+      state.bubbles.push({
+        x,
+        y,
+        vx: rand(-0.35, 0.55),
+        vy: rand(-1.7, -0.65),
+        r: rand(10, 25),
+        life: rand(80, 170),
+        maxLife: 170,
+        kind,
+        label: kind === 'data' ? ['ROI', 'Cost', 'CVR', 'BI', 'MCP'][Math.floor(rand(0, 5))] : '',
+      });
+    }
+
+    function spawnConfetti(count) {
+      for (let i = 0; i < count; i += 1) {
+        state.confetti.push({
+          x: state.w * 0.5 + rand(-140, 140),
+          y: state.h * 0.34 + rand(-60, 40),
+          vx: rand(-2.2, 2.2),
+          vy: rand(-4.5, -0.8),
+          rot: rand(0, Math.PI * 2),
+          vr: rand(-0.16, 0.16),
+          life: rand(80, 180),
+          color: ['#2563eb', '#14b8a6', '#f59e0b', '#60a5fa'][Math.floor(rand(0, 4))],
+        });
+      }
+    }
+
+    function update(dt, time) {
+      const age = time - state.modeStarted;
+      const waveGround = state.h * 0.66 + Math.sin(time / 680) * 14 + Math.sin(time / 1300) * 10;
+      state.ground += (waveGround - state.ground) * 0.024 * dt;
+
+      if (state.mode === 'intro') {
+        const targetY = state.ground;
+        state.vy += 0.85 * dt;
+        state.y += state.vy * dt;
+        state.x += (state.w * 0.5 - state.x) * 0.04 * dt;
+        if (state.y > targetY) {
+          state.y = targetY;
+          if (state.vy > 8) {
+            state.squash = 0.26;
+          }
+          state.vy = -Math.abs(state.vy) * 0.34;
+          if (Math.abs(state.vy) < 1.2 && age > 1200) {
+            setMode('idle');
+          }
+        }
+      } else if (state.mode === 'blocked') {
+        state.x += (state.w * 0.5 - state.x) * 0.045 * dt;
+        state.y += (state.ground - state.y) * 0.08 * dt;
+        state.squash *= Math.pow(0.9, dt);
+      } else {
+        const speedBase = state.mode === 'working' ? 2.2 : state.mode === 'summer' ? 1.85 : 1.45;
+        if (Math.abs(state.vx) < 0.4) state.vx = speedBase;
+        state.x += state.vx * dt;
+        if (state.x < 110) {
+          state.x = 110;
+          state.vx = Math.abs(speedBase + rand(0, 1.1));
+          jump(10);
+        }
+        if (state.x > state.w - 110) {
+          state.x = state.w - 110;
+          state.vx = -Math.abs(speedBase + rand(0, 1.1));
+          jump(10);
+        }
+
+        if (Math.random() < 0.012 * dt) jump(rand(9, state.mode === 'success' ? 18 : 14));
+        state.vy += 0.72 * dt;
+        state.y += state.vy * dt;
+        if (state.y > state.ground) {
+          state.y = state.ground;
+          if (Math.abs(state.vy) > 5.2) {
+            state.squash = 0.18;
+          }
+          state.vy = -Math.abs(state.vy) * 0.24;
+          if (Math.abs(state.vy) < 1) state.vy = 0;
+        }
+      }
+
+      if (state.mode === 'working') {
+        if (Math.random() < 0.04 * dt) spawnBubble(state.x + rand(30, 78), state.y + rand(-42, 8), 'data');
+      }
+
+      if (state.mode === 'summer' && Math.random() < 0.025 * dt) {
+        spawnBubble(state.x + 72, state.y - 12, 'bubble');
+      }
+
+      if (state.mode === 'success' && Math.random() < 0.032 * dt) {
+        spawnConfetti(3);
+      }
+
+      updateArrays(dt);
+      state.squash *= Math.pow(0.86, dt);
+      state.direction = state.vx >= 0 ? 1 : -1;
+    }
+
+    function jump(power) {
+      if (Math.abs(state.y - state.ground) < 4) {
+        state.vy = -power;
+        state.squash = -0.08;
+      }
+    }
+
+    function updateArrays(dt) {
+      state.particles = state.particles.filter(p => {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 0.02 * dt;
+        p.life -= dt;
+        return p.life > 0;
+      });
+
+      state.bubbles = state.bubbles.filter(b => {
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        b.vx += Math.sin((b.life + b.r) / 12) * 0.006 * dt;
+        b.life -= dt;
+        return b.life > 0;
+      });
+
+      state.trails = state.trails.filter(trail => {
+        trail.p += 0.018 * dt;
+        return trail.p < 1;
+      });
+
+      state.confetti = state.confetti.filter(c => {
+        c.x += c.vx * dt;
+        c.y += c.vy * dt;
+        c.vy += 0.09 * dt;
+        c.rot += c.vr * dt;
+        c.life -= dt;
+        return c.life > 0 && c.y < state.h + 40;
+      });
+    }
+
+    function drawBackground(time) {
+      ctx.clearRect(0, 0, state.w, state.h);
+      const g = ctx.createRadialGradient(state.w * 0.5, state.h * 0.42, 20, state.w * 0.5, state.h * 0.42, state.w * 0.56);
+      g.addColorStop(0, 'rgba(37,99,235,0.12)');
+      g.addColorStop(0.45, 'rgba(37,99,235,0.035)');
+      g.addColorStop(1, 'rgba(37,99,235,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, state.w, state.h);
+
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      for (let i = 0; i < 70; i += 1) {
+        const x = (i * 97 + time * 0.012) % (state.w + 80) - 40;
+        const y = (i * 53 + Math.sin(time / 900 + i) * 16) % (state.h + 80) - 40;
+        ctx.beginPath();
+        ctx.arc(x, y, i % 3 === 0 ? 1.4 : 0.9, 0, Math.PI * 2);
+        ctx.fillStyle = i % 4 === 0 ? 'rgba(20,184,166,0.42)' : 'rgba(37,99,235,0.34)';
+        ctx.fill();
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(37,99,235,0.16)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(state.w * 0.12, state.ground + 74);
+      ctx.bezierCurveTo(state.w * 0.34, state.ground + 48, state.w * 0.66, state.ground + 100, state.w * 0.88, state.ground + 58);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawMascot(time) {
+      const airborne = Math.max(0, state.ground - state.y);
+      const shadowScale = Math.max(0.45, 1 - airborne / 240);
+      ctx.save();
+      ctx.translate(state.x, state.y + 74);
+      ctx.scale(shadowScale, 0.42 * shadowScale);
+      const sg = ctx.createRadialGradient(0, 0, 0, 0, 0, 88);
+      sg.addColorStop(0, 'rgba(11,31,58,0.22)');
+      sg.addColorStop(1, 'rgba(11,31,58,0)');
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 76, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      const lean = Math.max(-0.16, Math.min(0.16, state.vx * 0.035));
+      const shake = state.mode === 'blocked' ? Math.sin(time / 58) * 5 * state.shake : 0;
+      const bob = Math.sin(time / 180) * (Math.abs(state.vy) < 0.2 ? 2.5 : 0.7);
+      const iconScale = 1 + Math.min(0.035, airborne / 3200);
+
+      ctx.save();
+      ctx.translate(state.x + shake, state.y + bob);
+      ctx.rotate(lean);
+      ctx.scale(iconScale, iconScale);
+      drawLogoBitmap();
+      drawAccessories(time);
+      if (!logo.ready) {
+        drawMark();
+        drawExpression(time);
+      }
+      ctx.restore();
+    }
+
+    function drawLogoBitmap() {
+      if (!logo.ready || !logo.bitmap) return;
+      ctx.save();
+      ctx.shadowColor = 'rgba(37, 99, 235, 0.22)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 14;
+      ctx.drawImage(logo.bitmap, -74, -74, 148, 148);
+      ctx.restore();
+      drawFaceOverlay();
+    }
+
+    function drawFaceOverlay() {
+      if (state.mode !== 'success' && state.mode !== 'blocked') return;
+      ctx.save();
+      ctx.strokeStyle = '#071f49';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      if (state.mode === 'success') {
+        ctx.arc(0, 23, 16, 0.12 * Math.PI, 0.88 * Math.PI);
+      } else {
+        ctx.moveTo(-16, 32);
+        ctx.quadraticCurveTo(0, 24, 16, 32);
+        ctx.moveTo(-32, -14);
+        ctx.lineTo(-12, -8);
+        ctx.moveTo(12, -8);
+        ctx.lineTo(32, -14);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawMark() {
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 28;
+      const gradient = ctx.createLinearGradient(-78, -78, 78, 78);
+      gradient.addColorStop(0, '#2563eb');
+      gradient.addColorStop(0.5, '#1677ff');
+      gradient.addColorStop(1, '#0052d9');
+      ctx.strokeStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, 64, Math.PI * 0.18, Math.PI * 1.86, true);
+      ctx.stroke();
+
+      ctx.lineWidth = 24;
+      ctx.beginPath();
+      ctx.moveTo(30, -52);
+      ctx.quadraticCurveTo(70, -38, 78, -6);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawExpression(time) {
+      const eyeLift = state.mode === 'success' ? -3 : state.mode === 'blocked' ? 3 : 0;
+      const blink = Math.sin(time / 880) > 0.985 ? 0.18 : 1;
+      ctx.save();
+      ctx.fillStyle = '#071f49';
+      ctx.beginPath();
+      ctx.ellipse(-20, 2 + eyeLift, 10, 10 * blink, 0, 0, Math.PI * 2);
+      ctx.ellipse(20, 2 + eyeLift, 10, 10 * blink, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#071f49';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      if (state.mode === 'success') {
+        ctx.arc(0, 29, 18, 0.12 * Math.PI, 0.88 * Math.PI);
+      } else if (state.mode === 'blocked') {
+        ctx.moveTo(-16, 32);
+        ctx.quadraticCurveTo(0, 24, 16, 32);
+      } else {
+        ctx.moveTo(-13, 30);
+        ctx.quadraticCurveTo(0, 38, 13, 30);
+      }
+      ctx.stroke();
+
+      if (state.mode === 'blocked') {
+        ctx.strokeStyle = 'rgba(7,31,73,0.75)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-32, -14);
+        ctx.lineTo(-12, -8);
+        ctx.moveTo(12, -8);
+        ctx.lineTo(32, -14);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawAccessories(time) {
+      if (state.mode !== 'summer') return;
+      ctx.save();
+      ctx.translate(2, -104 + Math.sin(time / 290) * 3);
+      ctx.rotate(Math.sin(time / 470) * 0.035);
+      const ug = ctx.createLinearGradient(-88, -34, 88, 28);
+      ug.addColorStop(0, '#f8c7d8');
+      ug.addColorStop(0.28, '#fff3c4');
+      ug.addColorStop(0.5, '#ffffff');
+      ug.addColorStop(0.72, '#f6a6c8');
+      ug.addColorStop(1, '#8bbcff');
+      ctx.fillStyle = ug;
+      ctx.shadowColor = 'rgba(246,166,200,0.26)';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(-86, 12);
+      ctx.quadraticCurveTo(0, -62, 86, 12);
+      ctx.lineTo(66, 2);
+      ctx.lineTo(38, 18);
+      ctx.lineTo(0, 4);
+      ctx.lineTo(-38, 18);
+      ctx.lineTo(-66, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.72)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -48);
+      ctx.lineTo(0, 78);
+      ctx.moveTo(-56, -8);
+      ctx.quadraticCurveTo(0, -36, 56, -8);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(246,166,200,0.52)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 10);
+      ctx.lineTo(0, 78);
+      ctx.stroke();
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.ellipse(54, 10, 14, 8, -0.35, 0, Math.PI * 2);
+      ctx.ellipse(75, 7, 14, 8, 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#be185d';
+      ctx.beginPath();
+      ctx.arc(64, 8, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(-42, -42 + Math.sin(time / 360) * 1.5);
+      ctx.rotate(-0.28);
+      ctx.fillStyle = '#f9a8d4';
+      ctx.beginPath();
+      ctx.ellipse(-8, 0, 11, 7, -0.4, 0, Math.PI * 2);
+      ctx.ellipse(8, 0, 11, 7, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.arc(0, 0, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.72)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-12, -2);
+      ctx.quadraticCurveTo(-5, -6, 0, -1);
+      ctx.moveTo(0, -1);
+      ctx.quadraticCurveTo(5, -6, 12, -2);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(0, 4);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(190,24,93,0.62)';
+      ctx.fillStyle = 'rgba(190,24,93,0.62)';
+      ctx.beginPath();
+      ctx.moveTo(-4, -1);
+      ctx.quadraticCurveTo(0, 2, 4, -1);
+      ctx.stroke();
+      const leftLens = ctx.createLinearGradient(-38, -15, -4, 13);
+      leftLens.addColorStop(0, 'rgba(190,24,93,0.88)');
+      leftLens.addColorStop(0.5, 'rgba(251,113,133,0.78)');
+      leftLens.addColorStop(1, 'rgba(253,186,116,0.68)');
+      ctx.fillStyle = leftLens;
+      ctx.beginPath();
+      ctx.moveTo(-40, -2);
+      ctx.quadraticCurveTo(-36, -17, -18, -15);
+      ctx.quadraticCurveTo(-3, -13, -5, 1);
+      ctx.quadraticCurveTo(-7, 13, -23, 12);
+      ctx.quadraticCurveTo(-38, 11, -40, -2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      const rightLens = ctx.createLinearGradient(4, -15, 40, 13);
+      rightLens.addColorStop(0, 'rgba(190,24,93,0.88)');
+      rightLens.addColorStop(0.5, 'rgba(251,113,133,0.78)');
+      rightLens.addColorStop(1, 'rgba(253,186,116,0.68)');
+      ctx.fillStyle = rightLens;
+      ctx.beginPath();
+      ctx.moveTo(4, 1);
+      ctx.quadraticCurveTo(2, -13, 18, -15);
+      ctx.quadraticCurveTo(36, -17, 40, -2);
+      ctx.quadraticCurveTo(38, 11, 23, 12);
+      ctx.quadraticCurveTo(7, 13, 4, 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      const shine = Math.max(0.28, 0.7 + Math.sin(time / 260) * 0.22);
+      ctx.globalAlpha = shine;
+      ctx.strokeStyle = 'rgba(255,255,255,0.88)';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-30, -8);
+      ctx.lineTo(-20, -12);
+      ctx.moveTo(10, -8);
+      ctx.lineTo(22, -12);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.82)';
+      ctx.beginPath();
+      ctx.arc(-14, -8, 2.2, 0, Math.PI * 2);
+      ctx.arc(27, -8, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const glow = ctx.createRadialGradient(-6, -2, 2, -6, -2, 48);
+      glow.addColorStop(0, 'rgba(251,113,133,0.24)');
+      glow.addColorStop(0.55, 'rgba(255,255,255,0.12)');
+      glow.addColorStop(1, 'rgba(251,113,133,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.ellipse(-2, -1, 54, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = 'rgba(251,113,133,0.28)';
+      ctx.beginPath();
+      ctx.ellipse(-42, 18, 11, 6, -0.12, 0, Math.PI * 2);
+      ctx.ellipse(40, 18, 11, 6, 0.12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#7f1d1d';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(12, 24);
+      ctx.quadraticCurveTo(18, 28, 24, 24);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(42, 37 + Math.sin(time / 230) * 2);
+      ctx.strokeStyle = '#f472b6';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(-17, -13);
+      ctx.lineTo(3, 4);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.86)';
+      roundRect(-12, -2, 30, 9, 5);
+      ctx.fill();
+      const tg = ctx.createLinearGradient(0, 0, 0, 34);
+      tg.addColorStop(0, '#fff7ed');
+      tg.addColorStop(0.55, '#f9a8d4');
+      tg.addColorStop(1, '#f59e0b');
+      ctx.fillStyle = tg;
+      roundRect(-10, 4, 26, 34, 8);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      roundRect(-5, 8, 7, 22, 4);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(11,31,58,0.25)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawEffects() {
+      for (const trail of state.trails) {
+        const p = trail.p;
+        const x = trail.x + (trail.tx - trail.x) * p;
+        const y = trail.y + (trail.ty - trail.y) * p - Math.sin(p * Math.PI) * 42;
+        ctx.save();
+        ctx.globalAlpha = Math.sin(p * Math.PI);
+        ctx.fillStyle = trail.color;
+        ctx.beginPath();
+        ctx.arc(x, y, 3 + Math.sin(p * Math.PI) * 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      for (const b of state.bubbles) {
+        const alpha = Math.max(0, Math.min(1, b.life / b.maxLife));
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const g = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.35, 2, b.x, b.y, b.r);
+        g.addColorStop(0, 'rgba(255,255,255,0.92)');
+        g.addColorStop(0.55, b.kind === 'data' ? 'rgba(37,99,235,0.18)' : 'rgba(20,184,166,0.16)');
+        g.addColorStop(1, 'rgba(255,255,255,0.12)');
+        ctx.fillStyle = g;
+        ctx.strokeStyle = b.kind === 'data' ? 'rgba(37,99,235,0.26)' : 'rgba(20,184,166,0.26)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        if (b.label) {
+          ctx.fillStyle = '#315a96';
+          ctx.font = '600 10px HarmonyOS Sans, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(b.label, b.x, b.y);
+        }
+        ctx.restore();
+      }
+
+      for (const p of state.particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      for (const c of state.confetti) {
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.rot);
+        ctx.globalAlpha = Math.max(0, Math.min(1, c.life / 80));
+        ctx.fillStyle = c.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      if (state.mode === 'success') {
+        drawCheckMark();
+      }
+
+      if (state.mode === 'blocked') {
+        drawBlockedBubble();
+      }
+    }
+
+    function drawCheckMark() {
+      const x = state.w * 0.72;
+      const y = state.h * 0.28;
+      const pulse = 1 + Math.sin(state.t / 180) * 0.04;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(pulse, pulse);
+      ctx.fillStyle = 'rgba(20,184,166,0.10)';
+      ctx.strokeStyle = 'rgba(20,184,166,0.38)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 46, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#14b8a6';
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-22, 0);
+      ctx.lineTo(-6, 17);
+      ctx.lineTo(26, -19);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBlockedBubble() {
+      const x = state.x + 82;
+      const y = state.y - 92;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.84)';
+      ctx.strokeStyle = 'rgba(245,158,11,0.35)';
+      ctx.lineWidth = 1;
+      roundRect(x - 72, y - 26, 144, 52, 16);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#9a5b00';
+      ctx.font = '600 12px HarmonyOS Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('还缺一个关键信息', x, y - 4);
+      ctx.font = '11px HarmonyOS Sans, sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('补齐后我继续推进', x, y + 14);
+      ctx.restore();
+    }
+
+    function loop(time) {
+      const dt = Math.min((time - state.last) / 16.67, 2);
+      state.last = time;
+      state.t = time;
+      update(dt, time);
+      drawBackground(time);
+      drawEffects();
+      drawMascot(time);
+      requestAnimationFrame(loop);
+    }
+
+    buttons.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-mode]');
+      if (!button) return;
+      setMode(button.dataset.mode);
+    });
+
+    canvas.addEventListener('pointermove', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      state.mouseX = event.clientX - rect.left;
+      state.mouseY = event.clientY - rect.top;
+      if (Math.hypot(state.mouseX - state.x, state.mouseY - state.y) < 130 && Math.random() < 0.08) {
+        spawnBubble(state.x + 58, state.y - 20, 'bubble');
+      }
+    });
+
+    canvas.addEventListener('click', () => {
+      if (state.mode !== 'summer') {
+        spawnBubble(state.x + 58, state.y - 12, state.mode === 'working' ? 'data' : 'bubble');
+        jump(13);
+      } else {
+        for (let i = 0; i < 7; i += 1) spawnBubble(state.x + 60 + rand(-12, 18), state.y + rand(-30, 10), 'bubble');
+        jump(12);
+      }
+    });
+
+    window.addEventListener('resize', resize);
+    resize();
+    loadLogoIcon().then(() => {
+      setMode('intro');
+      requestAnimationFrame(loop);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+{
+  "stamp": 1781510306856,
+  "url": "http://127.0.0.1:8002/?ui_check=1781510306856",
+  "api": {
+    "auth": {
+      "status": 200,
+      "text": "{\"user\":{\"account\":\"xuyun\",\"auths\":[\"personal_docs\",\"monitor_landing_link-delete\",\"monitor_landing_link-add\",\"monitor_landing_link-edit\",\"monitor_attribution_reserve-edit\",\"monitor_subpackage-add\",\"monitor_subpackage-update\",\"monitor_subpackage-delete\",\"monitor_subpackage-upload\",\"monitor_subpackage-edit\",\"monitor_callback_rule-view\",\"monitor_callback_rule-edit\",\"monitor_setting_whitelist-edit\",\"monitor_setting_custom-edit\",\"monitor_setting_sys-edit\",\"monitor_setting_project-edit\",\"monitor_activity_group-edit\",\"monitor_activity_promotion-switch\",\"monitor_activity_promotion-edit\",\"access_account-edit\",\"access_account-export\",\"access_account-auth\",\"agent_rebate-delete\",\"agent_rebate-edit\",\"agent_rebate-add\",\"access_application-delete\",\"access_application-edit\",\"access_application-add\",\"proje"
+    },
+    "projects": {
+      "status": 200,
+      "text": "{\"source\":\"aiad-production-project-list\",\"project_list_endpoint\":\"https://ads.dobest.com/api/aiad-setting/v2/app/list\",\"current\":{\"app_id\":10100413,\"app_name\":\"西游奇妙冒险\",\"app_status\":\"ENABLE\",\"icon\":\"https://pm-oss.tos-cn-beijing.volces.com/icons/856905f5b703ceb118efe3e900bb6cb4.jpg\",\"app_type\":\"APP\",\"is_current\":true},\"total\":106,\"returned\":50,\"projects\":[{\"app_id\":40100559,\"app_name\":\"星火英雄-国内H5\",\"app_alias\":\"xhyx_gnh5\",\"icon\":\"\",\"app_type\":[\"H5游戏\"],\"is_current\":false},{\"app_id\":10100560,\"app_name\":\"星火英雄-国内App\",\"app_alias\":\"xhyx_gnapp\",\"icon\":\"\",\"app_type\":[\"手游\"],\"is_current\":false},{\"app_id\":10100683,\"app_name\":\"大梦勇士-App国内\",\"app_alias\":\"dmys_appgn\",\"icon\":\"\",\"app_type\":[\"手游\"],\"is_current\":false},{\"app_id\":40100665,\"app_name\":\"代号：齿轮-国内H5\",\"app_alias\":\"dhcl_gnh5\",\"icon\":\"\",\"app_type\":[\"H5游戏\""
+    },
+    "conversations": {
+      "status": 200,
+      "text": "[{\"conversation_id\":\"conv-1781506650892\",\"user_id\":\"acct-xuyun\",\"title\":\"新对话\",\"status\":\"普通对话\",\"started_at\":\"2026-06-15T06:57:30.892Z\",\"updated_at\":\"2026-06-15T06:57:30.892Z\",\"last_message_at\":\"2026-06-15T06:57:30.892Z\",\"current_mode\":\"natural-chat\",\"project_binding\":{\"project_refs\":[\"10100042\"],\"default_project_ref\":\"10100042\",\"last_active_project_ref\":\"10100042\",\"source_project_refs\":[\"10100042\"]},\"message_count\":0},{\"conversation_id\":\"conv-1781506133462\",\"user_id\":\"acct-xuyun\",\"title\":\"日常问候\",\"status\":\"普通对话\",\"started_at\":\"2026-06-15T06:48:53.462Z\",\"updated_at\":\"2026-06-15T06:49:53.621Z\",\"last_message_at\":\"2026-06-15T06:49:53.098Z\",\"message_count\":4}]"
+    },
+    "chatDisplayConfig": {
+      "status": 200,
+      "text": "{\"welcomeText\":\"需要我帮你做点什么？\",\"welcomeTexts\":[\"需要我帮你做点什么？\",\"想了解什么，尽管问吧！\",\"随时准备好，只等你需要\",\"接下来聊点什么？\",\"我们进入正题吧\",\"嗨，今天有什么安排？\",\"公瑾……我先走一步。\",\"弦音袅袅，花香阵阵。\",\"妒……红颜……\",\"玉容花貌，难自弃。\",\"周郎，等我……\",\"帘幕燕双双，绿杨低映窗。\",\"叫你再直勾勾看着我！\",\"请多多指教！\",\"心中有邪，怎能懂得花香？\",\"弯弯明月，也不及我美。\",\"我想看那片，花海……\",\"花海香桂，赠与君！\",\"花娇月洁，怎能与我比？\",\"此生之愿，惟与君老……\",\"蕉下美人香，月下伊人娇。\",\"花香依旧不是伊……\"],\"quickTitle\":\"你可以直接这样问\",\"quickHint\":\"先选一个方向，再点具体问题，我会带入标准提问模板继续推进。\",\"taskPanelTitle\":\"任务\",\"starters\":[{\"id\":\"delivery\",\"label\":\"投放交付\",\"description\":\"确认哪些包可以交付投放，以及还缺什么。\",\"prompt\":\"哪些包能投？\",\"agent\":\"delivery\",\"openPanel\":true,\"enabled\":true,\"sortOrder\":10,\"children\":[{\"id\":\"delivery-package-ready\",\"label\":\"获取可用的投放包\",\"prompt\":\"获取当前项目下通过检测、可以交付投放的包，并告诉我包名、下载地址、上报验收状态、审核状态和联调情况。\",\"agent\":\"delivery\",\"openPanel\":true,\"enabled\":true,\"sortOrder\":10}]},{\"id\":\"anomaly-diagnosis\",\"la"
+    }
+  },
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510309882/messages",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510309882",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510309882",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510310431/messages",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510310431",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510310431",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510310431",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510336280/messages",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510336280",
+      "status": 500
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510336280",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510337222/messages",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510337222",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510337222",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510337222",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/chat",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510337222/messages",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8002/api/xiaoqiao/conversations/conv-1781510337222",
+      "status": 404
+    }
+  ],
+  "mojibakeHits": [],
+  "runtime": {
+    "prompt": "你好，请用一句话说明你现在可以帮我做什么。",
+    "beforeState": "ready",
+    "processingState": "processing",
+    "afterState": "empty",
+    "stateRows": [
+      {
+        "elapsedSec": 12,
+        "state": "processing",
+        "runtimeText": "已处理 2 步 · 用时 1.8s"
+      },
+      {
+        "elapsedSec": 17,
+        "state": "processing",
+        "runtimeText": "准备执行"
+      },
+      {
+        "elapsedSec": 22,
+        "state": "processing",
+        "runtimeText": ""
+      },
+      {
+        "elapsedSec": 27,
+        "state": "processing",
+        "runtimeText": ""
+      }
+    ],
+    "runtimeCards": 1,
+    "runtimeText": "准备执行",
+    "runtimeAppearMs": 31,
+    "hasRuntimePanel": false,
+    "bodySample": "新对话\n西游奇妙冒险\n叫你再直勾勾看着我！\n‹\n获取可用的投放包\n和媒体数据对不上\n这个指标怎么算\n接一个新媒体\n今天数据有点问题\n帮我出日报\n最近什么素材爆量\n›\nqwen3.7-plus-2026-05-26\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。",
+    "panelSample": "新对话\n西游奇妙冒险\n叫你再直勾勾看着我！\n‹\n获取可用的投放包\n和媒体数据对不上\n这个指标怎么算\n接一个新媒体\n今天数据有点问题\n帮我出日报\n最近什么素材爆量\n›\nqwen3.7-plus-2026-05-26\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。"
+  }
+}

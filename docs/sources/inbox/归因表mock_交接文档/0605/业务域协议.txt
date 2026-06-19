@@ -1,0 +1,27 @@
+业务域协议（Domain Protocol）
+report_query 只是第一层意图；进入报表域后，还要继续细分：趋势、汇总、排名、对比、诊断、路径等子语义；这些子语义最终决定：数据结构、能力选择、screenType、regions、componentBinding 和 UI。
+Report Domain = 任务编排域 Sub Intent / Analysis View = 可组合视图，不要把问数细分做成单选意图树，要做成“主目标 + 多分析视图组合”的报表域编排模型
+Top Intent：判断大方向
+Report Domain：进入问数/分析域
+Primary Goal：判断主目标
+Analysis Views：多选组合
+Execution Plan：编排多个分析块
+SemanticResultContract：按 regions 展示结果
+
+问数业务域协议
+docs/architecture/request-understanding/report-domain/
+├─ report-domain-protocol.md
+├─ report-sub-intents.md
+├─ trend-analysis-contract.md
+├─ ranking-analysis-contract.md
+├─ comparison-analysis-contract.md
+├─ diagnosis-analysis-contract.md
+├─ chart-selection-policy.md
+└─ report-screentype-mapping.md
+代码
+contracts/report-domain/
+├─ report-sub-intent.ts
+├─ trend-analysis-contract.ts
+├─ ranking-analysis-contract.ts
+├─ report-screentype.ts
+└─ chart-selection-policy.ts

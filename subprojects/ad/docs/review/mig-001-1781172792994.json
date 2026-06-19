@@ -1,0 +1,137 @@
+{
+  "caseId": "MIG-001",
+  "scenario": "天气",
+  "prompt": "南京本周日天气如何",
+  "keyPoint": "联网搜索",
+  "baseUrl": "http://10.236.14.27:8002",
+  "runId": "mig-001-1781172792994",
+  "currentUrl": "http://10.236.14.27:8002/",
+  "conversationId": "conv-1781172795054",
+  "sendState": "empty",
+  "titleResponse": {
+    "title": "南京本周日天气",
+    "source": "model",
+    "prompt_id": "conversation-title-generate",
+    "prompt_source": "managed"
+  },
+  "api": {
+    "conversationStatus": 200,
+    "messagesStatus": 200,
+    "title": "南京本周日天气",
+    "messageCount": 2,
+    "assistantMessageId": "msg-1781172809691-7y6569",
+    "traceId": "zt-chat-1781172796536-g0ryeh",
+    "hasResponseContract": true,
+    "hasSemanticResult": true,
+    "hasEvidenceOrSourceTool": true
+  },
+  "consoleMessages": [
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: ready, selectedProject: Object, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    }
+  ],
+  "failedRequests": [],
+  "networkRecords": [
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054/attachments"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054/messages"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/memory"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30&project_refs=10100042"
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/chat"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054"
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054/title"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054"
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/recommendations"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054/messages"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30&project_refs=10100042"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781172795054/messages"
+    }
+  ],
+  "chatSsePreview": "data: {\"type\":\"runtime_state\",\"runtime_state\":{\"current_stage\":\"understanding\",\"completed_stages\":[],\"status\":\"running\",\"started_at\":\"2026-06-11T10:13:16.536Z\",\"duration_ms\":92,\"label\":\"正在理解请求...\"}}\n\ndata: {\"type\":\"phase\",\"phase\":\"thinking\"}\n\ndata: {\"type\":\"runtime_state\",\"runtime_state\":{\"current_stage\":\"context_loading\",\"completed_stages\":[\"understanding\"],\"status\":\"running\",\"started_at\":\"2026-06-11T10:13:16.536Z\",\"duration_ms\":317,\"label\":\"正在补充上下文...\"}}\n\ndata: {\"type\":\"heartbeat\",\"ts\":1781172804627}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"intent.detected-1781172807943-l9fges\",\"started_at\":\"2026-06-11T10:13:27.943Z\",\"status\":\"success\",\"visibility\":\"user\",\"type\":\"intent.detected\",\"label\":\"确定路由\",\"summary\":\"进入help链路。\",\"intent_type\":\"help\",\"agent\":\"help\",\"output\":{\"clientIntent\":\"help\",\"resolvedIntent\":\"help\",\"serviceIntent\":\"help_qa\",\"ignoredClientIntentReason\":null,\"routeEvidence\":{\"routeIntent\":\"help\",\"userRequirementTask\":\"general\",\"reportRouteMatch\":false,\"reportContinuation\":false,\"reportContinuationClassification\":null,\"routeReason\":\"识别到说明、规则或能力查询诉求，进入帮助链路。\"},\"matchedRules\":[],\"selectedSkill\":null,\"capabilityDecision\":null,\"isReportQuery\":false,\"toolPurpose\":\"help_lookup\",\"warnings\":[]}}}\n\ndata: {\"type\":\"runtime_state\",\"runtime_state\":{\"current_stage\":\"data_fetching\",\"completed_stages\":[\"understanding\",\"context_loading\"],\"status\":\"running\",\"started_at\":\"2026-06-11T10:13:16.536Z\",\"duration_ms\":11407,\"label\":\"正在获取信息...\"}}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"web.search-1781172807946-c95fiv\",\"started_at\":\"2026-06-11T10:13:27.946Z\",\"status\":\"success\",\"visibility\":\"internal\",\"type\":\"web.search\",\"label\":\"查询公开来源\",\"summary\":\"已完成公开信息查询。\",\"input\":{\"query\":\"南京本周日天气如何\",\"maxResults\":5,\"allowedDomains\":[],\"blockedDomains\":[]},\"completed_at\":\"2026-06-11T10:13:29.189Z\",\"duration_ms\":1243,\"source_refs\":[{\"id\":\"web-1-54f0b2ab\",\"sourceId\":\"web-1-54f0b2ab\",\"title\":\"南京本周日天气如何 - 公开天气预报\",\"source\":\"wttr.in\",\"url\":\"https://wttr.in/Nanjing\",\"source_type\":\"web_search\",\"icon\":\"web_search\",\"snippet\":\"当前：33°C，体感 33°C，Sunny，湿度 28%。 预报：2026-06-11：22-35°C，Sunny；2026-06-12：25-35°C，Sunny；2026-06-13：21-30°C，Sunny\",\"siteName\":\"wttr.in\",\"publisher\":\"wttr.in\",\"retrievedAt\":\"2026-06-11T10:13:29.182Z\",\"fetchedAt\":\"2026-06-11T10:13:29.182Z\",\"contentHash\":\"d3673a93854681fb330692df5557ec695890a5b4\",\"freshness\":\"realtime\",\"confidence\":0.7}],\"output\":{\"source_count\":1,\"providerLabel\":\"DuckDuckGo Web Search\"}}}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"web.result-1781172809189-9k0gns\",\"started_at\":\"2026-06-11T10:13:29.189Z\",\"status\":\"success\",\"visibility\":\"internal\",\"type\":\"web.result\",\"label\":\"整理公开来源\",\"summary\":\"已获取 1 条公开来源。\",\"source_refs\":[{\"id\":\"web-1-54f0b2ab\",\"sourceId\":\"web-1-54f0b2ab\",\"title\":\"南京本周日天气如何 - 公开天气预报\",\"source\":\"wttr.in\",\"url\":\"https://wttr.in/Nanjing\",\"source_type\":\"web_search\",\"icon\":\"web_search\",\"snippet\":\"当前：33°C，体感 33°C，Sunny，湿度 28%。 预报：2026-06-11：22-35°C，Sunny；2026-06-12：25-35°C，Sunny；2026-06-13：21-30°C，Sunny\",\"siteName\":\"wttr.in\",\"publisher\":\"wttr.in\",\"retrievedAt\":\"2026-06-11T10:13:29.182Z\",\"fetchedAt\":\"2026-06-11T10:13:29.182Z\",\"contentHash\":\"d3673a93854681fb330692df5557ec695890a5b4\",\"freshness\":\"realtime\",\"confidence\":0.7}],\"output\":{\"source_count\":1,\"retrievedAt\":\"2026-06-11T10:13:29.182Z\",\"providerLabel\":\"DuckDuckGo Web Search\"}}}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"source.attached-1781172809189-2idbed\",\"started_at\":\"2026-06-11T10:13:29.189Z\",\"status\":\"success\",\"visibility\":\"user\",\"type\":\"source.attached\",\"label\":\"挂载来源：南京本周日天气如何 - 公开天气预报\",\"summary\":\"来源取自wttr.in\",\"completed_at\":\"2026-06-11T10:13:29.189Z\",\"source_refs\":[{\"id\":\"source-1\",\"title\":\"南京本周日天气如何 - 公开天气预报\",\"source\":\"wttr.in\",\"url\":\"https://wttr.in/Nanjing\",\"source_type\":\"web_search\",\"icon\":\"web_search\",\"prompt\":\"当前：33°C，体感 33°C，Sunny，湿度 28%。 预报：2026-06-11：22-35°C，Sunny；2026-06-12：25-35°C，Sunny；2026-06-13：21-30°C，Sunny\"}],\"output\":{\"source_type\":\"web_search\",\"report_name\":\"\",\"source\":\"wttr.in\",\"url\":\"https://wttr.in/Nanjing\"}}}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"route_observation-1781172809191-3eup19\",\"started_at\":\"2026-06-11T10:13:29.191Z\",\"status\":\"success\",\"visibility\":\"user\",\"type\":\"route_observation\",\"label\":\"路由观测\",\"summary\":\"Route observation: help_qa; actual general_chat; 1 mismatch(es) recorded.\",\"output\":{\"mode\":\"observe_only\",\"decisionId\":\"zt-chat-1781172796536-g0ryeh:route-observation\",\"traceId\":\"zt-chat-1781172796536-g0ryeh\",\"clientIntent\":\"help\",\"serviceIntent\":\"help_qa\",\"resolvedIntent\":\"help_qa\",\"primaryDeliverable\":\"help_answer\",\"decisionAuthority\":{\"clientIntent\":\"hint_only\",\"prompt\":\"evidence_only\",\"domainSignals\":\"evidence_only\",\"routeRules\":\"decision_support\",\"backendRouteDecision\":\"authoritative\"},\"routeEvidence\":[{\"source\":\"client_hint\",\"key\":\"body.intent\",\"value\":\"help\",\"reason\":\"Client hint only.\"},{\"source\":\"route_rule\",\"key\":\"route.intent_type\",\"value\":\"help\",\"reason\":\"public_web.classification_fallback\"},{\"source\":\"fallback_policy\",\"key\":\"matches_report_query_route\",\"value\":false},{\"source\":\"conversation_state\",\"key\":\"report_continuation\",\"value\":false},{\"source\":\"context\",\"key\":\"user_requirement.task\",\"value\":\"general\"}],\"domainSignals\":[],\"matchedRules\":[],\"routeRulesGovernance\":[],\"skillSelection\":{\"candidateSkills\":[],\"readiness\":\"blocked\",\"missingInputs\":[],\"warnings\":[]},\"capabilityDecision\":{\"candidates\":[{\"capabilityId\":\"public_web_search\",\"capabilityName\":\"configured_web_search\",\"toolScope\":\"public_web:web_search\",\"toolPurpose\":\"help_lookup\",\"score\":100,\"reason\":\"fetch_external_public_info; source_required\",\"missingInputs\":\"[Truncated]\",\"warnings\":\"[Truncated]\"}],\"executable\":{\"capabilityId\":\"public_web_search\",\"toolName\":\"configured_web_search\",\"toolScope\":\"public_web:web_search\",\"toolPurpose\":\"help_lookup\",\"executionMode\":\"direct_tool\"},\"missingInputs\":[],\"allowedToolScopes\":[\"public_web:web_search\"],\"forbiddenToolScopes\":[\"report_fallback\"],\"warnings\":[]},\"toolPurpose\":\"help_lookup\",\"isReportQuery\":false,\"confidence\":0.65,\"needsClarification\":false,\"warnings\":[{\"code\":\"client_intent_conflict\",\"message\":\"Client intent help differs from backend route help_qa.\",\"severity\":\"warning\"}],\"promptRuntime\":{\"available\":true,\"activePromptId\":\"route_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6\",\"conflicts\":[],\"conflictWarnings\":[],\"slots\":{\"route_prompt\":{\"activePromptId\":\"route_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"response_prompt\":{\"activePromptId\":\"response_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"7911b04dc727ee205009aa5a64a6c5669f9c4d75734ec3d43f3447d25ae63d0d\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"evidence_prompt\":{\"activePromptId\":\"evidence_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"99c70f0485bd9c779fa94e2e67da7902568a05c864b0d7f052e8f1df8936f65c\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"card_prompt\":{\"activePromptId\":\"card_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"963778bbe5757cd558bdeab4c924f5122885576e8f8ba05f55ce544a772d6873\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"followup_prompt\":{\"activePromptId\":\"followup_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"d8808c1feb9d3598be5b72dc2b8e534a4436eb2aaf59a93d995716b78c9d5dc9\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"tool_explain_prompt\":{\"activePromptId\":\"tool_explain_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"bdd400c",
+  "domPreview": "开启新对话\n今天\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n日常问候\n简单问候\n日常问候\n日常问候\n简单问候\n简单问候\n新对话\n新对话\n日常问候\nyoka超管\n南京本周日天气\n指间山海-国内\n\n南京本周日天气如何\n\n已处理 5 步 · 用时 1.2s\n我找到了与“南京本周日天气如何”相关的公开信息：\n公开信息\n当前：33°C，体感 33°C，Sunny，湿度 28%。\n预报：2026-06-11：22-35°C，Sunny；\n2026-06-12：25-35°C，Sunny；\n2026-06-13：21-30°C，Sunny\n来源\n南京本周日天气如何 - 公开天气预报：https://wttr.in/Nanjing\n检索时间：2026/6/11 18:13:29\nqwen3.7-plus-2026-05-26\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。",
+  "disclosurePreview": "开启新对话\n今天\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n日常问候\n简单问候\n日常问候\n日常问候\n简单问候\n简单问候\n新对话\n新对话\n日常问候\nyoka超管\n南京本周日天气\n指间山海-国内\n\n南京本周日天气如何\n\n已处理 5 步 · 用时 1.2s\n我找到了与“南京本周日天气如何”相关的公开信息：\n公开信息\n当前：33°C，体感 33°C，Sunny，湿度 28%。\n预报：2026-06-11：22-35°C，Sunny；\n2026-06-12：25-35°C，Sunny；\n2026-06-13：21-30°C，Sunny\n来源\n南京本周日天气如何 - 公开天气预报：https://wttr.in/Nanjing\n检索时间：2026/6/11 18:13:29\n过程与依据\n执行过程\n原始信息\n字段\n质量\nPrompt\n运行方式\npublic_web / external_service / configured_web_search\n已完成\n执行状态\n我找到了与“南京本周日天气如何”相关的公开信息：\n\n公开信息\n• 当前：33°C，体感 33°C，Sunny，湿度 28%。\n• 预报：2026-06-11：22-35°C，Sunny；\n• 2026-06-12：25-35°C，Sunny；\n• 2026-06-13：21-30°C，Sunny\n\n来源\n• 南京本周日天气如何 - 公开天气预报：https://wttr.in/Nanjing\n• 检索时间：2026/6/11 18:13:29\n执行过程\n确定路由\n已完成\n进入help链路。\n公开来源\n南京本周日天气如何 - 公开天气预报\n当前：33°C，体感 33°C，Sunny，湿度 28%。 预报：2026-06-11：22-35°C，Sunny；2026-06-12：25-35°C，Sunny；2026-06-13：21-30°C，Sunny\n检索时间：2026/6/11 18:13:29\n查询公开来源\n1.2s\n已完成\n已完成公开信息查询。\n公开来源\n南京本周日天气如何 - 公开天气预报\n当前：33°C，体感 33°C，Sunny，湿度 28%。 预报：2026-06-11：22-35°C，Sunny；2026-06-12：25-35°C，Sunny；2026-06-13：21-30°C，Sunny\n检索时间：2026/6/11 18:13:29\n整理公开来源\n已完成\n已获取 1 条公开来源。\n公开来源\n南京本周日天气如何 - 公开天气预报\n当前：33°C，体感 33°C，Sunny，湿度 28%。 预报：2026-06-11：22-35°C，Sunny；2026-06-12：25-35°C，Sunny；2026-06-13：21-30°C，Sunny\n检索时间：2026/6/11 18:13:29\n路由观测\n已完成\nRoute observation: help_qa; actual general_chat; 1 mismatch(es) recorded.\n调用明细\n查询公开来源\n类型：web_search\n已完成\n{\"source_count\":1,\"providerLabel\":\"DuckDuckGo Web Search\"}\n查看请求参数和返回参数\n整理公开来源\n类型：web_search\n已完成\n{\"source_count\":1,\"retrievedAt\":\"2026-06-11T10:13:29.182Z\",\"providerLabel\":\"DuckDuckGo Web Search\"}\n查看请求参数和返回参数\nqwen3.7-plus-2026-05-26\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。",
+  "mojibakeFindings": [],
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-001-1781172792994.png",
+  "acceptance": {
+    "pageHealthy": true,
+    "apiReadbackHealthy": true,
+    "titleHealthy": true,
+    "networkHealthy": true,
+    "noConsoleErrors": true,
+    "disclosureHealthy": true,
+    "noMojibake": true
+  },
+  "passed": true
+}

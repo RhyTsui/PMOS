@@ -1,0 +1,2263 @@
+{
+  "batch": "runtime-full-no-browser-20260614b",
+  "stamp": "20260614-140545",
+  "summary": {
+    "REVIEW": 24,
+    "PASS": 3
+  },
+  "total": 107,
+  "completed": 27,
+  "offset": 0,
+  "limit": null,
+  "caseTimeoutMs": 0,
+  "results": [
+    {
+      "rowIndex": 2,
+      "id": "MIG-000",
+      "scenario": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 37701,
+      "answer": "你好！我是小乔智投通用 AI 助手。我可以帮你查询投放数据（如消耗、ROI和转化表现）、定位数据异常，或协助广告联调配置检查。你可以直接描述你的需求，或使用“查投放数据”、“查异常”等快捷指令。请问有什么我可以帮你的？",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 3,
+      "id": "MIG-001",
+      "scenario": "天气",
+      "prompt": "南京本周日天气如何",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 6881,
+      "answer": "当前：28°C，体感 29°C，Partly cloudy，湿度 51%。\n  - 预报：2026-06-14：19-30°C，Patchy rain nearby；\n  - 2026-06-15：20-30°C，Patchy rain nearby；\n  - 2026-06-16：22-30°C，Patchy rain nearby",
+      "sourceCount": 1,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "source.attached",
+        "route_observation"
+      ],
+      "runtimeStatus": "success",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "external_service",
+        "composer_name": "public_web_grounded_answer",
+        "provider": "configured_web_search",
+        "summary": "已检测到明显公共网页检索意图。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "南京本周日天气如何",
+          "warnings": [],
+          "reasonCode": "public_web.need_detected",
+          "reasonContext": {
+            "topic": "南京本周日天气如何",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何",
+                "purpose": "primary"
+              },
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "verification"
+              },
+              {
+                "query": "南京本周日天气如何 official latest",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": false
+        }
+      }
+    },
+    {
+      "rowIndex": 4,
+      "id": "MIG-002",
+      "scenario": "新闻解读",
+      "prompt": "最近有哪些游戏上线",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 16148,
+      "answer": "1 天前&ensp;·&ensp;国际 · 军事 非洲“厂歌”何以跨海爆红 “以为是世界杯主题曲，没想到是一首厂歌。\n  - ”最近，一首来自赞比亚中资铜矿的《谦比希 …",
+      "sourceCount": 1,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "source.attached",
+        "route_observation"
+      ],
+      "runtimeStatus": "success",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "external_service",
+        "composer_name": "public_web_grounded_answer",
+        "provider": "configured_web_search",
+        "summary": "消息模板不可识别，请稍后再试。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "public_web_qa",
+          "sourceRequired": true,
+          "sanitizedQuery": "最近有哪些游戏上线",
+          "warnings": [],
+          "reasonCode": "public_web.default_general_lookup",
+          "reasonContext": {
+            "topic": "最近有哪些游戏上线",
+            "policy": "llm",
+            "confidence": 0.72
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "unknown",
+            "authority_need": "multi_source_consensus",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "deep",
+            "source_policy": "multi_source_consensus",
+            "query_strategy": "cross_source_compare",
+            "redaction_policy": "none",
+            "reasons": [
+              "high_risk_or_consensus_needed"
+            ],
+            "queries": [
+              {
+                "query": "最近有哪些游戏上线",
+                "purpose": "primary"
+              },
+              {
+                "query": "最近有哪些游戏上线 latest official sources",
+                "purpose": "verification"
+              },
+              {
+                "query": "最近有哪些游戏上线 source comparison",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": false
+        }
+      }
+    },
+    {
+      "rowIndex": 5,
+      "id": "MIG-003",
+      "scenario": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 69517,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问巨量媒体监测回传文档的位置，属于路径、规则及说明类问题，符合 help 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 28,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 28,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 6,
+      "id": "MIG-004",
+      "scenario": "行业知识问答",
+      "prompt": "腾讯iOS要接sdk吗",
+      "keyPoint": "知识库 联网搜索",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 65997,
+      "answer": "关于腾讯媒体iOS端是否需要接入SDK，当前上下文和知识库中缺乏直接证据，无法给出确定的结论。\n\n通常而言，iOS端接入媒体SDK主要用于支持广告交互、IDFA授权获取（需遵循苹果ATT政策）以及转化事件回传。具体是否必须接入，取决于您的投放链路设计（例如是否完全依赖服务端API回传或第三方归因）。\n\n建议您查阅腾讯广告官方最新的iOS接入文档，或直接咨询腾讯媒体技术支持，以获取针对您当前业务场景的准确要求。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问腾讯媒体iOS端是否需要接入SDK，属于接入条件和准备事项咨询，符合help意图中的配置说明帮助或说明帮助。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 2,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 7,
+      "id": "MIG-005",
+      "scenario": "系统知识问答",
+      "prompt": "我们支持鸿蒙吗",
+      "keyPoint": "知识库 多轮会话",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 25884,
+      "answer": "是的，系统支持鸿蒙。根据知识库记录，在 v3.14.11 版本中，系统已支持鸿蒙对接腾讯融合归因功能。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问系统是否支持鸿蒙操作系统，属于能力支持范围的说明类问题，符合说明帮助意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 8,
+      "id": "MIG-006",
+      "scenario": "系统操作帮助",
+      "prompt": "能不能选一个事件作为付费回传",
+      "keyPoint": "知识库 多轮会话",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 41508,
+      "answer": "可以。在投放系统中，通常可以选择特定的事件作为付费回传事件。一般操作逻辑为：首先在“事件管理”或“转化追踪”模块中，将目标事件（如标准事件“付费”或特定的自定义事件）配置或映射为付费转化事件；其次，确保该事件已在端内正确上报并通过联调验证；最后，在创建广告计划时，选择该事件作为优化目标（如oCPM付费）。由于当前未获取到系统特定版本的详细操作文档，建议您在后台的“事件管理”或“资产中心”模块中查找具体配置入口。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问是否可以选择特定事件作为付费回传，属于对系统能力支持范围、配置规则或操作路径的咨询，符合说明帮助或配置说明帮助的定义。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 9,
+      "id": "MIG-007",
+      "scenario": "指标解释",
+      "prompt": "有效是哪个点位",
+      "keyPoint": "知识库",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 43877,
+      "answer": "当前缺乏足够的信息来确定“有效”具体指代哪个点位。在不同的业务场景或媒体渠道中，“有效”可能对应不同的事件节点（如有效激活、有效注册、有效付费或特定的自定义行为）。建议您补充具体的应用、媒体渠道或业务场景信息，以便进一步确认对应的埋点或回调节点。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问“有效”指标对应的具体“点位”（如埋点、事件或回调节点），属于字段口径、规则或映射关系的说明类问题，符合“说明帮助”意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "no_hit",
+                "available": true,
+                "hit_count": 0,
+                "knowledge_base_count": 5,
+                "evidence_role": "not_applicable",
+                "freshness": "unknown",
+                "risk_flags": [
+                  "knowledge_no_hit"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "model_only",
+              "evidence_need": "optional",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_no_hit"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 10,
+      "id": "MIG-008",
+      "scenario": "系统说明",
+      "prompt": "素材报表的未知是什么",
+      "keyPoint": "知识库",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 130390,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 11,
+      "id": "MIG-009",
+      "scenario": "查大盘数据",
+      "prompt": "看下近7天的日报数据",
+      "keyPoint": "时间、tool发现",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 130319,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 12,
+      "id": "MIG-010",
+      "scenario": "查维度数据",
+      "prompt": "巨量iOS创新的投放效果，带自然量",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 13267,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询巨量引擎媒体下iOS端的投放效果及自然量数据，属于典型的广告报表数据查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 29,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 29,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 13,
+      "id": "MIG-011",
+      "scenario": "查明细数据",
+      "prompt": "查一下直播包的数据",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11787,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询直播包的数据，属于广告数据报表查询范畴，匹配报表MCP中的直播或包相关数据查询能力。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 17,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 17,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 14,
+      "id": "MIG-012",
+      "scenario": "查维度数据",
+      "prompt": "三国杀小游戏 鸿蒙端的数据",
+      "keyPoint": "终端",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12335,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定游戏（三国杀小游戏）及特定端（鸿蒙端）的数据，属于典型的广告/业务数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "failed",
+                "available": false,
+                "hit_count": 0,
+                "knowledge_base_count": 5,
+                "evidence_role": "not_applicable",
+                "freshness": "unknown",
+                "risk_flags": [
+                  "knowledge_failed"
+                ],
+                "error": "This operation was aborted"
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "model_only",
+              "evidence_need": "optional",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_failed"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 23,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 23,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 15,
+      "id": "MIG-013",
+      "scenario": "查多日数据",
+      "prompt": "查询近7日数据",
+      "keyPoint": "数据分析",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10047,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询近7日的数据，属于广告数据报表查询和趋势分析范畴，匹配 report_query 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 2,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 11,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 11,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 16,
+      "id": "MIG-014",
+      "scenario": "查多日数据",
+      "prompt": "查询近30日趋势、分日",
+      "keyPoint": "趋势图、数据分析",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10025,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询近30日的趋势数据并按分日展示，属于典型的广告数据报表查询需求，符合 report_query 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 17,
+      "id": "MIG-001",
+      "scenario": "广告报表-日期识别-DATE-001",
+      "prompt": "指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活 11,819 注册 10,554\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 28082,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.result",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              },
+              {
+                "source": "public_web",
+                "status": "failed",
+                "capability_type": "public_web_qa",
+                "reason_code": "public_web.no_results",
+                "source_count": 0,
+                "source_required": false,
+                "confidence": 0.72,
+                "evidence_role": "candidate_evidence",
+                "risk_flags": [
+                  "public_web_requires_composer_arbitration",
+                  "public_web_no_reliable_source",
+                  "relevance_gate_filtered_all"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge",
+                "public_web"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available",
+                "public_web_requires_composer_arbitration",
+                "public_web_no_reliable_source",
+                "relevance_gate_filtered_all"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 18,
+      "id": "MIG-002",
+      "scenario": "广告报表-日期识别-DATE-002",
+      "prompt": "指间山海 指间山海 2026 年 3 月 1 日至 3 月 15 日30日ROI多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：30日ROI 48.62%左右\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11012,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户明确询问特定应用（指间山海）在指定时间段内的ROI数据，属于典型的广告数据报表查询请求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 19,
+      "id": "MIG-003",
+      "scenario": "广告报表-日期识别-DATE-003",
+      "prompt": "指间山海 2026 年 2 月 29 日的数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：不存在日期不返回数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 14367,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定项目（指间山海）在特定日期的数据，符合广告数据与报表查询意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "no_hit",
+                "available": true,
+                "hit_count": 0,
+                "knowledge_base_count": 5,
+                "evidence_role": "not_applicable",
+                "freshness": "unknown",
+                "risk_flags": [
+                  "knowledge_no_hit"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "model_only",
+              "evidence_need": "optional",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_no_hit"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 21,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 21,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 20,
+      "id": "MIG-004",
+      "scenario": "广告报表-日期识别-DATE-F001",
+      "prompt": "指间山海2026-03-25日报中，查询广告投放部 各媒体激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 131728,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 21,
+      "id": "MIG-005",
+      "scenario": "广告报表-日期识别-DATE-F002",
+      "prompt": "指间山海上周周报中，广告投放部按应用类型筛选的激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：iOS应用：激活 299、注册 289、消耗35310.64  安卓应用：激活266、注册242，消耗26950.09\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 135569,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 22,
+      "id": "MIG-006",
+      "scenario": "广告报表-日期识别-DATE-F003",
+      "prompt": "指间山海2026年2月月报中，广告投放部按媒体细分的累计ROI情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 :31.13% tap:62.03% 苹果：54.06%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+媒体+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 139773,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 23,
+      "id": "MIG-007",
+      "scenario": "广告报表-日期识别-DATE-F004",
+      "prompt": "指间山海2026-05-21广告小时报表中，广告投放部9点-10点的激活数和折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数 1 折后消耗 32.31\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：广告小时报表+分时段",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 130060,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 24,
+      "id": "MIG-008",
+      "scenario": "广告报表-日期识别-DATE-F005",
+      "prompt": "指间山海二月同期广告投放部的累计ROI和合计第2日ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：上月同期：20260201-20260227 累计ROI:39.01 合计第2日ROI:8.38%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI报表+月累计/区间",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9807,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定项目（指间山海）、时间（二月同期）和部门（广告投放部）的累计ROI和第2日ROI数据，属于典型的广告数据报表查询意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 41,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 41,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 25,
+      "id": "MIG-009",
+      "scenario": "广告报表-媒体识别-MEDIA-001",
+      "prompt": "指间山海在巨量引擎2026-05-11~2026-05-17的激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-11~2026-05-17 巨量的激活数 422 ，结果支持1%的浮动\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：媒体解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 14896,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（指间山海）在特定媒体（巨量引擎）和特定时间范围（2026-05-11~2026-05-17）内的特定指标（激活数），并要求按媒体维度展示，属于典型的广告数据报表查询请求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 26,
+      "id": "MIG-010",
+      "scenario": "广告报表-媒体识别-MEDIA-004",
+      "prompt": "指间山海在2026-05-11~2026-05-17 每日的巨量引擎和苹果广告的折后消耗对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-17 巨量广告：4128.37 苹果广告：1742.51\r\n2026-05-16 巨量广告：4193.05 苹果广告：1537.59\r\n2026-05-15 巨量广告：4108.55 苹果广告：1062.29\r\n2026-05-14 巨量广告：4186.78 苹果广告：1191.23\r\n2026-05-13 巨量广告：4173.52 苹果广告：1011.12\r\n2026-05-12 巨量广告：4161.43 苹果广告：1057.61\r\n2026-05-11 巨量广告：4604.40 苹果广告：1108.29\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：媒体解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 124579,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 27,
+      "id": "MIG-011",
+      "scenario": "广告报表-媒体识别-MEDIA-F001",
+      "prompt": "指间山海2026-03-25日报中，巨量引擎在广告投放部的激活数、注册数和折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数126 注册数106 折后消耗11500\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+细分媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 125596,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 28,
+      "id": "MIG-012",
+      "scenario": "广告报表-媒体识别-MEDIA-F002",
+      "prompt": "指间山海2026-03-25日报中，腾讯广告在广告投放部、安卓应用类型下的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：0\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 126045,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    }
+  ]
+}

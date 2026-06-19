@@ -1,0 +1,36 @@
+{
+  "screenType": "login-entry",
+  "layout": "split-canvas-and-card",
+  "regions": [
+    {
+      "name": "brand-visual",
+      "purpose": "展示品牌气质与登录后的工作价值"
+    },
+    {
+      "name": "login-card",
+      "purpose": "承载小闪扫码和手机号登录"
+    },
+    {
+      "name": "security-note",
+      "purpose": "提示账号与隐私保护"
+    }
+  ],
+  "sourceRefs": [
+    "frontend/src/src/app/login/page.tsx",
+    "frontend/src/src/app/globals.css"
+  ],
+  "evidenceRefs": [
+    "aiad-next-frontend 登录页参考",
+    "当前小乔智投登录流程"
+  ],
+  "componentBindings": {
+    "background": "canvas-particles + light-beam rails",
+    "brand": "brand copy + particle atmosphere",
+    "loginMount": "YKLogin mount"
+  },
+  "notes": [
+    "只改登录页视觉，不改登录组件挂载逻辑和登录服务逻辑。",
+    "页面交互保持扫码/手机号登录原语义不变。",
+    "品牌展示区使用粒子氛围和静态业务提示，不承载短视频。"
+  ]
+}

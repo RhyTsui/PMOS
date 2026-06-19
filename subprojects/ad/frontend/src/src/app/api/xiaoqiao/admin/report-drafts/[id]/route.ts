@@ -8,7 +8,7 @@ export async function GET(
   const { id } = await params;
   const draft = await getReportDraft(id);
   if (!draft) {
-    return NextResponse.json({ error: 'report draft not found' }, { status: 404 });
+    return NextResponse.json({ error: 'report template result not found' }, { status: 404 });
   }
   return NextResponse.json(draft);
 }
@@ -21,7 +21,7 @@ export async function PUT(
   const body = await request.json();
   const draft = await updateReportDraft(id, body);
   if (!draft) {
-    return NextResponse.json({ error: 'report draft not found' }, { status: 404 });
+    return NextResponse.json({ error: 'report template result not found' }, { status: 404 });
   }
   return NextResponse.json(draft);
 }

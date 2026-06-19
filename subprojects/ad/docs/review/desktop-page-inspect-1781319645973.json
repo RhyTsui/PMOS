@@ -1,0 +1,22 @@
+{
+  "url": "http://127.0.0.1:8002/?ui_check=1781319645973",
+  "title": "小乔智投",
+  "bodyText": "",
+  "textareaCount": 0,
+  "composerCount": 0,
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    }
+  ],
+  "failedRequests": [],
+  "auth": {
+    "status": 200,
+    "text": "{\"user\":{\"account\":\"xuyun\",\"auths\":[\"personal_docs\",\"monitor_landing_link-delete\",\"monitor_landing_link-add\",\"monitor_landing_link-edit\",\"monitor_attribution_reserve-edit\",\"monitor_subpackage-add\",\"monitor_subpackage-update\",\"monitor_subpackage-delete\",\"monitor_subpackage-upload\",\"monitor_subpackage-edit\",\"monitor_callback_rule-view\",\"monitor_callback_rule-edit\",\"monitor_setting_whitelist-edit\",\"monitor_setting_custom-edit\",\"monitor_setting_sys-edit\",\"monitor_setting_project-edit\",\"monitor_activity_group-edit\",\"monitor_activity_promotion-switch\",\"monitor_activity_promotion-edit\",\"access_account-edit\",\"access_account-export\",\"access_account-auth\",\"agent_rebate-delete\",\"agent_rebate-edit\",\"agent_rebate-add\",\"access_application-delete\",\"access_application-edit\",\"access_application-add\",\"proje"
+  }
+}

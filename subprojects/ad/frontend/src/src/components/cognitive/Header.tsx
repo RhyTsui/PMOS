@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export function Header({
   isMobile = false,
-  conversationTitle = '智投chat对话',
+  conversationTitle = '小乔智投对话',
   autoSpeakEnabled = false,
   onToggleAutoSpeak,
   onCreateConversation,
@@ -50,10 +50,10 @@ export function Header({
               fontSize: isMobile ? 14 : 13,
               fontWeight: 600,
               color: c.textPrimary,
-              letterSpacing: 0.2,
+              letterSpacing: 0,
             }}
           >
-            智投chat
+            小乔智投
           </div>
           {!isMobile && (
             <div

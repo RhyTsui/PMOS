@@ -24,6 +24,9 @@ interface YkProjectSelectProps {
   maxVisibleItems?: number;
 }
 
+// Internal bridge for the YokaUI project picker. Product pages should use
+// ProjectSelectorCombo so project loading, recent items and mobile behavior
+// stay on one path.
 export default function YkProjectSelect({
   value,
   options,

@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-06-19T06:26:02.028Z",
+  "tests": {
+    "DATE-F003": {
+      "keywords": [
+        "ROI",
+        "二月",
+        "同期"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "DATE-F004": {
+      "keywords": [
+        "激活",
+        "消耗",
+        "小时",
+        "9 点"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "DATE-F005": {
+      "keywords": [
+        "ROI",
+        "二月"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MEDIA-001": {
+      "keywords": [
+        "巨量",
+        "激活"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MEDIA-004": {
+      "keywords": [
+        "巨量",
+        "苹果",
+        "消耗",
+        "对比"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    }
+  }
+}

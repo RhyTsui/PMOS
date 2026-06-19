@@ -1,0 +1,17 @@
+{
+  "requiredIdentifiers": ["app_id"],
+  "optionalIdentifiers": ["media_id"],
+  "requiredCapabilities": [
+    "app_context.resolve",
+    "check_base_event_ingestion",
+    "check_attr_preprocess_result",
+    "check_callback_rule_match"
+  ],
+  "branchCapabilities": {
+    "SDK": ["check_app_sdk_integration", "check_callback_delivery_trace"],
+    "API": ["check_api_callback_result"],
+    "NOTHING": [],
+    "CONFIG_ANOMALY": ["query_callback_rule_config"]
+  }
+}
+

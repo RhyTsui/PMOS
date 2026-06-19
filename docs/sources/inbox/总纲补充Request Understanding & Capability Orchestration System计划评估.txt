@@ -1,0 +1,757 @@
+一、总纲缺Request Understanding & Capability Orchestration System
+
+二、完整 AI Chat OS 结构
+Enterprise AI Chat OS
+│
+├─ 1. Product & Architecture Principles
+│  ├─ 产品定位
+│  ├─ 系统边界
+│  ├─ 协议优先原则
+│  ├─ 前端自主渲染原则
+│  └─ 禁止平行协议原则
+│
+├─ 2. Request Understanding System
+│  ├─ Intent Governance
+│  ├─ UserRequirementContract
+│  ├─ Slot Schema
+│  ├─ Entity Resolution
+│  ├─ Dictionary / Alias Governance
+│  ├─ Ambiguity Detection
+│  └─ Clarification Policy
+│
+├─ 3. Capability Orchestration System
+│  ├─ Capability Manifest
+│  ├─ MCP Tool Normalization
+│  ├─ Capability Selection Policy
+│  ├─ Tool Invocation Plan
+│  ├─ Fallback Policy
+│  ├─ Permission / Cost / Freshness Policy
+│  └─ Routing Trace
+│
+├─ 4. Runtime & Agent Orchestration System
+│  ├─ Runtime Display Protocol
+│  ├─ Agent Runtime State
+│  ├─ ToolCall State
+│  ├─ Workflow Runtime State
+│  ├─ Streaming State
+│  ├─ Retry / Recovery / Approval
+│  └─ Runtime Error Handling
+│
+├─ 5. Unified Semantic Contract
+│  ├─ SemanticResultContract
+│  ├─ SemanticRegion
+│  ├─ screenType
+│  ├─ regions
+│  ├─ componentBinding
+│  ├─ ActionContract
+│  ├─ EvidenceRef
+│  └─ SourceRef
+│
+├─ 6. Component Rendering System
+│  ├─ Component Registry
+│  ├─ Renderer Validation
+│  ├─ Fallback Renderer
+│  ├─ Markdown Renderer
+│  ├─ Data Visualization Renderer
+│  ├─ Data Table Renderer
+│  ├─ AI Runtime Renderer
+│  ├─ Evidence / Source Renderer
+│  └─ Asset / File Renderer
+│
+├─ 7. Interaction System
+│  ├─ Conversation UX
+│  ├─ Input UX
+│  ├─ Feedback UX
+│  ├─ Data Visualization UX
+│  ├─ AI Runtime UX
+│  └─ AI Trust UX
+│
+├─ 8. Visual System
+│  ├─ Typography
+│  ├─ Color
+│  ├─ Icon
+│  ├─ Spacing
+│  ├─ Radius / Border
+│  ├─ Elevation / Shadow
+│  └─ Motion
+│
+├─ 9. Frontend Engineering System
+│  ├─ Rendering Architecture
+│  ├─ Long Conversation Loading
+│  ├─ Virtualization
+│  ├─ Streaming Backpressure
+│  ├─ Artifact Lazy Loading
+│  ├─ State Management
+│  ├─ Responsive System
+│  └─ Performance Budget
+│
+├─ 10. Business Semantic Layer
+│  ├─ Metric Catalog
+│  ├─ Dimension Catalog
+│  ├─ Date / Granularity Rules
+│  ├─ Business Entity Mapping
+│  ├─ Material / Campaign / Account Semantics
+│  ├─ Data Freshness
+│  └─ Dataset Authority
+│
+├─ 11. Trust / Policy / Permission System
+│  ├─ Evidence Policy
+│  ├─ Source Policy
+│  ├─ Confidence Policy
+│  ├─ Sensitive Data Masking
+│  ├─ Permission Boundary
+│  ├─ Risk Confirmation
+│  └─ Audit Trail
+│
+├─ 12. Observability & Evaluation System
+│  ├─ Intent Trace
+│  ├─ Capability Routing Trace
+│  ├─ Tool Call Trace
+│  ├─ Contract Validation Trace
+│  ├─ Renderer Error Telemetry
+│  ├─ Golden Test Cases
+│  └─ Replay / Regression
+│
+└─ 13. Execution Layer
+   ├─ Validators
+   ├─ Adapters
+   ├─ Registry Runtime
+   ├─ Golden Examples
+   ├─ Guardrails
+   ├─ Telemetry
+   └─ Migration Scripts
+
+
+三、意图到底放哪里？
+
+不要放在这些地方：
+
+Unified Semantic Contract 下面  ❌
+Data Visualization UX 下面      ❌
+AI Runtime UI 下面              ❌
+Component Registry 下面         ❌
+Prompt 里面硬写                 ❌
+
+正确位置是：
+
+Enterprise AI Chat OS
+└─ Request Understanding System
+   └─ Intent Governance
+
+但它会和这些模块发生关系：
+
+Intent Governance
+  ↓
+UserRequirementContract
+  ↓
+Capability Selection Policy
+  ↓
+Tool Invocation Plan
+  ↓
+Runtime Display Protocol
+  ↓
+SemanticResultContract
+  ↓
+Component Registry
+
+也就是说：
+
+Intent 决定走哪条业务路径；
+Capability 决定用什么能力；
+Runtime 记录执行过程；
+SemanticResultContract 负责最终结果；
+Component Registry 负责前端渲染。
+
+
+四、不要只做 Intent，要升级成 UserRequirementContract
+
+只做意图会不够。
+
+例如：
+
+看下近 30 天素材消耗和 ROI 趋势
+
+如果只识别成：
+
+intent = report_query
+
+还是会被日报抢走。
+
+应该解析成：
+
+type UserRequirementContract = {
+  intent: "report_query"
+
+  requestedSubject: "material"
+
+  requestedView: "trend"
+
+  businessDomain: "advertising"
+
+  metrics: ["cost", "roi"]
+
+  dimensions: ["date", "material"]
+
+  dateRange: {
+    type: "relative"
+    value: "last_30_days"
+  }
+
+  granularity: "day"
+
+  outputPreference: {
+    preferredRegions: ["summary", "chart", "table"]
+    chartTypeHint: "line"
+  }
+
+  confidence: number
+
+  ambiguity: {
+    hasAmbiguity: boolean
+    candidates?: string[]
+    clarificationQuestion?: string
+  }
+}
+
+这样后续能力选择才有依据。
+
+真正的问题不是：
+
+report_query 还是 material-analysis
+
+而是：
+
+用户请求的主体是谁？
+请求的是数据、趋势、分析、诊断还是素材内容理解？
+需要哪些指标、维度、时间粒度？
+哪个能力对这个主体和数据源最权威？
+
+五、目前还缺哪些模块需要系统化规划对齐？
+1. Request Understanding System
+
+这是现在最大缺口。
+
+要补：
+
+intent-registry
+user-requirement-contract
+slot-schema
+entity-resolution
+dictionary-alias
+ambiguity-policy
+clarification-policy
+
+建议文档：
+
+docs/architecture/request-understanding/
+├─ request-understanding-system.md
+├─ intent-governance.md
+├─ user-requirement-contract.md
+├─ slot-schema.md
+├─ dictionary-resolution.md
+├─ ambiguity-clarification-policy.md
+└─ golden-intent-cases.md
+2. Capability Orchestration System
+
+这是解决“素材数据被日报抢走”的核心。
+
+要补：
+
+capability-manifest
+mcp-tool-normalization
+capability-selection-policy
+fallback-policy
+permission-policy
+routing-trace
+
+建议文档：
+
+docs/architecture/capability-orchestration/
+├─ capability-orchestration-system.md
+├─ capability-manifest.md
+├─ mcp-tool-normalization.md
+├─ capability-selection-policy.md
+├─ fallback-policy.md
+├─ permission-cost-freshness-policy.md
+└─ routing-trace.md
+
+核心原则：
+
+LLM 不直接选择最终 tool。
+MCP tool 必须先归一化为 CapabilityManifest。
+系统基于 UserRequirementContract + CapabilityManifest + SelectionPolicy 选择能力。
+3. Business Semantic Layer
+
+这是你们广告数据系统必须补的一层。
+
+否则：
+
+素材
+创意
+广告
+计划
+账户
+大盘
+ROI
+消耗
+转化
+趋势
+日报
+
+这些词会在不同模块里被不同解释。
+
+要补：
+
+metric-catalog
+dimension-catalog
+business-entity-catalog
+dataset-authority
+date-range-rules
+granularity-rules
+material/campaign/account semantics
+
+建议文档：
+
+docs/architecture/business-semantics/
+├─ business-semantic-layer.md
+├─ metric-catalog.md
+├─ dimension-catalog.md
+├─ entity-catalog.md
+├─ dataset-authority.md
+├─ date-granularity-rules.md
+└─ advertising-domain-semantics.md
+
+这层对问数非常关键。
+
+例如：
+
+素材数据
+
+不能只靠关键词，而应该映射成：
+
+subject = material
+domain = material-performance
+requiredDatasetAuthority = material-level-report
+4. Prompt / Runtime / Contract 关系
+
+你们现在有总纲、契约和执行层，但提示词和这些契约的关系还需要系统化。
+
+要补：
+
+哪些 prompt 可以参与意图解析
+哪些 prompt 可以参与能力解释
+哪些 prompt 不能直接指定 tool
+哪些 prompt 必须输出 UserRequirementContract
+哪些 prompt 必须输出 SemanticResultContract
+哪些 prompt 只能输出 RuntimePlan
+
+建议文档：
+
+docs/architecture/prompting/
+├─ prompt-governance.md
+├─ request-understanding-prompt-contract.md
+├─ capability-selection-prompt-policy.md
+├─ semantic-result-generation-policy.md
+└─ forbidden-prompt-patterns.md
+
+必须明确禁止：
+
+只要用户问素材，就调用 get_zt_ad_mat_report
+
+应该改成：
+
+当 UserRequirement.requestedSubject = material，
+能力选择阶段应优先选择 subject/material authoritative capability。
+5. Routing Trace / Evaluation System
+
+企业级系统必须能解释：
+
+为什么这句话走了 report_query？
+为什么没有走 material-analysis？
+为什么选了日报？
+为什么没选素材能力？
+为什么 fallback？
+
+要补：
+
+intent decision trace
+slot resolution trace
+capability candidate scoring trace
+fallback reason
+tool selection explanation
+golden routing tests
+
+建议文档：
+
+docs/architecture/observability/
+├─ routing-trace.md
+├─ intent-evaluation.md
+├─ capability-selection-evaluation.md
+├─ tool-call-audit.md
+└─ regression-replay.md
+
+Routing Trace 示例：
+
+type RoutingTrace = {
+  userMessage: string
+
+  requirement: UserRequirementContract
+
+  intentDecision: {
+    selectedIntent: string
+    confidence: number
+    rejectedIntents: Array<{
+      intent: string
+      reason: string
+    }>
+  }
+
+  capabilityDecision: {
+    selectedCapabilityId: string
+    candidates: Array<{
+      capabilityId: string
+      score: number
+      accepted: boolean
+      reasons: string[]
+    }>
+  }
+
+  fallback?: {
+    used: boolean
+    reason?: string
+    disclosureRequired?: boolean
+  }
+}
+6. Context & Memory System
+
+长会话场景下，用户可能说：
+
+继续看素材
+那 ROI 呢？
+换成近 30 天
+把它导出
+
+这不是单句意图能解决的。
+
+要补：
+
+conversation context
+last subject
+last report
+last date range
+last selected material
+last capability
+follow-up resolution
+context expiry
+context conflict detection
+
+建议文档：
+
+docs/architecture/context-memory/
+├─ conversation-context-system.md
+├─ follow-up-resolution.md
+├─ context-carryover-policy.md
+├─ context-expiry-policy.md
+└─ memory-safety-policy.md
+
+这层和意图强相关。
+
+7. Tool / MCP Governance
+
+现在 MCP 挂进来以后，不能让 tool description 自由竞争。
+
+要补：
+
+MCP tool onboarding
+tool capability normalization
+tool schema validation
+tool permission declaration
+tool output adapter
+tool versioning
+tool deprecation
+tool fallback eligibility
+
+建议文档：
+
+docs/architecture/mcp-governance/
+├─ mcp-tool-governance.md
+├─ tool-onboarding-checklist.md
+├─ tool-capability-normalization.md
+├─ tool-output-adapter-policy.md
+├─ tool-versioning.md
+└─ tool-deprecation-policy.md
+8. Result Assembly System
+
+现在你们有 SemanticResultContract，但还需要定义：
+
+raw tool result 如何组装成最终 semantic result
+多工具结果如何合并
+失败结果如何展示
+部分成功如何展示
+数据不足如何展示
+
+建议文档：
+
+docs/architecture/result-assembly/
+├─ result-assembly-system.md
+├─ tool-result-to-semantic-result.md
+├─ partial-result-policy.md
+├─ insufficient-data-policy.md
+├─ multi-tool-result-merge.md
+└─ result-quality-policy.md
+六、总纲应该新增的模块
+
+我建议你在 ENTERPRISE_AI_CHAT_OS_SPEC.md 里正式新增这 5 个一级模块：
+
+1. Request Understanding System
+2. Capability Orchestration System
+3. Business Semantic Layer
+4. Context & Memory System
+5. Observability & Evaluation System
+
+其中：
+
+Request Understanding System
+
+解决：
+
+用户到底想干什么
+Capability Orchestration System
+
+解决：
+
+应该用哪个能力完成
+Business Semantic Layer
+
+解决：
+
+业务词、指标、维度、数据源怎么统一解释
+Context & Memory System
+
+解决：
+
+多轮对话里的省略、追问、上下文承接
+Observability & Evaluation System
+
+解决：
+
+路由、能力选择、工具调用、契约生成是否可解释、可回放、可验收
+七、总纲与执行层的边界
+
+总纲只写：
+
+系统必须有 Request Understanding System。
+系统必须有 Capability Orchestration System。
+系统必须有 Business Semantic Layer。
+系统必须有 Routing Trace。
+系统不得让 LLM 直接自由选择最终工具。
+系统不得通过关键词硬编码绑定 tool。
+
+二级规范写：
+
+Intent 怎么定义
+Slot 怎么定义
+CapabilityManifest 怎么定义
+SelectionPolicy 怎么定义
+FallbackPolicy 怎么定义
+RoutingTrace 怎么定义
+
+执行层写：
+
+intent-registry.json
+capability-manifest.json
+validateUserRequirement()
+selectCapability()
+normalizeMcpTool()
+generateRoutingTrace()
+golden routing tests
+guardrail scripts
+
+不要把这些实现细节塞回总纲。
+
+八、建议新增目录
+
+你现在已有：
+
+semantic-contract/
+runtime/
+frontend-engineering/
+interaction-system/
+visual-system/
+migration/
+
+建议补：
+
+docs/architecture/
+├─ request-understanding/
+│  ├─ request-understanding-system.md
+│  ├─ intent-governance.md
+│  ├─ user-requirement-contract.md
+│  ├─ slot-schema.md
+│  ├─ dictionary-resolution.md
+│  └─ ambiguity-clarification-policy.md
+│
+├─ capability-orchestration/
+│  ├─ capability-orchestration-system.md
+│  ├─ capability-manifest.md
+│  ├─ mcp-tool-normalization.md
+│  ├─ capability-selection-policy.md
+│  ├─ fallback-policy.md
+│  └─ routing-trace.md
+│
+├─ business-semantics/
+│  ├─ business-semantic-layer.md
+│  ├─ metric-catalog.md
+│  ├─ dimension-catalog.md
+│  ├─ entity-catalog.md
+│  ├─ dataset-authority.md
+│  └─ date-granularity-rules.md
+│
+├─ context-memory/
+│  ├─ conversation-context-system.md
+│  ├─ follow-up-resolution.md
+│  ├─ context-carryover-policy.md
+│  └─ context-expiry-policy.md
+│
+├─ mcp-governance/
+│  ├─ mcp-tool-governance.md
+│  ├─ tool-onboarding-checklist.md
+│  ├─ tool-capability-normalization.md
+│  └─ tool-versioning.md
+│
+└─ result-assembly/
+   ├─ result-assembly-system.md
+   ├─ tool-result-to-semantic-result.md
+   ├─ partial-result-policy.md
+   └─ insufficient-data-policy.md
+
+代码层建议补：
+
+frontend/src/src/contracts/
+├─ request-understanding/
+│  ├─ user-requirement-contract.ts
+│  ├─ intent-contract.ts
+│  ├─ slot-contract.ts
+│  └─ routing-trace.ts
+│
+├─ capability/
+│  ├─ capability-manifest.ts
+│  ├─ capability-selection-policy.ts
+│  ├─ capability-score.ts
+│  └─ fallback-policy.ts
+│
+├─ business-semantics/
+│  ├─ metric-catalog.ts
+│  ├─ dimension-catalog.ts
+│  ├─ entity-catalog.ts
+│  └─ dataset-authority.ts
+│
+└─ mcp/
+   ├─ mcp-tool-normalizer.ts
+   ├─ tool-capability-adapter.ts
+   └─ tool-output-adapter.ts
+九、针对“素材数据调用成日报”的标准化解法
+
+不要写：
+
+素材问题强制 get_zt_ad_mat_report
+
+要写成系统规则：
+
+当 UserRequirement.requestedSubject = material
+且 requestedView 属于 data_query / trend_query / performance_analysis
+能力选择阶段必须优先选择：
+subject = material
+且 authoritativeFor 包含 material-performance
+且支持所需 metrics / dimensions / granularity 的 capability。
+
+account / day-report / roi-summary 类泛化能力不得作为 primary capability 胜出。
+只有当素材专用能力不存在、不可用、无权限、指标不支持或数据为空时，才允许进入 fallback。
+fallback 必须写入 sourceRefs / evidenceRefs / warnings，并在 UI 中披露。
+
+这才符合你们的产品化标准。
+
+十、给 Codex CLI 的改造口径
+
+可以直接这样写：
+
+请不要用关键词硬编码或 prompt 强制 toolName 的方式修复素材数据路由问题。
+
+现在需要把 Enterprise AI Chat OS 总纲补齐为完整的请求理解与能力编排架构。
+
+请新增以下系统模块和文档：
+
+1. Request Understanding System
+   - intent-governance.md
+   - user-requirement-contract.md
+   - slot-schema.md
+   - dictionary-resolution.md
+   - ambiguity-clarification-policy.md
+
+2. Capability Orchestration System
+   - capability-manifest.md
+   - mcp-tool-normalization.md
+   - capability-selection-policy.md
+   - fallback-policy.md
+   - routing-trace.md
+
+3. Business Semantic Layer
+   - metric-catalog.md
+   - dimension-catalog.md
+   - entity-catalog.md
+   - dataset-authority.md
+   - date-granularity-rules.md
+
+4. Context & Memory System
+   - conversation-context-system.md
+   - follow-up-resolution.md
+   - context-carryover-policy.md
+
+5. Result Assembly System
+   - tool-result-to-semantic-result.md
+   - partial-result-policy.md
+   - insufficient-data-policy.md
+
+并更新 ENTERPRISE_AI_CHAT_OS_SPEC.md：
+
+- 明确 Intent 属于 Request Understanding System，不属于 Unified Semantic Contract。
+- 明确 Capability Selection 属于 Capability Orchestration System，不允许 LLM 直接自由选择最终 tool。
+- 明确 MCP tool 必须先归一化为 CapabilityManifest，再进入能力选择。
+- 明确旧的 report_query / material-analysis / day-report fallback 不能再作为最终架构规则，只能通过 adapter 和 compatibility policy 过渡。
+- 明确所有最终结果必须进入 SemanticResultContract。
+- 明确所有执行过程必须进入 RuntimeDisplayProtocol。
+- 明确所有路由决策必须产生 RoutingTrace，支持回放和 golden tests。
+十一、最终判断
+
+你的直觉是对的：
+
+现在总纲还不够。
+
+但不是因为缺更多 UI 规范，也不是因为缺更多渲染组件，而是缺：
+
+请求理解
+能力编排
+业务语义
+上下文承接
+MCP 治理
+路由观测
+结果组装
+
+一句话收口：
+
+Enterprise AI Chat OS 不能只定义“结果怎么渲染”，还必须定义“用户请求如何被理解、能力如何被选择、工具如何被治理、结果如何被组装、路由如何被解释”。
+
+所以，意图不是总纲之外的新体系；它应该被升级为：
+
+Request Understanding System
+
+并和：
+
+Capability Orchestration System
+Business Semantic Layer
+Runtime Display Protocol
+Unified Semantic Contract
+Component Registry
+Observability & Evaluation
+
+一起进入总架构。

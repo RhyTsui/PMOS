@@ -1,0 +1,2989 @@
+{
+  "batch": "runtime-full-no-browser-20260615-postfix",
+  "stamp": "20260615-152240",
+  "summary": {
+    "REVIEW": 103,
+    "PASS": 4
+  },
+  "total": 107,
+  "completed": 107,
+  "offset": 0,
+  "limit": null,
+  "caseTimeoutMs": 60000,
+  "results": [
+    {
+      "rowIndex": 2,
+      "id": "MIG-000",
+      "scenario": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 24276,
+      "answer": "你好！我是小乔智投通用 AI 助手。我可以帮你查询投放数据（如消耗、ROI和转化表现）、定位数据异常和风险点，或者协助处理广告联调自动化等相关工作。请问今天有什么我可以帮你的？",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 3,
+      "id": "MIG-001",
+      "scenario": "天气",
+      "prompt": "南京本周日天气如何",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 51548,
+      "answer": "抱歉，我未能检索到关于南京本周日天气的可靠公开来源。由于天气信息需要实时且权威的数据支持，目前无法为您提供准确的预报。建议您通过官方气象网站或天气应用获取最新信息。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "route_observation"
+      ],
+      "runtimeStatus": "failed",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "provider": "configured_web_search",
+        "summary": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "南京本周日天气如何",
+          "warnings": [
+            "relevance_gate_filtered_all"
+          ],
+          "reasonCode": "public_web.no_results",
+          "reasonContext": {
+            "topic": "南京本周日天气如何",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何",
+                "purpose": "primary"
+              },
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "verification"
+              },
+              {
+                "query": "南京本周日天气如何 official latest",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": true
+        }
+      }
+    },
+    {
+      "rowIndex": 4,
+      "id": "MIG-002",
+      "scenario": "新闻解读",
+      "prompt": "最近有哪些游戏上线",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 46380,
+      "answer": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "route_observation"
+      ],
+      "runtimeStatus": "failed",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "provider": "configured_web_search",
+        "summary": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "public_web_qa",
+          "sourceRequired": true,
+          "sanitizedQuery": "最近有哪些游戏上线",
+          "warnings": [
+            "relevance_gate_filtered_all"
+          ],
+          "reasonCode": "public_web.no_results",
+          "reasonContext": {
+            "topic": "最近有哪些游戏上线",
+            "policy": "llm",
+            "confidence": 0.72
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "unknown",
+            "authority_need": "multi_source_consensus",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "deep",
+            "source_policy": "multi_source_consensus",
+            "query_strategy": "cross_source_compare",
+            "redaction_policy": "none",
+            "reasons": [
+              "high_risk_or_consensus_needed"
+            ],
+            "queries": [
+              {
+                "query": "最近有哪些游戏上线",
+                "purpose": "primary"
+              },
+              {
+                "query": "最近有哪些游戏上线 latest official sources",
+                "purpose": "verification"
+              },
+              {
+                "query": "最近有哪些游戏上线 source comparison",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": true
+        }
+      }
+    },
+    {
+      "rowIndex": 5,
+      "id": "MIG-003",
+      "scenario": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 30806,
+      "answer": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "route_observation"
+      ],
+      "runtimeStatus": "failed",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "provider": "configured_web_search",
+        "summary": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+          "warnings": [
+            "relevance_gate_filtered_all"
+          ],
+          "reasonCode": "public_web.no_results",
+          "reasonContext": {
+            "topic": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "not_relevant",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "shallow",
+            "source_policy": "stable_reference",
+            "query_strategy": "background_reference",
+            "redaction_policy": "none",
+            "reasons": [
+              "generic_public_evidence_needed"
+            ],
+            "queries": [
+              {
+                "query": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+                "purpose": "primary"
+              },
+              {
+                "query": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体 reference",
+                "purpose": "background"
+              }
+            ]
+          },
+          "model_fallback_used": true
+        }
+      }
+    },
+    {
+      "rowIndex": 6,
+      "id": "MIG-004",
+      "scenario": "行业知识问答",
+      "prompt": "腾讯iOS要接sdk吗",
+      "keyPoint": "知识库 联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 36940,
+      "answer": "当前可用证据不足以确认腾讯媒体iOS端是否必须接入SDK。由于iOS端受苹果ATT政策影响，具体的接入方式（如接入SDK、使用Server-to-Server API回传等）可能因具体的推广目标和事件回传需求而有所不同。建议您查阅腾讯广告最新的官方接入文档，或联系技术支持以确认当前业务场景下的具体接入要求。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户咨询腾讯媒体iOS端是否需要接入SDK，属于接入条件和准备事项咨询，匹配配置说明帮助或说明帮助意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 1
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 2,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 7,
+      "id": "MIG-005",
+      "scenario": "系统知识问答",
+      "prompt": "我们支持鸿蒙吗",
+      "keyPoint": "知识库 多轮会话",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 30779,
+      "answer": "根据当前可用的上下文和证据，我无法确认系统目前是否支持鸿蒙（HarmonyOS）。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问系统是否支持鸿蒙，属于能力支持范围的咨询，符合说明帮助意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 8,
+      "id": "MIG-006",
+      "scenario": "系统操作帮助",
+      "prompt": "能不能选一个事件作为付费回传",
+      "keyPoint": "知识库 多轮会话",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 40217,
+      "answer": "由于当前缺乏具体的项目配置与知识库证据，无法直接确认您当前项目是否支持选择特定事件作为付费回传。通常在广告联调与回传配置中，平台支持将特定事件（如付费、注册、关键行为等）配置为回传事件，但前提是需满足媒体后台的资产共享要求以及平台事件上报的验证条件。建议您通过以下步骤进行验证：\n1. 检查联调配置：确认后台的事件资产及回传相关配置是否完整。\n2. 检查事件上报：确认平台是否已有“付费”等目标事件的上报记录，以验证其可回传性。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问是否可以选择特定事件作为付费回传，属于对回传规则、事件配置及能力支持范围的咨询，符合说明帮助或配置说明帮助的定义。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 9,
+      "id": "MIG-007",
+      "scenario": "指标解释",
+      "prompt": "有效是哪个点位",
+      "keyPoint": "知识库",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 34139,
+      "answer": "目前无法直接确认“有效”具体对应哪个点位。为了准确帮您定位，需要补充以下信息：\n1. 您指的是哪个应用或项目？\n2. 这里的“有效”具体是指有效激活、有效注册、有效付费还是其他关键行为？\n\n如果您能提供具体的应用名称或项目ID，我可以帮您进一步查询相关的事件上报配置或联调记录，以确认具体的事件点位。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "no_hit",
+                "available": true,
+                "hit_count": 0,
+                "knowledge_base_count": 5,
+                "evidence_role": "not_applicable",
+                "freshness": "unknown",
+                "risk_flags": [
+                  "knowledge_no_hit"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "model_only",
+              "evidence_need": "optional",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_no_hit"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 10,
+      "id": "MIG-008",
+      "scenario": "系统说明",
+      "prompt": "素材报表的未知是什么",
+      "keyPoint": "知识库",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 7927,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 11,
+      "id": "MIG-009",
+      "scenario": "查大盘数据",
+      "prompt": "看下近7天的日报数据",
+      "keyPoint": "时间、tool发现",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 116,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 12,
+      "id": "MIG-010",
+      "scenario": "查维度数据",
+      "prompt": "巨量iOS创新的投放效果，带自然量",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 8395,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 13,
+      "id": "MIG-011",
+      "scenario": "查明细数据",
+      "prompt": "查一下直播包的数据",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10435,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 14,
+      "id": "MIG-012",
+      "scenario": "查维度数据",
+      "prompt": "三国杀小游戏 鸿蒙端的数据",
+      "keyPoint": "终端",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9183,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 15,
+      "id": "MIG-013",
+      "scenario": "查多日数据",
+      "prompt": "查询近7日数据",
+      "keyPoint": "数据分析",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 99,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 16,
+      "id": "MIG-014",
+      "scenario": "查多日数据",
+      "prompt": "查询近30日趋势、分日",
+      "keyPoint": "趋势图、数据分析",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 98,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 17,
+      "id": "MIG-001",
+      "scenario": "广告报表-日期识别-DATE-001",
+      "prompt": "指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活 11,819 注册 10,554\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 8836,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 18,
+      "id": "MIG-002",
+      "scenario": "广告报表-日期识别-DATE-002",
+      "prompt": "指间山海 指间山海 2026 年 3 月 1 日至 3 月 15 日30日ROI多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：30日ROI 48.62%左右\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 121,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 19,
+      "id": "MIG-003",
+      "scenario": "广告报表-日期识别-DATE-003",
+      "prompt": "指间山海 2026 年 2 月 29 日的数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：不存在日期不返回数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12386,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 20,
+      "id": "MIG-004",
+      "scenario": "广告报表-日期识别-DATE-F001",
+      "prompt": "指间山海2026-03-25日报中，查询广告投放部 各媒体激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 99,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 21,
+      "id": "MIG-005",
+      "scenario": "广告报表-日期识别-DATE-F002",
+      "prompt": "指间山海上周周报中，广告投放部按应用类型筛选的激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：iOS应用：激活 299、注册 289、消耗35310.64  安卓应用：激活266、注册242，消耗26950.09\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 104,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 22,
+      "id": "MIG-006",
+      "scenario": "广告报表-日期识别-DATE-F003",
+      "prompt": "指间山海2026年2月月报中，广告投放部按媒体细分的累计ROI情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 :31.13% tap:62.03% 苹果：54.06%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+媒体+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 104,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 23,
+      "id": "MIG-007",
+      "scenario": "广告报表-日期识别-DATE-F004",
+      "prompt": "指间山海2026-05-21广告小时报表中，广告投放部9点-10点的激活数和折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数 1 折后消耗 32.31\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：广告小时报表+分时段",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9796,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 24,
+      "id": "MIG-008",
+      "scenario": "广告报表-日期识别-DATE-F005",
+      "prompt": "指间山海二月同期广告投放部的累计ROI和合计第2日ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：上月同期：20260201-20260227 累计ROI:39.01 合计第2日ROI:8.38%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI报表+月累计/区间",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11891,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 25,
+      "id": "MIG-009",
+      "scenario": "广告报表-媒体识别-MEDIA-001",
+      "prompt": "指间山海在巨量引擎2026-05-11~2026-05-17的激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-11~2026-05-17 巨量的激活数 422 ，结果支持1%的浮动\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：媒体解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 87,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 26,
+      "id": "MIG-010",
+      "scenario": "广告报表-媒体识别-MEDIA-004",
+      "prompt": "指间山海在2026-05-11~2026-05-17 每日的巨量引擎和苹果广告的折后消耗对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-17 巨量广告：4128.37 苹果广告：1742.51\r\n2026-05-16 巨量广告：4193.05 苹果广告：1537.59\r\n2026-05-15 巨量广告：4108.55 苹果广告：1062.29\r\n2026-05-14 巨量广告：4186.78 苹果广告：1191.23\r\n2026-05-13 巨量广告：4173.52 苹果广告：1011.12\r\n2026-05-12 巨量广告：4161.43 苹果广告：1057.61\r\n2026-05-11 巨量广告：4604.40 苹果广告：1108.29\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：媒体解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 93,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 27,
+      "id": "MIG-011",
+      "scenario": "广告报表-媒体识别-MEDIA-F001",
+      "prompt": "指间山海2026-03-25日报中，巨量引擎在广告投放部的激活数、注册数和折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数126 注册数106 折后消耗11500\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+细分媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9305,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 28,
+      "id": "MIG-012",
+      "scenario": "广告报表-媒体识别-MEDIA-F002",
+      "prompt": "指间山海2026-03-25日报中，腾讯广告在广告投放部、安卓应用类型下的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：0\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12846,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 29,
+      "id": "MIG-013",
+      "scenario": "广告报表-媒体识别-MEDIA-F003",
+      "prompt": "指间山海2026-05-11~2026-05-17中，快手在广告投放部不同应用类型的ROI对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：快手没投放数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+媒体+应用类型",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 101,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 30,
+      "id": "MIG-014",
+      "scenario": "广告报表-媒体识别-MEDIA-F004",
+      "prompt": "指间山海2026年2月月报中，巨量引擎和腾讯广告在广告投放部的累计ROI对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：31.13% 腾讯没数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+多媒体ROI",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 98,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 31,
+      "id": "MIG-015",
+      "scenario": "广告报表-媒体识别-MEDIA-F005",
+      "prompt": "指间山海2026-03-25广告小时报表中，按媒体汇总全天数据，查看巨量引擎和腾讯广告的激活数与消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 消耗11500 腾讯没数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：小时报表+按媒体汇总全天",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 94,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 32,
+      "id": "MIG-016",
+      "scenario": "广告报表-语义理解-CSEM-001",
+      "prompt": "指间山海 - 国内 2026 年 3 月 18 日安卓应用激活数和首日 ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数 645 首日 ROI 11.12%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 94,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 33,
+      "id": "MIG-017",
+      "scenario": "广告报表-语义理解-CSEM-010",
+      "prompt": "指间山海 - 国内2026-05-11~2026-05-17和2026-05-04~2026-05-10的激活数环比变化",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-11~2026-05-17，激活数 796 \r\n2026-05-04~2026-05-10，激活数 1731 激活数环比变化 = (796 - 1731) / 5667 = -54.1%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 91,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 34,
+      "id": "MIG-018",
+      "scenario": "广告报表-语义理解-SEM-009",
+      "prompt": "指间山海2026-05-11~2026-05-17哪个媒体的累计 ROI 最高",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量广告\r\n巨量广告：累计ROI 8.28%\r\nTapTap广告：累计ROI 3.54%\r\n苹果广告：累计ROI 4.57%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：语义理解没问题",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 124,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 35,
+      "id": "MIG-019",
+      "scenario": "广告报表-语义理解-SEM-011",
+      "prompt": "指间山海2026-05-01~2026-05-07激活到注册的转化率",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活 3,758 注册3,219 转化率 85.66%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：语义理解没问题",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 7064,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 36,
+      "id": "MIG-020",
+      "scenario": "广告报表-语义理解-SEM-025",
+      "prompt": "指间山海 - 国内2026-05-01~2026-05-07哪个媒体的激活成本最低",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量广告\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 86,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 37,
+      "id": "MIG-021",
+      "scenario": "广告报表-语义理解-SEM-026",
+      "prompt": "指间山海 - 国内激活数最多的三个媒体",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 TapTap 苹果\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 90,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 38,
+      "id": "MIG-022",
+      "scenario": "广告报表-语义理解-SEM-F001",
+      "prompt": "指间山海2026-03-25日报中，广告投放部、巨量引擎、安卓应用类型的激活数、注册数、消耗和首日ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数2 注册数4 消耗0 roi 0或没数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报综合查询",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10139,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 39,
+      "id": "MIG-023",
+      "scenario": "广告报表-语义理解-SEM-F002",
+      "prompt": "指间山海2026-03-25日报中，广告投放部按细分媒体+应用类型查看激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量IOS：激活126 消耗11500 tap安卓：激活71，消耗7010.83 苹果和b站也有数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+细分媒体+应用类型",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 95,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 40,
+      "id": "MIG-024",
+      "scenario": "广告报表-语义理解-SEM-F003",
+      "prompt": "指间山海2026-03-25日报中，广告投放部按细分媒体+团队查看激活数和ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+细分媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 96,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 41,
+      "id": "MIG-025",
+      "scenario": "广告报表-语义理解-SEM-F004",
+      "prompt": "指间山海2026-03-25日报中，按细分应用类型+团队查看激活数和首日ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：创新部安卓：激活数353，首日ROI 9.01% 其他数据也有\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+细分应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 101,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 42,
+      "id": "MIG-026",
+      "scenario": "广告报表-语义理解-SEM-F005",
+      "prompt": "指间山海2026-05-11~2026-05-17中，广告投放部按媒体、应用类型细分的激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：安卓应用 TapTap广告 激活数：264\r\niOS应用 巨量广告 激活数：197\r\niOS应用 苹果广告 激活数：102\r\n安卓应用 巨量广告 激活数：1\r\n安卓应用 星广联投 激活数：1\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报综合查询",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 107,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 43,
+      "id": "MIG-027",
+      "scenario": "广告报表-语义理解-SEM-F007",
+      "prompt": "指间山海20260320-20260405那一周周报中，广告投放部按细分媒体查看区间首周ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量18.41% tap4.88% 苹果18.86%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+细分媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 98,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 44,
+      "id": "MIG-028",
+      "scenario": "广告报表-语义理解-SEM-F008",
+      "prompt": "指间山海20260320-20260405那一周周报中，广告投放部按细分应用类型查看累计ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：安卓 16.14% IOS 4.92%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+细分应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 97,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 45,
+      "id": "MIG-029",
+      "scenario": "广告报表-语义理解-SEM-F009",
+      "prompt": "指间山海2026年2月月报中，广告投放部按媒体、应用类型细分的top3的激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量IOS 1537 tap安卓 1581 巨量安卓1562\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报综合查询",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 89,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 46,
+      "id": "MIG-030",
+      "scenario": "广告报表-语义理解-SEM-F010",
+      "prompt": "指间山海2026年2月月报中，广告投放部按细分媒体查看累计ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：31.13% tap: 62.03% 苹果54.06%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+细分媒体+应用类型",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 93,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 47,
+      "id": "MIG-031",
+      "scenario": "广告报表-语义理解-SEM-F011",
+      "prompt": "指间山海2026年2月月报中，广告投放部按细分媒体查看区间首月ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：31.13% tap: 62.03% 苹果54.06%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+细分媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 91,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 48,
+      "id": "MIG-032",
+      "scenario": "广告报表-语义理解-SEM-F012",
+      "prompt": "指间山海2026年2月月报中，广告投放部按细分应用类型查看累计ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：安卓 44.12% IOS 33.74%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+细分应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 93,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 49,
+      "id": "MIG-033",
+      "scenario": "广告报表-数据准确性-ACC-001",
+      "prompt": "验证指间山海 2026-03-15 的广告激活数是否为 1250",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：3 月 15 广告激活数为 707\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：查询没问题，结论没问题",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 34298,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：---\ntitle: 联调手册（发行必读）\ndescription: 联调手册（发行必读）-\ndate: 2025-08-28\ntags: ['MinDoc,文档在线管理系统,WIKI,wiki,wiki在线,文档在线管理,接口文档在线管理,接口文档管理,数据服务文档,联调手册（...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.result",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              },
+              {
+                "source": "public_web",
+                "status": "failed",
+                "capability_type": "public_web_qa",
+                "reason_code": "public_web.no_results",
+                "source_count": 0,
+                "source_required": false,
+                "confidence": 0.72,
+                "evidence_role": "candidate_evidence",
+                "risk_flags": [
+                  "public_web_requires_composer_arbitration",
+                  "public_web_no_reliable_source",
+                  "relevance_gate_filtered_all"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge",
+                "public_web"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available",
+                "public_web_requires_composer_arbitration",
+                "public_web_no_reliable_source",
+                "relevance_gate_filtered_all"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 50,
+      "id": "MIG-034",
+      "scenario": "广告报表-数据准确性-ACC-002",
+      "prompt": "验证指间山海2026-05-11~2026-05-17中各媒体激活数之和是否等于总激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量广告 422\r\nTapTap广告 264\r\n苹果广告 102\r\n百度品专 4\r\n星广联投 2\r\n快手广告 1\r\n网易有道：1\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 92,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 51,
+      "id": "MIG-035",
+      "scenario": "广告报表-数据准确性-ACC-005",
+      "prompt": "指间山海 20260325 日报消耗是否等于各媒体消耗之和",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：20260325 消耗为 31,368\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12853,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 52,
+      "id": "MIG-036",
+      "scenario": "广告报表-语义理解-SEM-F013",
+      "prompt": "指间日报20260324 自然量激活数是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：20260324 自然量激活数为 121\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日报自然量",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 160,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 53,
+      "id": "MIG-037",
+      "scenario": "广告报表-语义理解-SEM-F015",
+      "prompt": "分别查询指间山海20260101那一天、所在周、所在月的 自然量的注册次留、注册3留",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：注册次留率: 57.29% (55人留存)、•注册次留率: 52.01% (363人留存)、•注册次留率: 52.66% (1,038人留存)\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 137,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 54,
+      "id": "MIG-038",
+      "scenario": "广告报表-语义理解-SEM-F016",
+      "prompt": "查询指间20260101那一天市场星图的7日设备留存率",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：0.5\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 135,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 55,
+      "id": "MIG-039",
+      "scenario": "广告报表-语义理解-SEM-F017",
+      "prompt": "查询指间20260101那一天市场量的7日设备留存率",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：0.5\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 133,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 56,
+      "id": "MIG-040",
+      "scenario": "广告报表-数据准确性-ACC-F001",
+      "prompt": "验证指间山海2026-03-25广告小时报表按分时段查询的各小时消耗之和是否等于当天总消耗（广告投放部）",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：13,647.98 不等于 20,658.81\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：小时报表汇总一致性",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 118,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 57,
+      "id": "MIG-041",
+      "scenario": "广告报表-数据准确性-ACC-F002",
+      "prompt": "验证指间山海2026-03-25广告小时报表按媒体汇总的全天激活数之和是否等于当天总激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：225 等于\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：小时报表按媒体汇总",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12426,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 58,
+      "id": "MIG-042",
+      "scenario": "广告报表-数据准确性-ACC-F003",
+      "prompt": "验证指间山海2026-03-25广告ROI日报中区间ROI和累计ROI计算是否正确",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：\r\n区间ROI：iOS应用 消耗：19,028.51 激活286  注册 250 首日ROI 9.32%  第30日ROI 4.04%\r\n               安卓应用 消耗：12,340.29 激活 428 注册 366  首日ROI 5.72%  第30日ROI 0.05%\r\n累计ROI：iOS应用 消耗：19,028.51 激活286  注册 250 首日ROI 9.32%  30日ROI 130.47%\r\n               安卓应用 消耗：12,340.29 激活 428 注册 366  首日ROI 5.72%  30日ROI 16.58%\r\n \r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI日报计算",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12144,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 59,
+      "id": "MIG-043",
+      "scenario": "广告报表-数据准确性-ACC-F004",
+      "prompt": "验证指间山海2026-05-11~2026-05-17广告ROI周报中巨量引擎安卓应用类型的累计ROI计算是否正确、",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：安卓应用 累计ROI：15.11%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI周报计算",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 93,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 60,
+      "id": "MIG-044",
+      "scenario": "广告报表-数据准确性-ACC-F005",
+      "prompt": "验证指间山海2026年3月广告ROI月报中腾讯广告iOS应用类型的区间ROI计算是否正确、",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：无数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI月报计算",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 103,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 61,
+      "id": "MIG-045",
+      "scenario": "广告报表-数据准确性-ACC-F006",
+      "prompt": "验证指间山海 2026-05-11 新增设备留存日报中的次留计算是否正确",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：112 2日留存数：49  次留率：43.75%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：新增设备留存日报",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12162,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 62,
+      "id": "MIG-046",
+      "scenario": "广告报表-数据准确性-ACC-F007",
+      "prompt": "验证指间山海注册用户留存周报中2026-05-11~2026-05-17 的7日留存计算是否正确",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：注册数：7337日留存数：156 7日留存率：24.80%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12315,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 63,
+      "id": "MIG-047",
+      "scenario": "广告报表-数据准确性-ACC-F008",
+      "prompt": "验证指间山海首日付费账号留存月报中的30日留存计算是否正确",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：首日付费账号留存月报",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12254,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 64,
+      "id": "MIG-048",
+      "scenario": "广告报表-多维度交叉-MDIM-001",
+      "prompt": "指间山海在 iOS 端巨量引擎和腾讯广告的2026-04-02 至 2026-04-08 激活数对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 1218 腾讯0\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 131,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 65,
+      "id": "MIG-049",
+      "scenario": "广告报表-多维度交叉-MDIM-007",
+      "prompt": "指间山海 20260325 iOS 端和 Android 端的激活数对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：ios 激活 286 安卓 426\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 112,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 66,
+      "id": "MIG-050",
+      "scenario": "广告报表-多维度交叉-MDIM-F001",
+      "prompt": "指间2026-01-01 IOS应用类型+巨量+广告投放部 全天激活数、累计45日roi、第45日roi、3日设备留存数、3日注册留存数、4日首日付费留存数、按时段19点-20点的首日注册设备数、按天截止到20点的首日付费账号数 分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：84 累计45日roi：47.65% 第45日roi：0.06% 2周roi：26.17% 第2周roi:12.7% 累计2月ROI：51.26% 第2月ROI: 18.81% 3日设备留存率：44.05% 3日注册留存率：49.37% 4日首日付费留存数：50% 按时段19点-20点的首日注册设备数：9 按天截止到20点的首日付费账号数：10\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按天",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 115,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 67,
+      "id": "MIG-051",
+      "scenario": "广告报表-多维度交叉-MDIM-F002",
+      "prompt": "指间2026-02-01 IOS应用类型+自然量+广告投放部 全天激活数、3日设备留存数、3日注册留存数、4日首日付费留存数分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：459 3日设备留存率：39.87% 3日注册留存率：41.12% 4日首日付费留存数：69.39%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按周",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 98,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 68,
+      "id": "MIG-052",
+      "scenario": "广告报表-多维度交叉-MDIM-F003",
+      "prompt": "指间2026-01-01那一周 IOS应用类型+巨量+广告投放部 总激活数、2周roi、第2周roi、3日设备留存数、3日注册留存数、4日首日付费留存数 分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：716 2周roi：26.17% 第2周roi:12.7% 3日设备留存率：47.63% 3日注册留存率：49.50% 4日首日付费留存数：67.07%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按月",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 107,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 69,
+      "id": "MIG-053",
+      "scenario": "广告报表-多维度交叉-MDIM-F004",
+      "prompt": "查询指间2026年1月1号广告投放部的总激活数、2日roi、第2日roi 、3日设备留存数、3日注册留存数、4日首日付费留存数在应用类型维度的分布情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表细分+按天",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 117,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 70,
+      "id": "MIG-054",
+      "scenario": "广告报表-多维度交叉-MDIM-F005",
+      "prompt": "查询指间2026年1月1号那一周广告媒体总激活数、2周roi 、第2周roi、3日设备留存数、3日注册留存数、4日首日付费留存数在团队的分布情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表细分+按周",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 116,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 71,
+      "id": "MIG-055",
+      "scenario": "广告报表-多维度交叉-MDIM-F006",
+      "prompt": "查询指间2025年12月1号那一月广告媒体的总激活数、2月累计roi 、第2月roi、3日设备留存数、3日注册留存数、4日首日付费留存数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：总激活数：30584 2月累计roi: 57.39% 第2月roi: 21.79 3日设备留存率 36.73 3日注册留存数：41.14% 4日首日付费留存数：59.02%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表细分+按月",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 99,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 72,
+      "id": "MIG-056",
+      "scenario": "广告报表-多维度交叉-MDIM-F007",
+      "prompt": "查询指间20260101 日报、所在周、所在月的激活数、注册数、有效数、首日付费数、消耗、折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：\r\n所在周： 激活数8,822 、注册数 7,859、有效数6,112、首日付费数 1,052、消耗 460,486.36、折后消耗 449,824.73\r\n所在月：激活数 29,674、注册数 26,670、有效数 21,132、首日付费数 4,121、消耗1,585,126.58、折后消耗 1,549,582.44\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日报指标范围",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 117,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 73,
+      "id": "MIG-057",
+      "scenario": "广告报表-多维度交叉-MDIM-F008",
+      "prompt": "查询指间20260101 小时报表 广告量激活数、注册数、有效数、首日付费数、新设备老账号数、消耗、折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：\r\n广告量激活数1,183、注册数1,045、有效数818、首日付费数117、新设备老账号数37、消耗49,005.92、折后消耗47,771.21\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：小时报表指标范围",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 118,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 74,
+      "id": "MIG-058",
+      "scenario": "广告报表-多维度交叉-MDIM-F009",
+      "prompt": "指间2025-12-01那一月IOS应用类型+巨量+广告投放部 总激活数、2月roi、第2月roi、3日设备留存数、3日注册留存数、4日首日付费留存数 分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：2348 累计2月ROI：51.26% 第2月ROI: 18.81% 3日设备留存率：42.42% 3日注册留存率：44.86% 4日首日付费留存数：59.09%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 100,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 75,
+      "id": "MIG-059",
+      "scenario": "广告报表-边缘场景-EDGE-001",
+      "prompt": "指间山海 2026 年 2 月 30 日的数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：不存在日期不返回数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：通过",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12238,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 76,
+      "id": "MIG-060",
+      "scenario": "广告报表-边缘场景-EDGE-003",
+      "prompt": "指间山海未来日期（2027 年 1 月 1 日）的数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：未来日期不返回数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：通过",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9899,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 77,
+      "id": "MIG-061",
+      "scenario": "广告报表-边缘场景-EDGE-F001",
+      "prompt": "指间山海2026-03-25广告小时报表中，广告投放部媒体筛选：自定义跳转时段激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：无数据\r\n\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：小时报表异常媒体",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9389,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 78,
+      "id": "MIG-062",
+      "scenario": "广告报表-边缘场景-EDGE-F002",
+      "prompt": "指间山海2026年3月广告ROI月报中，广告投放部按不存在的应用类型查看累计ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：无数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI月报异常应用类型",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 83,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 79,
+      "id": "MIG-063",
+      "scenario": "广告报表-业务场景-BUS-001",
+      "prompt": "指间山海最近 7 天（不含当天）的投放日报效果综合评估",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9626,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 80,
+      "id": "MIG-064",
+      "scenario": "广告报表-业务场景-BUS-F001",
+      "prompt": "给我生成指间山海上周广告投放部的投放效果周报，按媒体、应用类型拆分并包含ROI和留存结论",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报综合输出",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 84,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 81,
+      "id": "MIG-065",
+      "scenario": "广告报表-业务场景-BUS-F002",
+      "prompt": "请评估指间山海2026年3月广告投放部的月报表现，要求结合媒体、应用类型、ROI和留存给出结论",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报综合评估",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 83,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 82,
+      "id": "MIG-066",
+      "scenario": "广告报表-业务场景-BUS-F003",
+      "prompt": "请分析指间山海2026-03-25广告投放部日报中表现最差的媒体和应用类型组合，并给出优化建议",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：首日roi 是taptap 安卓最低\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报问题诊断",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 87,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 83,
+      "id": "MIG-067",
+      "scenario": "广告报表-多轮对话-DIA-001",
+      "prompt": "指间山海 20260521的激活数是多少？如果超过 700 就算好",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目=指间山海、日期=昨天、指标=激活数。\r\n3、返回真实激活数：74，并判断是否超过700。\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9101,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 84,
+      "id": "MIG-068",
+      "scenario": "广告报表-多轮对话-DIA-002",
+      "prompt": "指间山海 20250325 哪个媒体的 首日ROI 最高？数据是多少？",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：苹果广告最高55.9%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 84,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 85,
+      "id": "MIG-069",
+      "scenario": "广告报表-多轮对话-DIA-F001",
+      "prompt": "先看指间山海2026-03-25广告投放部日报的巨量引擎激活数，如果ROI低于20%再补充看苹果广告",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：20260325广告投放部巨量引擎激活回溯 126，首日roi地域20%,苹果广告的激活数是26\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报条件追问",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12371,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 86,
+      "id": "MIG-070",
+      "scenario": "广告报表-多轮对话-DIA-F002",
+      "prompt": "先查指间山海2026-05-11~2026-05-17广告投放部新增设备留存，如果注册用户留存更高，再告诉我高多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：\r\n新增设备留存：激活数：565  次留率：50.97%\r\n注册用户留存：注册数：531 次留率：51.79%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：留存条件追问",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 91,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 87,
+      "id": "MIG-071",
+      "scenario": "广告报表-语义理解-SEM-F018",
+      "prompt": "查询指间日报自然量数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 87,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 88,
+      "id": "MIG-072",
+      "scenario": "广告报表-数据准确性-FBK-F001",
+      "prompt": "指间和武将觉醒2026-05-17的消耗之和",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：指间：10,184.36 怒焰：20,167.67 合计：30,352.03\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 6856,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 89,
+      "id": "MIG-073",
+      "scenario": "广告报表-语义理解-SEM-F019",
+      "prompt": "指间山海最近投的怎样",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10097,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 90,
+      "id": "MIG-074",
+      "scenario": "广告报表-语义理解-SEM-F020",
+      "prompt": "指间2026-05-11~2026-05-17的完整日报数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：人工复核\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10978,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 91,
+      "id": "MIG-075",
+      "scenario": "广告报表-用户反馈-FBK-F004",
+      "prompt": "指间山海roi报表昨日自然量+巨量首日roi",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-04-07 自然量+巨量 7.37%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 83,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 92,
+      "id": "MIG-076",
+      "scenario": "广告报表-多维度交叉-MDIM-F010",
+      "prompt": "指间2026-03-01 IOS应用类型 全天激活数、累计10日roi、3日设备留存数、3日注册留存数、4日首日付费留存数、9点-10点的注册数、截止到9点的首日付费账号数分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-03-01 IOS 激活 202 累计10日ROI: 34.84% 3日设备留存数 85、3日注册留存数 96、4日首日付费留存数 27 2026-03-01 IOS 9点-10点的注册数 13 、截止到9点的首日付费账号数: 12\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 85,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 93,
+      "id": "MIG-077",
+      "scenario": "广告报表-语义理解-SEM-F021",
+      "prompt": "指间今日截止到9点巨量激活数据多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数： 188\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 83,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 94,
+      "id": "MIG-FBK-001",
+      "scenario": "MCP调用可解释",
+      "prompt": "三国杀OL2026-05-17巨量广告激活数、注册数、折后现金消耗分别是多少？",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、解析入参：项目=三国杀移动版、日期=昨天、媒体=巨量、指标=激活数/注册数/折后现金消耗。\r\n3、返回结果：\r\n巨量广告激活数 285、注册数 279、折后现金消耗 4,179.50\r\n4、MCP 失败时说明失败节点和重试建议。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 85,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 95,
+      "id": "MIG-FBK-002",
+      "scenario": "团队权限边界",
+      "prompt": "在当前账号没有【三国杀移动版】团队权限的情况下，查询【三国杀移动版】昨天巨量投放消耗是多少？",
+      "keyPoint": "1、先校验当前账号团队权限。\r\n2、无权限时不得查询或展示项目真实数据。\r\n3、提示无权查看或请切换到有权限团队。\r\n4、不得返回其他项目数据。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 85,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 96,
+      "id": "MIG-FBK-003",
+      "scenario": "多轮槽位继承",
+      "prompt": "第一轮：查三国杀OL2026-05-17 微信小游戏各媒体激活和注册。第二轮：那 iOS 呢？第三轮：那抖音小游戏 呢？",
+      "keyPoint": "1、第二轮沿用第一轮项目、日期、维度和指标。\r\n腾讯广告  激活972 注册898\r\n巨量广告 激活 79 注册 78\r\n小红书  激活 0注册 0\r\n2、第二轮新增过滤条件：应用类型=iOS。\r\n苹果广告  激活288 注册 123\r\n2、第三轮新增过滤条件：应用类型=DOUYIN。\r\n巨量广告 激活 206  注册 201\r\n3、上下文不足时先追问确认。\r\n4、结果中说明继承条件和新增条件。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9669,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 97,
+      "id": "MIG-FBK-004",
+      "scenario": "折后现金消耗知识解释",
+      "prompt": "帮我写一段话，解释什么是折后现金消耗，给运营同学培训用。",
+      "keyPoint": "1、识别为指标解释，不触发广告报表 MCP。\r\n2、优先使用指标解释知识库口径。\r\n3、说明折后、现金、消耗的含义。\r\n4、提示与总消耗、赠款消耗等口径差异。",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 35035,
+      "answer": "抱歉，当前未检索到内部知识库中关于“折后现金消耗”的具体口径与计算规则。为避免在运营培训中传递错误的业务定义，建议您先向数据或财务团队确认该指标的具体计算公式（例如：是否扣除赠款、返点、渠道补贴等），或查阅内部最新的数据字典后，再为您生成准确的培训文案。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "light_requirement",
+                "reason": "Planner 候选：用户要求解释“折后现金消耗”这一业务指标/字段口径，用于运营培训，属于字段口径和规则说明类问题，符合“说明帮助”意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 49,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 49,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 98,
+      "id": "MIG-FBK-006",
+      "scenario": "二次计算准确性",
+      "prompt": "三国杀OL2026-05-17巨量的注册成本、激活注册率和ROI分别是多少？",
+      "keyPoint": "1、调用广告报表 MCP 获取原始分子分母指标。\r\n2、按广告报表指标口径计算注册成本、激活注册率和 ROI。\r\n3、返回结果： \r\n激活数 285 注册成本15.03 注册数 279  首日ROI 1.67% 首日付费金额 70.00 激活注册率：97.9%",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 86,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 99,
+      "id": "MIG-FBK-007",
+      "scenario": "媒体维度识别",
+      "prompt": "三国杀OL2026-05-17按媒体看激活、注册、折后现金消耗。",
+      "keyPoint": "1、识别媒体为广告报表维度。\r\n2、返回全部有数据媒体，包含尾部媒体。\r\n3、返回结果\r\n腾讯广告 激活数 972 注册数 898  折后现金消耗 5,575.78\r\n巨量广告 激活数 285 注册数 279  折后现金消耗 4,179.50\r\n苹果广告 激活数 288 注册数 123  折后现金消耗 3,952.49\r\n百度搜索 激活数 101 注册数 66  折后现金消耗 3,161.43\r\nVivo广告 激活数 0 注册数 0  折后现金消耗 2,886.43\r\n华为商店广告 激活数 122 注册数 87  折后现金消耗 2,492.43",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10816,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 100,
+      "id": "MIG-FBK-008",
+      "scenario": "终端/应用类型识别",
+      "prompt": "三国杀小游戏2026-05-11~2026-05-17微信小游戏、B站小游戏、支付宝小游戏的激活、注册、消耗分别是多少？",
+      "keyPoint": "1、返回结果：\r\n微信小游戏的激活 79,944、注册 77,361、消耗 1,072,090.31\r\nB站小游戏的激活 46 、注册 46、消耗 411.51\r\n支付宝小游戏的激活 4,158、注册 4,069、消耗 0",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 85,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 101,
+      "id": "MIG-FBK-009",
+      "scenario": "大范围查询超时兜底",
+      "prompt": "查询三国杀移动版2026-02-01~2026-04-30 每天各媒体激活、注册、折后现金消耗、ROI。",
+      "keyPoint": "1、识别为大范围多维查询，并合理拆分 MCP 请求。\r\n2、查询耗时较长时给出阶段性提示。\r\n人工审核\r\n3、超时或中断时说明失败节点和缩小范围建议。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 84,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 102,
+      "id": "MIG-FBK-010",
+      "scenario": "日报格式一致性",
+      "prompt": "按日报格式输出三国杀移动版昨天广告投放整体情况。",
+      "keyPoint": "1、按广告日报常用字段顺序输出。\r\n2、字段名稳定，包含日期、项目、媒体/合计、消耗和转化指标。\r\n3、区分明细与合计。\r\n4、表格不得错列、漏列或难以复核。",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 7002,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 103,
+      "id": "MIG-FBK-012",
+      "scenario": "媒体明细与总计口径核对",
+      "prompt": "三国杀移动版 2026-05-17 按媒体查看激活数和注册数，帮我核对媒体明细与总计是否一致。",
+      "keyPoint": "1、返回各媒体明细和总计。\r\n2、说明激活数和注册数总计是否为全局去重口径。\r\n3、若总计为去重口径，说明明细合计可能不等于总计。\r\n4、给出口径解释和进一步核对建议。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 86,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 104,
+      "id": "MIG-FBK-013",
+      "scenario": "无效日期处理",
+      "prompt": "指间山海 2026 年 2 月 29 日激活数和注册数是多少？",
+      "keyPoint": "1、识别 2026 年 2 月 29 日为无效日期。\r\n2、不得发起无意义查询或返回虚构数据。\r\n3、提示用户更正日期。\r\n4、可给出相邻日期示例。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 84,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 105,
+      "id": "MIG-FBK-015",
+      "scenario": "自然量与广告量区分",
+      "prompt": "武将觉醒 2026-05-17自然量激活和广告投放激活分别是多少？",
+      "keyPoint": "1、\r\n自然量激活数：17\r\n广告投放激活数：204",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 85,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 106,
+      "id": "MIG-FBK-017",
+      "scenario": "查数转诊断",
+      "prompt": "为什么三国杀移动版昨天ROI突然下降？",
+      "keyPoint": "1、识别为异常诊断，不只返回 ROI 数字。\r\n2、查询 ROI、消耗、激活、注册、付费等关键指标并做对比。\r\n3、按媒体、应用类型、团队等维度定位波动来源。\r\n4、输出可能原因、证据和下一步排查动作。",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 81,
+      "answer": "需要登录后才能查询内部数据并继续诊断。请在当前浏览器完成登录后重试，我会按你的项目权限查看指标变化、定位可能原因。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 107,
+      "id": "MIG-FBK-018",
+      "scenario": "不存在媒体处理",
+      "prompt": "武将觉醒 2026-05-17 TapTap广告媒体激活数是多少？",
+      "keyPoint": "1、返回数据：\r\nTapTap广告 ：30",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 89,
+      "answer": "需要登录后才能查询内部报表数据。请在当前浏览器完成登录后重试，我会按你的项目权限继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    },
+    {
+      "rowIndex": 129,
+      "id": "MIG-000",
+      "scenario": "",
+      "prompt": "发起联调",
+      "keyPoint": "查看联调状态和步骤截图记录",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 83,
+      "answer": "需要登录后才能执行这类内部操作。请在当前浏览器完成登录后重试，我会按你的权限继续处理。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "context.prepared"
+      ],
+      "runtimeStatus": "",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {}
+    }
+  ]
+}

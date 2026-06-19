@@ -21,6 +21,12 @@ coverage/
 tmp/
 output/
 
+# Root-level debug/temp artifacts (browser screenshots, dev server output)
+tmp_*.png
+tmp_*.jpg
+tmp_*.jpeg
+tmp_chrome_login/
+
 # Logs
 *.log
 *.err.log
@@ -71,3 +77,13 @@ frontend/**/.env.local
 frontend/**/.env.*.local
 frontend/**/.turbo/
 frontend/**/.cache/
+
+# Debug screenshots
+step*.png
+
+# E2E test artifacts
+.auth/
+.auth-state/
+.test-output/
+.test-screenshots/
+.test-reports/

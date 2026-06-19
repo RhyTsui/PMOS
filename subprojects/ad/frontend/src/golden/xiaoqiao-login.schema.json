@@ -1,0 +1,43 @@
+{
+  "screenId": "xiaoqiao-login",
+  "screenType": "auth-login",
+  "layout": {
+    "desktop": "brand-panel + login-panel",
+    "mobile": "stacked login flow"
+  },
+  "regions": [
+    {
+      "id": "brand",
+      "purpose": "说明用户正在进入小乔智投，并提示登录后可继续处理的事项"
+    },
+    {
+      "id": "login",
+      "purpose": "挂载智投现有 YKLogin 登录组件，支持扫码和手机号登录"
+    },
+    {
+      "id": "security-note",
+      "purpose": "提醒用户保护隐私和公司数据"
+    }
+  ],
+  "sourceRefs": [
+    "https://pre-aitd.dobest.cn/#/login",
+    "E:/AI/ai-os/docs/sources/inbox/aiad-next-frontend/src/views/sys/login/Login.vue",
+    "subprojects/ad/docs/operations/ui-guardrail.md",
+    "subprojects/ad/docs/小乔智投-Ant-Design-X默认规范-2026-05-09.md"
+  ],
+  "evidenceRefs": [
+    "E:/AI/ai-os/docs/sources/inbox/aiad-next-frontend/src/plugins/ykLogin.ts",
+    "E:/AI/ai-os/docs/sources/inbox/aiad-next-frontend/public/js/ykLogin.iife.js"
+  ],
+  "states": {
+    "loading": "显示正在准备登录",
+    "error": "显示登录失败原因并保留重新登录入口",
+    "expired": "由 YKLogin 组件刷新二维码或提示重新登录",
+    "mobile": "单列布局，优先展示登录组件"
+  },
+  "recommendedActions": [
+    "登录成功后进入工作台",
+    "登录失败后重新扫码或使用手机号登录"
+  ],
+  "lastUpdatedAt": "2026-05-21"
+}

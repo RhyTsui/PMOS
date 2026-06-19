@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-06-19T10:09:08.800Z",
+  "tests": {
+    "MIG-022": {
+      "error": "no textarea"
+    },
+    "MIG-023": {
+      "keywords": [
+        "媒体",
+        "应用",
+        "激活",
+        "注册"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-024": {
+      "keywords": [
+        "媒体",
+        "团队",
+        "激活",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-025": {
+      "keywords": [
+        "应用",
+        "团队",
+        "激活",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-026": {
+      "keywords": [
+        "媒体",
+        "应用",
+        "激活"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-027": {
+      "keywords": [
+        "周报",
+        "媒体",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-028": {
+      "keywords": [
+        "周报",
+        "应用",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-029": {
+      "keywords": [
+        "月报",
+        "top3",
+        "激活"
+      ],
+      "hasAnswer": true
+    }
+  }
+}

@@ -100,7 +100,7 @@ export function analyzeReportRequirement(
           ? '本周'
           : '待确认';
 
-  const shouldGenerateDraft = /(生成|出一版|做一版).*(报表|草稿)/.test(lower) || lower.includes('开始查询');
+  const shouldGenerateDraft = /(生成|出一版|做一版).*(报表|模板|草稿)/.test(lower) || lower.includes('开始查询');
   const shouldExportToXiaoshan = lower.includes('导出') && lower.includes('小闪');
   const shouldCreateShareLink = lower.includes('共享') || lower.includes('分享');
   const shouldCreateScreenshot = lower.includes('截图') || lower.includes('快照');
@@ -132,6 +132,7 @@ export function buildReportAssistantReply(
   analysis: ReportRequirementAnalysis,
   options?: {
     draft?: ReportDraft;
+    draftBlockedReason?: string;
     shareLink?: string;
     screenshotHint?: string;
   },
@@ -148,7 +149,7 @@ export function buildReportAssistantReply(
     lines.push('我会把截图里的报表口径、维度和字段先转成可确认清单，再决定是否直接查数。');
   }
   if (analysis.intakeMode === 'file') {
-    lines.push('我会把上传文件里的报表结构先抽成模板草稿，再映射可用指标。');
+    lines.push('我会把上传文件里的报表结构先整理成模板，再映射可用指标。');
   }
   if (analysis.unclearMetrics.length) {
     lines.push(`待确认指标：${analysis.unclearMetrics.join('、')}`);
@@ -160,8 +161,13 @@ export function buildReportAssistantReply(
   }
   if (options?.draft) {
     lines.push('');
-    lines.push(`报表草稿已生成：${options.draft.templateName} / ${options.draft.reportDate}`);
+    lines.push(`报告模板已生成：${options.draft.templateName} / ${options.draft.reportDate}`);
     lines.push('你现在可以继续让我优化解读、生成共享链接、生成截图，或者标记导出到小闪。');
+  }
+  if (!options?.draft && options?.draftBlockedReason) {
+    lines.push('');
+    lines.push(`未生成报告模板：${options.draftBlockedReason}`);
+    lines.push('请先连接可用数据来源或上传可校验的数据文件，我再继续生成。');
   }
   if (options?.shareLink) {
     lines.push(`共享链接：${options.shareLink}`);

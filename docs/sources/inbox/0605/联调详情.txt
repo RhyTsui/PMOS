@@ -1,0 +1,50 @@
+小乔联调任务详情
+返回任务列表
+运行状态
+任务 ID
+5555
+状态
+成功
+阶段
+回传轮询
+当前步骤
+事件回传轮询
+Agent
+unknown
+暂停
+恢复
+人工接管
+步骤与截图
+
+巨量登录
+阶段：Web
+序号：1
+时间：2026/5/15 16:20:14
+[  10.7s]   OK [1/10] web/login -> success  [screenshot: D:\xiaoqiao\code\xiaoqiao-debug-runner\logs\steps\asset_popup.png]
+2026-05-15 15:17:12,418 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 开始登录...
+2026-05-15 15:17:12,419 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 正在使用 Cookie 登录态验证登录状态...
+2026-05-15 15:17:20,077 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 登录方式: Cookie 登录（复用上次成功登录态）
+
+巨量登录
+阶段：Web
+序号：1
+时间：2026/5/15 16:20:06
+[   3.1s]   ... [1/10] web/login -> running  [screenshot: D:\xiaoqiao\code\xiaoqiao-debug-runner\logs\steps\asset_popup.png]
+2026-05-15 15:17:10,594 [INFO] httpx: HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-15 15:17:11,548 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 检测到历史登录态，准备尝试 Cookie 登录: D:\xiaoqiao\code\xiaoqiao-debug-runner\logs\artifacts\web_storage_state.json
+2026-05-15 15:17:12,418 [INFO] plugins.media_sops.oceanengine: Playwright 初始化成功
+步骤截图
+巨量登录
+阶段：Web
+序号：1
+时间：2026/5/15 16:20:14
+[  10.7s]   OK [1/10] web/login -> success  [screenshot: D:\xiaoqiao\code\xiaoqiao-debug-runner\logs\steps\asset_popup.png]
+2026-05-15 15:17:12,418 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 开始登录...
+2026-05-15 15:17:12,419 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 正在使用 Cookie 登录态验证登录状态...
+2026-05-15 15:17:20,077 [INFO] plugins.media_sops.oceanengine: [Web Step 1] 登录方式: Cookie 登录（复用上次成功登录态）
+步骤截图
+进入事件资产
+阶段：Web
+序号：2
+时间：2026/5/15 16:20:14
+[  10.7s]   ... [2/10] web/navigate_event -> running  [screenshot: D:\xiaoqiao\code\xiaoqiao-debug-runner\logs\steps\asset_popup.png]

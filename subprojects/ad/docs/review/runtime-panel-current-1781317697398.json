@@ -1,0 +1,10 @@
+{
+  "url": "http://127.0.0.1:8002/?ui_check=1781317697398",
+  "runtimeCardText": "已处理 2 步 · 用时 1.8s",
+  "hasEmptyPanel": false,
+  "hasIntentRoute": true,
+  "hasIntentOrch": true,
+  "hasModelStep": true,
+  "hasRuntimeLogButton": true,
+  "tail": "询问AI助手功能\n指间山海-国内\n\n你好，请用一句话说明你现在可以帮我做什么。\n\n已处理 2 步 · 用时 1.8s\n查询结果\n我是小乔智投通用 AI 助手，可以帮您查询智投广告报表、管理联调自动化任务、搜索互联网信息，并进行数据分析与内容总结。\n运行过程\n意图路由\nJSON\n进入help链路。\n开放式回答仲裁\n已汇总 请求理解、IntentOrch 候选；证据模式：无需外部证据；上下文采纳 6 项、淘汰 1 项；风险标记 2 项。\n运行日志\n提示词\n大模型检测中\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。"
+}

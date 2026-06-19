@@ -1,0 +1,105 @@
+{
+  "contractType": "semantic-result",
+  "version": "1.0.0",
+  "resultId": "golden-report-trend-001",
+  "conversationId": "conv-001",
+  "messageId": "msg-001",
+  "screenType": "report-result",
+  "title": "过去 7 天花费趋势",
+  "createdAt": "2026-05-28T00:00:00.000Z",
+  "producer": {
+    "kind": "backend",
+    "name": "report-query-service",
+    "version": "1.0.0"
+  },
+  "regions": [
+    {
+      "id": "trend-data-view",
+      "type": "data-view",
+      "componentBinding": "data-visualization",
+      "title": "花费趋势",
+      "state": "ready",
+      "data": {
+        "viewType": "trend",
+        "requestedView": "trend",
+        "chartType": "line",
+        "dateRange": {
+          "start": "2026-05-21",
+          "end": "2026-05-27",
+          "timezone": "Asia/Singapore"
+        },
+        "granularity": "day",
+        "dataCoverage": {
+          "status": "complete",
+          "availablePoints": 7,
+          "requiredPoints": 2
+        },
+        "metricName": "spend",
+        "dataset": [
+          { "date": "2026-05-21", "value": 1200 },
+          { "date": "2026-05-22", "value": 1180 },
+          { "date": "2026-05-23", "value": 1320 },
+          { "date": "2026-05-24", "value": 1400 },
+          { "date": "2026-05-25", "value": 1380 },
+          { "date": "2026-05-26", "value": 1500 },
+          { "date": "2026-05-27", "value": 1475 }
+        ],
+        "insights": [
+          {
+            "id": "insight-spend-up",
+            "title": "花费较周初上升",
+            "summary": "5 月 27 日花费相比 5 月 21 日上升约 22.9%。",
+            "evidenceRefs": ["ev-spend-calc-001"],
+            "sourceRefs": ["src-report-query-001"],
+            "confidence": { "level": "high", "basis": "calculation" }
+          }
+        ]
+      },
+      "evidenceRefs": ["ev-spend-calc-001"],
+      "sourceRefs": ["src-report-query-001"],
+      "actions": [
+        {
+          "id": "drill-down-campaign",
+          "type": "drill-down",
+          "intent": "secondary",
+          "label": "按 Campaign 下钻",
+          "target": { "kind": "semantic-query", "value": "drilldown_campaign" },
+          "sourceRefs": ["src-report-query-001"],
+          "evidenceRefs": ["ev-spend-calc-001"],
+          "feedbackPolicy": { "resultHandling": "append-message", "showToast": true }
+        }
+      ],
+      "layoutHints": {
+        "placement": "main",
+        "width": "full",
+        "scrollMode": "virtualized",
+        "preferredVariant": "line-chart"
+      }
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "ev-spend-calc-001",
+      "type": "calculation",
+      "title": "花费变化率计算",
+      "summary": "1475 / 1200 - 1 = 22.9%",
+      "sourceRefIds": ["src-report-query-001"],
+      "confidence": { "level": "high", "score": 0.98, "basis": "calculation" },
+      "freshness": { "status": "fresh", "retrievedAt": "2026-05-28T00:00:00.000Z" }
+    }
+  ],
+  "sourceRefs": [
+    {
+      "id": "src-report-query-001",
+      "type": "warehouse-query",
+      "title": "Ad spend daily report query",
+      "retrievedAt": "2026-05-28T00:00:00.000Z",
+      "freshness": { "status": "fresh", "asOf": "2026-05-27T23:59:59.000Z" },
+      "reliability": { "level": "trusted" }
+    }
+  ],
+  "metadata": {
+    "promptVersion": "report-query-v1",
+    "contractVersion": "1.0.0"
+  }
+}

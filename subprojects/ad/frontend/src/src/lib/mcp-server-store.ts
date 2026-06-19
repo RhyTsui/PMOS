@@ -1,17 +1,16 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { McpServerConfig } from '@/types';
-import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
+import type { McpServerConfig, McpToolConfig } from '@/types';
+import { runtimeDataPath } from './runtime-data-path';
 
 const MCP_SERVERS_PATH = runtimeDataPath('mcp-servers.json');
-const LEGACY_MCP_SERVERS_PATH = legacyDataPath('mcp-servers.json');
 const COLLECTION_GATEWAY_MCP_ID = 'mcp-collection-gateway';
 const ZHITOU_CONFIG_MCP_ID = 'mcp-zhitou-config';
 const OCEANENGINE_MCP_ID = 'mcp-oceanengine';
 const DEBUG_AUTOMATION_MCP_ID = 'mcp-debug-automation';
+const MEDIA_CONFIG_MCP_ID = 'mcp-media-config';
 const TRACKING_LINK_MCP_ID = 'mcp-tracking-link';
-const REPORT_ORCHESTRATOR_MCP_ID = 'mcp-report-orchestrator';
-const PIXSO_MCP_ID = 'mcp-pixso';
+const WEB_SEARCH_MCP_ID = 'mcp-web-search';
 
 interface McpServersFile {
   servers: McpServerConfig[];
@@ -22,25 +21,6 @@ function nowTs(): number {
 }
 
 const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
-  {
-    id: PIXSO_MCP_ID,
-    name: 'Pixso MCP',
-    description: 'Pixso design MCP endpoint for Zhitou Chat design artifact access.',
-    category: 'function',
-    endpoint_url: 'http://127.0.0.1:3667/mcp',
-    transport: 'streamable-http',
-    auth_type: 'none',
-    auth_config: {},
-    status: 'disconnected',
-    enabled: true,
-    business_domains: ['design', 'prototype', 'zhitou-chat'],
-    bound_agents: ['demand', 'debugging'],
-    tags: ['Pixso', 'design', 'MCP'],
-    tools: [],
-    health_check_url: 'http://127.0.0.1:3667/mcp',
-    created_at: 0,
-    updated_at: 0,
-  },
   {
     id: COLLECTION_GATEWAY_MCP_ID,
     name: '统一采集网关 MCP',
@@ -192,7 +172,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
   {
     id: ZHITOU_CONFIG_MCP_ID,
     name: '智投配置 MCP',
-    description: '承载智投侧应用、官方渠道包和智投分包只读查询能力；v1 只获取已有分包，不自动创建分包。',
+    description: '承载智投侧应用、官方渠道包、智投分包查询和授权范围内的分包准备能力。',
     category: 'data',
     endpoint_url: '',
     transport: 'streamable-http',
@@ -200,8 +180,8 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
     auth_config: { token: '' },
     status: 'disconnected',
     enabled: true,
-    business_domains: ['投放前质量保障', '自动联调'],
-    bound_agents: ['debugging', 'demand', 'monitoring'],
+    business_domains: ['投放前质量保障', '自动联调', '投放包交付'],
+    bound_agents: ['debugging', 'demand', 'delivery', 'monitoring'],
     tags: ['P0', '智投配置', '分包', '只读', '真实MCP'],
     tools: [
       {
@@ -219,7 +199,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging', 'demand', 'monitoring'],
+        bound_agents: ['debugging', 'demand', 'delivery', 'monitoring'],
         access_mode: 'read',
         call_count: 0,
       },
@@ -238,8 +218,68 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging', 'demand', 'monitoring'],
+        bound_agents: ['debugging', 'demand', 'delivery', 'monitoring'],
         access_mode: 'read',
+        call_count: 0,
+      },
+      {
+        tool_id: 'get_app_package_list',
+        name: 'get_app_package_list',
+        description: '查询应用列表。用于查询应用数据，支持按项目ID、应用名称、应用类型、终端、创建人、状态、平台等多条件筛选。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' }, description: '项目ID、APPID或应用名称' },
+            app_name: { type: 'string', description: '应用名称' },
+            app_type: { type: 'string', description: '应用类型' },
+            terminal: { type: 'string', description: '终端，例如 android 或 ios' },
+            creator: { type: 'string', description: '创建人' },
+            status: { type: 'string', description: '状态' },
+            platform: { type: 'string', description: '平台' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['debugging', 'demand', 'delivery', 'monitoring'],
+        access_mode: 'read',
+        call_count: 0,
+      },
+      {
+        tool_id: 'zhitou_package.create_sub_package',
+        name: 'zhitou_package.create_sub_package',
+        description: '在已有官方母包通过验收后，按指定媒体范围生成智投分包；必须由已配置真实服务执行。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope', 'media_scope', 'terminal'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' } },
+            media_scope: { type: 'array', items: { type: 'string' } },
+            terminal: { type: 'string' },
+            official_channel_package: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['delivery'],
+        access_mode: 'write',
+        call_count: 0,
+      },
+      {
+        tool_id: 'zhitou_package.sync_media_sub_package',
+        name: 'zhitou_package.sync_media_sub_package',
+        description: '同步指定媒体后台分包结果和审核状态，用于投放包交付检查。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope', 'media_scope', 'terminal'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' } },
+            media_scope: { type: 'array', items: { type: 'string' } },
+            terminal: { type: 'string' },
+            package_name: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['delivery'],
+        access_mode: 'write',
         call_count: 0,
       },
     ],
@@ -261,7 +301,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
     status: 'disconnected',
     enabled: true,
     business_domains: ['自动联调', '投放前质量保障'],
-    bound_agents: ['debugging'],
+    bound_agents: ['debugging', 'delivery'],
     tags: ['P0', '巨量引擎', 'Streamable HTTP', 'Access-Token', '真实MCP'],
     tools: [],
     created_at: 0,
@@ -297,7 +337,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging'],
+        bound_agents: ['debugging', 'delivery'],
         access_mode: 'read',
         call_count: 0,
       },
@@ -316,7 +356,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging'],
+        bound_agents: ['debugging', 'delivery'],
         access_mode: 'read',
         call_count: 0,
       },
@@ -333,7 +373,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging'],
+        bound_agents: ['debugging', 'delivery'],
         access_mode: 'read',
         call_count: 0,
       },
@@ -352,7 +392,7 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging'],
+        bound_agents: ['debugging', 'delivery'],
         access_mode: 'write',
         call_count: 0,
       },
@@ -368,8 +408,116 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
           },
         },
         enabled: true,
-        bound_agents: ['debugging'],
+        bound_agents: ['debugging', 'delivery'],
         access_mode: 'read',
+        call_count: 0,
+      },
+      {
+        tool_id: 'debug_automation_get_result',
+        name: 'debug_automation_get_result',
+        description: '查询广告联调自动化任务结果摘要，用于确认包是否通过联调。',
+        input_schema: {
+          type: 'object',
+          required: ['task_id'],
+          properties: {
+            task_id: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['debugging', 'delivery'],
+        access_mode: 'read',
+        call_count: 0,
+      },
+      {
+        tool_id: 'debug_automation_get_steps',
+        name: 'debug_automation_get_steps',
+        description: '查询广告联调自动化任务步骤，用于定位联调过程阻塞项。',
+        input_schema: {
+          type: 'object',
+          required: ['task_id'],
+          properties: {
+            task_id: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['debugging', 'delivery'],
+        access_mode: 'read',
+        call_count: 0,
+      },
+    ],
+    created_at: 0,
+    updated_at: 0,
+  },
+  {
+    id: MEDIA_CONFIG_MCP_ID,
+    name: '媒体配置 MCP',
+    description: '查询媒体应用共享、媒体审核和分包同步结果，支撑投放包交付检查。',
+    category: 'data',
+    endpoint_url: '',
+    transport: 'streamable-http',
+    auth_type: 'bearer_token',
+    auth_config: { token: '' },
+    status: 'disconnected',
+    enabled: true,
+    business_domains: ['投放包交付', '自动联调'],
+    bound_agents: ['delivery', 'debugging'],
+    tags: ['P0', '媒体配置', '审核状态', '真实MCP'],
+    tools: [
+      {
+        tool_id: 'media_config.app_check',
+        name: 'media_config.app_check',
+        description: '检查媒体后台是否存在目标应用、是否共享到指定账户。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope', 'media_scope', 'terminal'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' } },
+            media_scope: { type: 'array', items: { type: 'string' } },
+            terminal: { type: 'string' },
+            package_name: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['delivery', 'debugging'],
+        access_mode: 'read',
+        call_count: 0,
+      },
+      {
+        tool_id: 'media_config.review_status',
+        name: 'media_config.review_status',
+        description: '查询媒体应用或分包审核状态。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope', 'media_scope', 'terminal'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' } },
+            media_scope: { type: 'array', items: { type: 'string' } },
+            terminal: { type: 'string' },
+            package_name: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['delivery', 'debugging'],
+        access_mode: 'read',
+        call_count: 0,
+      },
+      {
+        tool_id: 'media_config.share_app',
+        name: 'media_config.share_app',
+        description: '按后台授权配置将媒体应用共享给指定账户。',
+        input_schema: {
+          type: 'object',
+          required: ['project_scope', 'media_scope', 'terminal'],
+          properties: {
+            project_scope: { type: 'array', items: { type: 'string' } },
+            media_scope: { type: 'array', items: { type: 'string' } },
+            terminal: { type: 'string' },
+            target_account: { type: 'string' },
+          },
+        },
+        enabled: true,
+        bound_agents: ['delivery', 'debugging'],
+        access_mode: 'write',
         call_count: 0,
       },
     ],
@@ -493,87 +641,53 @@ const BUILTIN_MCP_SERVERS: McpServerConfig[] = [
     updated_at: 0,
   },
   {
-    id: REPORT_ORCHESTRATOR_MCP_ID,
-    name: '报表编排 MCP',
-    description: '承载自动报表模板解析、指标校验、数据预览和定时任务创建能力。',
-    category: 'function',
+    id: WEB_SEARCH_MCP_ID,
+    name: '联网搜索 MCP',
+    description: '通过搜索引擎获取实时信息，支持新闻、网页内容检索。需要接入真实 MCP endpoint 后启用；当前公开联网 HTTP Provider 由 Public Web 配置管理。',
+    category: 'data',
     endpoint_url: '',
     transport: 'streamable-http',
-    auth_type: 'bearer_token',
-    auth_config: { token: '' },
+    auth_type: 'none',
+    auth_config: {},
     status: 'disconnected',
-    enabled: true,
-    business_domains: ['自动报表', '报表任务', '拼表'],
-    bound_agents: ['help', 'monitoring'],
-    tags: ['P1', '自动报表', '真实MCP'],
+    enabled: false,
+    business_domains: ['通用问答', '实时信息', '新闻检索'],
+    bound_agents: ['help', 'hub', 'report'],
+    tags: ['P1', '联网搜索', '实时数据', '待配置MCP'],
     tools: [
       {
-        tool_id: 'report.parse_template',
-        name: 'report.parse_template',
-        description: '从文本模板或标准二维 Excel 模板中提炼报表结构、维度、指标、频率和接收对象。',
+        tool_id: 'web_search.query',
+        name: 'web_search.query',
+        description: '搜索互联网获取实时信息，返回相关网页摘要和链接。',
         input_schema: {
           type: 'object',
-          required: ['requirement'],
+          required: ['query'],
           properties: {
-            requirement: { type: 'string', description: '用户报表需求' },
-            attachment_ids: { type: 'array', items: { type: 'string' }, description: 'Excel 模板附件 ID' },
+            query: { type: 'string', description: '搜索关键词' },
+            num_results: { type: 'number', description: '返回结果数量，默认5条', default: 5 },
+            language: { type: 'string', description: '搜索语言，如zh-CN、en-US', default: 'zh-CN' },
           },
         },
         enabled: true,
-        bound_agents: ['help', 'monitoring'],
+        bound_agents: ['help', 'hub', 'report'],
         access_mode: 'read',
         call_count: 0,
       },
       {
-        tool_id: 'report.validate_metrics',
-        name: 'report.validate_metrics',
-        description: '校验报表模板中的指标是否存在、口径是否明确，并返回问题指标列表。',
+        tool_id: 'web_search.fetch_page',
+        name: 'web_search.fetch_page',
+        description: '获取指定URL的网页内容，用于深入阅读搜索结果。',
         input_schema: {
           type: 'object',
-          required: ['template'],
+          required: ['url'],
           properties: {
-            template: { type: 'object', additionalProperties: true },
-            metric_names: { type: 'array', items: { type: 'string' } },
+            url: { type: 'string', description: '网页URL' },
+            max_length: { type: 'number', description: '最大返回字符数，默认2000', default: 2000 },
           },
         },
         enabled: true,
-        bound_agents: ['help', 'monitoring'],
+        bound_agents: ['help', 'hub', 'report'],
         access_mode: 'read',
-        call_count: 0,
-      },
-      {
-        tool_id: 'report.preview',
-        name: 'report.preview',
-        description: '基于已确认模板调用多个报表/数仓工具拉取数据并返回类 Excel 数据预览。',
-        input_schema: {
-          type: 'object',
-          required: ['template'],
-          properties: {
-            template: { type: 'object', additionalProperties: true },
-            report_date: { type: 'string' },
-          },
-        },
-        enabled: true,
-        bound_agents: ['help', 'monitoring'],
-        access_mode: 'read',
-        call_count: 0,
-      },
-      {
-        tool_id: 'scheduled_report.create',
-        name: 'scheduled_report.create',
-        description: '基于已确认模板创建定时报表任务。',
-        input_schema: {
-          type: 'object',
-          required: ['template', 'schedule'],
-          properties: {
-            template: { type: 'object', additionalProperties: true },
-            schedule: { type: 'string', description: '自然语言或 cron 表达式' },
-            recipients: { type: 'array', items: { type: 'string' } },
-          },
-        },
-        enabled: true,
-        bound_agents: ['help', 'monitoring'],
-        access_mode: 'write',
         call_count: 0,
       },
     ],
@@ -610,13 +724,35 @@ function normalizeServer(input: Partial<McpServerConfig>): McpServerConfig {
 
 function mergeBuiltinServers(servers: McpServerConfig[]): McpServerConfig[] {
   const customServers = servers.filter(server => !BUILTIN_MCP_SERVERS.some(builtin => builtin.id === server.id));
+  const mergeTools = (builtinTools: McpToolConfig[], overrideTools: McpToolConfig[] = []) => {
+    const merged = builtinTools.map(tool => ({ ...tool }));
+    overrideTools.forEach((overrideTool) => {
+      const key = overrideTool.tool_id || overrideTool.name;
+      const index = merged.findIndex(tool => (tool.tool_id || tool.name) === key);
+      if (index >= 0) {
+        const builtinTool = merged[index];
+        merged[index] = {
+          ...builtinTool,
+          ...overrideTool,
+          tool_id: builtinTool.tool_id,
+          name: overrideTool.name || builtinTool.name,
+          description: overrideTool.description || builtinTool.description,
+          input_schema: Object.keys(overrideTool.input_schema || {}).length ? overrideTool.input_schema : builtinTool.input_schema,
+          bound_agents: overrideTool.bound_agents?.length ? overrideTool.bound_agents : builtinTool.bound_agents,
+        };
+        return;
+      }
+      merged.push(overrideTool);
+    });
+    return merged;
+  };
   const mergedBuiltins = BUILTIN_MCP_SERVERS.map((builtin) => {
     const override = servers.find(server => server.id === builtin.id);
     return normalizeServer({
       ...builtin,
       ...override,
       id: builtin.id,
-      tools: override?.tools?.length ? override.tools : builtin.tools,
+      tools: mergeTools(builtin.tools, override?.tools || []),
       created_at: override?.created_at || builtin.created_at || nowTs(),
       updated_at: Math.max(override?.updated_at || 0, builtin.updated_at || 0),
     });
@@ -626,19 +762,16 @@ function mergeBuiltinServers(servers: McpServerConfig[]): McpServerConfig[] {
 }
 
 async function readMcpServersFile(): Promise<McpServersFile> {
-  for (const serversPath of [MCP_SERVERS_PATH, LEGACY_MCP_SERVERS_PATH]) {
-    try {
-      const raw = await readFile(serversPath, 'utf8');
-      const parsed = JSON.parse(raw) as Partial<McpServersFile>;
-      const servers = Array.isArray(parsed.servers) ? parsed.servers.map(normalizeServer) : [];
-      return { servers };
-    } catch {
-      // 尝试下一个存储位置。
-    }
+  try {
+    const raw = await readFile(MCP_SERVERS_PATH, 'utf8');
+    const parsed = JSON.parse(raw) as Partial<McpServersFile>;
+    const servers = Array.isArray(parsed.servers) ? parsed.servers.map(normalizeServer) : [];
+    return { servers };
+  } catch {
+    // Use empty default when the new runtime store has not been created yet.
   }
   return { servers: [] };
 }
-
 async function writeMcpServersFile(file: McpServersFile): Promise<void> {
   await mkdir(path.dirname(MCP_SERVERS_PATH), { recursive: true });
   await writeFile(MCP_SERVERS_PATH, JSON.stringify(file, null, 2), 'utf8');

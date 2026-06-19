@@ -1,0 +1,4739 @@
+{
+  "generated_at": "2026-06-19T16:50:01.167Z",
+  "source": "E:\\AI\\ai-os\\docs\\sources\\inbox\\智投Chat_广告业务（问数）测试集_预期精简版_v3.xlsx",
+  "total": 91,
+  "mappings": [
+    {
+      "case_id": "MIG-001",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-日期识别-DATE-001",
+      "user_question": "指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活 11,819 注册 10,554\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：日期解析正确",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-002",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-日期识别-DATE-002",
+      "user_question": "指间山海 指间山海 2026 年 3 月 1 日至 3 月 15 日30日ROI多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：30日ROI 48.62%左右\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：日期解析正确",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-003",
+      "priority": "P2",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-日期识别-DATE-003",
+      "user_question": "指间山海 2026 年 2 月 29 日的数据",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：不存在日期不返回数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：日期解析正确",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-004",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-日期识别-DATE-F001",
+      "user_question": "指间山海2026-03-25日报中，查询广告投放部 各媒体激活数、注册数和消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报+媒体+团队",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-005",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-日期识别-DATE-F002",
+      "user_question": "指间山海上周周报中，广告投放部按应用类型筛选的激活数、注册数和消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：iOS应用：激活 299、注册 289、消耗35310.64  安卓应用：激活266、注册242，消耗26950.09\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：周报+应用类型+团队",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-006",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-日期识别-DATE-F003",
+      "user_question": "指间山海2026年2月月报中，广告投放部按媒体细分的累计ROI情况",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量 :31.13% tap:62.03% 苹果：54.06%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报+媒体+应用类型+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-007",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-日期识别-DATE-F004",
+      "user_question": "指间山海2026-05-21广告小时报表中，广告投放部9点-10点的激活数和折后消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数 1 折后消耗 32.31\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：广告小时报表+分时段",
+      "expected_report_domain": "ad_hour_report",
+      "expected_tool": "get_zt_hour_report",
+      "expected_tools": [
+        "get_zt_hour_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_hour_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "hour",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "hour",
+        "metrics",
+        "team"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_hour_report，但该用例需要多工具编排：get_zt_hour_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-008",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-日期识别-DATE-F005",
+      "user_question": "指间山海二月同期广告投放部的累计ROI和合计第2日ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：上月同期：20260201-20260227 累计ROI:39.01 合计第2日ROI:8.38%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：ROI报表+月累计/区间",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [
+        "comparison_delta",
+        "total_detail_reconcile"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-009",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-媒体识别-MEDIA-001",
+      "user_question": "指间山海在巨量引擎2026-05-11~2026-05-17的激活数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：2026-05-11~2026-05-17 巨量的激活数 422 ，结果支持1%的浮动\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：媒体解析正确",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-010",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-媒体识别-MEDIA-004",
+      "user_question": "指间山海在2026-05-11~2026-05-17 每日的巨量引擎和苹果广告的折后消耗对比",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：2026-05-17 巨量广告：4128.37 苹果广告：1742.51\n2026-05-16 巨量广告：4193.05 苹果广告：1537.59\n2026-05-15 巨量广告：4108.55 苹果广告：1062.29\n2026-05-14 巨量广告：4186.78 苹果广告：1191.23\n2026-05-13 巨量广告：4173.52 苹果广告：1011.12\n2026-05-12 巨量广告：4161.43 苹果广告：1057.61\n2026-05-11 巨量广告：4604.40 苹果广告：1108.29\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：媒体解析正确",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "app_package_type",
+        "terminal"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [
+        "comparison_delta"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-011",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-媒体识别-MEDIA-F001",
+      "user_question": "指间山海2026-03-25日报中，巨量引擎在广告投放部的激活数、注册数和折后消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数126 注册数106 折后消耗11500\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报+细分媒体+团队",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-012",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-媒体识别-MEDIA-F002",
+      "user_question": "指间山海2026-03-25日报中，腾讯广告在广告投放部、安卓应用类型下的激活数和注册数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：0\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报+媒体+应用类型+团队",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "terminal"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-013",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-媒体识别-MEDIA-F003",
+      "user_question": "指间山海2026-05-11~2026-05-17中，快手在广告投放部不同应用类型的ROI对比",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：快手没投放数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：周报+媒体+应用类型",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [
+        "comparison_delta"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-014",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-媒体识别-MEDIA-F004",
+      "user_question": "指间山海2026年2月月报中，巨量引擎和腾讯广告在广告投放部的累计ROI对比",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量：31.13% 腾讯没数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报+多媒体ROI",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [
+        "comparison_delta"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-015",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-媒体识别-MEDIA-F005",
+      "user_question": "指间山海2026-03-25广告小时报表中，按媒体汇总全天数据，查看巨量引擎和腾讯广告的激活数与消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量：激活126 消耗11500 腾讯没数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：小时报表+按媒体汇总全天",
+      "expected_report_domain": "ad_hour_report",
+      "expected_tool": "get_zt_hour_report",
+      "expected_tools": [
+        "get_zt_hour_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_hour_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "hour",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "hour",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_hour_report，但该用例需要多工具编排：get_zt_hour_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-016",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-CSEM-001",
+      "user_question": "指间山海 - 国内 2026 年 3 月 18 日安卓应用激活数和首日 ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数 645 首日 ROI 11.12%\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "app_package_type",
+        "terminal",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-017",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-CSEM-010",
+      "user_question": "指间山海 - 国内2026-05-11~2026-05-17和2026-05-04~2026-05-10的激活数环比变化",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：2026-05-11~2026-05-17，激活数 796 \n2026-05-04~2026-05-10，激活数 1731 激活数环比变化 = (796 - 1731) / 5667 = -54.1%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：-",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [
+        "comparison_delta"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-018",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-009",
+      "user_question": "指间山海2026-05-11~2026-05-17哪个媒体的累计 ROI 最高",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量广告\n巨量广告：累计ROI 8.28%\nTapTap广告：累计ROI 3.54%\n苹果广告：累计ROI 4.57%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：语义理解没问题",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [
+        "ranking_topn"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-019",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-SEM-011",
+      "user_question": "指间山海2026-05-01~2026-05-07激活到注册的转化率",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活 3,758 注册3,219 转化率 85.66%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：语义理解没问题",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-020",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-语义理解-SEM-025",
+      "user_question": "指间山海 - 国内2026-05-01~2026-05-07哪个媒体的激活成本最低",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量广告\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：-",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [
+        "ranking_topn"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-021",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-语义理解-SEM-026",
+      "user_question": "指间山海 - 国内激活数最多的三个媒体",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量 TapTap 苹果\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-022",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F001",
+      "user_question": "指间山海2026-03-25日报中，广告投放部、巨量引擎、安卓应用类型的激活数、注册数、消耗和首日ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数2 注册数4 消耗0 roi 0或没数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报综合查询",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "terminal",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-023",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-语义理解-SEM-F002",
+      "user_question": "指间山海2026-03-25日报中，广告投放部按细分媒体+应用类型查看激活数和注册数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量IOS：激活126 消耗11500 tap安卓：激活71，消耗7010.83 苹果和b站也有数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报+细分媒体+应用类型",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-024",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F003",
+      "user_question": "指间山海2026-03-25日报中，广告投放部按细分媒体+团队查看激活数和ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报+细分媒体+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-025",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F004",
+      "user_question": "指间山海2026-03-25日报中，按细分应用类型+团队查看激活数和首日ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：创新部安卓：激活数353，首日ROI 9.01% 其他数据也有\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报+细分应用类型+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-026",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-语义理解-SEM-F005",
+      "user_question": "指间山海2026-05-11~2026-05-17中，广告投放部按媒体、应用类型细分的激活数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：安卓应用 TapTap广告 激活数：264\niOS应用 巨量广告 激活数：197\niOS应用 苹果广告 激活数：102\n安卓应用 巨量广告 激活数：1\n安卓应用 星广联投 激活数：1\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：周报综合查询",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-027",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F007",
+      "user_question": "指间山海20260320-20260405那一周周报中，广告投放部按细分媒体查看区间首周ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量18.41% tap4.88% 苹果18.86%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：周报+细分媒体+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-028",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F008",
+      "user_question": "指间山海20260320-20260405那一周周报中，广告投放部按细分应用类型查看累计ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：安卓 16.14% IOS 4.92%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：周报+细分应用类型+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-029",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-语义理解-SEM-F009",
+      "user_question": "指间山海2026年2月月报中，广告投放部按媒体、应用类型细分的top3的激活数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量IOS 1537 tap安卓 1581 巨量安卓1562\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报综合查询",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [
+        "ranking_topn"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-030",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F010",
+      "user_question": "指间山海2026年2月月报中，广告投放部按细分媒体查看累计ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量：31.13% tap: 62.03% 苹果54.06%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报+细分媒体+应用类型",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-031",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F011",
+      "user_question": "指间山海2026年2月月报中，广告投放部按细分媒体查看区间首月ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量：31.13% tap: 62.03% 苹果54.06%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报+细分媒体+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-032",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F012",
+      "user_question": "指间山海2026年2月月报中，广告投放部按细分应用类型查看累计ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：安卓 44.12% IOS 33.74%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报+细分应用类型+团队",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-033",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-数据准确性-ACC-001",
+      "user_question": "验证指间山海 2026-03-15 的广告激活数是否为 1250",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：3 月 15 广告激活数为 707\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：查询没问题，结论没问题",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-034",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-数据准确性-ACC-002",
+      "user_question": "验证指间山海2026-05-11~2026-05-17中各媒体激活数之和是否等于总激活数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量广告 422\nTapTap广告 264\n苹果广告 102\n百度品专 4\n星广联投 2\n快手广告 1\n网易有道：1\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：-",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-035",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-数据准确性-ACC-005",
+      "user_question": "指间山海 20260325 日报消耗是否等于各媒体消耗之和",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：20260325 消耗为 31,368\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：-",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-036",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-SEM-F013",
+      "user_question": "指间日报20260324 自然量激活数是多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：20260324 自然量激活数为 121\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：日报自然量",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-037",
+      "priority": "P1",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-SEM-F015",
+      "user_question": "分别查询指间山海20260101那一天、所在周、所在月的 自然量的注册次留、注册3留",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：注册次留率: 57.29% (55人留存)、•注册次留率: 52.01% (363人留存)、•注册次留率: 52.66% (1,038人留存)\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-038",
+      "priority": "P1",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F016",
+      "user_question": "查询指间20260101那一天市场星图的7日设备留存率",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：0.5\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-039",
+      "priority": "P1",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-语义理解-SEM-F017",
+      "user_question": "查询指间20260101那一天市场量的7日设备留存率",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：0.5\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-040",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-数据准确性-ACC-F001",
+      "user_question": "验证指间山海2026-03-25广告小时报表按分时段查询的各小时消耗之和是否等于当天总消耗（广告投放部）",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：13,647.98 不等于 20,658.81\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：小时报表汇总一致性",
+      "expected_report_domain": "ad_hour_report",
+      "expected_tool": "get_zt_hour_report",
+      "expected_tools": [
+        "get_zt_hour_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_hour_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "hour",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "hour",
+        "metrics",
+        "team"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_hour_report，但该用例需要多工具编排：get_zt_hour_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-041",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-数据准确性-ACC-F002",
+      "user_question": "验证指间山海2026-03-25广告小时报表按媒体汇总的全天激活数之和是否等于当天总激活数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：225 等于\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：小时报表按媒体汇总",
+      "expected_report_domain": "ad_hour_report",
+      "expected_tool": "get_zt_hour_report",
+      "expected_tools": [
+        "get_zt_hour_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_hour_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "hour",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "hour",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_hour_report，但该用例需要多工具编排：get_zt_hour_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-042",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-数据准确性-ACC-F003",
+      "user_question": "验证指间山海2026-03-25广告ROI日报中区间ROI和累计ROI计算是否正确",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：\n区间ROI：iOS应用 消耗：19,028.51 激活286  注册 250 首日ROI 9.32%  第30日ROI 4.04%\n               安卓应用 消耗：12,340.29 激活 428 注册 366  首日ROI 5.72%  第30日ROI 0.05%\n累计ROI：iOS应用 消耗：19,028.51 激活286  注册 250 首日ROI 9.32%  30日ROI 130.47%\n               安卓应用 消耗：12,340.29 激活 428 注册 366  首日ROI 5.72%  30日ROI 16.58%\n \n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：ROI日报计算",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-043",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-数据准确性-ACC-F004",
+      "user_question": "验证指间山海2026-05-11~2026-05-17广告ROI周报中巨量引擎安卓应用类型的累计ROI计算是否正确、",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：安卓应用 累计ROI：15.11%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：ROI周报计算",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "app_package_type",
+        "terminal",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-044",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-数据准确性-ACC-F005",
+      "user_question": "验证指间山海2026年3月广告ROI月报中腾讯广告iOS应用类型的区间ROI计算是否正确、",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：无数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：ROI月报计算",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "app_package_type",
+        "terminal",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-045",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-数据准确性-ACC-F006",
+      "user_question": "验证指间山海 2026-05-11 新增设备留存日报中的次留计算是否正确",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数：112 2日留存数：49  次留率：43.75%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：新增设备留存日报",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-046",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-数据准确性-ACC-F007",
+      "user_question": "验证指间山海注册用户留存周报中2026-05-11~2026-05-17 的7日留存计算是否正确",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：注册数：7337日留存数：156 7日留存率：24.80%\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-047",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-数据准确性-ACC-F008",
+      "user_question": "验证指间山海首日付费账号留存月报中的30日留存计算是否正确",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：首日付费账号留存月报",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-048",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-多维度交叉-MDIM-001",
+      "user_question": "指间山海在 iOS 端巨量引擎和腾讯广告的2026-04-02 至 2026-04-08 激活数对比",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：巨量 1218 腾讯0\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "app_package_type",
+        "terminal"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [
+        "comparison_delta"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-049",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-007",
+      "user_question": "指间山海 20260325 iOS 端和 Android 端的激活数对比",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：ios 激活 286 安卓 426\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：-",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "app_package_type",
+        "terminal",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [
+        "comparison_delta"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "chart_or_comparison",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-050",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F001",
+      "user_question": "指间2026-01-01 IOS应用类型+巨量+广告投放部 全天激活数、累计45日roi、第45日roi、3日设备留存数、3日注册留存数、4日首日付费留存数、按时段19点-20点的首日注册设备数、按天截止到20点的首日付费账号数 分别是多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数：84 累计45日roi：47.65% 第45日roi：0.06% 2周roi：26.17% 第2周roi:12.7% 累计2月ROI：51.26% 第2月ROI: 18.81% 3日设备留存率：44.05% 3日注册留存率：49.37% 4日首日付费留存数：50% 按时段19点-20点的首日注册设备数：9 按天截止到20点的首日付费账号数：10\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：各报表筛选+按天",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_hour_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "terminal",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_hour_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-051",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F002",
+      "user_question": "指间2026-02-01 IOS应用类型+自然量+广告投放部 全天激活数、3日设备留存数、3日注册留存数、4日首日付费留存数分别是多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数：459 3日设备留存率：39.87% 3日注册留存率：41.12% 4日首日付费留存数：69.39%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：各报表筛选+按周",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type",
+        "terminal",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-052",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F003",
+      "user_question": "指间2026-01-01那一周 IOS应用类型+巨量+广告投放部 总激活数、2周roi、第2周roi、3日设备留存数、3日注册留存数、4日首日付费留存数 分别是多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数：716 2周roi：26.17% 第2周roi:12.7% 3日设备留存率：47.63% 3日注册留存率：49.50% 4日首日付费留存数：67.07%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：各报表筛选+按月",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "terminal",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-053",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F004",
+      "user_question": "查询指间2026年1月1号广告投放部的总激活数、2日roi、第2日roi 、3日设备留存数、3日注册留存数、4日首日付费留存数在应用类型维度的分布情况",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：各报表细分+按天",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-054",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F005",
+      "user_question": "查询指间2026年1月1号那一周广告媒体总激活数、2周roi 、第2周roi、3日设备留存数、3日注册留存数、4日首日付费留存数在团队的分布情况",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：各报表细分+按周",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-055",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F006",
+      "user_question": "查询指间2025年12月1号那一月广告媒体的总激活数、2月累计roi 、第2月roi、3日设备留存数、3日注册留存数、4日首日付费留存数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：总激活数：30584 2月累计roi: 57.39% 第2月roi: 21.79 3日设备留存率 36.73 3日注册留存数：41.14% 4日首日付费留存数：59.02%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：各报表细分+按月",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-056",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F007",
+      "user_question": "查询指间20260101 日报、所在周、所在月的激活数、注册数、有效数、首日付费数、消耗、折后消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：\n所在周： 激活数8,822 、注册数 7,859、有效数6,112、首日付费数 1,052、消耗 460,486.36、折后消耗 449,824.73\n所在月：激活数 29,674、注册数 26,670、有效数 21,132、首日付费数 4,121、消耗1,585,126.58、折后消耗 1,549,582.44\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：日报指标范围",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-057",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F008",
+      "user_question": "查询指间20260101 小时报表 广告量激活数、注册数、有效数、首日付费数、新设备老账号数、消耗、折后消耗",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：\n广告量激活数1,183、注册数1,045、有效数818、首日付费数117、新设备老账号数37、消耗49,005.92、折后消耗47,771.21\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：小时报表指标范围",
+      "expected_report_domain": "ad_hour_report",
+      "expected_tool": "get_zt_hour_report",
+      "expected_tools": [
+        "get_zt_hour_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_hour_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "hour",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "hour",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_hour_report，但该用例需要多工具编排：get_zt_hour_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-058",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F009",
+      "user_question": "指间2025-12-01那一月IOS应用类型+巨量+广告投放部 总激活数、2月roi、第2月roi、3日设备留存数、3日注册留存数、4日首日付费留存数 分别是多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数：2348 累计2月ROI：51.26% 第2月ROI: 18.81% 3日设备留存率：42.42% 3日注册留存率：44.86% 4日首日付费留存数：59.09%\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "terminal",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-059",
+      "priority": "P1",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-边缘场景-EDGE-001",
+      "user_question": "指间山海 2026 年 2 月 30 日的数据",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：不存在日期不返回数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：通过",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-060",
+      "priority": "P1",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-边缘场景-EDGE-003",
+      "user_question": "指间山海未来日期（2027 年 1 月 1 日）的数据",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：未来日期不返回数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：通过",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-061",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-边缘场景-EDGE-F001",
+      "user_question": "指间山海2026-03-25广告小时报表中，广告投放部媒体筛选：自定义跳转时段激活数",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：无数据\n\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：小时报表异常媒体",
+      "expected_report_domain": "ad_hour_report",
+      "expected_tool": "get_zt_hour_report",
+      "expected_tools": [
+        "get_zt_hour_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_hour_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "hour",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "hour",
+        "metrics",
+        "media",
+        "team"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_hour_report，但该用例需要多工具编排：get_zt_hour_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-062",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-边缘场景-EDGE-F002",
+      "user_question": "指间山海2026年3月广告ROI月报中，广告投放部按不存在的应用类型查看累计ROI",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：无数据\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：ROI月报异常应用类型",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "app_package_type",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence",
+        "recommended_actions"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-063",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-业务场景-BUS-001",
+      "user_question": "指间山海最近 7 天（不含当天）的投放日报效果综合评估",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：-",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-064",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-业务场景-BUS-F001",
+      "user_question": "给我生成指间山海上周广告投放部的投放效果周报，按媒体、应用类型拆分并包含ROI和留存结论",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：周报综合输出",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-065",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-业务场景-BUS-F002",
+      "user_question": "请评估指间山海2026年3月广告投放部的月报表现，要求结合媒体、应用类型、ROI和留存给出结论",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：月报综合评估",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-066",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-业务场景-BUS-F003",
+      "user_question": "请分析指间山海2026-03-25广告投放部日报中表现最差的媒体和应用类型组合，并给出优化建议",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：首日roi 是taptap 安卓最低\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报问题诊断",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "media",
+        "team",
+        "app_package_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-067",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-多轮对话-DIA-001",
+      "user_question": "指间山海 20260521的激活数是多少？如果超过 700 就算好",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目=指间山海、日期=昨天、指标=激活数。\n3、返回真实激活数：74，并判断是否超过700。\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [
+        "conditional_branch"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-068",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多轮对话-DIA-002",
+      "user_question": "指间山海 20250325 哪个媒体的 首日ROI 最高？数据是多少？",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：苹果广告最高55.9%\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "media",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [
+        "ranking_topn"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-069",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多轮对话-DIA-F001",
+      "user_question": "先看指间山海2026-03-25广告投放部日报的巨量引擎激活数，如果ROI低于20%再补充看苹果广告",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：20260325广告投放部巨量引擎激活回溯 126，首日roi地域20%,苹果广告的激活数是26\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：日报条件追问",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team",
+        "app_package_type",
+        "terminal",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_label_team",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [
+        "conditional_branch"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-070",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多轮对话-DIA-F002",
+      "user_question": "先查指间山海2026-05-11~2026-05-17广告投放部新增设备留存，如果注册用户留存更高，再告诉我高多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：\n新增设备留存：激活数：565  次留率：50.97%\n注册用户留存：注册数：531 次留率：51.79%\n4、输出查询口径、筛选条件和数据来源，便于复核。\n5、校验点：功能测试点：留存条件追问",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "team",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [
+        "comparison_delta",
+        "conditional_branch"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-071",
+      "priority": "P1",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-SEM-F018",
+      "user_question": "查询指间日报自然量数据",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-072",
+      "priority": "P0",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-数据准确性-FBK-F001",
+      "user_question": "指间和武将觉醒2026-05-17的消耗之和",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：指间：10,184.36 怒焰：20,167.67 合计：30,352.03\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-073",
+      "priority": "P1",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-SEM-F019",
+      "user_question": "指间山海最近投的怎样",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-074",
+      "priority": "P1",
+      "business_domain": "广告报表",
+      "scenario": "广告报表-语义理解-SEM-F020",
+      "user_question": "指间2026-05-11~2026-05-17的完整日报数据",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：人工复核\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-075",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-用户反馈-FBK-F004",
+      "user_question": "指间山海roi报表昨日自然量+巨量首日roi",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：2026-04-07 自然量+巨量 7.37%\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "media",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-076",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "广告报表-多维度交叉-MDIM-F010",
+      "user_question": "指间2026-03-01 IOS应用类型 全天激活数、累计10日roi、3日设备留存数、3日注册留存数、4日首日付费留存数、9点-10点的注册数、截止到9点的首日付费账号数分别是多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：2026-03-01 IOS 激活 202 累计10日ROI: 34.84% 3日设备留存数 85、3日注册留存数 96、4日首日付费留存数 27 2026-03-01 IOS 9点-10点的注册数 13 、截止到9点的首日付费账号数: 12\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_retention_report",
+      "expected_tool": "get_zt_ad_retention_report",
+      "expected_tools": [
+        "get_zt_ad_retention_report",
+        "get_zt_hour_report",
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_retention_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "retention",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "app_package_type",
+        "terminal",
+        "retention_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_retention_report，但该用例需要多工具编排：get_zt_ad_retention_report, get_zt_hour_report, get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-077",
+      "priority": "P0",
+      "business_domain": "媒体报表",
+      "scenario": "广告报表-语义理解-SEM-F021",
+      "user_question": "指间今日截止到9点巨量激活数据多少",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：激活数： 188\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-001",
+      "priority": "P0",
+      "business_domain": "Tools/MCP调用",
+      "scenario": "MCP调用可解释",
+      "user_question": "三国杀OL2026-05-17巨量广告激活数、注册数、折后现金消耗分别是多少？",
+      "expected_result": "1、识别为广告报表查询，并调用广告报表 MCP。\n2、解析入参：项目=三国杀移动版、日期=昨天、媒体=巨量、指标=激活数/注册数/折后现金消耗。\n3、返回结果：\n巨量广告激活数 285、注册数 279、折后现金消耗 4,179.50\n4、MCP 失败时说明失败节点和重试建议。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-002",
+      "priority": "P0",
+      "business_domain": "权限与范围",
+      "scenario": "团队权限边界",
+      "user_question": "在当前账号没有【三国杀移动版】团队权限的情况下，查询【三国杀移动版】昨天巨量投放消耗是多少？",
+      "expected_result": "1、先校验当前账号团队权限。\n2、无权限时不得查询或展示项目真实数据。\n3、提示无权查看或请切换到有权限团队。\n4、不得返回其他项目数据。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "team"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_label_team"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "permission_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-003",
+      "priority": "P0",
+      "business_domain": "多轮上下文",
+      "scenario": "多轮槽位继承",
+      "user_question": "第一轮：查三国杀OL2026-05-17 微信小游戏各媒体激活和注册。第二轮：那 iOS 呢？第三轮：那抖音小游戏 呢？",
+      "expected_result": "1、第二轮沿用第一轮项目、日期、维度和指标。\n腾讯广告  激活972 注册898\n巨量广告 激活 79 注册 78\n小红书  激活 0注册 0\n2、第二轮新增过滤条件：应用类型=iOS。\n苹果广告  激活288 注册 123\n2、第三轮新增过滤条件：应用类型=DOUYIN。\n巨量广告 激活 206  注册 201\n3、上下文不足时先追问确认。\n4、结果中说明继承条件和新增条件。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "app_package_type",
+        "terminal"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-004",
+      "priority": "P0",
+      "business_domain": "指标口径",
+      "scenario": "折后现金消耗知识解释",
+      "user_question": "帮我写一段话，解释什么是折后现金消耗，给运营同学培训用。",
+      "expected_result": "1、识别为指标解释，不触发广告报表 MCP。\n2、优先使用指标解释知识库口径。\n3、说明折后、现金、消耗的含义。\n4、提示与总消耗、赠款消耗等口径差异。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-006",
+      "priority": "P1",
+      "business_domain": "指标口径",
+      "scenario": "二次计算准确性",
+      "user_question": "三国杀OL2026-05-17巨量的注册成本、激活注册率和ROI分别是多少？",
+      "expected_result": "1、调用广告报表 MCP 获取原始分子分母指标。\n2、按广告报表指标口径计算注册成本、激活注册率和 ROI。\n3、返回结果： \n激活数 285 注册成本15.03 注册数 279  首日ROI 1.67% 首日付费金额 70.00 激活注册率：97.9%",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-FBK-007",
+      "priority": "P1",
+      "business_domain": "意图识别",
+      "scenario": "媒体维度识别",
+      "user_question": "三国杀OL2026-05-17按媒体看激活、注册、折后现金消耗。",
+      "expected_result": "1、识别媒体为广告报表维度。\n2、返回全部有数据媒体，包含尾部媒体。\n3、返回结果\n腾讯广告 激活数 972 注册数 898  折后现金消耗 5,575.78\n巨量广告 激活数 285 注册数 279  折后现金消耗 4,179.50\n苹果广告 激活数 288 注册数 123  折后现金消耗 3,952.49\n百度搜索 激活数 101 注册数 66  折后现金消耗 3,161.43\nVivo广告 激活数 0 注册数 0  折后现金消耗 2,886.43\n华为商店广告 激活数 122 注册数 87  折后现金消耗 2,492.43",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "chart_or_comparison",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-008",
+      "priority": "P1",
+      "business_domain": "应用类型",
+      "scenario": "终端/应用类型识别",
+      "user_question": "三国杀小游戏2026-05-11~2026-05-17微信小游戏、B站小游戏、支付宝小游戏的激活、注册、消耗分别是多少？",
+      "expected_result": "1、返回结果：\n微信小游戏的激活 79,944、注册 77,361、消耗 1,072,090.31\nB站小游戏的激活 46 、注册 46、消耗 411.51\n支付宝小游戏的激活 4,158、注册 4,069、消耗 0\n",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "app_package_type",
+        "terminal"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_rpt_os_type_v2",
+        "get_dict_zt_app_package_type"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-009",
+      "priority": "P1",
+      "business_domain": "稳定性与性能",
+      "scenario": "大范围查询超时兜底",
+      "user_question": "查询三国杀移动版2026-02-01~2026-04-30 每天各媒体激活、注册、折后现金消耗、ROI。",
+      "expected_result": "1、识别为大范围多维查询，并合理拆分 MCP 请求。\n2、查询耗时较长时给出阶段性提示。\n人工审核\n3、超时或中断时说明失败节点和缩小范围建议。",
+      "expected_report_domain": "ad_roi_report",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report",
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media",
+        "roi_data_type"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence",
+        "recommended_actions"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "permission_error",
+        "data_empty_or_unavailable",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "当前命中 get_zt_ad_roi_report，但该用例需要多工具编排：get_zt_ad_roi_report, get_zt_ad_day_report。"
+    },
+    {
+      "case_id": "MIG-FBK-010",
+      "priority": "P1",
+      "business_domain": "展示体验",
+      "scenario": "日报格式一致性",
+      "user_question": "按日报格式输出三国杀移动版昨天广告投放整体情况。",
+      "expected_result": "1、按广告日报常用字段顺序输出。\n2、字段名稳定，包含日期、项目、媒体/合计、消耗和转化指标。\n3、区分明细与合计。\n4、表格不得错列、漏列或难以复核。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [
+        "total_detail_reconcile"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-012",
+      "priority": "P1",
+      "business_domain": "数据准确性",
+      "scenario": "媒体明细与总计口径核对",
+      "user_question": "三国杀移动版 2026-05-17 按媒体查看激活数和注册数，帮我核对媒体明细与总计是否一致。",
+      "expected_result": "1、返回各媒体明细和总计。\n2、说明激活数和注册数总计是否为全局去重口径。\n3、若总计为去重口径，说明明细合计可能不等于总计。\n4、给出口径解释和进一步核对建议。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [
+        "total_detail_reconcile"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table",
+        "metric_evidence"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-013",
+      "priority": "P2",
+      "business_domain": "边界场景",
+      "scenario": "无效日期处理",
+      "user_question": "指间山海 2026 年 2 月 29 日激活数和注册数是多少？",
+      "expected_result": "1、识别 2026 年 2 月 29 日为无效日期。\n2、不得发起无意义查询或返回虚构数据。\n3、提示用户更正日期。\n4、可给出相邻日期示例。",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-015",
+      "priority": "P1",
+      "business_domain": "自然量报表",
+      "scenario": "自然量与广告量区分",
+      "user_question": "武将觉醒 2026-05-17自然量激活和广告投放激活分别是多少？",
+      "expected_result": "1、\n自然量激活数：17\n广告投放激活数：204",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "table"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-017",
+      "priority": "P1",
+      "business_domain": "问题排查",
+      "scenario": "查数转诊断",
+      "user_question": "为什么三国杀移动版昨天ROI突然下降？",
+      "expected_result": "1、识别为异常诊断，不只返回 ROI 数字。\n2、查询 ROI、消耗、激活、注册、付费等关键指标并做对比。\n3、按媒体、应用类型、团队等维度定位波动来源。\n4、输出可能原因、证据和下一步排查动作。",
+      "expected_report_domain": "report_diagnosis_candidate",
+      "expected_tool": "get_zt_ad_roi_report",
+      "expected_tools": [
+        "get_zt_ad_roi_report"
+      ],
+      "current_selected_tool": "get_zt_ad_roi_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "roi-trend",
+      "current_tool_match": "exact",
+      "ownership": [
+        "chat_mapping_required",
+        "orchestrator_postprocess",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics"
+      ],
+      "dictionary_tools": [
+        "list_all_apps"
+      ],
+      "postprocess": [
+        "diagnosis_handoff"
+      ],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "metric_evidence",
+        "recommended_actions"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "postprocess_error",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    },
+    {
+      "case_id": "MIG-FBK-018",
+      "priority": "P2",
+      "business_domain": "空结果处理",
+      "scenario": "不存在媒体处理",
+      "user_question": "武将觉醒 2026-05-17 TapTap广告媒体激活数是多少？",
+      "expected_result": "1、返回数据：\nTapTap广告 ：30",
+      "expected_report_domain": "ad_daily_report",
+      "expected_tool": "get_zt_ad_day_report",
+      "expected_tools": [
+        "get_zt_ad_day_report"
+      ],
+      "current_selected_tool": "get_zt_ad_day_report",
+      "current_selected_server": "报表MCP",
+      "current_rule_id": "daily-report",
+      "current_tool_match": "exact",
+      "ownership": [
+        "mcp_native",
+        "chat_mapping_required",
+        "ui_required"
+      ],
+      "required_slots": [
+        "project",
+        "date_range",
+        "metrics",
+        "media"
+      ],
+      "dictionary_tools": [
+        "list_all_apps",
+        "get_dict_zt_all_media"
+      ],
+      "postprocess": [],
+      "ui_contract": [
+        "source_refs",
+        "filters_summary",
+        "recommended_actions"
+      ],
+      "failure_categories": [
+        "route_error",
+        "tool_selection_error",
+        "mcp_call_error",
+        "result_parse_error",
+        "slot_error",
+        "dictionary_error",
+        "data_empty_or_unavailable",
+        "ui_contract_error"
+      ],
+      "current_status": "partial",
+      "status_reason": "MCP tool 命中正确，但仍需要验证后处理或 UI 契约。"
+    }
+  ]
+}

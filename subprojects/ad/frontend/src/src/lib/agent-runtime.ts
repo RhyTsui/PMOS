@@ -33,6 +33,41 @@ function normalizeToolEventType(kind: unknown, phase: 'call' | 'result'): Proces
   return phase === 'call' ? 'mcp.tool_call' : 'mcp.tool_result';
 }
 
+function humanizeToolName(value: string): string {
+  const name = value.trim();
+  const lower = name.toLowerCase();
+  const mappings: Array<[RegExp, string]> = [
+    [/get_app_package_list/i, '应用列表工具'],
+    [/debug_automation_get_result/i, '联调结果工具'],
+    [/debug_automation_get_steps/i, '联调步骤工具'],
+    [/debug_automation_create_task/i, '联调任务创建工具'],
+    [/debug_automation_start_task/i, '联调任务启动工具'],
+    [/zhitou_package\.channel_package_query/i, '项目包查询工具'],
+    [/zhitou_package\.download_url_query/i, '下载地址查询工具'],
+    [/zhitou_package\.create_sub_package/i, '分包生成工具'],
+    [/zhitou_package\.sync_media_sub_package/i, '分包同步工具'],
+    [/media_config\.share_app/i, '媒体应用授权工具'],
+    [/debug\.event_report_check/i, '回传结果检查工具'],
+    [/collect\.platform_event_report_status/i, '上报结果检查工具'],
+    [/get_zt_hour_report|get_ads_report|query_report/i, '报表查询工具'],
+    [/search_knowledge/i, '知识库检索'],
+  ];
+  const matched = mappings.find(([pattern]) => pattern.test(lower));
+  if (matched) return matched[1];
+  const withoutServer = name.split('.').pop() || name;
+  if (/^[a-z0-9_.-]+$/i.test(withoutServer)) return '业务工具';
+  return withoutServer || '业务工具';
+}
+
+function buildToolSummary(toolLabel: string, phase: 'call' | 'result', status?: unknown): string {
+  if (phase === 'call') return `正在调用${toolLabel}，请求内容已收起。`;
+  const normalizedStatus = String(status || '').toLowerCase();
+  if (/failed|error|not_configured|missing/.test(normalizedStatus)) {
+    return `${toolLabel}返回异常，展开查看原因。`;
+  }
+  return `${toolLabel}已返回，展开查看结果。`;
+}
+
 export function processEventsFromSsePayload(payload: unknown): AgentProcessEvent[] {
   const data = asRecord(payload);
   if (!data) return [];
@@ -95,14 +130,16 @@ export function processEventsFromSsePayload(payload: unknown): AgentProcessEvent
   if (type === 'tool_call' || type === 'tool_result') {
     const phase = type === 'tool_call' ? 'call' : 'result';
     const toolName = String(data.display_name || data.name || '工具调用');
+    const toolLabel = humanizeToolName(toolName);
     const kind = String(data.kind || 'mcp');
+    const output = phase === 'result' ? safeJson(data.result) : undefined;
     return [{
       id: eventId(`${phase}-${String(data.name || toolName)}`),
       type: normalizeToolEventType(kind, phase),
-      label: phase === 'call' ? `调用${toolName}` : `${toolName}返回`,
+      label: phase === 'call' ? `调用${toolLabel}` : `${toolLabel}返回`,
       status: phase === 'call' ? 'running' : 'success',
       visibility: 'user',
-      summary: String(data.query || data.result || data.arguments || ''),
+      summary: buildToolSummary(toolLabel, phase, output?.status),
       started_at: createdAt,
       completed_at: phase === 'call' ? undefined : createdAt,
       skill_name: kind === 'skill' ? toolName : undefined,
@@ -110,7 +147,7 @@ export function processEventsFromSsePayload(payload: unknown): AgentProcessEvent
       provider: String(data.provider_url || ''),
       prompt: typeof data.prompt === 'string' ? data.prompt : undefined,
       input: safeJson(data.arguments),
-      output: phase === 'result' ? safeJson(data.result) : undefined,
+      output,
     }];
   }
 

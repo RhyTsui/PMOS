@@ -1,7 +1,7 @@
 'use client';
 
 import React, { type ComponentType, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Input, Modal, Tooltip, message as antMessage } from 'antd';
+import { App, Input, Modal, Tooltip } from 'antd';
 import { motion } from 'framer-motion';
 import {
   BulbOutlined,
@@ -283,6 +283,7 @@ function getCapabilityFollowUpPayload(message: Message): CapabilityFollowUpPaylo
 }
 
 function CopyButton({ text }: { text: string }) {
+  const { message: antMessage } = App.useApp();
   const [copied, setCopied] = useState(false);
   const c = useThemeColors();
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2108,6 +2109,7 @@ export default function ChatContainer({
   chatDisplayConfig = DEFAULT_CHAT_DISPLAY_CONFIG,
   onResultRecommendationsChange,
 }: ChatContainerProps) {
+  const { message: antMessage } = App.useApp();
   const c = useThemeColors();
   const isMobile = useIsMobile();
   const { speak, stopSpeaking, synthesisSupported, speaking } = useSpeech();
@@ -2558,10 +2560,10 @@ export default function ChatContainer({
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
               className="xiaoqiao-empty-logo-wrap"
               data-testid="xiaoqiao-welcome-icon"
-              style={{ position: 'relative', width: 72, height: 72, flexShrink: 0, marginRight: compactWelcome ? 0 : 2 }}
+              style={{ position: 'relative', width: 108, height: 108, flexShrink: 0, marginRight: compactWelcome ? 0 : 2 }}
             >
               <div className="xiaoqiao-empty-logo" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <WelcomeMascotIcon size={72} stageWidth={72} stageHeight={72} />
+                <WelcomeMascotIcon size={108} stageWidth={108} stageHeight={108} />
               </div>
             </motion.div>
             <h1 style={{ margin: compactWelcome ? 0 : '-12px -10px 0 0', fontSize: 22, fontWeight: 500, lineHeight: 1.2, letterSpacing: 0, color: '#000000', textAlign: compactWelcome ? 'center' : 'left' }}>

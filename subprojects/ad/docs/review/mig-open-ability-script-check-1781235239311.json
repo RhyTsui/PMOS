@@ -1,0 +1,142 @@
+{
+  "caseId": "MIG-OPEN-ABILITY-SCRIPT-CHECK",
+  "prompt": "请用一句话说明你能帮我做什么。",
+  "runId": "mig-open-ability-script-check-1781235239311",
+  "baseUrl": "http://10.236.14.27:8002",
+  "conversationId": "conv-1781235253595",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-open-ability-script-check-1781235239311.png",
+  "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+  "evidenceMode": "insufficient_evidence",
+  "planning": {
+    "planner_candidates": [
+      {
+        "source": "request_understanding",
+        "intent_type": "help",
+        "confidence": "medium",
+        "service_intent": "help_qa",
+        "reason": "识别到说明、规则或能力查询诉求，进入帮助链路。"
+      },
+      {
+        "source": "intentorch",
+        "status": "failed",
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tool_names": [],
+        "suggested_tool_confidences": [],
+        "risk_flags": [
+          "candidate_unavailable"
+        ],
+        "duration_ms": 9,
+        "error": "Cloud Intent Engine not initialized. Call initCloudIntentEngine() first."
+      }
+    ],
+    "arbitration_summary": {
+      "selected_composer": "chat_answer_composer",
+      "evidence_mode_hint": "model_only",
+      "evidence_need": "optional",
+      "candidate_sources": [
+        "request_understanding",
+        "intentorch"
+      ],
+      "risk_flags": [
+        "candidate_unavailable",
+        "intentorch_failed"
+      ],
+      "rejected_authorities": [
+        "intentorch_direct_tool_selection",
+        "prompt_keyword_routing",
+        "raw_context_dump"
+      ],
+      "final_authority": "contract_safety"
+    }
+  },
+  "intentOrchEvent": {
+    "id": "intent_orch.candidate-1781235270429-aiv93r",
+    "started_at": "2026-06-12T03:34:30.429Z",
+    "status": "error",
+    "visibility": "internal",
+    "type": "intent_orch.candidate",
+    "label": "IntentOrch 候选",
+    "summary": "IntentOrch 候选不可用：Cloud Intent Engine not initialized. Call initCloudIntentEngine() first.",
+    "duration_ms": 9,
+    "output": {
+      "candidate": {
+        "source": "intentorch",
+        "status": "failed",
+        "duration_ms": 9,
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tools": [],
+        "risk_flags": [
+          "candidate_unavailable"
+        ],
+        "error": "Cloud Intent Engine not initialized. Call initCloudIntentEngine() first."
+      },
+      "arbitration_summary": {
+        "selected_composer": "chat_answer_composer",
+        "evidence_mode_hint": "model_only",
+        "evidence_need": "optional",
+        "candidate_sources": [
+          "request_understanding",
+          "intentorch"
+        ],
+        "risk_flags": [
+          "candidate_unavailable",
+          "intentorch_failed"
+        ],
+        "rejected_authorities": [
+          "intentorch_direct_tool_selection",
+          "prompt_keyword_routing",
+          "raw_context_dump"
+        ],
+        "final_authority": "contract_safety"
+      }
+    }
+  },
+  "processEventTypes": [
+    "intent.detected",
+    "intent_orch.candidate",
+    "route_observation"
+  ],
+  "pendingEventCount": 0,
+  "chatResponseCount": 1,
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: loading, selectedProject: null, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    }
+  ],
+  "failedRequests": [
+    {
+      "url": "http://10.236.14.27:8002/api/chat",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "badResponses": [],
+  "mojibakeFindings": [],
+  "domPreview": "开启新对话 今天 AI功能与能力介绍 AI功能咨询 询问AI可用功能 询问AI能力 你好，用一句话说明你可以做什 询问AI能处理的任务范围 询问AI能力范围 你好，用一句话说明你可以做什 询问AI功能 你好，用一句话说明你可以做什 询问AI功能说明 询问AI能力 询问AI能力与帮助 弦音袅袅花香阵阵是谁的台词 近期上线游戏 7 天内 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 日常问候 日常问候 日常问候 日常问候 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 yoka超管 AI功能与能力介绍 三国杀移动版 请用一句话说明你能帮我做什么。 已返回当前可用结果 查询结果 我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。 qwen3.7-plus-2026-05-26 保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。 请输入你的问题、需求或操作任务",
+  "acceptance": {
+    "pageLoaded": true,
+    "chatCompleted": true,
+    "apiReadbackHealthy": true,
+    "answerQualityHealthy": true,
+    "evidenceModeHealthy": true,
+    "noUnsupportedExternalClaim": true,
+    "intentOrchObservable": true,
+    "planningMetadataHealthy": true,
+    "noPendingRuntimeEvents": true,
+    "consoleHealthy": true,
+    "networkHealthy": true,
+    "noMojibake": true
+  },
+  "failureReason": "",
+  "passed": true
+}

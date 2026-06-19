@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { routeUserIntent } from '@/lib/intent-router';
+import { deriveRequestRouteDecision } from '@/lib/request-understanding';
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({})) as {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }, { status: 400 });
   }
 
-  const route = routeUserIntent(input);
+  const route = deriveRequestRouteDecision(input);
 
   return NextResponse.json({
     trace_id: `intent-route-${Date.now()}`,

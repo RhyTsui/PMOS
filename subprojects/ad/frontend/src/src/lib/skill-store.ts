@@ -1,31 +1,32 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { McpSkill } from '@/types';
-import { DEMO_MCP_SKILLS } from './demo-data';
-import { legacyDataPath, runtimeDataPath } from './runtime-data-path';
+import { runtimeDataPath } from './runtime-data-path';
 
 const SKILLS_PATH = runtimeDataPath('skills.json');
-const LEGACY_SKILLS_PATH = legacyDataPath('skills.json');
 
 interface SkillsFile {
   skills: McpSkill[];
 }
 
 function normalizeSkill(input: Partial<McpSkill>): McpSkill {
+  const mcpServerId = input.mcp_server_id || input.installed_server_id;
   return {
     id: input.id || `skill-${Date.now()}`,
     name: input.name || '',
     description: input.description || '',
+    prompt_template: input.prompt_template || '',
     icon: input.icon || '🔧',
     source: input.source || 'custom',
     category: input.category || 'other',
+    mcp_server_id: mcpServerId,
     endpoint_url: input.endpoint_url || '',
     transport: input.transport || 'streamable-http',
     auth_type: input.auth_type || 'none',
     auth_config_template: input.auth_config_template || {},
     expected_tools: Array.isArray(input.expected_tools) ? input.expected_tools : [],
     installed: Boolean(input.installed),
-    installed_server_id: input.installed_server_id,
+    installed_server_id: mcpServerId,
     tags: Array.isArray(input.tags) ? input.tags : [],
     use_cases: Array.isArray(input.use_cases) ? input.use_cases : [],
     sort_order: input.sort_order || 999,
@@ -35,7 +36,7 @@ function normalizeSkill(input: Partial<McpSkill>): McpSkill {
 }
 
 async function readSkillsFile(): Promise<SkillsFile> {
-  for (const filePath of [SKILLS_PATH, LEGACY_SKILLS_PATH]) {
+  for (const filePath of [SKILLS_PATH]) {
     try {
       const raw = await readFile(filePath, 'utf8');
       const parsed = JSON.parse(raw) as Partial<SkillsFile>;
@@ -46,7 +47,7 @@ async function readSkillsFile(): Promise<SkillsFile> {
       // Try next location.
     }
   }
-  return { skills: DEMO_MCP_SKILLS.map(normalizeSkill) };
+  return { skills: [] };
 }
 
 async function writeSkillsFile(file: SkillsFile): Promise<void> {
@@ -57,6 +58,11 @@ async function writeSkillsFile(file: SkillsFile): Promise<void> {
 export async function listSkills(): Promise<McpSkill[]> {
   const file = await readSkillsFile();
   return file.skills.sort((a, b) => a.sort_order - b.sort_order);
+}
+
+export async function getSkill(id: string): Promise<McpSkill | undefined> {
+  const file = await readSkillsFile();
+  return file.skills.find(skill => skill.id === id);
 }
 
 export async function createSkill(data: Partial<McpSkill>): Promise<McpSkill> {
@@ -86,8 +92,14 @@ export async function updateSkill(id: string, patch: Partial<McpSkill>): Promise
 }
 
 export async function setSkillInstalled(id: string, installed: boolean): Promise<McpSkill | undefined> {
-  return updateSkill(id, {
-    installed,
-    installed_server_id: installed ? `mcp-installed-${id}` : undefined,
-  });
+  return updateSkill(id, { installed });
+}
+
+export async function deleteSkill(id: string): Promise<boolean> {
+  const file = await readSkillsFile();
+  const before = file.skills.length;
+  file.skills = file.skills.filter(skill => skill.id !== id);
+  if (file.skills.length === before) return false;
+  await writeSkillsFile(file);
+  return true;
 }

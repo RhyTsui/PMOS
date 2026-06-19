@@ -1,0 +1,363 @@
+{
+  "caseId": "MIG-OPEN-ABILITY-CANDIDATE-CLEAN2",
+  "prompt": "你好，你现在可以帮我做什么。",
+  "runId": "mig-open-ability-candidate-clean2-1781247400599",
+  "baseUrl": "http://127.0.0.1:8002",
+  "conversationId": "conv-1781247405270",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-open-ability-candidate-clean2-1781247400599.png",
+  "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+  "evidenceMode": "source_grounded",
+  "planning": {
+    "planner_candidates": [
+      {
+        "source": "request_understanding",
+        "intent_type": "general",
+        "confidence": "low",
+        "service_intent": "general_chat",
+        "reason": "未命中明确业务链路，保持普通对话。"
+      },
+      {
+        "source": "intentorch",
+        "status": "timeout",
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tool_names": [],
+        "suggested_tool_confidences": [],
+        "risk_flags": [
+          "candidate_timeout"
+        ],
+        "duration_ms": 1936
+      },
+      {
+        "source": "public_web",
+        "status": "success",
+        "capability_type": "public_web_qa",
+        "reason_code": "public_web.default_general_lookup",
+        "source_count": 1,
+        "source_required": true,
+        "confidence": 0.72,
+        "evidence_role": "candidate_evidence",
+        "risk_flags": [
+          "public_web_requires_composer_arbitration"
+        ]
+      }
+    ],
+    "arbitration_summary": {
+      "selected_composer": "chat_answer_composer",
+      "evidence_mode_hint": "mixed_context",
+      "evidence_need": "recommended",
+      "candidate_sources": [
+        "request_understanding",
+        "intentorch",
+        "public_web"
+      ],
+      "risk_flags": [
+        "candidate_timeout",
+        "public_web_requires_composer_arbitration",
+        "intentorch_timeout"
+      ],
+      "rejected_authorities": [
+        "intentorch_direct_tool_selection",
+        "prompt_keyword_routing",
+        "raw_context_dump"
+      ],
+      "final_authority": "contract_safety"
+    }
+  },
+  "intentOrchEvent": {
+    "id": "intent_orch.candidate-1781247458310-er2vig",
+    "started_at": "2026-06-12T06:57:38.310Z",
+    "status": "waiting",
+    "visibility": "internal",
+    "type": "intent_orch.candidate",
+    "label": "IntentOrch 候选",
+    "summary": "IntentOrch 候选生成超时（1800ms），开放式回答继续由 Planner/Composer 主链处理。",
+    "duration_ms": 1936,
+    "output": {
+      "candidate": {
+        "source": "intentorch",
+        "status": "timeout",
+        "duration_ms": 1936,
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tools": [],
+        "risk_flags": [
+          "candidate_timeout"
+        ],
+        "timeout_ms": 1800
+      },
+      "arbitration_summary": {
+        "selected_composer": "chat_answer_composer",
+        "evidence_mode_hint": "mixed_context",
+        "evidence_need": "recommended",
+        "candidate_sources": [
+          "request_understanding",
+          "intentorch",
+          "public_web"
+        ],
+        "risk_flags": [
+          "candidate_timeout",
+          "public_web_requires_composer_arbitration",
+          "intentorch_timeout"
+        ],
+        "rejected_authorities": [
+          "intentorch_direct_tool_selection",
+          "prompt_keyword_routing",
+          "raw_context_dump"
+        ],
+        "final_authority": "contract_safety"
+      }
+    }
+  },
+  "routeObservationEvent": {
+    "id": "route_observation-1781247505928-yxgtju",
+    "started_at": "2026-06-12T06:58:25.928Z",
+    "status": "success",
+    "visibility": "user",
+    "type": "route_observation",
+    "label": "路由观测",
+    "summary": "路由观测通过：预期 general_chat，实际 general_chat；另有 1 个非阻断提醒。",
+    "output": {
+      "mode": "observe_only",
+      "decisionId": "zt-chat-1781247433949-d29bpb:route-observation",
+      "traceId": "zt-chat-1781247433949-d29bpb",
+      "clientIntent": "general",
+      "serviceIntent": "general_chat",
+      "resolvedIntent": "general_chat",
+      "primaryDeliverable": "chat_answer",
+      "decisionAuthority": {
+        "clientIntent": "hint_only",
+        "prompt": "evidence_only",
+        "domainSignals": "evidence_only",
+        "routeRules": "decision_support",
+        "backendRouteDecision": "authoritative"
+      },
+      "routeEvidence": [
+        {
+          "source": "client_hint",
+          "key": "body.intent",
+          "value": "general",
+          "reason": "Client hint only."
+        },
+        {
+          "source": "route_rule",
+          "key": "route.intent_type",
+          "value": "general",
+          "reason": "未命中明确业务链路，保持普通对话。"
+        },
+        {
+          "source": "fallback_policy",
+          "key": "matches_report_query_route",
+          "value": false
+        },
+        {
+          "source": "conversation_state",
+          "key": "report_continuation",
+          "value": false
+        },
+        {
+          "source": "context",
+          "key": "user_requirement.task",
+          "value": "general"
+        }
+      ],
+      "domainSignals": [],
+      "matchedRules": [],
+      "routeRulesGovernance": [],
+      "skillSelection": {
+        "candidateSkills": [],
+        "readiness": "blocked",
+        "missingInputs": [],
+        "warnings": []
+      },
+      "toolPurpose": "none",
+      "isReportQuery": false,
+      "confidence": 0.35,
+      "needsClarification": false,
+      "warnings": [
+        {
+          "code": "public_web_candidate_continues_to_composer",
+          "message": "公开联网结果已作为候选证据进入通用回答链路。",
+          "severity": "info"
+        },
+        {
+          "code": "client_intent_conflict",
+          "message": "客户端提示 general 与后端路由 general_chat 不一致。",
+          "severity": "warning"
+        }
+      ],
+      "promptRuntime": {
+        "available": true,
+        "activePromptId": "route_prompt",
+        "activePromptVersion": "1",
+        "promptSource": "runtime",
+        "seedFallbackUsed": false,
+        "cacheHit": true,
+        "contentHash": "3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6",
+        "conflicts": [],
+        "conflictWarnings": [],
+        "slots": {
+          "route_prompt": {
+            "activePromptId": "route_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "response_prompt": {
+            "activePromptId": "response_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "7911b04dc727ee205009aa5a64a6c5669f9c4d75734ec3d43f3447d25ae63d0d",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "evidence_prompt": {
+            "activePromptId": "evidence_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "99c70f0485bd9c779fa94e2e67da7902568a05c864b0d7f052e8f1df8936f65c",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "card_prompt": {
+            "activePromptId": "card_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "963778bbe5757cd558bdeab4c924f5122885576e8f8ba05f55ce544a772d6873",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "followup_prompt": {
+            "activePromptId": "followup_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "d8808c1feb9d3598be5b72dc2b8e534a4436eb2aaf59a93d995716b78c9d5dc9",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "tool_explain_prompt": {
+            "activePromptId": "tool_explain_prompt",
+            "activePromptVersion": "1",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "bdd400c089b87c900da7b1e71e812dc5e6137a013fe642b785c4a81a3ba6c838",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "report_query_route_prompt": {
+            "activePromptId": "report_query_route_prompt",
+            "activePromptVersion": "6",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "beaf91a3b5251d7126e7bb772b8ec93ba0de3defa65655e1957e00590bafed7e",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "report_query_answer_prompt": {
+            "activePromptId": "report_query_answer_prompt",
+            "activePromptVersion": "4",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "25ee3aa8e2046c0d12d7fb484fd175969dbc76884d8bda41450c5cb76d813860",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "report_query_visual_prompt": {
+            "activePromptId": "report_query_visual_prompt",
+            "activePromptVersion": "4",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "dde3cfb5c53645c2e48a6e337abbbbb2ca25f87a0d3bcbe5251800e2d28a6cd4",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          },
+          "report_query_evidence_prompt": {
+            "activePromptId": "report_query_evidence_prompt",
+            "activePromptVersion": "4",
+            "promptSource": "runtime",
+            "seedFallbackUsed": false,
+            "cacheHit": true,
+            "contentHash": "de2e497ff966cb6ca214a4e01e4cdb31ae6de5d968795a303c57aaa48ed3360f",
+            "conflicts": "[Truncated]",
+            "conflictWarnings": "[Truncated]"
+          }
+        }
+      },
+      "governanceConflicts": [],
+      "createdAt": "2026-06-12T06:58:25.928Z",
+      "actualExecution": {
+        "actualServiceIntent": "general_chat",
+        "actualIsReportQuery": false,
+        "actualToolPurpose": "none"
+      },
+      "mismatches": [
+        {
+          "code": "client_intent_conflict",
+          "message": "客户端提示 general 与后端路由 general_chat 不一致。",
+          "severity": "warning"
+        }
+      ]
+    }
+  },
+  "processEventTypes": [
+    "intent.detected",
+    "web.search",
+    "web.result",
+    "web.result",
+    "intent_orch.candidate",
+    "route_observation"
+  ],
+  "pendingEventCount": 0,
+  "chatResponseCount": 1,
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: loading, selectedProject: null, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    }
+  ],
+  "failedRequests": [],
+  "badResponses": [],
+  "mojibakeFindings": [],
+  "domPreview": "开启新对话 今天 AI能力咨询 咨询AI功能 询问AI可用功能 你好，你可以做什么 询问AI能力 询问AI可用功能 询问AI功能与帮助 用一句话说明你能做什么 询问AI的功能与帮助 AI功能咨询 AI功能与能力介绍 你好，用一句话说明你可以做什 询问AI能处理的任务范围 询问AI能力范围 你好，用一句话说明你可以做什 询问AI功能 你好，用一句话说明你可以做什 询问AI功能说明 询问AI能力 询问AI能力与帮助 弦音袅袅花香阵阵是谁的台词 近期上线游戏 7 天内 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 日常问候 yoka超管 AI能力咨询 三国杀移动版 你好，你现在可以帮我做什么。 已返回当前可用结果 查询结果 我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。 qwen3.7-plus-2026-05-26 保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。 请输入你的问题、需求或操作任务",
+  "acceptance": {
+    "pageLoaded": true,
+    "chatCompleted": true,
+    "apiReadbackHealthy": true,
+    "answerQualityHealthy": true,
+    "evidenceModeHealthy": true,
+    "noUnsupportedExternalClaim": true,
+    "intentOrchObservable": true,
+    "planningMetadataHealthy": true,
+    "routeObservationHealthy": true,
+    "noPendingRuntimeEvents": true,
+    "consoleHealthy": true,
+    "networkHealthy": true,
+    "noMojibake": true
+  },
+  "failureReason": "",
+  "passed": true
+}

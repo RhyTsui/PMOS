@@ -1,0 +1,51 @@
+{
+  "date": "2026-05-25",
+  "generated_at": "2026-05-25T00:00:00+08:00",
+  "source": {
+    "type": "manual-daily-distill",
+    "daily_report": "docs/review/daily/2026-05-25.md",
+    "distill": "docs/review/daily/2026-05-25.distill.md"
+  },
+  "items": [
+    {
+      "id": "A-20260525-001",
+      "title": "提交登录闭环修复",
+      "requirement": "将 proxy、useAuth、auth-service 中与登录循环修复相关的改动独立提交",
+      "acceptance": "失效 cookie 访问首页会回到 /login?redirect=%2F，且 /login 不再被旧 cookie 拦截",
+      "status": "todo",
+      "priority": "P0"
+    },
+    {
+      "id": "A-20260525-002",
+      "title": "清理登录链路乱码文案",
+      "requirement": "检查登录页、认证 API、layout metadata、auth-service 中的乱码文案",
+      "acceptance": "用户可见文案与维护注释均为可读中文，页面不出现乱码",
+      "status": "todo",
+      "priority": "P0"
+    },
+    {
+      "id": "A-20260525-003",
+      "title": "拆分 Chat UI 体验调整",
+      "requirement": "将输入框、筛选器、会话重命名、保存知识库、Markdown 表格滚动等 UI 改动拆分评审",
+      "acceptance": "每类改动有对应截图或验证说明，避免与认证修复混在同一提交",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "A-20260525-004",
+      "title": "沉淀 PRD v2.2 验收基线",
+      "requirement": "将 docs/prd-v2.2 文档包与当前实现差距建立追踪关系",
+      "acceptance": "形成需求覆盖矩阵或 checkpoint，能区分已实现、部分实现、待实现",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "A-20260525-005",
+      "title": "明确 8002 服务守护方式",
+      "requirement": "确认前端服务启动、重启、日志与端口占用处理方式",
+      "acceptance": "服务退出后有明确恢复步骤或脚本，避免再次出现打不开",
+      "status": "todo",
+      "priority": "P1"
+    }
+  ]
+}

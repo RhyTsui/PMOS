@@ -1,0 +1,58 @@
+{
+  "url": "http://127.0.0.1:8002/?quick_runtime=1781320011573",
+  "firstRuntimeText": "准备执行",
+  "finalState": "empty",
+  "runtimeText": "已处理 1 步",
+  "hasRuntimePanel": true,
+  "hasEmptyPanel": false,
+  "hasRuntimeLogButton": true,
+  "hasPromptButton": false,
+  "hasPrompt": true,
+  "conversationId": "conv-1781320013444",
+  "hasAnswer": true,
+  "rows": [
+    {
+      "elapsedSec": 0,
+      "state": "processing",
+      "runtimeText": "准备执行"
+    },
+    {
+      "elapsedSec": 5,
+      "state": "processing",
+      "runtimeText": "准备执行"
+    },
+    {
+      "elapsedSec": 10,
+      "state": "processing",
+      "runtimeText": "准备执行"
+    },
+    {
+      "elapsedSec": 15,
+      "state": "processing",
+      "runtimeText": "准备执行"
+    },
+    {
+      "elapsedSec": 20,
+      "state": "processing",
+      "runtimeText": "正在补充上下文"
+    },
+    {
+      "elapsedSec": 25,
+      "state": "processing",
+      "runtimeText": "正在补充上下文"
+    },
+    {
+      "elapsedSec": 30,
+      "state": "processing",
+      "runtimeText": "已处理 1 步"
+    }
+  ],
+  "consoleMessages": [],
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:8002/api/chat",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "tail": "验收运行过程17813200\n指间山海-国内\n\n验收运行过程 1781320011573\n\n已处理 1 步\n查询结果\n当前问题场景 system_operation 不在当前回复范围，请先补充更具体需求后再继续。\n运行过程\n意图路由\nJSON\n进入debugging链路。\n运行日志\nqwen3.7-plus-2026-05-26\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。"
+}

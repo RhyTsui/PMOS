@@ -1,3 +1,7 @@
+# ⚠️ LEGACY — Python 后端为历史遗留原型（Ads Flow Insight PoC），非当前主链路。
+# 当前项目主链路全部在 Next.js API Routes（frontend/src/）。
+# 本包保留仅为历史追溯，不建议新开发依赖此路径。
+
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -5,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ad"
 version = "0.1.0"
-description = "Local Ads Flow Insight prototype"
+description = "[LEGACY] Local Ads Flow Insight prototype — 非当前主链路，主链路见 frontend/src/"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

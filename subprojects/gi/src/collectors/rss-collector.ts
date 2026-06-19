@@ -122,10 +122,15 @@ export class RssCollector implements Collector {
 
     const url = normalizeUrl(item.link);
     const title = item.title || '';
-    const content = item.contentSnippet || item.content || '';
+    // 优先使用完整内容（HTML），而非摘要（contentSnippet）
+    const rawContent = item.content || item.contentSnippet || '';
+    const content = this.cleanContent(rawContent);
+
+    // 内容太短时（< 100字），可能是纯摘要，标记以便后续获取全文
+    const isSummaryOnly = content.length < 100 && !!item.link;
 
     // 提取图片
-    const images = this.extractImages(item.content || '');
+    const images = this.extractImages(rawContent);
 
     // 计算 SimHash
     const hash = computeSimHash(`${title} ${content}`);
@@ -137,6 +142,7 @@ export class RssCollector implements Collector {
       categories: (item.categories || []).map((c: any) =>
         typeof c === 'string' ? c : (c._ || c.name || '')
       ).filter(Boolean),
+      isSummaryOnly,
     };
 
     return {
@@ -145,8 +151,8 @@ export class RssCollector implements Collector {
       seedIds: seeds.map(s => s.id),
       url,
       title,
-      content: this.cleanContent(content),
-      contentHtml: item.content || undefined,
+      content,
+      contentHtml: rawContent || undefined,
       summary: item.contentSnippet?.substring(0, 200),
       author: (item as any).author || item.creator || undefined,
       publishedAt: item.isoDate || item.pubDate || undefined,

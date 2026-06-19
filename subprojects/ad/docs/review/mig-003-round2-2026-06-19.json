@@ -1,0 +1,22 @@
+{
+  "testId": "MIG-003",
+  "round": 2,
+  "date": "2026-06-19",
+  "scenario": "行业文档解读",
+  "input": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+  "expectedOutcome": "知识库+联网搜索定位文档",
+  "acceptanceResults": {
+    "pageLoad": { "status": "PASS" },
+    "instantUserMessage": { "status": "PASS" },
+    "aiResponse": { "status": "FAIL", "note": "卡在'进入候选规划阶段'，SSE 流提前关闭" },
+    "titleGeneration": { "status": "FAIL", "note": "标题未更新，保持'新对话'" },
+    "refreshReplay": { "status": "PASS", "note": "用户消息保留" },
+    "consoleErrors": { "status": "WARN", "note": "1 个错误" }
+  },
+  "overallResult": "FAIL",
+  "needsFix": true,
+  "rootCause": "SSE 流管理 bug：Public-web stage 返回 {} (非 terminal) 后，Open-answer stage 的 done 事件推送失败，stream controller 已关闭。与 MIG-002 相同问题。",
+  "modifiedFiles": [],
+  "commitHash": null,
+  "nextCase": "MIG-004"
+}

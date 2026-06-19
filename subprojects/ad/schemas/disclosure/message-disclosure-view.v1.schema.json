@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/disclosure/message-disclosure-view.v1.schema.json",
+  "title": "MessageDisclosureView",
+  "type": "object",
+  "required": [
+    "contractType",
+    "version",
+    "disclosureId",
+    "messageId",
+    "overview",
+    "execution",
+    "evidence",
+    "fields",
+    "qualityChecks",
+    "rawInfo",
+    "permissions",
+    "emptyStates"
+  ],
+  "properties": {
+    "contractType": {
+      "const": "message-disclosure-view"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "disclosureId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "messageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conversationId": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "overview": {
+      "type": "object"
+    },
+    "execution": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "fields": {
+      "type": "object"
+    },
+    "qualityChecks": {
+      "type": "object"
+    },
+    "rawInfo": {
+      "type": "object"
+    },
+    "permissions": {
+      "type": "object"
+    },
+    "emptyStates": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}
+

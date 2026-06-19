@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createUserMemory, listUserMemories, upsertUserMemoryByKey } from '@/lib/user-memory-store';
+import { syncMemoriesToDataki } from '@/lib/dataki-memory-sync';
+import { createUserMemory, getUserMemory, listUserMemories, upsertUserMemoryByKey } from '@/lib/user-memory-store';
+import { getPersonalKnowledgeScopeKey, resolveUserScopeFromRequest } from '@/lib/user-scope';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,9 +17,23 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const scope = await resolveUserScopeFromRequest(request);
   const body = await request.json();
+  const scopedBody = scope && !body.user_id
+    ? { ...body, user_id: scope.key }
+    : body;
   const memory = body?.key
-    ? await upsertUserMemoryByKey(body)
-    : await createUserMemory(body);
-  return NextResponse.json(memory, { status: 201 });
+    ? await upsertUserMemoryByKey(scopedBody)
+    : await createUserMemory(scopedBody);
+  const syncResult = await syncMemoriesToDataki({
+    user_id: memory.user_id,
+    memory_ids: [memory.id],
+    personal_config_scope_key: scope ? getPersonalKnowledgeScopeKey(scope) : memory.user_id,
+  }).catch((error) => ({
+    success: false,
+    status: 'failed',
+    error: error instanceof Error ? error.message : String(error),
+  }));
+  const syncedMemory = await getUserMemory(memory.id);
+  return NextResponse.json({ ...(syncedMemory || memory), sync_result: syncResult }, { status: 201 });
 }

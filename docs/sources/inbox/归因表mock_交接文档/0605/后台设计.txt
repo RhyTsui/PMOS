@@ -1,0 +1,17 @@
+Enterprise AI Chat Operating Platform
+AI Chat OS Control Plane=AI Runtime + Capability + Knowledge + Prompt + Workflow + Governance + Observability
+
+AI Chat OS Admin Console
+│
+├─ Runtime Control Plane
+├─ Capability Management
+├─ Prompt & Policy Management
+├─ Knowledge & Memory
+├─ Workflow & Agent
+├─ Semantic Contract Governance
+├─ Evaluation & Observability
+├─ Security & Permission
+├─ Data & Report Domain
+├─ User & Workspace
+├─ Frontend Rendering Governance
+└─ Operations & Release

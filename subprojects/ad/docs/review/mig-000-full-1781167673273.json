@@ -1,0 +1,53 @@
+{
+  "caseId": "MIG-000",
+  "conversationId": "conv-1781167415961",
+  "sourceReportPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-000-1781167411155.json",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-000-full-1781167673273.png",
+  "api": {
+    "conversationStatus": 200,
+    "messagesStatus": 200,
+    "conversationsStatus": 200,
+    "title": "简单问候",
+    "messageCount": 2,
+    "assistantMessageId": "msg-1781167433486-wk3o6s",
+    "traceId": "zt-chat-1781167420424-0gz866",
+    "hasResponseContract": true,
+    "hasSemanticResult": false,
+    "processEventCount": 2
+  },
+  "page": {
+    "runtimeCardVisible": true,
+    "disclosurePreview": "开启新对话\n今天\n简单问候\n日常问候\n日常问候\n简单问候\n简单问候\n新对话\n新对话\n日常问候\nyoka超管\n简单问候\n请选择项目\n\n你好\n\n已处理 2 步\n\n你好，我在。你可以直接告诉我想查询、分析或处理的事情。\n\n过程与依据\n查看这次结果的来源、执行和原始信息。\n过程与依据\n你好，我在。你可以直接告诉我想查询、分析或处理的事情。\n来源 0\n调用 0\n字段 0\n执行过程\n工具调用\n数据结果\n原始信息\n来源\n字段\n质量\nPrompt\n执行状态\n你好，我在。你可以直接告诉我想查询、分析或处理的事情。\ncompleted\n执行步骤\n确定路由\nsucceeded\n路由观测\nsucceeded\n大模型检测中\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。",
+    "replayPreview": "开启新对话\n今天\n简单问候\n日常问候\n日常问候\n简单问候\n简单问候\n新对话\n新对话\n日常问候\nyoka超管\n简单问候\n请选择项目\n\n你好\n\n已处理 2 步\n\n你好，我在。你可以直接告诉我想查询、分析或处理的事情。\n\n大模型检测中\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。"
+  },
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    }
+  ],
+  "failedRequests": [],
+  "mojibakeFindings": [],
+  "acceptance": {
+    "apiReadbackHealthy": true,
+    "replayHealthy": true,
+    "disclosureHealthy": true,
+    "titleHealthy": true,
+    "networkHealthy": true,
+    "noConsoleErrors": true,
+    "noMojibake": true
+  },
+  "passed": true
+}

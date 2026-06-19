@@ -1,0 +1,141 @@
+{
+  "caseId": "MIG-OPEN-ABILITY",
+  "prompt": "你好，请用一句话说明你现在可以帮我做什么。",
+  "runId": "mig-open-ability-1781233851380",
+  "baseUrl": "http://10.236.14.27:8002",
+  "conversationId": "conv-1781233855401",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-open-ability-1781233851380.png",
+  "answer": "我可以帮您查询和分析素材趋势、创意表现及广告账户报表数据，辅助您判断素材方向与优化空间。",
+  "evidenceMode": "model_only",
+  "planning": {
+    "planner_candidates": [
+      {
+        "source": "request_understanding",
+        "intent_type": "help",
+        "confidence": "medium",
+        "service_intent": "help_qa",
+        "reason": "识别到说明、规则或能力查询诉求，进入帮助链路。"
+      },
+      {
+        "source": "intentorch",
+        "status": "timeout",
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tool_names": [],
+        "suggested_tool_confidences": [],
+        "risk_flags": [
+          "candidate_timeout"
+        ],
+        "duration_ms": 1959
+      }
+    ],
+    "arbitration_summary": {
+      "selected_composer": "chat_answer_composer",
+      "evidence_mode_hint": "model_only",
+      "evidence_need": "optional",
+      "candidate_sources": [
+        "request_understanding",
+        "intentorch"
+      ],
+      "risk_flags": [
+        "candidate_timeout",
+        "intentorch_timeout"
+      ],
+      "rejected_authorities": [
+        "intentorch_direct_tool_selection",
+        "prompt_keyword_routing",
+        "raw_context_dump"
+      ],
+      "final_authority": "contract_safety"
+    }
+  },
+  "intentOrchEvent": {
+    "id": "intent_orch.candidate-1781233890015-ny23qn",
+    "started_at": "2026-06-12T03:11:30.015Z",
+    "status": "error",
+    "visibility": "internal",
+    "type": "intent_orch.candidate",
+    "label": "IntentOrch 候选",
+    "summary": "IntentOrch 候选生成超时（1800ms），开放式回答继续由 Planner/Composer 主链处理。",
+    "duration_ms": 1959,
+    "output": {
+      "candidate": {
+        "source": "intentorch",
+        "status": "timeout",
+        "duration_ms": 1959,
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tools": [],
+        "risk_flags": [
+          "candidate_timeout"
+        ],
+        "timeout_ms": 1800
+      },
+      "arbitration_summary": {
+        "selected_composer": "chat_answer_composer",
+        "evidence_mode_hint": "model_only",
+        "evidence_need": "optional",
+        "candidate_sources": [
+          "request_understanding",
+          "intentorch"
+        ],
+        "risk_flags": [
+          "candidate_timeout",
+          "intentorch_timeout"
+        ],
+        "rejected_authorities": [
+          "intentorch_direct_tool_selection",
+          "prompt_keyword_routing",
+          "raw_context_dump"
+        ],
+        "final_authority": "contract_safety"
+      }
+    }
+  },
+  "processEventTypes": [
+    "intent.detected",
+    "intent_orch.candidate",
+    "route_observation"
+  ],
+  "pendingEventCount": 0,
+  "chatResponseCount": 1,
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: loading, selectedProject: null, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    }
+  ],
+  "failedRequests": [
+    {
+      "url": "http://10.236.14.27:8002/api/chat",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "badResponses": [],
+  "mojibakeFindings": [],
+  "domPreview": "开启新对话 今天 询问AI功能 你好，用一句话说明你可以做什 询问AI功能说明 询问AI能力 询问AI能力与帮助 弦音袅袅花香阵阵是谁的台词 近期上线游戏 7 天内 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 日常问候 日常问候 日常问候 日常问候 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 日常问候 简单问候 日常问候 日常问候 简单问候 yoka超管 询问AI功能 三国杀移动版 你好，请用一句话说明你现在可以帮我做什么。 已处理 1 步 · 用时 2.0s 查询结果 我可以帮您查询和分析素材趋势、创意表现及广告账户报表数据，辅助您判断素材方向与优化空间。 qwen3.7-plus-2026-05-26 保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。",
+  "acceptance": {
+    "pageLoaded": true,
+    "chatCompleted": false,
+    "apiReadbackHealthy": true,
+    "answerQualityHealthy": true,
+    "evidenceModeHealthy": true,
+    "noUnsupportedExternalClaim": true,
+    "intentOrchObservable": true,
+    "planningMetadataHealthy": true,
+    "noPendingRuntimeEvents": true,
+    "consoleHealthy": true,
+    "networkHealthy": false,
+    "noMojibake": true
+  },
+  "failureReason": "chatCompleted, networkHealthy",
+  "passed": false
+}

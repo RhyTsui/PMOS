@@ -1,0 +1,36 @@
+{
+  "testId": "MIG-002",
+  "round": 2,
+  "date": "2026-06-19",
+  "scenario": "新闻解读",
+  "input": "最近有哪些游戏上线",
+  "expectedOutcome": "联网搜索获取最近上线游戏信息",
+  "capabilityDomains": ["Chat Runtime", "LLM 意图理解", "联网搜索", "Open Answer Stage"],
+  "round1Failure": "失败（具体原因待查）",
+  "acceptanceResults": {
+    "pageLoad": { "status": "PASS" },
+    "instantUserMessage": { "status": "PASS", "note": "用户消息立即显示" },
+    "aiResponse": {
+      "status": "BLOCKED",
+      "note": "响应卡在'进入候选规划阶段'，AI 未输出最终答案。模型 API 配额耗尽（429）导致模型调用失败，SSE 流提前关闭。"
+    },
+    "searchInvocation": { "status": "UNCERTAIN", "note": "SSE 捕获失败，无法确认搜索是否触发。管道进入规划阶段说明意图识别正常。" },
+    "titleGeneration": { "status": "PASS", "note": "会话标题自动生成'有哪些游戏上线'/'近期上线游戏'" },
+    "refreshReplay": { "status": "UNCERTAIN", "note": "未完成完整响应，刷新测试未执行" },
+    "consoleErrors": { "status": "PASS" },
+    "httpErrors": { "status": "WARN", "note": "1 个 HTTP 500（model-service-config）" }
+  },
+  "overallResult": "BLOCKED_BY_EXTERNAL",
+  "needsFix": false,
+  "rootCause": "阿里云百炼模型 API 配额耗尽（429 Rate Limit）。模型连接超时 30s × 2 次后触发 429 错误。SSE 流在响应推送前关闭（'SSE push skipped after stream closed'）。",
+  "serverLogs": [
+    "model_connect_timeout:30000 (attempt 1, 2)",
+    "429 You exceeded your current quota (attempt 3)",
+    "POST /api/chat 200 in 25s (fallback path)",
+    "SSE push skipped after stream closed"
+  ],
+  "modifiedFiles": [],
+  "commitHash": null,
+  "nextCase": "MIG-003 (行业文档解读)",
+  "note": "此用例受外部 API 配额限制阻塞，非代码 bug。待 API 配额恢复后重测。"
+}

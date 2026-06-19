@@ -183,6 +183,7 @@ export interface EvidenceMetadata {
   categories?: string[];
   searchQuery?: string;
   searchRank?: number;
+  isSummaryOnly?: boolean;
 }
 
 // ===== 结构化事件 =====

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3. 配置真源 + 模块职责</title>
+  <link rel="stylesheet" href="./review.css" />
+</head>
+<body>
+  <div class="shell">
+    <div class="hero">
+      <h1>3. 配置真源 + 模块职责</h1>
+      <p class="muted">本页对应 review 的第三部分：配置从哪来、谁写、谁读、是否生效，以及各模块在当前实现里的职责。</p>
+      <div class="nav">
+        <a href="./index.html">总入口</a>
+        <a href="./2-source-of-truth-and-diagrams.html">上一页：总纲索引 + 架构图</a>
+        <a href="./4-drift-risk-and-roadmap.html">下一页：Drift + 风险 + 路线图</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>3.1 配置真源地图</h2>
+      <table>
+        <tr>
+          <th>配置对象</th>
+          <th>后台页面</th>
+          <th>API</th>
+          <th>runtime 文件</th>
+          <th>seed 文件</th>
+          <th>store</th>
+          <th>loader</th>
+          <th>active</th>
+          <th>cache</th>
+          <th>影响运行时</th>
+        </tr>
+        <tr><td>prompt configs</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/prompts*</code></td><td><code>runtime-data/prompt-configs.json</code></td><td><code>managed-prompt-seeds.ts</code></td><td><code>prompt-store.ts</code></td><td><code>getActivePromptContent</code> / <code>getPromptConfigMetadata</code></td><td>是</td><td>是</td><td>是</td></tr>
+        <tr><td>intent route rules</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/intent-route-rules</code></td><td><code>runtime-data/intent-route-rules.json</code></td><td><code>advertising-domain-pack.ts</code></td><td><code>intent-route-rules-store.ts</code></td><td><code>loadIntentRouteRulesSync</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>entity resolution</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/entity-resolution-config</code></td><td><code>runtime-data/entity-resolution-config.json</code></td><td>builtin seed</td><td><code>entity-resolution-config-store.ts</code></td><td><code>loadEntityResolutionConfigSync</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>report query policy</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/report-query-policy</code></td><td><code>runtime-data/report-query-policy.json</code></td><td>builtin seed</td><td><code>report-query-policy-store.ts</code></td><td><code>loadReportQueryPolicySync</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>report capability overrides</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/report-capability-overrides</code></td><td><code>runtime-data/report-capability-overrides.json</code></td><td>builtin defaults</td><td><code>report-capability-override-store.ts</code></td><td><code>loadReportCapabilityOverridesSync</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>MCP servers</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/mcp-servers*</code></td><td><code>runtime-data/mcp-servers.json</code></td><td>builtin defaults</td><td><code>mcp-server-store.ts</code></td><td><code>listMcpServers</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>feature switches</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/feature-switches*</code></td><td><code>runtime-data/feature-switches.json</code></td><td>builtin defaults</td><td><code>feature-switch-store.ts</code></td><td><code>loadFeatureSwitchesSync</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>skill contracts</td><td><code>app/admin/page.tsx</code> / skills 页面</td><td><code>/api/xiaoqiao/skill-contracts*</code></td><td><code>runtime-data/skill-contracts.json</code></td><td>builtin contracts</td><td><code>skill-contract-store.ts</code></td><td><code>listSkillContracts</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>workflow configs</td><td><code>app/admin/page.tsx</code></td><td><code>automation-templates</code> / <code>report-drafts</code> / <code>report-template-results</code></td><td><code>workflow-tasks.json</code> / <code>automation-*</code></td><td>builtin defaults</td><td><code>workflow-task-store.ts</code> / <code>automation-*</code></td><td><code>startWorkflowRun</code> / <code>createWorkflowTask</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>domain pack</td><td>无独立页面，混入 admin / route rules / prompt</td><td>间接</td><td>代码种子</td><td><code>advertising-domain-pack.ts</code></td><td><code>advertising-domain-pack.ts</code></td><td><code>normalizeDomainPacks</code></td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>metric / media / project / package config</td><td><code>entity resolution</code> / <code>report-query-policy</code> / <code>MCP</code></td><td>对应各 store</td><td>各自 runtime json</td><td>builtin seed</td><td><code>metric-catalog.ts</code>、<code>dimension-catalog.ts</code>、<code>entity-resolution-config-store.ts</code></td><td>各自 loader</td><td>是</td><td>否</td><td>是</td></tr>
+        <tr><td>chat display config</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/chat-display-config</code></td><td><code>runtime-data/running-config.json</code> / <code>runtime-config.json</code></td><td>builtin defaults</td><td><code>runtime-config.ts</code></td><td><code>getChatDisplayConfig</code></td><td>是</td><td>是</td><td>是</td></tr>
+        <tr><td>user / workspace / project scope</td><td><code>auth</code> / <code>workspace</code> / <code>project</code> 页面</td><td><code>/api/xiaoqiao/auth/*</code>、<code>/api/xiaoqiao/workspace</code></td><td>会话 / 用户态数据</td><td>builtin defaults</td><td><code>user-scope.ts</code> / <code>conversation-store.ts</code> / <code>user-preference-store.ts</code></td><td><code>resolveUserScopeFromRequest</code></td><td>是</td><td>部分</td><td>是</td></tr>
+        <tr><td>operation logs</td><td><code>app/admin/page.tsx</code></td><td><code>/api/xiaoqiao/admin/operation-logs</code></td><td><code>runtime-data/operation-logs.json</code></td><td>无</td><td><code>admin-operation-log-store.ts</code></td><td><code>loadOperationLogs</code></td><td>是</td><td>否</td><td>是</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>3.2 模块职责清单</h2>
+      <table>
+        <tr>
+          <th>模块</th>
+          <th>文件 / 目录</th>
+          <th>当前职责</th>
+          <th>上游</th>
+          <th>下游</th>
+          <th>运行时生效</th>
+          <th>控制面</th>
+          <th>执行面</th>
+          <th>风险</th>
+        </tr>
+        <tr><td>request-understanding</td><td><code>frontend/src/src/lib/request-understanding.ts</code></td><td>识别 task / serviceIntent / routeEvidence / domainSignals / capabilityCandidates</td><td>用户输入、上下文</td><td>route decision、report runtime</td><td>是</td><td>否</td><td>是</td><td>高</td></tr>
+        <tr><td>intent-router</td><td><code>frontend/src/src/lib/intent-router.ts</code></td><td>旧式意图路由</td><td>用户输入</td><td>历史 golden / shadow path</td><td>低</td><td>否</td><td>是</td><td>高</td></tr>
+        <tr><td>intent-route-rules</td><td><code>frontend/src/src/lib/intent-route-rules.ts</code> / store</td><td>规则打分、加载、发布</td><td>admin 配置、domain pack</td><td>route decision</td><td>是</td><td>是</td><td>是</td><td>中</td></tr>
+        <tr><td>intent-route-engine</td><td><code>frontend/src/src/lib/intent-route-engine.ts</code></td><td>规则 + LLM + role 的复合路由</td><td>rules、servers、context</td><td>composite route decision</td><td>低</td><td>否</td><td>是</td><td>高</td></tr>
+        <tr><td>context-compiler</td><td><code>frontend/src/src/lib/context-compiler.ts</code></td><td>编译上下文、角色、偏好、slot、项目、任务</td><td>会话 / 用户 / 项目</td><td>route hints</td><td>是</td><td>部分</td><td>是</td><td>中</td></tr>
+        <tr><td>route-decision-observation</td><td><code>frontend/src/src/lib/route-decision-observation.ts</code></td><td>只读观测与偏差记录</td><td>route decision、capability decision</td><td>metadata / trace / golden</td><td>是</td><td>否</td><td>是</td><td>中</td></tr>
+        <tr><td>response-contract</td><td><code>frontend/src/src/lib/response-contract.ts</code></td><td>legacy envelope + metadata + message parts</td><td>workflow result / semantic result</td><td>前端消息、trace</td><td>是</td><td>否</td><td>是</td><td>高</td></tr>
+        <tr><td>report-query-orchestrator</td><td><code>frontend/src/src/lib/report-query-orchestrator.ts</code></td><td>问数能力选择 / preflight / tool chain / 业务结果</td><td>requirement / servers / manifest</td><td>report result / semantic result</td><td>是</td><td>部分</td><td>是</td><td>高</td></tr>
+        <tr><td>capability-orchestration</td><td><code>frontend/src/src/lib/capability-orchestration.ts</code></td><td>manifest / coverage / execution decision</td><td>requirement、capability manifest</td><td>capabilityDecision</td><td>是</td><td>部分</td><td>是</td><td>高</td></tr>
+        <tr><td>report-capability-manifest</td><td><code>frontend/src/src/lib/report-capability-manifest.ts</code></td><td>报表能力清单</td><td>MCP servers、overrides</td><td>capability selector</td><td>是</td><td>是</td><td>是</td><td>中</td></tr>
+        <tr><td>mcp-server-store</td><td><code>frontend/src/src/lib/mcp-server-store.ts</code></td><td>MCP server store 真源</td><td>admin API</td><td>manifest / selector</td><td>是</td><td>是</td><td>是</td><td>中</td></tr>
+        <tr><td>prompt-store</td><td><code>frontend/src/src/lib/prompt-store.ts</code></td><td>prompt 版本 / active prompt / fallback / cache</td><td>admin prompts / seeds</td><td>runtime prompt</td><td>是</td><td>是</td><td>否</td><td>高</td></tr>
+        <tr><td>managed-prompt-seeds</td><td><code>frontend/src/src/lib/managed-prompt-seeds.ts</code></td><td>内置 prompt seed</td><td>编译期</td><td>prompt-store init</td><td>是</td><td>半控制面</td><td>否</td><td>中</td></tr>
+        <tr><td>advertising-domain-pack</td><td><code>frontend/src/src/lib/advertising-domain-pack.ts</code></td><td>广告域信号 / pack / seed</td><td>domain 词库</td><td>route rules / manifest</td><td>是</td><td>部分</td><td>是</td><td>中</td></tr>
+        <tr><td>skill-orchestration</td><td><code>frontend/src/src/lib/skill-orchestration.ts</code></td><td>skill candidate / execution</td><td>skill contracts / message</td><td>skill runtime / trace</td><td>是</td><td>是</td><td>是</td><td>中</td></tr>
+        <tr><td>semantic-result-contract</td><td><code>frontend/src/src/contracts/semantic/*</code></td><td>最终业务结果协议</td><td>后端 / skill / MCP</td><td>renderer / projection</td><td>是</td><td>否</td><td>是</td><td>低到中</td></tr>
+        <tr><td>message presentation</td><td><code>frontend/src/src/components/cognitive/message-presentation*.ts[x]</code></td><td>contract 到 UI 投影</td><td>semantic result / message contract</td><td>Chat UI / Right panel</td><td>是</td><td>否</td><td>是</td><td>中</td></tr>
+        <tr><td>admin page</td><td><code>frontend/src/src/app/admin/page.tsx</code></td><td>管理控制台聚合入口</td><td>admin APIs</td><td>UI tabs / forms</td><td>是</td><td>是</td><td>否</td><td>高</td></tr>
+        <tr><td>admin APIs</td><td><code>frontend/src/src/app/api/xiaoqiao/admin/*</code></td><td>配置写入口</td><td>UI</td><td>runtime JSON / store</td><td>是</td><td>是</td><td>部分</td><td>高</td></tr>
+        <tr><td>route golden scripts</td><td><code>frontend/src/scripts/*.ts</code></td><td>路由 / runtime / observation golden</td><td>当前实现</td><td>CI / 手工验收</td><td>否</td><td>否</td><td>否</td><td>中</td></tr>
+      </table>
+    </div>
+
+    <div class="footer-nav">
+      <a class="pill" href="./2-source-of-truth-and-diagrams.html">← 上一页</a>
+      <a class="pill" href="./4-drift-risk-and-roadmap.html">下一页 →</a>
+    </div>
+  </div>
+</body>
+</html>
+

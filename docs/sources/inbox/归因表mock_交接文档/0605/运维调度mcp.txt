@@ -1,0 +1,8 @@
+智投调度
+project
+aiad-azkaban-job-v2
+
+folw_id:
+20分钟调度：mainland01-realtime-job
+天级任务调度：mainland01-daily-job
+分钟调度：attr-minute-job

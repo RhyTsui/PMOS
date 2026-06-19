@@ -1,0 +1,2904 @@
+{
+  "batch": "runtime-full-no-browser-20260615",
+  "stamp": "20260615-093226",
+  "summary": {
+    "REVIEW": 30,
+    "PASS": 6
+  },
+  "total": 107,
+  "completed": 36,
+  "offset": 0,
+  "limit": null,
+  "caseTimeoutMs": 0,
+  "results": [
+    {
+      "rowIndex": 2,
+      "id": "MIG-000",
+      "scenario": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 18243,
+      "answer": "你好！我是小乔智投通用 AI 助手。我可以帮你查询投放数据（如消耗、ROI和转化表现）、定位数据异常和风险点，或者协助进行广告联调配置检查等。请问今天有什么我可以帮你的？",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "general",
+                "confidence": "low",
+                "service_intent": "general_chat",
+                "reason": "未命中明确业务链路，保持普通对话。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 3,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 3,
+      "id": "MIG-001",
+      "scenario": "天气",
+      "prompt": "南京本周日天气如何",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 21673,
+      "answer": "我没有检索到足够可靠的公开来源来确认南京本周日的天气情况，因此无法提供已证实的结论。建议您通过官方气象网站或应用查询最新天气信息，或者提供更具体的官方链接以便我为您重新判断。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "route_observation"
+      ],
+      "runtimeStatus": "failed",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "provider": "configured_web_search",
+        "summary": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "南京本周日天气如何",
+          "warnings": [
+            "relevance_gate_filtered_all"
+          ],
+          "reasonCode": "public_web.no_results",
+          "reasonContext": {
+            "topic": "南京本周日天气如何",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "how_to",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "standard",
+            "source_policy": "official_first",
+            "query_strategy": "official_domain_discovery",
+            "redaction_policy": "none",
+            "reasons": [
+              "fresh_official_source_needed"
+            ],
+            "queries": [
+              {
+                "query": "南京本周日天气如何",
+                "purpose": "primary"
+              },
+              {
+                "query": "南京本周日天气如何 official",
+                "purpose": "verification"
+              },
+              {
+                "query": "南京本周日天气如何 official latest",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": true
+        }
+      }
+    },
+    {
+      "rowIndex": 4,
+      "id": "MIG-002",
+      "scenario": "新闻解读",
+      "prompt": "最近有哪些游戏上线",
+      "keyPoint": "联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 39911,
+      "answer": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "route_observation"
+      ],
+      "runtimeStatus": "failed",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "provider": "configured_web_search",
+        "summary": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "public_web_qa",
+          "sourceRequired": true,
+          "sanitizedQuery": "最近有哪些游戏上线",
+          "warnings": [
+            "relevance_gate_filtered_all"
+          ],
+          "reasonCode": "public_web.no_results",
+          "reasonContext": {
+            "topic": "最近有哪些游戏上线",
+            "policy": "llm",
+            "confidence": 0.72
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "unknown",
+            "authority_need": "multi_source_consensus",
+            "freshness_need": "live",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "deep",
+            "source_policy": "multi_source_consensus",
+            "query_strategy": "cross_source_compare",
+            "redaction_policy": "none",
+            "reasons": [
+              "high_risk_or_consensus_needed"
+            ],
+            "queries": [
+              {
+                "query": "最近有哪些游戏上线",
+                "purpose": "primary"
+              },
+              {
+                "query": "最近有哪些游戏上线 latest official sources",
+                "purpose": "verification"
+              },
+              {
+                "query": "最近有哪些游戏上线 source comparison",
+                "purpose": "verification"
+              }
+            ]
+          },
+          "model_fallback_used": true
+        }
+      }
+    },
+    {
+      "rowIndex": 5,
+      "id": "MIG-003",
+      "scenario": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 26320,
+      "answer": "我没有检索到足够可靠的公开来源来确认巨量媒体监测回传文档的具体位置。建议补充更具体的名称、入口路径、官方页面或上下文；如果您已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "web.search",
+        "web.result",
+        "web.search",
+        "web.result",
+        "route_observation"
+      ],
+      "runtimeStatus": "failed",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "provider": "configured_web_search",
+        "summary": "我没有检索到足够可靠的公开来源，因此不能把它当作已证实结论。\n\n建议补充更具体的名称、入口路径、官方页面或上下文；如果你已经有官方链接，可以继续发给我，我会按可验证来源重新判断。",
+        "metadata": {
+          "primaryGoal": "fetch_external_public_info",
+          "capabilityType": "web_search",
+          "sourceRequired": true,
+          "sanitizedQuery": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+          "warnings": [
+            "relevance_gate_filtered_all"
+          ],
+          "reasonCode": "public_web.no_results",
+          "reasonContext": {
+            "topic": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+            "policy": "heuristic",
+            "confidence": 0.9
+          },
+          "factNeed": {
+            "answer_shape": "trend_or_summary",
+            "fact_visibility": "public",
+            "authority_need": "official_source",
+            "freshness_need": "not_relevant",
+            "sensitivity": "none",
+            "consequence_risk": "high",
+            "ambiguity": []
+          },
+          "providerEligibility": {
+            "provider": "public_web",
+            "eligible": true,
+            "role": "primary_answer",
+            "reasons": [
+              "provider_authority_profile_matched"
+            ],
+            "rejectedBy": []
+          },
+          "searchPlan": {
+            "allowed": true,
+            "role": "primary_answer",
+            "depth": "shallow",
+            "source_policy": "stable_reference",
+            "query_strategy": "background_reference",
+            "redaction_policy": "none",
+            "reasons": [
+              "generic_public_evidence_needed"
+            ],
+            "queries": [
+              {
+                "query": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体",
+                "purpose": "primary"
+              },
+              {
+                "query": "https://open.oceanengine.com/labels/7 监测回传文档在哪 巨量 媒体 reference",
+                "purpose": "background"
+              }
+            ]
+          },
+          "model_fallback_used": true
+        }
+      }
+    },
+    {
+      "rowIndex": 6,
+      "id": "MIG-004",
+      "scenario": "行业知识问答",
+      "prompt": "腾讯iOS要接sdk吗",
+      "keyPoint": "知识库 联网搜索",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 26398,
+      "answer": "当前证据不足，无法直接确认腾讯媒体在iOS端是否需要接入SDK。建议您通过以下方式进行验证：1. 查阅腾讯广告或相关媒体平台最新的官方开发者接入文档；2. 联系平台技术支持或您的业务对接人，确认当前业务场景下的具体接入要求及iOS隐私合规规范。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问腾讯媒体在iOS端是否需要接入SDK，属于接入条件、准备事项及能力支持范围的说明类咨询，匹配help意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 2,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 7,
+      "id": "MIG-005",
+      "scenario": "系统知识问答",
+      "prompt": "我们支持鸿蒙吗",
+      "keyPoint": "知识库 多轮会话",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 29908,
+      "answer": "根据当前可用的上下文和证据，无法确认我们是否支持鸿蒙系统。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问是否支持鸿蒙系统，属于能力支持范围的说明类问题，匹配 help 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 8,
+      "id": "MIG-006",
+      "scenario": "系统操作帮助",
+      "prompt": "能不能选一个事件作为付费回传",
+      "keyPoint": "知识库 多轮会话",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 36113,
+      "answer": "基于当前可用的证据，无法直接确认是否可以选择特定事件作为付费回传。具体的事件选择规则通常取决于当前接入的媒体平台要求以及项目的事件资产配置。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问是否可以选择特定事件作为付费回传，属于对系统能力支持范围、配置规则或接入条件的咨询，符合说明帮助或配置说明帮助的定义。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 9,
+      "id": "MIG-007",
+      "scenario": "指标解释",
+      "prompt": "有效是哪个点位",
+      "keyPoint": "知识库",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 24004,
+      "answer": "由于当前缺乏具体的项目上下文和知识库证据，无法确认您所指的“有效”具体对应哪个事件点位。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "real_llm",
+        "composer_name": "chat_answer",
+        "model_span_id": "0000000000000000",
+        "model_name": "qwen3.7-plus-2026-05-26",
+        "summary": "通用回答由模型在有可执行工具场景下生成，未修改工具事实。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "help",
+                "confidence": "high",
+                "service_intent": "help_qa",
+                "reason": "Planner 候选：用户询问“有效”指标对应的具体事件点位，属于字段口径、规则或事件定义的说明类咨询，符合 help 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "no_hit",
+                "available": true,
+                "hit_count": 0,
+                "knowledge_base_count": 5,
+                "evidence_role": "not_applicable",
+                "freshness": "unknown",
+                "risk_flags": [
+                  "knowledge_no_hit"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "model_only",
+              "evidence_need": "optional",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_no_hit"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 13,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 10,
+      "id": "MIG-008",
+      "scenario": "系统说明",
+      "prompt": "素材报表的未知是什么",
+      "keyPoint": "知识库",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 137802,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 11,
+      "id": "MIG-009",
+      "scenario": "查大盘数据",
+      "prompt": "看下近7天的日报数据",
+      "keyPoint": "时间、tool发现",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 131458,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 12,
+      "id": "MIG-010",
+      "scenario": "查维度数据",
+      "prompt": "巨量iOS创新的投放效果，带自然量",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 13016,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：应用类型: 安卓,IOS,H5,字段名: os_type,字段说明: 终端,来源: 原有,是否必含: 可含，非必备\n应用类型: 安卓,IOS,H5,字段名: channel,字段说明: 渠道ID,来源: 原有,是否必含: 必含\n应用类型: H5,字段名: login_from,字...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定媒体（巨量）、特定系统（iOS）的投放效果数据，并要求包含自然量指标，属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 29,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 29,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 13,
+      "id": "MIG-011",
+      "scenario": "查明细数据",
+      "prompt": "查一下直播包的数据",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11812,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：---\ntitle: 广告直播报表\ndescription: 广告直播报表-\ndate: 2025-06-11\ntags: ['MinDoc,文档在线管理系统,WIKI,wiki,wiki在线,文档在线管理,接口文档在线管理,接口文档管理,数据服务文档,广告直播报表']\n---\n...[truncated]\n- 相关资料：# Document\n\n\n# Summary\n广告直播报表模块提供直播相关的广告数据与市场数据查询功能。该报表可帮助用户了解直播活动的广告投放效果，同时支持对达人数据进行细分查看，便于进一步分析合作达人的表现。\n- 相关资料：根据您补充的信息，我理解您的意思是：\n\n**关于投放策略的选择：**\n\n| 维度 | 可选方案 | 说明 |\n|------|---------|------|\n| 投放目标 | 促活 / 召回 / 不区分 | 取决于业务策略 |\n| 包体选择 | 新包 / 老包 / 不区分包 ...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询“直播包的数据”，属于广告数据报表查询需求，意图为获取特定维度（直播包）的报表数据。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 4,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 17,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 17,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 14,
+      "id": "MIG-012",
+      "scenario": "查维度数据",
+      "prompt": "三国杀小游戏 鸿蒙端的数据",
+      "keyPoint": "终端",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 12137,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：# **v3.14.2-三国杀数据处理**\n\n# **一、背景**\n\n三小11月份改成8002（创角）作为登录、注册后的遗留问题：\n\n1.回流注册也一并改了，用的创角8002，导致报表数据几乎没有，应该用活跃登录即8001。\n\n2.如果激活依旧用8002，回流用8001，那回流归...[truncated]\n- 相关资料：# **V3.14.7-鸿蒙对接华为商店/限定付费次数回推/3年ROI**\n\n# **一、背景**\n\n1.三国杀移动版、一将需要投鸿蒙系统，期望能够衡量广告效果\n\n2.春节期望能够在华为商店投手杀\n\n3.公司尝试短剧方向，期望能够接收短剧的广告点击数据，用于后续的数据分析。\n\n4...[truncated]\n- 相关资料：# Document\nv3.14.2.1-临时需求，支持三小-抖小-留存回推(1).docx\n\n# Summary\n该文档记录了一项针对三国杀小游戏的临时需求，旨在紧急恢复抖音小游戏端的账号留存数据回推。由于此前研发取消了回推机制，三国杀小游戏的留存数据大幅下降约40%，项目组与...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（三国杀小游戏）在特定操作系统（鸿蒙端）的数据，符合报表或广告数据查询的意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 3,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 23,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 23,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 15,
+      "id": "MIG-013",
+      "scenario": "查多日数据",
+      "prompt": "查询近7日数据",
+      "keyPoint": "数据分析",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10959,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：---\ntitle: 更新日志\ndescription: 更新日志-\ndate: 2024-07-03\ntags: ['MinDoc,文档在线管理系统,WIKI,wiki,wiki在线,文档在线管理,接口文档在线管理,接口文档管理,数据服务文档,更新日志']\n---\nv1.6 预...[truncated]\n- 相关资料：# **v3.14.12-财务数据API-账户日流水**\n\n### **文档记录**\n\n|  |\n| --- | --- | --- | --- | --- | --- |\n| 产品版本号 | 修订内容 | 修订时间 | 修订人 | 评审状态 | 备注 |\n| v3.14.12....[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户明确要求查询近7日的数据，属于典型的广告数据报表查询请求，符合 report_query 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 2,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 11,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 11,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 16,
+      "id": "MIG-014",
+      "scenario": "查多日数据",
+      "prompt": "查询近30日趋势、分日",
+      "keyPoint": "趋势图、数据分析",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9497,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：# **v3.14.12-财务数据API-账户日流水**\n\n### **文档记录**\n\n|  |\n| --- | --- | --- | --- | --- | --- |\n| 产品版本号 | 修订内容 | 修订时间 | 修订人 | 评审状态 | 备注 |\n| v3.14.12....[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询近30日的趋势数据并按分日展示，属于典型的广告报表数据查询需求，符合 report_query 意图。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 15,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 17,
+      "id": "MIG-001",
+      "scenario": "广告报表-日期识别-DATE-001",
+      "prompt": "指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活 11,819 注册 10,554\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 13364,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：指标: 落地页打开人数\n指标: 落地页转化数\n指标: 落地页转化率\n指标: 落地页转化成本\n指标: 下载器激活数\n指标: 下载器激活率\n指标: 下载器激活成本\n指标: 启动器激活数\n指标: 启动器激活率\n指标: 启动器激活成本\n指标分类: 媒体指标,指标名称: 消耗,是否默认展示...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（指间山海）在指定时间范围（2026年3月1日至3月15日）内的激活数和注册数，属于典型的广告数据报表查询需求，匹配报表MCP能力。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 18,
+      "id": "MIG-002",
+      "scenario": "广告报表-日期识别-DATE-002",
+      "prompt": "指间山海 指间山海 2026 年 3 月 1 日至 3 月 15 日30日ROI多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：30日ROI 48.62%左右\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10812,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：### 5.4 注册\n\n- 标准词：注册\n- 词类：事件\n- 别名：创角、建号、创建角色、sign up、register\n- 定义：用户完成账号注册或创建角色的事件。\n- 归一化规则：游戏业务中“创角”归一为“注册”，同时保留原词“创角”作为业务别名。\n- 不应混淆：激活、登录...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户明确询问特定应用（指间山海）在指定时间段的ROI数据，属于典型的广告数据报表查询请求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 26,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 19,
+      "id": "MIG-003",
+      "scenario": "广告报表-日期识别-DATE-003",
+      "prompt": "指间山海 2026 年 2 月 29 日的数据",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：不存在日期不返回数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10658,
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定项目（指间山海）在特定日期的数据，符合广告数据查询和报表查询的意图定义。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "no_hit",
+                "available": true,
+                "hit_count": 0,
+                "knowledge_base_count": 5,
+                "evidence_role": "not_applicable",
+                "freshness": "unknown",
+                "risk_flags": [
+                  "knowledge_no_hit"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "model_only",
+              "evidence_need": "optional",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_no_hit"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 21,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 21,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 20,
+      "id": "MIG-004",
+      "scenario": "广告报表-日期识别-DATE-F001",
+      "prompt": "指间山海2026-03-25日报中，查询广告投放部 各媒体激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 136618,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 21,
+      "id": "MIG-005",
+      "scenario": "广告报表-日期识别-DATE-F002",
+      "prompt": "指间山海上周周报中，广告投放部按应用类型筛选的激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：iOS应用：激活 299、注册 289、消耗35310.64  安卓应用：激活266、注册242，消耗26950.09\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 136966,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 22,
+      "id": "MIG-006",
+      "scenario": "广告报表-日期识别-DATE-F003",
+      "prompt": "指间山海2026年2月月报中，广告投放部按媒体细分的累计ROI情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 :31.13% tap:62.03% 苹果：54.06%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+媒体+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 136021,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 23,
+      "id": "MIG-007",
+      "scenario": "广告报表-日期识别-DATE-F004",
+      "prompt": "指间山海2026-05-21广告小时报表中，广告投放部9点-10点的激活数和折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数 1 折后消耗 32.31\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：广告小时报表+分时段",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 139543,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 24,
+      "id": "MIG-008",
+      "scenario": "广告报表-日期识别-DATE-F005",
+      "prompt": "指间山海二月同期广告投放部的累计ROI和合计第2日ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：上月同期：20260201-20260227 累计ROI:39.01 合计第2日ROI:8.38%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI报表+月累计/区间",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 11681,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：指标分类: 媒体指标,指标名称: 消耗\n指标名称: 折后消耗\n指标名称: 展示数\n指标名称: 点击数\n指标名称: 千次展示成本\n指标名称: 点击率\n指标名称: 点击成本\n指标名称: 转化数\n指标名称: 转化成本\n指标名称: 直播观看\n指标名称: 直播间停留\n指标名称: 直播间评论...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定项目（指间山海）、特定时间（二月同期）和特定部门（广告投放部）的累计ROI和第2日ROI数据，属于典型的广告数据报表查询。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 41,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 41,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 25,
+      "id": "MIG-009",
+      "scenario": "广告报表-媒体识别-MEDIA-001",
+      "prompt": "指间山海在巨量引擎2026-05-11~2026-05-17的激活数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-11~2026-05-17 巨量的激活数 422 ，结果支持1%的浮动\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：媒体解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 10961,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：字段名: channel,字段说明: 渠道ID,来源: 原有,是否必含: 必含\n字段名: login_from,字段说明: 场景值,来源: 原有,是否必含: 条件必含\n字段名: h5_param,字段说明: 广告参数，包含活动,广告等信息,来源: 原有,是否必含: 非必含\n分类:...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（指间山海）在特定媒体（巨量引擎）和指定时间范围内的激活数数据，属于典型的广告报表数据查询。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 33,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 26,
+      "id": "MIG-010",
+      "scenario": "广告报表-媒体识别-MEDIA-004",
+      "prompt": "指间山海在2026-05-11~2026-05-17 每日的巨量引擎和苹果广告的折后消耗对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-17 巨量广告：4128.37 苹果广告：1742.51\r\n2026-05-16 巨量广告：4193.05 苹果广告：1537.59\r\n2026-05-15 巨量广告：4108.55 苹果广告：1062.29\r\n2026-05-14 巨量广告：4186.78 苹果广告：1191.23\r\n2026-05-13 巨量广告：4173.52 苹果广告：1011.12\r\n2026-05-12 巨量广告：4161.43 苹果广告：1057.61\r\n2026-05-11 巨量广告：4604.40 苹果广告：1108.29\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：媒体解析正确",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 134813,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 27,
+      "id": "MIG-011",
+      "scenario": "广告报表-媒体识别-MEDIA-F001",
+      "prompt": "指间山海2026-03-25日报中，巨量引擎在广告投放部的激活数、注册数和折后消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数126 注册数106 折后消耗11500\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+细分媒体+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 135849,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 28,
+      "id": "MIG-012",
+      "scenario": "广告报表-媒体识别-MEDIA-F002",
+      "prompt": "指间山海2026-03-25日报中，腾讯广告在广告投放部、安卓应用类型下的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：0\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+应用类型+团队",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 138305,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 29,
+      "id": "MIG-013",
+      "scenario": "广告报表-媒体识别-MEDIA-F003",
+      "prompt": "指间山海2026-05-11~2026-05-17中，快手在广告投放部不同应用类型的ROI对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：快手没投放数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：周报+媒体+应用类型",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 129246,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 30,
+      "id": "MIG-014",
+      "scenario": "广告报表-媒体识别-MEDIA-F004",
+      "prompt": "指间山海2026年2月月报中，巨量引擎和腾讯广告在广告投放部的累计ROI对比",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：31.13% 腾讯没数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+多媒体ROI",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 130948,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 31,
+      "id": "MIG-015",
+      "scenario": "广告报表-媒体识别-MEDIA-F005",
+      "prompt": "指间山海2026-03-25广告小时报表中，按媒体汇总全天数据，查看巨量引擎和腾讯广告的激活数与消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 消耗11500 腾讯没数据\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：小时报表+按媒体汇总全天",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 133415,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 32,
+      "id": "MIG-016",
+      "scenario": "广告报表-语义理解-CSEM-001",
+      "prompt": "指间山海 - 国内 2026 年 3 月 18 日安卓应用激活数和首日 ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数 645 首日 ROI 11.12%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 14239,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：指标分类: 媒体指标,指标名称: 消耗\n指标名称: 折后消耗\n指标名称: 展示数\n指标名称: 点击数\n指标名称: 千次展示成本\n指标名称: 点击率\n指标名称: 点击成本\n指标名称: 转化数\n指标名称: 转化成本\n指标名称: 直播观看\n指标名称: 直播间停留\n指标名称: 直播间评论...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（指间山海）、日期（2026年3月18日）、平台（国内安卓）的特定指标（应用激活数、首日ROI），属于明确的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 39,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 39,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 33,
+      "id": "MIG-017",
+      "scenario": "广告报表-语义理解-CSEM-010",
+      "prompt": "指间山海 - 国内2026-05-11~2026-05-17和2026-05-04~2026-05-10的激活数环比变化",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：2026-05-11~2026-05-17，激活数 796 \r\n2026-05-04~2026-05-10，激活数 1731 激活数环比变化 = (796 - 1731) / 5667 = -54.1%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 138299,
+      "answer": "还需要确认项目后才能继续查询。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "intent.detected",
+        "context.prepared",
+        "capability.checked",
+        "planner.arbitrated",
+        "skill.started",
+        "mcp.tool_result",
+        "model.step",
+        "route_observation",
+        "answer.final"
+      ],
+      "runtimeStatus": "missing_input",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "rule_fallback",
+        "composer_name": "buildEmptyDiagnosis",
+        "summary": "报表结果由规则降级文案生成。"
+      }
+    },
+    {
+      "rowIndex": 34,
+      "id": "MIG-018",
+      "scenario": "广告报表-语义理解-SEM-009",
+      "prompt": "指间山海2026-05-11~2026-05-17哪个媒体的累计 ROI 最高",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量广告\r\n巨量广告：累计ROI 8.28%\r\nTapTap广告：累计ROI 3.54%\r\n苹果广告：累计ROI 4.57%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：语义理解没问题",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 13322,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：广告类型：包括信息流广告、搜索广告两种，同媒体分类的用途。\n代理返点模式：返点或折扣，返点即额外赠送虚拟币，折扣则是减少付款金额。\n消耗采集方式：API或上传，可用于上传消耗功能的校验。\n赠款采集方式：API或无，用于折扣ROI统计。\n监测平台：媒体已经对接的监测平台，对接监测平...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户明确询问特定时间段和特定应用（指间山海）的媒体维度ROI数据，属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 30,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 30,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 35,
+      "id": "MIG-019",
+      "scenario": "广告报表-语义理解-SEM-011",
+      "prompt": "指间山海2026-05-01~2026-05-07激活到注册的转化率",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活 3,758 注册3,219 转化率 85.66%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：语义理解没问题",
+      "status": "PASS",
+      "reason": "有回复且无乱码",
+      "durationMs": 12833,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：指标: 落地页打开人数\n指标: 落地页转化数\n指标: 落地页转化率\n指标: 落地页转化成本\n指标: 下载器激活数\n指标: 下载器激活率\n指标: 下载器激活成本\n指标: 启动器激活数\n指标: 启动器激活率\n指标: 启动器激活成本\n指标分类: 媒体指标,指标名称: 消耗,是否默认展示...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（指间山海）在指定时间范围内的数据指标（激活到注册的转化率），属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 29,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 29,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 36,
+      "id": "MIG-020",
+      "scenario": "广告报表-语义理解-SEM-025",
+      "prompt": "指间山海 - 国内2026-05-01~2026-05-07哪个媒体的激活成本最低",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量广告\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：-",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 11207,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：字段名: channel,字段说明: 渠道ID,来源: 原有,是否必含: 必含\n字段名: login_from,字段说明: 场景值,来源: 原有,是否必含: 条件必含\n字段名: h5_param,字段说明: 广告参数，包含活动,广告等信息,来源: 原有,是否必含: 非必含\n分类:...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户要求查询特定项目和时间范围内按媒体维度的激活成本数据，属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 37,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 37,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "rowIndex": 37,
+      "id": "MIG-021",
+      "scenario": "广告报表-语义理解-SEM-026",
+      "prompt": "指间山海 - 国内激活数最多的三个媒体",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 TapTap 苹果\r\n4、输出查询口径、筛选条件和数据来源，便于复核。",
+      "status": "REVIEW",
+      "reason": "未命中关键点，需人工复核",
+      "durationMs": 9435,
+      "answer": "基于内部知识库命中的资料，当前可以先参考以下信息：\n\n- 相关资料：字段名: channel,字段说明: 渠道ID,来源: 原有,是否必含: 必含\n字段名: login_from,字段说明: 场景值,来源: 原有,是否必含: 条件必含\n字段名: h5_param,字段说明: 广告参数，包含活动,广告等信息,来源: 原有,是否必含: 非必含\n分类:...[truncated]\n\n当前模型总结链路未能稳定生成完整表述，以上为已命中资料的直接摘要；如需更精确结论，可以继续补充范围或让我按这些资料展开。",
+      "sourceCount": 0,
+      "eventTypes": [
+        "intent.detected",
+        "planner.arbitrated",
+        "model.step",
+        "route_observation"
+      ],
+      "runtimeStatus": "fallback",
+      "selectedSkill": "",
+      "selectedTool": "",
+      "answerOrigin": {
+        "source": "template_composer",
+        "composer_name": "fallbackAnswer",
+        "summary": "兜底回答由本地规则生成。",
+        "metadata": {
+          "open_answer_planning": {
+            "planner_candidates": [
+              {
+                "source": "request_understanding",
+                "intent_type": "report_query",
+                "confidence": "high",
+                "service_intent": "data_query",
+                "reason": "Planner 候选：用户请求查询特定应用（指间山海）下按激活数排序的媒体数据，属于典型的广告数据报表查询需求。"
+              },
+              {
+                "source": "intentorch",
+                "status": "disabled",
+                "parsed_intent_count": 0,
+                "tool_selection_count": 0,
+                "suggested_tool_names": [],
+                "suggested_tool_confidences": [],
+                "risk_flags": [],
+                "duration_ms": 0
+              },
+              {
+                "source": "knowledge",
+                "status": "searched",
+                "available": true,
+                "hit_count": 1,
+                "knowledge_base_count": 5,
+                "evidence_role": "candidate_evidence",
+                "freshness": "fresh",
+                "risk_flags": [
+                  "knowledge_hit_available"
+                ]
+              }
+            ],
+            "arbitration_summary": {
+              "selected_composer": "chat_answer_composer",
+              "evidence_mode_hint": "mixed_context",
+              "evidence_need": "recommended",
+              "candidate_sources": [
+                "request_understanding",
+                "knowledge"
+              ],
+              "risk_flags": [
+                "knowledge_hit_available"
+              ],
+              "rejected_authorities": [
+                "intentorch_direct_tool_selection",
+                "prompt_keyword_routing",
+                "raw_context_dump"
+              ],
+              "final_authority": "contract_safety"
+            },
+            "context_selection": {
+              "memory": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 8,
+                  "min_score": 0.16,
+                  "query_terms": 31,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              },
+              "recent_conversations": {
+                "selected_count": 0,
+                "rejected_count": 0,
+                "policy": {
+                  "strategy": "generic_relevance_decay_importance",
+                  "limit": 4,
+                  "min_score": 0.16,
+                  "query_terms": 31,
+                  "candidate_count": 0
+                },
+                "selected_ids": [],
+                "selected": [],
+                "rejected": []
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

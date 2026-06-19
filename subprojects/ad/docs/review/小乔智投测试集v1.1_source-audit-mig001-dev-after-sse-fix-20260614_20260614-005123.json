@@ -1,0 +1,17 @@
+[
+  {
+    "rowIndex": 3,
+    "id": "MIG-001",
+    "scenario": "天气",
+    "prompt": "南京本周日天气如何",
+    "keyPoint": "联网搜索",
+    "status": "ERROR",
+    "reason": "AbortError: BodyStreamBuffer was aborted",
+    "answer": "",
+    "durationMs": 120043,
+    "traceId": "",
+    "sourceCount": 0,
+    "eventLabels": [],
+    "runtimeStatus": ""
+  }
+]

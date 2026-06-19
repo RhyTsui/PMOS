@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-06-19T06:21:11.671Z",
+  "tests": {
+    "DATE-001": {
+      "input": "指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数",
+      "keywords": [
+        "激活",
+        "注册",
+        "3 月"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "DATE-002": {
+      "input": "指间山海 2026 年 3 月 1 日至 3 月 15 日 30 日 ROI 多少",
+      "keywords": [
+        "ROI",
+        "3 月"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "DATE-003": {
+      "input": "指间山海 2026 年 2 月 29 日的数据",
+      "keywords": [
+        "2 月",
+        "数据"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "DATE-F001": {
+      "input": "指间山海 2026-03-25 日报中，查询广告投放部 各媒体激活数、注册数和消耗",
+      "keywords": [
+        "激活",
+        "注册",
+        "消耗",
+        "日报"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    }
+  }
+}

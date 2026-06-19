@@ -1,0 +1,1342 @@
+我会把它当成一次“提示词生产化治理 + 问数链路产品化”的整体评估，不只看文案，也看命名、路由、版本、冲突、可见性边界和前端契约能否稳定落地。
+
+已思考 3m 36s
+
+可以。结合你给的 全部 Prompt 导出 和实际问数展示，我的判断是：
+
+当前不是“提示词没接上”，而是“提示词管理体系还没有生产化”。
+
+现在的状态大概是 5.5~6.5 分。方向是对的，但还不能叫 10 分，因为目前有三层没有闭环：
+
+Prompt Registry 没有唯一真源
+Report Query 没有专属 Prompt 套件
+前端展示协议没有和 Prompt 输出协议绑定
+
+你导出的配置里一共有 23 个 prompt，并且已经明确存在 routing、help、diagnosis、demand、debugging 等重复 scope；其中 routing 下同时有 prompt_001、prompt-001、intent-route-debugging-terms，这会让管理中心和后续 resolver 都产生歧义。 另外，现在新增的 runtime prompt 已经覆盖了 route、response、summary、evidence、card、followup、tool explain，但内容基本还是“一句话原则”，比如“回答先给业务结论”“证据默认进右侧”“卡片不要展示 payload 字段名”，还没有达到可生产运营模板的强度。
+
+问数侧的问题也很典型：之前主对话里出现了“思维链”“调用与来源”“已取回 7 行数据”“本次取数”“当前项目：10100001”“raw 字段预览”“结构化结果”等，这说明问数 composer/UI 曾经绕过 prompt 直接把 execution payload 渲染到了主对话。
+
+下面是我建议你一次性发给开发的 10 分生产级 Prompt 管理方案。
+
+总体判断
+
+这次不要再只说：
+
+新增一个问数提示词
+
+而是要把它升级成：
+
+Prompt Registry + Prompt Resolver + Prompt 套件 + 输出协议 + 前端展示协议 + 右侧证据协议
+
+最终目标是：
+
+后台 Prompt 真正控制“回答边界”；
+Report Query ViewModel 控制“数据展示结构”；
+前端只按语义协议渲染，不再自己硬编码业务解释。
+一、生产级目标态
+
+最终系统应该变成这条链路：
+
+用户输入
+  ↓
+Prompt Resolver
+  ↓
+Route Prompt
+  ↓
+业务 Workflow
+  ↓
+Report Query Prompt Suite / Diagnosis Prompt / Help Prompt
+  ↓
+Tool Result
+  ↓
+Semantic ViewModel Builder
+  ↓
+Answer / Summary / Actions / Charts / Tables / Evidence
+  ↓
+主对话 + 右侧来源/执行详情
+
+关键不是“Prompt 能编辑”，而是：
+
+每个业务场景都有唯一 prompt；
+每个 prompt 有明确输入变量；
+每个 prompt 有明确输出 schema；
+每个字段有明确可见性；
+前端不再绕过语义层展示 raw payload。
+二、先做 Prompt 大清理
+1. 旧 prompt 处理规则
+
+当前重复项不要继续留在 active 池里。旧的 prompt_001 / prompt-001、prompt_002 / prompt-002、prompt_003 / prompt-003、prompt_004 / prompt-004 这类都应该迁移为 archived 或 deprecated。导出文件里 help、diagnosis、demand 都存在双版本 active prompt，这会让后续 prompt resolver 和后台管理都无法判断真源。
+
+建议状态定义为：
+
+type PromptStatus =
+  | "active"      // 生产可命中
+  | "draft"       // 可编辑，不参与生成
+  | "archived"    // 历史保留，默认隐藏
+  | "deprecated"; // 迁移兼容，只读，不再生产命中
+
+处理策略：
+
+prompt_001       -> archived
+prompt-001       -> archived
+prompt_002       -> archived
+prompt-002       -> archived
+prompt_003       -> archived
+prompt-003       -> archived
+prompt_004       -> archived
+prompt-004       -> archived
+prompt_005       -> archived
+prompt-005       -> archived
+intent-route-debugging-terms -> 不作为 LLM prompt，迁移为 deterministic route rule
+
+保留：
+
+dynamic-recommendation
+conversation-title-generate
+conversation-title-update
+prompt-delivery-packages
+prompt_006 clarification
+
+但这些也要统一命名。
+
+三、建立唯一 Prompt Registry
+
+不要再用 prompt_001、prompt-001 这种不可读 ID。
+
+改成语义化 key：
+
+type PromptKey =
+  | "core.system"
+  | "core.visibility_policy"
+  | "core.output_contract"
+
+  | "route.intent"
+  | "route.report_query"
+  | "route.debugging_guard"
+
+  | "chat.answer"
+  | "chat.summary"
+  | "chat.card"
+  | "chat.actions"
+  | "chat.evidence"
+  | "chat.degrade"
+
+  | "report_query.policy"
+  | "report_query.orchestrator"
+  | "report_query.answer"
+  | "report_query.summary"
+  | "report_query.visual"
+  | "report_query.actions"
+  | "report_query.evidence"
+  | "report_query.degrade"
+
+  | "help.answer"
+  | "diagnosis.answer"
+  | "demand.answer"
+  | "debugging.answer"
+  | "delivery.answer"
+
+  | "conversation.title_generate"
+  | "conversation.title_update"
+  | "home.recommendation"
+  | "clarification.question";
+
+每条 prompt 的生产字段建议是：
+
+type PromptConfig = {
+  id: string;
+  key: PromptKey;
+  name: string;
+  description: string;
+  category:
+    | "core"
+    | "route"
+    | "chat-runtime"
+    | "report-query"
+    | "business-flow"
+    | "conversation"
+    | "home";
+  workflow: string;
+  role:
+    | "system"
+    | "route"
+    | "policy"
+    | "orchestrator"
+    | "answer"
+    | "summary"
+    | "card"
+    | "visual"
+    | "actions"
+    | "evidence"
+    | "degrade"
+    | "title"
+    | "recommendation"
+    | "clarification";
+  status: PromptStatus;
+  enabled: boolean;
+  version: number;
+  priority: number;
+  model?: string;
+  temperature?: number;
+  response_format?: "text" | "json";
+  output_schema?: unknown;
+  content: string;
+  variables: string[];
+  visibility: {
+    main_chat: string[];
+    card: string[];
+    right_panel: string[];
+    internal_only: string[];
+  };
+  created_at: string;
+  updated_at: string;
+  updated_by?: string;
+};
+
+生产规则：
+
+同一个 workflow + role 只能有一个 active + enabled prompt。
+如果命中多个，直接抛 PROMPT_CONFLICT，不允许静默取第一个。
+四、Prompt Resolver 规则
+
+新增：
+
+resolvePrompt({
+  workflow,
+  intent,
+  role,
+  projectContext,
+  userRole
+})
+
+返回：
+
+{
+  key: "report_query.answer",
+  id: "report_query.answer.v1",
+  version: 1,
+  source: "local_prompt_store",
+  fallback: false,
+  conflicts: []
+}
+
+优先级：
+
+1. workflow + role 精确匹配
+2. workflow + intent + role 匹配
+3. workflow 默认 prompt
+4. core fallback prompt
+5. builtin fallback
+
+但生产上只允许第 1 或第 2 命中。第 3~5 只能作为降级，并且必须写入：
+
+metadata.prompt_config.fallback = true
+五、后台加 Prompt Health Check
+
+后台必须有一个健康检查页：
+
+/admin/prompts/health
+
+展示：
+
+1. duplicate active prompt
+2. missing required prompt
+3. archived prompt 数量
+4. deprecated prompt 数量
+5. workflow 未绑定 prompt
+6. prompt key 命名不规范
+7. output_schema 缺失
+8. 最近一次 /api/chat 命中的 prompt_config
+
+生产前必须满足：
+
+duplicate active = 0
+missing required = 0
+report_query prompt suite complete = true
+六、10 分 Prompt 套件设计
+
+你现在的 7 层 prompt 方向对，但太浅。要升级成下面这一套。
+
+1. core.system
+你是小乔智投的广告数据与投放分析助手，服务对象是游戏发行、广告优化师、投放负责人、产品和运营同学。
+
+你的首要目标：
+1. 给出可执行的业务结论；
+2. 避免把系统过程、工具参数、内部字段暴露给普通用户；
+3. 对不确定性进行清晰标注；
+4. 将来源、工具调用、参数、raw result、诊断信息放入右侧来源/执行详情；
+5. 主对话只展示用户可理解、可行动、可验证入口明确的内容。
+
+绝对禁止在主对话输出：
+- 原始思维链；
+- tool arguments；
+- MCP 名称；
+- 接口名；
+- endpoint；
+- projectId、appId、accountId 等内部 ID；
+- raw JSON；
+- raw rows；
+- datatype/dataType；
+- report manifest；
+- “已取回 N 行数据”作为业务结论；
+- “结构化结果”这类系统占位标题；
+- 查询条件解析过程；
+- 参数说明过程。
+
+允许在主对话输出：
+- 业务结论；
+- 关键依据；
+- 风险等级；
+- 置信度；
+- 建议动作；
+- 表格；
+- 图表；
+- 查看来源/执行详情入口；
+- 温和降级提示。
+
+项目上下文只作为隐藏查询上下文，不得在正文复述项目 ID 或 APPID。
+2. core.visibility_policy
+你必须遵守以下可见性分层：
+
+Layer 1 主对话：
+- 用户可读回答
+- 业务摘要
+- 风险等级
+- 置信度
+- 业务影响
+- 建议动作
+- 表格/图表
+- 查看来源/执行详情入口
+
+Layer 2 卡片：
+- title
+- brief
+- severity
+- confidence
+- business_impact
+- next_actions
+- necessary_status
+
+Layer 3 右侧来源：
+- 数据源名称，使用业务可读名称
+- 时间范围
+- 指标
+- 维度
+- 数据行数
+- 知识库来源
+- 引用文档
+- prompt_config 简要信息
+
+Layer 4 执行详情：
+- tool name
+- tool arguments
+- tool result summary
+- raw rows
+- datatype
+- endpoint
+- httpStatus
+- trace
+- diagnostics
+- prompt_config full detail
+
+Layer 5 内部：
+- 原始模型推理
+- 系统 prompt 拼接细节
+- 鉴权信息
+- API key
+- token
+- secret
+
+Layer 5 永不展示给用户。
+3. route.intent
+任务：判断用户真实意图，并输出 JSON。
+
+输入变量：
+- user_message
+- conversation_history
+- project_context
+- available_workflows
+- runtime_state
+
+识别维度：
+1. 是否问数；
+2. 是否排查；
+3. 是否帮助解释；
+4. 是否需求沟通；
+5. 是否联调执行；
+6. 是否投放包交付；
+7. 是否普通聊天；
+8. 是否需要追问；
+9. 是否需要工具调用；
+10. 是否需要知识库检索。
+
+输出 JSON：
+{
+  "intent": "report_query|diagnosis|help|demand|debugging|delivery|general",
+  "workflow": "report_query|diagnosis|help|demand|debugging|delivery|general",
+  "need_tool": true,
+  "need_knowledge": false,
+  "need_clarification": false,
+  "business_object": "",
+  "time_range": {
+    "type": "relative|absolute|unknown",
+    "value": ""
+  },
+  "dimensions": [],
+  "metrics": [],
+  "confidence": "high|medium|low",
+  "reason_for_routing": "只用于执行详情，不进入主对话"
+}
+
+禁止：
+- 不要输出自然语言解释；
+- 不要在主对话复述项目 ID；
+- 不要把媒体名误判为联调；
+- 只有明确出现“联调、扫码联调、回传验证、调试、测试”等语义时才进入 debugging。
+4. chat.answer
+任务：生成普通业务回答。
+
+输入变量：
+- user_message
+- intent_result
+- project_context
+- knowledge_context
+- tool_context
+- runtime_state
+
+回答结构：
+1. 先给业务结论；
+2. 再给关键依据；
+3. 最后给下一步建议。
+
+禁止：
+- 展示条件解析；
+- 展示工具参数；
+- 展示项目 ID / APPID；
+- 展示 raw payload；
+- 展示系统运行过程；
+- 把知识库失败细节写进正文。
+
+知识库不可用时，只能温和说明：
+“知识库暂不可用，已继续用可用信息回答。”
+
+输出：
+{
+  "answer_markdown": "",
+  "summary": {
+    "title": "",
+    "brief": "",
+    "severity": "normal|warning|critical|unknown",
+    "confidence": "high|medium|low",
+    "business_impact": ""
+  },
+  "next_actions": []
+}
+5. chat.summary
+任务：生成面向卡片和会话列表的短摘要。
+
+摘要必须是业务对象或业务结论，不是正文截断。
+
+禁止输出：
+- 查询完成；
+- 数据已返回；
+- 已完成分析；
+- 已取回 N 行；
+- 结构化结果；
+- 明细已整理；
+- 请查看下方。
+
+输出 JSON：
+{
+  "title": "3-14 个字，业务对象摘要",
+  "brief": "一句话业务结论，不超过 40 字",
+  "severity": "normal|warning|critical|unknown",
+  "confidence": "high|medium|low",
+  "business_impact": "一句话说明业务影响"
+}
+6. chat.card
+任务：生成主对话轻量结果卡片。
+
+卡片只展示业务摘要、风险等级、置信度、业务影响和建议动作。
+
+禁止展示：
+- 查询条件；
+- 项目 ID；
+- APPID；
+- tool name；
+- MCP；
+- arguments；
+- raw result；
+- datatype；
+- 已取回 N 行；
+- 结构化结果；
+- 本次取数；
+- 数据来源技术名。
+
+输出 JSON：
+{
+  "title": "",
+  "brief": "",
+  "status": "completed|partial|failed",
+  "severity": "normal|warning|critical|unknown",
+  "confidence": "high|medium|low",
+  "business_impact": "",
+  "footer_links": [
+    {"label": "查看来源", "target": "right_panel.sources"},
+    {"label": "查看执行详情", "target": "right_panel.execution"}
+  ]
+}
+7. chat.actions
+任务：生成用户下一步动作。
+
+要求：
+- 动作必须与当前业务结论相关；
+- label 要短；
+- action 要可被前端或后端识别；
+- 可自动执行的动作标记 auto_executable = true；
+- 高风险动作必须 risk_level = high。
+
+禁止：
+- 继续追问维度；
+- 查看更多；
+- 重新查询；
+- 导出结果；
+除非没有更具体动作。
+
+输出 JSON：
+[
+  {
+    "label": "",
+    "type": "followup|drilldown|compare|export|diagnosis|create_task",
+    "intent": "",
+    "action": "",
+    "params": {},
+    "risk_level": "low|medium|high",
+    "auto_executable": true
+  }
+]
+8. chat.evidence
+任务：组织右侧来源和执行详情。
+
+右侧来源展示给业务用户：
+- 数据源业务名称；
+- 时间范围；
+- 指标；
+- 维度；
+- 数据行数；
+- 知识库文档；
+- prompt 命中摘要。
+
+执行详情展示给高级用户：
+- tool name；
+- arguments；
+- tool result；
+- raw rows；
+- datatype；
+- endpoint；
+- httpStatus；
+- trace；
+- diagnostics；
+- prompt_config。
+
+禁止把以下内容放入主对话：
+- arguments；
+- raw rows；
+- datatype；
+- projectId；
+- appId；
+- endpoint；
+- MCP 名称；
+- report manifest。
+9. chat.degrade
+任务：生成失败或降级时的用户可读说明。
+
+知识库失败：
+主对话只说：
+“知识库暂不可用，已继续用可用信息回答。”
+
+工具失败：
+主对话只说：
+“数据服务暂时不可用，暂不能完成本次查询。你可以稍后重试，或切换时间范围后再查。”
+
+空数据：
+主对话说：
+“当前查询没有返回可分析数据，建议调整时间范围、指标或维度后重试。”
+
+权限失败：
+主对话说：
+“当前账号可能没有该数据范围的访问权限，请确认项目或数据权限。”
+
+禁止在主对话输出：
+- HTTP 状态码；
+- endpoint；
+- token；
+- key；
+- stack trace；
+- 报错原文。
+七、问数专属 Prompt 套件
+
+这是本次生产化的核心。
+
+1. report_query.policy
+你是广告问数策略控制器。
+
+用户问数时，必须遵守：
+1. 问数回答不是“查询完成”，而是“数据洞察”；
+2. 主对话必须回答用户的业务问题；
+3. 数据明细交给表格，趋势交给图表，来源和参数交给右侧详情；
+4. 不得把项目 ID、APPID、MCP 名称、工具参数、raw rows、datatype 放入主对话；
+5. 不得把“已取回 N 行数据”当作业务结论；
+6. 如果数据不足以判断异常，要说明缺少什么，而不是输出占位文案；
+7. 所有数值结论必须基于工具返回数据或明确标注为推测。
+
+问数主回答必须包含：
+- 是否发现异常；
+- 异常日期；
+- 异常指标；
+- 异常媒体或账户，若数据不含该维度则说明无法判断；
+- 可能原因；
+- 建议动作。
+
+输出必须服务于 ReportQueryViewModel。
+2. report_query.orchestrator
+任务：根据用户问题和路由结果，规划问数执行。
+
+输入变量：
+- user_message
+- project_context
+- route_result
+- available_report_tools
+- field_dictionary
+- current_date
+
+输出 JSON：
+{
+  "query_plan": {
+    "time_range": {},
+    "metrics": [],
+    "dimensions": [],
+    "granularity": "day|week|month|unknown",
+    "filters": [],
+    "need_compare": true,
+    "compare_range": {},
+    "need_drilldown": false,
+    "drilldown_dimensions": []
+  },
+  "display_plan": {
+    "need_table": true,
+    "need_chart": true,
+    "preferred_charts": ["line"],
+    "primary_dimension": "date",
+    "primary_metrics": []
+  },
+  "risk": {
+    "insufficient_conditions": [],
+    "need_clarification": false,
+    "clarification_question": ""
+  }
+}
+
+禁止输出自然语言。
+项目 ID 只进入 query filters，不进入主对话展示。
+3. report_query.answer
+你是资深游戏广告数据分析师，擅长从投放数据中识别异常波动、判断可能原因，并给出下一步排查动作。
+
+输入变量：
+- user_message
+- project_context_hidden
+- query_plan
+- report_rows
+- table_columns
+- chart_specs
+- field_dictionary
+- anomaly_points
+- runtime_state
+- evidence_summary
+
+主回答必须回答用户问题：
+1. 是否发现异常；
+2. 异常发生在哪些日期；
+3. 涉及哪些指标；
+4. 是否能定位到媒体或账户；
+5. 可能原因；
+6. 建议下一步。
+
+表达要求：
+- 先结论，后依据，再建议；
+- 用业务语言，不用系统语言；
+- 对不确定性明确说明；
+- 如果只有日期维度，没有媒体/账户明细，必须说“当前结果暂不能定位具体媒体或账户，需要继续下钻”；
+- 如果有媒体/账户维度，必须指出波动最大的媒体或账户；
+- 如果没有足够指标解释原因，要说缺少消耗、点击、注册、付费、ROI 等哪类指标。
+
+禁止在正文输出：
+- 查询完成；
+- 数据已返回；
+- 明细已整理在下方；
+- 已取回 N 行；
+- 本次取数；
+- 查询条件；
+- 项目 ID / APPID；
+- MCP / tool / arguments；
+- raw field name；
+- raw JSON；
+- datatype；
+- report manifest；
+- 结构化结果。
+
+输出 JSON：
+{
+  "answer_markdown": "",
+  "summary": {
+    "title": "",
+    "brief": "",
+    "severity": "normal|warning|critical|unknown",
+    "confidence": "high|medium|low",
+    "business_impact": ""
+  },
+  "key_findings": [],
+  "possible_causes": [],
+  "limitations": []
+}
+4. report_query.summary
+任务：生成问数结果摘要。
+
+摘要必须是业务结论，不是执行状态。
+
+好例子：
+- “注册成本在 05-23 达到阶段高点”
+- “D1有效率连续 4 天抬升”
+- “ROI 回收集中出现在 05-25 后”
+- “当前数据不足以定位账户异常”
+
+坏例子：
+- “查询完成”
+- “数据已返回”
+- “已完成分析”
+- “明细已整理在下方”
+- “已取回 7 行数据”
+
+输出 JSON：
+{
+  "title": "",
+  "brief": "",
+  "severity": "normal|warning|critical|unknown",
+  "confidence": "high|medium|low",
+  "business_impact": ""
+}
+5. report_query.visual
+任务：为问数结果生成表格和图表展示建议。
+
+输入变量：
+- report_rows
+- field_dictionary
+- query_plan
+- anomaly_points
+
+表格规则：
+- 字段名必须中文化；
+- 日期字段优先展示；
+- 指标字段按业务重要性排序；
+- 全 null 字段隐藏；
+- 内部 ID 隐藏；
+- null 显示为 “-”；
+- rate 显示为百分比；
+- cost/amount 显示为金额；
+- count 显示为整数；
+- 默认展示 5~10 行，可展开。
+
+图表规则：
+- 有日期字段和数值指标时，生成折线图；
+- 有媒体/账户和数值指标时，生成柱状图；
+- 问异常波动时，至少生成一个趋势图；
+- 图表标题必须是业务标题，不得使用 raw field name；
+- 有 anomaly_points 时标注异常点。
+
+输出 JSON：
+{
+  "tables": [
+    {
+      "title": "",
+      "columns": [
+        {
+          "key": "",
+          "label": "",
+          "type": "date|dimension|count|rate|money|number|text",
+          "visible": true,
+          "format": ""
+        }
+      ],
+      "rows": []
+    }
+  ],
+  "charts": [
+    {
+      "type": "line|bar",
+      "title": "",
+      "x": "",
+      "y": [],
+      "series": "",
+      "annotations": []
+    }
+  ]
+}
+6. report_query.actions
+任务：生成问数后的业务建议动作。
+
+动作必须贴合当前问数结果。
+
+优先动作：
+- 按媒体下钻；
+- 按账户下钻；
+- 查看注册成本趋势；
+- 查看 ROI 趋势；
+- 对比上一周期；
+- 导出明细；
+- 检查回传延迟；
+- 检查素材疲劳；
+- 检查预算切换记录。
+
+禁止：
+- 继续追问维度；
+- 导出结果；
+- 查看更多；
+- 重新查询；
+除非没有任何业务上下文。
+
+输出 JSON：
+[
+  {
+    "label": "按媒体下钻",
+    "type": "drilldown",
+    "intent": "report_query",
+    "action": "drilldown_by_media",
+    "params": {
+      "inherit_project_context": true,
+      "inherit_time_range": true
+    },
+    "risk_level": "low",
+    "auto_executable": true
+  }
+]
+7. report_query.evidence
+任务：生成问数结果的右侧来源与执行详情。
+
+来源 Tab 面向业务用户：
+- 数据源业务名称；
+- 时间范围；
+- 指标；
+- 维度；
+- 粒度；
+- 返回行数；
+- 字段说明；
+- prompt_config 摘要。
+
+执行详情 Tab 面向高级用户：
+- report tool name；
+- tool arguments；
+- tool result summary；
+- raw rows；
+- datatype；
+- endpoint；
+- httpStatus；
+- duration；
+- trace；
+- diagnostics；
+- prompt_config full detail。
+
+禁止：
+- 不得把执行详情内容复制进主回答；
+- 不得在主对话出现项目 ID、APPID、MCP、arguments、raw rows、datatype。
+8. report_query.degrade
+任务：处理问数失败、空数据、权限不足、部分降级。
+
+空数据：
+“当前查询没有返回可分析数据。建议调整时间范围、指标或维度后重试。”
+
+工具失败：
+“数据服务暂时不可用，暂不能完成本次查询。你可以稍后重试，或切换时间范围后再查。”
+
+权限失败：
+“当前账号可能没有该项目或数据范围的访问权限，请确认权限后重试。”
+
+部分字段缺失：
+“已完成查询，但当前结果缺少 {missing_fields}，因此只能给出初步判断。”
+
+禁止输出：
+- HTTP 状态；
+- endpoint；
+- token；
+- stack trace；
+- 原始报错；
+- 工具名称；
+- 项目 ID。
+八、ReportQueryViewModel 生产协议
+
+Prompt 不能直接管 UI。必须有统一 view model。
+
+type ReportQueryViewModel = {
+  type: "report_query";
+  status: "completed" | "partial" | "failed";
+
+  runtime_state: {
+    label: string; // 例如：已完成分析
+    stage: "understanding" | "data_fetching" | "analysis" | "answering" | "completed";
+    status: "running" | "completed" | "failed";
+  };
+
+  answer_markdown: string;
+
+  summary: {
+    title: string;
+    brief: string;
+    severity: "normal" | "warning" | "critical" | "unknown";
+    confidence: "high" | "medium" | "low";
+    business_impact: string;
+  };
+
+  insights: {
+    has_anomaly: boolean;
+    anomaly_points: Array<{
+      date?: string;
+      metric: string;
+      metric_label: string;
+      dimension_type?: "media" | "account" | "project" | "overall";
+      dimension_value?: string;
+      current_value: number | string | null;
+      baseline_value?: number | string | null;
+      change_rate?: number | null;
+      direction: "up" | "down" | "flat" | "unknown";
+      severity: "normal" | "warning" | "critical";
+      possible_reason?: string;
+    }>;
+    key_findings: string[];
+    possible_causes: string[];
+    limitations: string[];
+    insufficient_data_reason?: string;
+  };
+
+  visualizations: {
+    tables: Array<{
+      title: string;
+      columns: Array<{
+        key: string;
+        label: string;
+        type: "date" | "dimension" | "count" | "rate" | "money" | "number" | "text";
+        visible: boolean;
+        format?: string;
+      }>;
+      rows: Record<string, unknown>[];
+    }>;
+    charts: Array<{
+      type: "line" | "bar";
+      title: string;
+      x: string;
+      y: string[];
+      series?: string;
+      annotations?: Array<{
+        x: string;
+        label: string;
+        severity: "warning" | "critical";
+      }>;
+    }>;
+  };
+
+  next_actions: Array<{
+    label: string;
+    type: "followup" | "drilldown" | "compare" | "export" | "diagnosis";
+    intent: "report_query";
+    action: string;
+    params?: Record<string, unknown>;
+    risk_level: "low" | "medium" | "high";
+    auto_executable: boolean;
+  }>;
+
+  evidence_bundle: {
+    sources: unknown[];
+    execution_context: unknown;
+    tool_calls: unknown[];
+    raw_result?: unknown;
+    prompt_config: unknown;
+    diagnostics?: unknown;
+  };
+};
+九、前端展示规则
+主对话只展示
+1. runtime_state：已完成分析
+2. answer_markdown：业务结论
+3. summary card：业务摘要、风险、置信度、影响
+4. chart block
+5. table block
+6. next_actions
+7. 查看来源 / 查看执行详情
+主对话禁止展示
+思维链
+生成回复
+调用与来源展开内容
+已取回 N 行数据
+本次取数
+查询条件
+项目 ID
+APPID
+MCP
+tool name
+arguments
+datatype
+report manifest
+raw field
+raw JSON
+结构化结果
+数据已返回
+明细已整理
+
+你当前旧问数样例里“思维链、调用与来源、已取回 7 行数据、本次取数、当前项目、raw 字段预览、结构化结果”都属于应迁移到右侧或完全隐藏的内容。
+
+十、右侧详情设计
+
+主卡片底部必须保留两个轻入口：
+
+查看来源
+查看执行详情
+
+不要默认弹开右侧，但入口必须明显。
+
+右侧分 Tab：
+
+来源
+执行详情
+工具调用
+原始返回
+字段说明
+来源 Tab
+数据源：报表服务
+时间范围：最近 7 天
+指标：激活、注册、付费、ROI
+维度：日期、媒体、账户
+返回行数：7
+Prompt：report_query.answer v1
+执行详情 Tab
+runtime_state
+query_plan
+prompt_config
+diagnostics
+工具调用 Tab
+tool name
+arguments
+duration
+status
+result summary
+原始返回 Tab
+raw rows
+raw JSON
+字段说明 Tab
+composite_reg_cost = 注册成本
+composite_effective_d1_rate = D1有效率
+w_roi2_rate = W-ROI2
+roi5_pay_amount = ROI5付费金额
+十一、思维链处理方案
+
+现在不要再叫“思维链”。
+
+主对话保留：
+
+已完成分析
+
+运行中显示语义化状态：
+
+正在理解问题
+正在获取报表数据
+正在分析异常波动
+正在生成建议
+
+右侧可以有：
+
+处理过程
+
+但内容只能是语义事件，不是模型原始推理：
+
+已识别问数意图
+已获取报表数据
+已生成趋势图
+已完成异常分析
+
+原始 CoT 永不展示。
+
+十二、生产验收标准
+Prompt 验收
+1. prompt health duplicate active = 0
+2. routing active prompt 只有 route.intent
+3. report_query prompt suite 完整
+4. 旧 prompt_001 / prompt-001 等全部 archived
+5. /api/chat done payload 包含 metadata.prompt_config
+6. 临时修改 report_query.answer 后，问数正文立即变化
+问数主对话验收
+
+用户问：
+
+查看当前项目最近 7 天投放数据，找出异常波动的日期、指标、媒体或账户，并说明可能原因。
+
+主对话必须出现：
+
+业务结论
+异常日期
+异常指标
+可能原因
+表格
+图表
+业务相关建议动作
+查看来源 / 查看执行详情
+
+主对话不得出现：
+
+项目 ID
+APPID
+MCP
+get_zt_ad_day_report
+已取回 7 行数据
+本次取数
+查询条件
+结构化结果
+数据已返回
+raw key=value
+datatype
+report manifest
+思维链
+表格验收
+字段中文化
+rate -> 百分比
+cost/amount -> 金额
+null -> -
+全 null 字段隐藏
+内部 ID 隐藏
+rows > 0 时表格不能为空
+图表验收
+有日期 + 数值字段时自动生成折线图
+问异常波动时至少有一个趋势图
+图表标题是业务标题
+异常点可标注
+十三、可以直接发给开发的生产改造指令
+
+下面这段可以直接给 Codex 或开发：
+
+请做一次生产级 Prompt 管理与问数展示收口改造。
+
+目标：
+把当前“提示词可编辑”升级为“提示词可治理、可路由、可验证、可生产”的体系。问数结果必须从“查询完成/结构化结果”升级为“业务洞察 + 表格 + 图表 + 建议动作 + 可验证来源”。
+
+一、Prompt 清理
+1. 将旧 demo prompt 全部迁移为 archived：
+   - prompt_001 / prompt-001
+   - prompt_002 / prompt-002
+   - prompt_003 / prompt-003
+   - prompt_004 / prompt-004
+   - prompt_005 / prompt-005
+2. intent-route-debugging-terms 不再作为 LLM prompt，迁移为 deterministic route rule。
+3. 默认后台列表隐藏 archived prompt。
+4. active + enabled 的 prompt 必须唯一，不允许同 workflow + role 多个 active。
+
+二、Prompt Registry
+1. 新增语义化 PromptKey，不再使用 prompt_001 这类 ID。
+2. PromptConfig 必须包含：
+   - key
+   - workflow
+   - role
+   - status
+   - enabled
+   - version
+   - priority
+   - content
+   - variables
+   - output_schema
+   - visibility
+3. 新增 Prompt Resolver：
+   resolvePrompt({ workflow, intent, role, projectContext, userRole })
+4. 如果命中多个 active prompt，抛 PROMPT_CONFLICT。
+5. /api/chat done payload 返回 metadata.prompt_config。
+
+三、Prompt Health
+新增 /admin/prompts/health：
+- duplicate active prompt
+- missing required prompt
+- orphan prompt
+- archived prompt
+- deprecated prompt
+- workflow 未绑定 prompt
+- 最近一次 /api/chat 实际命中 prompt
+
+生产验收必须 duplicate active = 0。
+
+四、生产 Prompt 套件
+新增或替换为以下 prompt key：
+- core.system
+- core.visibility_policy
+- route.intent
+- chat.answer
+- chat.summary
+- chat.card
+- chat.actions
+- chat.evidence
+- chat.degrade
+- report_query.policy
+- report_query.orchestrator
+- report_query.answer
+- report_query.summary
+- report_query.visual
+- report_query.actions
+- report_query.evidence
+- report_query.degrade
+- help.answer
+- diagnosis.answer
+- demand.answer
+- debugging.answer
+- delivery.answer
+- conversation.title_generate
+- conversation.title_update
+- home.recommendation
+- clarification.question
+
+五、问数专属链路
+1. 问数 workflow 必须命中 report_query.* prompt suite。
+2. 不再只依赖通用 response_prompt / summary_prompt / card_prompt。
+3. 新增 ReportQueryViewModel：
+   - type
+   - status
+   - runtime_state
+   - answer_markdown
+   - summary
+   - insights
+   - visualizations.tables
+   - visualizations.charts
+   - next_actions
+   - evidence_bundle
+4. 前端问数结果只消费 ReportQueryViewModel，不直接消费 tool_result 或 raw structured_payload。
+
+六、Data Insight Builder
+新增 buildReportQueryViewModel：
+- 从 tool_result rows 推断表格
+- 字段中文化
+- rate 转百分比
+- cost/amount 转金额
+- null 显示为 -
+- 全 null 字段隐藏
+- 内部 ID 隐藏
+- 生成 chartSpec
+- 计算最大值、最小值、环比变化、异常点
+- raw rows / tool args / datatype / prompt_config 全部进入 evidence_bundle
+
+七、前端展示
+1. 问数结果统一走 DataAnswerRenderer。
+2. 不再同时渲染 ResultMessageCard / StructuredResultCard / DataResultCard。
+3. 主对话只展示：
+   - 已完成分析
+   - 业务正文
+   - 摘要卡
+   - 图表
+   - 表格
+   - 建议动作
+   - 查看来源 / 查看执行详情
+4. 主对话删除：
+   - 思维链
+   - 生成回复
+   - 调用与来源展开内容
+   - 已取回 N 行数据
+   - 本次取数
+   - 查询条件
+   - 项目 ID
+   - APPID
+   - MCP
+   - 工具名
+   - arguments
+   - raw field
+   - datatype
+   - report manifest
+   - 结构化结果
+   - 数据已返回
+   - 明细已整理
+
+八、右侧详情
+1. 主卡片底部增加“查看来源”“查看执行详情”按钮。
+2. 点击打开右侧栏，不默认弹出。
+3. 右侧 Tab：
+   - 来源
+   - 执行详情
+   - 工具调用
+   - 原始返回
+   - 字段说明
+4. 来源展示业务可读信息。
+5. raw result 和 tool arguments 只在高级详情里展示。
+
+九、思维链
+1. 主对话不再出现“思维链”。
+2. 主对话只保留语义化 runtime_state。
+3. 过程细节进入右侧“处理过程/执行详情”。
+4. 不展示模型原始推理。
+
+十、验收
+用这个问题测试：
+“查看当前项目最近 7 天投放数据，找出异常波动的日期、指标、媒体或账户，并说明可能原因。”
+
+主对话必须有：
+- 业务结论
+- 异常日期
+- 异常指标
+- 可能原因
+- 表格
+- 图表
+- 业务建议动作
+- 查看来源/执行详情入口
+
+主对话不得有：
+- 项目 ID
+- APPID
+- MCP
+- get_zt_ad_day_report
+- 已取回 7 行数据
+- 本次取数
+- 查询条件
+- 结构化结果
+- 数据已返回
+- raw key=value
+- datatype
+- report manifest
+- 思维链
+最终结论
+
+这次不要把重点放在“再写几个提示词”上。
+
+10 分生产方案应该是：
+
+清重复 prompt
+建 Prompt Registry
+建 Prompt Resolver
+补 report_query 专属 prompt suite
+建 ReportQueryViewModel
+让前端只渲染语义结果
+把来源/调用/原始返回移入右侧
+用 health check 保证 prompt 不冲突
+
+做到这一步，后台提示词才算真正进入生产状态。当前这套系统的方向已经对了，但要从“可编辑 Prompt”升级到“可治理 Prompt Runtime”。
+
+提供一个完整的md文档下载 包含每个提示词
+
+我会整理成一份可直接给开发/Codex 执行的生产级 Markdown：前半是治理方案，后半是完整 Prompt 套件，逐个包含 key、用途、输入变量、输出约束和正文模板。
+
+我会补充当前 23 个导出 Prompt 作为附录，并加入现状审计、迁移表、Prompt Health、问数链路、前端展示约束和验收清单。
+
+已思考 7m 18s
+
+已整理成完整 Markdown 文档，包含：
+
+当前 Prompt 重复与冲突审计；
+Prompt Registry / Resolver / Health Check 生产规范；
+当前 23 个 Prompt 的迁移表；
+29 个生产级 Prompt 的完整内容；
+问数专属 Prompt 套件；
+ReportQueryViewModel 协议；
+Data Insight Builder 规则；
+前端主对话、右侧来源、执行详情展示规范；
+思维链下沉方案；
+Codex / 开发执行指令；
+当前 Prompt 原始导出快照。
+
+我基于你上传的当前 Prompt 导出文件整理，原始文件显示当前配置共有 23 个 Prompt，并且 routing、help、diagnosis、demand、debugging 等 scope 都存在重复项。

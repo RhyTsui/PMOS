@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || process.env.AD_CHAT_BASE_URL || 'http://10.236.14.27:8002';
+
 test('首页输入与播报入口可交互', async ({ page }) => {
   const pageErrors = [];
   const consoleErrors = [];
@@ -9,7 +11,7 @@ test('首页输入与播报入口可交互', async ({ page }) => {
     if (msg.type() === 'error') consoleErrors.push(msg.text());
   });
 
-  await page.goto('http://127.0.0.1:5000/', { waitUntil: 'domcontentloaded' });
+  await page.goto(`${baseURL}/`, { waitUntil: 'domcontentloaded' });
   await expect(page.getByText('小乔智投').first()).toBeVisible({ timeout: 15000 });
 
   const textarea = page.locator('textarea').first();
@@ -32,7 +34,7 @@ test('自动报表页可输入并显示中文文案', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
-  await page.goto('http://127.0.0.1:5000/reports', { waitUntil: 'commit', timeout: 15000 });
+  await page.goto(`${baseURL}/reports`, { waitUntil: 'commit', timeout: 15000 });
   await expect(page.getByRole('heading', { name: '自动报表服务' })).toBeVisible({ timeout: 15000 });
   await expect(page.getByText('报表需求对话')).toBeVisible();
 
@@ -53,7 +55,7 @@ test('配置管理页能正常打开', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
-  await page.goto('http://127.0.0.1:5000/admin', { waitUntil: 'domcontentloaded' });
+  await page.goto(`${baseURL}/admin`, { waitUntil: 'domcontentloaded' });
   await expect(page.locator('body')).toContainText('配置');
 
   await page.screenshot({

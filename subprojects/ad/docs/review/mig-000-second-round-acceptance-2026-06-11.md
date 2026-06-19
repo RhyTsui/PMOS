@@ -1,0 +1,28 @@
+# MIG-000 第二轮验收记录
+
+- 用例编号：MIG-000
+- 测试场景：连通
+- 输入：你好
+- 预期：LLM 理解普通问候并给出简单回应，页面、接口读回、刷新回放、标题、过程与依据、Console/Network、乱码检查均健康。
+- 实际结果：通过。页面展示用户输入与助手回复“你好，我在。你可以直接告诉我想查询、分析或处理的事情。”；会话标题由标题链路生成“简单问候”；右侧“过程与依据”可点击展开并回放执行步骤。
+- 失败原因与修复点：
+  - 项目 icon 直接使用生产 CDN，在 Playwright 受限网络下出现资源失败；新增同源 `/api/xiaoqiao/project-icon` 代理，远端不可达时返回本地 SVG 占位。
+  - 欢迎区图标视觉偏小风险；锁定欢迎图标容器和图片为 72x72，并加入稳定测试标识。
+  - 测试脚本误把 PNG 二进制按文本做乱码扫描；脚本已跳过 `image/*`、字体和二进制响应。
+  - Dev server 在长时间验收中触发 Node heap OOM；测试启动脚本提高 `NODE_OPTIONS=--max-old-space-size=8192`。
+- 复测证据：
+  - 基础链路报告：`docs/review/mig-000-1781167411155.json`
+  - 基础链路截图：`docs/review/mig-000-1781167411155.png`
+  - 完整链路报告：`docs/review/mig-000-full-1781167673273.json`
+  - 完整链路截图：`docs/review/mig-000-full-1781167673273.png`
+- 接口读回：
+  - conversation_id：`conv-1781167415961`
+  - message_count：2
+  - assistant_message_id：`msg-1781167433486-wk3o6s`
+  - trace_id：`zt-chat-1781167420424-0gz866`
+  - response_contract：存在
+  - process_events：2
+- 乱码扫描结果：DOM、SSE、会话详情、messages、conversations、Console 文本均未发现乱码；二进制图像不按文本扫描。
+- 风险备注：
+  - MIG-000 是普通对话链路，不验证问数/MCP 工具执行正确性；不得据此进入第二条以外的批量通过结论。
+  - `SemanticResultContract` 在普通问候中未生成结构化业务语义，当前以 ResponseContract、trace_id、process_events 和 answer_markdown 作为普通对话链路证据。

@@ -1,0 +1,911 @@
+# SDK 对接上报说明文档
+
+更新时间：2026-05-25
+
+本文给对接 SDK 同事使用，说明如何通过 CozeLoop / 连弩观测 SDK 上报 Trace，并补充统计、筛选和轨迹评测所需的推荐字段。
+
+当前 Python SDK 上报链路是：
+
+```text
+业务应用
+-> cozeloop Python SDK
+-> 观测服务
+-> Trace 列表和统计页查询
+```
+
+除平台另行提供 HTTP API 对接方案外，建议优先使用对应语言 SDK。
+
+## 1. 接入参数
+
+### 1.1 安装与版本确认
+
+本文示例基于下面的 Python SDK 版本。实际接入版本以平台发布的兼容版本或安装命令为准：
+
+```bash
+python -m pip install cozeloop==0.1.28
+```
+
+安装后建议用包元数据确认版本：
+
+```bash
+python -m pip show cozeloop
+```
+
+如果平台提供内网源或指定包源，以平台给出的安装命令为准。同一业务系统内建议保持 SDK 版本一致。
+
+### 1.2 初始化参数
+
+接入前需要拿到：
+
+| 参数 | 示例 | 说明 |
+| --- | --- | --- |
+| `api_base_url` | `<api_base_url>` | SDK 上传 API 地址，由平台提供 |
+| `workspace_id` | `<workspace_id>` | 工作空间 ID，由平台提供 |
+| `api_token` | 不写入文档/代码库 | 推荐项目级 SDK token |
+| `env` | `test` / `pre` / `prod` | 业务应用运行环境；只能使用这三个枚举值之一，不要传中文展示名 |
+| `service_name` | `<your-service-name>` | 当前上报服务名，例如 `chat-service` |
+
+推荐用环境变量配置：
+
+```bash
+COZELOOP_API_BASE_URL=<api_base_url>
+COZELOOP_WORKSPACE_ID=<workspace_id>
+COZELOOP_API_TOKEN=<sdk_token>
+APP_ENV=test
+APP_SERVICE_NAME=<your-service-name>
+```
+
+`api_base_url` 是 SDK 上传 API 地址，不是控制台页面地址。具体 API 地址、控制台地址和 workspace_id 由平台联调人员提供。
+
+控制台 Trace 页入口由平台提供。联调时打开平台提供的控制台地址，再选择对应工作空间、项目、环境和时间范围：
+
+```text
+<console_trace_url>
+```
+
+### 1.3 TraceID 关联规则
+
+如果调用方、评测平台或业务后台需要把一次接口调用和观测平台 Trace 列表自动关联，接口返回或记录的 `trace_id` 必须是观测平台中的真实 TraceID，也就是 SDK 创建 root span 后对应的 TraceID。
+
+不要把业务系统自己的 `request_id`、日志 trace id、`case_id`、`message_id`、`thread_id`、`user_session` 当成平台 `trace_id` 使用。它们可以作为业务排查字段保留，但不能替代用于 Trace 关联的 `trace_id`。
+
+推荐区分下面两类 ID：
+
+| 字段 | 含义 | 用途 |
+| --- | --- | --- |
+| `trace_id` | 观测平台真实 TraceID，来自 SDK/root span | 下游平台自动关联 Trace，优先使用 |
+| `sdk_trace_id` | SDK/观测平台 TraceID | 与 `trace_id` 同值时用于显式说明来源 |
+| `local_trace_id` / `request_trace_id` | 业务侧自定义请求 ID 或日志 trace ID | 业务日志反查、排障 |
+| `case_id` / `message_id` / `thread_id` / `user_session` | 业务或评测上下文 | 用例归因、会话排查 |
+
+推荐接口返回结构：
+
+```json
+{
+  "trace_id": "25f3ec99e60c894a6447f7837ef1b8ee",
+  "sdk_trace_id": "25f3ec99e60c894a6447f7837ef1b8ee",
+  "local_trace_id": "<business_request_id>",
+  "case_id": "<case_id>",
+  "user_session": "<user_session>"
+}
+```
+
+如果接口响应被平台统一包装，例如：
+
+```json
+{
+  "code": 0,
+  "data": {
+    "trace_id": "25f3ec99e60c894a6447f7837ef1b8ee"
+  }
+}
+```
+
+Trace 关联路径应配置为：
+
+```text
+$.data.trace_id
+```
+
+如果直接解析接口原始响应，则配置为：
+
+```text
+$.trace_id
+```
+
+对 SSE 或流式 Chat API，chunk 事件可以只返回增量内容。如业务协议允许，建议在最终事件、响应元数据或日志中记录 SDK 生成的 `trace_id`，方便下游把回答结果和观测 Trace 确定性关联：
+
+```json
+{
+  "event": "done",
+  "answer": "完整回答",
+  "trace_id": "25f3ec99e60c894a6447f7837ef1b8ee",
+  "sdk_trace_id": "25f3ec99e60c894a6447f7837ef1b8ee",
+  "local_trace_id": "<business_request_id>"
+}
+```
+
+业务自定义 ID 建议同时写入 SDK tags，例如 `span.set_tags({"local_trace_id": local_trace_id})`，这样既能从业务日志跳到平台 Trace，也能从平台 Trace 反查业务请求。
+
+## 2. 项目和环境怎么传
+
+### 项目
+
+项目筛选和数据归属必须通过平台认可的项目身份方式传给服务端，不能只依赖 input/output 或普通 tags。
+
+推荐方式：
+
+| 方式 | 适用场景 | 说明 |
+| --- | --- | --- |
+| 项目级 SDK token | 推荐 | token 本身绑定项目，平台据此识别项目身份 |
+
+正式接入推荐使用项目级 SDK token 或平台明确支持的认证方式。除平台明确要求外，不需要额外传 `project_id`。
+
+项目归属的判断标准不是 Trace 详情里能看到某个项目字段，而是：使用项目级 token 上报后，在 Trace 页和统计页按对应项目筛选能查到这批数据。不要通过普通 tag、input 或 output 补偿项目归属。
+
+如果业务需要，也可以在 input/output 或普通 tags 中保留低敏业务关联字段用于展示、日志关联和排障。项目筛选和数据归属仍以平台认可的项目身份为准。
+
+### 环境
+
+环境来自业务应用运行时，通过标准 `env` 字段上报。token 用于认证及项目归属，不建议用 token 推断业务运行环境。
+
+每条 span 都要带稳定的 `env`。当前标准环境值如下，必须传枚举值本身，不要传页面展示文案；如私有部署有扩展环境，以平台配置为准：
+
+| 页面展示 | 上报值 |
+| --- | --- |
+| 测试 | `test` |
+| 预发 | `pre` |
+| 生产 | `prod` |
+
+如果页面下拉展示为“测试”，上报和筛选值仍应是 `test`，不是 `测试`。
+
+```text
+test
+pre
+prod
+```
+
+每条 span 都要写入标准环境字段 `env`。Python SDK 建议同时写：
+
+```python
+span.set_deployment_env(env)
+span.set_system_tags({"env": env})
+```
+
+原因：`set_deployment_env(env)` 会写 SDK 的部署环境信息；`set_system_tags({"env": env})` 用于让 Trace 和统计稳定识别环境。如果某个接入场景只能先写一个字段，优先写 `set_system_tags({"env": env})`。
+
+## 3. Trace 结构要求
+
+一次用户请求必须上报一条 root span。业务实际发生的 Agent 编排、模型调用、工具调用、知识库检索都应作为子 span 同步上报；只上报 root span 只能看到基础 Trace，不能支撑模型、工具、token、错误码分布。
+
+`span_type` 来自 `client.start_span(name, span_type, ...)` 的第二个参数，是 Trace 展示和统计分流的核心字段。
+
+推荐的 `span_type` 约定如下：
+
+- root span 用 `custom`。
+- 模型调用用 `model`。
+- 工具调用用 `tool`。
+- 知识库检索用 `retriever`，不要写 `vector_retriever`。
+- Agent 编排、规划、路由、工具选择用 `agent`。
+
+推荐结构：
+
+```text
+Root Span: 一次用户请求，span_type=custom
+  Agent Span: 编排、规划、路由、工具选择，span_type=agent
+    Retriever Span: 每次知识库检索/召回，span_type=retriever
+    Model Span: 每次模型调用，span_type=model
+    Tool Span: 每次工具/MCP/API 调用，span_type=tool
+```
+
+没有 Agent 编排时，model/tool/retriever 直接挂在 root 下：
+
+```text
+Root Span
+  Retriever Span（有知识库检索/召回时）
+  Model Span
+  Tool Span（有真实工具调用时）
+```
+
+### 3.1 知识库/RAG 与轨迹评测
+
+知识库检索和知识库工具调用可能服务于不同用途：
+
+| 层次 | 推荐 Span | 用途 |
+| --- | --- | --- |
+| RAG 观测层 | `span_type=retriever`，如 `span_name=retriever.knowledge_base.search` | 展示 query、documents、score、召回质量 |
+| 轨迹评测层 | `span_type=tool`，如 `span_name=tool.knowledge_search` | 当评测规则要求知识库工具步骤时，表示 Agent 调用了知识库工具 |
+
+`retriever` 是 Raw Trace / RAG 观测语义；tool span 是工具调用语义。两者可以描述同一次知识库检索的两个视角，不代表需要做两次检索。`tool.knowledge_search` 只是示例名称，实际名称以业务工具名和平台评测配置为准。
+
+如果业务链路包含知识库检索，并且知识库检索是由工具调用触发，应同时上报：
+
+```text
+agent.route
+  retriever.knowledge_base.search   # 观测召回详情
+  tool.<knowledge_tool_name>        # 轨迹评测需要时的知识库工具步骤
+```
+
+如果业务链路中还存在模型调用、普通工具调用或 Agent 编排，也应分别上报对应的 model、tool、agent span，避免 Trace 详情、统计和轨迹评测缺失关键节点。
+
+## 4. Span 字段清单
+
+下面按 span 类型列出必填字段和选填字段。所有 span 都要保证 `span_name` 稳定、`span_type` 正确、父子关系正确、`status_code` 正确。
+
+表格第一列是字段含义，不是实际上报的中文字段名；真正的传参方式和取值以第二列 SDK 写法为准。例如“span 类型”不是传中文，而是在 `client.start_span(name, span_type, ...)` 的第二个参数传 `custom` / `agent` / `model` / `tool` / `retriever`。
+
+### 4.1 Root span
+
+Root span 表示一次完整用户请求。一个用户请求至少要有一个 root span。
+
+**基础字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| span 名称 | `client.start_span("biz.chat.request", "custom", start_new_trace=True)` | 名称稳定，不拼动态 ID |
+| span 类型 | `custom` | 推荐 root 使用 `custom` |
+| Trace 起点 | `start_new_trace=True` | 表示开启一条新的 Trace |
+| 状态码 | `span.set_status_code(0/非0)` | 成功为 0，失败为非 0 |
+| 环境 | `span.set_system_tags({"env": env})` | 环境筛选和统计使用 |
+| 服务名 | `span.set_service_name(service_name)` | Trace 检索和排查使用 |
+| 输入 | `span.set_input({...})` | 用户原始问题、请求上下文等 |
+| 输出 | `span.set_output({...})` | 最终回答或失败结果 |
+| 用户 ID | `span.set_user_id(user_id)` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+| 消息 ID | `span.set_message_id(message_id)` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+| 会话/线程 ID | `span.set_thread_id(thread_id)` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+
+**选填字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| SDK 部署环境 | `span.set_deployment_env(env)` | 辅助展示；统计筛选仍以系统 `env` 为准 |
+| 业务标签 | `span.set_tags({...})` | 渠道、场景、业务请求 ID 等排查字段 |
+| 项目上下文 | `span.set_input/set_output({...})` | 可用于展示，但项目筛选不能只依赖 input/output |
+| 错误详情 | `span.set_output({"error_code": ..., "message": ...})` | 只做详情展示，正式错误率仍看 `status_code` |
+
+### 4.2 Agent span（有 Agent 编排时）
+
+Agent span 表示 Agent 编排、意图识别、计划生成、模型路由、工具选择、多轮任务拆解等过程。有这类链路时应上报。
+
+**基础字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| span 名称 | `client.start_span("agent.chat.planner", "agent", child_of=root)` | 名称稳定，能表达 Agent 步骤 |
+| span 类型 | `agent` | 推荐 Agent 编排使用 `agent` |
+| 父 span | `child_of=root` 或 `child_of=parent_agent` | 保持链路层级 |
+| 状态码 | `span.set_status_code(0/非0)` | Agent 编排失败时写非 0 |
+| 环境 | `span.set_system_tags({"env": env})` | 与 root 保持一致 |
+| 服务名 | `span.set_service_name(service_name)` | 与 root 保持一致 |
+| 输入 | `span.set_input({...})` | 用户意图、上下文、候选工具、候选知识库等 |
+| 输出 | `span.set_output({...})` | planning 摘要、路由决策、下一步动作、选择结果等 |
+| 用户/消息/线程 | `set_user_id/set_message_id/set_thread_id` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+
+**选填字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| Agent 名称 | `span.set_tags({"agent_name": "xxx"})` | 多 Agent 场景便于区分 |
+| Agent 步骤 | `span.set_tags({"agent_step": "planning"})` | 如 planning、routing、tool_selection |
+| 路由名称 | `span.set_tags({"route_name": "rag_then_tool"})` | 便于分析不同策略 |
+| 选择结果 | `span.set_output({"selected_tool": ..., "selected_model": ...})` | 只记录可展示摘要 |
+| 失败原因 | `span.set_output({"error_code": ..., "message": ...})` | 详情展示，正式错误仍看 `status_code` |
+
+Agent span 推荐 key：
+
+| 位置 | key | 说明 |
+| --- | --- | --- |
+| `input` | `question` | 用户问题或本轮任务摘要 |
+| `input` | `intent` | 意图识别结果 |
+| `input` | `context` | 可展示的上下文摘要 |
+| `input` | `candidate_tools` | 候选工具列表 |
+| `input` | `candidate_knowledge_bases` | 候选知识库列表 |
+| `output` | `decision_summary` | Agent 决策摘要 |
+| `output` | `route_target` | 路由目标，如 model、tool、knowledge_base |
+| `output` | `selected_tool` | 选中的工具 |
+| `output` | `selected_model` | 选中的模型 |
+| `output` | `next_steps` | 下一步动作摘要 |
+| `tags` | `agent_name` | Agent 名称 |
+| `tags` | `agent_step` | Agent 步骤，如 planning、routing、tool_selection |
+| `tags` | `route_name` | 路由策略名称 |
+
+Agent span 当前主要用于 Trace 详情还原、失败定位和后续轨迹评测。模型/工具调用次数仍按 model/tool span 统计，不要把真实模型调用或工具调用只写在 agent span 里。Agent 输出建议记录可展示的决策摘要，不要记录完整推理链、敏感上下文或不可对外展示的内部提示词。
+
+### 4.3 Model span
+
+Model span 表示一次真实模型调用。每次模型调用都要单独上报一个 model span。
+
+**基础字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| span 名称 | `client.start_span("model.qwen3.5-plus", "model", child_of=agent_or_root)` | 名称稳定，可包含模型名 |
+| span 类型 | `model` | 模型调用固定用 `model` |
+| 父 span | `child_of=agent` 或 `child_of=root` | 有 Agent 时挂 Agent 下，没有则挂 root 下 |
+| 状态码 | `span.set_status_code(0/非0)` | 模型错误率和错误码分布依赖 |
+| 环境 | `span.set_system_tags({"env": env})` | 与 root 保持一致 |
+| 服务名 | `span.set_service_name(service_name)` | 与 root 保持一致 |
+| 模型名 | `span.set_model_name(model_name)` | 模型分布、模型下拉、模型 token 分布依赖 |
+| 输入 tokens | `span.set_input_tokens(input_tokens)` | 必须是整数 |
+| 输出 tokens | `span.set_output_tokens(output_tokens)` | 必须是整数 |
+| 输入 | `span.set_input({...})` | prompt、messages、模型请求摘要等 |
+| 输出 | `span.set_output({...})` | 模型响应或失败结果 |
+| 用户/消息/线程 | `set_user_id/set_message_id/set_thread_id` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+
+**选填字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| 模型供应商 | `span.set_model_provider(provider)` | 便于排查和分组 |
+| 模型别名/路由标识 | `span.set_tags({"model_alias": "xxx"})` | 有模型路由或别名时使用；不要包含敏感内部代号 |
+| 首 token 时间 | `span.set_start_time_first_resp(first_resp_micros)` | TTFT / TPOT 使用，单位是微秒时间戳 |
+| 扩展 tokens | 按平台提供的标准封装方法填写 | 如系统 tokens、工具选择 tokens |
+| 模型参数 | `span.set_tags({...})` | temperature、top_p、max_tokens、stream 等 |
+| 失败详情 | `span.set_output({"error_code": ..., "message": ...})` | 详情展示，正式错误仍看 `status_code` |
+
+不要只把模型名或 token 写进 `output`，例如 `output.model_name` 或 `output.token_usage`。这些可以展示，但不能替代统计字段。
+
+### 4.4 Tool span（有工具调用时）
+
+Tool span 表示一次真实工具、MCP、插件或业务 API 调用。每次工具调用都要单独上报一个 tool span。
+
+**基础字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| span 名称 | `client.start_span("tool.search", "tool", child_of=agent_or_root)` | 工具分布按 span name 聚合，名称必须稳定 |
+| span 类型 | `tool` | 工具调用固定用 `tool` |
+| 父 span | `child_of=agent` 或 `child_of=root` | 有 Agent 时挂 Agent 下，没有则挂 root 下 |
+| 状态码 | `span.set_status_code(0/非0)` | 工具错误率和错误码分布依赖 |
+| 环境 | `span.set_system_tags({"env": env})` | 与 root 保持一致 |
+| 服务名 | `span.set_service_name(service_name)` | 与 root 保持一致 |
+| 输入参数 | `span.set_input({"arguments": ...})` | Trace 详情展示 |
+| 输出结果 | `span.set_output({"result": ...})` | Trace 详情展示 |
+| 用户/消息/线程 | `set_user_id/set_message_id/set_thread_id` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+
+**选填字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| 工具类型 | `span.set_tags({"tool_type": "mcp/api/plugin"})` | 区分 MCP、HTTP API、插件等 |
+| 工具服务 | `span.set_tags({"tool_provider": "xxx"})` | 多工具服务方排查 |
+| 工具调用 ID | `span.set_tags({"tool_call_id": "xxx"})` | 和模型 tool call 对齐 |
+| 工具分类 | `span.set_tags({"tool_category": "knowledge_base"})` | 知识库工具应填写，便于只看 tool span 时区分知识库 |
+| 超时/重试信息 | `span.set_output({"timeout_ms": ..., "retry": ...})` | 排查使用 |
+| 失败详情 | `span.set_output({"error_code": ..., "message": ...})` | 详情展示，正式错误仍看 `status_code` |
+
+工具名要稳定，不要把动态参数拼进名称里。
+
+推荐：
+
+```text
+tool.search
+tool.<knowledge_tool_name>
+tool.format_check
+tool.get_report
+```
+
+不推荐：
+
+```text
+tool.search.user_123.request_456
+```
+
+### 4.5 知识库 / Retriever span（有知识库检索时）
+
+知识库 span 表示一次知识库检索、文档召回、向量搜索或混合检索。span 类型按 SDK 标准写 `retriever`，不要写 `vector_retriever`。
+
+**基础字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| span 名称 | `client.start_span("retriever.knowledge_base.search", "retriever", child_of=agent_or_root)` | 名称稳定，能表达检索来源 |
+| span 类型 | `retriever` | 知识库检索固定用 `retriever` |
+| 父 span | `child_of=agent` 或 `child_of=root` | 有 Agent 时挂 Agent 下，没有则挂 root 下 |
+| 状态码 | `span.set_status_code(0/非0)` | 检索失败或超时时写非 0 |
+| 环境 | `span.set_system_tags({"env": env})` | 与 root 保持一致 |
+| 服务名 | `span.set_service_name(service_name)` | 与 root 保持一致 |
+| 检索输入 | `span.set_input({"query": "..."})` | 至少包含 query |
+| 检索输出 | `span.set_output({"documents": [...]})` | documents 每项至少包含 content，可选 id、index、score、vector |
+| 用户/消息/线程 | `set_user_id/set_message_id/set_thread_id` | 有稳定脱敏 ID 时建议填写，并遵循业务合规要求 |
+
+**选填字段**
+
+| 字段含义 | SDK 写法 / 传参值 | 说明 |
+| --- | --- | --- |
+| 检索类型 | `span.set_tags({"search_type": "vector/hybrid/keyword"})` | 区分向量、关键词、混合检索 |
+| 知识库 ID | `span.set_tags({"knowledge_base_id": "xxx"})` | 有稳定 ID 时填写 |
+| top_k / collection | `span.set_tags({...})` 或放入 input 补充字段 | 命中异常时方便排查 |
+| 过滤条件 | `span.set_input({"query": "...", "filters": ...})` | 命中过滤或召回异常时方便排查 |
+| rerank 信息 | `span.set_output({"rerank": ...})` | 有 rerank 时填写 |
+| 召回数量 | `span.set_output({"total_hits": n})` | 便于分析召回效果 |
+| embedding 模型 | `span.set_tags({"embedding_model": "xxx"})` | 向量检索排查使用 |
+| 失败详情 | `span.set_output({"error_code": ..., "message": ...})` | 详情展示，正式错误仍看 `status_code` |
+
+知识库检索 span 主要用于 Trace 详情还原和 RAG 问题排查，不直接计入模型/工具调用统计。
+
+如果知识库检索是以工具方式被 Agent 调用，并且评测规则要求工具步骤，应同时保留一个稳定的 tool span，例如：
+
+```text
+span_type=tool
+span_name=tool.<knowledge_tool_name>
+```
+
+`retriever.knowledge_base.search` 和对应 tool span 可以共用同一次检索结果：retriever 负责展示 query、documents、score 等召回细节；tool span 负责表达“Agent 调用了知识库工具”这个轨迹步骤。
+
+### 4.6 轨迹评测相关字段
+
+如果接入方需要让评测平台按 Trace 抽取轨迹，除 Trace 页面可见外，还要满足下面约束：
+
+| 项 | 要求 |
+| --- | --- |
+| TraceID | 接口返回的 `trace_id` 必须是 SDK/观测平台真实 TraceID；业务自定义 ID 只能放 `local_trace_id` |
+| 轨迹节点 | 按平台轨迹评测配置要求上报必要的 `agent`、`model`、`tool` 等 span |
+| 知识库观测节点 | `retriever.knowledge_base.search` 用于 Raw Trace / RAG 观测，是否进入轨迹以平台评测配置为准 |
+| 父子关系 | 需要评测的 model/tool span 应能归属到对应 agent/root |
+
+验收判断：
+
+```text
+Raw Trace 能看到 retriever.knowledge_base.search = RAG 观测链路可见
+需要轨迹评测的 tool/model/agent span 能按配置抽取 = 轨迹评测链路可用
+只有 retriever、没有对应 tool span = RAG 可排查，但知识库工具步骤不一定能进入轨迹
+```
+
+### 4.7 自定义选填字段放哪里
+
+自定义字段先区分用途。普通 tag 默认仅用于检索和排查，不会自动形成统计指标。
+
+| 用途 | 建议位置 | 说明 |
+| --- | --- | --- |
+| Trace 详情展示、上下文排查 | `span.set_input({...})` / `span.set_output({...})` | 适合放请求参数、回答内容、召回文档、错误详情等 |
+| Trace 检索、过滤、后续可能下钻 | `span.set_tags({...})` | 适合放场景、渠道、agent_step、tool_type、knowledge_base_id 等低基数字段 |
+| 平台固定统计字段 | SDK 标准方法或平台规定字段 | 例如 `span_type`、`status_code`、`env`、`model_name`、tokens，不能只放普通 tag 或 input/output |
+
+自定义 tag 默认用于 Trace 检索、过滤和排查；如果要在统计页形成新的分布图或汇总指标，需要遵循平台扩展指标规范。
+
+字段大小和类型限制以平台发布说明为准。为保证展示和检索性能，建议按下面方式保守上报：
+
+- `input` / `output` 只放排查所需摘要，不放超长原文。
+- 知识库 `documents` 只放命中文档的必要字段，例如 `id`、`content` 摘要、`score`、`index`，不要放整篇大文档；默认不要上传向量数组。
+- `tags` 只放短字符串、低基数字段，不放大对象、长文本、完整文档或动态唯一 ID。
+- 密钥、完整内部提示词、完整推理链、不可展示的用户隐私不要写入任何 span 字段。
+
+## 5. 错误码口径
+
+错误率和错误码分布只看标准 `status_code`。
+
+Trace 详情里的 `Status` 和 `StatusCode` 也取自这个标准字段：
+
+```text
+Python SDK: span.set_status_code(...)
+-> Trace 详情 Status / StatusCode
+-> 统计页错误率 / 错误码分布
+```
+
+页面展示上，`status_code=0` 会显示 `Status=Success`，右侧 `StatusCode` 可能显示为 `-`；非 0 时显示 `Status=Error` 和具体错误码。
+
+```python
+span.set_status_code(0)    # 成功
+span.set_status_code(500)  # 模型失败
+span.set_status_code(503)  # 工具失败或上游超时
+```
+
+`output` 里可以放业务错误详情，但不能替代 `status_code`：
+
+```python
+span.set_output({
+    "status": "error",
+    "error_code": "MODEL_TIMEOUT",
+    "message": "upstream timeout"
+})
+```
+
+统计不会解析 `output.error_code` 做正式错误率。
+
+## 6. Python SDK 示例
+
+下面示例可以直接给对接 SDK 同事参考，重点展示 root、agent、retriever、tool、model 的典型组合方式。真实 token 不要写入代码库；服务名、模型名、工具名、知识库名请按实际业务替换。
+
+### 6.1 典型链路示例
+
+有 Agent、知识库、工具和模型调用时，参考下面结构按实际链路覆盖上报：
+
+```python
+import os
+from datetime import datetime, timedelta, timezone
+
+import cozeloop
+
+
+client = cozeloop.new_client(
+    api_base_url=os.environ["COZELOOP_API_BASE_URL"],
+    workspace_id=os.environ["COZELOOP_WORKSPACE_ID"],
+    api_token=os.environ["COZELOOP_API_TOKEN"],
+    upload_timeout=30,
+)
+
+ENV = os.getenv("APP_ENV", "test")
+SERVICE_NAME = os.getenv("APP_SERVICE_NAME", "chat-service")
+
+
+def mark_common(span, *, status_code, user_id, message_id, thread_id):
+    span.set_service_name(SERVICE_NAME)
+    span.set_status_code(status_code)
+    span.set_user_id(user_id)
+    span.set_message_id(message_id)
+    span.set_thread_id(thread_id)
+    span.set_deployment_env(ENV)
+    span.set_system_tags({"env": ENV})
+
+
+def report_chat_trace():
+    now = datetime.now(timezone.utc)
+    user_id = "user-001"
+    message_id = "msg-001"
+    thread_id = "thread-001"
+
+    root = client.start_span(
+        "biz.chat.request",
+        "custom",
+        start_time=now,
+        start_new_trace=True,
+    )
+    mark_common(
+        root,
+        status_code=0,
+        user_id=user_id,
+        message_id=message_id,
+        thread_id=thread_id,
+    )
+    root.set_input({"query_summary": "帮我查询昨天的数据"})
+
+    agent = client.start_span(
+        "agent.chat.planner",
+        "agent",
+        start_time=now + timedelta(milliseconds=20),
+        child_of=root,
+    )
+    mark_common(
+        agent,
+        status_code=0,
+        user_id=user_id,
+        message_id=message_id,
+        thread_id=thread_id,
+    )
+    agent.set_input({
+        "intent": "query_business_data",
+        "available_tools": ["tool.query_report"],
+        "available_knowledge_bases": ["business-kb"],
+    })
+    agent.set_tags({
+        "agent_name": "business-agent",
+        "agent_step": "planning",
+        "route_name": "rag_then_tool",
+    })
+    agent.set_output({
+        "decision_summary": "需要先检索业务口径，再调用查询工具",
+        "next_steps": [
+            "search knowledge base for metric definition",
+            "call report tool",
+            "summarize answer",
+        ],
+        "selected_tool": "tool.query_report",
+        "selected_knowledge_base": "business-kb",
+    })
+
+    retriever = client.start_span(
+        "retriever.knowledge_base.search",
+        "retriever",
+        start_time=now + timedelta(milliseconds=50),
+        child_of=agent,
+    )
+    mark_common(
+        retriever,
+        status_code=0,
+        user_id=user_id,
+        message_id=message_id,
+        thread_id=thread_id,
+    )
+    retriever.set_input({
+        "query": "昨天数据"
+    })
+    retriever.set_tags({
+        "knowledge_base_id": "business-kb",
+        "top_k": "3",
+        "search_type": "hybrid",
+    })
+    retriever.set_output({
+        "documents": [
+            {
+                "id": "doc-001",
+                "index": "business-kb",
+                "content": "业务数据按自然日聚合...",
+                "score": 0.92,
+            }
+        ]
+    })
+    retriever.finish()
+
+    kb_tool = client.start_span(
+        "tool.knowledge_search",
+        "tool",
+        start_time=now + timedelta(milliseconds=80),
+        child_of=agent,
+    )
+    mark_common(
+        kb_tool,
+        status_code=0,
+        user_id=user_id,
+        message_id=message_id,
+        thread_id=thread_id,
+    )
+    kb_tool.set_input({
+        "arguments": {
+            "query": "昨天数据",
+            "limit": 3,
+        }
+    })
+    kb_tool.set_tags({
+        "tool_type": "mcp",
+        "tool_name": "kb_search",
+        "tool_category": "knowledge_base",
+    })
+    kb_tool.set_output({
+        "result": {
+            "kind": "knowledge_base",
+            "summary": "召回业务口径文档",
+        }
+    })
+    kb_tool.finish()
+
+    model = client.start_span(
+        "model.qwen3.5-plus",
+        "model",
+        start_time=now + timedelta(milliseconds=100),
+        child_of=agent,
+    )
+    mark_common(
+        model,
+        status_code=0,
+        user_id=user_id,
+        message_id=message_id,
+        thread_id=thread_id,
+    )
+    model.set_model_provider("qwen")
+    model.set_model_name("qwen3.5-plus")
+    model.set_input_tokens(300)
+    model.set_output_tokens(120)
+    model.set_start_time_first_resp(
+        int((now + timedelta(milliseconds=350)).timestamp() * 1_000_000)
+    )
+    model.set_input({"message_count": 1, "content_preview": "帮我查询昨天的数据"})
+    model.set_output({"content_preview": "需要调用查询工具", "status": "success"})
+    model.finish()
+
+    tool = client.start_span(
+        "tool.query_report",
+        "tool",
+        start_time=now + timedelta(milliseconds=500),
+        child_of=agent,
+    )
+    mark_common(
+        tool,
+        status_code=0,
+        user_id=user_id,
+        message_id=message_id,
+        thread_id=thread_id,
+    )
+    tool.set_input({"arguments": {"date": "yesterday"}})
+    tool.set_output({"result": "ok", "rows": 12})
+    tool.finish()
+
+    agent.finish()
+
+    root.set_output({"answer_preview": "昨天数据为 1234", "status": "success"})
+    root.finish()
+    client.flush()
+
+
+if __name__ == "__main__":
+    report_chat_trace()
+```
+
+### 6.2 flush 和失败日志
+
+`client.flush()` 表示触发 SDK 尽快提交本地缓冲的 span。它只证明“客户端尝试提交”，不能单独证明 Trace 已可检索、字段已被页面或统计链路消费。
+
+建议接入 SDK 事件回调，记录 flush 相关结果。这样即使 SDK 没有直接抛异常，也能留下可定位的上报证据：
+
+```python
+import logging
+import os
+
+import cozeloop
+
+
+logger = logging.getLogger(__name__)
+
+
+def on_finish_event(events):
+    def _inner(info):
+        events.append({
+            "event_type": getattr(info, "event_type", ""),
+            "is_event_fail": bool(getattr(info, "is_event_fail", True)),
+            "item_num": int(getattr(info, "item_num", 0) or 0),
+            "detail_msg": getattr(info, "detail_msg", ""),
+            "latency_ms": getattr(getattr(info, "extra_params", None), "latency_ms", None),
+        })
+
+    return _inner
+
+
+flush_events = []
+
+client = cozeloop.new_client(
+    api_base_url=os.environ["COZELOOP_API_BASE_URL"],
+    workspace_id=os.environ["COZELOOP_WORKSPACE_ID"],
+    api_token=os.environ["COZELOOP_API_TOKEN"],
+    trace_finish_event_processor=on_finish_event(flush_events),
+)
+
+
+def flush_trace(client, *, trace_id, message_id, thread_id, env, service_name):
+    try:
+        client.flush()
+    except Exception:
+        logger.exception(
+            "cozeloop trace flush failed",
+            extra={
+                "trace_id": trace_id,
+                "message_id": message_id,
+                "thread_id": thread_id,
+                "env": env,
+                "service_name": service_name,
+            },
+        )
+        raise
+
+    failed_events = [event for event in flush_events if event.get("is_event_fail")]
+    if failed_events:
+        logger.error(
+            "cozeloop trace flush event failed",
+            extra={
+                "trace_id": trace_id,
+                "message_id": message_id,
+                "thread_id": thread_id,
+                "env": env,
+                "service_name": service_name,
+                "failed_events": failed_events,
+            },
+        )
+```
+
+`trace_id` 不需要业务方传入，它是 SDK 创建 root span 后生成的链路 ID，也是观测平台 Trace 关联使用的 ID；能读到时建议和 `message_id`、`thread_id` 一起记录。如果业务侧已有自己的请求 ID，应单独记录为 `local_trace_id` 或 `request_trace_id`，不要覆盖 SDK `trace_id`。`flush` 成功后，还要按第 9 节继续验收 Trace 页、项目筛选、环境筛选和统计页。
+
+## 7. 失败场景示例
+
+如果本次用户请求最终失败，root span 也要写非 0 `status_code`。如果某个子 span 失败但重试后整体成功，root 可以保持 0，失败的子 span 保留非 0。
+
+模型失败时，model span 必须写非 0 `status_code`：
+
+```python
+model = client.start_span("model.doubao-pro", "model", child_of=root)
+mark_common(model, status_code=500, user_id=user_id, message_id=message_id, thread_id=thread_id)
+model.set_model_name("doubao-pro")
+model.set_input_tokens(300)
+model.set_output_tokens(0)
+model.set_output({
+    "status": "error",
+    "error_code": "MODEL_500",
+    "message": "model request failed"
+})
+model.finish()
+```
+
+工具失败时，tool span 必须写非 0 `status_code`：
+
+```python
+tool = client.start_span("tool.search", "tool", child_of=root)
+mark_common(tool, status_code=503, user_id=user_id, message_id=message_id, thread_id=thread_id)
+tool.set_input({"query": "xxx"})
+tool.set_output({
+    "status": "error",
+    "error_code": "UPSTREAM_TIMEOUT",
+    "message": "search timeout"
+})
+tool.finish()
+```
+
+## 8. 常见接入误区
+
+| 错误做法 | 问题 |
+| --- | --- |
+| 只上报 root span | 模型、工具、token、错误码分布都算不出来 |
+| 把 root span 上报成 `tool` 或 `model` | 会污染工具/模型统计 |
+| 只把 `model_name` 写进 `output` | 模型分布和模型下拉读不到 |
+| 只把 token 写进 `output.token_usage` | token 统计为 0 |
+| 只把错误码写进 `output.error_code` | 错误率和错误码分布读不到 |
+| 只把 `project_id` 放在 input/output 或普通 custom tag | Trace 详情能展示，但项目筛选和隔离不能依赖它 |
+| 不写 `env` 或每个 span 写得不一致 | 环境筛选不准 |
+| 有 Agent 编排但不上报 `agent` span | Trace 看不到规划、路由、工具选择等中间过程 |
+| 有 Agent 编排，但模型/工具/知识库调用没有单独 span | 统计页可能没有模型、工具、知识库明细 |
+| 评测规则要求知识库工具步骤，但只上报 `retriever` | RAG 详情可见，但轨迹评测可能抽不到对应工具步骤 |
+| 把完整推理链或敏感提示词写进 `agent` output | 容易造成敏感信息暴露，也不适合页面展示 |
+| `span_name` 拼用户 ID、请求 ID 等动态内容 | 分布会被打散，无法按稳定模型/工具聚合 |
+| 子 span 失败但 root 状态没有按最终结果设置 | Trace 状态和实际请求结果不一致 |
+
+## 9. 上报后怎么验收
+
+### 对接方自查
+
+建议先用唯一 `message_id` 和 `thread_id` 上报一条成功样本、一条失败样本。`trace_id` 不是业务入参，也不要求对接方手动生成；它由 SDK 创建 root span 后生成，能读到就一起记录，排查最快。如果接入方接口需要把 TraceID 返回给连弩或其他评测平台，应返回 SDK/观测平台生成的 `trace_id`；业务自定义请求 ID 另放 `local_trace_id` 或 `request_trace_id`。
+
+联调样本建议包含：
+
+```text
+message_id: <unique_message_id>
+thread_id: <unique_thread_id>
+trace_id: SDK 生成后记录
+local_trace_id: 业务请求 ID（如有）
+env: test
+service_name: <your-service-name>
+```
+
+验收步骤：
+
+| 步骤 | 页面/动作 | 输入或筛选 | 预期 | 排查建议 |
+| --- | --- | --- | --- | --- |
+| 1 | SDK 日志 | `message_id`、`thread_id`、可选 `trace_id`、可选 `local_trace_id`、env、service_name、flush event | flush 没有异常，事件里没有失败项；`trace_id` 能在观测平台 Trace 页检索到 | token、workspace、网络、服务端接入异常，或误把业务 ID 当成平台 TraceID |
+| 2 | Trace 页 | 数据源选择 SDK 上报，时间范围覆盖样本，先选全部项目/全部环境 | 能查到 root span；有模型、工具、知识库、Agent 时能看到对应子 span | 检查 token、workspace、网络、时间范围和 SDK flush 结果 |
+| 3 | Trace 页 | 切到对应项目 | 能看到同一批样本 | 确认使用平台提供的项目级 SDK token；如仍异常，记录样本信息并联系平台支持 |
+| 4 | Trace 页 | 切到对应 env | 只看到该环境样本 | 检查是否每条 span 都写了标准 `env` |
+| 5 | Trace 详情 | 打开成功样本和失败样本 | 失败 span 显示 `Status=Error`，`StatusCode` 为非 0；成功 span 为 Success | 检查是否用 `span.set_status_code(...)` |
+| 6 | Trace 详情 | 查看 model span | 能看到 `model_name`、`input_tokens`、`output_tokens` | 检查是否使用 SDK 标准方法，而不是只写 output |
+| 7 | Trace 详情 | 查看 tool span | `span_name` 是稳定工具名，不带用户 ID 或请求 ID | 检查工具 span 命名 |
+| 8 | Trace 详情 | 查看 retriever span | `span_type=retriever`，能看到 query 和 documents 摘要 | 检查是否误写成 `vector_retriever` 或 documents 过大 |
+| 9 | 轨迹评测 | 使用 SDK `trace_id` 抽取轨迹 | 有知识库工具时能看到对应 tool span，且归属到某个 agent/root | 检查是否只上报 retriever、tool 名称是否符合评测配置、parent 链路是否挂错 |
+| 10 | 统计页 | 同项目、同 env、同时间范围 | 使用次数、模型调用、工具调用、token、错误率有值 | 如 Trace 已可见但统计暂无数据，请联系平台支持确认统计刷新周期和指标口径 |
+| 11 | 数据安全检查 | input/output/tags | 没有密钥、完整内部提示词、完整推理链或不可展示用户隐私 | 截断、脱敏或改放摘要 |
+
+### 平台联合验收
+
+下面是页面验收标准。验收时应使用平台提供的项目、环境和时间范围进行查询；如项目筛选结果异常，请记录样本 `trace_id`、workspace、项目、环境和时间范围，并提交平台支持排查。
+
+| 页面 | 筛选 | 期望 |
+| --- | --- | --- |
+| Trace | SDK 上报、全部项目、全部环境 | 能看到 root/model/tool span；有 Agent 或知识库链路时，也能看到 agent/retriever span |
+| Trace | 切换到对应项目 | 仍能看到该项目上报数据 |
+| Trace | 切换到对应 env | 只看到该环境数据 |
+| 统计 | 全部项目/对应项目 | 使用次数、模型调用、工具调用、token 有值 |
+| 统计 | 错误样本 | 错误率和错误码分布有值 |
+| 统计 | 分布图 | 模型分布、工具分布、token 分布有值 |
+| 轨迹评测 | 使用 SDK `trace_id` 抽取 | 有知识库工具时，轨迹结果包含符合评测配置的 tool span |
+
+### 自查标准
+
+- 切换到对应项目后能看到数据。
+- 切换到对应 env 后能看到对应环境数据。
+- root span 为 `custom`。
+- model span 有 `model_name`、`input_tokens`、`output_tokens`。
+- tool span 有稳定 `span_name`。
+- 有 Agent 链路时，agent span 为 `agent`，并有可展示的 input/output 摘要。
+- 有知识库链路时，知识库 span 为 `retriever`，不是 `vector_retriever`，并有 query 和 documents；documents 至少包含 `content`。
+- 有知识库链路且需要轨迹评测时，Raw Trace 里还要有符合评测配置的稳定 tool span，不能只依赖 retriever。
+- 失败 span 的 `status_code` 为非 0。
+
+## 10. 上报覆盖要求
+
+请按实际业务链路覆盖上报以下节点和字段：
+
+- 每次用户请求上报一个 root span。
+- 每次模型调用上报一个 model span，并使用 SDK 标准方法写入模型名、输入 token、输出 token。
+- 每次工具、MCP、插件或业务 API 调用上报一个 tool span，span 名称保持稳定。
+- 有知识库检索、文档召回、向量搜索或混合检索时，上报 retriever span，并写入 query 和 documents 摘要。
+- 有 Agent 编排、规划、路由或工具选择时，上报 agent span，并写入可展示的 input/output 摘要和推荐 tags。
+- 知识库检索同时作为工具步骤参与轨迹评测时，按平台评测配置上报对应的稳定 tool span。
+- 项目身份正式接入使用项目级 token，不靠 tags/input/output 解决项目筛选。
+- 环境用标准 `env` 写到每条 span。
+- 错误统一写 `span.set_status_code()`。
+- 联调时记录 `message_id`、`thread_id` 和 SDK 生成的 `trace_id`。
+- 需要给连弩或评测平台做 Trace 关联时，返回的 `trace_id` 应是观测平台真实 TraceID；业务侧请求 ID 单独返回或记录为 `local_trace_id` / `request_trace_id`。

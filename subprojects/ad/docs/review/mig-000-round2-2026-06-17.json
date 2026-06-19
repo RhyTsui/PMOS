@@ -1,0 +1,51 @@
+{
+  "testId": "MIG-000",
+  "round": 2,
+  "date": "2026-06-17",
+  "scenario": "连通",
+  "input": "你好",
+  "expectedOutcome": "LLM理解+简单回应",
+  "capabilityDomains": ["Chat Runtime", "LLM 意图理解", "SSE 流式渲染", "ResponseContract"],
+  "acceptanceResults": {
+    "pageLoad": { "status": "PASS", "note": "首页正常加载，输入框可用" },
+    "instantUserMessage": { "status": "PASS", "note": "发送后立即显示用户消息，不等待后端返回" },
+    "aiResponse": { "status": "PASS", "note": "SSE 流式渲染，T+5s 可见完整回复" },
+    "apiResponse": { "status": "PASS", "note": "POST /api/chat → 200, 121KB SSE body, 22 chunks" },
+    "sseContractFields": {
+      "status": "PASS",
+      "details": {
+        "message_id": "present (trace_id)",
+        "routeDecision": "present (intent_type: general)",
+        "semantic_result": "present (完整对象)",
+        "business_summary": "present (title, brief, severity, confidence)",
+        "answer_markdown": "present (完整回答文本)",
+        "source_refs": "present",
+        "evidence_refs": "present",
+        "tool_calls": "none (general 场景符合预期)",
+        "renderer_regions": "answer_markdown → markdown-result"
+      }
+    },
+    "refreshReplay": { "status": "PASS", "note": "刷新后用户消息+AI响应均正确显示" },
+    "titleGeneration": { "status": "PASS", "note": "LLM 生成标题 '日常问候'，非硬编码" },
+    "consoleErrors": { "status": "PASS", "note": "0 个非预期错误" },
+    "mojibakeScan": { "status": "PASS", "note": "DOM/SSE/API 均无乱码" },
+    "neighborTest": { "status": "PASS", "note": "相邻表达 'hi' 同样正常响应" }
+  },
+  "overallResult": "PASS",
+  "needsFix": false,
+  "rootCause": "N/A - 用例在当前版本已通过。第一轮标记'失败'可能是测试环境或选择器问题。",
+  "apiCallSequence": [
+    "GET /api/xiaoqiao/auth/me → 200",
+    "GET /api/xiaoqiao/conversations?limit=30 → 200",
+    "GET /api/xiaoqiao/conversations/{id}/messages?limit=30 → 200",
+    "PATCH /api/xiaoqiao/conversations/{id} → 200",
+    "POST /api/xiaoqiao/conversations/{id}/messages → 201",
+    "POST /api/chat → 200 (SSE 121KB)",
+    "PATCH /api/xiaoqiao/conversations/{id} → 200",
+    "POST /api/xiaoqiao/conversations/{id}/title → 200"
+  ],
+  "loadMessagesBehavior": "skipNextLoadRef 正确跳过首次 loadMessages 调用，后续从后端加载 8 条历史消息并正确 merge",
+  "modifiedFiles": [],
+  "commitHash": null,
+  "nextCase": "MIG-001 (天气查询)"
+}

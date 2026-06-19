@@ -1,0 +1,74 @@
+{
+  "caseId": "MIG-000",
+  "scenario": "连通",
+  "input": "你好",
+  "expected": "LLM理解+简单回应",
+  "runId": "mig-000-first-1781191059687",
+  "conversationId": "conv-1781191078588",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-000-first-1781191059687.png",
+  "api": {
+    "conversationStatus": 200,
+    "messagesStatus": 200,
+    "title": "日常问候",
+    "userMessageId": "msg-1781191101769-jsz0cl",
+    "assistantMessageId": "msg-1781191121566-io8uyo",
+    "traceId": "zt-chat-1781191109493-jv9ux6",
+    "hasResponseContract": true,
+    "hasSemanticResult": true,
+    "hasBusinessSummary": true,
+    "hasAnswerMarkdown": true,
+    "sourceCount": 0,
+    "toolCallCount": 0,
+    "processEventCount": 2,
+    "pendingProcessEventCount": 0
+  },
+  "page": {
+    "runtimeCardVisible": true,
+    "replayRuntimeVisible": true,
+    "disclosurePreview": "运行过程\n意图路由\n进入general链路。\n运行日志\n提示词",
+    "replayPreview": "日常问候\n请选择项目\n\n你好\n\n已处理 2 步\n查询结果\n你好，我在。你可以直接告诉我想查询、分析或处理的事情。\n大模型检测中\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。"
+  },
+  "network": {
+    "failedRequests": [],
+    "badResponses": [],
+    "chatResponseCount": 1
+  },
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: loading, selectedProject: null, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    }
+  ],
+  "mojibakeFindings": [],
+  "acceptance": {
+    "pageHealthy": true,
+    "apiReadbackHealthy": true,
+    "replayHealthy": true,
+    "titleHealthy": true,
+    "networkHealthy": true,
+    "consoleHealthy": true,
+    "noMojibake": true,
+    "disclosureHealthy": true,
+    "answerLayoutHealthy": true
+  },
+  "failureReason": "",
+  "fixPoints": [],
+  "riskNotes": [],
+  "passed": true
+}

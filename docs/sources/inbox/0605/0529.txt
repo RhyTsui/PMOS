@@ -1,0 +1,1374 @@
+tool_calls raw item 没有写入 rawValue，同时页面调用处把 canViewRaw 固定成了 false。我接下来会
+  把工具调用原始数据补进 raw item
+工具调用 这条原始信息要带上实际 tool_calls 数据
+
+对话角度问题
+visual-system
+-color-system.md
+-elevation-shadow-system.md
+-icon-system.md
+-motion-system.md
+-radius-border-system.md
+-spacing-system.md
+-typography.md
+-visual-system-breakdown.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+检查可用能力：已选择 check_activation_callback_gap
+
+
+暂不处理：
+- 把已定义的 typography、color、interaction、runtime、renderer、registry 规范扩展为跨页面可复用约束，而不是只在消息域生效。
+- 对消息展示域之外的主要用户页面做一致性验证，重点检查：正文层级、数据组件、流式状态、移动端响应式、虚拟化与性能预算。
+-用户权限过滤一部分代码
+
+1.能力发现还有问题 
+2.看不到发现过程
+
+1、用这个测试集来测一轮，看看有几个通过的，生成测试文档.excle，标注每一条不通过 不通过原因，需要优化的地方。禁止直接修改系统，而是根据测试结果进行汇总分析，结合系统现状和总纲架构，再整理出迭代plan。
+
+2、对接知识库的key自动获取
+E:\AI\ai-os\docs\sources\inbox\get_user_api_key.py
+管理员账号：
+admin@xiaoqiao.com
+管理员密码：
+asdf1234
+调用case：
+python get_user_api_key.py --base-url https://dataki.dobest.com --admin-email admin@xiao
+qiao.com --admin-password asdf1234 --target-name 徐韵
+
+3、目标方向：重做正文渲染架构、去掉 ChatContainer 里的临时 preview strip、让正文、结果、过程与依据都按总纲契约驱动，而不是组件里手工拼接
+实施方案：**不要新增一套平行的 Presentation OS，而是在现有 Enterprise AI Chat OS 下，把 Chat Presentation Layer 作为“消息返回展示规范域”补齐。**当前系统已经有三层消息模型雏形：MessageSurface 负责正文，MessageContract 负责结果，MessageDisclosureView 负责过程与依据；问题是正文区还没有完全切换到 screenType + regions + componentBinding 的契约驱动渲染。我已经整理成一份可直接给 Codex CLI 的更新方案文档：E:\AI\ai-os\docs\sources\inbox\PMAIOS_CHAT_PRESENTATION_LAYER_UPDATE_PLAN.md，请仔细阅读分析 ，结合当前实施现状和总纲架构思想，输出10分上线计划，历史包袱要删掉不要兼容，已经部署的组件库要直接引用应用，不要再一个个描述，各类组件要完成批量注册和渲染展示。
+
+
+  # Chat Presentation Layer 完整上线计划
+
+  ## Summary
+
+  不新增平行的 Presentation OS，直接在现有 Enterprise AI Chat OS 下补齐 Chat Presentation Layer：把消息返回展示域收口为 SemanticResultContract /
+  MessageContract -> regions[] -> componentBinding -> Component Registry -> Renderer。
+  本次目标不是“再做一个页面”，而是把正文、结果、过程与依据全部改成契约驱动渲染，删除 ChatContainer 里的临时 preview strip、旧式手工拼接和渲染层兼容
+  兜底，形成可上线的统一消息展示架构。
+
+  ## Key Changes
+
+  ### 1) 规范与目录补齐：把当前总纲拆成可执行文档树
+
+  - P0 先补齐/归位核心文档：
+      - docs/architecture/frontend-engineering/message-rendering-architecture.md
+      - docs/architecture/frontend-engineering/message-state-management.md
+      - docs/architecture/semantic-contract/region-contract.md
+      - docs/architecture/semantic-contract/block-contract.md
+      - docs/architecture/semantic-contract/component-binding.md
+      - docs/architecture/semantic-contract/layout-hints-contract.md
+      - docs/architecture/semantic-contract/semantic-result-adapter-policy.md
+      - docs/architecture/frontend-engineering/registry-spec.md
+  - P1 补齐展示域细分文档：
+      - screen-type-spec.md
+      - streaming-state-spec.md
+      - markdown-renderer.md
+      - data-visualization-renderer.md
+      - runtime-renderer.md
+      - action-renderer.md
+      - empty-error-state-renderer.md
+      - autonomous-rendering-engine.md
+  - P2 补齐体验与约束文档：
+      - virtualization-spec.md
+      - performance-spec.md
+      - responsive-system.md
+      - feedback-system.md
+      - progressive-disclosure-ux.md
+      - result-consumption-ux.md
+      - mobile-responsive-chat-ux.md
+  - 已存在但要保留为真源的视觉/交互文档，只作为 token 和 UX 来源，不重写总纲：
+      - typography / color / icon / motion
+      - conversation-input-feedback-ux / ai-runtime-ux / data-visualization-ux / ai-trust-ux
+
+  ### 2) 统一契约模型：正文、结果、过程与依据都从总纲派生
+
+  - SemanticResultContract 继续作为最终业务结果真源，不再新增平行 UI schema。
+  - screenType 负责页面级语义与默认 region 排序，不负责选具体组件。
+  - regions[] 继续作为唯一结构化承载；如需更细颗粒度，只允许作为内部 block 结构，不进入旧式手工拼接路径。
+  - componentBinding 作为唯一渲染挂载入口，负责把 region/block 绑定到具体 renderer。
+  - MessageDisclosureView 继续作为过程与依据唯一消费对象，不允许正文/结果层直接读取 tool_calls / raw_result / process_events 来拼 UI。
+  - ActionContract / EvidenceRef / SourceRef / RuntimeRef 继续保持分层，禁止 renderer 私有定义这些结构。
+
+  ### 3) 消息渲染链路重做：ChatContainer 退回壳层，正文改为区域化渲染
+
+  - ChatContainer 只保留消息列表编排、消息壳、动作挂载、抽屉挂载，不再做业务结果重组。
+  - 删除 DisclosurePreviewStrip 这类临时预览条，不保留“正文里先塞一个轻量过程入口”的过渡方案。
+  - MessageSurface 只负责消息 frame + region tree 渲染，不再从 workflow_result / report_query_result / structured_payload 反推业务结论。
+  - MessageActionBar 只负责消息级动作入口，不承载正文结果。
+  - MessageDisclosureDrawer 继续作为侧边过程与依据面板，不并入正文渲染。
+  - 旧的兼容读法在渲染路径里全部清掉：正文/结果展示不再直接读取 workflow_result / report_query_result / tool_calls / process_events / raw_result。
+
+  ### 4) 组件注册与批量渲染：把现有部署的组件库直接接入注册矩阵
+
+  - registry-spec.md 定义统一注册、解析、validate、fallback、telemetry 规则。
+  - autonomous-rendering-engine.md 定义从 SemanticResultContract -> regions -> componentBinding -> registry -> renderer -> React tree 的声明式管线。
+  - 已部署的表格、图表、Markdown、运行态、动作、空态、错误态组件库不逐个散写在页面里，而是通过 registry preset 批量注册。
+  - 统一补齐并收口这些 renderer family：
+      - markdown-renderer
+      - data-visualization-renderer
+      - runtime-renderer
+      - action-renderer
+      - empty-error-state-renderer
+  - data-visualization-renderer 作为唯一业务图表/表格入口，内部再按数据形态选择已部署的具体实现。
+  - markdown-renderer 只处理正文类内容，不混表格、图表、动作、来源解释。
+  - runtime-renderer 只处理运行态摘要与过程可视化，完整 trace 仍归 disclosure / runtime 协议。
+  - 所有 renderer 必须具备 validate、fallback、性能声明和 telemetry，不允许页面层临时判断组件类型。
+
+  ### 5) UX / 体验 / 性能：把总纲 UI 规范真正落到消息展示域
+
+  - screen-type-spec.md 补齐页面类型与布局策略：对话、分析、报告、仪表盘、指标解释、工作流结果、错误/空态、权限受限等。
+  - streaming-state-spec.md 补齐流式输出、打字机节奏、partial / recovered / failed / paused 等状态展示。
+  - virtualization-spec.md、performance-spec.md、responsive-system.md 补齐长会话、大表格、长 markdown、移动端抽屉化、滚动稳定性和性能预算。
+  - feedback-system.md、progressive-disclosure-ux.md、result-consumption-ux.md 补齐反馈、逐级披露、结果继续追问、证据查看、导出等交互。
+  - 视觉系统现有规范只作为 token 来源，不在这次任务里重做风格。
+
+  ### 6) 历史包袱清理：只保留规范入口，不保留展示兼容
+
+  - 删除或收口所有只为旧展示形态服务的分支、旧卡片和旧重组逻辑。
+  - ReportQueryResultCard、旧 ResultPanel、旧报表兼容卡如果仍存在，只能作为 renderer-backed region 的实现细节，不能继续在页面里重复承载结果。
+
+  ## Test Plan
+      - plain markdown answer
+      - markdown with metric cards
+      - report query with table and chart
+      - report query empty result
+      - failed tool with error state
+      - streaming partial answer
+      - message with actions
+      - message with disclosure entry
+      - renderer missing fallback
+      - legacy input normalization boundary
+  - 断言每个 case：
+      - screenType / regions[] / componentBinding 命中正确
+      - registry resolve 成功
+      - validate 通过
+      - 不读取 raw_result / tool_calls / process_events 直接拼正文
+      - disclosure 只从 MessageDisclosureView 打开
+  - 做 UI 回归：
+      - 正文不再出现临时 preview strip
+      - 结果、过程与依据、动作分区不重复叙述
+      - 桌面端与移动端布局稳定
+      - 长会话滚动与流式更新不抖动
+  - 做静态 guardrail：
+      - 搜索校验 ChatContainer / MessageSurface 不再直接组合 legacy result payload
+      - registry 中所有 componentBinding 都有对应 renderer
+      - renderer 不私有定义 action / evidence / source / runtime
+
+  ## Assumptions
+
+  - 现有 SemanticResultContract、RuntimeDisplayProtocol、MessageDisclosureView 不推翻，只补齐正文渲染域。
+  - 不新增平行 Presentation OS，不做双轨兼容展示。
+  - 已部署的组件库直接通过 registry 批量注册，不逐个在页面层写硬编码引用。
+  - 如果历史文档与新 canonical 命名冲突，按新 canonical 目录收口，旧文档仅作为迁移参考，最终删除重复表述。
+  - 这次交付的“10 分”标准是：正文、结果、过程与依据都能从同一套契约稳定渲染，且页面层没有 legacy 拼接痕迹。
+
+4、上传拼表
+
+5、自动化
+
+6、知识客服
+
+7、需求
+
+8、包
+
+9、排查
+
+10、智投也没上下文
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.当前只能通过点击消息操作栏-来源按钮，展开右侧侧边栏，查看过程，目前也只有一个工具调用、一个执行详情、一个原始返回代码块可查看。来源空当前没有可披露的来源信息。字段说明当前没有返回可展示的字段说明。也不知道是哪个步骤的，无法有效排查问题。之前的设计是默认不展开，这个没问题，用户对过程默认不展开也没问题。chat的整个过程应该是有思考步骤 请求参数 返回参数等等多轮多步骤的吧？这个部分应该怎么更友好的设计和披露呢？trace是包括全部过程嘛？ 要在总纲架构下完善这个模块，做到10分。
+
+BUG：已经取到结果了，但是消息里没有数据，重复信息，没必要的信息依然没有清理，之前修复过这个问题。
+提问：指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数
+回答：
+状态标签：已完成分析
+正文：报表查询已完成，结果已生成。
+卡片：查询完成、已形成可继续分析的数据判断。、可基于当前结果继续追问、对比或导出。
+建议按钮：继续追问维度、导出结果
+来源：缺少来源和字段说明；工具调用、执行详情和原始返回都是代码，不是流式输出，不是日志，也不是好理解的步骤。
+这个问题单独解决，这次先解决消息区的组件和渲染问题
+截图：E:\AI\ai-os\docs\sources\inbox\image (1).png
+
+E:\AI\ai-os\docs\sources\inbox增加了PMAIOS_ARCHITECTURE_DIRECTORY_DISCLOSURE_SUPPLEMENT.md、PMAIOS_ARCHITECTURE_DIRECTORY_DISCLOSURE_SUPPLEMENT (1).md（完整目录、P0/P1/P2、Mermaid 修订、契约建议和验收标准都在文件里：）
+按当前目录做归位审查，整理成一份可直接给 Codex CLI 的补充目录设计。
+核心判断是：当前总纲不用推翻，Disclosure Contract / Disclosure Projection 已经在一级架构里，下一步是把它从“图上的节点”补成“可执行目录、契约、builder、renderer、测试和迁移规则”。
+当前架构应补成这样
+Enterprise AI Chat OS
+├─ ENTERPRISE_AI_CHAT_OS_SPEC.md
+├─ 00_SPEC_INDEX.md
+├─ 01_EXECUTION_LAYER_INDEX.md
+├─ 02_ORCHESTRATION_LAYER_INDEX.md
+├─ 03_DISCLOSURE_LAYER_INDEX.md                     ← 新增
+├─ 04_PRESENTATION_LAYER_INDEX.md                   ← 新增 / 可选
+│
+├─ docs/
+│  └─ architecture/
+│     ├─ architecture-map.md                        ← 补强
+│     ├─ visual-system/
+│     ├─ interaction-system/
+│     ├─ frontend-engineering-system/
+│     ├─ unified-semantic-contract/
+│     ├─ runtime-display-protocol/
+│     ├─ disclosure-contract/                       ← 新增正式层
+│     ├─ component-binding-registry-renderer/
+│     ├─ orchestration-layer/
+│     ├─ execution-layer/
+│     └─ skill-workflow-packages/
+│
+├─ frontend/
+│  └─ src/
+│     ├─ contracts/
+│     │  ├─ semantic-result/
+│     │  ├─ runtime-display/
+│     │  └─ disclosure/                             ← 新增
+│     ├─ renderers/
+│     │  └─ disclosure/                             ← 新增
+│     └─ chat/
+│        ├─ MessageActionBar.tsx                    ← 补强
+│        ├─ MessageDisclosureDrawer.tsx             ← 新增
+│        └─ messageState.ts                         ← 补强
+│
+├─ schemas/
+│  └─ disclosure/                                   ← 新增
+│
+├─ examples/
+│  └─ disclosure/                                   ← 新增
+│
+├─ tests/
+│  ├─ contracts/
+│  ├─ golden/
+│  └─ e2e/
+│
+└─ management-center/
+   └─ import/
+      ├─ disclosure-panel.default-config.json       ← 新增
+      ├─ disclosure-permission-policy.example.json  ← 新增
+      └─ disclosure-quality-rules.example.json      ← 新增
+
+
+P0 最小必补目录
+
+如果只先解决“过程与依据披露层”当前问题，最小不需要全量补完，先加这些：
+docs/architecture/disclosure-contract/
+├─ disclosure-system.md
+├─ message-disclosure-view.contract.md
+├─ disclosure-projection-builder.md
+├─ execution-step-disclosure.md
+├─ evidence-disclosure-policy.md
+├─ field-catalog-disclosure.md
+├─ quality-check-disclosure.md
+├─ raw-data-disclosure-policy.md
+└─ legacy-runtime-to-disclosure-adapter.md
+
+frontend/src/contracts/disclosure/
+├─ types.ts
+├─ message-disclosure-view.schema.ts
+├─ builders/buildDisclosureView.ts
+├─ adapters/legacyRuntimeToDisclosure.ts
+├─ validators.ts
+├─ examples/report-query.missing-metadata.example.ts
+└─ __tests__/
+
+frontend/src/renderers/disclosure/
+├─ DisclosurePanelRenderer.tsx
+├─ OverviewTab.tsx
+├─ ExecutionTab.tsx
+├─ EvidenceTab.tsx
+├─ FieldCatalogTab.tsx
+├─ QualityCheckTab.tsx
+├─ RawInfoTab.tsx
+└─ EmptyState.tsx
+
+schemas/disclosure/
+└─ message-disclosure-view.v1.schema.json
+
+tests/golden/
+└─ disclosure-golden-cases.test.ts
+
+架构链路应明确成这样
+
+当前架构图里的链路可以升级为：
+Request Understanding
+→ Capability Orchestration
+→ Business Semantics
+→ Context Memory
+→ MCP Governance
+→ Skill / Workflow
+→ MCP / Tool Calls
+→ Result Assembly
+→ Unified Semantic Contract
+→ Runtime Display Protocol
+→ Disclosure Projection Builder
+→ MessageDisclosureView
+→ Component Binding / Registry / Renderer
+→ Chat UI
+
+关键是这几个边界不要混：
+Unified Semantic Contract
+= 业务结果真源
+
+Runtime Display Protocol
+= 运行过程真源
+
+Disclosure Contract / Projection
+= 用户可见过程与依据的投影层
+
+Component Binding / Registry / Renderer
+= 展示层
+
+Skill / Workflow
+= 能力实现，不是披露协议中心
+
+这次最重要的新增对象
+
+建议正式定义：
+MessageDisclosureView
+
+它是前端右侧「过程与依据」面板唯一消费对象。
+
+不要让前端直接读：
+tool_call
+raw_result
+execution_detail
+source_refs
+field names
+
+而应该统一读：
+MessageDisclosureView
+├─ overview
+├─ execution
+├─ evidence
+├─ fields
+├─ qualityChecks
+├─ rawInfo
+├─ permissions
+└─ emptyStates
+这样当前问题会系统性解决：
+
+来源为空
+字段说明为空
+只有一个工具调用
+只有一个原始 JSON
+不知道是哪一步
+无法排查问题
+
+都会变成可解释的状态，而不是 UI 空白。
+Codex CLI 任务可以直接这样下
+请在不推翻现有 Enterprise AI Chat OS 总纲的前提下，补齐 Disclosure Contract / Disclosure Projection 层。
+
+目标：
+1. 新增 docs/architecture/disclosure-contract/ 下的核心文档。
+2. 新增 frontend/src/contracts/disclosure/ 下的 TypeScript 契约、builder、adapter、validator、tests。
+3. 新增 schemas/disclosure/message-disclosure-view.v1.schema.json。
+4. 新增 frontend/src/renderers/disclosure/ 下的 DisclosurePanelRenderer 与 6 个 tab。
+5. 修改 MessageActionBar：入口文案从“来源”升级为“过程与依据”。
+6. 修改 message state：按 message_id 绑定 disclosure view，不读全局 currentResult。
+7. 增加 legacyRuntimeToDisclosure，兼容当前只有 tool_call / execution_detail / raw_result 的情况。
+8. 增加 golden cases，覆盖 source empty、field empty、tool-only、partial result、failed tool with retry。
+9. 禁止前端通过字段名硬编码业务含义；字段解释必须来自 Field / Metric Catalog 或 disclosure input。
+10. Raw JSON 只能在 RawInfoTab 中折叠展示，并执行脱敏和权限策略。
+
+
+但是当前实际应该已经有一些在细节文档中有定义，只是还存在一些不完善，以及存在一些旧链路，所以需要结合这个方案综合评估，我们的目标就是把这个模块做到10分可上线。
+
+
+
+  下一会话建议直接接的方向
+  - 重做正文渲染架构
+  - 去掉 ChatContainer 里的临时 preview strip
+  - 让正文、结果、过程与依据都按总纲契约驱动，而不是组件里手工拼接
+
+
+
+
+Chat Presentation Layer
+目录：
+docs/architecture/chat-presentation/
+│
+├─ chat-presentation-system.md
+│
+├─ message-surface.md
+│
+├─ ui-schema-contract.md
+│
+├─ presentation-planner.md
+│
+├─ semantic-to-ui-mapping.md
+│
+├─ progressive-disclosure.md
+│
+├─ data-visualization-system.md
+│
+├─ action-surface-system.md
+│
+├─ card-library-spec.md
+│
+├─ streaming-rendering.md
+│
+├─ ai-runtime-experience.md
+│
+└─ trust-and-feedback-patterns.md
+
+正文
+正文=结构化组件，例如：
+┌─────────────────────┐
+│ 注册数              │
+│ 12,345              │
+│ ↑15%                │
+└─────────────────────┘
+
+┌─────────────────────┐
+│ AI结论              │
+│ 本周注册增长明显     │
+└─────────────────────┘
+
+┌─────────────────────┐
+│ 数据表              │
+└─────────────────────┘
+
+┌─────────────────────┐
+│ 推荐动作            │
+└─────────────────────┘
+
+UI Schema
+{
+  "blocks":[
+    {
+      "type":"metric_card"
+    },
+    {
+      "type":"ai_summary"
+    },
+    {
+      "type":"table"
+    }
+  ]
+}
+然后：
+Renderer
+↓
+React
+
+Presentation Layer 需要解决什么
+
+实际上有五大问题。
+1 信息压缩
+当前：
+
+100行内容
+
+用户不看。
+
+应该：
+
+一句结论
+
+展开看细节
+
+例如：
+
+注册数增长15%
+
+[查看原因]
+
+2 渐进式披露
+第一层：
+
+结论
+
+第二层：
+
+关键指标
+
+第三层：
+
+明细
+
+第四层：
+
+原始数据
+而不是：
+
+直接输出3000字
+3 多模态数据展示
+
+企业AI绝大部分是：
+
+指标
+表格
+图表
+状态
+流程
+
+不是纯文本。
+
+因此正文必须支持：
+
+Metric Card
+
+Table
+
+Chart
+
+Timeline
+
+Flow
+
+Status
+
+Action
+4 行动导向
+
+很多AI只会说：
+
+发现问题
+
+结束。
+
+企业AI必须：
+
+发现问题
+
+下一步建议
+
+立即执行
+
+例如：
+
+激活异常
+
+[查看原因]
+
+[开始排查]
+
+[创建Case]
+5 AI运行体验
+
+这是你之前一直在讨论的：
+
+思维链体验
+
+但不要暴露 CoT。
+
+应该是：
+
+正在理解问题
+
+正在匹配能力
+
+正在查询数据
+
+正在生成结果
+
+这种 Runtime UX。
+
+企业Chat正文最终应该长什么样
+
+我建议统一：
+
+Message Surface
+
+├─ Runtime Header
+
+├─ AI Summary
+
+├─ KPI Cards
+
+├─ Visualization
+
+├─ Key Findings
+
+├─ Recommendations
+
+├─ Action Area
+
+├─ Artifact Viewer
+
+└─ Disclosure Entry
+
+例如：
+
+[查询完成]
+
+注册数
+12,345
+↑15%
+
+激活数
+9,876
+↑12%
+
+━━━━━━━━━━
+
+AI发现
+
+1. 注册增长主要来自Android
+
+2. 投放成本下降
+
+━━━━━━━━━━
+
+推荐动作
+
+[查看渠道]
+
+[生成日报]
+
+[继续分析]
+
+━━━━━━━━━━
+
+数据表
+
+━━━━━━━━━━
+
+过程与依据
+下一阶段我建议不要直接做UI
+
+而是先做
+
+Presentation Contract
+
+即：
+
+Semantic Result
+↓
+Presentation Schema
+
+否则未来：
+
+报表查询
+
+监控告警
+
+归因排查
+
+知识问答
+
+联调助手
+
+都会各写各的UI。
+
+最后失控。
+
+所以接下来最合理的路线
+
+已经完成：
+
+Request Understanding
+
+Capability Orchestration
+
+Semantic Layer
+
+Context Layer
+
+MCP Layer
+
+Result Assembly
+
+Disclosure Layer
+
+下一阶段正式进入：
+
+Chat Presentation Layer
+
+优先顺序：
+
+P0
+Presentation Contract
+
+P1
+Message Surface System
+
+P2
+Card Library
+
+P3
+Visualization System
+
+P4
+Runtime Experience
+
+P5
+AI-first Enterprise Chat Design System
+
+这一步做完以后，你的小乔智投就会从：
+
+企业版 ChatGPT
+
+变成：
+
+真正的 AI Native 企业工作台
+
+因为用户看到的将不再是一坨 Markdown，而是围绕业务任务自动组织的信息界面。
+
+
+重点：当前我们的架构应该已经有了类似的设计，我只需要对齐补充即可
+现在这套架构已经有正文渲染链路了，不需要新建一套 Presentation Layer。
+
+当前已有位置是：
+
+Unified Semantic Contract
+→ regions[]
+→ componentBinding
+→ Component Registry
+→ Renderer
+→ 前端自主渲染结果
+
+所以正文部分接下来要做的不是“新增大层”，而是补齐语义结果到组件渲染的标准化细节。
+
+应该补充的位置
+
+在当前目录里重点补这 3 块：
+
+Unified Semantic Contract
+Component Binding / Registry / Renderer
+Frontend Engineering System
+
+不建议再新增一个独立的：
+
+Chat Presentation Layer
+
+否则会和你现有的：
+
+Component Binding / Registry / Renderer
+
+重复。
+
+正文部分要补什么
+
+建议补成：
+
+docs/architecture/unified-semantic-contract/
+├─ semantic-result-contract.md
+├─ region-contract.md                         ← 补
+├─ block-contract.md                          ← 补
+├─ answer-markdown-contract.md                ← 补
+├─ visualization-region-contract.md           ← 补
+├─ action-region-contract.md                  ← 补
+└─ semantic-to-region-assembly.md             ← 补
+
+docs/architecture/component-binding-registry-renderer/
+├─ component-binding-system.md
+├─ component-registry.md
+├─ renderer-contract.md
+├─ message-surface-renderer.md                ← 补
+├─ card-renderer.md                           ← 补
+├─ table-renderer.md                          ← 补
+├─ chart-renderer.md                          ← 补
+├─ action-renderer.md                         ← 补
+├─ empty-state-renderer.md                    ← 补
+└─ renderer-fallback-policy.md                ← 补
+
+docs/architecture/frontend-engineering-system/
+├─ frontend-engineering-system.md
+├─ message-rendering-pipeline.md              ← 补
+├─ streaming-rendering-policy.md              ← 补
+├─ renderer-validation-policy.md              ← 补
+└─ ui-regression-golden-cases.md              ← 补
+正文渲染的核心链路
+
+你现在要明确这条链：
+
+SemanticResultContract
+→ regions[]
+→ blocks[]
+→ componentBinding
+→ renderer.validate()
+→ renderer.render()
+→ Message Surface
+
+其中：
+
+Disclosure Layer
+只负责“过程与依据”
+
+正文渲染
+只负责“结果怎么呈现”
+
+两者不能混。
+
+正文层的关键对象
+
+建议正式定义：
+
+SemanticResultContract {
+  answer_markdown?: string
+  regions: Region[]
+  actions?: ActionContract[]
+  disclosure_ref?: string
+}
+Region {
+  region_id: string
+  region_type:
+    | 'summary'
+    | 'metric_cards'
+    | 'table'
+    | 'chart'
+    | 'insight'
+    | 'recommendation'
+    | 'actions'
+    | 'artifact'
+  title?: string
+  priority: number
+  blocks: Block[]
+  componentBinding: ComponentBinding
+}
+Block {
+  block_id: string
+  block_type:
+    | 'markdown'
+    | 'metric_card'
+    | 'data_table'
+    | 'chart'
+    | 'finding'
+    | 'recommendation'
+    | 'action_group'
+    | 'empty_state'
+  data: unknown
+}
+这次正文补充的目标
+
+不是改 Disclosure，而是解决：
+
+1. AI 正文不能只是一坨 markdown
+2. 结果卡、表格、图表、动作区不能各自抢渲染
+3. answer_markdown、summary、visualizations、actions 要有固定归属
+4. 不允许前端从 raw_result 猜 UI
+5. 不允许每个业务组件私有定义结构
+6. 所有正文内容必须从 SemanticResultContract / regions[] 来
+和 Disclosure 的边界
+
+最终应该是：
+
+正文区域：
+answer_markdown
+summary
+metric cards
+tables
+charts
+insights
+recommendations
+actions
+
+右侧过程与依据：
+execution steps
+sources
+evidence
+field catalog
+quality checks
+raw info
+trace projection
+
+一句话：
+
+Disclosure 解释“为什么可信”；正文渲染负责“结果如何高质量呈现”。
+
+
+• 有，而且不止一个。
+
+  - Ant Design / Ant Design X：作为会话工作台和结果承接的主 UI 基座
+  - @ant-design/plots：图表渲染的一部分，主要在 DataVizRenderer 里用
+  - ECharts：也是 DataVizRenderer 的图表引擎之一
+  - Radix UI：底层交互组件能力，很多基础控件依赖它
+  - Framer Motion：消息滑入、过渡、动效
+  - Lucide React：图标
+  - Sonner：toast 提示
+
+  按“表”和“图”来说，现状是：
+
+  - 表：不是自己手写纯 table 方案，已经接了 AG Grid，并且也保留了基础 Table 组件封装
+  - 图：已经接了 ECharts + @ant-design/plots + Recharts，不是单一图表库
+
+  你可以直接看这几个落点：
+
+  - frontend/src/package.json
+  - frontend/src/src/components/cognitive/DataVizRenderer.tsx
+  - frontend/src/src/components/ui/chart.tsx
+
+  所以结论是：
+
+  1. 是的，已经部署了一些开源组件框架。
+  2. 表和图都不是空白状态，已经有真实落地。
+  3. 但它们还没有完全统一成“总纲里一套正式的组件矩阵”，现在更像是“已经接入、部分标准化、部分过渡并存”。
+
+  如果你要，我可以下一步直接给你列一份：
+  “当前已接入的开源组件框架清单 + 在架构里对应的角色 + 还缺的标准化层”。
+
+
+- P1 的核心主干大部分已经有了
+  - 一部分是“已有文档 + 代码实现”
+  - 一部分还只是“能力已经在代码里，但没有按你这批文件名单独成文”
+
+  我按你列的目录对一下，结果是这样：
+
+  已经有独立文档的
+
+  - docs/architecture/visual-system/typography.md
+  - docs/architecture/visual-system/color-system.md
+  - docs/architecture/visual-system/icon-system.md
+  - docs/architecture/visual-system/motion-system.md
+  - docs/architecture/interaction-system/ai-runtime-ux.md
+  - docs/architecture/interaction-system/data-visualization-ux.md
+  - docs/architecture/interaction-system/ai-trust-ux.md
+  - docs/architecture/semantic-contract/semantic-result-contract.md
+  - docs/architecture/semantic-contract/action-contract.md
+  - docs/architecture/semantic-contract/evidence-contract.md
+  - docs/architecture/runtime/runtime-display-protocol.md
+  - docs/architecture/frontend-engineering/frontend-engineering-system.md
+  - docs/architecture/frontend-engineering/component-registry-renderer.md
+  - docs/architecture/frontend-engineering/component-registry-implementation.md
+
+  有能力，但不是按你列的文件名单独建出来的
+
+  - conversation-ux.md：仓库里对应的是 docs/architecture/interaction-system/conversation-input-feedback-ux.md
+  - component-binding.md：没有单独成文，主要分布在 docs/architecture/semantic-contract/semantic-result-contract.md 和 docs/architecture/frontend-
+    engineering/component-registry-renderer.md 以及代码里的 registry / validator
+  - screen-type-spec.md：没有单独成文，但 screenType 已在 frontend/src/src/contracts/semantic/semantic-result-contract.ts 里定义
+  - streaming-state-spec.md：没有单独成文，但 streaming 状态已在 frontend/src/src/contracts/runtime/runtime-display-protocol.ts 里
+
+  目前还没按你列的名字完整落成的
+  - virtualization-spec.md
+  - performance-spec.md
+  - responsive-system.md
+  - registry-spec.md
+  - markdown-renderer.md
+  - data-visualization-renderer.md
+  - runtime-renderer.md
+  - autonomous-rendering-engine.md
+
+  这些不是“完全没有”，而是实现分散在代码里，文档还没按这个命名体系单独整理出来。例如：
+
+  - 组件注册和解析已经在 frontend/src/src/contracts/renderer/component-registry.ts / frontend/src/src/contracts/renderer/component-registry-runtime.ts
+    里
+  - markdown-result、data-visualization、ai-runtime、workflow-trace、disclosure-panel 这些 binding 已经在 contract 和 validator 里
+  - 数据可视化、消息正文、运行态渲染也已经有实现，但还没完全整理成你要的那套“总纲 UIUX 规范文档树”
+
+  结论很直接：
+
+  1. 总纲的核心协议层已经做了不少。
+  2. 你列的 UIUX 体系不是空白，但还没完整按这棵目录树成套归位。
+  3. 现在的状态是“能力有了，文档和归档不齐”。
+
+  如果你要，我下一步可以直接帮你把这批东西整理成一份**“现状对照表”**，按你的目录逐项标：
+
+  - 已有独立文档
+  - 代码已实现，文档未归位
+  - 还缺失，需要新增
+
+  这样你就能一眼看到哪几份先补。
+
+
+
+下面这份可以直接作为“正文渲染架构（当前态）”的文档底稿，放进总纲里也能对上你现在的实现状态。
+
+  # 正文渲染架构（当前态）
+
+  ## 1. 定位
+
+  正文渲染不是单独的文案展示层，而是 AI 会话结果的主承载层。
+
+  它负责把一次对话的输出拆成三类可见内容：
+
+  - 正文：给用户直接看的结论、摘要、说明
+  - 结果：结构化数据、图表、表格、下一步动作
+  - 过程与依据：来源、执行、字段、质量检查、原始信息
+
+  当前实现上，这三类内容已经开始分层，但还没有完全做到由总纲契约自动驱动，仍存在少量硬编码入口和过渡组件。
+
+  ---
+
+  ## 2. 当前链路
+
+  ```txt
+  Message
+  → MessageSurface
+  → MessageContract / workflow_result / semantic_result
+  → 正文展示
+  → 结果展示
+  → MessageActionBar
+  → MessageDisclosureDrawer
+  → DisclosurePanelRenderer
+
+  对应到当前代码，主要入口在：
+
+  - frontend/src/src/components/cognitive/ChatContainer.tsx
+  - frontend/src/src/components/cognitive/MessageActionBar.tsx
+  - frontend/src/src/components/cognitive/MessageDisclosureDrawer.tsx
+  - frontend/src/src/renderers/disclosure/DisclosurePanelRenderer.tsx
+  - frontend/src/src/contracts/semantic/semantic-result-contract.ts
+
+  ———
+
+  ## 3. 三层正文模型
+
+  ### 3.1 正文层
+
+  正文层只负责“用户第一眼看到的自然语言内容”。
+
+  当前来源优先级：
+
+  1. MessageContract.answer_markdown
+  2. message.content
+  3. 兼容性的 workflow_result.answer
+
+  当前渲染位置：
+
+  - MessageSurface
+  - MarkdownRenderer
+  - 长文本折叠与展开逻辑
+
+  当前规则：
+
+  - 正文只保留短摘要、结论、说明
+  - 工程字段、工具调用、原始 JSON 不应直接进正文
+  - 超长内容会自动折叠
+  - 对消息正文中的 inline 来源段，会进行清理或剥离
+
+  当前实现里，正文渲染仍然有一部分硬编码逻辑在 MessageSurface 内，例如：
+
+  - 长文折叠
+  - inline 来源段剥离
+  - 文本类型区分渲染
+
+  这些逻辑是合理的，但还没有完全上升为总纲里的统一正文协议。
+
+  ———
+
+  ### 3.2 结果层
+
+  结果层负责“正文下面的结构化结论”。
+
+  它承载的是已经抽象过的业务结果，而不是执行细节。
+
+  当前输入来源：
+
+  - MessageContract.visualizations
+  - MessageContract.business_summary
+  - MessageContract.next_actions
+
+  当前渲染位置：
+
+  - SafeDataVizRenderer
+  - BusinessSummaryCard
+  - ActionsRenderer
+
+  当前目标：
+
+  - 表格、图表、下一步动作属于结果层
+  - 结果层和正文层要分离
+  - 结果层不再回写为正文里的重复说明
+
+  当前状态：
+
+  - 已经有 MessageContract 作为结果真源
+  - 但页面里仍有少量兼容型逻辑，过去会从 workflow_result 或 report_query_result 反推结果
+  - 这部分正在收口到 message_contract
+
+  ———
+
+  ### 3.3 过程与依据层
+
+  过程与依据层负责“为什么得出这个结果”。
+
+  当前投影对象是：
+
+  - MessageDisclosureView
+
+  当前渲染入口：
+
+  - frontend/src/src/components/cognitive/MessageDisclosureDrawer.tsx
+  - frontend/src/src/renderers/disclosure/DisclosurePanelRenderer.tsx
+
+  当前页签结构：
+
+  - 概览
+  - 执行
+  - 依据
+  - 字段
+  - 质量
+  - 原始信息
+
+  这个层的职责是：
+
+  - 展示来源，不展示内部实现细节
+  - 展示执行，不把执行细节塞回正文
+  - 展示字段，不靠字段名硬猜业务含义
+  - 展示原始信息，但必须脱敏并受权限控制
+
+  ———
+
+  ## 4. 当前正文渲染职责边界
+
+  ### 4.1 MessageSurface
+
+  MessageSurface 是正文的主渲染器。
+
+  它当前负责：
+
+  - 根据消息角色选择展示样式
+  - 识别长文本并折叠
+  - 渲染 Markdown
+  - 剥离正文里的 inline 来源段
+
+  它不应该负责：
+
+  - 结果图表生成
+  - 来源面板组装
+  - 执行链拼装
+  - 业务字段解释
+
+  ———
+
+  ### 4.2 MessageActionBar
+
+  MessageActionBar 是正文的动作入口补充。
+
+  它当前负责：
+
+  - 引用
+  - 过程与依据
+  - 复制链接
+  - 调用链
+
+  它的职责不是结果内容本身，而是让用户从正文快速跳到下一步。
+
+  当前状态里，它已经从纯菜单入口，升级成了带“过程与依据”按钮的可见入口。
+
+  ———
+
+  ### 4.3 Disclosure Preview Strip
+
+  消息体内现在有一条轻量的过程预览条。
+
+  它的作用是：
+
+  - 让用户在正文下方直接看到这条结果里有哪些来源、执行、下一步和能力
+  - 作为抽屉的前置入口
+  - 减少“必须先去右侧面板”的跳转成本
+
+  它属于过渡态入口，作用明确，但不应成为长期唯一方案。长期目标还是由总纲契约驱动区域布局。
+
+  ———
+
+  ## 5. 当前契约关系
+
+  ### 5.1 业务结果真源
+
+  当前业务结果真源是：
+
+  - MessageContract
+
+  它承载：
+
+  - answer_markdown
+  - business_summary
+  - visualizations
+  - next_actions
+  - runtime_state
+  - evidence_bundle
+  - execution_context
+
+  ### 5.2 过程真源
+
+  当前过程真源是：
+
+  - RuntimeDisplayProtocol
+
+  它承载：
+
+  - runtime 状态
+  - tool calls
+  - workflow steps
+  - events
+  - errors
+  - approvals
+  - recovery
+
+  ### 5.3 过程与依据投影层
+
+  当前投影层是：
+
+  - MessageDisclosureView
+
+  它承接：
+
+  - MessageContract
+  - RuntimeDisplayProtocol
+  - 来源 / 证据 / 字段目录 / 原始信息
+  - 权限与脱敏策略
+
+  ### 5.4 结构化结果总纲
+
+  当前总纲结果结构已经有了：
+
+  - SemanticResultContract
+  - regions[]
+  - componentBinding
+
+  但正文区域还没有完全改成由 regions 统一驱动。
+
+  ———
+
+  ## 6. 当前还在硬编码的地方
+
+  这部分是你后面要按总纲继续收口的重点。
+
+  ### 6.1 正文内的临时入口
+
+  当前 ChatContainer 里仍然直接插入了：
+
+  - DisclosurePreviewStrip
+  - MessageActionBar
+  - MessageDisclosureDrawer
+
+  这意味着正文区的某些布局仍然是组件级硬编码，而不是完全由契约生成。
+
+  ### 6.2 结果与过程的并列挂载
+
+  当前页面里，结果层和过程与依据层是并列挂载的：
+
+  - 正文消息里有结果摘要
+  - 右侧面板里有过程与依据
+  - 消息下方有预览条
+
+  这已经能用，但还不是最终的总纲态。
+
+  ### 6.3 旧兼容入口仍存在
+
+  虽然已经收口了很多旧逻辑，但系统里仍然存在兼容读取：
+
+  - workflow_result
+  - report_query_result
+  - tool_calls
+  - process_events
+
+  这些现在主要留在适配层，不应继续扩散到渲染层。
+
+  ———
+
+  ## 7. 按总纲继续完善时的目标形态
+
+  未来正文渲染应收敛成三块：
+
+  SemanticResultContract
+  → 正文区域
+  → 结果区域
+  → 过程与依据区域
+
+  推荐的长期原则：
+
+  1. 正文只负责自然语言摘要
+  2. 结果只负责结构化呈现
+  3. 过程与依据只负责来源、执行、字段、质量和原始信息
+  4. 所有区域都应该通过 regions[].componentBinding 映射
+  5. ChatContainer 只做编排，不做业务解释
+  6. MessageSurface 只做正文渲染，不做结果再组装
+  7. MessageDisclosureView 作为过程与依据的唯一消费对象
+
+  ———
+
+  ## 8. 建议的正文总纲落点
+
+  如果你要把正文按总纲继续完善，下一步应把正文从“消息组件渲染”升级为“契约区域渲染”。
+
+  也就是：
+
+  - 正文区使用 screenType + regions + componentBinding 决定布局
+  - 正文摘要、表格、图表、证据、动作各自进入不同 region
+  - MessageSurface 逐步退化为 markdown-result 的默认渲染器
+  - DisclosurePreviewStrip 作为过渡态，后续可以并入统一区域布局
+  - 右侧 MessageDisclosureDrawer 继续保留为详细过程面板，而不是正文的唯一入口
+
+  ———
+
+  ## 9. 当前一句话总结
+
+  当前正文渲染架构是一个三层模型：
+
+  - MessageSurface 负责正文
+  - MessageContract 负责结果
+  - MessageDisclosureView 负责过程与依据
+
+  现在已经从单一正文展示，走到了“正文 + 结果 + 过程依据”并行的阶段，但正文区还没有完全切换成由总纲契约驱动的区域化渲染。
+
+
+  如果你要，我下一步可以继续把这份稿子改成更正式的 `docs/architecture/正文渲染架构.md` 结构，直接补上：
+  - `正文层 / 结果层 / 过程层` 的 Mermaid 图
+  - `screenType -> regions -> componentBinding` 的正文映射图
+  - 当前硬编码点和后续收口点的对照表
+
+

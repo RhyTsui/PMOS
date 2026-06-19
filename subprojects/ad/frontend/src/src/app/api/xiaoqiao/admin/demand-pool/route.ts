@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDemoDemandPool } from '@/lib/demo-data';
+import { listDemandPoolItems } from '@/lib/demand-pool-store';
 
 export async function GET() {
-  return NextResponse.json(getDemoDemandPool());
+  return NextResponse.json(await listDemandPoolItems());
 }

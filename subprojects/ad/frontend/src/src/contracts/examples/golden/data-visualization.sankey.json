@@ -1,0 +1,63 @@
+{
+  "contractType": "semantic-result",
+  "version": "1.0.0",
+  "resultId": "golden-sankey-001",
+  "screenType": "analysis-result",
+  "title": "转化路径分析",
+  "createdAt": "2026-05-28T00:00:00.000Z",
+  "producer": { "kind": "backend", "name": "path-analysis-service" },
+  "regions": [
+    {
+      "id": "conversion-sankey",
+      "type": "data-view",
+      "componentBinding": "data-visualization",
+      "title": "转化路径 Sankey",
+      "data": {
+        "viewType": "sankey",
+        "requestedView": "chart",
+        "chartType": "sankey",
+        "nodes": [
+          { "id": "impression", "label": "曝光" },
+          { "id": "click", "label": "点击" },
+          { "id": "purchase", "label": "购买" }
+        ],
+        "links": [
+          { "source": "impression", "target": "click", "value": 1200 },
+          { "source": "click", "target": "purchase", "value": 86 }
+        ],
+        "insights": [
+          {
+            "id": "insight-click-to-purchase",
+            "title": "点击到购买转化较低",
+            "summary": "点击到购买路径转化为 7.2%。",
+            "evidenceRefs": ["ev-sankey-calc-001"],
+            "sourceRefs": ["src-path-query-001"],
+            "confidence": { "level": "medium", "basis": "calculation" }
+          }
+        ]
+      },
+      "evidenceRefs": ["ev-sankey-calc-001"],
+      "sourceRefs": ["src-path-query-001"]
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "ev-sankey-calc-001",
+      "type": "calculation",
+      "title": "点击到购买转化率",
+      "summary": "86 / 1200 = 7.2%",
+      "sourceRefIds": ["src-path-query-001"],
+      "confidence": { "level": "medium", "basis": "calculation" },
+      "freshness": { "status": "fresh", "retrievedAt": "2026-05-28T00:00:00.000Z" }
+    }
+  ],
+  "sourceRefs": [
+    {
+      "id": "src-path-query-001",
+      "type": "warehouse-query",
+      "title": "Conversion path query",
+      "retrievedAt": "2026-05-28T00:00:00.000Z",
+      "reliability": { "level": "trusted" }
+    }
+  ]
+}

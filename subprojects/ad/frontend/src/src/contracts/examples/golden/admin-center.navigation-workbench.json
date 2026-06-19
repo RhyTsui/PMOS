@@ -1,0 +1,224 @@
+{
+  "screenId": "admin-center-navigation-workbench",
+  "screenType": "admin-control-plane",
+  "title": "智能体配置中枢",
+  "lastUpdatedAt": "2026-06-19",
+  "layout": {
+    "desktop": {
+      "shell": "left-sidebar-navigation",
+      "sidebarWidth": 292,
+      "content": "single-active-config-surface",
+      "stickyRegions": ["sidebar", "pageHeader"]
+    },
+    "mobile": {
+      "shell": "top-compact-navigation",
+      "content": "single-active-config-surface",
+      "overflowPolicy": "horizontal-scroll-for-navigation-only"
+    }
+  },
+  "regions": [
+    {
+      "id": "adminSidebar",
+      "componentBinding": "admin-navigation",
+      "purpose": "按治理领域组织配置入口，避免顶部菜单随入口增加而溢出。",
+      "states": ["loadingAccess", "canView", "canEdit", "noAccess"]
+    },
+    {
+      "id": "pageHeader",
+      "componentBinding": "admin-context-header",
+      "purpose": "展示当前位置、当前配置页说明和运行影响标签。",
+      "states": ["default"]
+    },
+    {
+      "id": "configSurface",
+      "componentBinding": "admin-config-tab",
+      "purpose": "承载具体配置页；同一时间只加载当前页，降低首屏负担。",
+      "states": ["loading", "empty", "ready", "saving", "saved", "error", "permissionDenied"]
+    },
+    {
+      "id": "crudScaffold",
+      "componentBinding": "admin-crud-scaffold",
+      "purpose": "统一配置页的标题、刷新、加载、空态、错误、保存中和保存完成反馈。",
+      "states": ["loading", "empty", "ready", "saving", "saved", "error"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "type": "architecture",
+      "path": "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
+      "note": "Admin Control Plane、Frontend Presentation 和 Trace 分层真源。"
+    },
+    {
+      "type": "guardrail",
+      "path": "docs/operations/ui-guardrail.md",
+      "note": "管理入口必须有明确任务、状态和下一步动作。"
+    },
+    {
+      "type": "design-system",
+      "path": "docs/小乔智投-Ant-Design-X默认规范-2026-05-09.md",
+      "note": "Ant Design + Ant Design X 为默认产品交互基线。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/admin-direct-check-fixed.png",
+      "note": "没有专属新截图时采用最近管理中心浏览器验收截图作为视觉基准。"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "menu-metadata",
+      "path": "frontend/src/src/components/admin/admin-menu.tsx",
+      "note": "导航入口来自 ADMIN_CENTERS 与 ADMIN_MENU_ITEMS，不在页面壳写业务菜单分支。"
+    },
+    {
+      "id": "tab-persistence",
+      "path": "frontend/src/src/components/admin/admin-tab-helpers.ts",
+      "note": "当前页签使用本地存储和 URL tab 参数恢复。"
+    },
+    {
+      "id": "crud-scaffold",
+      "path": "frontend/src/src/components/admin/AdminCrudScaffold.tsx",
+      "note": "管理页通用 CRUD 状态组件，覆盖标题、工具条、加载、错误、空态和保存状态。"
+    },
+    {
+      "id": "feature-switch-sample",
+      "path": "frontend/src/src/components/admin/FeatureSwitchesTab.tsx",
+      "note": "代表性配置页：覆盖读取、刷新、空态、错误、保存中、保存完成和选中项持久化。"
+    },
+    {
+      "id": "prompt-management-performance",
+      "path": "frontend/src/src/components/admin/PromptManagementTab.tsx",
+      "note": "提示词页首屏只读取列表和健康状态，版本记录在打开版本页签或保存/回滚后按需读取。"
+    },
+    {
+      "id": "public-web-config-sample",
+      "path": "frontend/src/src/components/admin/PublicWebConfigTab.tsx",
+      "note": "代表性能力来源配置页：覆盖读取、刷新、保存反馈、错误提示、搜索来源开关、访问密钥配置和多源编排参数。"
+    },
+    {
+      "id": "trace-config-sample",
+      "path": "frontend/src/src/components/admin/TraceConfigTab.tsx",
+      "note": "代表性模型与观测配置页：覆盖统一标题、编辑入口、保存反馈、读取错误提示、加载骨架和连接测试状态。"
+    },
+    {
+      "id": "role-profile-sample",
+      "path": "frontend/src/src/components/admin/RoleProfileManagementTab.tsx",
+      "note": "代表性编辑页：覆盖搜索、新增、编辑、保存反馈、加载、错误和空态。"
+    },
+    {
+      "id": "user-management-sample",
+      "path": "frontend/src/src/components/admin/UserManagementTab.tsx",
+      "note": "代表性账号配置页：覆盖搜索持久化、新增、编辑、权限开关、偏好画像、刷新、保存反馈、加载、错误和空态。"
+    },
+    {
+      "id": "automation-template-sample",
+      "path": "frontend/src/src/components/admin/AutomationTemplateManagementTab.tsx",
+      "note": "代表性任务模板页：覆盖选中模板持久化、新建、编辑、保存、删除确认、加载、错误和空态。"
+    },
+    {
+      "id": "operation-log-sample",
+      "path": "frontend/src/src/components/admin/OperationLogsTab.tsx",
+      "note": "代表性只读审计页：覆盖筛选、刷新、加载、错误、空态和表格读取。"
+    },
+    {
+      "id": "runtime-observability-sample",
+      "path": "frontend/src/src/components/admin/RuntimeObservabilityTab.tsx",
+      "note": "代表性只读观测页：覆盖刷新、加载骨架、错误提示、最近更新时间和运行健康信息展示。"
+    },
+    {
+      "id": "skill-management-sample",
+      "path": "frontend/src/src/components/admin/SkillManagementTab.tsx",
+      "note": "代表性能力治理页：覆盖导入、复制、启停、编辑、保存反馈、读取错误、列表骨架、空态和选中能力持久化。"
+    },
+    {
+      "id": "workflow-management-sample",
+      "path": "frontend/src/src/components/admin/WorkflowManagementTab.tsx",
+      "note": "代表性工作流配置页：覆盖刷新、编辑、复制、策略保存、保存反馈、读取错误、列表骨架、空态、当前工作流和任务回放持久化。"
+    },
+    {
+      "id": "mcp-config-sample",
+      "path": "frontend/src/src/components/admin/McpConfigTab.tsx",
+      "note": "代表性外部服务配置页：覆盖新增、编辑、删除/停用确认、连接测试、刷新、读取错误、保存反馈、列表骨架、空态和选中服务持久化。"
+    },
+    {
+      "id": "entity-resolution-sample",
+      "path": "frontend/src/src/components/admin/EntityResolutionConfigTab.tsx",
+      "note": "代表性轻量配置页：覆盖刷新、读取错误、加载骨架、JSON 配置编辑、保存反馈和条目预览。"
+    },
+    {
+      "id": "chat-display-settings-sample",
+      "path": "frontend/src/src/components/admin/ChatDisplaySettingsTab.tsx",
+      "note": "代表性展示偏好配置页：覆盖欢迎语、快捷入口、思考过程、代码展示、保存反馈、加载骨架和本地生效范围说明。"
+    },
+    {
+      "id": "admin-overview-sample",
+      "path": "frontend/src/src/components/admin/AdminOverviewTab.tsx",
+      "note": "管理中心入口页：按治理领域展示入口、说明和影响标签，使用统一页面标题规范。"
+    },
+    {
+      "id": "demand-pool-sample",
+      "path": "frontend/src/src/components/admin/DemandPoolTab.tsx",
+      "note": "代表性运营跟进页：覆盖筛选、选中需求持久化、加载骨架、读取错误、空态和详情查看。"
+    },
+    {
+      "id": "auto-debug-config-sample",
+      "path": "frontend/src/src/components/admin/AutoDebugConfigTab.tsx",
+      "note": "代表性联调配置页：覆盖筛选、选中模板持久化、编辑、启停、保存反馈、读取错误、加载骨架和配置详情。"
+    },
+    {
+      "id": "orchestration-governance-sample",
+      "path": "frontend/src/src/components/admin/OrchestrationGovernanceTab.tsx",
+      "note": "代表性请求治理页：覆盖刷新、读取错误、加载骨架、规则编辑、覆盖配置编辑、保存反馈和能力预览。"
+    },
+    {
+      "id": "intent-route-rules-sample",
+      "path": "frontend/src/src/components/admin/IntentRouteRulesTab.tsx",
+      "note": "代表性意图规则页：覆盖新增、编辑、删除、保存、回滚、加载骨架、空态、版本提示和保存反馈。"
+    },
+    {
+      "id": "prompt-management-sample",
+      "path": "frontend/src/src/components/admin/PromptManagementTab.tsx",
+      "note": "代表性提示词配置页：覆盖筛选、健康提示、选中提示词持久化、正文编辑、保存反馈、错误提示、空态和版本按需读取。"
+    }
+  ],
+  "interactionContract": {
+    "navigation": [
+      "桌面端使用左侧分组导航，展示当前分组下的页面入口和说明。",
+      "移动端保留紧凑横向导航，避免侧栏挤压配置表单。",
+      "切换页面时同步 localStorage 与 URL tab 参数，刷新后保持当前位置。"
+    ],
+    "crud": [
+      "新增使用主按钮或明确的创建入口，入口文案以用户目标命名。",
+      "编辑使用当前行或详情区的保存动作，保存中必须禁用重复提交。",
+      "筛选、搜索、当前选中项等轻量页面状态优先本地持久化，刷新后恢复用户正在处理的位置。",
+      "删除、停用、覆盖运行配置等高风险动作必须有二次确认和操作日志。",
+      "列表页必须覆盖加载、空态、错误、无权限和保存成功反馈；只读审计页必须覆盖筛选、刷新和无结果回退。",
+      "批量操作必须说明影响范围，不允许静默修改运行中配置。"
+    ],
+    "performance": [
+      "管理中心首屏只加载导航、权限和当前配置页。",
+      "重型配置页通过动态导入按需加载。",
+      "配置详情的历史版本、审计补充等非首屏数据按需读取，避免进入页面时对每个条目发起额外请求。",
+      "配置保存后以服务端返回为准刷新本页状态，不用前端猜测运行态成功。"
+    ]
+  },
+  "recommendedActions": [
+    {
+      "id": "continue-edit-current-config",
+      "label": "继续编辑当前配置",
+      "target": "configSurface"
+    },
+    {
+      "id": "review-operation-log",
+      "label": "查看操作记录",
+      "target": "operation-logs"
+    }
+  ],
+  "acceptance": {
+    "noTraditionalDashboardShell": true,
+    "noEngineeringJargonInUserCopy": true,
+    "noBusinessKeywordRoutingInUi": true,
+    "supportsMobileStacking": true,
+    "coversLoadingErrorEmptyPermission": true
+  }
+}

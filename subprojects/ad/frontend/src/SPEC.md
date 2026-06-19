@@ -1,3 +1,14 @@
+> **⚠️ ARCHIVED — 本文件为历史遗留设计稿（AIFS 阶段），不再作为当前项目真源。**
+>
+> 当前前端设计与视觉规范以以下文档为准：
+> - `docs/review/智投Chat-前端自主渲染与色彩字体系统-2026-05-27.md` — 设计系统真源
+> - `docs/architecture/visual-system/` — Visual System 规范集
+> - `docs/architecture/interaction-system/` — Interaction System 规范集
+> - `docs/architecture/frontend-engineering/` — 前端工程规范
+> - `MASTER_SPEC.md` §8 UI Rendering Protocol — 渲染协议
+>
+> 本文件中描述的 AIFS "深色未来主义 + 呼吸灯特效"、8 Agent Dock、MetricCard 等内容已被 Enterprise AI Chat OS 体系替代，仅供历史参考。
+
 # AIFS (AI Intelligent Flow System) - 技术规格文档
 
 ## 1. Concept & Vision

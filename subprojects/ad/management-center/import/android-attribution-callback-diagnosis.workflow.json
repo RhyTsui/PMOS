@@ -1,0 +1,15 @@
+{
+  "workflowRef": "android-attribution-callback-diagnosis.workflow",
+  "steps": [
+    { "key": "resolve_app_context", "toolBindings": ["fetch_app_context"] },
+    { "key": "resolve_media_context", "toolBindings": ["fetch_media_context"] },
+    { "key": "check_base_event_ingestion", "toolBindings": ["check_base_event_ingestion"] },
+    { "key": "check_attr_preprocess_result", "toolBindings": ["check_attr_preprocess_result"] },
+    { "key": "check_callback_rule_match", "toolBindings": ["check_callback_rule_match"] },
+    { "key": "check_app_sdk_integration", "toolBindings": ["check_app_sdk_integration"] },
+    { "key": "check_callback_delivery_trace", "toolBindings": ["check_callback_delivery_trace"] },
+    { "key": "check_api_callback_result", "toolBindings": ["check_api_callback_result"] },
+    { "key": "query_callback_rule_config", "toolBindings": ["query_callback_rule_config"] }
+  ]
+}
+

@@ -13,41 +13,33 @@ export function getTraceConfigFromEnvDefaults(): TraceConfig {
     apiUrl: process.env.COZELOOP_API_BASE_URL || 'http://liannu.dc.yokagames.com:1117',
     workspaceId: process.env.COZELOOP_WORKSPACE_ID || '',
     apiToken: process.env.COZELOOP_API_TOKEN || '',
-    projectId: process.env.LIANLU_PROJECT_ID || '10100283',
     env: (process.env.LIANLU_ENV as TraceConfig['env']) || 'test',
     serviceName: process.env.LIANLU_SERVICE_NAME || 'xiaoqiao-zhitou-chat-service',
     sampleRate: parseFloat(process.env.LIANLU_SAMPLE_RATE || '1'),
-    appId: process.env.LIANLU_APP_ID || '10100283',
   };
 }
 
 function normalizeTraceConfig(input?: Partial<TraceConfig>): TraceConfig {
   const defaults = getTraceConfigFromEnvDefaults();
   return {
-    ...defaults,
-    ...input,
     enabled: input?.enabled ?? defaults.enabled,
     apiUrl: input?.apiUrl?.trim() || defaults.apiUrl,
     workspaceId: input?.workspaceId?.trim() || '',
     apiToken: input?.apiToken?.trim() || '',
-    projectId: input?.projectId?.trim() || defaults.projectId,
     env: input?.env || defaults.env,
     serviceName: input?.serviceName?.trim() || defaults.serviceName,
     sampleRate: Number.isFinite(input?.sampleRate) ? Number(input?.sampleRate) : defaults.sampleRate,
-    appId: input?.appId?.trim() || defaults.appId,
   };
 }
 
 export function getTraceConfigSync(): TraceConfig {
   for (const configPath of [CONFIG_PATH, LEGACY_CONFIG_PATH]) {
     try {
-      if (!existsSync(configPath)) {
-        continue;
-      }
+      if (!existsSync(configPath)) continue;
       const raw = readFileSync(configPath, 'utf8');
       return normalizeTraceConfig(JSON.parse(raw) as Partial<TraceConfig>);
     } catch {
-      // 尝试下一个存储位置。
+      // try next path
     }
   }
   return normalizeTraceConfig();

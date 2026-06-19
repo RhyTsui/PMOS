@@ -17,7 +17,7 @@ import {
   CodeOutlined,
   TagOutlined,
 } from '@ant-design/icons';
-import { Tag, Tooltip, message as antMessage } from 'antd';
+import { App, Tag, Tooltip } from 'antd';
 import type { CallSpan, CallChainData, ModelCallDetail, ToolCallDetail } from '@/types';
 import { useThemeColors } from '@/hooks/useTheme';
 
@@ -43,6 +43,7 @@ function formatJsonPreview(data: Record<string, unknown>, maxLen = 200): string 
 
 /* ─── Copy Button ─── */
 function MiniCopyButton({ text }: { text: string }) {
+  const { message: antMessage } = App.useApp();
   const [copied, setCopied] = useState(false);
   const c = useThemeColors();
   const handleCopy = useCallback(() => {
@@ -118,7 +119,7 @@ function DataPreview({ label, data }: { label: string; data?: Record<string, unk
           borderRadius: 6,
           border: `1px solid ${c.borderFaint}`,
           fontSize: 11,
-          fontFamily: 'JetBrains Mono, monospace',
+          fontFamily: 'var(--font-mono)',
           color: '#1f2937',
           lineHeight: 1.6,
           maxHeight: 160,
@@ -250,7 +251,7 @@ function SpanNode({ span, depth = 0 }: { span: CallSpan; depth?: number }) {
         {span.durationMs != null && (
           <span style={{
             fontSize: 11,
-            fontFamily: 'JetBrains Mono, monospace',
+            fontFamily: 'var(--font-mono)',
             color: span.durationMs > 3000 ? c.warning : c.textMuted,
           }}>
             {formatDuration(span.durationMs)}
@@ -445,14 +446,24 @@ export function CallChainPanel({ data, visible, onClose }: CallChainPanelProps) 
             background: c.accentBg,
             border: `1px solid ${c.border}`,
             color: c.accent,
-            fontFamily: 'JetBrains Mono, monospace',
+            fontFamily: 'var(--font-mono)',
           }}>
             {data.traceId.slice(0, 12)}...
           </Tag>
         )}
+        {data?.traceUrl && (
+          <a
+            href={data.traceUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{ fontSize: 12, color: c.accent, textDecoration: 'none' }}
+          >
+            打开原始 trace
+          </a>
+        )}
         <div style={{ flex: 1 }} />
         {data && (
-          <span style={{ fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: c.textMuted }}>
+          <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: c.textMuted }}>
             {formatDuration(data.totalDurationMs)}
           </span>
         )}
@@ -504,19 +515,19 @@ export function CallChainPanel({ data, visible, onClose }: CallChainPanelProps) 
                 <div style={{ display: 'flex', gap: 16 }}>
                   <div>
                     <span style={{ fontSize: 11, color: c.textMuted }}>Input</span>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: modelColor, fontFamily: 'JetBrains Mono, monospace' }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: modelColor, fontFamily: 'var(--font-mono)' }}>
                       {data.tokenUsage.inputTokens.toLocaleString()}
                     </div>
                   </div>
                   <div>
                     <span style={{ fontSize: 11, color: c.textMuted }}>Output</span>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: c.accent, fontFamily: 'JetBrains Mono, monospace' }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: c.accent, fontFamily: 'var(--font-mono)' }}>
                       {data.tokenUsage.outputTokens.toLocaleString()}
                     </div>
                   </div>
                   <div>
                     <span style={{ fontSize: 11, color: c.textMuted }}>Total</span>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: c.textPrimary, fontFamily: 'JetBrains Mono, monospace' }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: c.textPrimary, fontFamily: 'var(--font-mono)' }}>
                       {data.tokenUsage.totalTokens.toLocaleString()}
                     </div>
                   </div>

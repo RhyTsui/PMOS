@@ -112,18 +112,42 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   const config = statusConfig[status] ?? statusConfig.idle;
   const displayLabel = label ?? config.label;
+  const isRunning = status === 'running' || status === 'active' || status === 'clarifying';
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <span
-        className={cn(
-          'rounded-full',
-          config.color,
-          sizeConfig[size],
-          config.glow && pulse && 'animate-pulse',
-          config.glow && 'shadow-[0_0_8px_currentColor]'
+      <span className="relative flex items-center justify-center">
+        {/* 执行中的扩散波纹动画 */}
+        {isRunning && config.glow && pulse && (
+          <>
+            <span
+              className={cn(
+                'absolute rounded-full animate-ping opacity-75',
+                config.color,
+                sizeConfig[size]
+              )}
+            />
+            <span
+              className={cn(
+                'absolute rounded-full animate-ping opacity-50',
+                config.color,
+                sizeConfig[size]
+              )}
+              style={{ animationDelay: '0.5s' }}
+            />
+          </>
         )}
-      />
+        {/* 主体圆点 */}
+        <span
+          className={cn(
+            'rounded-full relative z-10',
+            config.color,
+            sizeConfig[size],
+            config.glow && pulse && !isRunning && 'animate-pulse',
+            config.glow && 'shadow-[0_0_8px_currentColor]'
+          )}
+        />
+      </span>
       {(showLabel || label) && (
         <span className="text-xs text-[var(--aifs-text-secondary)]">
           {displayLabel}

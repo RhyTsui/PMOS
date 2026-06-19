@@ -1,14 +1,15 @@
 'use client';
 
 import { useMemo } from 'react';
-import { ConfigProvider, theme } from 'antd';
+import { App, ConfigProvider, theme } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { useTheme } from '@/hooks/useTheme';
+import { ZHITOU_CHAT_COLORS } from '@/lib/zhitou-chat-colors';
 
 function AntdProvider({ children }: { children: React.ReactNode }) {
   const { isDark, accent } = useTheme();
   const fontFamily =
-    'Inter, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans SC, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    'PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans SC, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
 
   const tokens = useMemo(() => {
     if (isDark) {
@@ -30,12 +31,12 @@ function AntdProvider({ children }: { children: React.ReactNode }) {
       colorPrimary: accent,
       colorBgContainer: '#FFFFFF',
       colorBgElevated: '#FFFFFF',
-      colorBgLayout: '#F8FAFC',
+      colorBgLayout: ZHITOU_CHAT_COLORS.surfaceMain,
       colorBorder: 'rgba(0, 0, 0, 0.1)',
       colorBorderSecondary: 'rgba(0, 0, 0, 0.06)',
-      colorText: '#1E293B',
-      colorTextSecondary: '#64748B',
-      colorTextTertiary: '#94A3B8',
+      colorText: ZHITOU_CHAT_COLORS.textPrimary,
+      colorTextSecondary: ZHITOU_CHAT_COLORS.textSecondary,
+      colorTextTertiary: ZHITOU_CHAT_COLORS.textMuted,
       borderRadius: 12,
       fontFamily,
     };
@@ -81,14 +82,14 @@ function AntdProvider({ children }: { children: React.ReactNode }) {
         colorBorder: 'rgba(0, 0, 0, 0.12)',
         activeBorderColor: accent,
         hoverBorderColor: accent,
-        colorText: '#1E293B',
-        colorTextPlaceholder: '#94A3B8',
+        colorText: ZHITOU_CHAT_COLORS.textPrimary,
+        colorTextPlaceholder: ZHITOU_CHAT_COLORS.textMuted,
       },
       Select: {
         colorBgContainer: '#FFFFFF',
         colorBgElevated: '#FFFFFF',
         colorBorder: 'rgba(0, 0, 0, 0.12)',
-        colorText: '#1E293B',
+        colorText: ZHITOU_CHAT_COLORS.textPrimary,
         optionSelectedBg: `${accent}15`,
       },
       Tag: { colorBgContainer: `${accent}0F` },
@@ -115,7 +116,7 @@ function AntdProvider({ children }: { children: React.ReactNode }) {
         components,
       }}
     >
-      {children}
+      <App>{children}</App>
     </ConfigProvider>
   );
 }

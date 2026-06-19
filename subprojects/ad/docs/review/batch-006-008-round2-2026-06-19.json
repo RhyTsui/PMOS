@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-06-19T05:10:32.404Z",
+  "tests": {
+    "MIG-006": {
+      "input": "能不能选一个事件作为付费回传",
+      "keywords": [
+        "事件",
+        "付费",
+        "回传"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-007": {
+      "input": "有效是哪个点位",
+      "keywords": [
+        "有效",
+        "点位"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    },
+    "MIG-008": {
+      "input": "素材报表的未知是什么",
+      "keywords": [
+        "素材",
+        "报表",
+        "未知"
+      ],
+      "hasAnswer": true,
+      "notStuck": true
+    }
+  }
+}

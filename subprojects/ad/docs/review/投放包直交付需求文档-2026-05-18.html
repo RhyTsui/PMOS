@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>投放包直交付需求文档</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --panel: #ffffff;
+      --text: #182130;
+      --muted: #5b6678;
+      --line: #e5eaf2;
+      --accent: #2563eb;
+      --accent-soft: #e9f1ff;
+      --warn: #d97706;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+    body { line-height: 1.65; }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 28px 28px 22px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+      background: var(--accent-soft);
+      border: 1px solid #d8e7ff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px 24px 14px;
+      margin-top: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.03);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
+    p { margin: 0 0 12px; }
+
+    ul, ol {
+      margin: 0 0 12px 22px;
+      padding: 0;
+    }
+
+    li { margin: 4px 0; }
+
+    .note {
+      border-left: 4px solid var(--warn);
+      background: #fff8ed;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: #7a4b00;
+      margin: 12px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin: 12px 0 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 14px 10px;
+      background: #fbfcfe;
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .muted { color: var(--muted); }
+
+    .tag {
+      display: inline-block;
+      margin-right: 8px;
+      margin-bottom: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: #2b5bd7;
+      font-size: 12px;
+      border: 1px solid #d8e5ff;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    code {
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #f2f5fb;
+      border: 1px solid #e6ebf3;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>投放包直交付需求文档</h1>
+      <p class="subtitle">目标：通过 <code>获取广告包</code> 服务，直接交付通过检测的投放包给投放侧。</p>
+      <div class="toc">
+        <a href="#background">背景</a>
+        <a href="#goal">目标</a>
+        <a href="#flow">流程</a>
+        <a href="#states">状态</a>
+        <a href="#page">页面建议</a>
+        <a href="#accept">验收标准</a>
+      </div>
+    </header>
+
+    <section id="background">
+      <h2>背景</h2>
+      <p>当前智投 chat 的定位，已经从“应用管理、包管理、分包工具、线下验收、线下联调协助”逐步转向“直接交付可用的投放包给投放侧”。</p>
+      <p>过去的方式是先给工具，再由运营、QA、联调同学协助用户一步步完成包管理、验收和联调；新的目标是把前置流程自动化，最终直接输出“已经通过我们检测、可以交付投放”的包。</p>
+    </section>
+
+    <section id="goal">
+      <h2>目标</h2>
+      <ol>
+        <li>让用户在最短路径上拿到“通过检测的投放包”。</li>
+        <li>以“获取广告包”服务作为第一入口，自动汇聚符合条件的包。</li>
+        <li>只依赖最少输入完成判断，输入不全时明确提示缺失项。</li>
+        <li>将包的检测、分包、共享、联调、状态展示统一到一条可交付链路里。</li>
+        <li>最终给投放侧看到的是“可用包列表”，而不是一堆中间工具和人工协助动作。</li>
+      </ol>
+    </section>
+
+    <section id="flow">
+      <h2>流程</h2>
+
+      <h3>1. 项目初始化与包规范检验</h3>
+      <p>先判断当前项目下有哪些包符合交付规范，再决定是否进入包列表。</p>
+      <div class="grid">
+        <div class="card">
+          <strong>识别范围</strong>
+          <span class="tag">官方母包</span>
+          <span class="tag">巨量包</span>
+          <span class="tag">腾讯包</span>
+          <span class="tag">快手包</span>
+          <span class="tag">联运包</span>
+        </div>
+        <div class="card">
+          <strong>最小输入</strong>
+          <p class="muted">只需要：出母包、提审。缺失时要明确提示。</p>
+        </div>
+      </div>
+
+      <h3>2. 智投包列表生成</h3>
+      <p>将可交付包整理成面向投放的包列表，展示每个包的地址、归属、上报验收状态、审核状态、联调状态。</p>
+
+      <h3>3. 分包自动生成</h3>
+      <p>根据媒体类型自动生成对应分包，减少人工分包成本。</p>
+      <ul>
+        <li><strong>官方渠道包 <code>310003</code></strong>：自动生成爱奇艺广告、百度搜索、百度信息流、UC头条、百度品专、神马搜索、超级粉丝通、网易有道、官网、市场分包。</li>
+        <li><strong>巨量 / 腾讯 / 快手包</strong>：自动创建 1 个市场星图分包、1 个广告分包、1 个广告星图分包、1 个广告直播分包、1 个市场直播分包，并同步媒体后台分包。</li>
+      </ul>
+
+      <h3>4. 联调与共享</h3>
+      <p>巨量 / 腾讯 / 快手包在联调前，需要先查找户里应用、共享给指定账户，再自动执行联调；其他媒体包在分包后直接自动联调。</p>
+
+      <h3>5. 最终交付视图</h3>
+      <p>用户最终看到的是可直接使用的包，不是工具信息。</p>
+    </section>
+
+    <section id="states">
+      <h2>状态定义</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>状态类型</strong>
+          <ul>
+            <li>上报验收状态</li>
+            <li>审核状态</li>
+            <li>联调状态</li>
+            <li>可交付状态</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>示例状态</strong>
+          <ul>
+            <li>待补齐</li>
+            <li>待验收</li>
+            <li>验收通过</li>
+            <li>审核中</li>
+            <li>审核通过</li>
+            <li>联调中</li>
+            <li>联调通过</li>
+            <li>不通过</li>
+            <li>可交付</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="page">
+      <h2>页面建议</h2>
+      <ul>
+        <li>建议把“获取广告包”作为第一入口，用户先从这里进入。</li>
+        <li>页面结构建议：顶部输入状态、中部可交付包列表、右侧过程展开区、底部缺失输入和异常原因。</li>
+        <li>输入不完整时先提示，不盲目往下跑。</li>
+        <li>结果优先展示可交付包，中间过程只在展开时查看。</li>
+      </ul>
+    </section>
+
+    <section id="accept">
+      <h2>验收标准</h2>
+      <ol>
+        <li>只要输入了出母包和提审，就能进入包检测流程。</li>
+        <li>输入缺失时，系统能明确提示缺少什么。</li>
+        <li><code>310003</code> 官包能自动生成对应分包列表。</li>
+        <li>巨量 / 腾讯 / 快手包能自动生成 5 类分包并同步媒体后台。</li>
+        <li>联调状态能在包列表里看到。</li>
+        <li>最终页面能直接展示可交付包，而不是工具信息。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>待确认问题</h2>
+      <ul>
+        <li>“获取广告包”服务的最终入参字段是否统一命名。</li>
+        <li>出母包和提审的来源是手输、项目配置，还是后台自动带入。</li>
+        <li>分包模板是否需要支持后续媒体扩展。</li>
+        <li>联调失败后是否要自动进入人工接管流程。</li>
+      </ul>
+    </section>
+
+    <div class="footer">投放包直交付需求文档 · 2026-05-18</div>
+  </div>
+</body>
+</html>

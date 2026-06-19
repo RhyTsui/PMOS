@@ -1,0 +1,203 @@
+{
+  "caseId": "MIG-000",
+  "scenario": "连通",
+  "prompt": "你好",
+  "keyPoint": "LLM理解+简单回应",
+  "baseUrl": "http://10.236.14.27:8002",
+  "currentUrl": "http://10.236.14.27:8002/",
+  "sendState": "empty",
+  "titleResponse": {
+    "title": "简单问候",
+    "source": "model",
+    "prompt_id": "conversation-title-generate",
+    "prompt_source": "managed"
+  },
+  "failedRequests": [],
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "log",
+      "text": "[Fast Refresh] rebuilding"
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: loading, selectedProject: null, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    }
+  ],
+  "networkRecords": [
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/auth/me"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/memory?user_id=user-001&memory_type=context&business_domain=debugging"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/memory?user_id=user-001&memory_type=context&business_domain=debugging"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/chat-display-config"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/chat-display-config"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/projects?page=1&page_size=all&all=true&_ts=1781167414825"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/project-icon?src=https%3A%2F%2Fpm-oss.tos-cn-beijing.volces.com%2Ficons%2F44ab385a1afd653c1d5978843161be9e.png",
+      "skippedTextScan": true,
+      "contentType": "image/png"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30&project_refs=10100042"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/memory"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961/messages"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961/attachments"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/admin/model-service-config"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30"
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/chat"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/admin/model-service-config"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/workspace"
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961/title"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/tasks"
+    },
+    {
+      "method": "POST",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/recommendations"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961"
+    },
+    {
+      "method": "POST",
+      "status": 201,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961/messages"
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations?limit=30"
+    },
+    {
+      "method": "PATCH",
+      "status": 200,
+      "url": "http://10.236.14.27:8002/api/xiaoqiao/conversations/conv-1781167415961"
+    }
+  ],
+  "welcomeIconBox": null,
+  "chatSsePreview": "data: {\"type\":\"runtime_state\",\"runtime_state\":{\"current_stage\":\"understanding\",\"completed_stages\":[],\"status\":\"running\",\"started_at\":\"2026-06-11T08:43:40.424Z\",\"duration_ms\":73,\"label\":\"正在理解请求...\"}}\n\ndata: {\"type\":\"phase\",\"phase\":\"thinking\"}\n\ndata: {\"type\":\"runtime_state\",\"runtime_state\":{\"current_stage\":\"context_loading\",\"completed_stages\":[\"understanding\"],\"status\":\"running\",\"started_at\":\"2026-06-11T08:43:40.424Z\",\"duration_ms\":377,\"label\":\"正在补充上下文...\"}}\n\ndata: {\"type\":\"heartbeat\",\"ts\":1781167429410}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"intent.detected-1781167432984-8e0nmn\",\"started_at\":\"2026-06-11T08:43:52.984Z\",\"status\":\"success\",\"visibility\":\"user\",\"type\":\"intent.detected\",\"label\":\"确定路由\",\"summary\":\"进入general链路。\",\"intent_type\":\"general\",\"agent\":\"hub\",\"output\":{\"clientIntent\":\"general\",\"resolvedIntent\":\"general\",\"serviceIntent\":\"general_chat\",\"ignoredClientIntentReason\":null,\"routeEvidence\":{\"routeIntent\":\"general\",\"userRequirementTask\":\"general\",\"reportRouteMatch\":false,\"reportContinuation\":false,\"reportContinuationClassification\":null,\"routeReason\":\"未命中明确业务链路，保持普通对话。\"},\"matchedRules\":[],\"selectedSkill\":null,\"capabilityDecision\":null,\"isReportQuery\":false,\"toolPurpose\":\"none\",\"warnings\":[]}}}\n\ndata: {\"type\":\"route\",\"intent\":\"general\",\"hasThinking\":false,\"toolsUsed\":[]}\n\ndata: {\"type\":\"runtime_state\",\"runtime_state\":{\"current_stage\":\"response_generation\",\"completed_stages\":[\"understanding\",\"context_loading\"],\"status\":\"running\",\"started_at\":\"2026-06-11T08:43:40.424Z\",\"duration_ms\":12606,\"label\":\"正在生成回答...\"}}\n\ndata: {\"type\":\"content\",\"content\":\"你好，我在。你可以直接告诉我想查询、分析或处理的事情。\"}\n\ndata: {\"type\":\"process_event\",\"event\":{\"id\":\"route_observation-1781167433032-0085vj\",\"started_at\":\"2026-06-11T08:43:53.032Z\",\"status\":\"success\",\"visibility\":\"user\",\"type\":\"route_observation\",\"label\":\"路由观测\",\"summary\":\"Route observation: general_chat; actual general_chat; 1 mismatch(es) recorded.\",\"output\":{\"mode\":\"observe_only\",\"decisionId\":\"zt-chat-1781167420424-0gz866:route-observation\",\"traceId\":\"zt-chat-1781167420424-0gz866\",\"clientIntent\":\"general\",\"serviceIntent\":\"general_chat\",\"resolvedIntent\":\"general_chat\",\"primaryDeliverable\":\"chat_answer\",\"decisionAuthority\":{\"clientIntent\":\"hint_only\",\"prompt\":\"evidence_only\",\"domainSignals\":\"evidence_only\",\"routeRules\":\"decision_support\",\"backendRouteDecision\":\"authoritative\"},\"routeEvidence\":[{\"source\":\"client_hint\",\"key\":\"body.intent\",\"value\":\"general\",\"reason\":\"Client hint only.\"},{\"source\":\"route_rule\",\"key\":\"route.intent_type\",\"value\":\"general\",\"reason\":\"未命中明确业务链路，保持普通对话。\"},{\"source\":\"fallback_policy\",\"key\":\"matches_report_query_route\",\"value\":false},{\"source\":\"conversation_state\",\"key\":\"report_continuation\",\"value\":false},{\"source\":\"context\",\"key\":\"user_requirement.task\",\"value\":\"general\"}],\"domainSignals\":[],\"matchedRules\":[],\"routeRulesGovernance\":[],\"skillSelection\":{\"candidateSkills\":[],\"readiness\":\"blocked\",\"missingInputs\":[],\"warnings\":[]},\"toolPurpose\":\"none\",\"isReportQuery\":false,\"confidence\":0.35,\"needsClarification\":false,\"warnings\":[{\"code\":\"client_intent_conflict\",\"message\":\"Client intent general differs from backend route general_chat.\",\"severity\":\"warning\"}],\"promptRuntime\":{\"available\":true,\"activePromptId\":\"route_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6\",\"conflicts\":[],\"conflictWarnings\":[],\"slots\":{\"route_prompt\":{\"activePromptId\":\"route_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"3351e7f5be48e23dbe54a9a16663ca9e67342b6327aee52abec342aa7dc9fff6\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"response_prompt\":{\"activePromptId\":\"response_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"7911b04dc727ee205009aa5a64a6c5669f9c4d75734ec3d43f3447d25ae63d0d\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"evidence_prompt\":{\"activePromptId\":\"evidence_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"99c70f0485bd9c779fa94e2e67da7902568a05c864b0d7f052e8f1df8936f65c\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"card_prompt\":{\"activePromptId\":\"card_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"963778bbe5757cd558bdeab4c924f5122885576e8f8ba05f55ce544a772d6873\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"followup_prompt\":{\"activePromptId\":\"followup_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"d8808c1feb9d3598be5b72dc2b8e534a4436eb2aaf59a93d995716b78c9d5dc9\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"tool_explain_prompt\":{\"activePromptId\":\"tool_explain_prompt\",\"activePromptVersion\":\"1\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"bdd400c089b87c900da7b1e71e812dc5e6137a013fe642b785c4a81a3ba6c838\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"report_query_route_prompt\":{\"activePromptId\":\"report_query_route_prompt\",\"activePromptVersion\":\"6\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"beaf91a3b5251d7126e7bb772b8ec93ba0de3defa65655e1957e00590bafed7e\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"report_query_answer_prompt\":{\"activePromptId\":\"report_query_answer_prompt\",\"activePromptVersion\":\"4\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"25ee3aa8e2046c0d12d7fb484fd175969dbc76884d8bda41450c5cb76d813860\",\"conflicts\":\"[Truncated]\",\"conflictWarnings\":\"[Truncated]\"},\"report_query_visual_prompt\":{\"activePromptId\":\"report_query_visual_prompt\",\"activePromptVersion\":\"4\",\"promptSource\":\"runtime\",\"seedFallbackUsed\":false,\"cacheHit\":true,\"contentHash\":\"dde3cfb5c53645c2e48a6e337abbbbb2ca25f87",
+  "domPreview": "开启新对话\n今天\n简单问候\n日常问候\n日常问候\n简单问候\n简单问候\n新对话\n新对话\n日常问候\nyoka超管\n简单问候\n指间山海-国内\n\n你好\n\n已处理 2 步\n\n你好，我在。你可以直接告诉我想查询、分析或处理的事情。\n\nqwen3.7-plus-2026-05-26\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。\n请输入你的问题、需求或操作任务",
+  "mojibakeFindings": [],
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-000-1781167411155.png",
+  "acceptance": {
+    "hasAssistantReply": true,
+    "noFailedImportantRequests": true,
+    "noUnexpectedErrorResponses": true,
+    "hasModelGeneratedTitle": true,
+    "welcomeIconHealthy": true,
+    "networkHealthy": true,
+    "noMojibake": true
+  },
+  "passed": true
+}

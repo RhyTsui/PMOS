@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { ZHITOU_CHAT_COLORS, ZHITOU_CHAT_PRESENTATION_TOKENS } from '@/lib/zhitou-chat-colors';
 
 type Theme = 'light' | 'dark';
 
@@ -12,8 +13,8 @@ export interface AccentPreset {
 }
 
 export const ACCENT_PRESETS: AccentPreset[] = [
-  { key: 'cyan',    label: '青空', dark: '#00D9FF', light: '#0088CC' },
-  { key: 'blue',    label: '极光蓝', dark: '#3B82F6', light: '#2563EB' },
+  { key: 'cyan',    label: '青空', dark: ZHITOU_CHAT_COLORS.primary, light: ZHITOU_CHAT_COLORS.primary },
+  { key: 'blue',    label: '极光蓝', dark: ZHITOU_CHAT_COLORS.primary, light: ZHITOU_CHAT_COLORS.primary },
   { key: 'purple',  label: '星云紫', dark: '#8B5CF6', light: '#7C3AED' },
   { key: 'green',   label: '翡翠绿', dark: '#10B981', light: '#059669' },
   { key: 'orange',  label: '落日橙', dark: '#F59E0B', light: '#D97706' },
@@ -34,7 +35,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   theme: 'light',
   isDark: false,
   toggleTheme: () => {},
-  accent: '#0088CC',
+  accent: ZHITOU_CHAT_COLORS.primary,
   accentKey: 'cyan',
   setAccentKey: () => {},
   accentPresets: ACCENT_PRESETS,
@@ -82,7 +83,9 @@ function lighten(hex: string, factor: number): string {
  * Dynamically derived from accent color selection.
  */
 export function useThemeColors() {
-  const { isDark, accent } = useTheme();
+  const { isDark } = useTheme();
+  const accent = ZHITOU_CHAT_COLORS.primary;
+  const chatTokens = ZHITOU_CHAT_PRESENTATION_TOKENS;
 
   return useMemo(() => ({
     // Accent (dynamic)
@@ -98,17 +101,17 @@ export function useThemeColors() {
     accentBorderFaint: rgba(accent, 0.1),
 
     // Semantic (fixed)
-    success: isDark ? '#00FF88' : '#00B368',
-    warning: isDark ? '#FFB800' : '#D49600',
-    danger: isDark ? '#FF3366' : '#E0204A',
-    info: isDark ? '#7B61FF' : '#6B46E0',
+    success: isDark ? '#00FF88' : ZHITOU_CHAT_COLORS.success,
+    warning: isDark ? '#FFB800' : ZHITOU_CHAT_COLORS.warning,
+    danger: isDark ? '#FF3366' : ZHITOU_CHAT_COLORS.danger,
+    info: isDark ? '#7B61FF' : ZHITOU_CHAT_COLORS.info,
 
     // Text
-    textPrimary: isDark ? '#FFFFFF' : '#1F1F1F',
-    textSecondary: isDark ? '#8B9DC3' : '#4D4D4D',
-    textMuted: isDark ? '#4A5568' : '#7A7F87',
-    textSubtle: isDark ? '#3A4558' : '#A0A4AA',
-    textBody: isDark ? '#C8D0DC' : '#2F2F2F',
+    textPrimary: isDark ? '#FFFFFF' : ZHITOU_CHAT_COLORS.textPrimary,
+    textSecondary: isDark ? '#8B9DC3' : ZHITOU_CHAT_COLORS.textSecondary,
+    textMuted: isDark ? '#4A5568' : ZHITOU_CHAT_COLORS.textMuted,
+    textSubtle: isDark ? '#3A4558' : '#8EA0B8',
+    textBody: isDark ? '#C8D0DC' : ZHITOU_CHAT_COLORS.textBody,
 
     // Surfaces
     bgMain: isDark ? '#0F1724' : '#F8FAFC',
@@ -132,8 +135,8 @@ export function useThemeColors() {
     // Input
     inputBorder: rgba(accent, 0.15),
     inputBorderFocus: rgba(accent, 0.5),
-    inputText: isDark ? '#E8ECF4' : '#1E293B',
-    inputPlaceholder: isDark ? '#5A6B80' : '#94A3B8',
+    inputText: isDark ? '#E8ECF4' : ZHITOU_CHAT_COLORS.textPrimary,
+    inputPlaceholder: isDark ? '#5A6B80' : ZHITOU_CHAT_COLORS.textMuted,
     inputCaret: accent,
     inputShadow: isDark ? '0 2px 8px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.06)',
     inputShadowFocused: isDark
@@ -185,7 +188,44 @@ export function useThemeColors() {
     shadowGlowStrong: isDark
       ? `0 0 20px ${rgba(accent, 0.25)}, 0 0 40px ${rgba(accent, 0.1)}`
       : `0 0 15px ${rgba(accent, 0.15)}, 0 0 30px ${rgba(accent, 0.05)}`,
-  }), [isDark, accent]);
+
+    chat: {
+      surface: {
+        ...chatTokens.surface,
+        canvas: isDark ? '#0F1724' : chatTokens.surface.canvas,
+        panel: isDark ? '#1A2438' : chatTokens.surface.panel,
+        panelSubtle: isDark ? 'rgba(15, 20, 35, 0.62)' : chatTokens.surface.panelSubtle,
+        user: isDark ? rgba(accent, 0.16) : chatTokens.surface.user,
+        assistant: isDark ? '#1A2438' : chatTokens.surface.assistant,
+        status: isDark ? 'rgba(15, 20, 35, 0.72)' : chatTokens.surface.status,
+      },
+      border: {
+        ...chatTokens.border,
+        subtle: isDark ? 'rgba(255, 255, 255, 0.08)' : chatTokens.border.subtle,
+        default: isDark ? 'rgba(255, 255, 255, 0.12)' : chatTokens.border.default,
+        focus: rgba(accent, 0.35),
+      },
+      text: {
+        primary: isDark ? '#FFFFFF' : chatTokens.text.primary,
+        secondary: isDark ? '#8B9DC3' : chatTokens.text.secondary,
+        muted: isDark ? '#5A6B80' : chatTokens.text.muted,
+      },
+      status: {
+        success: isDark ? '#00FF88' : chatTokens.status.success,
+        warning: isDark ? '#FFB800' : chatTokens.status.warning,
+        danger: isDark ? '#FF3366' : chatTokens.status.danger,
+        info: isDark ? '#7B61FF' : chatTokens.status.info,
+        degraded: isDark ? '#D6A600' : chatTokens.status.degraded,
+      },
+      radius: chatTokens.radius,
+      shadow: {
+        message: isDark ? '0 6px 18px rgba(0, 0, 0, 0.22)' : chatTokens.shadow.message,
+        panel: isDark ? '0 10px 28px rgba(0, 0, 0, 0.26)' : chatTokens.shadow.panel,
+      },
+      spacing: chatTokens.spacing,
+      motion: chatTokens.motion,
+    },
+  }), [isDark, accent, chatTokens]);
 }
 
 const THEME_STORAGE_KEY = 'xiaoqiao-theme';
@@ -219,15 +259,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Sync accent CSS custom properties
   useEffect(() => {
-    const preset = ACCENT_PRESETS.find(p => p.key === accentKey) ?? ACCENT_PRESETS[0];
-    const color = theme === 'dark' ? preset.dark : preset.light;
+    const color = ZHITOU_CHAT_COLORS.primary;
     const root = document.documentElement;
 
     root.style.setProperty('--accent', color);
     root.style.setProperty('--accent-rgb', hexToRgb(color).join(', '));
     root.style.setProperty('--accent-dark', darken(color, 0.25));
     root.style.setProperty('--accent-light', lighten(color, 0.15));
-  }, [theme, accentKey]);
+  }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setTheme('light');
@@ -239,10 +278,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(ACCENT_STORAGE_KEY, key);
   }, []);
 
-  const accent = useMemo(() => {
-    const preset = ACCENT_PRESETS.find(p => p.key === accentKey) ?? ACCENT_PRESETS[0];
-    return theme === 'dark' ? preset.dark : preset.light;
-  }, [theme, accentKey]);
+  const accent = useMemo(() => ZHITOU_CHAT_COLORS.primary, []);
 
   const value = useMemo(() => ({
     theme,

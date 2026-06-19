@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Select, Button, Descriptions, Space, Divider, message } from 'antd';
+import { App, Drawer, Form, Input, Select, Button, Descriptions, Space, Divider } from 'antd';
 import { EditOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
 import type { TaskContext, MissingField } from '@/types';
+import { ZHITOU_CHAT_COLORS } from '@/lib/zhitou-chat-colors';
 
 interface ContextEditDrawerProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface ContextEditDrawerProps {
 export function ContextEditDrawer({
   open, taskContext, missingFields, onClose, onSave,
 }: ContextEditDrawerProps) {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const [editingMissing, setEditingMissing] = useState<Record<string, string>>({});
 
@@ -79,14 +81,14 @@ export function ContextEditDrawer({
         <Space>
           <Button icon={<UndoOutlined />} onClick={() => form.resetFields()}>重置</Button>
           <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}
-            style={{ background: '#00D9FF', borderColor: '#00D9FF' }}>保存</Button>
+            style={{ background: ZHITOU_CHAT_COLORS.primary, borderColor: ZHITOU_CHAT_COLORS.primary }}>保存</Button>
         </Space>
       }
     >
       {/* Missing Fields Quick Fill */}
       {missingFields.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <div style={{ color: '#FF3366', fontSize: 13, fontWeight: 500, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ color: ZHITOU_CHAT_COLORS.danger, fontSize: 13, fontWeight: 500, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
             <EditOutlined />
             缺失字段补录 ({missingFields.length})
           </div>
@@ -100,7 +102,7 @@ export function ContextEditDrawer({
               }}>
                 <div style={{ fontSize: 12, color: '#c8d6e5', marginBottom: 4 }}>
                   {field.field_label}
-                  {field.priority === 'required' && <span style={{ color: '#FF3366', marginLeft: 4 }}>*</span>}
+                  {field.priority === 'required' && <span style={{ color: ZHITOU_CHAT_COLORS.danger, marginLeft: 4 }}>*</span>}
                 </div>
                 <div style={{ fontSize: 11, color: '#8b949e', marginBottom: 6 }}>{field.why_required}</div>
                 <Input

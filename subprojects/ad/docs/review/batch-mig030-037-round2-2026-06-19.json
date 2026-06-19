@@ -1,0 +1,65 @@
+{
+  "timestamp": "2026-06-19T10:16:57.969Z",
+  "tests": {
+    "MIG-030": {
+      "error": "no textarea"
+    },
+    "MIG-031": {
+      "keywords": [
+        "月报",
+        "媒体",
+        "ROI",
+        "首月"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-032": {
+      "keywords": [
+        "月报",
+        "应用",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-033": {
+      "keywords": [
+        "激活",
+        "1250",
+        "验证"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-034": {
+      "keywords": [
+        "激活",
+        "验证",
+        "之和"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-035": {
+      "keywords": [
+        "消耗",
+        "日报",
+        "之和"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-036": {
+      "keywords": [
+        "自然量",
+        "激活",
+        "日报"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-037": {
+      "keywords": [
+        "自然量",
+        "注册",
+        "留"
+      ],
+      "hasAnswer": true
+    }
+  }
+}

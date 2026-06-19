@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-06-19T06:31:11.192Z",
+  "tests": {
+    "MIG-014b": {
+      "keywords": [
+        "巨量",
+        "腾讯",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-015b": {
+      "keywords": [
+        "巨量",
+        "腾讯",
+        "激活",
+        "消耗"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-016": {
+      "keywords": [
+        "安卓",
+        "激活",
+        "ROI"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-017": {
+      "keywords": [
+        "激活",
+        "对比"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-018": {
+      "keywords": [
+        "媒体",
+        "ROI",
+        "最高"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-019": {
+      "keywords": [
+        "激活",
+        "注册",
+        "转化率"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-020": {
+      "keywords": [
+        "媒体",
+        "激活",
+        "成本"
+      ],
+      "hasAnswer": true
+    },
+    "MIG-021": {
+      "keywords": [
+        "激活",
+        "媒体",
+        "三"
+      ],
+      "hasAnswer": true
+    }
+  }
+}

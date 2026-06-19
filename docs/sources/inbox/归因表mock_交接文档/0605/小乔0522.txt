@@ -1,0 +1,376 @@
+
+对话区域的输入框UIUX效果优化
+
+问题描述1：输入框色值，阴影，按钮色值均需调整与品牌色一致
+优化提示词：
+Hover 态 — 从「浅蓝」变「发光」
+新增 :before 伪元素做淡蓝背景光（D6E1FF），位置Y=4 模糊=20 不干扰文字层级
+边框从透明变品牌蓝 #2e75FE
+按钮色值变成品牌蓝色#2e75FE
+过渡用 cubic-bezier(0.4, 0, 0.2, 1)，WeDesign 标准缓动
+
+问题描述2：输入框里添加附件、文字输入、按钮点击未中部居中
+优化提示词：
+附件图标、输入文字与品牌蓝 #2E75FE 圆形发送按钮统一垂直居中对齐，保留原功能不变
+
+问题描述3：项目IP的logo存在毛边
+优化提示词：
+将主操作区域顶部的图标替换为提供的透明Logo，必须按照原图等比例缩放并居中对齐，保持原位置、原尺寸比例和视觉重心，其余页面文字、布局、色值、背景、卡片、输入框全部 1:1 保持不变，Logo 边缘需高清无毛边、无白边、无阴影、无背景。
+
+
+问题描述4：登录页面存在多层嵌套，且宽高比例拉伸
+优化提示词：
+将右侧登录模块重新调整为符合 1920×1080 B端登录页比例的轻量卡片：删除原「欢迎登录」标题与多层嵌套外框，仅保留一个白色圆角登录主卡片，卡片位置固定在页面右侧约 x=1220、y=170，宽度约 560px，高度压缩至约 760px，内边距上下 44px、左右 48px；顶部保留「登录账号」与说明文字，登录方式 Tab 与分割线保持横向布局，二维码区域居中放置并适当缩小，二维码容器宽约 470px、高约 360px，底部「权限申请｜帮助中心」与二维码容器保持 32px 间距，整体减少上下留白、降低登录框高度、保持左侧品牌区和背景不变。
+
+
+
+1. 先把上下文分层定死
+  把现有数据源归位到四层，不再混用：
+  - 会话上下文：最近消息、临时角色、临时约束、追问状态
+  - 任务上下文：task / run / result / evidence / blocker / next_action
+  - 项目上下文：项目可用能力、口径、开关、MCP/模型可用性
+  - 用户偏好画像：默认角色、主动偏好、输出风格、分析重点、风险偏好、解释深度、决策风格
+  这一步的关键不是新增功能，而是先把“谁负责什么”分清。
+
+2.新增 UserPreferenceProfile
+  这份对象只存稳定偏好，不存原始记忆、不存全量对话。
+  建议字段保留你给的结构，并补两个必要项：
+  - currentRole：当前生效角色
+  - roleHistory：角色来源和切换痕迹
+  原则：
+  - 只保留高置信、跨任务复用、长期稳定的偏好
+  - 不把每天对话直接写进偏好
+  - 偏好是软约束，不能覆盖任务和项目边界先不让用户填写和查看
+
+3.新增 context-compiler
+    做一个统一编译器，把分散来源编成一份消费包：
+    - 输入：会话上下文、任务上下文、项目上下文、用户记忆、提示词、skill、开关、工具可用性
+    - 输出：CompiledContextPackage
+
+4. 结果要有可感知收益
+    所以偏好注入要影响这几件事：
+
+    - 路由前置：默认把问题引向合适角色/视角
+    - 回答生成：结论优先、证据优先、风险优先、简洁/详细
+    - 结果渲染：默认展示哪些块
+    - 追问策略：问一个关键问题还是一次性补全
+    - 快捷入口：按用户习惯排序
+
+5. 偏好提炼要有节制
+    更新机制不要实时写偏好，采用“原始记录 -> 周期蒸馏 ”的方式：
+    - 对话/行为先写原始记忆或行为日志
+    - 每日或每周生成偏好候选
+    - 按置信度和稳定性筛选
+    - 只更新高置信偏好
+
+6.先在后台的用户列表增加偏好查看，后续考虑给用户看和管理。
+
+7.登录时获取用户的角色，把角色和项目一样注入默认的上下文，然后后台增加角色提示词管理，定义角色如何影响后续的服务、解释方式和结果模板。以及角色：用于默认工作方式和入口文案，快捷入口：用于初始意图引导
+
+8.角色化体验路由系统：让用户默认进入最适合自己的服务范围，减少 MCP 风控拦截，提升对话成功率和专业感。投 Chat 支持角色化体验路由。系统会在用户进入会话时自动加载项目、角色和默认数据视角，并基于角色决定欢迎页入口、问题语义、Agent / Workflow / Skill 路由和回答风格。
+
+当用户问题模糊且可能超出角色范围时，系统优先拉回角色默认视角，并提示统计口径或请求确认；当用户明确提出超出角色范围的问题时，系统不直接触发越界工具调用，而是说明范围差异，并引导到当前角色可处理的替代服务。MCP 风控仅作为最终兜底，不作为主要产品体验路径。角色 Profile
+  ↓
+默认数据视角
+  ↓
+可服务范围
+  ↓
+模糊问题处理策略
+  ↓
+明确越界处理策略
+  ↓
+Agent / Workflow / Skill 偏好
+  ↓
+回答风格偏好
+
+
+
+
+
+
+
+
+
+
+
+
+1.动态推荐
+那就在输入框上面增加动态推荐，后台增加动态推荐的提示词管理。【动态推荐prompt：
+请根据用户角色、最近会话、历史自动化任务、当前系统状态和四条业务流，
+生成 3 条适合当前用户的下一步建议。
+推荐必须满足：
+1. 文案简短，适合放在首页卡片
+2. 每条推荐都能转化为一条可发送的提示词
+3. 优先推荐帮助、需求沟通、问题排查、广告联调四类业务
+4. 不推荐无法承接的能力
+5. 不使用 Agent、MCP、Workflow 等内部技术词】
+
+
+
+
+
+2.提示词配置
+后台配置的自然语言查询的skill好像还是一个mock的mcp地址？
+ - constants.ts 里 6 条
+  - demo-data.ts 里 7 条
+  - prompt-store.ts 里 2 条系统 prompt
+
+  ts-check 也已经过了。
+  接下来我会继续把 chat/route.ts 里剩下的兜底文案、回答模板和路由判定继续往后台配置里收，不再让主链路继续背写死规则。
+
+3.问数
+
+4.问数组件
+AG Grid Community + Apache ECharts+Ant Design Charts+React Flow+SQL/DuckDB 拼表 + SheetJS 只负责导出 Excel
+
+每个消息能展示trace组件嘛？我发traceid给你 这样你能做完整的分析评估，给出问题优化方案。本身trace数据有上报给连弩对吧，后台
+
+1.登录界面优化
+用粒子光束品牌动画等领先前端技术，完成登录页的设计，不要改动到登录组件和登录功能服务。
+登录页面的登录框有重叠展示的问题，去掉描述性文案{安全登录登录账号使用小闪扫码或手机号登录}，页面有点错位，登录框主体部分展示不完整，宽度需要调整，请用浏览器检查。另外就是左侧的说明文案，你觉得应该如何设计。再就是icon应该和欢迎页一样可巡游交互把。
+
+
+
+主要阻塞点
+
+  1. chat/route.ts 没有接入 executeReportQueryStep
+      - report-query-orchestrator.ts 里有 Report Tool Registry、tool
+        chain、ReportQueryResult，但主链路实际没用它。
+      - 所以前端的 ReportQueryResultCard 很多时候不会生效。
+  2. 老链路仍固定偏向小时报表
+      - buildServicePlan() 里自然语言查数 step 仍写着 智投报表
+        MCP.get_zt_hour_report。
+      - executeServiceStep() 里报表工具选择仍优先 get_ads_report ->
+        get_zt_hour_report -> query_report，不是按“近30天、每日、趋
+        势、ROI”来选。
+  3. 多处中文正则已经乱码化
+      - intent-router.ts
+      - report-query-orchestrator.ts
+      - chat/route.ts 部分内部文案和判定
+      - 这会导致“近30天、每日、趋势、上周、腾讯、安卓、消耗”等中文信
+        号识别失败，默认退到 today/hour/help/debug 等错误路径。
+  4. 自然问数没有独立 intent
+      - 当前取数仍被挂在 help 或通用服务计划下，所以页面会出现“小乔智
+        投”标签，而不是“取数/报表查询”。
+      - 建议新增或至少内部标准化 report_query 路由类型，不再用 help
+        承载查数。
+  5. 入参适配不够稳
+      - 旧 adaptReportToolInput() 和 orchestrator 的
+        buildReportToolInput() 并存。
+      - 日期解析中文乱码后，“近30天”会退化成今天。
+      - “安卓、腾讯广告媒体、每日、首日ROI”这些维度没有稳定映射到 MCP
+        schema。
+  6. MCP 工具选择依赖工具名关键词
+      - 如果生产 MCP 的 tool 名不是 get_ads_report/query_report/
+        get_zt_hour_report 这类，可能选不到。
+      - 应该用后台配置的 tool registry 显式绑定：daily / hour / roi /
+        retention / material 对应哪些 MCP tool。
+  7. 质量检查会拦截空表，但原因不够可操作
+      - 空表、字段缺失、日期缺口都能发现，但当前链路没把“选错工具/日
+        期解析错/缺参数/MCP返回空”拆开展示。
+
+  建议 P0 修复顺序
+
+  1. 把 chat/route.ts 自然问数分支直接改走 executeReportQueryStep()。
+  2. 移除自然问数里固定 get_zt_hour_report 的服务计划。
+  3. 修复 intent-router.ts 和 report-query-orchestrator.ts 的乱码正
+     则。
+  4. 后台增加/启用 Report Tool Registry：按 hour/daily/roi/retention/
+     material 绑定真实 MCP tool。
+  5. Trace 明确输出：为什么选 daily/roi，为什么拒绝 hour。
+  6. 把 ReportQueryResult 放进 done.metadata.report_query_result，保
+     证数据表格和趋势组件能渲染。
+
+  我目前只能未登录访问 /api/xiaoqiao/admin/mcp-servers，返回“请先登
+  录”，所以还没验证生产 MCP 的实际 tool 列表。代码层阻塞已经明确
+
+
+
+
+1.动态推荐
+
+
+
+
+
+
+
+
+
+
+1.mock
+2.问数
+3.组件
+4.登录
+
+是否存在写死 不够标准化 产品化 架构化 系统化的情况
+
+近30天的巨量广告媒体的安卓每日消耗和首日ROI的趋势对比图
+
+提问：
+请求：
+返回：
+排查：
+检查当前还有哪些功能有问题 或者只是做做样子，比如上传图片 图片解
+  析 上传excle excle解析 图片中的指标和维度，可以提炼成取数
+我先做一次功能真实性审查，不改代码：重点看上传附件、图片解析、
+  Excel 解析、附件内容进入会话上下文、以及能否把图片/表格里的指标维
+  度转成问数条件。然后给你列出“已真实可用 / 半成品 / 做样子 / 缺
+  口”的清单。初扫结果已经很明确：附件上传 UI 和接口是有的，Excel 导出也有，
+  但“解析上传的 Excel/图片并提炼指标维度进入问数”很可能没有真实打
+  通。现在我继续看具体实现，区分“存文件”“假解析摘要”“真实解析”“进入
+  问数链路”。具体实现确认了几个关键问题：附件上传只是保存文件并立即标成“已解
+  析”；图片/Excel 没有 OCR、没有 SheetJS 读取、没有字段结构化；会话
+  发送时只把附件摘要拼进 prompt。也就是说当前用户体验像“已解析”，但
+  业务上没有真正解析内容。我检查了一圈，结论比较明确：现在“上传”是真的，但“图片解析、Excel
+  解析、从图片里提炼指标/维度并转成取数条件”基本还没真正打通，更多是
+  UI 和提示词层面的占位。
+
+  当前问题
+
+  1. 图片解析是假的
+     frontend/src/src/lib/attachment-store.ts:34 里图片只生成固定摘
+     要：“图片已进入视觉内容识别队列”，没有 OCR、视觉模型、图片结构
+     化提取。
+     而且创建附件时直接标记为 parsed，没有真实解析过程。
+  2. Excel / 表格解析也是假的
+     表格只靠文件名或 MIME 判断类型，frontend/src/src/lib/
+     attachment-store.ts:37 只写了固定摘要。
+     代码里 xlsx 目前主要用于导出 Excel，frontend/src/src/
+     components/cognitive/DataVizRenderer.tsx:33，没有发现读取上传
+     Excel、解析 sheet、识别表头、指标、维度的流程。
+  3. 附件没有真正进入对话理解
+     发送消息时只把附件名和摘要拼进 prompt：
+     frontend/src/src/app/page.tsx:1184
+     也就是说模型拿不到图片 OCR 内容、Excel 行列、指标字段、日期字
+     段、维度字段。
+  4. 图片里的指标和维度无法提炼成取数条件
+     报告/问数相关逻辑主要靠用户文本关键词识别，frontend/src/src/
+     lib/report-agent.ts:59。
+     /api/xiaoqiao/report-session 也只接收附件摘要，不接收附件解析结
+     果或文件内容：
+     frontend/src/src/app/api/xiaoqiao/report-session/route.ts:34
+  5. 重试解析也是占位
+     frontend/src/src/lib/attachment-store.ts:157 的
+     retryAttachmentParse 只是重新设置 parsed 状态，没有重新解析。
+  6. 问数组件有真实部分，但和上传解析没接上
+     AG Grid / ECharts / React Flow / Excel 导出有实现。
+     DuckDB SQL 查询也有接口：frontend/src/src/app/api/xiaoqiao/
+     query-table/route.ts:17
+     但它只查询前端传入的 rows，没有接入上传 Excel 的解析结果，也缺
+     少用户权限校验和 SQL 安全限制。
+  7. 附件预览也有风险
+     附件的 preview_url 指向 /api/xiaoqiao/attachments/{id}，但这个
+     接口返回的是 JSON 元数据，不是图片文件本体。图片保存后预览可能
+     失效或异常。
+
+  真正已经做成的部分
+
+  - 文件可以上传并落库/落盘。
+  - 文本日志类文件有极轻量内容读取。
+  - AG Grid / ECharts / React Flow 展示能力是真实的。
+  - Excel 导出是真实的。
+  - 问数 SQL 执行能力有雏形，但还没和附件解析、权限、会话上下文连起
+    来。
+
+  建议下一步按这个顺序补
+
+  1. 先修附件状态：上传后只能是 uploaded/parsing，不能直接显示
+     parsed。
+  2. 增加真实解析层：
+      - 图片：OCR/视觉识别，提取文字、表格、指标、维度、日期、平台、
+        媒体、账户等。
+      - Excel：SheetJS 读取 workbook，解析 sheet、表头、字段类型、样
+     文编译层。
+  5. 问数时自动把这些上下文带入取数链路，不再让用户重复补条件。
+  6. DuckDB 查询接口接入已解析表格，同时加用户权限、项目权限、SQL 白
+     名单和行数限制。
+  上后，图片/Excel 才能真正变成取数条件。
+
+原始需求：用户截图粘贴 上传excle，加上取数提问，就能提供报表给用户，还能追问是否加入到自动化任务定时生成，在我的资产能够归纳查看和下载。过程中涉及很多细节包括解析成指标 维度即报表需求，然后确认能力边界，补上不支持的说明，支持则转化为问数需求。这里交互不宜披露的很细，应该给用户很方便的感觉。重点是为了满足发行人员拼表 做日报周报月报的需求。
+
+作为资深的AI数据产品专家，集合当前已经实现和未完全实现以及没做的各部分，集合当前的统一化架构，生成一个系统性的产品化的，一定不要写死的满足单点需求的解法，而是提供标准化设计和需求任务拆解，以及完善的自测。
+
+
+
+
+
+
+
+route": "report_query_orchestrator
+返回：项目登录状态已过期，请在后台重新配置项目 Token 后再查数
+
+chat/route.ts 
+ report-query-orchestrator.ts 
+  list_all_apps
+
+
+组件没有做好（支持AG Grid Community + Apache ECharts+Ant Design Charts+React Flow+SQL/DuckDB 拼表 + SheetJS 只负责导出 Excel），支持动态触发渲染生效。
+3.问数服务异常，需深入检查，提供全面解决方案。同时提供trace信息，便于一个个去跟踪处理。
+
+4.登录页设计
+
+目前查到三个真实使用点：/api/xiaoqiao/projects、chat/route.ts 的项
+  目解析/能力调用、report-query-orchestrator.ts 的 MCP 鉴权兜底。按你
+  说的新链路，应改成用户登录 Token 获取项目列表，旧配置最多保留接口地
+  址，不再保存/使用 Token。
+
+
+
+一个对话框，1、输入框输入取包，消息区展示包列表和包的健康状态，展示workflow：游戏广告数据上报*已验收通过、包体监测*已自动执行通过、三方对接功能*已自动联调通过、报表指标已自动排查通过的流式输出效果。2、1结束后，输入框接着输入查看巨量近30天的激活数和7日ROI指标对比趋势。消息去展示可视化的趋势图，附加数据解读和进一步分析建议。3、第二个对话完成，继续输入框上传截图，图片为一张表头和维度项的模板，然后说获取这些数据。消息区展示第一步确认指标和维度，思维链中确认没有能力缺失，接着直接返回可行的表格和数据，然后提供下一步建议是否加入自动化任务，继续确认加入展开定时。第3个对话完成，接着演示数据gap排查，行业情报、素材创意等。
+
+
+
+
+
+
+5.分享
+右上角的分享按钮 去掉复制会话链接。
+会话栏 消息操作栏 右上角的分享到小闪功能 是复制链接，因为每个会话都有一个默认项目，如果用户没有这个项目权限，这个链接是打不开的。浏览器显示会话标题，但是正文空白，仅提示“没有该项目权限，无法查看该会话链接”
+增加一个 如果是链接在浏览器直接打开 非小闪app内部打开，则跳转至登录页，登录后打开用户的小乔智投，但是没有选中会话列表，也没有会话区顶部栏，顶部展示一行字“这是已分享的 小乔智投 对话副本”
+点击其它会话就消失了，除非从分享链接打开。参考chatgpt
+https://chatgpt.com/share/6a0f52a4-f94c-8320-b531-15fe91c348d6
+
+6.mock
+10.查完了。结论是：系统里还残留不少 mock 数据和写死的 demo 逻辑，而且最关键的一层还在默认走 demo 模式。
+  最重要的残留
+  1. API 默认还是 demo
+      - frontend/src/src/lib/api.ts:1 里 apiMode 默认值还是 demo，也就是说很多 /api/xiaoqiao/* 请求默认先走本地 runtime
+        routes，而不是 service。
+      - 这不是注释层面的 mock，是运行时默认分流。
+  2. demo 数据层还在
+      - frontend/src/src/lib/demo-data.ts:1 仍然保留了整套 DEMO_WORKSPACE / DEMO_CONVERSATIONS / DEMO_TASKS /
+        DEMO_PROMPTS / DEMO_MCP_SERVERS，还有一整套增删改查 helper。
+      - 这相当于一层完整的内存 mock 服务。
+  3. 常量文件里还有大量 mock 种子
+      - frontend/src/src/lib/constants.ts:1 里还留着大块 MOCK_WORKSPACE / MOCK_CONVERSATIONS / MOCK_TASKS /
+        MOCK_PROMPT_CONFIGS / MOCK_DEBUG_TASK / MOCK_MCP_SERVERS。
+      - 这类不是 UI 文案，是硬编码的数据源。
+  页面和组件里的写死 fallback
+  4. 、      - frontend/src/src/app/admin/page.tsx:245 还保留了 MOCK_PROMPTS
+      - 同文件里还有 MOCK_DEBUG_CONFIGS、MOCK_SWITCHES
+      - 现在提示词页已经接真实 store 了，但这些 fallback 还在，说明页面仍然有 demo 兜底逻辑。
+  5. 部分业务面板还在用 mock 数据跑
+      - frontend/src/src/components/agents/IntegrationPanel.tsx:1
+      - frontend/src/src/components/agents/DiagnosisPanel.tsx:1
+      - frontend/src/src/components/agents/PostbackPanel.tsx:1
+      - frontend/src/src/components/agents/PredictionPanel.tsx:1
+  哪些不算真正的 mock
+  - placeholder="..." 这类只是输入框占位文案，不算 mock 服务。
+  - Date.now()、Math.random() 主要是造 ID/时间戳，不能单独算 mock。
+  - 文档里的 “Mock Data / Demo” 大多是历史说明，不一定还在运行态生效。
+
+
+
+
+
+
+
+1.logo毛边
+
+2.小游戏榜单
+媒体流量趋势
+媒体素材创意
+买量行业简报
+蒸馏游戏数据模型
+

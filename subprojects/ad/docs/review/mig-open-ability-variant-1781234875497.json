@@ -1,0 +1,139 @@
+{
+  "caseId": "MIG-OPEN-ABILITY-VARIANT",
+  "prompt": "你现在能帮我处理哪些事情？请一句话概括。",
+  "runId": "mig-open-ability-variant-1781234875497",
+  "baseUrl": "http://10.236.14.27:8002",
+  "conversationId": "conv-1781234878251",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-open-ability-variant-1781234875497.png",
+  "answer": "作为小乔智投通用AI助手，我能帮你进行日常问答与内容总结、查询智投广告数据报表、管理广告联调自动化任务、搜索互联网实时信息，并结合项目上下文与偏好记忆提供个性化解答。",
+  "evidenceMode": "model_only",
+  "planning": {
+    "planner_candidates": [
+      {
+        "source": "request_understanding",
+        "intent_type": "general",
+        "confidence": "low",
+        "service_intent": "general_chat",
+        "reason": "未命中明确业务链路，保持普通对话。"
+      },
+      {
+        "source": "intentorch",
+        "status": "timeout",
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tool_names": [],
+        "suggested_tool_confidences": [],
+        "risk_flags": [
+          "candidate_timeout"
+        ],
+        "duration_ms": 1802
+      }
+    ],
+    "arbitration_summary": {
+      "selected_composer": "chat_answer_composer",
+      "evidence_mode_hint": "model_only",
+      "evidence_need": "optional",
+      "candidate_sources": [
+        "request_understanding",
+        "intentorch"
+      ],
+      "risk_flags": [
+        "candidate_timeout",
+        "intentorch_timeout"
+      ],
+      "rejected_authorities": [
+        "intentorch_direct_tool_selection",
+        "prompt_keyword_routing",
+        "raw_context_dump"
+      ],
+      "final_authority": "contract_safety"
+    }
+  },
+  "intentOrchEvent": {
+    "id": "intent_orch.candidate-1781234909880-prxrc8",
+    "started_at": "2026-06-12T03:28:29.880Z",
+    "status": "error",
+    "visibility": "internal",
+    "type": "intent_orch.candidate",
+    "label": "IntentOrch 候选",
+    "summary": "IntentOrch 候选生成超时（1800ms），开放式回答继续由 Planner/Composer 主链处理。",
+    "duration_ms": 1802,
+    "output": {
+      "candidate": {
+        "source": "intentorch",
+        "status": "timeout",
+        "duration_ms": 1802,
+        "parsed_intent_count": 0,
+        "tool_selection_count": 0,
+        "suggested_tools": [],
+        "risk_flags": [
+          "candidate_timeout"
+        ],
+        "timeout_ms": 1800
+      },
+      "arbitration_summary": {
+        "selected_composer": "chat_answer_composer",
+        "evidence_mode_hint": "model_only",
+        "evidence_need": "optional",
+        "candidate_sources": [
+          "request_understanding",
+          "intentorch"
+        ],
+        "risk_flags": [
+          "candidate_timeout",
+          "intentorch_timeout"
+        ],
+        "rejected_authorities": [
+          "intentorch_direct_tool_selection",
+          "prompt_keyword_routing",
+          "raw_context_dump"
+        ],
+        "final_authority": "contract_safety"
+      }
+    }
+  },
+  "processEventTypes": [
+    "intent.detected",
+    "web.search",
+    "web.result",
+    "web.result",
+    "intent_orch.candidate",
+    "route_observation"
+  ],
+  "pendingEventCount": 0,
+  "chatResponseCount": 1,
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "debug",
+      "text": "[ChatProjectContext] {projectLoadStatus: loading, selectedProject: null, projectContextTextEmpty: false, metadataProjectContextPresent: true, warnings: Array(0)}"
+    }
+  ],
+  "failedRequests": [],
+  "badResponses": [],
+  "mojibakeFindings": [],
+  "domPreview": "开启新对话 今天 询问AI能处理的任务范围 询问AI能力范围 你好，用一句话说明你可以做什 你好，用一句话说明你可以做什 询问AI功能 你好，用一句话说明你可以做什 询问AI功能说明 询问AI能力 询问AI能力与帮助 弦音袅袅花香阵阵是谁的台词 近期上线游戏 7 天内 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 日常问候 日常问候 日常问候 日常问候 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 南京本周日天气 日常问候 简单问候 日常问候 yoka超管 询问AI能处理的任务范围 三国杀移动版 你现在能帮我处理哪些事情？请一句话概括。 已处理 4 步 · 用时 4.4s 查询结果 作为小乔智投通用AI助手，我能帮你进行日常问答与内容总结、查询智投广告数据报表、管理广告联调自动化任务、搜索互联网实时信息，并结合项目上下文与偏好记忆提供个性化解答。 qwen3.7-plus-2026-05-26 保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。 请输入你的问题、需求或操作任务",
+  "acceptance": {
+    "pageLoaded": true,
+    "chatCompleted": true,
+    "apiReadbackHealthy": true,
+    "answerQualityHealthy": true,
+    "evidenceModeHealthy": true,
+    "noUnsupportedExternalClaim": true,
+    "intentOrchObservable": true,
+    "planningMetadataHealthy": true,
+    "noPendingRuntimeEvents": true,
+    "consoleHealthy": true,
+    "networkHealthy": true,
+    "noMojibake": true
+  },
+  "failureReason": "",
+  "passed": true
+}

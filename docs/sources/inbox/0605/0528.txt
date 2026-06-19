@@ -1,0 +1,807 @@
+现在 report-query 主链路已经改成以 semantic_result 为真源，viz_spec 已从当前代码渲染路
+  径里移除。受影响的入口都已经一起改了：
+
+
+
+E:\AI\ai-os\docs\sources\inbox 增加了文件：AI Chat Message Renderer System.txt，目的
+  是围绕当前的架构，补充一些缺失的组件并完成组件注册，实现架构接入和补充，便于调试。请
+  评估当前是否已存在相关实施，如何进行系统性改造升级。我的目标是逐个逐个需求场景来验证
+  总纲和整体架构的可用性。
+
+已发布到 GitLab
+  - 提交：0fc591a feat: publish AI Chat OS execution layer updates
+  - 分支：feature/xuyun_init
+  - 远端：已推送到 origin/feature/xuyun_init
+  - 当前工作区：干净
+  GitLab 的 MR 地址也已经返回了：
+  http://gitlab.sh.com/aiad/xiaoqiao/merge_requests/new?merge_request%5Bsource_branch%5D=feature%2Fxuyun_init
+
+
+开启review模式 遍历这3个文件夹 提炼出和问数相关的部分，整理出P0级实施清单，建立迭代版本，版本号往后追加。E:\AI\ai-os\subprojects\ad\docs\prd-v2.2 E:\AI\ai-os\subprojects\ad\docs\design-v1 E:\AI\ai-os\subprojects\ad\docs\implementation-v1
+
+然后开启plan模式，逐个和我确认问题损益，是否是现有框架下的系统性解决方案，以及修改后的变更影响。
+
+再开启woek模式，逐个执行 验证。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+避免做成“一堆孤立组件”。正确目标是：先定义消息渲染组件体系与 registry，再把 Markdown、表格、图表、表单、文件、Runtime、Evidence 等都注册为统一 renderer。单独做一套AI Chat Message Renderer System，不要只叫“图表组件”或“消息组件”。它本质是：SemanticResultContract
+  -> regions[]
+  -> componentBinding
+  -> renderer registry
+  -> 具体渲染组件
+
+
+一、必须设计的组件大类
+1. Markdown / 文本结果组件
+用于普通回答、解释、总结、方案输出。
+包括：
+MarkdownResultRenderer
+RichTextRenderer
+CodeBlockRenderer
+QuoteRenderer
+ChecklistRenderer
+LongTextCollapseRenderer
+
+可以基于 react-markdown / remark / rehype；Ant Design X 也已经有 AI interface 和 X Markdown 方向，可以作为基础参考。
+
+
+
+2. Data Visualization 组件
+用于问数、报表、趋势、归因、路径分析。
+包括：
+MetricCardRenderer
+KpiGroupRenderer
+LineChartRenderer
+BarChartRenderer
+PieChartRenderer
+AreaChartRenderer
+StackedBarRenderer
+FunnelRenderer
+SankeyRenderer
+PathAnalysisRenderer
+HeatmapRenderer
+ScatterRenderer
+GeoMapRenderer
+CohortRenderer
+TrendInsightRenderer
+建议底层优先用 ECharts，因为图表类型多、交互强，也支持大数据和渐进渲染。
+
+
+3. Table / Grid 组件
+这是广告数据场景的核心。
+包括：
+SimpleTableRenderer
+DataGridRenderer
+PivotTableRenderer
+ComparisonTableRenderer
+MetricBreakdownTableRenderer
+VirtualizedTableRenderer
+EditableTableRenderer
+TableWithChartLinkageRenderer
+
+底层建议：
+TanStack Table + TanStack Virtual
+TanStack Table 是 headless table，可以保留你自己的样式体系；虚拟化要配 TanStack Virtual 或 react-window。
+
+4. Excel / 文件预览组件
+不是只做 Excel，还要做 Artifact 预览体系。
+包括：
+ExcelPreviewRenderer
+CsvPreviewRenderer
+JsonPreviewRenderer
+PdfPreviewRenderer
+ImagePreviewRenderer
+FileCardRenderer
+AttachmentListRenderer
+DownloadExportRenderer
+
+Excel 类建议先支持：
+xlsx / csv 预览
+sheet 切换
+冻结首行首列
+列宽自适应
+分页
+导出
+
+5. Form / Action 组件
+用于 AI 追问、参数确认、任务配置、权限申请。
+包括：
+DynamicFormRenderer
+ParameterConfirmRenderer
+DateRangePickerRenderer
+DimensionMetricSelectorRenderer
+FilterBuilderRenderer
+PermissionRequestRenderer
+ApprovalConfirmRenderer
+TaskScheduleFormRenderer
+
+这类组件必须接入统一：ActionContract，不能每个表单自己定义提交协议。
+
+6. AI Runtime 组件
+用于展示 AI 怎么执行，不是业务结果本身。
+包括：
+RuntimeTimelineRenderer
+AgentStepRenderer
+ToolCallCardRenderer
+WorkflowTraceRenderer
+StreamingStateRenderer
+RetryRecoveryRenderer
+ApprovalWaitingRenderer
+RuntimeErrorRenderer
+
+这类组件接：RuntimeDisplayProtocol，不要直接塞进业务结果协议里。
+
+
+7. Evidence / Source / Trust 组件
+这是企业级 AI Chat 很关键。
+包括：
+EvidencePanelRenderer
+SourceListRenderer
+ConfidenceBadgeRenderer
+FreshnessBadgeRenderer
+DataLineageRenderer
+RiskNoticeRenderer
+SensitiveDataMaskRenderer
+AIInferenceLabelRenderer
+
+所有结论、洞察、风险建议都要能挂：evidenceRefs / sourceRefs
+
+
+8. Business Result Card 组件
+用于把业务结果卡片化。
+包括：
+ReportResultCardRenderer
+MetricExplainerCardRenderer
+DiagnosisResultCardRenderer
+AttributionResultCardRenderer
+CampaignInsightCardRenderer
+TaskResultCardRenderer
+DecisionCardRenderer
+NextActionCardRenderer
+
+这些不是新协议，只是不同：componentBinding下的 renderer。
+
+9. Workflow / Task 组件
+用于自动化任务、日报、联调、排查流程。
+包括：
+WorkflowProgressRenderer
+TaskStatusRenderer
+StepListRenderer
+ChecklistProgressRenderer
+RunResultRenderer
+ScheduleStatusRenderer
+ReviewGateRenderer
+
+10. Asset / Media 组件
+广告投放场景非常需要。
+包括：
+CreativeAssetCardRenderer
+VideoPreviewRenderer
+ImageGalleryRenderer
+MaterialComparisonRenderer
+CreativeTagRenderer
+AssetLineageRenderer
+
+11. Empty / Error / Fallback 组件
+必须有，不然前端会炸。
+包括：
+UnknownBindingFallbackRenderer
+InvalidContractRenderer
+PermissionDeniedRenderer
+EmptyResultRenderer
+InsufficientDataRenderer
+RendererErrorBoundary
+LoadingSkeletonRenderer
+
+二、建议第一版注册这些 binding
+不用一次做太细，第一版建议先注册 12 个：
+const defaultComponentBindings = [
+  "markdown-result",
+  "data-visualization",
+  "data-table",
+  "metric-card",
+  "form",
+  "asset-reference",
+  "ai-runtime",
+  "workflow-trace",
+  "evidence-panel",
+  "source-list",
+  "decision-card",
+  "fallback"
+]
+
+然后每个 binding 内部再分具体 renderer，例如：
+componentBinding = "data-visualization"
+region.data.chartType = "line" | "bar" | "pie" | "sankey"
+不要把每一种图表都注册成顶层 binding，否则 registry 会膨胀。
+
+
+三、推荐开源底座
+可以先部署开源框架，但要明确它们只是“底座”，不是你的协议。
+
+建议：
+基础 UI：Ant Design / Ant Design X
+Markdown：Ant Design X Markdown 或 react-markdown
+图表：ECharts
+表格：TanStack Table + TanStack Virtual
+虚拟列表：react-virtuoso 或 TanStack Virtual
+表单：Ant Design Form + JSON Schema Form 思路
+文件预览：SheetJS / PDF viewer / 自研 ArtifactPreview
+
+Ant Design 是企业级 React UI 库，Ant Design X 更贴 AI interface 场景；ECharts 适合复杂图表；TanStack Table 适合 headless 数据表格。
+
+四、正确实施顺序
+1. 定义 ComponentBinding 分类
+2. 建 createComponentRegistry()
+3. 注册 fallback renderer
+4. 注册 markdown-result
+5. 注册 data-table
+6. 注册 data-visualization
+7. 注册 form/action
+8. 注册 evidence/source
+9. 注册 ai-runtime/workflow-trace
+10. 接入 SemanticResultContract validation
+11. 接入 golden examples 回归
+12. 再逐步美化组件样式
+
+你可以先部署开源框架和定义组件样式需求，但不要先写大量业务组件。先把
+contract -> registry -> renderer -> fallback -> telemetry这条链路跑通。
+
+
+
+结论
+做的不是普通组件库，而是：AI Chat OS Message Renderer Registry
+它包括：
+Markdown
+Data Visualization
+Table/Grid
+Excel/File Preview
+Form/Action
+AI Runtime
+Workflow Trace
+Evidence/Source
+Business Result Card
+Asset/Media
+Fallback/Error
+
+第一版先做 10～12 个顶层 binding，后续按业务扩展 renderer。
+
+
+
+
+
+
+总纲从UI出发 到 chat整体规范规格，发现不能解决对话路由，准确调用工具的问题，旧的一些设定都需要被推翻，当前服务是1分，我们要做系统性的标准型的chat产品，任何mcp接入都能去准确发现能力，调用能力，而不是定制的硬编码实现需求。所以我们需要补充架构，总纲缺Request Understanding & Capability Orchestration System。E:\AI\ai-os\docs\sources\inbox中增加了文件“总纲补充Request Understanding & Capability Orchestration System计划评估.txt”请仔细阅读禁止压缩禁止收敛。同时也把这次新增的请求理解、能力编排、业务语义、MCP 治理、上下文承接、结果组装和路由观测整理成独立可落地文件包，并附总纲补丁与 Codex CLI 执行说明。涉及到后台管理中心的修改也需要一并处理。注：当前上下文问题不是很大，之前做过一轮处理，但是是定制化的处理，不够系统化，也需要纳入到整个架构中来。
+E:\AI\ai-os\docs\sources\inbox下包括
+总纲补充Request Understanding & Capability Orchestration System计划评估.txt
+AI_CHAT_OS_ORCHESTRATION_LAYER_PACK.zip（文件包）
+AI_CHAT_OS_ORCHESTRATION_LAYER_FULL.md（合并版 Markdown）
+包内核心入口：
+README.md
+CODEX_CLI_IMPLEMENTATION_PROMPT.md
+
+docs/architecture/02_ORCHESTRATION_LAYER_INDEX.md
+docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC_ORCHESTRATION_PATCH.md
+
+docs/architecture/request-understanding/*
+docs/architecture/capability-orchestration/*
+docs/architecture/business-semantics/*
+docs/architecture/context-memory/*
+docs/architecture/mcp-governance/*
+docs/architecture/result-assembly/*
+docs/architecture/observability/*
+docs/architecture/prompting/*
+
+frontend/src/src/contracts/request-understanding/*
+frontend/src/src/contracts/capability/*
+frontend/src/src/contracts/business-semantics/*
+frontend/src/src/contracts/context-memory/*
+frontend/src/src/contracts/mcp/*
+frontend/src/src/contracts/result-assembly/*
+frontend/src/src/contracts/examples/*
+frontend/src/src/contracts/__tests__/*
+
+scripts/guardrails/check-routing-governance.ts
+
+这份包的定位是：
+
+总纲：定义系统边界
+二级规范：定义协议与体验
+执行层：定义 validator / adapter / registry / golden / guardrail
+编排层：定义意图、槽位、能力、MCP、路由、结果组装
+
+它不会把“意图”做成总纲之外的新体系，而是正式纳入：
+
+Enterprise AI Chat OS
+└─ Request Understanding & Capability Orchestration System
+
+里面也已经包含针对你刚才“素材数据被日报抢走”的标准化治理方案：
+
+不是硬编码：素材 -> get_zt_ad_mat_report
+
+而是：
+
+UserRequirementContract.requestedSubject = material
++ requiredDatasetAuthority = material-performance
++ CapabilityManifest.subject = material
++ authority.authoritativeFor = material-performance
++ CapabilitySelectionPolicy
++ RoutingTrace
++ fallback disclosure
+
+给 Codex CLI 可以直接从这个文件开始：
+
+CODEX_CLI_IMPLEMENTATION_PROMPT.md
+
+或者先读：
+
+docs/architecture/02_ORCHESTRATION_LAYER_INDEX.md
+
+
+
+
+1、旧的 material-analysis、report_query、ReportQueryViewModel 保留兼容适配，但不再作
+    为最终语义真源
+不要兼容，不要兜底，要重构，删除 禁止发挥任何作用 只用新的总纲统一指导运行。
+
+ 2、第一阶段优先做架构补齐、协议补齐、后台治理入口补齐和路由回归门禁，不先做大面积视觉
+    重构。但这个模块只影响但是请求返回消息，就是要大面积视觉重构，只是重构消息区，会话之前不要动。
+
+
+3、现有报表链路继续可用，但要被新的编排层约束和解释，不能再反向主导路由结果。
+现在的报表链路只有1分，要重构 不然不停作用不知道如何排查了。
+
+4、UserRequirementContract.requestedSubject = material + requiredDatasetAuthority = material-performance + CapabilityManifest.subject = material + authority.authoritativeFor = material-performance + CapabilitySelectionPolicy + RoutingTrace + fallback disclosure 这是什么 素材只是一个维度 只是一个外挂mcp的报表数据 为什么会有单独的文件，如果我没挂这个mcp呢 ，所以把 material-performance 做成系统固定能力、固定文件、固定架构模块，那是有问题的。更准确地说，应该只是一个示例表达，不能作为系统硬编码规则。正确改法是：
+素材不是总纲级模块。
+素材不是固定能力。
+素材不是必须存在的 MCP。
+素材只是业务语义层里的一个 entity / dimension / breakdown 维度。
+一、正确建模方式
+不要把素材写成：
+也就是说：
+UserRequirementContract {
+  task: "report_query"
+
+  businessDomain: "advertising"
+
+  requestedView: "trend" | "table" | "summary"
+
+  metrics: ["cost", "roi"]
+
+  dimensions: [
+    {
+      key: "material",
+      role: "breakdown"
+    },
+    {
+      key: "date",
+      role: "x_axis"
+    }
+  ]
+
+  dateRange: {
+    type: "relative",
+    value: "last_30_days"
+  }
+
+  granularity: "day"
+
+  dataRequirement: {
+    requiredDimensions: ["material", "date"]
+    requiredMetrics: ["cost", "roi"]
+    requiredGranularity: "day"
+  }
+}
+用户问“素材数据”
+不是路由到“素材专属系统”
+而是解析为：
+报表查询 + 需要 material 维度 + 需要相关指标 + 需要某种时间粒度
+二、MCP 也不能被写死
+
+get_zt_ad_mat_report 只是某个环境里挂进来的 MCP tool。
+
+它不应该进入总纲成为固定依赖。
+
+正确方式是：
+
+MCP Tool
+  ↓
+normalize
+  ↓
+CapabilityManifest
+  ↓
+Capability Registry
+  ↓
+Selection Policy
+
+如果挂了这个 MCP，它会变成一个 capability：
+
+CapabilityManifest {
+  capabilityId: "mcp.get_zt_ad_mat_report"
+
+  provider: "mcp"
+
+  capabilityType: "data.report"
+
+  dataDomain: "advertising"
+
+  supports: {
+    metrics: ["cost", "roi", "click", "conversion"]
+    dimensions: ["date", "material", "campaign"]
+    granularity: ["day"]
+    views: ["summary", "trend", "table"]
+  }
+
+  source: {
+    sourceType: "mcp"
+    toolName: "get_zt_ad_mat_report"
+  }
+}
+
+如果没挂这个 MCP，这条 capability 就不存在。
+
+系统不应该报错，也不应该假装存在。
+
+三、如果没挂素材 MCP，应该怎么表现？
+
+如果用户问：
+
+看下近 30 天素材消耗和 ROI 趋势
+
+系统先解析成：
+
+需要：
+- cost
+- roi
+- date
+- material
+- day granularity
+
+然后去 capability registry 里找：
+
+哪个能力支持 material 维度？
+哪个能力支持 cost / roi？
+哪个能力支持 day granularity？
+哪个能力有权限？
+哪个能力数据最新？
+情况 A：有素材维度 MCP
+
+选择它。
+
+get_zt_ad_mat_report
+情况 B：没有素材 MCP，但有通用报表支持 material 维度
+
+也可以选通用报表。
+
+比如某个工具虽然叫：
+
+get_ad_report
+
+但它支持：
+
+dimensions = ["material", "date"]
+metrics = ["cost", "roi"]
+
+那它可以被选中。
+
+情况 C：只有大盘日报，不支持 material 维度
+
+不能直接回答素材数据。
+
+应该返回：
+
+当前可用数据源只支持账户/大盘维度，不支持素材维度。
+我可以先展示整体消耗和 ROI 趋势，或请接入支持素材维度的报表能力后再查询素材表现。
+
+如果允许兜底，必须披露：
+
+以下结果基于大盘日报，不是素材维度数据。
+四、所以“强优先”的真实含义不是素材专属优先
+
+应该改成：
+
+维度覆盖优先
+指标覆盖优先
+粒度覆盖优先
+权限满足优先
+数据新鲜度优先
+最小兜底优先
+
+而不是：
+
+素材词 = 固定素材工具
+
+正确规则是：
+
+当用户请求需要 material 维度时，
+系统应优先选择支持 material 维度、所需指标、所需时间粒度的 capability。
+
+如果不存在这样的 capability，
+不得使用不支持 material 维度的大盘日报冒充素材结果。
+
+如果使用大盘日报兜底，必须明确披露。
+
+这不是硬编码业务工具，而是通用能力选择规则。
+
+五、这里应该改掉几个命名
+
+我建议把前面这些命名改掉，避免误导。
+
+不建议
+requestedSubject = "material"
+requiredDatasetAuthority = "material-performance"
+CapabilityManifest.subject = "material"
+authority.authoritativeFor = "material-performance"
+建议
+focusEntity = "material"                 // 用户关注对象，可选
+requiredDimensions = ["material", "date"] // 真正用于能力匹配
+requiredMetrics = ["cost", "roi"]
+requiredGranularity = "day"
+requiredView = "trend"
+
+Capability 侧也不要写成：
+
+subject = "material"
+
+而应该写：
+
+supports: {
+  dimensions: ["material", "date"]
+  metrics: ["cost", "roi"]
+  granularity: ["day"]
+}
+
+这样就不会变成“素材模块”。
+
+六、总纲里应该怎么写
+
+不要写：
+
+素材能力必须优先。
+
+应该写：
+
+能力选择不得基于固定 toolName 或关键词硬编码。
+
+系统必须将用户请求解析为结构化数据需求，包括：
+- task
+- metrics
+- dimensions
+- filters
+- dateRange
+- granularity
+- requestedView
+
+MCP tool 必须先归一化为 CapabilityManifest，声明其支持的：
+- metrics
+- dimensions
+- filters
+- granularity
+- permissions
+- output shape
+
+能力选择必须基于 UserRequirementContract 与 CapabilityManifest 的覆盖关系进行。
+
+如果当前环境未挂载满足数据需求的 MCP/tool，系统必须：
+1. 提示能力不可用；或
+2. 使用低精度兜底结果，并在 sourceRefs / warnings 中披露。
+七、这才是标准化链路
+用户问题：
+“看下近 30 天素材消耗和 ROI 趋势”
+
+↓ Request Understanding
+
+UserRequirementContract:
+- task = report_query
+- requestedView = trend
+- metrics = cost, roi
+- dimensions = material, date
+- granularity = day
+
+↓ Capability Selection
+
+从当前已挂载 MCP / 内部工具里找：
+- 是否支持 material 维度
+- 是否支持 cost / roi
+- 是否支持 day 粒度
+- 是否有权限
+- 是否数据新鲜
+
+↓ Tool Invocation
+
+选择满足条件的 capability
+
+↓ Result Assembly
+
+组装 SemanticResultContract
+
+↓ Renderer Registry
+
+渲染 chart/table/summary
+
+这里没有任何一步要求系统必须知道：
+
+get_zt_ad_mat_report
+
+这个名字。
+
+八、素材只是一个示例，不应该生成“素材专属架构文件”
+
+如果文件包里出现类似：
+
+material-capability.md
+material-performance.md
+material-routing.md
+
+这种东西，不建议作为核心架构文件。
+
+最多只能放在：
+
+examples/
+golden-cases/
+use-cases/
+
+作为示例用例。
+
+核心文件应该是通用的：
+
+request-understanding/user-requirement-contract.md
+capability-orchestration/capability-manifest.md
+capability-orchestration/capability-selection-policy.md
+business-semantics/dimension-catalog.md
+business-semantics/metric-catalog.md
+business-semantics/dataset-authority.md
+mcp-governance/tool-capability-normalization.md
+observability/routing-trace.md
+九、给 Codex CLI 的修正口径
+
+你可以这样改：
+
+请不要把 material / 素材 建模成固定系统模块、固定 MCP、固定 toolName 或固定 dataset authority。
+
+素材在当前架构中应作为 Business Semantic Layer 里的一个业务维度 / 实体维度处理。
+
+请将原先类似：
+- requestedSubject = material
+- requiredDatasetAuthority = material-performance
+- CapabilityManifest.subject = material
+- authoritativeFor = material-performance
+
+统一改为更通用的结构：
+- focusEntity?: material
+- requiredDimensions: ["material", "date"]
+- requiredMetrics: [...]
+- requiredGranularity
+- requiredView
+- CapabilityManifest.supports.dimensions
+- CapabilityManifest.supports.metrics
+- CapabilityManifest.supports.granularity
+
+能力选择必须基于 requiredDimensions / requiredMetrics / requiredGranularity 与 CapabilityManifest.supports 的覆盖关系。
+
+如果当前环境没有挂载支持 material 维度的 MCP/tool，不允许用不支持 material 维度的大盘日报冒充素材数据。
+只有在 fallback policy 允许时，才能返回低精度结果，并必须通过 sourceRefs / warnings 明确披露。
+最终结论
+
+你说得对：
+
+素材只是一个维度，不应该变成架构里的固定能力。
+
+正确架构是：
+
+不是：
+素材问题 -> 素材专属文件 -> 素材专属 MCP
+
+而是：
+用户需求 -> requiredDimensions / metrics / granularity
+       -> 当前已注册 CapabilityManifest
+       -> 覆盖度匹配
+       -> 可用则调用
+       -> 不可用则澄清或披露兜底
+
+所以，如果之前文档里把 material-performance 写得像固定能力，应该改成示例用例，不能进入核心协议。
+
+
+
+
+
+路由与项目上下文
+- 统一路由决策、项目解析、能力预检
+- 意图细分到报表域
+- 明确多项目冲突、无权限、补项目的追问和阻断规则
+
+能力发现
+从运行态 MCP / Tool schema 生成 `ReportCapabilityManifest`
+ Manifest 支持版本、生成时间、tool 名称、输入输出 schema、错误码、权限字段
+ 路由、slot、预检、Trace 都引用 Manifest 版本
+支持后台刷新、配置变更后重建能力事实
+
+MCP 执行链路
+`用户输入 -> 术语归一化 -> 问数类型 -> 项目解析 -> slot 补齐 -> 字典调用 -> tool 选择 -> schema adapter -> MCP 调用 -> 结果解析 -> 后处理 -> UI 契约`
+**必须补齐**
+
+ UI 闭环
+ 
+- 最终查询项目
+- 时间范围
+- 筛选条件
+- 数据来源
+- 工具调用摘要
+- 下一步建议
+
+**必须保留的动作**
+
+- 保存到我的资产
+- 转报表
+- 转模板
+- 创建定时报表入口
+
+
+
+
+http://10.236.14.27:8002/页面打不开
+做完之后再加一个skill导入和编辑功能哈
+连弩侧返回上报的参数和连弩要求的标准参数不一致，请检查文档和上报，最新文档：E:\AI\ai-os\docs\sources\inbox\SDK对接上报说明文档_20260525
+
+增加了一个截图对话：photo_2026-05-28_16-16-49.jpg，已确认返回了数据，但是整个消息返回存在诸多问题，你看截图。我也提供一些说明：
+描述
+1.发起会话，先显示的是...，而不是用户的提问，没有形成对话结构。
+2.先展示的是旧的思维链和调用与来源组件，以及新的状态标签。
+3.等执行完了旧的思维链和调用与来源组件消失，展示正文。
+4.正文结构包括：取回结果 文本格式（多少行数据）、查询状态卡片 卡片+文本 是否查询完成 是否形成可继续分析的数据判断 引导继续追问文案、继续操作按钮、图表，共4部分。
+问题：
+1、思维链和调用与来源组件要么删掉重做，要么按这个样式注册成新的组件，我希望是清理掉按总纲重做。
+2、取回多少条数据没必要展示
+3、已经有一个状态标签，无需卡片表述查询完成 是否形成继续分析的判断和引导，这个卡片就不应该有。
+4、继续追问和导出结果都应该是在图标之下，整个消息正文结尾。
+5、数据可视化展示异常，取指标，X轴都有问题，其次是样式，百分比保留小数点后2位这类规范之前写过，是哪里出问题没生效。
+请按总纲给出问题清单，以及对应的设计方案和实施方案，和我确认，务必按总纲架构设计，务必区分架构修改、提示词修改、代码修改、配置修改、其它修改，避免硬编码，并且要提供10分解决方案，避免单点解决问题，确保需求具备通用性，不是为了某一个mcp某一个tool服务，我们是通用的chat，支持各种外挂mcp。
+
+
+
+
+
+
+
+1、当前还出现了思维链组件，消息声明周期好像还有问题，之前的实施是没生效嘛？还是服务没重启？
+
+2、E:\AI\ai-os\docs\sources\inbox 增加了3个文件，ANDROID_ATTRIBUTION_DIAGNOSIS_SKILL_PACKAGE.zip
+ANDROID_ATTRIBUTION_DIAGNOSIS_SKILL_PACKAGE_FULL.md
+安卓归因问题排查prompt.md
+这是一个skill包，原始文档：安卓归因问题排查prompt.md 经过分析拆解成的一个归因回推广告数据链路排查skill，目前只包含安卓广告归因回推链路。
+同时管理中心已配置排查需要的mcp，有24个tool可被调用。
+现在拆成了符合总纲架构下调用的工程包，请充分评估接入实施方案。
+虽然我们是做skill，但是还是要产品化思考架构的统一，避免为一个单点问题硬编码逻辑，后续还有很多skill，是可以直接后台管理中心添加，还是走产品迭代补充？Skill在整个链路中是否缺失上下游？
+
+3、当前管理中心的能力清单只有59个，实际绑定mcp的tool不止这些，是没有自动更新嘛？当前更新机制是怎样的？我看页面右上角有一个刷新按钮，点击没反应，是因不可用嘛？如果有手动刷新也是可以，自动更新最好。
+
+4.用这个测试集来测一轮，看看有几个通过的，生成测试文档.excle，标注每一条不通过 不通过原因，需要优化的地方。禁止直接修改系统，而是根据测试结果进行汇总分析，结合系统现状和总纲架构，再整理出迭代plan。
+
+
+明天对接知识库的key自动获取

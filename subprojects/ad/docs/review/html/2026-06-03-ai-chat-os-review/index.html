@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Chat OS 完整 Review 总入口</title>
+  <link rel="stylesheet" href="./review.css" />
+</head>
+<body>
+  <div class="shell">
+    <div class="hero">
+      <h1>AI Chat OS 完整 Review 总入口</h1>
+      <p class="muted">
+        审核基准：当前 <code>HEAD=ee1da8241b16297d7dd5f0d46b5314da54fe097d</code> + 当前 worktree。
+        P0.6 已进入主分支，但仍按 <span class="warning">未封版实现</span> 处理，不当作稳定架构结论。
+      </p>
+      <div class="nav">
+        <a href="./1-state-and-repomap.html">1. 当前状态 + Repo Map</a>
+        <a href="./2-source-of-truth-and-diagrams.html">2. 总纲索引 + 架构图</a>
+        <a href="./3-config-maps-and-module-responsibility.html">3. 配置真源 + 模块职责</a>
+        <a href="./4-drift-risk-and-roadmap.html">4. Drift + 风险 + 路线图</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>总览结论</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>主链状态</h3>
+          <p>Chat 主链已经从“单一报表链”调整为“request understanding + capability orchestration + report runtime + presentation”。</p>
+        </div>
+        <div class="card">
+          <h3>P0.6 位置</h3>
+          <p>P0.6 的 runtime / presentation boundary / route runtime golden 已进入 HEAD，但仍有语义收口问题。</p>
+        </div>
+        <div class="card">
+          <h3>主要风险</h3>
+          <p>clarification 与 capability blocking 的边界、`/api/chat` 的超大 handler、prompt / control plane 的多源真源仍是高风险项。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>阅读顺序</h2>
+      <div class="toc">
+        <a href="./1-state-and-repomap.html">
+          <strong>1. 当前代码状态 + Repo Map</strong>
+          <div class="small muted">确认分支、HEAD、未提交变更、仓库结构和执行链路。</div>
+        </a>
+        <a href="./2-source-of-truth-and-diagrams.html">
+          <strong>2. 总纲架构索引 + 真实架构图</strong>
+          <div class="small muted">按总纲对照当前实现，并查看 7 张架构图。</div>
+        </a>
+        <a href="./3-config-maps-and-module-responsibility.html">
+          <strong>3. 配置真源地图 + 模块职责</strong>
+          <div class="small muted">看配置从哪来、谁写、谁读、是否生效。</div>
+        </a>
+        <a href="./4-drift-risk-and-roadmap.html">
+          <strong>4. 总纲 vs 实现差异 + 风险路线图</strong>
+          <div class="small muted">看偏差、看阻塞项、看下一步怎么收口。</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>快速结论</h2>
+      <ul>
+        <li>通用 Chat 仍存在向 Report Query 退化的历史风险，但 P0.6 已在收缩前置阻断。</li>
+        <li>Query Contract 前置阻断问题已明显减弱，但尚未完全收口。</li>
+        <li>Capability Discovery 已前移到 preflight 语义，但与参数表单仍存在边界耦合风险。</li>
+        <li>SemanticResultContract 和 RuntimeDisplayProtocol 已作为主协议生效，不应再被路由层劫持。</li>
+        <li>后台已有入口，但控制面仍不是单一 source-of-truth。</li>
+      </ul>
+    </div>
+
+    <div class="footer-nav">
+      <span class="pill">总入口</span>
+      <a class="pill" href="./1-state-and-repomap.html">开始阅读 →</a>
+    </div>
+  </div>
+</body>
+</html>
+

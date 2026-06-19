@@ -1,0 +1,55 @@
+{
+  "caseId": "MIG-001",
+  "conversationId": "conv-1781177058550",
+  "sourceReportPath": "docs/review/mig-001-1781177056141.json",
+  "screenshotPath": "E:\\AI\\ai-os\\subprojects\\ad\\docs\\review\\mig-001-full-1781182650669.png",
+  "api": {
+    "conversationStatus": 200,
+    "messagesStatus": 200,
+    "title": "南京本周日天气",
+    "messageCount": 2,
+    "assistantMessageId": "msg-1781177075530-5i4adm",
+    "traceId": "zt-chat-1781177061838-3b1a2v",
+    "hasResponseContract": true,
+    "hasSemanticResult": true,
+    "hasAnswerMarkdown": true,
+    "sourceCount": 1,
+    "toolCallCount": 2,
+    "pendingProcessEventCount": 0
+  },
+  "page": {
+    "runtimeCardVisible": true,
+    "rightPanelWidth": 380,
+    "replayPreview": "开启新对话\n今天\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n南京本周日天气\n日常问候\n简单问候\n日常问候\n日常问候\n简单问候\n简单问候\n新对话\n新对话\n日常问候\nyoka超管\n南京本周日天气\n请选择项目\n\n南京本周日天气如何\n\n已处理 4 步 · 用时 1.1s\n我找到了与“南京本周日天气如何”相关的公开信息：\n公开信息\n当前：33°C，体感 33°C，Sunny，湿度 28%。\n预报：2026-06-11：22-35°C，Sunny；\n2026-06-12：25-35°C，Sunny；\n2026-06-13：21-30°C，Sunny\n来源\n南京本周日天气如何 - 公开天气预报：https://wttr.in/Nanjing\n检索时间：2026/6/11 19:24:34\n大模型检测中\n保护用户隐私和公司数据是员工责任，禁止向无权限者提供敏感信息。",
+    "disclosurePreview": "过程与依据\n执行过程\n意图路由\n进入help链路。\n查询公开来源\n1.1s\n南京本周日天气如何 - 公开天气预报\n结果检查\n质量检查\n系统运行总览\n连弩 Trace\n意图路由\n>\nJSON\n路由决策\n28 行 · 768 字符\n1\n{\n2\n  \"key\": \"intent.detected-1781177073113-mjfbqh\",\n3\n  \"label\": \"确定路由\",\n4\n  \"status\": \"success\",\n5\n  \"summary\": \"进入help链路。\",\n6\n  \"kind\": \"agent\",\n7\n  \"traceRef\": \"intent.detected-1781177073113-mjfbqh\",\n8\n  \"metadata\": {\n9\n    \"clientIntent\": \"help\",\n10\n    \"resolvedIntent\": \"help\",\n11\n    \"serviceIntent\": \"help_qa\",\n12\n    \"ignoredClientIntentReason\": null,\n13\n    \"routeEvidence\": {\n14\n      \"routeIntent\": \"help\",\n15\n      \"userRequirementTask\": \"general\",\n16\n      \"reportRouteMatch\": false,\n17\n      \"reportContinuation\": false,\n18\n      \"reportContinuationClassification\": null,\n19\n      \"routeReason\": \"识别到说明、规则或能力查询诉求，进入帮助链路。\"\n20\n    },\n21\n    \"matchedRules\": [],\n22\n    \"selectedSkill\": null,\n23\n    \"capabilityDecision\": null,\n24\n    \"isReportQuery\": false,\n25\n    \"toolPurpose\": \"help_lookup\",\n26\n    \"warnings\": []\n27\n  }\n28\n}\nJSON\n路由观测\n229 行 · 7800 字符\n1\n{\n2\n  \"key\": \"route_observation-1781177074263-84bhh8\",\n3\n  \"label\": \"路由观测\",\n4\n  \"status\": \"success\",\n5\n  \"summary\": \"Route observation: help_qa; actual general_chat; 1 mismatch(es) recorded.\",\n6\n  \"kind\": \"custom\",\n7\n  \"traceRef\": \"route_observation-1781177074263-84bhh8\",\n8\n  \"metadata\": {\n9\n    \"mode\": \"observe_only\",\n10\n    \"decisionId\": \"zt-chat-1781177061838-3b1a2v:route-observation\",\n11\n    \"traceId\": \"zt-chat-1781177061838-3b1a2v\",\n12\n    \"clientIntent\": \"help\",\n13\n    \"serviceIntent\": \"help_qa\",\n14\n    \"resolvedIntent\": \"help_qa\",\n15\n    \"primaryDeliverable\": \"help_answer\",\n16\n    \"decisionAuthority\": {\n17\n      \"clientIntent\": \"hint_only\",\n18\n      \"prompt\": \"evidence_only\",\n19\n      \"domainSignals\": \"evidence_only\",\n20\n      \"routeRules\": \"decision_support\",\n21\n      \"backendRouteDecision\": \"authoritative\"\n22\n    },\n23\n    \"routeEvidence\": [\n24\n      {\n25\n        \"source\": \"client_hint\",\n26\n        \"key\": \"body.intent\",\n27\n        \"value\": \"help\",\n28\n        \"reason\": \"Client hint only.\"\n29\n      },\n30\n      {\n31\n        \"source\": \"route_rule\",\n32\n        \"key\": \"route.intent_type\",\n33\n        \"value\": \"help\",\n34\n        \"reason\": \"public_web.classification_fallback\"\n35\n      },\n36\n      {\n37\n        \"source\": \"fallback_policy\",\n38\n        \"key\": \"matches_report_query_route\",\n39\n        \"value\": false\n40\n      },\n41\n      {\n42\n        \"source\": \"conversation_state\",\n43\n        \"key\": \"report_continuation\",\n44\n        \"value\": false\n45\n      },\n46\n      {\n47\n        \"source\": \"context\",\n48\n        \"key\": \"user_requirement.task\",\n49\n        \"value\": \"general\"\n50\n      }\n51\n    ],\n52\n    \"domainSignals\": [],\n53\n    \"matchedRules\": [],\n54\n    \"routeRulesGovernance\": [],\n55\n    \"skillSelection\": {\n56\n      \"candidateSkills\": [],\n57\n      \"readiness\": \"blocked\",\n58\n      \"missingInputs\": [],\n59\n      \"warnings\": []\n60\n    },\n61\n    \"capabilityDecision\": {\n62\n      \"candidates\": [\n63\n        {\n64\n          \"capabilityId\": \"public_web_search\",\n65\n          \"capabilityName\": \"con"
+  },
+  "consoleMessages": [
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "[HMR] connected"
+    },
+    {
+      "type": "log",
+      "text": "[Fast Refresh] rebuilding"
+    }
+  ],
+  "failedRequests": [],
+  "mojibakeFindings": [],
+  "acceptance": {
+    "apiReadbackHealthy": true,
+    "replayHealthy": true,
+    "disclosureHealthy": true,
+    "rightPanelWidthHealthy": true,
+    "runtimeToggleCloseHealthy": true,
+    "titleHealthy": true,
+    "layoutHealthy": true,
+    "networkHealthy": true,
+    "noConsoleErrors": true,
+    "noMojibake": true
+  },
+  "passed": true
+}

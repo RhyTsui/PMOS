@@ -1,0 +1,132 @@
+1.正在加载项目范围... 删除这个文案，不影响这个功能判断。
+2.个人中心-知识库，删除这个前端的菜单展示，不要动知识库功能。
+3.浏览器已有登录态时可自动登录
+4.输入框上传文件或者截图，可以直接提交，本身就是输入。
+5.输入框粘贴了长文本自动生成文件上传。
+6.欢迎区的logo替换
+9.1.会话列表展示了执行中的动效，但是点击进去没有执行中的动作，有degraded、queued 但是这不是正在查询的，是查询结果已经没
+  走通。需检查设计方案。有多个标题叫新会话，但是点击进去会话内容是空的。但是点击开启新会话是正常的。
+10.包能力仍可能被问数能力误吃
+
+11.其它待办
+ P0.6 Tool-First Runtime 部分已提交，仍有未提交修复 已有 8b7247a、68e7b4e、1f754f9，但当前还有 request-understanding.ts、report-query-orchestrator.ts、capability 相关 dirty 变更，需要封版审计
+P1-C 配置真源治理 当前 log 显示后续还有 model governance 相关提交 
+ Model Service IA-B/C/D 已提交一部分，但当前仍有 dirty 修复 fd87fd3、603963a、1da885f、d859c03、273aaee 已提交；当前还有 model-router、model-assistants、trace、chat regression 等未 提交
+Observability Isolation / Trace fail-open 当前是未提交变更 trace.ts、model-router.ts、route.ts 等 dirty，尚未形成独立提交  Real Runtime P0 Closure 当前是未提交变更 /api/chat、日期解析、chat runtime regression 等 dirty，尚未封版
+是否有一批 P0 runtime / trace / model / regression 变更停留在 dirty worktree
+单独提交 Observability Isolation / Trace fail-open。 
+单独提交 Real Runtime P0 Closure。 
+ 单独提交前端 Modal warning 修复：TaskSidebar.tsx。 
+全量验证通过后，再重新进入 RC。 
+P1-D
+ResponseContract 大收口、
+/api/chat 模块化拆分
+
+思考过程执行过程的披露方式
+查看近30天的首日ROI和消耗的对比趋势
+思考过程（23.9s）
+我来帮你查看近30天的首日ROI和消耗对比趋势。首先获取当前时间信息，然后调用ROI报表获取数据。
+现在调用ROI报表获取近30天（2026-05-07至2026-06-05）的首日ROI和消耗数据：
+
+
+12.知识回答、缺参追问、需求草稿、自动化摘要、问数总结、诊断总结、普通回答都开始有模型能力，但仍受工具、契约、权限和展示边界约束
+
+13.后台改造BUG检查
+
+
+14.这些检查：
+1. 后台 8 个中心菜单重构
+2. 旧入口 redirect
+3. Agent Center 绑定关系页面
+4. Workflow Center 全量治理
+5. Capability Center 全量治理
+6. Frontend Rendering Governance 独立中心
+7. Operations & Release 发布回滚后台
+
+15.
+路由
+查数
+上传拼表
+自动化
+知识客服
+需求
+包
+排查
+智投页面上下文
+后台设计
+业务域协议
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. P0.6 封版
+2. P0.7 MCP Workflow / Automation Task 最小协议
+3. 总纲文档刷新 + type-only 契约
+4. P1-C 控制面真源治理
+5. Admin Console IA
+6. /api/chat 模块化拆分
+
+
+知识回答、缺参追问、需求草稿、自动化摘要、问数总结、诊断总结、普通回答都开始有模型能力，但仍受工具、契约、权限和展示边界约束
+
+
+
+7.连弩sdk隔离
+
+后台改造
+1. 总览卡片和主 Tab 重复，需要去重。
+2. intent-rules + entity-resolution 应归入请求理解中心。
+3. prompts + role-profiles 应归入提示词中心。
+4. MCP 配置、能力发现、工具清单、能力策略应归入能力中心。
+5. 用户、空间、权限、操作日志应归入空间权限与运营治理。
+6. 旧菜单需要 old menu → new center 映射。
+
+orchestration + workflow + skills 全部合并到能力治理域
+建议改成：
+能力中心负责：Capability / Skill / MCP / Tool / Coverage / Health Check
+工作流中心负责：Workflow Definition / Template / Run History / Replay
+两者通过绑定关系互相引用，不把真源混在一起
+
+暂缓
+这些不要现在做代码：
+1. 后台 8 个中心菜单重构
+2. 旧入口 redirect
+3. Agent Center 绑定关系页面
+4. Workflow Center 全量治理
+5. Capability Center 全量治理
+6. Frontend Rendering Governance 独立中心
+7. Operations & Release 发布回滚后台
+
+路由
+查数
+上传拼表
+自动化
+知识客服
+需求
+包
+排查
+智投页面上下文
+后台设计
+业务域协议
+
+
+
+系统明知“指标、时间范围缺失”，仍然把“检查可用能力、编排报表查询、路由观测、生成回复”全部标成 succeeded，最后再给用户一个“暂时无法完成”。
+前置理解没有形成可执行的 Query Contract
+截图里“查询目标=summary”被确认，但“指标、时间范围”未识别。对于问数来说，summary 不是可执行目标，至少要进一步解析成：汇总什么指标、什么时间、什么项目、什么维度、什么过滤条件。现在相当于只识别了一个模糊意图，就进入后续编排。
+为什么要确认查什么指标和维度，当我们还没访问tool的时候

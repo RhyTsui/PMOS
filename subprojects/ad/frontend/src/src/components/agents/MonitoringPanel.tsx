@@ -44,7 +44,7 @@ interface MonitorMetric {
 }
 
 // ==========================================
-// Mock Data Generators
+// Data generators
 // ==========================================
 
 function generateTimeSeries(base: number, variance: number, count: number, label: string, label2?: string, base2?: number, variance2?: number) {

@@ -39,6 +39,9 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "scripts",
+    "vitest.config.ts",
+    "playwright.config.ts"
   ]
 }

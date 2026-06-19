@@ -1,0 +1,26 @@
+已接好。
+
+  现在本地 8002 的联调链路已经切到开发提供的预发真实服务：
+
+  http://pre-xiaoqiao.hz.com/api/v1/xiaoqiao/debug-automation
+
+  已覆盖：
+
+  - 创建联调任务：创建前会先把 mock_mode 设为 off
+  - 查询任务列表、详情、步骤、结果
+  - 查询失败原因：从真实服务的 error_message 归一到 failure_reason
+  - mcp-start 现在也走这套真实服务，不再走本地 mock store
+  - 新增了本地代理：/api/xiaoqiao/debug-automation/runtime-features
+
+  我也做了联调验证：
+
+  - runtime-features 返回 mock_mode: "off"
+  - 查询失败任务 validate-f27cd0b6 能拿到失败原因：'media'
+  - 通过本地 API 创建测试任务成功，返回 execution_mode: "REAL"
+  - 测试任务已删除，避免污染预发任务列表
+  - npm run ts-check 通过
+  - npm run build 通过
+  - 本地服务已重启在：http://127.0.0.1:8002/
+
+  注意：仓库里原本有不少未提交改动，我只针对联调服务接入做了必要修
+  改，未回滚其他已有变更。

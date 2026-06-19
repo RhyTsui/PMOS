@@ -1,0 +1,110 @@
+{
+  "contractType": "semantic-result",
+  "version": "1.0.0",
+  "resultId": "golden-insufficient-trend-001",
+  "conversationId": "conv-001",
+  "messageId": "msg-002",
+  "screenType": "report-result",
+  "title": "今日花费趋势",
+  "createdAt": "2026-05-28T00:00:00.000Z",
+  "producer": {
+    "kind": "backend",
+    "name": "report-query-service",
+    "version": "1.0.0"
+  },
+  "regions": [
+    {
+      "id": "trend-data-view",
+      "type": "data-view",
+      "componentBinding": "data-visualization",
+      "title": "趋势数据不足",
+      "state": "degraded",
+      "data": {
+        "viewType": "trend",
+        "requestedView": "trend",
+        "chartType": "table",
+        "dateRange": {
+          "start": "2026-05-28",
+          "end": "2026-05-28",
+          "timezone": "Asia/Singapore"
+        },
+        "granularity": "day",
+        "dataCoverage": {
+          "status": "insufficient",
+          "availablePoints": 1,
+          "requiredPoints": 2,
+          "missingReasons": ["当前查询范围只有一个日期点，无法形成趋势线。"]
+        },
+        "metricName": "spend",
+        "dataset": [
+          { "date": "2026-05-28", "value": 980 }
+        ],
+        "insights": [
+          {
+            "id": "insight-insufficient-trend",
+            "title": "无法生成趋势图",
+            "summary": "趋势至少需要两个日期点。当前只有 2026-05-28 一个数据点。",
+            "evidenceRefs": ["ev-single-point-001"],
+            "sourceRefs": ["src-report-query-002"],
+            "confidence": { "level": "high", "basis": "calculation" }
+          }
+        ]
+      },
+      "evidenceRefs": ["ev-single-point-001"],
+      "sourceRefs": ["src-report-query-002"],
+      "actions": [
+        {
+          "id": "expand-date-range",
+          "type": "continue-analysis",
+          "intent": "primary",
+          "label": "扩大时间范围继续分析",
+          "target": { "kind": "semantic-query", "value": "expand_date_range" },
+          "payload": { "suggestedRange": "last_7_days" },
+          "evidenceRefs": ["ev-single-point-001"],
+          "sourceRefs": ["src-report-query-002"],
+          "feedbackPolicy": { "resultHandling": "append-message", "showToast": true }
+        },
+        {
+          "id": "show-table",
+          "type": "filter",
+          "intent": "secondary",
+          "label": "查看当前数据表格",
+          "target": { "kind": "local-state", "value": "requestedView" },
+          "payload": { "requestedView": "table" }
+        }
+      ],
+      "layoutHints": {
+        "placement": "main",
+        "width": "full",
+        "preferredVariant": "table"
+      },
+      "fallback": {
+        "reason": "empty-data",
+        "title": "趋势数据不足",
+        "message": "当前时间范围只有一个日期点，无法生成趋势图。",
+        "actionIds": ["expand-date-range", "show-table"]
+      }
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "ev-single-point-001",
+      "type": "data-snapshot",
+      "title": "单日期数据点",
+      "summary": "查询结果只包含 2026-05-28 一个日期点。",
+      "sourceRefIds": ["src-report-query-002"],
+      "confidence": { "level": "high", "basis": "source" },
+      "freshness": { "status": "fresh", "retrievedAt": "2026-05-28T00:00:00.000Z" }
+    }
+  ],
+  "sourceRefs": [
+    {
+      "id": "src-report-query-002",
+      "type": "warehouse-query",
+      "title": "Ad spend daily report query",
+      "retrievedAt": "2026-05-28T00:00:00.000Z",
+      "freshness": { "status": "fresh", "asOf": "2026-05-28T00:00:00.000Z" },
+      "reliability": { "level": "trusted" }
+    }
+  ]
+}

@@ -1,12 +1,37 @@
 import { NextResponse } from 'next/server';
-import { getDemoDebugTasks, createDemoDebugTask } from '@/lib/demo-data';
+import {
+  buildRealDebugCreatePayload,
+  DebugAutomationServiceError,
+  ensureRealDebugAutomationMode,
+  normalizeDebugTask,
+  requestDebugAutomationService,
+} from '@/lib/real-debug-automation-service';
 
 export async function GET() {
-  return NextResponse.json(getDemoDebugTasks());
+  try {
+    const tasks = await requestDebugAutomationService<unknown[]>('/tasks');
+    return NextResponse.json(Array.isArray(tasks) ? tasks.map(normalizeDebugTask) : []);
+  } catch (error) {
+    if (error instanceof DebugAutomationServiceError) {
+      return NextResponse.json(error.body, { status: error.status });
+    }
+    return NextResponse.json({ error: 'debug automation service unavailable' }, { status: 502 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const task = createDemoDebugTask(body);
-  return NextResponse.json(task, { status: 201 });
+  try {
+    const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+    await ensureRealDebugAutomationMode();
+    const task = await requestDebugAutomationService('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(buildRealDebugCreatePayload(body)),
+    });
+    return NextResponse.json(normalizeDebugTask(task), { status: 201 });
+  } catch (error) {
+    if (error instanceof DebugAutomationServiceError) {
+      return NextResponse.json(error.body, { status: error.status });
+    }
+    return NextResponse.json({ error: 'create debug automation task failed' }, { status: 502 });
+  }
 }

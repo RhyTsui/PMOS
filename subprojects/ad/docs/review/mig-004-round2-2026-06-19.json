@@ -1,0 +1,14 @@
+{
+  "testId": "MIG-004",
+  "round": 2,
+  "date": "2026-06-19",
+  "scenario": "行业知识问答",
+  "input": "腾讯iOS要接sdk吗",
+  "acceptanceResults": {
+    "aiResponse": { "status": "FAIL", "note": "卡在'进入候选规划阶段'，SSE 流提前关闭" },
+    "titleGeneration": { "status": "PASS", "note": "标题生成'腾讯iOS是否需要接入SDK'" }
+  },
+  "overallResult": "FAIL",
+  "rootCause": "同 MIG-002/MIG-003：SSE 流在 done 事件推送前关闭",
+  "nextCase": "需要修复 SSE 流管理 bug 后继续测试"
+}

@@ -1,11 +1,13 @@
 import { POST as chatPost } from '@/app/api/chat/route';
 import type { AgentProcessEvent, SourceRef } from '@/types';
+import { AUTH_TOKEN_COOKIE } from './auth-service';
 
 export interface RuntimeEvaluationResult {
   answer: string;
   process_events: AgentProcessEvent[];
   sources: SourceRef[];
   metadata: Record<string, unknown>;
+  done_payload?: Record<string, unknown>;
 }
 
 function parseSsePayloads(raw: string): Record<string, unknown>[] {
@@ -41,23 +43,49 @@ async function responseToText(response: Response): Promise<string> {
   return text;
 }
 
+function base64UrlEncodeJson(value: Record<string, unknown>): string {
+  return Buffer.from(JSON.stringify(value), 'utf8')
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function buildEvaluationAuthCookie(): string {
+  const header = base64UrlEncodeJson({ alg: 'none', typ: 'JWT' });
+  const payload = base64UrlEncodeJson({
+    uid: 100000,
+    account: 'evaluation-runtime',
+    user_name: 'evaluation-runtime',
+    real_name: '评估运行',
+  });
+  return `${AUTH_TOKEN_COOKIE}=${encodeURIComponent(`${header}.${payload}.`)}`;
+}
+
 export async function runChatRuntimeForEvaluation(input: {
   message: string;
   scenario?: string;
   metadata?: Record<string, unknown>;
+  conversationId?: string;
+  history?: Array<Record<string, unknown>>;
+  headers?: Record<string, string>;
 }): Promise<RuntimeEvaluationResult> {
+  const conversationId = input.conversationId || `eval-${Date.now()}`;
   const request = new Request('http://127.0.0.1/api/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-pathname': '/evaluation',
-      'x-conversation-id': `eval-${Date.now()}`,
+      'x-conversation-id': conversationId,
       'user-agent': 'lianu-evaluation-runtime',
+      cookie: buildEvaluationAuthCookie(),
+      ...(input.headers || {}),
     },
     body: JSON.stringify({
       message: input.message,
-      history: [],
+      history: input.history || [],
       intent: input.scenario,
+      metadata: input.metadata || {},
     }),
   });
 
@@ -105,5 +133,6 @@ export async function runChatRuntimeForEvaluation(input: {
       payload_count: payloads.length,
       received_metadata: input.metadata || {},
     },
+    done_payload: donePayload,
   };
 }
