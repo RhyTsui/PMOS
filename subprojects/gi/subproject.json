@@ -1,0 +1,11 @@
+{
+  "id": "gi",
+  "name": "游戏内参 Game Insider",
+  "description": "游戏行业情报信号源平台 - 采集、结构化、评分、同步行业情报",
+  "status": "active",
+  "createdAt": "2026-04-17T00:00:00.000Z",
+  "defaultWorkflow": "pmaios-main",
+  "rootPath": "subprojects/gi",
+  "memoryPath": "subprojects/gi/docs/memory/project-memory.md",
+  "overrides": {}
+}

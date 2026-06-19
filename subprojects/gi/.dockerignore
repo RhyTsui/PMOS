@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+frontend/node_modules
+
+# Data
+data/*.db
+data/*.db-journal
+backups/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+.nyc_output/
+test/
+
+# Docs (不需要在生产镜像)
+docs/
+*.md
+!README.md
+
+# Git
+.git
+.gitignore
+
+# Misc
+*.tsbuildinfo
+dist/
+*.tgz

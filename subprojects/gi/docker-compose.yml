@@ -1,0 +1,100 @@
+services:
+  # ===== GI 后端服务 =====
+  gi-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '8003:8003'
+    environment:
+      PORT: 8003
+      NODE_ENV: production
+      QWEN_API_KEY: ${QWEN_API_KEY}
+      QWEN_BASE_URL: ${QWEN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      DATAKI_BASE_URL: ${DATAKI_BASE_URL}
+      DATAKI_API_KEY: ${DATAKI_API_KEY}
+      DATAKI_KNOWLEDGE_BASE_ID: ${DATAKI_KNOWLEDGE_BASE_ID}
+      RSSHUB_URL: http://rsshub:1200
+      WEWE_RSS_URL: http://wewe-rss:4000
+      CHANGEDETECTION_URL: http://changedetection:5000
+      CRAWL4AI_URL: http://scrapling:8888
+      SCRAPLING_URL: http://scrapling:8888
+    volumes:
+      - gi_data:/app/data
+    depends_on:
+      - scrapling
+      - rsshub
+    networks:
+      - gi-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8003/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ===== Scrapling Sidecar =====
+  # 自适应采集引擎 - 反爬绕过 + 自适应选择器
+  scrapling:
+    build:
+      context: ./src/python
+      dockerfile: Dockerfile.scrapling
+    restart: always
+    ports:
+      - '8889:8888'
+    networks:
+      - gi-network
+
+  # ===== RSSHub =====
+  rsshub:
+    image: diygod/rsshub:latest
+    restart: always
+    ports:
+      - '1200:1200'
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: memory
+      CACHE_EXPIRE: 300
+      REQUEST_RETRY: 3
+      REQUEST_TIMEOUT: 30000
+    volumes:
+      - rsshub_data:/data
+    networks:
+      - gi-network
+
+  # ===== WeWe RSS =====
+  wewe-rss:
+    image: cooderl/wewe-rss:latest
+    restart: always
+    ports:
+      - '4000:4000'
+    environment:
+      DATABASE_URL: 'sqlite:/data/wewe.db'
+    volumes:
+      - wewe_data:/data
+    networks:
+      - gi-network
+
+  # ===== changedetection.io =====
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    restart: always
+    ports:
+      - '5000:5000'
+    volumes:
+      - changedetection_data:/data
+    environment:
+      BASE_URL: 'http://localhost:5000'
+    networks:
+      - gi-network
+
+networks:
+  gi-network:
+    driver: bridge
+
+volumes:
+  gi_data:
+  rsshub_data:
+  wewe_data:
+  changedetection_data:

@@ -1,0 +1,18 @@
+# Scrapling Sidecar Dockerfile
+# 基于 Scrapling 官方镜像
+FROM pyd4vinci/scrapling:latest
+
+WORKDIR /app
+
+# 安装 FastAPI 和依赖
+RUN pip install --no-cache-dir fastapi uvicorn pydantic
+
+# 复制服务端代码
+COPY scrapling_server.py .
+
+# 安装浏览器（如果基础镜像没有）
+RUN scrapling install || true
+
+EXPOSE 8888
+
+CMD ["python", "scrapling_server.py"]
