@@ -18,8 +18,8 @@ function AppLayout() {
   const location = useLocation();
 
   const menuItems = [
-    { key: '/', icon: <ThunderboltOutlined />, label: '情报看板' },
-    { key: '/events', icon: <FileTextOutlined />, label: '事件列表' },
+    { key: '/', icon: <ThunderboltOutlined />, label: '情报流' },
+    { key: '/events', icon: <FileTextOutlined />, label: '事件分析' },
     { key: '/admin', icon: <SettingOutlined />, label: '系统管理' },
   ];
 

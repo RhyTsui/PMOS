@@ -1,107 +1,138 @@
 import { useEffect, useState } from 'react';
-import { Card, List, Tag, Select, Space, Empty, Spin } from 'antd';
+import { Card, List, Tag, Space, Empty, Spin, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { eventsApi, type EvidenceEvent } from '../services/api';
+import { ClockCircleOutlined, GlobalOutlined } from '@ant-design/icons';
+import api from '../services/api';
+
+const { Paragraph, Text } = Typography;
 
 const PRIORITY_COLORS: Record<string, string> = {
-  P0: 'red',
-  P1: 'orange',
-  P2: 'blue',
-  P3: 'default',
+  P0: 'red', P1: 'orange', P2: 'blue', P3: 'default',
 };
 
-const EVENT_TYPES = [
-  '上线', '测试', '预约', '版号', '榜单变化',
-  '买量', '舆情', '融资', '组织动作', '版本更新',
-  '出海', '合作', '政策', 'AI应用'
-];
+interface Evidence {
+  id: string;
+  title: string;
+  content: string;
+  url: string;
+  sourceId: string;
+  sourceName?: string;
+  status: string;
+  collectedAt: string;
+}
+
+interface Source {
+  id: string;
+  name: string;
+  shortName: string;
+}
 
 export default function EventListPage() {
-  const [events, setEvents] = useState<EvidenceEvent[]>([]);
+  const [evidence, setEvidence] = useState<Evidence[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
-  const [eventType, setEventType] = useState<string | undefined>();
-  const [priority, setPriority] = useState<string | undefined>();
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadEvents();
-  }, [eventType, priority]);
+    loadData();
+  }, []);
 
-  const loadEvents = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const response = await eventsApi.list({ eventType, priority }) as any;
-      setEvents(Array.isArray(response) ? response : []);
+      const [evRes, srcRes] = await Promise.all([
+        api.get('/evidence?limit=50') as any,
+        api.get('/sources') as any,
+      ]);
+      const evList = Array.isArray(evRes) ? evRes : [];
+      const srcList = Array.isArray(srcRes) ? srcRes : [];
+      setSources(srcList);
+
+      // 给 evidence 附加 sourceName
+      const srcMap = new Map(srcList.map((s: Source) => [s.id, s]));
+      const enriched = evList.map((e: Evidence) => ({
+        ...e,
+        sourceName: srcMap.get(e.sourceId)?.name || '未知来源',
+      }));
+      setEvidence(enriched);
     } catch (error) {
-      console.error('Failed to load events:', error);
+      console.error('Failed to load:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const priorityOrder: Record<string, number> = { P0: 0, P1: 1, P2: 2, P3: 3 };
-  const sortedEvents = [...events].sort((a, b) => {
-    const pDiff = (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3);
-    if (pDiff !== 0) return pDiff;
-    return b.impactScore - a.impactScore;
-  });
+  // 按时间倒序
+  const sorted = [...evidence].sort(
+    (a, b) => new Date(b.collectedAt).getTime() - new Date(a.collectedAt).getTime()
+  );
+
+  // 内容预览（去 HTML，取前 150 字）
+  const preview = (content: string) => {
+    const text = content
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return text.length > 150 ? text.substring(0, 150) + '...' : text;
+  };
+
+  const formatTime = (t: string) => {
+    const d = new Date(t);
+    const now = new Date();
+    const diff = (now.getTime() - d.getTime()) / 1000;
+    if (diff < 60) return '刚刚';
+    if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+    return `${Math.floor(diff / 86400)} 天前`;
+  };
 
   return (
     <div>
-      <h1 style={{ marginBottom: 24 }}>事件列表</h1>
-
-      <Space style={{ marginBottom: 16 }}>
-        <Select
-          placeholder="事件类型"
-          allowClear
-          style={{ width: 150 }}
-          value={eventType}
-          onChange={setEventType}
-          options={EVENT_TYPES.map(t => ({ label: t, value: t }))}
-        />
-        <Select
-          placeholder="优先级"
-          allowClear
-          style={{ width: 120 }}
-          value={priority}
-          onChange={setPriority}
-          options={['P0', 'P1', 'P2', 'P3'].map(p => ({ label: p, value: p }))}
-        />
-      </Space>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ margin: 0 }}>情报流</h1>
+        <Text type="secondary">{sorted.length} 条情报</Text>
+      </div>
 
       <Spin spinning={loading}>
-        {sortedEvents.length === 0 ? (
-          <Empty description="暂无事件" />
+        {sorted.length === 0 ? (
+          <Empty description="暂无情报" />
         ) : (
           <List
-            grid={{ gutter: 16, xs: 1, sm: 1, md: 2, lg: 2, xl: 3, xxl: 3 }}
-            dataSource={sortedEvents}
-            renderItem={(event) => (
-              <List.Item>
+            dataSource={sorted}
+            renderItem={(item) => (
+              <List.Item style={{ padding: '16px 0' }}>
                 <Card
                   hoverable
-                  onClick={() => navigate(`/events/${event.id}`)}
-                  title={
-                    <Space>
-                      <Tag color={PRIORITY_COLORS[event.priority]}>{event.priority}</Tag>
-                      <span style={{ fontSize: 14 }}>{event.eventType}</span>
-                    </Space>
-                  }
-                  extra={<span style={{ color: '#1890ff' }}>{event.impactScore}分</span>}
+                  onClick={() => navigate(`/events/${item.id}`)}
+                  style={{ width: '100%' }}
+                  bodyStyle={{ padding: '16px 24px' }}
                 >
-                  <h3 style={{ marginBottom: 12, fontSize: 16, lineHeight: 1.5 }}>
-                    {event.eventTitle}
-                  </h3>
-                  <div style={{ marginBottom: 12 }}>
-                    {event.audienceTags.slice(0, 4).map(tag => (
-                      <Tag key={tag} style={{ marginBottom: 4 }}>{tag}</Tag>
-                    ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <h3 style={{ margin: 0, fontSize: 16, lineHeight: 1.5, flex: 1 }}>
+                      {item.title || '无标题'}
+                    </h3>
+                    <Tag color={PRIORITY_COLORS[item.status === 'extracted' ? 'P0' : 'P3']} style={{ marginLeft: 12 }}>
+                      {item.status === 'extracted' ? '已分析' : '待处理'}
+                    </Tag>
                   </div>
-                  <div style={{ color: '#666', fontSize: 12 }}>
-                    <span>{event.sourceCount} 个来源</span>
-                    <span style={{ marginLeft: 16 }}>
-                      {new Date(event.lastSeenAt).toLocaleDateString()}
-                    </span>
+
+                  <Paragraph type="secondary" style={{ margin: '8px 0', fontSize: 14, lineHeight: 1.6 }}>
+                    {preview(item.content)}
+                  </Paragraph>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                    <Space size={16}>
+                      <Tag color="blue">{item.sourceName}</Tag>
+                      {item.url && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          <GlobalOutlined /> {new URL(item.url).hostname}
+                        </Text>
+                      )}
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      <ClockCircleOutlined /> {formatTime(item.collectedAt)}
+                    </Text>
                   </div>
                 </Card>
               </List.Item>
