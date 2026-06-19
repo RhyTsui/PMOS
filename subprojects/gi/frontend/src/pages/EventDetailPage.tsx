@@ -26,7 +26,7 @@ export default function EventDetailPage() {
     setLoading(true);
     try {
       const response = await eventsApi.get(eventId) as any;
-      setEvent(response.data);
+      setEvent(response);
     } catch (error) {
       console.error('Failed to load event:', error);
     } finally {

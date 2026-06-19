@@ -7,7 +7,14 @@ const api = axios.create({
 
 // 请求拦截器
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // 后端返回 { data: ..., meta: ... } 格式，自动解包
+    const body = response.data;
+    if (body && typeof body === 'object' && 'data' in body) {
+      return body.data;
+    }
+    return body;
+  },
   (error) => {
     console.error('API Error:', error);
     return Promise.reject(error);

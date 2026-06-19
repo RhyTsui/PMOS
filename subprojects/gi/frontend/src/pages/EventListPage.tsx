@@ -31,7 +31,7 @@ export default function EventListPage() {
     setLoading(true);
     try {
       const response = await eventsApi.list({ eventType, priority }) as any;
-      setEvents(response.data || []);
+      setEvents(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error('Failed to load events:', error);
     } finally {

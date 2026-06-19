@@ -20,8 +20,8 @@ export default function AdminPage() {
         seedsApi.list() as any,
         systemApi.status(),
       ]);
-      setSources(sourcesRes.data || []);
-      setSeeds(seedsRes.data || []);
+      setSources(Array.isArray(sourcesRes) ? sourcesRes : []);
+      setSeeds(Array.isArray(seedsRes) ? seedsRes : []);
       setStatus(statusRes);
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -60,7 +60,7 @@ export default function AdminPage() {
       await seedsApi.evolve();
       message.success({ content: '种子进化完成', key: 'evolve' });
       const seedsRes = await seedsApi.list() as any;
-      setSeeds(seedsRes.data || []);
+      setSeeds(Array.isArray(seedsRes) ? seedsRes : []);
     } catch (error) {
       message.error({ content: '进化失败', key: 'evolve' });
     }

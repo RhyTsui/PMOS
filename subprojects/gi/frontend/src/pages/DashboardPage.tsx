@@ -51,7 +51,7 @@ export default function DashboardPage() {
               title="调度器状态"
               value={status?.scheduler?.isRunning ? '运行中' : '已停止'}
               prefix={<ThunderboltOutlined />}
-              valueStyle={{ color: status?.scheduler.isRunning ? '#3f8600' : '#cf1322' }}
+              valueStyle={{ color: status?.scheduler?.isRunning ? '#3f8600' : '#cf1322' }}
             />
           </Card>
         </Col>
