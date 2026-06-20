@@ -18,6 +18,7 @@ import { sourceDiscoveryRouter } from './source-discovery.js';
 import { rsshubRouter } from './rsshub.js';
 import { weweRouter } from './wewe.js';
 import { dailyReportRouter } from './daily-report.js';
+import { trendsRouter } from './trends.js';
 
 export function createApiRouter(): Router {
   const router = Router();
@@ -38,6 +39,7 @@ export function createApiRouter(): Router {
   router.use('/rsshub', rsshubRouter);
   router.use('/wewe', weweRouter);
   router.use('/daily-report', dailyReportRouter);
+  router.use('/trends', trendsRouter);
 
   return router;
 }

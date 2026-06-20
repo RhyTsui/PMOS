@@ -7,7 +7,8 @@ import {
   DatabaseOutlined,
   MessageOutlined,
   SearchOutlined,
-  AlertOutlined
+  AlertOutlined,
+  LineChartOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventListPage from './pages/EventListPage';
@@ -18,6 +19,7 @@ import DashboardPage from './pages/DashboardPage';
 import FeedbackPage from './pages/FeedbackPage';
 import SourceDiscoveryPage from './pages/SourceDiscoveryPage';
 import GapDetectionPage from './pages/GapDetectionPage';
+import TrendsPage from './pages/TrendsPage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -28,6 +30,7 @@ function AppLayout() {
   const menuItems = [
     { key: '/', icon: <ThunderboltOutlined />, label: '情报流' },
     { key: '/events', icon: <FileTextOutlined />, label: '事件分析' },
+    { key: '/trends', icon: <LineChartOutlined />, label: '趋势分析' },
     { key: '/sources', icon: <DatabaseOutlined />, label: '信源/种子' },
     {
       key: 'management',
@@ -65,6 +68,7 @@ function AppLayout() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/events" element={<EventListPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/trends" element={<TrendsPage />} />
             <Route path="/sources" element={<SourcesPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/discovery" element={<SourceDiscoveryPage />} />
