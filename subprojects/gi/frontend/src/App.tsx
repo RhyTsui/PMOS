@@ -4,7 +4,10 @@ import {
   FileTextOutlined,
   SettingOutlined,
   ThunderboltOutlined,
-  DatabaseOutlined
+  DatabaseOutlined,
+  MessageOutlined,
+  SearchOutlined,
+  AlertOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventListPage from './pages/EventListPage';
@@ -12,6 +15,9 @@ import EventDetailPage from './pages/EventDetailPage';
 import AdminPage from './pages/AdminPage';
 import SourcesPage from './pages/SourcesPage';
 import DashboardPage from './pages/DashboardPage';
+import FeedbackPage from './pages/FeedbackPage';
+import SourceDiscoveryPage from './pages/SourceDiscoveryPage';
+import GapDetectionPage from './pages/GapDetectionPage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -23,7 +29,17 @@ function AppLayout() {
     { key: '/', icon: <ThunderboltOutlined />, label: '情报流' },
     { key: '/events', icon: <FileTextOutlined />, label: '事件分析' },
     { key: '/sources', icon: <DatabaseOutlined />, label: '信源/种子' },
-    { key: '/admin', icon: <SettingOutlined />, label: '系统管理' },
+    {
+      key: 'management',
+      icon: <SettingOutlined />,
+      label: '管理',
+      children: [
+        { key: '/feedback', icon: <MessageOutlined />, label: '反馈管理' },
+        { key: '/discovery', icon: <SearchOutlined />, label: '源发现' },
+        { key: '/gaps', icon: <AlertOutlined />, label: '漏采告警' },
+        { key: '/admin', icon: <SettingOutlined />, label: '系统管理' },
+      ],
+    },
   ];
 
   return (
@@ -50,6 +66,9 @@ function AppLayout() {
             <Route path="/events" element={<EventListPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
             <Route path="/sources" element={<SourcesPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/discovery" element={<SourceDiscoveryPage />} />
+            <Route path="/gaps" element={<GapDetectionPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -1,0 +1,91 @@
+[
+  {
+    "document_title": "2026游戏广告AI-First产品战略研究报告",
+    "expert_persona": "游戏行业资深广告产品专家",
+    "user_analysis": {
+      "target_user": "高级广告优化师/投放总监",
+      "user_pain_points": [
+        "无效低效的机械化调价与素材堆砌",
+        "多平台归因碎片化导致决策链路断裂",
+        "创意产出速度跟不上消耗速度",
+        "深度转化数据回传延迟导致的模型调优滞后"
+      ],
+      "ai_optimizer_workflow": {
+        "routine_tasks": "从盯盘、导数转变为指令下达、Prompt工程与Agent策略调校",
+        "trilogy_model": {
+          "ai_replacement": [
+            "实时竞价调整",
+            "自动化预算分配",
+            "素材机械化组合",
+            "例行报表生成"
+          ],
+          "human_ai_collaboration": [
+            "归因诊断分析",
+            "素材脚本发散",
+            "实验设计策略",
+            "文案本地化校对"
+          ],
+          "human_exclusive": [
+            "商业目标权衡",
+            "复杂人性洞察（如玩家心理博弈）",
+            "跨部门资源协调",
+            "品牌安全与合规管理",
+            "从0到1的营销模型创新"
+          ]
+        },
+        "core_competency_model": {
+          "data_acuity": "具备异常数据快速判断力，能够通过微观波动推导宏观生态变化",
+          "creative_power": "由执行者转型为导演与编剧，利用AI工具进行高频内容产出",
+          "full_funnel_thinking": "深谙游戏后端ROI逻辑，能通过LTV预测优化前端获客"
+        },
+        "attribution_logic": {
+          "mechanism": "平台设备信息下发 + 品牌自定义回传数据",
+          "challenges": "回传延迟对实时模型的负向冲击",
+          "critical_factor": "数据治理质量决定了AI模型的预测准确度"
+        }
+      }
+    },
+    "business_demand_trends_2026": {
+      "market_dynamics": "流量红利消失，存量博弈下从‘买量’转向‘精细化增长运营’",
+      "platform_evolution": "媒体平台API深度封闭化，私有化部署的AI Agent成为企业壁垒",
+      "creative_centric": "素材即策略，AI原生视频素材生成技术将直接决定获客成本"
+    },
+    "strategic_planning_directions": {
+      "direction_name": "AI驱动的自主化投放增长引擎",
+      "core_pillars": [
+        {
+          "pillar": "数字优化师Agent矩阵",
+          "description": "内置激进型、稳健型、创意型等多种人格Agent，模拟N年经验优化师进行24/7实时操作",
+          "goal": "降低人力成本80%，提升异常响应速度至秒级"
+        },
+        {
+          "pillar": "端到端自动化素材工厂",
+          "description": "从脚本生成、视频剪辑、配音到投放后的效果回传，实现全链路闭环",
+          "goal": "单日千级高保真创意产出与验证"
+        },
+        {
+          "pillar": "预测性数据中台",
+          "description": "基于预估LTV模型，在用户进入游戏前1小时预判其长线价值，辅助AI即时调整出价",
+          "goal": "解决数据回传延迟问题，实现提前干预"
+        }
+      ]
+    },
+    "pm_and_technical_requirements": {
+      "pm_competencies": [
+        "算法理解力：深度理解Transformer与强化学习在广告竞价中的应用",
+        "游戏业务洞察：具备数值策划思维，理解买量ROI与游戏内经济系统的协同",
+        "Prompt架构能力：能将复杂的投放经验转化为可工程化的Prompt模板"
+      ],
+      "technical_requirements": [
+        "多模态模型部署：支持文、图、视频的统一表征理解",
+        "低延迟流式计算：支持秒级广告明细归因与策略反馈Loop",
+        "RAG架构集成：通过检索增强生成，将公司历史投放经验库化为Agent的知识底座"
+      ]
+    },
+    "industry_best_practices": [
+      "基于用户全生命周期的自动化出价策略（VO/AEO/UAC 3.0进阶版）",
+      "利用AI数字人进行多语言全球化本地化投放的高效适配",
+      "构建私有化投放模型，解决公域平台策略趋同导致的竞争僵局"
+    ]
+  }
+]

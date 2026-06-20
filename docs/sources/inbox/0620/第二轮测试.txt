@@ -1,0 +1,741 @@
+能否去掉查询结果这四个固定的字
+
+  P1-3 后续工作：
+  - 实现 capabilityRefs resolver 层（把 tool_name 映射到实际 capability）
+  - 不直接用 tool_name 做最终能力选择
+
+  1. 继续排查 LLM API 问题？
+  2. 改进错误处理逻辑？
+  3. 基于现有成果提交 Phase 3D？
+P0：必须先收口的待办
+1. Phase 3D-1：真实 API JSON 失败安全诊断
+这是下一步最高优先级。当前真实 API 里 planner_shadow_observation 能触发，但 Planner 输出仍然 json_parse_failed。这说明 Shadow Trace 安全，但 Planner 规划还不可用。- 确认 planner_shadow 是否真的调用了模型
+- 确认 response.text 是否为空、极短、fallback、非 JSON
+- 修复 debugSummary 不生成的问题
+- 增加 parse_error_code 细分
+- 不记录 raw output / raw prompt / raw user message
+- 重新跑真实 API 验证
+真实 API 下能看到安全 debugSummary
+能明确 json_parse_failed 的真实原因
+主链仍不受影响
+无敏感字段泄露
+2. 修正 Planner Prompt 真实输出成功率
+等 3D-1 定位完原因后，再做 prompt 修复，不要盲调。
+重点：
+- prompt 必须强制只输出 JSON object
+- 示例必须完全符合 PlannerPlanContract
+- plan_steps 必须符合当前 PlanStep 契约
+- 不允许 tool_name / input_mapping / output_mapping 这类未定义字段
+- evidence_mode 与 evidence_requirements 必须对齐
+验收：
+真实 API 至少在“你好 / 查日报 / 昨天巨量消耗多少”中，有稳定 succeeded 或 contract_validation_failed，而不是 json_parse_failed
+3. 工作区清理与基线隔离
+当前仍有大量历史 modified / untracked 文件。这个会影响后续主链接入审查。
+要做：
+- 分类当前工作区剩余文件
+- P0 治理字段单独提交或暂存
+- 其他历史任务单独提交或回滚
+- 确保 Planner 后续阶段在干净工作区上做
+特别注意：
+frontend/src/src/types/index.ts 中的 P0 治理字段
+canonicalId / aliasIds / deprecatedBy 等
+这些不要和 Planner 后续 commit 混在一起。
+4. tsc baseline 收口
+现在全量 npx tsc --noEmit 还有 6 个既有错误：
+ChatContainer.tsx
+search-provider-config.ts
+report-execution-integration.test.ts
+如果不修，后面每轮都会出现“本次无关错误”的争议。
+建议单独开一个小任务：
+fix(typecheck): clean existing TypeScript baseline errors
+验收：
+npx tsc --noEmit 全量通过
+P1：Planner Shadow 稳定化
+5. Phase 3E：Shadow Metrics / 统计面板
+等 JSON 成功率修好后，可以开始统计：
+planner_shadow status 分布：
+- disabled
+- llm_unavailable
+- timeout
+- json_parse_failed
+- contract_validation_failed
+- succeeded
+同时统计：
+- 平均耗时
+- succeeded rate
+- json_parse_failed rate
+- contract_validation_failed rate
+- 不同 task_type 分布
+- route.intent_type 与 planner.task_type 差异
+这一步只做观测，不进决策。
+6. Phase 3F：Planner 与现有 route 差异对比
+目标不是让 Planner 接管，而是做 offline / shadow comparison。
+要比：
+现有 route.intent_type
+Planner task_type
+Planner service_intent
+Planner evidence_mode
+Planner confidence
+输出：
+planner_route_alignment:
+  matched / diverged / planner_uncertain / existing_uncertain
+验收：
+只记录差异，不改变 route
+不改变 tool
+不改变 answer
+7. Prompt 后台治理完善
+当前已经注册 planner_shadow ModelUseCase 和 Prompt Variables Contract，但还要确认后台控制面是否能看到：
+- planner_shadow use case
+- active prompt
+- prompt version
+- required_variables
+- forbidden_variables
+- model route config
+- effective config
+如果后台看不到，后续要补 Admin effective config view。
+P2：进入 Planner-first 主链前的必备工程
+8. Capability Grounding 设计，不要直接实施
+Planner 成功产出 contract 后，下一步不是直接执行工具，而是先设计：
+PlannerPlanContract
+  ↓
+Capability Grounding
+  ↓
+Executable Candidate
+  ↓
+Tool Contract Matching
+  ↓
+Resolver / Preflight
+这一阶段要新增：
+planner-capability-grounding.ts
+planner-capability-grounding.test.ts
+但只生成候选，不执行 MCP。
+9. Tool Contract Matching
+必须确保 Planner 的 tool_selection_priors 只是 hint。
+要做：
+- Planner tool hint 只能加权候选
+- selectedTool 必须来自 Capability Manifest + Tool Contract
+- requiredInputs 必须检查
+- resolverDependencies 必须检查
+- permission / project support 必须检查
+验收：
+Planner 选错工具，不会被执行
+Planner 低置信，不会覆盖 capability
+工具缺参数，进入 required_input_assist
+10. ContractSafety / Evidence Ledger 对接
+在 Planner 进入主链前，必须确保：
+- Planner inference 只能是 planner_inference evidence
+- 不能伪装成 tool_result
+- Answer Composer 只基于 Evidence Ledger
+- 无证据业务断言被降级或阻断
+这一步是 Planner 从 shadow 进入 real path 的安全门。
+P3：最后才考虑 Planner 接管策略
+11. Planner Assisted Routing，不是直接接管
+第一阶段只能做：
+Planner 参与 route review
+不覆盖 route
+只在 trace 中记录差异
+第二阶段可以做：
+Planner 与规则一致时提高 confidence
+Planner 与 capability grounding 一致时提供候选补充
+仍然不能做：
+Planner 直接覆盖 route.intent_type
+Planner 直接选择 MCP tool
+Planner 直接生成 tool args
+Planner 直接宣告执行成功
+
+1. 先定义 Planner 完成标准
+Planner 不能只看“有代码”。至少要满足：
+1. 真实 API 下能稳定生成合法 PlannerPlanContract
+2. succeeded / contract_validation_failed / json_parse_failed 有清晰统计
+3. 不泄露 raw prompt / raw output / full plan
+4. 不影响 route / tool / answer
+5. Planner 与现有 route 的差异可观测
+6. 默认 shadow，不接管主链
+也就是当前要先把 Phase 3D-1 / 3E / 3F 做完：
+3D-1：真实 API JSON 失败诊断
+3D：Planner JSON 成功率修复
+3E：Shadow Metrics
+3F：Planner vs 当前 Route 差异对比
+这些完成后，才算 Planner Shadow 稳定。
+
+2. Planner 后的第一大块：Capability Grounding
+Planner 输出的是“计划”和“候选能力”，但不能直接执行。
+下一层要做：
+PlannerPlanContract
+  ↓
+Capability Grounding
+  ↓
+Capability Candidate
+  ↓
+Executable Candidate
+核心目标：
+把 Planner 的 task_type / service_intent / evidence_mode / candidate_capabilities
+映射到系统真实能力清单，但不执行工具。
+要解决的问题：
+1. Planner 说需要 internal_data_required，系统有哪些数据能力能满足？
+2. Planner 给出 candidate_capabilities，是否真实存在？
+3. 这些能力是否支持当前 service_intent？
+4. 是否需要项目、媒体、日期、指标、权限？
+5. 能力是 executable、missing_input、permission_blocked 还是 unsupported？
+新增模块建议：
+planner-capability-grounding.ts
+planner-capability-grounding.test.ts
+输出结构建议：
+点：Planner 只能提供 hint，不能决定最终能力。
+
+3. 第二大块：Tool Contract Matching
+Capability Grounding 之后，才能进入工具匹配。
+这一层要做：
+Capability Candidate
+  ↓
+Tool Contract Matching
+  ↓
+Executable Tool Candidate
+要校验：
+1. toolPurpose
+2. supportedServiceIntents
+3. requiredInputs
+4. optionalInputs
+5. defaultInputs
+6. resolverDependencies
+7. permission requirements
+8. project/app/media support
+9. outputContract
+10. errorTaxonomy
+这一层的核心规则：
+Planner 的 tool_selection_priors 只能加权，不能成为 selectedTool。
+错误设计是：
+Planner 选了 get_xxx_report
+↓
+直接执行 get_xxx_report
+正确设计是：
+Planner tool hint
+↓
+Capability Manifest / Tool Contract 校验
+↓
+Resolver / Permission / Preflight
+↓
+才形成 executable candidate
+新增模块建议：
+planner-tool-contract-matching.ts
+planner-tool-contract-matching.test.ts
+
+4. 第三大块：Resolver Chain / Required Input Assist
+工具候选有了以后，不能马上执行。要先补参数。
+这一层要回答：
+用户说“巨量昨天消耗多少”
+↓
+项目是什么？
+媒体是什么？
+日期是什么？
+指标是什么？
+粒度是什么？
+工具需要哪些字段？
+哪些能自动解析？
+哪些必须追问？
+核心链路：
+Tool Required Inputs
+  ↓
+Context Resolver
+  ↓
+Entity Resolver
+  ↓
+Dictionary Resolver
+  ↓
+Default Policy
+  ↓
+Required Input Assist
+这里要非常注意你之前反复强调的边界：
+Tool 默认策略以 Tool Contract 为准
+不要在 Chat Core 写业务默认值
+不要在 Prompt 里写死媒体、指标、项目
+不要让 LLM 直接生成 appId/media_id
+LLM 在这里最多做：
+1. 解释缺什么
+2. 帮用户理解为什么要补充
+3. 生成追问话术
+不能做：
+1. 编造项目 ID
+2. 编造媒体 ID
+3. 编造工具参数
+4. 伪造 resolver 结果
+
+6. 第五大块：Tool Execution + Evidence Ledger执行工具后，所有事实都要进入 Evidence Ledger。这是从“能调用工具”升级成“可信回答”的关键。
+
+7. 第六大块：Answer Composer有了 Evidence Ledger，才进入 Answer Composer。Answer Composer 的职责是：把证据综合成用户可读答案
+
+8. 第七大块：ContractSafety
+Answer Composer 后必须过 ContractSafety。
+检查：
+1. 有没有无证据业务断言
+2. 有没有工具结果被模型改写反了
+3. 有没有 sourceRefs/evidenceRefs 缺失
+4. 有没有 raw params 泄露到主消息
+5. 有没有 appId/media_id/project_id 泄露
+6. 有没有乱码
+7. 有没有敏感信息
+8. 有没有把失败说成成功
+9. 有没有把 shadow plan 当成真实执行
+ContractSafety 是后置硬闸，不能被 Prompt 绕过。
+
+9. 第八大块：Result / Runtime / Disclosure 分离
+
+10.Browser E2E
+
+11. 第十大块：Admin Control Plane
+Planner-first 最后必须进入后台治理。
+后台至少要能看到：
+ModelUseCase: planner_shadow / planner_route_review / planner_answer_compose
+Prompt version
+Prompt variables contract
+Effective model config
+Capability manifest
+Tool contract
+Resolver policy
+Evidence policy
+Safety policy
+Feature flags
+Trace sampling
+Shadow success rate
+否则就是代码配置，不是产品化治理。
+
+
+
+
+
+
+
+
+
+P1-2：Domain Ontology / Object Resolver 落地
+这是当前最该继续的。
+目标是把：
+semantic-frame-resolver.ts 里的业务对象识别
+从硬编码正则迁移到：
+Domain Ontology / Report Catalog / Capability Manifest
+重点验收：
+ROI报表 → report.roi
+查日报 → report.daily
+查看报表 → 不误判 daily
+数据口径是什么 → 不生成 report object
+日报怎么配置 → 可识别 report.daily，但不进入 report execution
+联调 → workflow
+投放包 → package
+这一步完成后，才能说业务对象识别真正开始脱离关键词硬编码。
+
+P1-3：清理 request-understanding.ts 遗留关键词 fallback
+当前还存在这些架构债：
+hasStrongReportIntent
+inferServiceIntentFromRequirement
+deriveUserRequirement 回填
+inferRequestedView
+后续要改成：
+优先消费 semanticFrame
+其次消费 domain object resolver
+最后才 fallback
+最终目标是：
+request-understanding.ts 不再直接用 “日报/报表/数据/查数/取数/明细” 决定 route/serviceIntent/execution
+但这一步不要一次性删，要逐步迁移，每删一类 fallback 就补对应回归测试。
+
+
+P1-6：Field Dictionary / Schema Registry / Metric Dictionary
+现在 field_definition 被正确拦截了，但回答字段含义还需要证据源。
+要补三类来源：
+Field Dictionary：字段、枚举、displayName
+Metric Dictionary：ROI、消耗、激活、留存等指标口径
+Schema Registry：报表字段、维度、类型、可视化结构
+
+
+P1-7：Capability Affordance / Capability Manifest 补强
+Object Resolver 解析出业务对象后，还要和能力真正关联。
+需要让 capability manifest 声明：
+executionClass
+supportedSemanticTasks
+supportedObjectTypes
+requiredSlots
+outputContract
+riskLevel
+capabilityPurpose
+例如：
+report.daily + retrieve_report_data → get_zt_ad_day_report
+field_definition + report.daily → schema_lookup / field_dictionary
+package.fetch + request_operation → package_fetch capability
+workflow.integration → integration_workflow
+这一步做完，工具选择才真正从“工具名/关键词”升级为“能力承接任务”。
+
+
+P1-8：Tool Fallback Policy
+你之前已经遇到过：
+选中一个 tool
+发现无权限 / 项目不支持 / 空数据
+就结束
+需要补：
+Candidate
+→ Executable Candidate
+→ Selected Capability
+→ Preflight
+→ Execute
+→ Normalize Error
+→ Fallback Policy
+错误分类建议：
+permission_blocked：不 fallback，提示权限
+unsupported_project：允许 fallback
+empty_data：可 fallback 或返回空数据说明
+business_failed：按 inner code 分类
+schema_mismatch：不执行，进入 contract error
+
+
+P1-10：DataVizRenderer columnSchema
+这个可以做，但建议放在 P1-2/P1-3/P1-4 之后。
+目标：
+columns: string[] 继续兼容
+新增 columnSchema: [{ key, label, type, visible }]
+Renderer 优先用 label
+缺失 label fallback 到 key
+不使用 as any
+解决：
+表格英文 key
+字段 displayName 不显示
+columnLabels 未消费
+
+P2-2：Automation Task Runtime
+后面定时报表、ROI 异常检查、联调监控、投放包检查都不能塞进同步 chat。
+需要：
+AutomationTask
+TaskRun
+TaskArtifact
+TaskNotification
+Scheduler
+Worker
+Run History
+
+P2-3：数字优化师 Agent 化
+等前面的基础链路稳定后，再做：
+数据归因 Agent
+创意策略 Agent
+诊断 Agent
+投放策略 Agent
+但必须先有：
+Semantic Frame
+Domain Ontology
+Capability Affordance
+Evidence Ledger
+Execution Gate
+Risk Approval
+否则 Agent 会变成大模型直接调工具，风险很高。
+
+
+
+
+
+
+
+
+## P0 未完成的架构债（P1 待办）
+  ### request-understanding.ts 遗留关键词正则
+  以下函数仍使用业务关键词正则，P1 需迁移到消费 semanticFrame：
+  - hasStrongReportIntent: /(查数|查询|看下|...)/i
+  - inferServiceIntentFromRequirement: /(生成|导出|订阅|报告|...)/i
+  - deriveUserRequirement 回填: /(日报|周报|月报|报告|...)/i
+  ### semantic-frame-resolver 业务信号
+  - detectSpeechAct: /(查|查询|看下|数据|报表|日报|...)/i
+  - detectBusinessObjects: /(报表|日报|周报|月报)/i
+  P1 需迁移到 Domain Ontology / Report Catalog / Capability Manifest
+  ### 缺失能力
+  - 无 /api/chat 集成测试
+  - 无 Playwright E2E 测试
+  - 无真实浏览器扫码测试
+
+  ◼ 修复 Bug1+2 联网搜索关键词提取
+     ◼ 修复 Bug7+8 报表查询项目发现
+     ◼ 修复报表路由/工具选择错误
+     ◻ 修复报表数据展示（指标名/维度/指标完整性/数据准确性）
+     ◻ 评估脱敏设计价值，确认是否禁用
+
+语义帧      （ 向量...）单独设计路由？
+领域本体
+能力契约
+证据账本
+工具风险分级
+RAG/Schema/字段字典分层
+模型调用治理
+评测集
+前端语义渲染契约
+后台治理中心
+
+Semantic Frame Runtime
++ Domain Ontology
++ Capability Affordance
++ Evidence Ledger
++ Execution Gate
++ Render Surface Policy
++ Eval Harness
+
+User Message
+→ Semantic Frame Builder
+→ Domain Object Resolver
+→ Evidence Policy
+→ Capability Discovery
+→ Execution Gate
+→ Tool / KB / Schema / Web
+→ Result Normalization
+→ Evidence Ledger
+→ Answer Composer
+→ Render Surface Projection
+→ Trace / Eval
+
+
+P1：把能力和证据补完整
+1. Domain Ontology / Report Catalog
+2. Field Dictionary / Metric Dictionary / Schema Registry
+3. Capability Affordance 扩展
+4. Tool fallback policy
+5. Evidence Ledger
+6. RenderSurfacePolicy
+
+P2：Agent 化和自动化
+1. Automation Task Runtime
+2. Digital Optimizer Agent roles
+3. Shadow Mode
+4. Risk approval workflow
+5. 多 Agent 协同
+6. Strategy simulation / predictive diagnosis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1、提问：“富春山周五天气”
+回复：“我没有检索到足够可靠的公开来源来确认富春山周五的天气情况，因此无法提供已证实的结论。建议补充更具体的名称、入口路径、官方页面或上下文；如果您已经有官方链接，可以继续发给我，我会按可验证来源重新判断。”
+执行过程：公开来源查询失败
+
+提问：“最近有哪些游戏上线”
+回复：“抱歉，由于公共网页检索服务暂时失败，我无法为您获取最近游戏公测的最新信息。建议您稍后重试。”
+
+执行过程：整理公开来源黄灯
+粘贴图片的过程中和完成后都支持删除
+解析的图片内容在日志中看不到
+控制台报错：警告：[antd: message] 静态函数无法消费动态主题的上下文。请改用 App 组件。
+检查点：确保项目中已安装 antd 5.x 版本（若为 4.x 则此问题不存在，但建议升级）。
+确认所有直接调用 message 静态方法的地方都已改为通过 App.useApp() 获取的实例。
+
+提问：“https://open.oceanengine.com/labels/7 监测回传文档在哪”
+回复：“公共网页检索失败，暂时无法确认巨量媒体监测回传文档的具体位置。请稍后重试。”
+
+
+提问：“腾讯iOS要接sdk吗”
+回复：“根据当前可用的上下文和证据，无法直接确认腾讯媒体在iOS端是否必须接入SDK。建议您通过以下方式进行验证：1. 查阅腾讯广告（或优量汇）官方的iOS端接入文档，确认具体业务场景（如应用推广、事件回传、归因等）对SDK的依赖要求。2.”
+回复被截断了。
+日志没有看到rag知识库的记录
+IntentOrch 增强候选永远都不可用
+
+提问：“我们支持鸿蒙吗”
+回复：“抱歉，基于当前的上下文和知识库证据，无法确认我们是否支持鸿蒙（HarmonyOS）系统。”
+
+提问：“素材报表的未知是什么”
+回复：“date dt --	2026-06-16”
+执行过程：问数链路。skipped list_all_apps  skill - 成功 get_zt_ad_day_report mcp（缺时间）
+问题：这应该是知识解答，如果是查数据已应该是查素材报表，而不是日报。日志中还在说或策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。
+
+提问：“看下近7天的日报数据”
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+点击提交 没有成功成成列表，退回到了欢迎页。
+点击历史会话，加载很长时间。
+执行过程，如果是执行中 要显示动态效果
+第二次新会话问，返回了
+
+用了账户报表而不是日报，不知道怎么候选的，账号报表是维度明细数据，用户要的是近7天的日报数据。
+表格组件中的页行数修改功能无效
+另外既然是维度数据，就应该展示维度，当前只展示了日期，且表头都还是英文，日期显示成了X。
+再就是指标只展示了composite_reg_cost 3日ROI 一个中文一个英文，且这仿佛是写死的，日报有很多指标都应该展示。
+数据对不上。
+
+
+
+天气API接了2个了都，不需要再接了，甚至可以删掉一个。
+换googleapi能解决问题吗？本身是关键词输入的问题把？为什么会提取 最近作为关键词呢？是否要由llm来控制输入内容
+知识库之前都接好了，现在是配置信息丢失了吗？如果是丢失要么找回要么我去再录一遍，但是一定要找到丢失的原因。如果不是则检查程序。
+IntentOrch 超时的问题 本身是没部署好没对接好不要再加健壮性设计了，这个问题修复几次都没解决，属于核心能力不可用状态。
+报表查询流程不调用 get_app_list 解析项目名，跟项目名有啥关系，当前右上角的列表也有名称对应的appid，之前做过项目名的提示词控制吧？也做过项目名和项目表的候选推断吧，输入找名称相关性获取唯一appid再去调用tool，或者找名称相关性时调用get_app_list 也行，这个本身是有前置调用说明的呀，主体解析也有这个提示词管理。appid是通过名称匹配获取的，以及当前上下文里就应该有会话默认项目的appid。完全不存在没有appid的情况，找不到用默认项目appid也行，或者当存在多个的时候优先用默认项目的appid。
+
+knowledgeBaseDataset 为空 — 没有指定数据集 ID，知识库不知道搜什么！ 默认是全查，不需要指定
+表格组件中的页行数修改功能无效
+
+解决方案禁止采用硬编码，IF规则，关键字信号，需要系统性产品化解决通用问题
+
+
+
+
+
+
+● 现在整理一下本次升级的完整验收状态，并记录到共享上下文：
+
+● Bash(cd "E:\AI\ai-os" && npm run cli -- mcp-context task-start "统一搜索编排升级验收总结" --tool claude 2>/dev/null &&
+      npm run cli -- mcp-context checkpoint "统一搜索编排升级完整验收：(1) 72…)
+  ⎿  > pmaios@0.4.0 cli
+     > tsx src/cli/aios.ts mcp-context task-start 统一搜索编排升级验收总结 --tool claude
+     … +33 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to E:\AI\ai-os\subprojects\ad
+  ⎿  Allowed by auto mode classifier
+
+  Thought for 2s (ctrl+o to expand)
+
+● 统一搜索编排升级 — 验收报告
+
+  ✅ 已完成
+
+  ┌──────────────────────────────┬──────────────────────────────────────────────────────────────────┐
+  │              项              │                               结果                               │
+  ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+  │ GitLab 提交推送              │ 72ca00e → feature/xuyun_init @ gitlab.sh.com/aiad/xiaoqiao       │
+  ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+  │ test:chat-runtime-regression │ 10 CASE / 58 断言全绿 / exit 0                                   │
+  ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+  │ pnpm build                   │ ✅ 通过（Next.js 14.1s 编译 + 84 静态页 + tsup 655KB server.js） │
+  ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+  │ Dev server                   │ ✅ 启动正常（/api/xiaoqiao/runtime-version=200, /login=200）     │
+  ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+  │ 共享上下文                   │ 已记录到 mcp-context（checkpoint ckpt-47dc0e49）                 │
+  └──────────────────────────────┴──────────────────────────────────────────────────────────────────┘
+
+  🔑 关键修复验证
+
+  - 登录短路：evaluation runner 走正式 cookie/JWT 入口，测试不再被未登录拦截
+  - 媒体字典精确匹配：巨量→10001 正确到 cost_amount 输出
+  - weather-7d provider：端到端返回真实天气（雷雨 22.5-31°C，Open-Meteo 源）
+  - 公开搜索污染防护：内部业务查询（appId 10100001 成本/ROI）不走公网
+
+  ⚠️ 剩余（需人工）
+
+  浏览器侧验证需要你实际登录 http://localhost:8002 验证：
+  1. 发一条"下周日南京的天气"看右侧依据面板是否展示 Open-Meteo 来源
+  2. F12 Network 检查 /api/chat 响应中 retrievalResult 字段结构
+  3. Console 检查无 Uncaught 错误
+
+  ▎ Build 的 3 个 Turbopack 警告都是 attachment-store.ts 的文件匹配模式（匹配 13644 文件），与本次提交无关的既有问题。
+
+  Dev server 还在后台运行（http://localhost:8002），你可以直接打开浏览器验证。验证完后需要我帮你停掉 dev server 吗？
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+问：素材报表的未知是什么：
+走了问数链路，用过是知识问答。
+即使走问数链路，也不是不行，调用了日报报表tool，更匹配的应该是素材报表tool 
+报表数据展示的指标名为字段名非中文指标名
+报表数据展示的维度不完整，只有日期缺少双维度账户ID/账户名
+报表数据展示的指标不完整，只有3日ROI和消耗，缺少tool里支持的全部指标
+报表数据展示的指标数据错误，数据对不上不知道是不是appid传错了还是tool取错了。
+另外：“检测到内部业务信息，需脱敏后再查询。”评估脱敏设计价值，和我确认是否可以禁用脱敏，避免影响正常链路。
+
+IntentOrch 增强状态改为开启后未验证可用性
+LLM 驱动的意图+工具联合决策测试
+架构优化了是否要更新规格文档
+处理异常，已处理2步 会显示成红色，应该是状态灯为红色。
+knowledgeBaseDataset 为空是不是会自动去取列表获取id再请求
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+仍然存在大量硬编码，IF规则，关键字信号的设计，可能会导致解决方案偏移，实际解决问题场景变窄，没能根本性实现通用chat能力。需从系统层面分析这些问题的共性，基于行业最佳实践，提出产品化方案。比如LLM 驱动的意图+工具联合决策。
+
+
+
+
+刚才完成了升级统一搜索编排的任务，但是没有整理提交和推送到gitlab
+修复了天气类实时源没有走到可靠来源，已经把这条链路改成优先走 7 天天气 provider，当前最关键的 7 天天气实时源问题已经修到代码和回归测试层。剩余没跑的是 validate:ad-ui / build，浏览器侧右侧依据渲染、Network/Console 的人工或自动化验证证据。
+已补强：
+Firecrawl 默认改为 v1/extract，Provider Adapter 支持 extract / scrape 两种抓取形态。
+公开搜索结果新增统一 RetrievalResult，以 public_search 接入 Retrieval Layer evidence contract。
+/api/chat 公开搜索 metadata 透传 retrievalResult，右侧依据可拿到统一召回层结构。
+evaluation runner 通过正式 cookie/JWT 入口注入评估用户作用域，修复 test:chat-runtime-regression 被未登录短路的问题，不放松生产鉴权。
+测试补了 Firecrawl Extract 请求体与 retrievalResult 断言。
+新增统一公开搜索编排：[search-orchestrator.ts](E:\\AI\\ai-os\\subprojects\\ad\\frontend\\src\\src\\lib\\search-orchestrator.ts)
+新增 Provider Adapter：[search-provider-adapter.ts](E:\\AI\\ai-os\\subprojects\\ad\\frontend\\src\\src\\lib\\search-provider-adapter.ts)、配置化 Provider：[search-provider-config.ts](E:\\AI\\ai-os\\subprojects\\ad\\frontend\\src\\src\\lib\\search-provider-config.ts)
+新增统一 Retrieval Layer 契约：[retrieval-layer-contract.ts](E:\\AI\\ai-os\\subprojects\\ad\\frontend\\src\\src\\contracts\\retrieval\\retrieval-layer-contract.ts)
+接入公开搜索 runtime、/api/chat evidence/trace metadata、天气查询污染防护与内部业务优先识别
+补充单测和 5 个目标验收用例：[search-orchestrator-acceptance.test.ts](E:\\AI\\ai-os\\subprojects\\ad\\frontend\\src\\tests\\search-orchestrator-acceptance.test.ts)
+已完成一轮可验证的 Search Orchestrator 改造，但我没有把 /goal 标记为完成，因为现有 test:chat-runtime-regression 仍因登录/内部报表媒体字典断言失败，MCP/业务问数链路还不能宣称全量验收通过。
+
+能否去掉查询结果这四个固定的字

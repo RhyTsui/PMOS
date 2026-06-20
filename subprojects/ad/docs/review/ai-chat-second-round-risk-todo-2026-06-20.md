@@ -37,6 +37,7 @@
 | P1 | 第二轮测试判定增加日期、指标标签和关键数值覆盖 | `SECOND_ROUND_EVAL_SELF_TEST=1 node scripts/run-second-round-tests.cjs` 通过，历史 MIG-051 错报表答案不再判通过 |
 | P1 | 第二轮测试判定补充无冒号指标值格式 | `激活数 645 首日 ROI 11.12%` 这类 keyPoint 可被解析；错 ROI 自测不再通过 |
 | P1 | 第二轮测试判定补充分组格式归属校验 | `所在周/所在月` 多行分组会在对应分组片段内校验指标和值；周/月数值互换自测不再通过 |
+| P1 | 第二轮测试判定补充媒体/应用类型分组归属校验 | `SECOND_ROUND_EVAL_SELF_TEST=1 node scripts/run-second-round-tests.cjs` 覆盖媒体分组和应用类型分组数值互换，避免“分组标签正确但数值串组”的答案宽松通过 |
 | P1 | 第二轮测试判定补充紧凑日期与不返回数据语义 | `20260101` 会归一校验为 `2026-01-01`；不存在日期/未来日期必须说明不返回数据且不能夹带报表指标数值 |
 | P1 | 第二轮测试脚本 checkpoint 增加过程事件摘要 | checkpoint 包含 `processEventSummary` 和 `outputSummary` |
 | P1 | 第二轮测试脚本增加 dev server 内存护栏和非交互登录阻断 | `SECOND_ROUND_MEMORY_SELF_TEST=1 node scripts/run-second-round-tests.cjs` 通过；`SECOND_ROUND_NON_INTERACTIVE=1 SECOND_ROUND_CASE_IDS=MIG-051` 会快速写入登录阻断 checkpoint，不再等待 5 分钟 |
@@ -44,7 +45,7 @@
 | P1 | 第二轮测试脚本关闭默认自动重启，避免错端口拉起服务 | `SECOND_ROUND_NON_INTERACTIVE=1 SECOND_ROUND_CASE_IDS=MIG-050..060` 不再自动拉起默认端口 dev server；服务器不可用时写 checkpoint |
 | P1 | 第二轮测试脚本支持显式 auth 文件且不打印 token 前缀 | `SECOND_ROUND_AUTH_FILE=...` 可指定刷新后的登录态文件；日志只输出 cookie 名、时间戳和文件路径，避免把 token 片段写入终端或 checkpoint |
 | P1 | MIG-061~068 批次脚本限制重复 SSE 捕获 | `node --check e2e-batch-mig061-068.cjs` 通过；API 模式不再在浏览器 fetch wrapper 中重复保存完整 SSE body，UI 模式每个 case 后清理已消费捕获 |
-| P1 | MIG-061~068 批次脚本增加 dev server 内存护栏和有界采样 | `node --check e2e-batch-mig061-068.cjs` 通过；脚本按 `E2E_BASE_URL` 端口采样监听进程 Working Set，超过 `E2E_MAX_SERVER_RSS_MB` 默认 3072MB 时阻断后续 case，并在报告写入 `memoryPeakMb`、`memorySamples`、`memoryGuard` |
+| P1 | MIG-061~068 批次脚本增加 dev server 内存护栏和有界采样 | `E2E_MEMORY_SELF_TEST=1 node e2e-batch-mig061-068.cjs` 与 `node --check e2e-batch-mig061-068.cjs` 通过；脚本按 `E2E_BASE_URL` 端口采样监听进程 Working Set，超过 `E2E_MAX_SERVER_RSS_MB` 默认 3072MB 时阻断后续 case，并在报告写入 `memoryPeakMb`、`memorySamples`、`memoryGuard` |
 | P1 | 早期鉴权/public web 分流逻辑迁出主 stage，恢复规则债务门禁 | `npm.cmd run validate:ad-ui`（工作目录：`frontend/src`）通过 |
 
 ## 仍阻断
@@ -54,7 +55,7 @@
 | P0 | 刷新有效登录态后重跑 `get_zt_ad_retention_report` 真实链路 | 入参构造轻量验证已通过；8002 非交互重跑因服务不可用阻断，8010 非交互重跑服务可用但登录态失效；`tmp/auth-state.json` 与 `.auth-state/auth-tokens.json` 两个本地 auth 来源探测 `/api/xiaoqiao/auth/me` 均为 401，均未进入业务链路 | 刷新登录态后重跑 MIG-051，必须返回留存指标而不是日报 fallback |
 | P0 | 用真实链路验收 MIG-050/052/053 多指标拆解和工具覆盖 | 离线拆解已覆盖 daily/roi/retention/hour 与 retentionType 拆分；最新 8010 MIG-050~060 非交互重跑全部因登录态失效阻断，尚未确认 MCP 入参、Evidence Ledger 和最终回答一致 | 重跑 MIG-050~060，强制校验 source/evidence/tool trace 与关键数值 |
 | P0 | 治理 E2E 长请求内存增长 | dev server 曾在多轮报表 E2E 后达到约 4GB 并 OOM；当前第二轮脚本与 MIG-061~068 批次脚本均已能采样监听 PID 和 Working Set，并在超过默认 3072MB 时阻断后续 case；最新 8010 阻断 checkpoint 记录 PID 6868 Working Set / `memoryPeakMb` 为 306MB，未触发护栏；MIG-061~068 批次脚本也已避免测试端重复持有完整 SSE body | 继续在有效登录态下定位服务端增长来源，限制 IntentOrch/LLM 重入；重跑前建议重启服务或缩小批次，批次运行不应崩服务；MIG-061~068 真实批次还需用有效登录态验证报告内 `memoryPeakMb/memorySamples` |
-| P1 | 继续扩展第二轮测试判定到复杂媒体/应用类型分组格式 | 已覆盖 `指标：数值`、`指标 数值`、`指标数值`、`所在周/所在月` 分组归属、紧凑日期、不存在/未来日期不返回数据；仍需继续观察媒体/应用类型多行分组 | 对媒体/应用类型分组答案补更细的 label 归属校验，避免宽松通过 |
+| P1 | 继续扩展第二轮测试判定到复杂嵌套分组格式 | 已覆盖 `指标：数值`、`指标 数值`、`指标数值`、`所在周/所在月` 分组归属、媒体分组归属、应用类型分组归属、紧凑日期、不存在/未来日期不返回数据；仍需继续观察媒体+应用类型组合嵌套分组 | 对媒体+应用类型组合、表格化答案补更细的 label 归属校验，避免宽松通过 |
 
 ## 已验证命令
 
@@ -72,6 +73,7 @@
 - `SECOND_ROUND_NON_INTERACTIVE=1 SECOND_ROUND_CASE_IDS=MIG-051 SECOND_ROUND_BASE_URL=http://127.0.0.1:8010 SECOND_ROUND_AUTH_FILE=E:\AI\ai-os\subprojects\ad\.auth-state\auth-tokens.json node scripts/run-second-round-tests.cjs`
 - `SECOND_ROUND_NON_INTERACTIVE=1 SECOND_ROUND_CASE_IDS=MIG-050,MIG-051,MIG-052,MIG-053,MIG-054,MIG-055,MIG-056,MIG-057,MIG-058,MIG-059,MIG-060 SECOND_ROUND_BASE_URL=http://127.0.0.1:8002 node scripts/run-second-round-tests.cjs`
 - `SECOND_ROUND_NON_INTERACTIVE=1 SECOND_ROUND_CASE_IDS=MIG-050,MIG-051,MIG-052,MIG-053,MIG-054,MIG-055,MIG-056,MIG-057,MIG-058,MIG-059,MIG-060 SECOND_ROUND_BASE_URL=http://127.0.0.1:8010 node scripts/run-second-round-tests.cjs`
+- `E2E_MEMORY_SELF_TEST=1 node e2e-batch-mig061-068.cjs`
 - `node --check e2e-batch-mig061-068.cjs`
 
 ## 最新关键证据

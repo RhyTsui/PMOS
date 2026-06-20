@@ -206,6 +206,16 @@ function summarizeRawEvents(events) {
       execution_decision: output.execution_decision,
       blocking_reason: output.blocking_reason,
       selected_tool_name: output.selected_tool_name,
+      selected_capability_id: output.selected_capability_id,
+      execution_decision: output.execution_decision,
+      data_coverage: output.data_coverage,
+      presentation_coverage: output.presentation_coverage,
+      fallback_used: output.fallback_used,
+      fallback_reason: output.fallback_reason,
+      candidate_count: output.candidate_count,
+      coverage_matrix: Array.isArray(output.coverage_matrix)
+        ? output.coverage_matrix.slice(0, 8)
+        : undefined,
     } : undefined;
     return {
       index,

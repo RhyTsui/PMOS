@@ -1,0 +1,87 @@
+❯ 接着上个会话任务，第二轮测试，实施到了用例001，卡在大模型调用上，
+  现在的行为是：
+    1. 管理后台点击"停用" → enabled: false ✅ 正确保存
+    2. 后端读取配置 → 发现默认 profile 禁用 → 只记录 warning
+    3. 继续用禁用的 profile 发起模型调用 → 连接失败
+    4. 不会自动切换到其他启用的 profile
+    ---
+    现在开始修。先 A（快速修复配置），再 B（代码加降级逻辑）。
+
+
+
+推荐下一步
+  1. 立即可做：人工登录 http://10.236.14.27:8002/admin → 「评估与可观测中心」→
+  「运行时可观测」，验收面板效果
+  2. 短期：立项修复 chat-runtime-regression 失败用例（report-execution-gate 分析）
+  3. 中期：route.ts 进一步拆分（4000 → 2000 行以内）
+  本次会话从「整理待办清单 → 分析最佳实践差距 → 实施 6 阶段 + 集成 + Admin 可视化」完整落地。
+找到问题了！ADMIN_TABS 数组里没有 runtime-observability，tab 不会被显示。
+
+实体解析能力集
+1.有维度字典的tool，隐式分类标记，在查数据报表tool之前去这个分类获取参数
+2.有知识库，里面有维度信息
+3.知识库里专门还有一个受控字典的知识
+4.有上下文，尤其是会话默认项目机制
+5.有记忆检索
+6.有专门的实体解析提示词也有字典，有一个步骤是全量去查的过程
+7.还有能力主动发现模块
+8.还有增强工具串行是部署的IntentOrch增强层是会自动进化自动编排的
+9.还设计了基于tool信息自动优化实体提示词中的字典映射的功能
+
+能力	解决的问题	说明
+对话	用户自然表达、需求不清、背景复杂时，系统能听懂真实诉求并推进服务	这是统一入口，也是分发中枢
+查数	用户想快速查询广告核心指标	消耗、激活、注册、ROI、留存、付费等
+拼表	用户想按模板生成报表或合并多源数据	Excel/CSV、字段映射、模板取数、多表拼接
+分析	用户想理解数据表现和变化	标签聚合分析、数据解读、趋势、对比、排名
+排查	用户怀疑数据不准、缺失、对不上	查数据源、口径、权限、上报、预处理、归因、回传、映射
+诊断	用户基于可信数据判断业务问题原因	ROI 下降、消耗涨但激活没涨、创意转化差、消耗为0
+取包	用户需要获取可用包、包状态和下载地址	包列表、包详情、可用性检查
+自动联调	用户需要检查包和链路是否可交付	联调触发、步骤、截图、日志、失败原因
+创意追踪	用户需要查看创意维度数据和效果表现	创意数据、多维度聚合、脚本解读、异常创意、创意排名
+
+
+优先级	优化项	目标
+P0	压薄 /api/chat	route 只做入口，不做业务大脑
+P0	拆 lib/ runtime core 和 domain pack	通用 Chat 不绑定广告域
+P0	清理 ghost prompt / ghost config	只保留真实 runtime 生效配置
+P0	收敛 ResponseContract / SemanticResultContract	消灭多套字段
+P0	主消息/右侧展示边界收口	避免内部字段泄露
+P1	拆超级 Hook	修复发送、SSE、回放、重试体验
+P1	建立 renderer registry	组件只展示，不解释业务
+P1	文档-代码覆盖审计	避免 doc_only 被误当 done
+P1	死代码/重复代码扫描	删除遗留实现
+P2	/api/chat 模块化为 runtime pipeline	支撑后续 Agent/Automation
+
+
+立刻做一次“代码量治理审计”
+不是让 Codex 直接改，而是先只读输出表。
+重点查这些：
+1. 最大的 30 个 ts/tsx 文件
+2. 最大的 20 个函数
+3. 最大的 20 个 React 组件
+4. 最大的 10 个 hook
+5. app/api 下超过 300 行的 route
+6. lib 下含广告业务词的通用模块
+7. 未被 import 的 ts/tsx/json/md
+8. prompt 配置是否被 runtime 消费
+9. contract/types 是否重复定义
+10. 测试覆盖是否匹配核心链路
+可以给 Codex 的任务目标是：
+只读审计当前代码量与结构膨胀问题，不修改文件。
+请统计并输出：
+1. 全项目最大的 50 个 ts/tsx/js 文件，包含路径、行数、职责判断、是否应该拆分。
+2. app/api 下所有 route 文件行数，标记超过 300 行的高风险入口。
+3. lib 下所有超过 500 行文件，判断是否混合了 runtime、domain、tool、prompt、trace、presentation 职责。
+4. components 下超过 300 行组件，判断是否存在业务解释、字段兜底、后端逻辑修补。
+5. hooks 下超过 300 行 hook，判断是否混合发送、SSE、回放、状态机、错误处理。
+6. contracts 和 types 中疑似重复的 response、semantic result、trace、tool、capability 类型。
+7. JSON 配置按 runtime_active / seed_only / fixture_only / doc_example / deprecated 分类。
+8. Markdown 文档与代码实现状态对齐：done / partial / doc_only / outdated。
+9. 查找通用 Chat Core 中是否出现广告域硬编码词：巨量、腾讯、ROI、日报、media_id、promotionSource、appId、get_zt。
+10. 输出 P0/P1/P2 代码量治理方案，不要修改代码，不要提交。
+最终输出：
+- 当前最大结构风险
+- 可能的错误架构决策
+- 可删除/可迁移/需保留的代码类型
+- 建议拆分边界
+- 每项治理的验收标准

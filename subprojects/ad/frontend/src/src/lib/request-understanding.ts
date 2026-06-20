@@ -601,8 +601,8 @@ function buildDecision(intent_type: IntentType, reason: string, override: Partia
 
 function isReportFollowupIntent(text: string): boolean {
   const normalized = text.replace(/\s+/g, '');
-  const followupSignals = /(再查|再看|重查|再次|重试|继续|上次|刚刚|刚才|接着|继续查|再输出|导出|趋势|对比|同比|环比)/i.test(normalized);
-  if (followupSignals) return true;
+  const followupCue = /(再查|再看|重查|再次|重试|继续|上次|刚刚|刚才|接着|继续查|再输出|导出|趋势|对比|同比|环比)/i.test(normalized);
+  if (followupCue) return true;
   return false;
 }
 
@@ -701,19 +701,19 @@ export function deriveRequestRouteDecision(message: string, context?: RequestRou
   // Field definition signal — MUST be checked before evaluateIntentRouteRules and capability candidate
   // to prevent report_query from hijacking field explanation requests
   // "素材报表的未知是什么" must be intercepted here, not pulled into report execution
-  const fieldDefSignal = detectFieldDefinitionSignal(text);
-  if (fieldDefSignal.matched) {
-    const objectDesc = fieldDefSignal.targetObject || '当前对象';
-    const termDesc = fieldDefSignal.targetTerm || '该术语';
+  const fieldDef = detectFieldDefinitionSignal(text);
+  if (fieldDef.matched) {
+    const objectDesc = fieldDef.targetObject || '当前对象';
+    const termDesc = fieldDef.targetTerm || '该术语';
     return buildDecision('help', `规则候选：识别到字段/口径解释诉求（${objectDesc}.${termDesc}），进入帮助链路。`, {
       agent: 'help',
       is_business_related: true,
       workflow_level: 'light',
-      confidence: fieldDefSignal.confidence === 'high' ? 'medium' : 'low',
+      confidence: fieldDef.confidence === 'high' ? 'medium' : 'low',
       requiresExecution: false,
-      clarification_needed: fieldDefSignal.requiresClarification,
+      clarification_needed: fieldDef.requiresClarification,
       required_slots: [],
-      suggested_actions: fieldDefSignal.requiresClarification
+      suggested_actions: fieldDef.requiresClarification
         ? ['补充查询对象', '查看常见字段说明']
         : ['查看字段说明', '继续追问'],
       tracking_target: 'field_definition',
@@ -1067,8 +1067,8 @@ export function deriveUserRequirement(message: string, context?: BusinessContext
   const identifierDependencies = inferRequiredIdentifiers(text, dimensions, entityHints);
 
   const isWritingRequirement = isDeliverableWritingRequest(text);
-  const fieldDefSignal = detectFieldDefinitionSignal(text);
-  const isFieldDefinitionRequirement = !isWritingRequirement && fieldDefSignal.matched;
+  const fieldDef = detectFieldDefinitionSignal(text);
+  const isFieldDefinitionRequirement = !isWritingRequirement && fieldDef.matched;
   const isReportRequirement = !isWritingRequirement && !isFieldDefinitionRequirement && !isCapabilitySupportQuestion(text) && !isConfigurationHelpQuestion(text) && hasStrongReportIntent(text, metrics, dimensions, dateRange, semanticFrame);
   const isDiagnosisRequirement = isDiagnosisQuestion(text);
   const isHelpRequirement = !isWritingRequirement && !isDiagnosisRequirement && (isConfigurationHelpQuestion(text) || isHelpQuestion(text));

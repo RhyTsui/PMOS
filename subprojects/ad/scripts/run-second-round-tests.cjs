@@ -668,6 +668,16 @@ function runEvaluationSelfTest() {
   if (groupedWrong.pass) throw new Error('expected grouped week/month swapped answer to fail');
   const groupedRight = evaluate('MIG-056', '广告报表-分组格式', groupedPrompt, groupedKeyPoint, '', '2026-01-01，所在周：激活数 8,822，注册数 7,859。所在月：激活数 29,674，注册数 26,670。', 'report_query', '', 'success', evidence);
   if (!groupedRight.pass) throw new Error(`expected grouped week/month answer to pass, got ${groupedRight.reason}`);
+  const mediaGroupedKeyPoint = '1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：\n巨量：激活数 1,234、首日 ROI 12.34%\n腾讯广告：激活数 567、首日 ROI 8.90%\n4、输出查询口径、筛选条件和数据来源，便于复核。';
+  const mediaGroupedWrong = evaluate('MIG-066', '广告报表-媒体分组格式', '查询指间2026-03-25按媒体拆分激活数和首日 ROI', mediaGroupedKeyPoint, '', '2026-03-25，巨量：激活数 567，首日 ROI 8.90%。腾讯广告：激活数 1,234，首日 ROI 12.34%。', 'report_query', '', 'success', evidence);
+  if (mediaGroupedWrong.pass) throw new Error('expected media grouped swapped answer to fail');
+  const mediaGroupedRight = evaluate('MIG-066', '广告报表-媒体分组格式', '查询指间2026-03-25按媒体拆分激活数和首日 ROI', mediaGroupedKeyPoint, '', '2026-03-25，巨量：激活数 1,234，首日 ROI 12.34%。腾讯广告：激活数 567，首日 ROI 8.90%。', 'report_query', '', 'success', evidence);
+  if (!mediaGroupedRight.pass) throw new Error(`expected media grouped answer to pass, got ${mediaGroupedRight.reason}`);
+  const appTypeGroupedKeyPoint = '1、识别为广告报表查询，并调用广告报表 MCP。\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\n3、返回结果：\nIOS：激活数 2,345、注册数 1,987\n安卓：激活数 3,210、注册数 2,876\n4、输出查询口径、筛选条件和数据来源，便于复核。';
+  const appTypeGroupedWrong = evaluate('MIG-053', '广告报表-应用类型分组格式', '查询指间2026-01-01应用类型维度的激活数和注册数', appTypeGroupedKeyPoint, '', '2026-01-01，IOS：激活数 3,210，注册数 2,876。安卓：激活数 2,345，注册数 1,987。', 'report_query', '', 'success', evidence);
+  if (appTypeGroupedWrong.pass) throw new Error('expected app type grouped swapped answer to fail');
+  const appTypeGroupedRight = evaluate('MIG-053', '广告报表-应用类型分组格式', '查询指间2026-01-01应用类型维度的激活数和注册数', appTypeGroupedKeyPoint, '', '2026-01-01，IOS：激活数 2,345，注册数 1,987。安卓：激活数 3,210，注册数 2,876。', 'report_query', '', 'success', evidence);
+  if (!appTypeGroupedRight.pass) throw new Error(`expected app type grouped answer to pass, got ${appTypeGroupedRight.reason}`);
   const compactDateWrong = evaluate('MIG-057', '广告报表-紧凑日期', '查询指间20260101 小时报表 广告量激活数', '1、识别为广告报表查询，并调用广告报表 MCP。\n3、返回结果：广告量激活数1,183', '', '小时报表广告量激活数 1,183。', 'report_query', '', 'success', evidence);
   if (compactDateWrong.pass) throw new Error('expected compact YYYYMMDD answer without normalized date to fail');
   const compactDateRight = evaluate('MIG-057', '广告报表-紧凑日期', '查询指间20260101 小时报表 广告量激活数', '1、识别为广告报表查询，并调用广告报表 MCP。\n3、返回结果：广告量激活数1,183', '', '2026-01-01 小时报表查询结果：广告量激活数 1,183。筛选条件和数据来源已随报表结果返回。', 'report_query', '', 'success', evidence);

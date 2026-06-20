@@ -1,0 +1,141 @@
+/* 专门用户展示老版邮箱的微盘附件 */
+.wedrive_att_bt .info_big .info_name {
+	text-overflow: ellipsis;
+	width: 230px;
+	overflow: hidden;
+	white-space: nowrap;
+	font-weight: 500;
+	font-size: 12px;
+	color: #2B2B2B;
+}
+.wedrive_att_bt .info_size {
+  font-size: 12px;
+  color: #787878;
+  margin-top: 4px;
+}
+.wedrive_att_bt {
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 4px;
+  width: 400px;
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: pointer;
+  height: auto;
+}
+.wedrive_att_bt:hover {
+  background: #F9FAFC;
+}
+.wedrive_att_bt .name_big .attach_item {
+  margin-right: 20px;
+}
+.wedrive_att_bt .name_big .attach_item:last-child {
+  margin-right: 0;
+}
+.wedrive_att_bt .name_big .down_big {
+  opacity: 0;
+  transition: all .3s;
+  float: left;
+  height: 36px;
+  line-height: 36px;
+  vertical-align: middle;
+  padding-left: 30px;
+  margin-top: 0;
+  font-size: 0;
+}
+.wedrive_att_bt .name_big .down_big .attach_item {
+  display: inline-block;
+  vertical-align: middle;
+  width: 28px;
+  height: 28px;
+  background-size: 28px 28px;
+  background-repeat:no-repeat;
+}
+.attach_download {
+  background-image:url(../../images/wedrive/attach/icon_action_download_normal4f119d.png);
+}
+.attach_download:hover {
+  background-image:url(../../images/wedrive/attach/icon_action_download_hover4f119d.png);
+}
+.attach_download:active {
+  background-image:url(../../images/wedrive/attach/icon_action_download_press4f119d.png);
+}
+
+.attach_open {
+  background-image:url(../../images/wedrive/attach/icon_action_open_normal4f119d.png);
+}
+.attach_open:hover {
+  background-image:url(../../images/wedrive/attach/icon_action_open_hover4f119d.png);
+}
+.attach_open:active {
+  background-image:url(../../images/wedrive/attach/icon_action_open_press4f119d.png);
+}
+
+.attach_transfer {
+  background-image:url(../../images/wedrive/attach/icon_action_transfer_normal4f119d.png);
+}
+.attach_transfer:hover {
+  background-image:url(../../images/wedrive/attach/icon_action_transfer_hover4f119d.png);
+}
+.attach_transfer:active {
+  background-image:url(../../images/wedrive/attach/icon_action_transfer_press4f119d.png);
+}
+
+.attach_wedrive {
+  background-image:url(../../images/wedrive/attach/icon_action_wedrive_normal4f119d.png);
+}
+.attach_wedrive:hover {
+  background-image:url(../../images/wedrive/attach/icon_action_wedrive_hover4f119d.png);
+}
+.attach_wedrive:active {
+  background-image:url(../../images/wedrive/attach/icon_action_wedrive_press4f119d.png);
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min--moz-device-pixel-ratio: 2), (min-device-pixel-ratio: 2), (-o-min-device-pixel-ratio: 2/1), (min-resolution: 2dppx), (min-resolution: 192dpi) {
+  .attach_download {
+    background-image:url(../../images/wedrive/attach/icon_action_download_normal_2x4f119d.png);
+  }
+  .attach_download:hover {
+    background-image:url(../../images/wedrive/attach/icon_action_download_hover_2x4f119d.png);
+  }
+  .attach_download:active {
+    background-image:url(../../images/wedrive/attach/icon_action_download_press_2x4f119d.png);
+  }
+
+  .attach_open {
+    background-image:url(../../images/wedrive/attach/icon_action_open_normal_2x4f119d.png);
+  }
+  .attach_open:hover {
+    background-image:url(../../images/wedrive/attach/icon_action_open_hover_2x4f119d.png);
+  }
+  .attach_open:active {
+    background-image:url(../../images/wedrive/attach/icon_action_open_press_2x4f119d.png);
+  }
+
+  .attach_transfer {
+    background-image:url(../../images/wedrive/attach/icon_action_transfer_normal_2x4f119d.png);
+  }
+  .attach_transfer:hover {
+    background-image:url(../../images/wedrive/attach/icon_action_transfer_hover_2x4f119d.png);
+  }
+  .attach_transfer:active {
+    background-image:url(../../images/wedrive/attach/icon_action_transfer_press_2x4f119d.png);
+  }
+
+  .attach_wedrive {
+    background-image:url(../../images/wedrive/attach/icon_action_wedrive_normal_2x4f119d.png);
+  }
+  .attach_wedrive:hover {
+    background-image:url(../../images/wedrive/attach/icon_action_wedrive_hover_2x4f119d.png);
+  }
+  .attach_wedrive:active {
+    background-image:url(../../images/wedrive/attach/icon_action_wedrive_press_2x4f119d.png);
+  }
+}
+
+.wedrive_att_bt:hover .name_big .down_big {
+  opacity: 1;
+}
+.wedrive_att_bt .info_big {
+  float: left;
+}

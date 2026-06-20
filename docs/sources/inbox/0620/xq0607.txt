@@ -1,0 +1,118 @@
+P0-Gate：LLM 接入前硬编码事实迁移”
+检查timeout / maxTokens / jsonMode 的类型级默认值
+LLM问数链路按trace设计逐个调用
+大模型生成标题功能异常，当前是语义截断 不是重新生成
+思考过程执行过程的披露方式优化，提问“下周日南京的天气”虽然是进入general链路，返回消息执行动态语还显示“查询广告数据”
+ dataPolicy does not allow external model 警告需多模型
+codex "继续检查 LLM 问数链路第二轮风险治理：重点看 contract schema 输出治理、answer/status/candidates alias adapter 是否只是兜底、dataPolicy.allowExternalModel=false 是否仍误调外部模型、query_contract_building/entity_candidate_extraction 是否只进入 Resolver 候选而不直接决定最终ID。请输出风险清单、代码位置、修复方案、Resolver消费策略、dataPolicy行为矩阵和测试用例。"
+联网搜索昨天已经做了但是没生效，提问“下周日南京的天气”回复没能力，联网搜索记录来源功能需检查，Web + Internal Knowledge 混合问答是否调用正确能力
+
+会话中用户硬指定其它项目则切换右上角项目，右上角项目作为会话默认项目，历史会话加载时切换至默认项目。
+
+chat_answer 真实模型稳定，对chat_answer调用链路进行稳定性治理，提升成功率与用户体验。要求：超时控制(连接3s、响应30s、超时记录日志)；自动重试(仅网络异常、Timeout、HTTP429/502/503/504，最多3次，退避1s/2s/4s)；熔断(连续失败超阈值触发，熔断期间跳过故障模型，支持半开恢复检测)。输出：架构设计、代码改造方案、核心实现代码、配置示例、单元测试方案、Mermaid时序图、风险评估与上线方案。
+
+Tool-First 问数真实执行，codex "请检查通用 chat 中 Tool-First 问数真实执行链路的问题，重点排查：意图识别、工具路由、权限安全、SQL/API生成、真实执行、错误处理、结果可信性、可观测性、性能并发、Answer生成和测试覆盖。请输出问题清单、风险等级、代码位置、修复建议、架构调整、测试用例和可落地代码修改方案。"
+
+文件与 Excel 能力要测试是否是按“File-to-Report Workflow”做的，目前有资产中心不知道和产物中心是否对应，自动化任务 Run History也需要检查一下缺失项。上传Excel 解析成提问，然后取数 生成excle闭环当前存在P0问题。[引用附件] 游戏项目日报模板.xlsx：已读取 2 个表格页，可作为表格资料继续分析。获取近30天日报数据。回复是“未生成有效回复”，0调用。
+
+codex exec "请基于当前仓库实际代码做最小范围改造，解决资产打不开的问题：先全仓搜索现有资产列表、资产详情、附件/素材/创意资源打开逻辑，以及之前已部署的 Excel 预览工具入口；不要新部署前端框架，不要重写 Excel 工具；实现或复用统一 AssetPreviewModal/资产预览弹窗，点击资产时按文件类型分流：图片用弹窗 img 预览，视频用弹窗 video controls 播放且关闭弹窗后停止播放，Excel/xlsx/xls/csv 优先用 iframe 嵌入现有 Excel 工具打开，其他未知类型提供下载或新窗口打开兜底；同时检查并修复 previewUrl/downloadUrl、鉴权、MIME 类型、CORS、视频 Range 支持相关前后端接口问题；要求保留现有业务入口和权限逻辑，避免破坏旧功能；完成后补充或更新必要测试，并输出修改文件、关键逻辑、验收方式和仍需人工确认的后端/部署项。"
+
+媒体字典 exact 自动补 media_id是指什么问题，当前实体解析是否生效，项目 媒体 应用类型 终端 团队 指标口径 数据范围 时间这些核心问数维度或请求参数是否能准确理解
+
+Trace fail-open：追踪失败时允许请求继续通过
+MCP business error normalization这个问题是否已经解决
+prompt_source 是否还可能出现 runtime_call / audit_projection 这类非标准值
+answer_composition 与 chat_answer 的语义边界是否存在不清楚的情况
+ModelRouterSource 与 status 语义是否完全统一
+ResponseContract是否收口
+主消息边界是否已经解决
+/api/chat 模块化拆分 好像做了一部分
+指标没有展示中文
+展示数据的时候展示错误指标
+业务域分析
+任务的执行记录是否可用
+调用评测集测试，生成测试报告
+
+
+
+
+
+
+
+
+
+
+
+问数速度太慢了 ，检查
+导出到小闪周一再还没接
+知识回答/缺参追问/需求多轮沟通/自动化摘要/问数总结/诊断总结/普通回答都开始有模型能力但仍受工具契约权限展示边界约束
+后台存在一些中心级治理，做了一轮优化但是改造中存在诸多BUG待检查修复
+DataResultTab / PromptTab 是否列表化展示模型参与节点
+从规划出发还有哪些纠正和补充的
+通用回答能力
+内部知识能力
+外部联网能力
+问数与报表能力
+数据分析能力
+自动化任务能力
+多模态能力
+理解与可观测能力
+包与联调能力
+数据诊断能力
+
+模型可以参与理解和候选排序，但最终选择必须由 Capability Contract、Tool Contract、权限、数据范围、可执行性预检和回退策略共同决定。OpenAI 的 function calling 定位是把模型连接到外部数据和系统；MCP 也把外部 API、数据库、工具、工作流标准化为可发现、可调用的能力；这些都说明工具不是 prompt 里的随意函数，而应该被当成可治理的产品能力来管理。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+继续当前未提交工作区，只做提交前观测语义收口，不改变问数执行结果，不启用新 LLM 决策，不改 MCP schema，不改 preflight/argument mapping，不改 ResponseContract 主消息边界，不提交。
+
+请只补两个点：
+
+1. model-assistants.ts / enhanceTextWithModel / enhanceLowRiskModelText 异常兜底：
+如果增强器 catch 到异常且底层 participation 丢失，必须补一条 ModelParticipationRecord：
+status=error
+fallbackReason=model_error 或 enhancer_error
+outputConsumed=false
+outputConsumedBy=[]
+answer_origin 不标成模型成功
+主流程继续 fail-open，返回规则/模板 fallback。
+
+2. trace 状态语义：
+not_applicable 不要映射成 failed/error 类 trace 状态。
+应映射为 skipped / not_applicable / info 语义，避免误触发失败告警。
+fallback_to_rules 也不应算 failed，应为 fallback/skipped/info。
+只有 error 才算模型失败。
+
+完成后补或调整测试：
+- 模型增强器异常也能进入 model_participation。
+- not_applicable 不会在 trace projection 中表现为 failed。
+- fallback_to_rules 不会表现为 failed。
+- 主消息不展示 model_participation 细节。
+- runtime metadata / disclosure / trace projection 仍可看到 participation。
+
+执行：
+npm.cmd run ts-check
+npm.cmd run test:model-service-governance
+npm.cmd exec vitest run tests/model-participation-trace.test.ts
+npm.cmd run test:chat-runtime-regression
+git diff --check
+
+不要提交，输出修改文件、验证结果、剩余风险。

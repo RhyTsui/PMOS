@@ -1,0 +1,9 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://dashscope.aliyuncs.com/apps/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "sk-d406ccc7bccc4e4bae305b698df626ab",
+    "ANTHROPIC_MODEL": "qwen3.7-plus-2026-05-26",
+    "ANTHROPIC_SMALL_FAST_MODEL": "qwen3.7-plus-2026-05-26"
+  },
+  "model": "qwen3.7-plus-2026-05-26"
+}

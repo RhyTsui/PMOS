@@ -9,7 +9,10 @@ import { QwenClient } from '../src/lib/llm-client.js';
 vi.mock('../src/lib/llm-client.js', () => {
   const mockCallVision = vi.fn().mockImplementation((imageUrl: string) => {
     // 模拟不同图片的返回
-    if (imageUrl.includes('chart')) {
+    if (!imageUrl || imageUrl === '' || !imageUrl.startsWith('http')) {
+      // 无效 URL 抛出错误
+      return Promise.reject(new Error('Invalid URL'));
+    } else if (imageUrl.includes('chart')) {
       return Promise.resolve('这是一张游戏收入数据图表，显示2024年Q3各公司收入排名');
     } else if (imageUrl.includes('screenshot')) {
       return Promise.resolve('游戏截图展示新角色立绘，二次元风格，画面精美');
@@ -129,7 +132,7 @@ describe('ImageUnderstandingService', () => {
     expect(customService['config'].skipSmallImages).toBe(false);
   });
 
-  it('图片URL验证', () => {
+  it('图片URL验证', async () => {
     // 测试无效URL
     const invalidUrls = [
       '',
@@ -137,10 +140,10 @@ describe('ImageUnderstandingService', () => {
       'ftp://example.com/image.jpg',
     ];
 
-    invalidUrls.forEach(async (url) => {
+    for (const url of invalidUrls) {
       const result = await service.describeImage(url);
       expect(result).toBeNull();
-    });
+    }
   });
 
   it('并发处理控制', async () => {

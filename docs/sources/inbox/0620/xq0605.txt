@@ -1,0 +1,82 @@
+ENTERPRISE_AI_CHAT_OS_SPEC.md 乱码
+
+AD文件夹下的md治理
+
+当提问提出去了 回答没有结束就切换，再点击会话提问会不变。
+
+P0-Gate：LLM 接入前硬编码事实迁移”
+
+提问“下周日南京的天气”虽然是进入general链路，返回消息头部的执行动态语还显示“查询广告数据”
+
+执行过程太乱了：进入问数链路。未命中明确业务链路，保持普通对话。读取当前会话项目范围和可用报表工具。检查可用能力：已完成 结果：已找到可执行能力。按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。再问又回复：当前未接入联网查询能力，无法获取下周日南京的天气。
+
+DataResultTab / PromptTab 没有列表化展示模型参与节点
+prompt_source 还可能出现 runtime_call / audit_projection 这类非标准值
+answer_composition 与 chat_answer 的语义边界还需要更清楚
+ModelRouterSource 与 status 语义还没有完全统一
+
+
+大模型生成标题功能异常，当前是语义截断 不是重新生成
+
+联网搜索昨天已经做了，记录来源要检查一下，文件与 Excel 能力要测试是否是按“File-to-Report Workflow”做的，目前有资产中心不知道和产物中心是否对应，自动化任务 Run History也需要检查一下缺失项，Package / Integration 专项域是否已存在，Web + Internal Knowledge 混合问答是否调用正确能力
+
+
+问数过程中是否全部都是大模型调用，还是有一些环节没有用上大模型，要确保该用的都要用上。
+
+每个会话会有一个默认项目即提问时右上角选中的项目，如果有多个提问，记录最后一个提问时右上角选中的项目。然后点历史会话，会获取会话的默认项目，加载历史消息时切换右上角的项目。
+
+总纲补充：
+小乔 Chat 的能力来源不是单一大模型，而是：内部知识库、外部联网搜索、业务 MCP、文件/表格、自动化任务和大模型认知增强的组合。
+
+架构原则：
+模型负责理解、归纳、解释和草拟；
+MCP 负责业务事实和执行；
+Web Search 负责外部实时公开信息；
+知识库负责内部沉淀知识；
+Artifact/Task 负责交付和追踪；
+Trace 负责旁路观测，不影响主流程。   
+
+产品原则：
+通用 Chat 负责理解用户目标；
+Capability Discovery 负责发现能做什么；
+Resolver Chain 负责把自然语言实体转成工具参数；
+Tool Contract 负责判断能不能执行；
+Execution Policy 负责决定调用哪个、是否 fallback；
+MCP 负责真实业务动作；
+LLM 负责解释、总结、诊断和草拟；
+Evidence Ledger 负责可追溯；
+Presentation 负责主消息和右侧分层展示。
+
+Trace fail-open
+chat_answer 真实模型稳定
+Tool-First 问数真实执行
+媒体字典 exact 自动补 media_id
+MCP business error normalization
+主消息边界
+真实 HTTP regression
+
+Web Search / Web Fetch / Source Ledger
+Excel 拼表与导出
+Artifact Store
+Task Run History
+Package / Integration 专项域
+Admin 模型路由细化
+
+当前还存在的待办case：
+P1-D
+ResponseContract 大收口
+/api/chat 模块化拆分
+思考过程执行过程的披露方式优化
+知识回答/缺参追问/需求多轮沟通/自动化摘要/问数总结/诊断总结/普通回答都开始有模型能力但仍受工具契约权限展示边界约束 
+后台做了一轮优化但是改造中存在诸多BUG待检查修复
+也存在一些中心级治理
+浏览器已有登录态时可自动登录未验收
+模型可以参与理解和候选排序，但最终选择必须由 Capability Contract、Tool Contract、权限、数据范围、可执行性预检和回退策略共同决定。OpenAI 的 function calling 定位是把模型连接到外部数据和系统；MCP 也把外部 API、数据库、工具、工作流标准化为可发现、可调用的能力；这些都说明工具不是 prompt 里的随意函数，而应该被当成可治理的产品能力来管理。
+
+进行一轮预发布上线测试，调用评测集测试，生成测试报告
+
+6月7号 完全跑通通用回答能力、内部知识能力、外部联网能力、问数与报表能力、数据分析能力、自动化任务能力、多模态能力、理解与可观测能力。
+
+6月8号完全跑通包与联调能力
+
+6月10号完全跑通数据诊断能力

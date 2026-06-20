@@ -1,0 +1,133 @@
+
+<!-- saved from url=(0104)https://exmail.qq.com/cgi-bin/readtemplate?t=domain2&sid=-2-2xgUWRaWPdF81,7&defcss=false&cbname=1&cbid=1 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=gb18030">                                                             <meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39; https://*.mail.qq.com https://*.weixin.qq.com; script-src-elem &#39;self&#39; https://*.mail.qq.com https://*.weixin.qq.com https://*.qqmail.com http://*.mail.qq.com http://*.weixin.qq.com http://*.qqmail.com https://captcha.gtimg.com https://*.captcha.qq.com https://res.wx.qq.com &#39;nonce-3613758035&#39;; script-src &#39;self&#39; https://*.mail.qq.com https://*.weixin.qq.com https://*.qqmail.com http://*.mail.qq.com http://*.weixin.qq.com http://*.qqmail.com https://captcha.gtimg.com https://*.captcha.qq.com https://res.wx.qq.com &#39;nonce-3613758035&#39;; style-src &#39;self&#39; https://*.mail.qq.com https://*.weixin.qq.com https://*.qqmail.com http://*.mail.qq.com http://*.weixin.qq.com http://*.qqmail.com &#39;unsafe-inline&#39;; img-src * &#39;self&#39; data: http: https: blob: wedrivepreview:; object-src &#39;none&#39;; base-uri &#39;self&#39;; frame-src &#39;self&#39; https://xui.ptlogin2.qq.com https://captcha.gtimg.com/ https://*.captcha.qq.com https://*.weixin.qq.com https://*.exmail.qq.com https://exmail.qq.com; connect-src &#39;self&#39; https://cube.weixinbridge.com https://report.url.cn https://rescdn.qqmail.com http://rescdn.qqmail.com; report-to csp-endpoint">        <script data-csp-script="" nonce="">
+        window.gUin = "736150416";
+        window.cspSucc = true;
+    </script>    <script nonce="" data-csp-script="" src="./global7e1bf3.js.下载"></script>                            <script data-csp-script="" nonce="">
+                var _val = +new Date();
+                var _expire = new Date((+new Date()) + 30 * 24 * 3600 * 1000 );
+                document.cookie = 'brwidF=' + _val + '; expires=' + _expire + '; path=/; domain=' + location.host + '; ';
+            </script>            <script nonce="">
+console.log("[domain2.html] loaded: false, exmail.qq.com");
+if(window.location.hostname.indexOf("exmail.qq.com") !=-1 ) {
+document.domain = "exmail.qq.com";
+}
+
+function filteScript(str, from) {
+if (!str) {
+return '';
+}
+
+var originalText = str;
+// 上报函数 - 发现script标签时调用
+function reportScript(originalText, match, fromSource, v4) {
+if (window.globalCspReport) {
+window.globalCspReport('common', {
+type: 'error',
+function: 'reportDomainScript',
+msg: window.frameElement && window.frameElement.name,
+v1: originalText,
+v2: match,
+v3: fromSource,
+v4: v4 || ''
+});
+}
+}
+
+try {
+var parser = new DOMParser();
+var doc = parser.parseFromString(str, 'text/html');
+
+// 移除所有script标签
+var scripts = doc.querySelectorAll('script');
+var hasScripts = false;
+for(var i = 0; i < scripts.length; i++) {
+reportScript(originalText, scripts[i].outerHTML, from);
+hasScripts = true;
+scripts[i].remove();
+}
+var resHtml = '';
+if (from === 'header') {
+resHtml = doc.head.innerHTML;
+} else if (str.indexOf('<body') > -1) {
+resHtml = doc.body.outerHTML;
+} else {
+resHtml = doc.body.innerHTML;
+}
+if (!resHtml) {
+reportScript(originalText, '', from, 'empty doc');
+}
+return resHtml;
+} catch(e) {
+console.log('[domain2.html] parseFromString error', e);
+// 匹配所有 script 标签（包括不完整的）
+var res = str.replace(/<script[\s\S]*?<\/script>|<script[\s\S]*?\/>/ig, function(match) {
+reportScript(originalText, match, from);
+return '';
+});
+return res;
+}
+}
+
+var goBody = [];
+(function() {
+if(!parent.getTop) {
+console.log('[domain2.html] parent.getTop is null, return');
+return;
+}
+if (typeof parent.getTop != "function") {
+if (window.globalCspReport) {
+window.globalCspReport('common', {
+type: 'error',
+function: 'reportDomain',
+msg: 'getTop',
+v1: parent.getTop && parent.getTop.toString(),
+v4: window.frameElement && window.frameElement.contentDocument && window.frameElement.contentDocument.location.href
+});
+}
+return;
+}
+
+try {
+var isFromSignatureEditor = (window.parent.window.location.search.indexOf('t=setting1_editsign') !== -1) ? true : false;
+} catch(e) {
+var isFromSignatureEditor = false;
+}
+try {
+var isFromTodoEditor = (window.parent.window.location.search.indexOf('t=todo') !== -1) ? true : false;
+} catch(e) {
+var isFromTodoEditor = false;
+}
+
+var _oFrameElm = window.frameElement;
+var cbload = _oFrameElm.getAttribute("data-cbload");
+_oFrameElm.addEventListener("load", function() {
+console.log('[domain2.html] iframe addEventListener load, callback:', cbload);
+if (cbload == "true" && _oFrameElm.getAttribute('inlineloaded') != "true") {
+var mainWin = parent.getTop().getMainWin();
+var self = this;
+_oFrameElm.setAttribute("loaded", true);
+_oFrameElm.setAttribute("eventloaded", true);
+
+if (isFromTodoEditor) {
+_oFrameElm['_render_']=1;
+}
+
+var callbackid = _oFrameElm.getAttribute("callbackid");
+var callback = '_creAteifRAmeoNlQAd_';
+if (callback && typeof mainWin[callback] == "function") {
+console.log('[domain2.html] do callback', callback, 'callbackid', callbackid);
+if(isFromSignatureEditor || isFromTodoEditor) {
+window.parent.window[callback](callbackid, this);
+} else {
+mainWin[callback](callbackid, this);
+}
+} else if (callback && typeof window.parent.window[callback] == "function") {
+window.parent.window[callback](callbackid, this);
+}
+}
+});
+
+console.log("[domain2] has id");
+})();
+</script></head><body class="domain"></body></html>

@@ -43,13 +43,14 @@ describe('request-understanding route decision', () => {
       semanticTask: 'retrieve_report_data',
       executionMode: 'data_execution',
       serviceIntent: 'system_operation',
-      evidenceNeed: ['data_mcp'],
-      riskLevel: 'L1',
+      businessObjects: [],
+      evidenceNeeds: ['data_mcp'],
       requiredSlots: [],
+      filledSlots: [],
       missingSlots: [],
-      confidence: 'medium',
-      frameSource: 'semantic_frame',
-      frameVersion: 'test',
+      needsClarification: false,
+      confidence: 0.7,
+      frameSource: 'syntax_rule',
     };
     const requirement = deriveUserRequirement('最近 14 天的投放日报效果综合评估', null, semanticFrame);
 
