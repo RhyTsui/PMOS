@@ -72,6 +72,7 @@ export interface RequestRoutingContext {
   capabilityCandidates?: CapabilitySelectionCandidate[];
   llmIntentSignal?: LlmIntentSignal | null;
   semanticFrame?: RequestSemanticFrame | null;
+  clientIntent?: string | null;
 }
 
 export function normalizeUserQuestionText(message: string): string {
@@ -672,6 +673,7 @@ export function deriveRequestRouteDecision(message: string, context?: RequestRou
     || hasBusinessContext;
   const canUseBusinessTextRulePath = governedBusinessCue || hasCapabilityCandidate;
   const llmIntentSignal = context?.llmIntentSignal;
+  const clientRouteHint = typeof context?.clientIntent === 'string' ? context.clientIntent.trim() : '';
   const llmUnderstandingMatched = llmIntentSignal
     && llmIntentSignal.confidence >= 0.7
     && llmIntentSignal.intent_type !== 'general';
@@ -786,6 +788,32 @@ export function deriveRequestRouteDecision(message: string, context?: RequestRou
         tracking_target: semanticFrame.serviceIntent,
       });
     }
+  }
+
+  if (clientRouteHint === 'report_query' && structuredReportSurfaceIntent) {
+    return buildDecision('report_query', '客户端候选：前端意图与受治理报表/业务信号一致，进入统一问数链路。', {
+      agent: 'report',
+      is_business_related: true,
+      workflow_level: 'light',
+      confidence: structuredReportSurfaceIntent ? 'medium' : 'low',
+      requiresExecution: true,
+      required_slots: ['project', 'time_range', 'metric'],
+      suggested_actions: ['查询报表数据', '展示趋势结果', '检查数据质量'],
+      tracking_target: 'data_query',
+    });
+  }
+
+  if (structuredReportSurfaceIntent) {
+    return buildDecision('report_query', '规则候选：识别到结构化报表、指标、时间或维度查数信号，进入统一问数链路。', {
+      agent: 'report',
+      is_business_related: true,
+      workflow_level: 'light',
+      confidence: 'medium',
+      requiresExecution: true,
+      required_slots: ['project', 'time_range', 'metric'],
+      suggested_actions: ['查询报表数据', '展示趋势结果', '检查数据质量'],
+      tracking_target: 'data_query',
+    });
   }
 
   if (canUseCodeRulePath && isDeliverableWritingRequest(text)) {
@@ -1064,13 +1092,18 @@ export function deriveUserRequirement(message: string, context?: BusinessContext
   });
   // Override serviceIntent for field definition
   // Prefer semanticFrame.serviceIntent when available (P1 migration)
-  const effectiveServiceIntent = isReportRequirement && (
+  const semanticServiceIntent = semanticFrame?.serviceIntent;
+  const reportServiceIntentFromSignals = isReportRequirement
+    && (serviceIntent === 'data_query' || serviceIntent === 'report_delivery')
+    && semanticServiceIntent !== 'data_query'
+    && semanticServiceIntent !== 'report_delivery';
+  const effectiveServiceIntent = reportServiceIntentFromSignals || (isReportRequirement && (
     semanticFrame?.semanticTask === 'execute_workflow'
-    || (serviceIntent === 'report_delivery' && semanticFrame?.serviceIntent === 'data_query')
-    || (serviceIntent === 'package_fetch' && (semanticFrame?.serviceIntent === 'integration_workflow' || semanticFrame?.serviceIntent === 'system_operation'))
-  )
+    || (serviceIntent === 'report_delivery' && semanticServiceIntent === 'data_query')
+    || (serviceIntent === 'package_fetch' && (semanticServiceIntent === 'integration_workflow' || semanticServiceIntent === 'system_operation'))
+  ))
     ? serviceIntent
-    : semanticFrame?.serviceIntent
+    : semanticServiceIntent
     || (isFieldDefinitionRequirement ? 'field_definition' : serviceIntent);
   const requirementEvidence = buildRequirementEvidence({
     text,

@@ -706,6 +706,7 @@ export async function executeReportQueryStage(
 
     // Evidence ledger — tool result
     const updatedLedger = recordEvidence(io.getEvidenceLedger(), {
+      stage: 'report_query',
       source: 'tool_result',
       sourceId: reportStep.selection_trace?.selected_tool || 'report_query',
       confidence: reportStep.status === 'success' ? 'confirmed_fact' : reportStep.status === 'empty' ? 'confirmed_fact' : 'high_probability',
@@ -1062,6 +1063,7 @@ export async function executeReportQueryStage(
     onShadowResult: (shadowResult) => {
       if (shadowResult.status === 'succeeded' && shadowResult.plan) {
         io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), {
+          stage: 'planning',
           source: 'planner_inference',
           sourceId: 'planner_shadow',
           confidence: 'high_probability',

@@ -38,6 +38,7 @@ import { intentToServiceType } from '@/contracts/service-catalog/intent-to-servi
 import { deriveRequestRouteDecision } from '@/lib/request-understanding';
 import { getActiveCaseFrame, createCaseFrame } from '@/lib/case-frame-store';
 import { addMessageId, updateBusinessContext } from '@/lib/case-frame-helpers';
+import { hasInternalBusinessContext, shouldUsePublicWebBeforeAuth } from './auth-public-web-deferral';
 import type { StreamIO } from './pipeline-types';
 
 // ─── 输入类型 ─────────────────────────────────────────────
@@ -163,21 +164,30 @@ export async function executeUnderstandingStage(
   const bodyForContext = body as Partial<import('@/lib/chat-runtime/project-context').ChatProjectRequestBody>;
   const compiledContext = await compileChatContext({ body: bodyForContext, message, conversationId, userScopeKey, userScope: userScope as import('@/lib/user-scope').UserScope | null });
   const projectContextSummary = buildProjectContextSummary(bodyForContext, compiledContext);
+  const question = cleanQuestion(message);
 
   // ─── Semantic Frame ─────────────────────────────────
-  const semanticFrame = deriveRequestSemanticFrame({ message: cleanQuestion(message) });
+  const semanticFrame = deriveRequestSemanticFrame({ message: question });
 
   // ─── User Requirement ───────────────────────────────
-  let userRequirement = deriveUserRequirement(cleanQuestion(message), compiledContext.businessContext, semanticFrame);
+  let userRequirement = deriveUserRequirement(question, compiledContext.businessContext, semanticFrame);
   io.pushRuntimeState('context_loading', ['understanding']);
 
   // ─── Auth 校验 ──────────────────────────────────────
   const earlyServiceIntent = String(userRequirement.serviceIntent || '');
-  if (!userScope && (
+  const earlyAuthRequired = (
     userRequirement.task === 'report_query'
     || userRequirement.task === 'diagnosis'
     || AUTH_REQUIRED_SERVICE_INTENTS.has(earlyServiceIntent)
-  )) {
+  );
+  const shouldDeferAuthForPublicWeb = await shouldUsePublicWebBeforeAuth({
+    question,
+    conversationIntent: body.intent,
+    hasUserScope: Boolean(userScope),
+    authRequired: earlyAuthRequired,
+    businessContext: compiledContext.businessContext,
+  });
+  if (!userScope && earlyAuthRequired && !shouldDeferAuthForPublicWeb) {
     const authRequiredAnswer = authRequiredAnswerForServiceIntent(earlyServiceIntent);
     io.pushEvent(createProcessEvent({
       type: 'context.prepared',
@@ -245,15 +255,15 @@ export async function executeUnderstandingStage(
   }
 
   // ─── Intent Routing ─────────────────────────────────
-  const question = cleanQuestion(message);
   const intentRouteRules = loadIntentRouteRulesSync();
+  const clientRouteHint = typeof body.intent === 'string' && body.intent.trim() ? body.intent.trim() : undefined;
 
   const preRouteModelServiceConfig = await getModelServiceConfig();
   const preRouteServers = await listMcpServers();
-  const capabilitySummary = preRouteServers
+  const toolSummary = preRouteServers
     .flatMap(s => s.enabled && s.status === 'connected' ? [`${s.name}: ${s.tools.map(t => t.name).join(', ')}`] : [])
     .join('; ') || '无已连接MCP服务';
-  const intentRoutingPreAssist = await runReportModelNode({
+  const routeReviewAssist = await runReportModelNode({
     useCase: 'intent_routing_review',
     fallbackText: '',
     modelServiceConfig: preRouteModelServiceConfig,
@@ -263,15 +273,15 @@ export async function executeUnderstandingStage(
       projectContext: compiledContext.businessContext,
       availableIntentTypes: ['report_query', 'diagnosis', 'help', 'demand', 'debugging', 'general'],
       routeRules: intentRouteRules?.rules?.map((r: any) => `${r.name}: ${r.description}`).join('; ') || '',
-      capabilitySummary,
+      capabilitySummary: toolSummary,
     },
     consume: { enabled: false, consumedBy: 'pre_route_intent_lane' },
     traceMeta: { node: 'intent_routing_review', phase: 'pre_route' },
   });
-  const llmIntentSignal: LlmIntentSignal | null = intentRoutingPreAssist.output
-    && typeof intentRoutingPreAssist.output === 'object'
-    && 'intent_type' in (intentRoutingPreAssist.output as Record<string, unknown>)
-    ? intentRoutingPreAssist.output as LlmIntentSignal
+  const llmRouteReview: LlmIntentSignal | null = routeReviewAssist.output
+    && typeof routeReviewAssist.output === 'object'
+    && 'intent_type' in (routeReviewAssist.output as Record<string, unknown>)
+    ? routeReviewAssist.output as LlmIntentSignal
     : null;
 
   // ─── Route Decision ─────────────────────────────────
@@ -279,19 +289,19 @@ export async function executeUnderstandingStage(
     businessContext: compiledContext.businessContext,
     slotState: compiledContext.slotState,
     routeRules: intentRouteRules,
-    llmIntentSignal,
+    llmIntentSignal: llmRouteReview,
     semanticFrame,
+    clientIntent: clientRouteHint,
   });
 
   // ─── Capability Discovery ───────────────────────────
   const routeServers = await listMcpServers();
-  const routeCapabilityManifest = buildCapabilityManifest(routeServers);
-  const routeCapabilityCandidates = discoverCapabilityCandidatesForMessage(question, routeCapabilityManifest);
+  const routeManifest = buildCapabilityManifest(routeServers);
+  const routeCandidates = discoverCapabilityCandidatesForMessage(question, routeManifest);
   const skillSelection = await selectSkillCandidate(question, route.intent_type, route.reason);
-  const clientIntent = typeof body.intent === 'string' && body.intent.trim() ? body.intent.trim() : undefined;
   const matchedRouteRules = evaluateIntentRouteRules({ message: cleanQuestion(message), rules: intentRouteRules.rules });
   const reportRouteMatch = matchesReportQueryRoute(message, intentRouteRules);
-  const capabilityReportMatch = Boolean(routeCapabilityCandidates.find((candidate: any) =>
+  const reportCandidateMatch = Boolean(routeCandidates.find((candidate: any) =>
     candidate.capability.capabilityType === 'data.report'
     && candidate.capability.supportedServiceIntents?.find((intent: string) => intent === 'report_delivery' || intent === 'data_query')
   ));
@@ -308,33 +318,30 @@ export async function executeUnderstandingStage(
         question,
         route.intent_type,
         reportRouteMatch,
-        capabilityReportMatch,
+        reportCandidateMatch,
         { modelServiceConfig: publicWebModelServiceConfig },
       )
     : null;
 
   // ─── Route Warnings ─────────────────────────────────
   const routeWarnings = [...new Set([
-    ...(clientIntent && clientIntent !== route.intent_type ? [`client_intent_conflict:${clientIntent}->${route.intent_type}`] : []),
-    ...(clientIntent === 'report_query' && route.intent_type !== 'report_query' ? ['client_intent_ignored:report_query_hint_overridden'] : []),
+    ...(clientRouteHint && clientRouteHint !== route.intent_type ? [`client_intent_conflict:${clientRouteHint}->${route.intent_type}`] : []),
+    ...(clientRouteHint === 'report_query' && route.intent_type !== 'report_query' ? ['client_intent_ignored:report_query_hint_overridden'] : []),
   ])];
 
   // ─── Public Web Need ────────────────────────────────
-  const routeServiceIntent = SERVICE_INTENT_BY_ROUTE_INTENT[route.intent_type] || 'general_chat';
-  const internalBusinessCueForPublicWeb = Boolean(
-    AUTH_REQUIRED_SERVICE_INTENTS.has(routeServiceIntent)
-    || AUTH_REQUIRED_SERVICE_INTENTS.has(userRequirement.serviceIntent || '')
-    || userRequirement.task === 'report_query'
-    || userRequirement.task === 'diagnosis'
-    || userRequirement.task === 'debugging'
-    || reportRouteMatch
-    || capabilityReportMatch
-    || compiledContext.businessContext.latestResult
-    || compiledContext.businessContext.qualityCheck
-    || compiledContext.businessContext.timeRange
-    || compiledContext.businessContext.metrics,
+  const routeServiceKind = SERVICE_INTENT_BY_ROUTE_INTENT[route.intent_type] || 'general_chat';
+  const internalContextPresent = hasInternalBusinessContext(compiledContext.businessContext);
+  const strongInternalRouteEvidence = Boolean(
+    reportRouteMatch
+    || reportContinuationContext
+    || (reportCandidateMatch && internalContextPresent)
   );
-  const publicWebNeed = await detectPublicWebNeed(question, {
+  const internalBusinessCueForPublicWeb = Boolean(
+    internalContextPresent
+    || strongInternalRouteEvidence
+  );
+  const publicWebAccess = await detectPublicWebNeed(question, {
     modelServiceConfig: publicWebModelServiceConfig,
     context: {
       routeIntent: route.intent_type,
@@ -345,17 +352,28 @@ export async function executeUnderstandingStage(
   });
 
   // ─── Report Gate ────────────────────────────────────
-  const routeSelectedCapability = routeCapabilityCandidates[0]?.capability || null;
+  const routeSelectedCandidate = routeCandidates[0]?.capability || null;
   const reportGate = shouldEnterReportExecution({
     route,
     userRequirement,
     semanticFrame,
-    selectedCapability: routeSelectedCapability,
-    capabilityReportMatch,
+    selectedCapability: routeSelectedCandidate,
+    capabilityReportMatch: reportCandidateMatch,
     reportRouteMatch,
   });
-  const isReportQuery = reportGate.shouldEnter;
-  if (isReportQuery && publicWebNeed.required) {
+  const publicWebPrimaryCandidate = Boolean(
+    publicWebAccess.required
+    && publicWebAccess.searchPlan?.allowed !== false
+    && publicWebAccess.providerEligibility?.eligible !== false
+    && publicWebAccess.factNeed?.fact_visibility === 'public'
+    && !internalContextPresent
+    && !strongInternalRouteEvidence
+  );
+  const isReportQuery = publicWebPrimaryCandidate ? false : reportGate.shouldEnter;
+  if (publicWebPrimaryCandidate && reportGate.shouldEnter) {
+    routeWarnings.push('report_gate_deferred_to_public_web_fact_need');
+  }
+  if (isReportQuery && publicWebAccess.required) {
     routeWarnings.push('public_web_candidate_deferred_to_internal_capability');
   }
 
@@ -364,8 +382,8 @@ export async function executeUnderstandingStage(
     stage: 'route_arbitration',
     isReportQuery,
     reportRouteMatch,
-    capabilityReportMatch,
-    publicWebNeed,
+    capabilityReportMatch: reportCandidateMatch,
+    publicWebNeed: publicWebAccess,
     knowledge: { status: 'not_collected_in_route_arbitration', hitCount: 0 },
     hasProjectContext: Boolean(projectContextSummary || compiledContext.project?.currentProject),
     hasMemoryOrHistoryContext: Boolean((body.history || []).length),
@@ -373,7 +391,7 @@ export async function executeUnderstandingStage(
 
   // ─── Route Decision Metadata ─────────────────────────
   const routeDecisionMetadata = buildRouteDecisionMetadata({
-    clientIntent,
+    clientIntent: clientRouteHint,
     routeIntent: route.intent_type,
     resolvedIntent: isReportQuery ? 'report_query' : route.intent_type,
     routeReason: route.reason,
@@ -404,7 +422,7 @@ export async function executeUnderstandingStage(
   io.pushEvent(createProcessEvent({
     type: 'planner.arbitrated',
     label: '信息源仲裁',
-    summary: isReportQuery && publicWebNeed.required
+    summary: isReportQuery && publicWebAccess.required
       ? '公开信息需求已作为候选记录，内部数据能力优先执行。'
       : '已完成内部能力、公开信息和上下文候选仲裁。',
     status: 'success',
@@ -422,7 +440,7 @@ export async function executeUnderstandingStage(
     message,
     semanticFrame,
     userRequirement,
-    routeServiceIntent: typeof routeServiceIntent === 'string' ? routeServiceIntent : undefined,
+    routeServiceIntent: typeof routeServiceKind === 'string' ? routeServiceKind : undefined,
     businessContext: {
       project: compiledContext?.businessContext?.project as { id?: string; name?: string } | undefined,
       media: compiledContext?.businessContext?.media as string | undefined,
@@ -431,7 +449,7 @@ export async function executeUnderstandingStage(
   });
 
   // 基于 discovery 结果生成 service proposal
-  const candidateServiceType = fromLegacyServiceIntent(routeServiceIntent);
+  const candidateServiceType = fromLegacyServiceIntent(routeServiceKind);
   const serviceProposal = candidateServiceType
     ? generateServiceProposal({
         message,
@@ -504,21 +522,21 @@ export async function executeUnderstandingStage(
     projectContextSummary,
     route,
     routeServers,
-    routeCapabilityManifest,
-    routeCapabilityCandidates,
+    routeCapabilityManifest: routeManifest,
+    routeCapabilityCandidates: routeCandidates,
     skillSelection,
-    clientIntent,
+    clientIntent: clientRouteHint,
     matchedRouteRules,
     reportRouteMatch,
-    capabilityReportMatch,
+    capabilityReportMatch: reportCandidateMatch,
     reportContinuation,
     reportContinuationClassification,
-    publicWebNeed,
+    publicWebNeed: publicWebAccess,
     routeInformationSourceArbitration,
     routeDecisionMetadata,
     isReportQuery,
     routeWarnings,
-    routeServiceIntent,
+    routeServiceIntent: routeServiceKind,
     serviceProposal,
     possibleServices: serviceDiscovery.possibleServices,
     caseFrame,

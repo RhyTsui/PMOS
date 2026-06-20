@@ -142,7 +142,8 @@ export type EvidenceStatus =
   | 'extracted'
   | 'failed'
   | 'duplicate'
-  | 'filtered';
+  | 'filtered'
+  | 'processed_no_value';
 
 export interface RawEvidence {
   id: string;
@@ -354,4 +355,23 @@ export interface DedupRecord {
   titleHash: string;
   dedupGroupId?: string;
   createdAt: string;
+}
+
+// ===== 反馈 =====
+
+export type FeedbackType = 'source' | 'seed' | 'general';
+export type FeedbackStatus = 'pending' | 'processing' | 'accepted' | 'rejected';
+
+export interface Feedback {
+  id: string;
+  feedbackType: FeedbackType;
+  content: string;
+  submitter?: string;
+  contact?: string;
+  status: FeedbackStatus;
+  relatedIds?: string[];
+  adminNotes?: string;
+  processedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }

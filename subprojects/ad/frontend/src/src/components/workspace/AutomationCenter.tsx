@@ -182,8 +182,8 @@ export function AutomationCenter(props: AutomationCenterProps) {
       <section style={{ display: 'flex', minHeight: 0, height: '100%', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, paddingBottom: 18 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 26, lineHeight: 1.2, color: c.textPrimary }}>自动化</h1>
-            <p style={{ margin: '8px 0 0', color: c.textSecondary, fontSize: 13 }}>管理自动生成的报表、拼表和分析任务。</p>
+            <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 26, lineHeight: 1.2, color: c.textPrimary }}>自动任务</h1>
+            <p style={{ margin: '8px 0 0', color: c.textSecondary, fontSize: 13 }}>管理定时报表、拼表和分析任务。</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button type="button" onClick={handleOpenAutomationCreateFromResult} style={{ height: 34, border: 'none', borderRadius: 10, background: '#eef4ff', color: '#2563eb', padding: '0 12px', fontSize: 12, cursor: 'pointer' }}>用本次结果创建</button>
@@ -220,7 +220,7 @@ export function AutomationCenter(props: AutomationCenterProps) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {automationLoading ? (
                 <div data-automation-loading style={{ display: 'grid', gap: 12 }}>
-                  <div style={{ fontSize: 12, color: c.textMuted }}>正在读取自动化任务...</div>
+                  <div style={{ fontSize: 12, color: c.textMuted }}>正在读取自动任务...</div>
                   <LoadingSkeletonRows rows={4} minHeight={300} />
                 </div>
               ) : automationReportTasks.length > 0 ? (
@@ -228,7 +228,7 @@ export function AutomationCenter(props: AutomationCenterProps) {
               ) : (
                 <div style={{ minHeight: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: c.textMuted, fontSize: 13 }}>
                   <Clock3 size={22} color="#9ca3af" />
-                  <div style={{ marginTop: 12 }}>尚未配置自动化任务。</div>
+                  <div style={{ marginTop: 12 }}>尚未配置自动任务。</div>
                   <button type="button" onClick={() => setAutomationTab('templates')} style={{ marginTop: 18, height: 34, borderRadius: 10, border: 'none', background: '#111827', color: '#fff', padding: '0 14px', fontSize: 13, cursor: 'pointer' }}>从模板创建</button>
                 </div>
               )}

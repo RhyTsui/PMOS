@@ -102,7 +102,12 @@ export function shouldEnterReportExecution(
   // directly (mapped from route.intent_type === 'report_query') so that a
   // misclassified semantic frame or a generic userRequirement doesn't block
   // a legitimate data query.
-  const routeIsStrongReport = input.reportRouteMatch
+  const routeIsStrongReport = (
+    input.reportRouteMatch
+    || input.userRequirement.task === 'report_query'
+    || input.userRequirement.serviceIntent === 'data_query'
+    || input.userRequirement.serviceIntent === 'report_delivery'
+  )
     && input.route.intent_type === 'report_query'
     && input.route.requiresExecution;
   const serviceIntent = routeIsStrongReport
@@ -142,7 +147,7 @@ export function shouldEnterReportExecution(
   // queries (e.g. messages using "搜索" or containing metric names without
   // action verbs like "查").
   if (routeIsStrongReport) {
-    reasons.push('route_evidence_override:report_route_match');
+    reasons.push('route_evidence_override:strong_report_contract');
   } else if (executionMode) {
     if (!isExecutionModeAllowedForReport(executionMode)) {
       blockedBy.push(`execution_mode:${executionMode}`);

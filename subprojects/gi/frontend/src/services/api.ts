@@ -67,9 +67,26 @@ export interface SystemStatus {
 
 // ===== API 方法 =====
 export const eventsApi = {
-  list: (params?: { eventType?: string; priority?: string }) =>
-    api.get('/events', { params }),
+  list: (params?: {
+    eventType?: string;
+    priority?: string;
+    audienceTag?: string;
+    search?: string;
+    minScore?: string;
+    limit?: string;
+  }) => api.get('/events', { params }),
   get: (id: string) => api.get(`/events/${id}`),
+};
+
+export const signalsApi = {
+  list: (params?: { priority?: string; status?: string; audienceTag?: string }) =>
+    api.get('/signals', { params }),
+  stats: () => api.get('/signals/stats'),
+};
+
+export const gapsApi = {
+  detect: () => api.get('/gaps'),
+  stats: () => api.get('/gaps/stats'),
 };
 
 export const sourcesApi = {

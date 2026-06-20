@@ -103,7 +103,7 @@ describe('information source arbitration', () => {
     expect(context?.status).toBe('candidate');
     expect(context?.role).toBe('context');
     expect(context?.reasons).toContain('context_can_fill_empty_slots_but_not_override_current_turn');
-    expect(arbitration.selected_source).toBe('model');
+    expect(arbitration.selected_source).toBe('model_only');
   });
 
   it('selects knowledge when internal capability is unavailable and knowledge evidence exists', () => {

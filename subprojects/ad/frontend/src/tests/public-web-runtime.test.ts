@@ -360,7 +360,7 @@ describe('public web runtime safety', () => {
         results: [
           {
             title: '南京天气预报',
-            url: 'https://weather.example.org/nanjing',
+            url: 'https://weather.example.com/nanjing',
             snippet: '南京本周日天气预报：2026年6月21日多云，气温 24-31℃。',
             siteName: 'Weather Service',
           },
@@ -373,7 +373,7 @@ describe('public web runtime safety', () => {
         ...original,
         enabled: true,
         providers: (original.providers || []).map(provider => ({ ...provider, enabled: false })),
-        searchEndpoint: 'https://search.example.org/query',
+        searchEndpoint: 'https://search.example.com/query',
         method: 'GET',
         queryParam: 'q',
         resultsPath: 'results',

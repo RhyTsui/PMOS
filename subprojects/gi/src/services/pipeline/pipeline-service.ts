@@ -2,7 +2,7 @@
  * 数据管道服务
  *
  * 编排完整的数据处理流程：
- * RawEvidence → StructuredEvent → EvidenceEvent → Signal
+ * RawEvidence → [图片理解] → StructuredEvent → EvidenceEvent → Signal
  */
 import { v4 as uuidv4 } from 'uuid';
 import { RawEvidenceRepository } from '../../repositories/raw-evidence-repository.js';
@@ -10,6 +10,7 @@ import { StructuredEventRepository } from '../../repositories/structured-event-r
 import { EvidenceEventRepository } from '../../repositories/evidence-event-repository.js';
 import { SignalRepository } from '../../repositories/signal-repository.js';
 import { ExtractionService } from '../extraction/index.js';
+import { ImageUnderstandingService } from '../image/index.js';
 import { computeSimHash } from '../../lib/simhash.js';
 import type {
   RawEvidence, StructuredEvent, EvidenceEvent, Signal, EventType, Priority,
@@ -24,6 +25,7 @@ export class PipelineService {
   private evidenceEventRepo: EvidenceEventRepository;
   private signalRepo: SignalRepository;
   private extractionService: ExtractionService;
+  private imageService: ImageUnderstandingService;
 
   constructor() {
     this.evidenceRepo = new RawEvidenceRepository();
@@ -31,6 +33,7 @@ export class PipelineService {
     this.evidenceEventRepo = new EvidenceEventRepository();
     this.signalRepo = new SignalRepository();
     this.extractionService = new ExtractionService();
+    this.imageService = new ImageUnderstandingService();
   }
 
   /**
@@ -59,7 +62,21 @@ export class PipelineService {
     }
 
     try {
-      // 2. LLM 抽取 → StructuredEvent
+      // 2. 图片理解（如有图片，先调用 Qwen-VL 描述）
+      if (evidence.images && evidence.images.length > 0) {
+        console.log(`[Pipeline] 处理 ${evidence.images.length} 张图片...`);
+        const imgResult = await this.imageService.processImages(evidenceId);
+        if (imgResult.processed > 0) {
+          console.log(`[Pipeline] 图片理解完成: ${imgResult.processed} 张`);
+          // 重新加载 evidence（已包含图片描述）
+          const updatedEvidence = this.evidenceRepo.findById(evidenceId);
+          if (updatedEvidence) {
+            Object.assign(evidence, updatedEvidence);
+          }
+        }
+      }
+
+      // 3. LLM 抽取 → StructuredEvent
       console.log(`[Pipeline] 抽取证据: ${evidence.title.substring(0, 50)}...`);
       const structuredEvent = await this.extractionService.extractFromEvidence(evidence);
 
@@ -68,21 +85,34 @@ export class PipelineService {
         return result;
       }
 
-      // 保存 StructuredEvent
-      this.structuredEventRepo.create(structuredEvent);
+      // 注意：extraction-service 内部已保存 structuredEvent，此处不再重复保存
       result.structuredEventId = structuredEvent.id;
       console.log(`[Pipeline] 抽取完成: ${structuredEvent.eventTitle}`);
 
-      // 3. 合并到 EvidenceEvent
+      // 4. 过滤无价值情报：LLM 判定为"无有效情报"的文章不进入后续流程
+      if (structuredEvent.eventTitle === '无有效情报') {
+        this.evidenceRepo.updateStatus(evidence.id, 'processed_no_value');
+        console.log(`[Pipeline] 跳过无价值情报: ${evidence.title.substring(0, 50)}`);
+        result.success = true;
+        return result;
+      }
+
+      // 5. 合并到 EvidenceEvent（仅对有情报价值的内容做去重合并）
       const evidenceEvent = this.mergeToEvidenceEvent(structuredEvent, evidence);
       result.evidenceEventId = evidenceEvent.id;
       console.log(`[Pipeline] 事件合并: ${evidenceEvent.eventTitle} (来源: ${evidenceEvent.sourceCount})`);
 
-      // 4. 生成 Signal
-      const signal = this.generateSignal(evidenceEvent, evidence.sourceId);
-      this.signalRepo.create(signal);
-      result.signalId = signal.id;
-      console.log(`[Pipeline] 信号生成: ${signal.title} (${signal.priority})`);
+      // 6. 生成 Signal（防止同一 evidenceEvent 重复生成信号）
+      const existingSignal = this.signalRepo.findByEvidenceEventId(evidenceEvent.id);
+      if (existingSignal) {
+        result.signalId = existingSignal.id;
+        console.log(`[Pipeline] 信号已存在，跳过: ${existingSignal.title}`);
+      } else {
+        const signal = this.generateSignal(evidenceEvent, evidence.sourceId);
+        this.signalRepo.create(signal);
+        result.signalId = signal.id;
+        console.log(`[Pipeline] 信号生成: ${signal.title} (${signal.priority})`);
+      }
 
       result.success = true;
     } catch (error) {

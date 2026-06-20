@@ -251,7 +251,18 @@ function buildProviderHeaders(provider: PublicSearchProviderConfig, defaults: Pu
 }
 
 function normalizeSearchItems(data: unknown, provider: PublicSearchProviderConfig, config: PublicWebConfig): SearchProviderResultItem[] {
-  const rawItems = config.resultsPath ? readPath(data, config.resultsPath) : findArrayCandidate(data);
+  const providerDefaultPath = provider.kind === 'brave'
+    ? 'web.results'
+    : provider.kind === 'exa' || provider.kind === 'tavily'
+      ? 'results'
+      : '';
+  const providerItems = providerDefaultPath ? readPath(data, providerDefaultPath) : undefined;
+  const configuredItems = config.resultsPath ? readPath(data, config.resultsPath) : undefined;
+  const rawItems = Array.isArray(providerItems) && providerItems.length
+    ? providerItems
+    : Array.isArray(configuredItems) && configuredItems.length
+      ? configuredItems
+      : findArrayCandidate(data);
   const list = Array.isArray(rawItems) ? rawItems : findArrayCandidate(rawItems);
   return list
     .map((item): SearchProviderResultItem | null => {

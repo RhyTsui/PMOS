@@ -57,7 +57,7 @@ describe('PromptBuilder', () => {
   it('应该包含所有 7 个角色', () => {
     const prompt = buildExtractionPrompt(mockEvidence, mockSource);
 
-    expect(prompt).toContain('老板');
+    expect(prompt).toContain('组织');
     expect(prompt).toContain('战略');
     expect(prompt).toContain('发行');
     expect(prompt).toContain('运营');

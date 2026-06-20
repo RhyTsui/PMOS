@@ -167,14 +167,14 @@
 | `RQO-003` | `report-query-orchestrator.ts:989` `scoreCapabilityMatch` | 选工具 | P0 | 迁到 Plan Arbitrator + Capability Discovery 评分契约 |
 | `RQO-004` | `report-query-orchestrator.ts:1211` `hasStrongReportQueryIntent` | 选工具 | P0 | 降级为 RequestUnderstanding/TaskPlan 候选 |
 | `RQO-005` | `report-query-orchestrator.ts:1234` `selectReportToolForType` | 选工具 | P0 | 改为 Capability Discovery 结果，候选和拒绝原因入 Trace |
-| `RQO-011` | `report-query-orchestrator.ts:4080` `executeReportQueryStep` | 生成最终回答 | P0 | 拆为计划输入、能力选择、参数预检、执行、证据归一化、回答组合 |
+| `RQO-011` | `report-query-orchestrator.ts:4246` `executeReportQueryStep` | 生成最终回答 | P0 | 拆为计划输入、能力选择、参数预检、执行、证据归一化、回答组合 |
 | `RU-004` | `request-understanding.ts:650` `deriveRequestRouteDecision` | 选工具 | P0 | 拆成 planner candidate assembly + Plan Arbitrator |
 | `RQO-001` | `report-query-orchestrator.ts:903` `capabilitySignalTerms` | 影响打分 | P1 | 迁到 Capability Manifest / seed-only |
 | `RQO-002` | `report-query-orchestrator.ts:927` `questionTypeSignalTerms` | 影响打分 | P1 | 迁到 Metric Catalog / Tool Contract granularity |
-| `RQO-007` | `report-query-orchestrator.ts:2159` `selectFallbackToolsForAppScope` | 选工具 | P1 | 迁到 Execution Policy fallback contract |
-| `RQO-008` | `report-query-orchestrator.ts:2377` `reportToolFallbackReason` | 影响打分 | P1 | 迁到 MCP outcome taxonomy |
-| `RQO-009` | `report-query-orchestrator.ts:3439` `buildDictionaryPlans` | 补参数 | P1 | 迁到 resolver candidate lane |
-| `RQO-010` | `report-query-orchestrator.ts:3519` `resolveDictionaryFiltersByCapability` | 补参数 | P1 | 拆成 resolver candidate、preference merge、dictionary execution、trace |
+| `RQO-007` | `report-query-orchestrator.ts:2281` `selectFallbackToolsForAppScope` | 选工具 | P1 | 迁到 Execution Policy fallback contract |
+| `RQO-008` | `report-query-orchestrator.ts:2499` `reportToolFallbackReason` | 影响打分 | P1 | 迁到 MCP outcome taxonomy |
+| `RQO-009` | `report-query-orchestrator.ts:3603` `buildDictionaryPlans` | 补参数 | P1 | 迁到 resolver candidate lane |
+| `RQO-010` | `report-query-orchestrator.ts:3685` `resolveDictionaryFiltersByCapability` | 补参数 | P1 | 拆成 resolver candidate、preference merge、dictionary execution、trace |
 | `RU-001` | `request-understanding.ts:217` `activeRequestSignals` | 候选 | P1 | seed-only，输出结构化 domain signals |
 | `RU-002` | `request-understanding.ts:221` `hasRoutePhrase` | 候选 | P1 | route phrase 只作为 candidate evidence |
 | `RU-003` | `request-understanding.ts:637` `hasGovernedBusinessRoutingSignal` | 影响打分 | P1 | rules/config fallback candidate，置信度封顶 |

@@ -27,6 +27,9 @@ export interface SearchEvidenceItem {
   source_ref_id: string;
   fetched: boolean;
   fetch_failed?: boolean;
+  query_relevance?: number;
+  source_quality?: number;
+  authority?: number;
 }
 
 export interface RerankScore {
@@ -252,18 +255,43 @@ function textTokens(text: string): string[] {
   return Array.from(new Set([...cjkTokens, ...ascii])).filter(item => item.length >= 2);
 }
 
+function opaqueIdentifierTokens(text: string): string[] {
+  const tokens = String(text || '').toLowerCase().match(/[a-z0-9][a-z0-9-]{7,}/g) || [];
+  return tokens.filter(token => {
+    const compact = token.replace(/-/g, '');
+    if (/\d/.test(compact)) return true;
+    const vowels = compact.match(/[aeiou]/g)?.length || 0;
+    return compact.length >= 9 && vowels / compact.length < 0.3;
+  });
+}
+
+function itemSearchText(item: SearchProviderResultItem, fetched?: FetchProviderResult): string {
+  return `${item.title}\n${item.snippet}\n${fetched?.markdown || fetched?.text || ''}\n${item.siteName || ''}`.toLowerCase();
+}
+
 function scoreQueryRelevance(query: string, item: SearchProviderResultItem, fetched?: FetchProviderResult): number {
   const tokens = textTokens(query);
   if (!tokens.length) return 0;
-  const haystack = `${item.title}\n${item.snippet}\n${fetched?.markdown || fetched?.text || ''}\n${item.siteName || ''}`.toLowerCase();
+  const haystack = itemSearchText(item, fetched);
+  if (opaqueIdentifierTokens(query).some(token => !haystack.includes(token))) return 0;
   return tokens.filter(token => haystack.includes(token)).length / tokens.length;
 }
 
 function scoreSourceQuality(item: SearchProviderResultItem): number {
   const host = hostOf(item.url);
+  const pathname = (() => {
+    try {
+      return new URL(item.url).pathname.toLowerCase();
+    } catch {
+      return '';
+    }
+  })();
+  const authorityText = `${item.title}\n${item.siteName || ''}\n${host}\n${pathname}`.toLowerCase();
   const text = `${item.title}\n${item.snippet}\n${item.siteName || ''}\n${host}`.toLowerCase();
   if (item.provider === 'weather-7d' || /open-meteo|wttr\.in/.test(text)) return 0.9;
-  if (/\.(gov|edu|mil)(\.[a-z]{2})?$/.test(host) || /官方|帮助中心|开发者|文档|公告|official|docs|developer|help|support/.test(text)) return 1;
+  if (isCommunityOrSocialSource(item.url)) return 0.36;
+  if (/\.(gov|edu|mil)(\.[a-z]{2})?$/.test(host) || /官方|帮助中心|开发者|文档|公告|official|docs|developer|help|support/.test(authorityText)) return 1;
+  if (!isCommunityOrSocialSource(item.url) && /\/(world|news|article|articles|press|release|video)(?:\/|$|-)/i.test(pathname)) return 0.72;
   if (/news|times|post|daily|journal|press|wire|观察|新闻|日报|时报|媒体/.test(text)) return 0.72;
   if (/百科|wiki|reference|论坛|社区|问答|知乎|贴吧|reddit|quora|forum/.test(text)) return 0.36;
   return 0.5;
@@ -443,19 +471,41 @@ function cleanExtractedContent(value: string): string {
   return cleaned.join('\n').slice(0, 6000);
 }
 
+function isCommunityOrSocialSource(url: string): boolean {
+  const host = hostOf(url);
+  return /(?:^|\.)((x|twitter|facebook|instagram|threads|reddit|quora)\.com|zhihu\.com|tieba\.baidu\.com)$/i.test(host)
+    || /forum|community|bbs/i.test(host);
+}
+
+function hasOfficialOrInstitutionalEvidence(item: SearchEvidenceItem): boolean {
+  const text = `${item.title}\n${item.source_url}`.toLowerCase();
+  return /\.(gov|edu|mil)(\.[a-z]{2})?(?:\/|$)/.test(item.source_url)
+    || /官方|帮助中心|开发者|文档|公告|official|docs|developer|help|support/.test(text)
+    || (
+      !isCommunityOrSocialSource(item.source_url)
+      && (item.source_quality || 0) >= 0.7
+      && (item.query_relevance || 0) >= 0.15
+    );
+}
+
 function assessInformationGap(need: PublicWebNeed, evidenceItems: SearchEvidenceItem[], requiredSourceCount: number): Record<string, unknown> {
-  const fetchedCount = evidenceItems.filter(item => item.fetched).length;
+  const fetchedCount = evidenceItems.reduce((count, item) => count + Number(item.fetched), 0);
+  const snippetBackedCount = evidenceItems.reduce(
+    (count, item) => count + Number(!item.fetched && item.fetch_failed && hasOfficialOrInstitutionalEvidence(item)),
+    0,
+  );
   const sourceCount = new Set(evidenceItems.map(item => item.source_url)).size;
   const missing: string[] = [];
   if (sourceCount < requiredSourceCount) missing.push('insufficient_independent_sources');
-  if (need.searchPlan?.depth === 'deep' && fetchedCount < Math.min(requiredSourceCount, sourceCount)) missing.push('insufficient_full_content');
-  if (need.searchPlan?.source_policy === 'official_first' && !evidenceItems.some(item => /官方|帮助中心|文档|official|docs|developer|support/i.test(`${item.title}\n${item.source_url}`))) {
+  if (need.searchPlan?.depth === 'deep' && (fetchedCount + snippetBackedCount) < Math.min(requiredSourceCount, sourceCount)) missing.push('insufficient_full_content');
+  if (need.searchPlan?.source_policy === 'official_first' && !evidenceItems.find(hasOfficialOrInstitutionalEvidence)) {
     missing.push('official_source_not_confirmed');
   }
   return {
     action: 'gap_analysis',
     source_count: sourceCount,
     fetched_count: fetchedCount,
+    snippet_backed_count: snippetBackedCount,
     required_source_count: requiredSourceCount,
     missing,
     status: missing.length ? 'partial' : 'sufficient',
@@ -617,8 +667,12 @@ export async function runSearchOrchestrator(message: string, need: PublicWebNeed
   const allItems: SearchProviderResultItem[] = [];
   const orchestratorConfig = getOrchestratorConfig(config);
   const maxRounds = Math.max(1, Math.min(orchestratorConfig.maxResearchRounds, need.searchPlan?.depth === 'deep' ? orchestratorConfig.maxResearchRounds : 1));
+  const maxQueriesPerRound = need.searchPlan?.depth === 'deep' ? 4 : 3;
   for (let round = 1; round <= maxRounds; round += 1) {
-    const roundQueries = round === 1 ? rewritten.queries : rewritten.queries.filter(query => query.purpose !== 'primary');
+    const roundQueryCandidates = round === 1
+      ? rewritten.queries
+      : rewritten.queries.reduce<SearchPlanQuery[]>((items, query) => query.purpose !== 'primary' ? [...items, query] : items, []);
+    const roundQueries = roundQueryCandidates.slice(0, maxQueriesPerRound);
     researchLoopSteps.push({ round, action: round === 1 ? 'initial_search' : 'gap_followup_search', query_count: roundQueries.length });
     for (const query of roundQueries) {
       for (const provider of searchProviders) {
@@ -645,12 +699,16 @@ export async function runSearchOrchestrator(message: string, need: PublicWebNeed
 
   const deduped = dedupeItems(allItems).slice(0, Math.max(config.maxResults, orchestratorConfig.maxFetchPages));
   const fetchedByUrl = new Map<string, FetchProviderResult>();
-  const structuredEvidenceItems = deduped.filter(item => item.provider === 'weather-7d' || /open-meteo|wttr/i.test(`${item.provider} ${item.siteName || ''} ${item.url}`));
+  const structuredEvidenceUrls = new Set<string>();
+  const structuredEvidenceItems = deduped.reduce<SearchProviderResultItem[]>((items, item) => {
+    const structured = item.provider === 'weather-7d' || /open-meteo|wttr/i.test(`${item.provider} ${item.siteName || ''} ${item.url}`);
+    return structured ? (structuredEvidenceUrls.add(item.url), [...items, item]) : items;
+  }, []);
   structuredEvidenceItems.forEach(item => {
     fetchResults.push({ url: item.url, status: 'skipped', reason: 'structured_provider_content' });
   });
   const fetchTargets = deduped
-    .filter(item => !structuredEvidenceItems.some(structured => structured.url === item.url))
+    .reduce<SearchProviderResultItem[]>((items, item) => structuredEvidenceUrls.has(item.url) ? items : [...items, item], [])
     .slice(0, orchestratorConfig.maxFetchPages);
   if (fetchTargets.length && fetchProvider) {
     for (const item of fetchTargets) {
@@ -672,19 +730,42 @@ export async function runSearchOrchestrator(message: string, need: PublicWebNeed
   const minScore = need.searchPlan?.source_policy === 'official_first' || need.searchPlan?.source_policy === 'official_required'
     ? 0.14
     : need.sourceRequired ? 0.24 : 0.16;
-  const accepted = ranked.filter(entry => entry.score.total >= minScore).slice(0, config.maxResults);
+  const minShellRelevance = 0.08;
+  const accepted = ranked
+    .filter(entry => {
+      const shellRelevance = scoreQueryRelevance(message, entry.item, undefined);
+      const isStructuredWeatherEvidence = entry.item.provider === 'weather-7d' || /open-meteo|wttr/i.test(`${entry.item.provider} ${entry.item.siteName || ''} ${entry.item.url}`);
+      return entry.score.total >= minScore && (isStructuredWeatherEvidence || shellRelevance >= minShellRelevance);
+    })
+    .slice(0, config.maxResults);
   const rerankScores = ranked.map(entry => entry.score);
   const sourceRefs = buildSourceRefs(accepted.map(entry => entry.item), fetchedByUrl);
-  const evidenceItems = accepted
-    .map((entry, index) => sourceRefs[index]
-      ? extractEvidence(entry.item, sourceRefs[index], fetchedByUrl.get(entry.item.url))
-      : null)
-    .filter((item): item is SearchEvidenceItem => Boolean(item));
+  const evidenceItems: SearchEvidenceItem[] = [];
+  accepted.forEach((entry, index) => {
+    const sourceRef = sourceRefs[index];
+    if (!sourceRef) return;
+    evidenceItems.push({
+      ...extractEvidence(entry.item, sourceRef, fetchedByUrl.get(entry.item.url)),
+      query_relevance: entry.score.query_relevance,
+      source_quality: entry.score.source_quality,
+      authority: entry.score.authority,
+    });
+  });
   for (const item of evidenceItems) {
     item.snippet = cleanExtractedContent(item.snippet).slice(0, 420) || item.snippet;
   }
-  const requiredSourceCount = need.searchPlan?.source_policy === 'multi_source_consensus' || need.searchPlan?.depth === 'deep' ? 2 : 1;
+  const requiredSourceCount = need.searchPlan?.source_policy === 'multi_source_consensus' ? 2 : 1;
   const gapAnalysis = assessInformationGap(need, evidenceItems, requiredSourceCount);
+  const gapMissing = Array.isArray(gapAnalysis.missing)
+    ? gapAnalysis.missing.reduce<string[]>((items, item) => {
+      const value = String(item || '');
+      return value ? [...items, value] : items;
+    }, [])
+    : [];
+  const hasSufficientEvidence = evidenceItems.length > 0 && gapAnalysis.status === 'sufficient';
+  const filterReason = hasSufficientEvidence
+    ? undefined
+    : gapMissing[0] || (evidenceItems.length ? 'insufficient_evidence_quality' : 'relevance_gate_filtered_all');
   const conflicts = detectEvidenceConflicts(evidenceItems);
   researchLoopSteps.push(gapAnalysis, {
     action: 'conflict_detection',
@@ -692,30 +773,34 @@ export async function runSearchOrchestrator(message: string, need: PublicWebNeed
     conflicts,
     status: conflicts.length ? 'conflicting' : 'no_conflict_detected',
   });
-  const summary = evidenceItems.length
+  const summary = hasSufficientEvidence
     ? await composeEvidenceSummary({ message, evidenceItems, conflicts, warnings })
     : { answer: '', origin: 'template_evidence_summary' as const, warnings: [] };
   warnings.push(...summary.warnings.map(item => `llm_summary_warning:${item}`));
   const answer = summary.answer;
-  const status = evidenceItems.length ? 'success' : 'failed';
+  const status = hasSufficientEvidence ? 'success' : 'failed';
+  const acceptedSourceRefs = hasSufficientEvidence ? sourceRefs : [];
+  const acceptedEvidenceItems = hasSufficientEvidence ? evidenceItems : [];
 
   processEvents.push(createProcessEvent({
     type: 'web.result',
     label: '整理公开依据',
-    summary: evidenceItems.length
+    summary: hasSufficientEvidence
       ? `已获取 ${evidenceItems.length} 条可引用依据。`
       : '没有检索到足够可靠的公开依据。',
-    status: evidenceItems.length ? 'success' : 'error',
+    status: hasSufficientEvidence ? 'success' : 'error',
     visibility: 'internal',
-    source_refs: sourceRefs as SourceRef[],
+    source_refs: acceptedSourceRefs as SourceRef[],
     output: {
       provider_calls: providerCalls,
       fetch_results: fetchResults,
       rerank_scores: rerankScores,
-      evidence_items: evidenceItems,
+      evidence_items: acceptedEvidenceItems,
+      rejected_evidence_items: hasSufficientEvidence ? [] : evidenceItems,
+      filter_reason: filterReason,
       research_loop_steps: researchLoopSteps,
       conflicts,
-      answer_origin: evidenceItems.length ? summary.origin : 'insufficient_evidence',
+      answer_origin: hasSufficientEvidence ? summary.origin : 'insufficient_evidence',
       warnings,
     },
   }));
@@ -723,8 +808,8 @@ export async function runSearchOrchestrator(message: string, need: PublicWebNeed
   return {
     status,
     answer,
-    sourceRefs,
-    evidenceItems,
+    sourceRefs: acceptedSourceRefs,
+    evidenceItems: acceptedEvidenceItems,
     processEvents,
     providerCalls,
     rerankScores,
@@ -740,10 +825,10 @@ export async function runSearchOrchestrator(message: string, need: PublicWebNeed
       provider_calls: providerCalls,
       fetch_results: fetchResults,
       rerank_scores: rerankScores,
-      evidence_items: evidenceItems,
+      evidence_items: acceptedEvidenceItems,
       research_loop_steps: researchLoopSteps,
       conflicts,
-      answer_origin: evidenceItems.length ? summary.origin : 'insufficient_evidence',
+      answer_origin: hasSufficientEvidence ? summary.origin : 'insufficient_evidence',
     },
   };
 }

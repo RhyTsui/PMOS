@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-06-20T10:02:23.949Z",
+  "selectedCaseIds": [
+    "MIG-051"
+  ],
+  "total": 1,
+  "passCount": 0,
+  "failCount": 0,
+  "blockedCount": 1,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-20T10:02:23.949Z",
+    "guardMb": 3072,
+    "pids": [
+      6868
+    ],
+    "processes": [
+      {
+        "pid": 6868,
+        "workingSetMb": 3161
+      }
+    ],
+    "maxWorkingSetMb": 3161
+  },
+  "memoryPeakMb": 3161,
+  "memorySamples": [
+    {
+      "phase": "case_start",
+      "caseId": "MIG-051",
+      "attempt": 0,
+      "sampledAt": "2026-06-20T10:02:23.048Z",
+      "guardMb": 3072,
+      "pids": [
+        6868
+      ],
+      "processes": [
+        {
+          "pid": 6868,
+          "workingSetMb": 3161
+        }
+      ],
+      "maxWorkingSetMb": 3161
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-20T10:02:23.949Z",
+      "guardMb": 3072,
+      "pids": [
+        6868
+      ],
+      "processes": [
+        {
+          "pid": 6868,
+          "workingSetMb": 3161
+        }
+      ],
+      "maxWorkingSetMb": 3161
+    }
+  ],
+  "results": [
+    {
+      "caseId": "MIG-051",
+      "scene": "广告报表-多维度交叉-MDIM-F002",
+      "prompt": "指间2026-02-01 IOS应用类型+自然量+广告投放部 全天激活数、3日设备留存数、3日注册留存数、4日首日付费留存数分别是多少",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活数：459 3日设备留存率：39.87% 3日注册留存率：41.12% 4日首日付费留存数：69.39%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：各报表筛选+按周",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "dev server 内存 3161MB 超过护栏 3072MB",
+      "answer": "",
+      "elapsed": "",
+      "memoryBefore": {
+        "sampledAt": "2026-06-20T10:02:23.048Z",
+        "guardMb": 3072,
+        "pids": [
+          6868
+        ],
+        "processes": [
+          {
+            "pid": 6868,
+            "workingSetMb": 3161
+          }
+        ],
+        "maxWorkingSetMb": 3161
+      },
+      "memoryGuard": {
+        "sampledAt": "2026-06-20T10:02:23.494Z",
+        "guardMb": 3072,
+        "pids": [
+          6868
+        ],
+        "processes": [
+          {
+            "pid": 6868,
+            "workingSetMb": 3161
+          }
+        ],
+        "maxWorkingSetMb": 3161
+      }
+    }
+  ]
+}

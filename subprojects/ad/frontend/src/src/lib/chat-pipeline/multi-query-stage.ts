@@ -18,6 +18,7 @@
 
 import type { StreamIO, ChatPipelineContext, ChatPipelineResult } from './pipeline-types';
 import { createRuntimeState } from '@/lib/chat-runtime/runtime-state';
+import { buildReportQueryInput } from '@/lib/chat-runtime/report-query-input';
 import { createProcessEvent } from '@/lib/chat-route-primitives';
 import { buildResponseContract } from '@/lib/response-contract';
 import { buildTraceUrl } from '@/lib/trace';
@@ -26,53 +27,38 @@ import { emitChatMessageTrace } from '@/app/api/chat/chat-trace';
 import { recordEvidence } from '@/lib/evidence-ledger';
 import { executeMultiToolOrchestration } from '@/lib/multi-tool-orchestrator';
 import { buildReportCapabilityManifest, type ReportToolCapability } from '@/lib/report-capability-manifest';
-import { resolveMetricKey, resolveDimensionKey } from '@/lib/query-decomposer';
+import {
+  canonicalDimensionKey,
+  extractDimensionKeysFromText,
+  extractMetricKeysFromText,
+  resolveMetricKey,
+  resolveDimensionKey,
+} from '@/lib/query-decomposer';
 import { transitionCaseFrameStage, addEvidenceRef, addDeliverable } from '@/lib/case-frame-helpers';
+import { getReportMetricDomain } from '@/contracts/business-semantics/metric-catalog';
 import type { FederatedQueryResult } from '@/contracts/multi-query';
 import type { QueryDecomposition } from '@/contracts/multi-query';
 import type { McpServerConfig } from '@/types';
 import type { ServiceType } from '@/contracts/service-catalog';
 import type { UserRequirementContract } from '@/contracts/request-understanding/user-requirement-contract';
 
-// ─── Metric → Domain Mapping ───────────────────────────
-
-const METRIC_DOMAIN_MAP: Record<string, string> = {
-  cost: 'daily',
-  activation: 'daily',
-  register: 'daily',
-  payment: 'daily',
-  revenue: 'daily',
-  arppu: 'daily',
-  roi: 'roi',
-  roas: 'roi',
-  retention_d1: 'retention',
-  retention_d7: 'retention',
-  retention_d30: 'retention',
-};
-
-function getMetricDomain(metric: string): string | undefined {
-  return METRIC_DOMAIN_MAP[metric];
-}
-
 // ─── Extract Metrics/Dimensions from UserRequirement ────
 
-function extractFromUserRequirement(req: UserRequirementContract | undefined): {
+function extractFromUserRequirement(req: UserRequirementContract | undefined, message = ''): {
   metrics: string[];
   dimensions: string[];
 } {
-  if (!req) return { metrics: [], dimensions: [] };
-
   const metrics = new Set<string>();
   const dimensions = new Set<string>();
 
   // metrics: string[]
-  for (const m of req.metrics ?? []) {
+  for (const m of req?.metrics ?? []) {
     const resolved = resolveMetricKey(m);
     if (resolved) metrics.add(resolved);
   }
 
   // dimensions: RequirementDimension[] → extract key
-  for (const d of req.dimensions ?? []) {
+  for (const d of req?.dimensions ?? []) {
     if (typeof d === 'string') {
       dimensions.add(resolveDimensionKey(d));
     } else if (d && typeof d === 'object' && 'key' in d) {
@@ -81,7 +67,7 @@ function extractFromUserRequirement(req: UserRequirementContract | undefined): {
   }
 
   // dataRequirement may also have metrics/dimensions
-  if (req.dataRequirement) {
+  if (req?.dataRequirement) {
     for (const m of req.dataRequirement.requiredMetrics ?? []) {
       const resolved = resolveMetricKey(m);
       if (resolved) metrics.add(resolved);
@@ -89,6 +75,12 @@ function extractFromUserRequirement(req: UserRequirementContract | undefined): {
     for (const d of req.dataRequirement.requiredDimensions ?? []) {
       dimensions.add(resolveDimensionKey(d));
     }
+  }
+  for (const metric of extractMetricKeysFromText(message)) {
+    metrics.add(metric);
+  }
+  for (const dimension of extractDimensionKeysFromText(message)) {
+    dimensions.add(dimension);
   }
 
   return {
@@ -120,7 +112,7 @@ export function shouldEnterMultiQueryStage(
   if (!ctx.isReportQuery) return false;
 
   // 提取指标和维度
-  const { metrics, dimensions } = extractFromUserRequirement(ctx.userRequirement);
+  const { metrics, dimensions } = extractFromUserRequirement(ctx.userRequirement, ctx.message || ctx.question || '');
 
   // 单指标 + 筛选维度应走普通问数；只有多指标或多输出维度才有拼表价值。
   if (metrics.length < 2 && dimensions.length < 2) return false;
@@ -128,16 +120,16 @@ export function shouldEnterMultiQueryStage(
   // 检查是否有单个工具能满足完整需求
   const capabilities = buildReportCapabilityManifest(servers);
   const completeTool = capabilities.tools.find(tool => {
-    const supportedDimensions = new Set(tool.supported_dimensions);
+    const supportedDimensions = new Set(tool.supported_dimensions.map(canonicalDimensionKey));
     const reportDomains = new Set(tool.report_domains);
     // 检查工具是否支持所有请求的维度
     const supportsAllDimensions = dimensions.every(dim =>
-      supportedDimensions.has(dim)
+      supportedDimensions.has(canonicalDimensionKey(dim))
     );
 
     // 检查工具是否支持所有请求的指标
     const supportsAllMetrics = metrics.every(metric => {
-      const domain = getMetricDomain(metric);
+      const domain = getReportMetricDomain(metric);
       return Boolean(domain && reportDomains.has(domain as any));
     });
 
@@ -197,7 +189,7 @@ export async function executeMultiQueryStage(
   }));
 
   // 提取指标和维度
-  const { metrics, dimensions } = extractFromUserRequirement(userRequirement);
+  const { metrics, dimensions } = extractFromUserRequirement(userRequirement, message);
 
   // 构建适配 orchestrator 输入的 semanticFrame shape
   const orchSemanticFrame = {
@@ -209,6 +201,7 @@ export async function executeMultiQueryStage(
   const orchUserRequirement = {
     metrics,
     dimensions,
+    query: message,
   };
 
   // 构建 capability manifest
@@ -221,6 +214,7 @@ export async function executeMultiQueryStage(
     userRequirement: orchUserRequirement,
     capabilities: capabilityManifest.tools,
     servers,
+    baseInput: buildReportQueryInput(message, compiledContext, userScopeKey),
     serviceType: 'join_table_report' as ServiceType,
     timeRange: extractTimeRange(userRequirement),
     filters: extractFilters(userRequirement),
@@ -272,6 +266,7 @@ export async function executeMultiQueryStage(
 
   // 记录证据
   const updatedLedger = recordEvidence(io.getEvidenceLedger(), {
+    stage: 'multi_query',
     source: 'tool_result',
     sourceId: 'multi_query_orchestration',
     confidence: decomposition.confidence > 0.7 ? 'high_probability' : 'unverified',
@@ -321,6 +316,7 @@ export async function executeMultiQueryStage(
 
   // 记录每个工具的执行结果
   for (const sqr of federatedResult.subQueryResults) {
+    const sourceId = `tool:${sqr.serverName || sqr.toolName}.${sqr.toolName}`.replace(/[^a-zA-Z0-9:_./-]+/g, '_');
     io.pushEvent(createProcessEvent({
       type: sqr.ok ? 'mcp.tool_result' : 'mcp.tool_error',
       label: sqr.ok ? `${sqr.toolName} 完成` : `${sqr.toolName} 失败`,
@@ -330,6 +326,21 @@ export async function executeMultiQueryStage(
       status: sqr.ok ? 'success' : 'error',
       intent_type: 'multi_query',
       agent: 'multi_query',
+      tool_name: sqr.toolName,
+      source_refs: [{
+        id: sourceId,
+        title: sqr.toolName,
+        source: sqr.serverName ? `${sqr.serverName}.${sqr.toolName}` : sqr.toolName,
+        source_type: 'report_mcp',
+        icon: 'report_mcp',
+        status: sqr.ok ? 'success' : 'error',
+      }],
+      output: {
+        sub_query_id: sqr.subQueryId,
+        row_count: sqr.rows.length,
+        column_count: sqr.columns.length,
+        error_message: sqr.errorMessage,
+      },
     }));
   }
 
@@ -460,16 +471,16 @@ function buildMultiQueryAnswer(
 ): string {
   const parts: string[] = [];
 
-  parts.push(`## 多工具查询结果`);
+  parts.push(`## 查询结果`);
   parts.push('');
   parts.push(`**查询**: ${message}`);
   parts.push('');
 
   // 工具说明
   if (decomposition.subQueries.length > 1) {
-    parts.push(`**数据来源**: 已从 ${decomposition.subQueries.length} 个工具合并数据`);
+    parts.push(`**数据来源**: 已合并 ${decomposition.subQueries.length} 类报表数据`);
     const toolSummary = decomposition.subQueries.map(sq =>
-      `- **${sq.toolName}**: ${sq.metrics.join(', ')}`,
+      `- ${sq.metrics.join(', ')}`,
     );
     parts.push(toolSummary.join('\n'));
     parts.push('');
@@ -485,7 +496,7 @@ function buildMultiQueryAnswer(
   // 部分失败提示
   if (federatedResult.hasPartialFailure) {
     parts.push('');
-    parts.push('> ⚠️ 部分工具执行失败，缺失数据已填空值。');
+    parts.push('> 部分数据暂未返回，缺失位置已留空。');
     if (federatedResult.missingDataNotes.length > 0) {
       parts.push('>');
       for (const note of federatedResult.missingDataNotes.slice(0, 3)) {

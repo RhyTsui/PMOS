@@ -284,4 +284,23 @@ CREATE TABLE IF NOT EXISTS dedup_records (
 
 CREATE INDEX IF NOT EXISTS idx_dedup_content ON dedup_records(content_hash);
 CREATE INDEX IF NOT EXISTS idx_dedup_title ON dedup_records(title_hash);
+
+-- 信源/种子反馈（同事提交）
+CREATE TABLE IF NOT EXISTS feedback (
+  id TEXT PRIMARY KEY,
+  feedback_type TEXT NOT NULL CHECK(feedback_type IN ('source', 'seed', 'general')),
+  content TEXT NOT NULL,
+  submitter TEXT,
+  contact TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'processing', 'accepted', 'rejected')),
+  related_ids TEXT DEFAULT '[]',
+  admin_notes TEXT,
+  processed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_type ON feedback(feedback_type);
+CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status);
+CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
 `;

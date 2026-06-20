@@ -31,7 +31,8 @@ import { normalizeAllSubQueryResults } from './dimension-normalizer';
 import { mergeSubQueryResults } from './result-joiner';
 import { callMcpTool } from './mcp-discovery';
 import type { ReportToolCapability } from './report-capability-manifest';
-import type { McpServerConfig } from '@/types';
+import { buildReportToolInput } from './report-query-orchestrator';
+import type { McpServerConfig, McpToolConfig } from '@/types';
 import type { ServiceType } from '@/contracts/service-catalog';
 
 // ─── Orchestrator Input ──────────────────────────────────
@@ -58,11 +59,25 @@ export interface MultiToolOrchestratorInput {
   timeRange?: { start: string; end: string };
   /** 过滤条件 */
   filters?: Record<string, string[]>;
+  /** 已编译的报表基础入参（项目、用户作用域等） */
+  baseInput?: Record<string, unknown>;
   /** 关联的 ServiceType */
   serviceType: ServiceType;
   /** 执行超时（ms），默认 30000 */
   timeoutMs?: number;
 }
+
+type MultiQueryResolvedFilters = {
+  mediaId?: string[];
+  osTypes?: string[];
+  terminalOs?: string[];
+  teamIds?: string[];
+  appPackageType?: string[];
+  accountId?: string[];
+  pkgId?: string[];
+  optimizerIds?: string[];
+  dynamicFilters?: Record<string, string[]>;
+};
 
 // ─── Orchestrator Output ─────────────────────────────────
 
@@ -87,6 +102,12 @@ async function executeSubQuery(
   subQuery: SubQuery,
   servers: McpServerConfig[],
   timeoutMs: number,
+  params: {
+    message: string;
+    capabilities: ReportToolCapability[];
+    baseInput?: Record<string, unknown>;
+    resolvedFilters?: MultiQueryResolvedFilters;
+  },
 ): Promise<SubQueryResult> {
   const startTime = Date.now();
 
@@ -121,7 +142,13 @@ async function executeSubQuery(
   }
 
   // 构建 MCP 调用参数
-  const args = buildMcpToolArgs(subQuery);
+  const capability = params.capabilities.find(item => item.capability_id === subQuery.capabilityId);
+  const args = toolArgsOrThrow(buildMcpToolArgs(subQuery, tool, {
+    message: params.message,
+    capability,
+    baseInput: params.baseInput,
+    resolvedFilters: params.resolvedFilters,
+  }));
 
   try {
     const result = await callMcpTool(
@@ -166,6 +193,7 @@ async function executeSubQuery(
       rawResult: result.result,
     };
   } catch (error) {
+    const diagnosticError = error as { diagnostics?: unknown };
     return {
       subQueryId: subQuery.subQueryId,
       toolName: subQuery.toolName,
@@ -175,6 +203,7 @@ async function executeSubQuery(
       columns: [],
       rows: [],
       latencyMs: Date.now() - startTime,
+      rawResult: diagnosticError.diagnostics,
     };
   }
 }
@@ -184,7 +213,16 @@ async function executeSubQuery(
 /**
  * 将 SubQuery 转换为 MCP 工具的调用参数。
  */
-function buildMcpToolArgs(subQuery: SubQuery): Record<string, unknown> {
+export function buildMcpToolArgs(
+  subQuery: SubQuery,
+  tool?: McpToolConfig,
+  options?: {
+    message?: string;
+    capability?: ReportToolCapability;
+    baseInput?: Record<string, unknown>;
+    resolvedFilters?: MultiQueryResolvedFilters;
+  },
+): { ok: true; args: Record<string, unknown> } | { ok: false; errorMessage: string; diagnostics: Record<string, unknown> } {
   const args: Record<string, unknown> = {};
 
   // 指标
@@ -213,7 +251,85 @@ function buildMcpToolArgs(subQuery: SubQuery): Record<string, unknown> {
     Object.assign(args, subQuery.extraInputs);
   }
 
-  return args;
+  const adapted = tool && options?.message
+    ? buildReportToolInput(
+      tool,
+      options.message,
+      {
+        ...(options.baseInput || {}),
+        ...baseInputFromSubQuery(subQuery),
+      },
+      options.resolvedFilters,
+      options.capability,
+    )
+    : undefined;
+  return !adapted
+    ? { ok: true, args }
+    : adapted.preflight.ok
+      ? { ok: true, args: { ...adapted.finalArgs, ...subQuery.extraInputs } }
+      : {
+        ok: false,
+        errorMessage: `Tool argument preflight failed: ${adapted.preflight.status}`,
+        diagnostics: {
+          finalArgKeys: adapted.finalArgKeys,
+          missingRequiredKeysBeforeCall: adapted.missingRequiredKeysBeforeCall,
+          preflight: adapted.preflight,
+        },
+      };
+}
+
+function toolArgsOrThrow(
+  result: ReturnType<typeof buildMcpToolArgs>,
+): Record<string, unknown> {
+  return result.ok ? result.args : raiseToolArgError(result.errorMessage, result.diagnostics);
+}
+
+function raiseToolArgError(message: string, diagnostics: Record<string, unknown>): never {
+  const error = new Error(message) as Error & { diagnostics?: Record<string, unknown> };
+  error.diagnostics = diagnostics;
+  throw error;
+}
+
+function baseInputFromSubQuery(subQuery: SubQuery): Record<string, unknown> {
+  return {
+    ...(subQuery.metrics.length ? { metrics: subQuery.metrics } : {}),
+    ...(subQuery.dimensions.length ? { dimensions: subQuery.dimensions } : {}),
+    ...(subQuery.timeRange ? {
+      start_date: subQuery.timeRange.start,
+      end_date: subQuery.timeRange.end,
+      startDate: subQuery.timeRange.start,
+      endDate: subQuery.timeRange.end,
+    } : {}),
+  };
+}
+
+function resolvedFiltersFromInput(filters?: Record<string, string[]>): MultiQueryResolvedFilters | undefined {
+  const keys = Object.keys(filters || {});
+  const source = filters || {};
+  const output: MultiQueryResolvedFilters = { dynamicFilters: filters };
+  const read = (...names: string[]) => {
+    const values: string[] = [];
+    for (const name of names) {
+      for (const value of source[name] || []) {
+        value ? values.push(value) : undefined;
+      }
+    }
+    return values;
+  };
+  const mappings: Array<[keyof MultiQueryResolvedFilters, string[]]> = [
+    ['mediaId', read('mediaId', 'media_id', 'mediaIds', 'media_ids')],
+    ['terminalOs', read('terminalOs', 'terminal_os', 'osType', 'osTypes', 'os_type')],
+    ['osTypes', read('terminalOs', 'terminal_os', 'osType', 'osTypes', 'os_type')],
+    ['teamIds', read('teamIds', 'team_id', 'teamId', 'team_ids')],
+    ['appPackageType', read('appPackageType', 'app_package_type', 'packageType', 'package_type')],
+    ['accountId', read('accountId', 'account_id', 'accountIds', 'account_ids')],
+    ['pkgId', read('pkgId', 'pkg_id', 'packageId', 'package_id')],
+    ['optimizerIds', read('optimizerIds', 'optimizer_id', 'optimizerId', 'optimizer_ids')],
+  ];
+  for (const [key, values] of mappings) {
+    values.length ? (output[key] = values as never) : undefined;
+  }
+  return keys.length === 0 ? undefined : output;
 }
 
 // ─── Parse MCP Result ────────────────────────────────────
@@ -444,8 +560,14 @@ export async function executeMultiToolOrchestration(
   }
 
   // 3. 并行执行所有子查询
+  const resolvedFilters = resolvedFiltersFromInput(input.filters);
   const executionPromises = decomposition.subQueries.map(
-    sq => executeSubQuery(sq, input.servers, timeoutMs),
+    sq => executeSubQuery(sq, input.servers, timeoutMs, {
+      message: input.message,
+      capabilities: input.capabilities,
+      baseInput: input.baseInput,
+      resolvedFilters,
+    }),
   );
   const subQueryResults = await Promise.all(executionPromises);
 

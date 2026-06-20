@@ -169,7 +169,8 @@ export async function POST(request: NextRequest) {
       // Stage 2: Evidence Ledger 初始化（从持久化存储加载，支持跨请求）
       // 初始使用 conversationId 作为 caseId，后续会切换到 CaseFrame 的 caseId
       let evidenceCaseId = `conv-${conversationId}`;
-      let evidenceLedger: EvidenceLedger = await getEvidenceLedgerByCase(userScopeKey, evidenceCaseId).catch(() => createEmptyEvidenceLedger());
+      let evidenceLedger: EvidenceLedger = await getEvidenceLedgerByCase(userScopeKey, evidenceCaseId)
+        .catch(() => createEmptyEvidenceLedger({ caseId: evidenceCaseId, conversationId }));
       let streamIO: StreamIO;
       let closed = false;
       let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
@@ -215,15 +216,32 @@ export async function POST(request: NextRequest) {
                 };
                 payload.metadata = metadata;
               }
-              // tripwire 触发时，保留原答案但在 metadata 中标记 guardrail 发现
-              // 不替换 answer，避免用户看到"已拦截"消息而实际内容已生成
               if (outputResult.tripwire_triggered) {
                 const metadata = (payload.metadata || {}) as Record<string, unknown>;
                 metadata.output_guardrail_tripwire = true;
                 metadata.output_guardrail_reason = outputResult.tripwire_reason;
                 metadata.output_guardrail_findings = outputResult.findings.map((f) => ({ code: f.code, severity: f.severity, message: f.message }));
+                const blockedAnswer = '这次结果没有通过证据和安全检查，我已停止输出原回答。请补充更多信息或稍后重试，我会重新按可追溯来源处理。';
+                const blockedResponseContract = buildResponseContract({
+                  status: 'blocked',
+                  intentType: body.intent,
+                  traceId,
+                  answer: blockedAnswer,
+                  processEvents,
+                  metadata: {
+                    output_guardrail_tripwire: true,
+                    output_guardrail_reason: outputResult.tripwire_reason,
+                    output_guardrail_findings: metadata.output_guardrail_findings,
+                    evidence_ledger: serializeLedgerForMetadata(streamIO.getEvidenceLedger()),
+                  },
+                });
+                payload.result = {
+                  ...(result || {}),
+                  answer: blockedAnswer,
+                  response_contract: blockedResponseContract,
+                };
+                metadata.response_contract = blockedResponseContract;
                 payload.metadata = metadata;
-                // 不替换 answer 和 response_contract.status，保持原答案
               }
             }
           }
@@ -329,7 +347,8 @@ export async function POST(request: NextRequest) {
           const correctEvidenceCaseId = caseFrame.caseId;
           if (correctEvidenceCaseId !== evidenceCaseId) {
             // 从存储中加载对应的 Evidence Ledger
-            const correctLedger = await getEvidenceLedgerByCase(userScopeKey, correctEvidenceCaseId).catch(() => createEmptyEvidenceLedger());
+            const correctLedger = await getEvidenceLedgerByCase(userScopeKey, correctEvidenceCaseId)
+              .catch(() => createEmptyEvidenceLedger({ caseId: correctEvidenceCaseId, conversationId }));
             streamIO.setEvidenceLedger(correctLedger);
             // 更新本地的 evidenceCaseId 引用（用于后续保存）
             evidenceCaseId = correctEvidenceCaseId;

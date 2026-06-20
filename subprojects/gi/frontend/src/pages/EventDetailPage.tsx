@@ -4,7 +4,7 @@ import { Card, Tag, Button, Space, Spin, Empty, Typography, Divider } from 'antd
 import { ArrowLeftOutlined, GlobalOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import api from '../services/api';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Text } = Typography;
 
 interface Evidence {
   id: string;

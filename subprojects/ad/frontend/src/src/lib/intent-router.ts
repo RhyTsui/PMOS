@@ -84,11 +84,11 @@ function isFieldExplanationQuestion(text: string): boolean {
 function hasStrongReportIntent(text: string): boolean {
   const normalized = text.replace(/\s+/g, '');
   const hasMetric = hasAdvertisingDomainSignal(normalized, ['metric']);
-  const hasQueryAction = /(查数|查询|看下|看看|查看|统计|取数|明细|日报|周报|月报|生成|导出|订阅|拼表|拉取|下载|分析)/i.test(normalized);
+  const hasQueryAction = /(查数|查询|看下|看看|查看|统计|取数|明细|报表|日报|周报|月报|小时报|生成|导出|订阅|拼表|拉取|下载|分析)/i.test(normalized);
   const hasTrendOrCompare = /(趋势|走势|对比|比较|排名|环比|同比|变化)/i.test(normalized);
   const hasBusinessObject = hasAdvertisingDomainSignal(normalized, ['businessObject', 'media']);
   const hasValueQuestion = /(多少|几|是多少|值是多少|有多少)/i.test(normalized);
-  const hasTime = /(今天|今日|昨天|昨日|上周|本周|本月|近\d{1,3}天|最近\d{1,3}天|过去\d{1,3}天|日期|时间|day|daily|hour|hourly)/i.test(normalized);
+  const hasTime = /(今天|今日|昨天|昨日|上周|本周|本月|近\d{1,3}天|最近\d{1,3}天|过去\d{1,3}天|日期|时间|小时|\d{4}-\d{1,2}-\d{1,2}|\d{8}|day|daily|hour|hourly)/i.test(normalized);
   const hasFileWorkflow = /(上传.*(excel|表|模板)|excel.*(模板|表?)|按模板|模板取数|拼表)/i.test(normalized);
   return Boolean(
     hasFileWorkflow

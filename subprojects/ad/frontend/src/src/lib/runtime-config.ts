@@ -213,6 +213,8 @@ function isSyntheticPublicWebHost(host: string): boolean {
   return Boolean(normalizedHost) && (
     normalizedHost === 'example.test'
     || normalizedHost.endsWith('.example.test')
+    || normalizedHost === 'example.org'
+    || normalizedHost.endsWith('.example.org')
     || normalizedHost === 'localhost'
     || normalizedHost === '127.0.0.1'
     || normalizedHost === '0.0.0.0'

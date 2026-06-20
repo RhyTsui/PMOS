@@ -80,6 +80,7 @@ export async function executePublicWebStage(
   const publicWebReasonCode = publicWebResult.reasonCode || (publicWebNeed.reasonCode as string) || 'public_web.need_not_detected';
   // Stage 2: 公开网络结果入账 Evidence Ledger
   const updatedLedger = recordEvidence(io.getEvidenceLedger(), {
+    stage: 'public_web',
     source: 'public_web',
     sourceId: (publicWebNeed.reasonCode as string) || 'public_web',
     confidence: publicWebResult.status === 'success' ? 'confirmed_fact' : 'unverified',
@@ -453,7 +454,7 @@ export async function executePublicWebStage(
     })
     : undefined;
   if (routeObservation) io.pushEvent(buildRouteObservationEvent(routeObservation));
-  await emitPlannerShadowObservationIfEnabled({ message, history: body.history, pushEvent: io.pushEvent, route: { intent_type: route.intent_type as any, confidence: route.confidence as any, serviceIntent: routeServiceIntent as string }, onShadowResult: (result) => { io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), { source: 'planner_inference', sourceId: 'planner_shadow', confidence: result.status === 'succeeded' ? 'high_probability' : 'unverified', content: { status: result.status, task_type: result.plan?.task_type, service_intent: result.plan?.service_intent, confidence: result.plan?.confidence, duration_ms: result.durationMs } })); } });
+  await emitPlannerShadowObservationIfEnabled({ message, history: body.history, pushEvent: io.pushEvent, route: { intent_type: route.intent_type as any, confidence: route.confidence as any, serviceIntent: routeServiceIntent as string }, onShadowResult: (result) => { io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), { stage: 'planning', source: 'planner_inference', sourceId: 'planner_shadow', confidence: result.status === 'succeeded' ? 'high_probability' : 'unverified', content: { status: result.status, task_type: result.plan?.task_type, service_intent: result.plan?.service_intent, confidence: result.plan?.confidence, duration_ms: result.durationMs } })); } });
   await io.endPlanningAndStartExecution();
 
   const runtimeProjection = buildMessageRuntimeProjection({

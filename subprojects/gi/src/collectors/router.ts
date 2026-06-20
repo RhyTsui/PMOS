@@ -12,6 +12,7 @@ import { ScraplingCollector } from './scrapling-collector.js';
 import { IntelSourceRepository } from '../repositories/intel-source-repository.js';
 import { SeedRepository } from '../repositories/seed-repository.js';
 import { RawEvidenceRepository } from '../repositories/raw-evidence-repository.js';
+import { SourceHealthService } from '../services/health/index.js';
 import type { IntelSource, Seed, RawEvidence, CollectionJob, AccessMethod } from '../models/types.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -57,11 +58,13 @@ export class CollectorRouter {
   private sourceRepo: IntelSourceRepository;
   private seedRepo: SeedRepository;
   private evidenceRepo: RawEvidenceRepository;
+  private healthService: SourceHealthService;
 
   constructor() {
     this.sourceRepo = new IntelSourceRepository();
     this.seedRepo = new SeedRepository();
     this.evidenceRepo = new RawEvidenceRepository();
+    this.healthService = new SourceHealthService();
   }
 
   /**
@@ -100,6 +103,9 @@ export class CollectorRouter {
       const completedAt = new Date();
       const duration = completedAt.getTime() - startedAt.getTime();
 
+      // 记录采集成功（健康监控）
+      this.healthService.recordSuccess(source.id, duration, newEvidences.length);
+
       return {
         success: true,
         totalCollected: allEvidences.length,
@@ -111,6 +117,9 @@ export class CollectorRouter {
     } catch (error) {
       const duration = Date.now() - startedAt.getTime();
       const message = error instanceof Error ? error.message : String(error);
+
+      // 记录采集失败（健康监控）
+      this.healthService.recordFailure(source.id, message);
 
       return {
         success: false,

@@ -37,4 +37,12 @@ describe('intent router governance', () => {
     expect(decision.suggested_actions).toContain('先确认项目和范围');
     expect(JSON.stringify(decision)).not.toMatch(mojibakePattern);
   });
+
+  it('routes explicit hourly report metric requests to report query before server-side fallback', () => {
+    const decision = routeUserIntent('2026-03-25 广告小时报表中，按自定义时段查看激活数');
+
+    expect(decision.intent_type).toBe('report_query');
+    expect(decision.agent).toBe('report');
+    expect(decision.confidence).toBe('high');
+  });
 });

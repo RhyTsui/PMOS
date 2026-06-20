@@ -369,6 +369,7 @@ export async function executeOpenAnswerStage(
     onShadowResult: async (result) => {
       if (result.status === 'succeeded' && result.plan) {
         const updatedLedger = recordEvidence(io.getEvidenceLedger(), {
+          stage: 'planning',
           source: 'planner_inference',
           sourceId: 'planner_shadow',
           confidence: 'high_probability',

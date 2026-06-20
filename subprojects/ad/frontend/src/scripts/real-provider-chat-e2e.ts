@@ -9,6 +9,7 @@ import {
   resolveKnowledgeBaseIds,
 } from '../src/lib/runtime-config';
 import { detectPublicWebNeed, executePublicWebQuery } from '../src/lib/public-web-runtime';
+import { hasConfiguredPublicSearchProvider } from '../src/lib/search-orchestrator';
 import { runChatRuntimeForEvaluation } from '../src/lib/evaluation-runtime-runner';
 import { runtimeDataPath } from '../src/lib/runtime-data-path';
 
@@ -287,7 +288,7 @@ async function assertKnowledgeStaleCase(): Promise<string | CaseSkip> {
 async function assertPublicWebConfigured(): Promise<string> {
   const config = await getPublicWebConfig();
   assert(config.enabled, 'real public web provider is disabled');
-  assert(config.searchEndpoint, 'real public web search endpoint is not configured');
+  assert(hasConfiguredPublicSearchProvider(config), 'real public web search provider is not configured');
   return `${config.providerLabel} ${config.method}`;
 }
 

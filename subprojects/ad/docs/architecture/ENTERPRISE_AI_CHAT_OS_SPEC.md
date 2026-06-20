@@ -20,6 +20,41 @@ Enterprise AI Chat OS 是一个 `Planner-first, tool-grounded, contract-guarded`
 
 它以 LLM 结构化理解与任务规划作为主脑，以 MCP/API/知识库/公开联网等受治理能力作为事实与动作来源，以 Evidence Ledger、ResponseContract、ContractSafety 和 Trace 作为上线边界，最终向用户交付有证据、有置信度、有来源、有下一步动作的回答。
 
+### 1.1 小乔智投 VNext 产品定位
+
+基于 `小乔智投 AI 服务平台白皮书 VNext`，小乔智投产品定位升级为面向游戏发行与广告投放场景的 AI 服务平台。该升级不改变 Enterprise AI Chat OS 的运行架构，不新增平行 OS、Protocol、Schema 或 Contract。
+
+五大能力中心在本规格中的架构定位如下：
+
+| 能力中心 | 架构归属 | 接入方式 |
+|---|---|---|
+| Conversation OS | Request Understanding / Task Planning / Chat Domain / Frontend Presentation | 通过 ServiceCatalog、CapabilityManifest、ResponseContract、DisclosureProjection 表达服务分诊、任务承接和结果解释 |
+| Data Intelligence | Capability Discovery / MCP / Report Domain / Evidence Ledger | 通过 Metric Catalog、Report Catalog、Tool Contract、EvidenceRef 和 SemanticResultContract 表达查数、拼表、报表、分析和洞察 |
+| Intelligence Center | Knowledge/Public Web / Model Service / Answer Composer | 作为证据辅助和 shadow 决策能力进入 Planner 与 Composer，不替代内部数据和人工确认 |
+| Delivery & Integration OS | Workflow / MCP / Task / ActionContract | 通过交付 SOP、包状态、联调、配置检查、CaseFrame 和任务产物接入 |
+| AI Service OS | Task Center / Automation / Execution Policy / Observability | 作为自动化运行层接入 L0-L5 风险分级、审批、审计、回滚和运行历史 |
+
+因此，五大中心只是 `ServiceCatalog + CapabilityManifest` 的产品分类和治理标签，运行时仍必须经过 Request Understanding、Planner、Arbitrator、Capability Discovery、Execution Policy、Evidence Ledger、Answer Composer、ContractSafety、ResponseContract 和 Trace。
+
+VNext 最小契约字段：
+
+- `ServiceDefinition.governance.center`
+- `ServiceDefinition.governance.serviceLine`
+- `ServiceDefinition.governance.automationLevel`
+- `ServiceDefinition.governance.riskLevel`
+- `ServiceDefinition.governance.toolContractRefs`
+- `ServiceDefinition.governance.evidenceNeed`
+- `ServiceDefinition.governance.outputSurface`
+- `ServiceDefinition.governance.approvalPolicy`
+- `CapabilityManifest.center`
+- `CapabilityManifest.serviceLine`
+- `CapabilityManifest.automationLevel`
+- `CapabilityManifest.evidenceNeed`
+- `CapabilityManifest.outputSurface`
+- `CapabilityManifest.approvalPolicy`
+
+这些字段不得直接授权执行。执行授权必须继续由 `semantic frame + route + capability + execution gate + safety policy` 联合决定。
+
 ## 2. 当前现状与差距
 
 ### 2.1 当前规格文档现状
@@ -729,4 +764,3 @@ Report Domain 是业务域协议，不是 UI schema。报表能力必须声明�
 
 - 用户确认 1-6 架构收口方向
 - 初始版本发布
-

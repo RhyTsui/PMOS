@@ -81,6 +81,17 @@
 5. 前端运行过程只消费后端 `DisclosureProjection`，不得从正文或关键词反推步骤含义。
 6. 规格文档先行，runtime、contract、tests 后续实现必须以总纲为准。
 
+## 3.2 VNext 服务平台实施边界
+
+`小乔智投 AI 服务平台白皮书 VNext` 将产品升级为面向游戏发行与广告投放场景的 AI 服务平台。实施时必须遵守：
+
+- 五大能力中心只能作为 `ServiceCatalog`、`CapabilityManifest`、Admin 治理和前端信息架构的分类标签，不得新增绕开 Enterprise AI Chat OS 的平行运行协议。
+- `Conversation OS`、`Data Intelligence`、`Intelligence Center`、`Delivery & Integration OS`、`AI Service OS` 在代码中分别落为 `center`、`serviceLine`、`automationLevel`、`riskLevel`、`evidenceNeed`、`outputSurface`、`approvalPolicy` 等受治理字段。
+- 这些字段不得单独授权执行。执行仍必须由 semantic frame、route、capability、execution gate、permission、tool contract 和 safety policy 联合决定。
+- P0/P1 只能承诺已绑定真实 MCP/Workflow/Knowledge/Task 的能力；P2/P3 的预测、策略建议、自动投放只能以 shadow、建议或受控自动化等级表达，不得在主消息中写成已经执行。
+- L3 及以上自动化必须具备用户确认、审计记录和失败降级；L4/L5 还必须具备回滚策略和长期评测证据。
+- 前端五大中心入口必须保持会话驱动和任务承接，不得做成后台 dashboard、能力介绍墙或静态营销页。
+
 ## 4. LLM 使用边界
 
 ### 4.1 允许

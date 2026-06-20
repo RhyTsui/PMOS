@@ -582,16 +582,27 @@ function hasExplicitHourNeed(message: string): boolean {
   return /小时|分时|实时|截至当前|截止当前|当前小时|hour|hourly/i.test(message);
 }
 
+function parseHourSlot(message: string): { hour?: string; startHour?: string; endHour?: string } {
+  const text = String(message || '').replace(/\s+/g, '');
+  const rangeMatch = text.match(/(\d{1,2})(?:点|时)?(?:-|~|到|至)(\d{1,2})(?:点|时)/);
+  const cutoffMatch = text.match(/(?:截止到|截至|截止|到)(\d{1,2})(?:点|时)/);
+  const singleMatch = text.match(/(?:^|[^\d])(\d{1,2})(?:点|时)(?![-~到至]\d)/);
+  const startHour = rangeMatch?.[1] || cutoffMatch?.[1] || singleMatch?.[1] || undefined;
+  const endHour = rangeMatch?.[2] || cutoffMatch?.[1] || singleMatch?.[1] || startHour;
+  const hour = startHour && endHour && startHour !== endHour ? `${startHour}-${endHour}` : startHour;
+  return { hour, startHour, endHour };
+}
+
 function inferRequestedView(message: string): 'trend' | 'detail' | 'comparison' {
   const text = normalizeRoutingText(message).normalized_text.replace(/\s+/g, '');
-  if (/对比|比较|环比|同比|comparison|compare/i.test(text)) return 'comparison';
-  if (/趋势|每日|按日|折线|图表|近\d{1,3}(?:天|日)|最近\d{1,3}(?:天|日)|过去\d{1,3}(?:天|日)|trend|chart/i.test(text)) return 'trend';
-  return 'detail';
+  const isComparison = /对比|比较|环比|同比|comparison|compare/i.test(text);
+  const isTrend = /趋势|每日|按日|折线|图表|近\d{1,3}(?:天|日)|最近\d{1,3}(?:天|日)|过去\d{1,3}(?:天|日)|trend|chart/i.test(text);
+  return isComparison ? 'comparison' : isTrend ? 'trend' : 'detail';
 }
 
 function matchTerms(message: string, terms: string[]): string[] {
   const lower = message.toLowerCase();
-  return terms.filter(term => term && lower.includes(term.toLowerCase()));
+  return terms.reduce<string[]>((items, term) => term && lower.indexOf(term.toLowerCase()) >= 0 ? [...items, term] : items, []);
 }
 
 function normalizeText(value: unknown): string {
@@ -1722,8 +1733,59 @@ function configuredModeledArgumentKeys(policy: ReportQueryProjectResolutionPolic
 function schemaEnumValues(properties: Record<string, unknown>, key: string): string[] {
   const schema = properties[key];
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return [];
-  const values = (schema as { enum?: unknown }).enum;
+  const directValues = (schema as { enum?: unknown }).enum;
+  const itemValues = (schema as { items?: { enum?: unknown } }).items?.enum;
+  const values = Array.isArray(directValues) ? directValues : itemValues;
   return Array.isArray(values) ? values.map(String).filter(Boolean) : [];
+}
+
+function valueForSchemaType(properties: Record<string, unknown>, key: string, value: string | undefined): string | string[] | undefined {
+  const schema = properties[key];
+  const expectsArray = Boolean(schema && typeof schema === 'object' && !Array.isArray(schema) && (schema as { type?: unknown }).type === 'array');
+  return value === undefined
+    ? undefined
+    : expectsArray
+      ? csvValues(value)
+      : value;
+}
+
+function externalPromotionValueAllowed(properties: Record<string, unknown>, key: string, value: string, allowedExternalValues: string[]): boolean {
+  if (!allowedExternalValues.length) return true;
+  const schema = properties[key];
+  const expectsArray = Boolean(schema && typeof schema === 'object' && !Array.isArray(schema) && (schema as { type?: unknown }).type === 'array');
+  const values = expectsArray ? csvValues(value) : [value];
+  return values.length > 0 && values.every(item => allowedExternalValues.includes(item));
+}
+
+function csvValues(value: string): string[] {
+  const output: string[] = [];
+  for (const raw of value.split(',')) {
+    const item = raw.trim();
+    item && output.push(item);
+  }
+  return output;
+}
+
+function promotionValues(value: unknown, allowedExternalValues: string[] = []): string[] {
+  const output: string[] = [];
+  if (!Array.isArray(value)) {
+    const normalized = String(value).trim();
+    if (allowedExternalValues.includes(normalized)) return [normalized];
+  }
+  const rawValues = Array.isArray(value) ? value : String(value).split(',');
+  for (const raw of rawValues) {
+    const item = String(raw).trim();
+    item && output.push(item);
+  }
+  return output;
+}
+
+function hasInvalidPromotionMediaMapping(values: string[], mediaIds: string[]): boolean {
+  let invalid = false;
+  for (const value of values) {
+    invalid = invalid || /^\d+$/.test(value) || mediaIds.indexOf(value) >= 0;
+  }
+  return invalid;
 }
 
 function inferPromotionSourceInternal(params: {
@@ -1760,6 +1822,7 @@ function mapPromotionSourceToExternal(params: {
   allowedExternalValues: string[];
   argumentKey: string;
   internalValues: string[];
+  filterValues: Record<string, string[]>;
   unsupported: boolean;
 } {
   const adapterConfig = promotionSourceAdapter(params.type, params.policy);
@@ -1768,8 +1831,9 @@ function mapPromotionSourceToExternal(params: {
   const adapter = `tool_schema_adapter:${params.tool.name}:${params.type}`;
   const internalValues = adapterConfig?.internal_values || [];
   const configuredExternalValues = adapterConfig?.external_values?.[params.internal] || [params.internal].filter(Boolean);
+  const filterValues = adapterConfig?.filter_values?.[params.internal] || {};
   const external = allowedExternalValues.length
-    ? configuredExternalValues.find(value => allowedExternalValues.includes(value))
+    ? configuredExternalValues.find(value => externalPromotionValueAllowed(params.properties, argumentKey, value, allowedExternalValues))
     : configuredExternalValues[0];
   return {
     external,
@@ -1777,8 +1841,19 @@ function mapPromotionSourceToExternal(params: {
     allowedExternalValues,
     argumentKey,
     internalValues,
+    filterValues,
     unsupported: !external,
   };
+}
+
+function assignPromotionSourceFilterValues(params: {
+  filterValues: Record<string, string[]>;
+  assign: (key: string, value: unknown, source: string) => void;
+  properties: Record<string, unknown>;
+}): void {
+  for (const [key, values] of Object.entries(params.filterValues).filter(([, values]) => values.length)) {
+    params.assign(key, listValueForSchema(params.properties, key, values), 'promotion_source_resolver.filter_values');
+  }
 }
 
 export function buildToolArgumentPreflight(params: {
@@ -1838,9 +1913,14 @@ export function buildToolArgumentPreflight(params: {
     }
   }
   if (promotionValue !== undefined && promotionValue !== null && promotionValue !== '') {
-    const asString = String(promotionValue);
     const allowedExternalValues = params.promotionMapping?.allowedExternalValues || [];
-    if (/^\d+$/.test(asString) || mediaIds.includes(asString)) {
+    const values = promotionValues(promotionValue, allowedExternalValues);
+    const asString = values.join(',');
+    let hasUnsupportedExternalValue = false;
+    for (const value of values) {
+      hasUnsupportedExternalValue = hasUnsupportedExternalValue || allowedExternalValues.indexOf(value) < 0;
+    }
+    if (hasInvalidPromotionMediaMapping(values, mediaIds)) {
       issues.push({
         field: promotionArgumentKey,
         code: 'source_mapping_violation',
@@ -1858,7 +1938,7 @@ export function buildToolArgumentPreflight(params: {
         source: promotionSource,
       });
     }
-    if (allowedExternalValues.length && !allowedExternalValues.includes(asString)) {
+    if (allowedExternalValues.length && hasUnsupportedExternalValue) {
       issues.push({
         field: promotionArgumentKey,
         code: 'invalid_external_enum',
@@ -1880,7 +1960,7 @@ export function buildToolArgumentPreflight(params: {
         source: mediaSource,
       });
     }
-    if (!/resolved_filters\.mediaId|capability_slot_mapping:media/.test(mediaSource)) {
+    if (!/resolved_filters\.mediaId|capability_slot_mapping:media|promotion_source_resolver\.filter_values/.test(mediaSource)) {
       issues.push({
         field: 'mediaId',
         code: 'source_mapping_violation',
@@ -1925,7 +2005,17 @@ export function buildReportToolInput(
 ): ReportToolInputBuildResult {
   const policy = loadReportQueryPolicySync();
   const semanticAliases = mergedEntityAliasMaps(policy);
-  const type = selectReportQuestionType(message);
+  const capabilityDomains = `,${String(capability?.report_domains || '')},`;
+  const capabilityType = capabilityDomains.indexOf(',retention,') >= 0
+    ? 'retention'
+    : capabilityDomains.indexOf(',roi,') >= 0
+      ? 'roi'
+      : capabilityDomains.indexOf(',hourly,') >= 0
+        ? 'hour'
+        : capabilityDomains.indexOf(',daily,') >= 0
+          ? 'daily'
+          : undefined;
+  const type = capabilityType || selectReportQuestionType(message);
   const entry = policy.tool_selection_rules.find(item => item.question_type === type) || policy.tool_selection_rules[policy.tool_selection_rules.length - 1];
   const parsedRange = parseDateRange(message);
   const useParsedDateRange = parsedRange.is_explicit || hasExplicitDateRangeNeed(message);
@@ -1947,6 +2037,7 @@ export function buildReportToolInput(
   const defaults = adapterDefaults(tool, type, policy);
   const requiredKeys = schemaRequired(tool);
   const reportTimeType = timeTypeForRange(type, parsedRange, policy);
+  const hourSlot = parseHourSlot(message);
   const promotionAdapter = promotionSourceAdapter(type, policy);
   const promotionInternal = inferPromotionSourceInternal({
     message,
@@ -1987,13 +2078,22 @@ export function buildReportToolInput(
     assign(key, value, 'policy.schema_adapters.required_defaults');
   }
   if (promotionExternal.argumentKey && (promotionExternal.argumentKey in properties || Object.keys(properties).length === 0)) {
-    assign(promotionExternal.argumentKey, promotionExternal.external, `${promotionInternal.source}.external`);
+    assign(
+      promotionExternal.argumentKey,
+      valueForSchemaType(properties, promotionExternal.argumentKey, promotionExternal.external),
+      `${promotionInternal.source}.external`,
+    );
     sourceMapping[`${promotionExternal.argumentKey}.internal`] = promotionInternal.value;
     sourceMapping[`${promotionExternal.argumentKey}.external`] = String(promotionExternal.external || '');
     sourceMapping[`${promotionExternal.argumentKey}.source`] = promotionInternal.source;
     sourceMapping[`${promotionExternal.argumentKey}.adapter`] = promotionExternal.adapter;
     sourceMapping[`${promotionExternal.argumentKey}.allowedExternalValues`] = promotionExternal.allowedExternalValues.join(',');
   }
+  assignPromotionSourceFilterValues({
+    filterValues: promotionExternal.filterValues,
+    assign,
+    properties,
+  });
   assign('appId', appId, 'baseInput.appId_alias');
   assign('project_id', appId, 'baseInput.appId_alias');
   assign('projectId', appId, 'baseInput.appId_alias');
@@ -2008,6 +2108,15 @@ export function buildReportToolInput(
   assign('dimensions', dimensions, 'request_understanding.dimensions');
   assign('granularity', type === 'hour' ? 'hour' : 'day', 'request_understanding.granularity');
   assign('timeType', reportTimeType, 'policy.semantic_defaults.time_type');
+  for (const [key, value] of Object.entries({
+    hour: hourSlot.hour,
+    hourRange: hourSlot.hour,
+    timeSlot: hourSlot.hour,
+    startHour: hourSlot.startHour,
+    endHour: hourSlot.endHour,
+  })) {
+    value ? assign(key, valueForSchemaType(properties, key, value), 'time_slot_resolver') : undefined;
+  }
   assign('baseTimeType', policy.semantic_defaults.base_time_type, 'policy.semantic_defaults.base_time_type');
   assign('report_type', type, 'request_understanding.question_type');
   assign('user_question', message.slice(0, 1000), 'user_message');
@@ -2025,12 +2134,18 @@ export function buildReportToolInput(
     assign('osType', listValueForSchema(properties, 'osType', resolvedFilters.terminalOs), 'resolved_filters.terminalOs');
   }
   if (resolvedFilters.teamIds?.length) assign('teamIds', resolvedFilters.teamIds, 'resolved_filters.teamIds');
-  if (resolvedFilters.appPackageType?.length) assign('appPackageType', resolvedFilters.appPackageType[0], 'resolved_filters.appPackageType');
+  if (resolvedFilters.appPackageType?.length) {
+    assign('appPackageType', listValueForSchema(properties, 'appPackageType', resolvedFilters.appPackageType), 'resolved_filters.appPackageType');
+    assign('appPackageTypes', listValueForSchema(properties, 'appPackageTypes', resolvedFilters.appPackageType), 'resolved_filters.appPackageType');
+  }
   if (resolvedFilters.accountId?.length) assign('accountId', resolvedFilters.accountId, 'resolved_filters.accountId');
   if (resolvedFilters.pkgId?.length) assign('pkgId', resolvedFilters.pkgId, 'resolved_filters.pkgId');
   if (resolvedFilters.optimizerIds?.length) assign('optimizerIds', resolvedFilters.optimizerIds, 'resolved_filters.optimizerIds');
   if (mediaKeys.length && resolvedFilters.mediaId?.length) {
     assign('subGroup', 'media_id', 'request_understanding.media_dimension');
+  }
+  if (dimensions.some(item => item === 'app_package_type') && resolvedFilters.appPackageType?.length) {
+    assign('subGroup', 'app_package_type', 'request_understanding.app_package_type_dimension');
   }
   if (resolvedFilters.teamIds?.length) assign('subGroup', 'team_id', 'resolved_filters.teamIds');
   if (resolvedFilters.accountId?.length) assign('subGroup', 'account_id', 'resolved_filters.accountId');

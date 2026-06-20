@@ -294,7 +294,11 @@ async function main(): Promise<void> {
       const output = isRecord(webResult?.output) ? webResult.output : {};
       assert(webResult && webResult.status !== 'success', `low relevance unexpectedly succeeded: ${JSON.stringify(webResult)}`);
       assert(
-        output.filter_reason === 'relevance_gate_filtered_all' || output.filter_reason === 'provider_returned_no_results',
+        output.filter_reason === 'relevance_gate_filtered_all'
+        || output.filter_reason === 'provider_returned_no_results'
+        || output.filter_reason === 'official_source_not_confirmed'
+        || output.filter_reason === 'insufficient_independent_sources'
+        || output.filter_reason === 'insufficient_evidence_quality',
         `unexpected filter reason: ${JSON.stringify(output)}`,
       );
       return JSON.stringify({

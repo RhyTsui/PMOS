@@ -6,6 +6,8 @@
  * - 种子进化（每周评估）
  * - 健康检查（每小时）
  * - 去重清理（每天）
+ * - 源发现（每周自动发现新源）
+ * - 每日统计报告（每天晚上 10 点）
  *
  * @see docs/design/05-采集器设计.md
  */
@@ -13,6 +15,10 @@ import cron, { type ScheduledTask } from 'node-cron';
 import { IntelSourceRepository } from '../repositories/intel-source-repository.js';
 import { CollectionService } from '../services/collection/index.js';
 import { SeedService } from '../services/seed/index.js';
+import { GapDetectionService } from '../services/gap-detection/index.js';
+import { SourceHealthService } from '../services/health/index.js';
+import { SourceDiscoveryService } from '../services/source-discovery/index.js';
+import { DailyReportService } from '../services/daily-report/index.js';
 import type { IntelSource } from '../models/types.js';
 
 /**
@@ -23,6 +29,9 @@ export interface SchedulerConfig {
   healthCheckCron: string;      // 健康检查 cron（默认每小时）
   evolutionCron: string;        // 种子进化 cron（默认每周一）
   cleanupCron: string;          // 清理任务 cron（默认每天凌晨）
+  gapDetectionCron: string;    // 漏采检测 cron（默认每天 9 点）
+  sourceDiscoveryCron: string; // 源发现 cron（默认每周日凌晨 4 点）
+  dailyReportCron: string;     // 每日报告 cron（默认每天晚上 10 点）
 
   // 采集调度
   enableAutoCollection: boolean; // 是否启用自动采集
@@ -33,6 +42,9 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   healthCheckCron: '0 * * * *',     // 每小时
   evolutionCron: '0 3 * * 1',       // 每周一凌晨 3 点
   cleanupCron: '0 2 * * *',         // 每天凌晨 2 点
+  gapDetectionCron: '0 9 * * *',    // 每天 9 点
+  sourceDiscoveryCron: '0 4 * * 0', // 每周日凌晨 4 点
+  dailyReportCron: '0 22 * * *',    // 每天晚上 10 点
   enableAutoCollection: true,
   defaultCron: '*/30 * * * *',      // 每 30 分钟
 };
@@ -45,6 +57,10 @@ export class Scheduler {
   private sourceRepo: IntelSourceRepository;
   private collectionService: CollectionService;
   private seedService: SeedService;
+  private gapService: GapDetectionService;
+  private healthService: SourceHealthService;
+  private discoveryService: SourceDiscoveryService;
+  private dailyReportService: DailyReportService;
   private jobs: Map<string, ScheduledTask> = new Map();
   private isRunning = false;
 
@@ -53,6 +69,10 @@ export class Scheduler {
     this.sourceRepo = new IntelSourceRepository();
     this.collectionService = new CollectionService();
     this.seedService = new SeedService();
+    this.gapService = new GapDetectionService();
+    this.healthService = new SourceHealthService();
+    this.discoveryService = new SourceDiscoveryService();
+    this.dailyReportService = new DailyReportService();
   }
 
   /**
@@ -122,6 +142,15 @@ export class Scheduler {
       case 'cleanup':
         await this.runCleanup();
         break;
+      case 'gap-detection':
+        this.runGapDetection();
+        break;
+      case 'source-discovery':
+        this.runSourceDiscovery();
+        break;
+      case 'daily-report':
+        await this.runDailyReport();
+        break;
       default:
         throw new Error(`Unknown job: ${jobName}`);
     }
@@ -146,6 +175,21 @@ export class Scheduler {
     // 清理任务
     this.addJob('cleanup', this.config.cleanupCron, () => {
       this.runCleanup();
+    });
+
+    // 漏采检测
+    this.addJob('gap-detection', this.config.gapDetectionCron, () => {
+      this.runGapDetection();
+    });
+
+    // 源发现
+    this.addJob('source-discovery', this.config.sourceDiscoveryCron, () => {
+      this.runSourceDiscovery();
+    });
+
+    // 每日报告
+    this.addJob('daily-report', this.config.dailyReportCron, () => {
+      this.runDailyReport();
     });
   }
 
@@ -192,12 +236,51 @@ export class Scheduler {
 
   /**
    * 运行健康检查
+   *
+   * 检查各情报源是否可访问，更新健康状态
    */
   private async runHealthCheck(): Promise<void> {
     console.log('  → 检查数据源健康状态...');
-    // TODO: 实现具体的健康检查逻辑
-    // - 检查各源是否可访问
-    // - 更新 source_health 表
+    const sources = this.sourceRepo.findEnabled();
+    let healthy = 0;
+    let unhealthy = 0;
+
+    for (const source of sources) {
+      try {
+        const reachable = await this.checkSourceReachable(source);
+        if (reachable) {
+          healthy++;
+        } else {
+          unhealthy++;
+          this.healthService.recordFailure(source.id, '源不可访问（健康检查）');
+        }
+      } catch (error) {
+        unhealthy++;
+        const msg = error instanceof Error ? error.message : String(error);
+        this.healthService.recordFailure(source.id, `健康检查异常: ${msg}`);
+      }
+    }
+
+    console.log(`  → 健康检查完成: ${healthy} 个正常, ${unhealthy} 个异常`);
+  }
+
+  /**
+   * 检查源是否可访问
+   */
+  private async checkSourceReachable(source: IntelSource): Promise<boolean> {
+    const url = source.feedUrl || source.baseUrl;
+    if (!url) return false;
+
+    try {
+      const response = await fetch(url, {
+        method: source.accessMethod === 'rss' ? 'GET' : 'HEAD',
+        signal: AbortSignal.timeout(10000),
+        headers: { 'User-Agent': 'GI-HealthCheck/1.0' },
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -247,6 +330,105 @@ export class Scheduler {
     // TODO: 实现清理逻辑
     // - 清理过期的 retired 种子
     // - 清理过期的重复证据
+  }
+
+  /**
+   * 运行漏采检测
+   */
+  private runGapDetection(): void {
+    console.log('  → 运行漏采检测...');
+    try {
+      const report = this.gapService.detect();
+      console.log(`  → 漏采检测完成: 检查 ${report.totalSeedsChecked} 个种子, 发现 ${report.gapsFound} 个漏采`);
+      if (report.summary.critical > 0) {
+        console.warn(`  → ⚠️ 严重漏采 ${report.summary.critical} 个，请及时处理`);
+        report.alerts
+          .filter(a => a.severity === 'critical')
+          .forEach(a => console.warn(`    - [${a.seedType}] ${a.seedText} (${a.gapDays}天未产出)`));
+      }
+      if (report.summary.warning > 0) {
+        console.log(`  → 警告级漏采 ${report.summary.warning} 个`);
+      }
+    } catch (error) {
+      console.error('  → 漏采检测失败:', error);
+    }
+  }
+
+  /**
+   * 运行源发现
+   */
+  private async runSourceDiscovery(): Promise<void> {
+    console.log('  → 运行源发现...');
+    try {
+      const report = await this.discoveryService.discover();
+      console.log(`  → 源发现完成: 检查 ${report.seedsChecked} 个种子, 发现 ${report.discoveredCount} 个新源`);
+
+      if (report.discoveries.length > 0) {
+        console.log(`  → 发现的源:`);
+        report.discoveries.forEach(d => {
+          console.log(`    - ${d.name} (${d.sourceType}, 置信度: ${d.confidence.toFixed(2)})`);
+          console.log(`      ${d.url}`);
+          console.log(`      策略: ${d.discoveryMethod}, 理由: ${d.reason}`);
+        });
+      }
+
+      // 输出统计
+      console.log(`  → 发现策略统计:`);
+      console.log(`    - LLM 推荐: ${report.stats.llm_recommendation} 个`);
+      console.log(`    - 共现提取: ${report.stats.cooccurrence} 个`);
+      console.log(`    - 搜索引擎: ${report.stats.search} 个`);
+      console.log(`    - 交叉引用: ${report.stats.cross_reference} 个`);
+    } catch (error) {
+      console.error('  → 源发现失败:', error);
+    }
+  }
+
+  /**
+   * 运行每日报告
+   */
+  private async runDailyReport(): Promise<void> {
+    console.log('  → 生成每日报告...');
+    try {
+      const report = await this.dailyReportService.generateReport();
+      console.log(`  → 每日报告生成完成: ${report.reportDate}`);
+      console.log(`  → 采集统计:`);
+      console.log(`    - 新增证据: ${report.collection.newEvidenceCount} 条`);
+      console.log(`    - 新增结构化事件: ${report.collection.newStructuredEventsCount} 条`);
+      console.log(`    - 新增信号: ${report.collection.newSignalsCount} 条`);
+
+      console.log(`  → 信号统计:`);
+      console.log(`    - 总信号数: ${report.signals.total}`);
+      console.log(`    - P0 信号: ${report.signals.byPriority.P0} 个`);
+      console.log(`    - P1 信号: ${report.signals.byPriority.P1} 个`);
+
+      console.log(`  → 源健康:`);
+      console.log(`    - 总源数: ${report.sourceHealth.total}`);
+      console.log(`    - 启用源: ${report.sourceHealth.enabled}`);
+      console.log(`    - 健康: ${report.sourceHealth.byHealthStatus.healthy}`);
+      console.log(`    - 降级: ${report.sourceHealth.byHealthStatus.degraded}`);
+      console.log(`    - 下线: ${report.sourceHealth.byHealthStatus.down}`);
+
+      if (report.gapAlerts) {
+        console.log(`  → 漏采告警:`);
+        console.log(`    - 检查种子: ${report.gapAlerts.seedsChecked}`);
+        console.log(`    - 漏采数: ${report.gapAlerts.gapsFound}`);
+        console.log(`    - 严重: ${report.gapAlerts.criticalCount}`);
+        console.log(`    - 警告: ${report.gapAlerts.warningCount}`);
+      }
+
+      if (report.trends) {
+        console.log(`  → 趋势分析:`);
+        console.log(`    - 上升: ${report.trends.risingCount}`);
+        console.log(`    - 稳定: ${report.trends.stableCount}`);
+        console.log(`    - 下降: ${report.trends.decliningCount}`);
+      }
+
+      console.log(`  → 整体健康度: ${report.summary.overallHealth}%`);
+      console.log(`  → 建议:`);
+      report.summary.recommendations.forEach(r => console.log(`    - ${r}`));
+    } catch (error) {
+      console.error('  → 每日报告生成失败:', error);
+    }
   }
 }
 

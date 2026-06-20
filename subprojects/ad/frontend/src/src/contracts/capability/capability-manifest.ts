@@ -1,3 +1,10 @@
+import type {
+  ApprovalPolicyRef,
+  AutomationLevel,
+  ServiceCenter,
+  ServiceOutputSurface,
+} from '@/contracts/service-catalog';
+
 export type CapabilityProvider = 'mcp' | 'builtin';
 
 export type CapabilityPurpose =
@@ -83,6 +90,20 @@ export interface CapabilityManifest {
   provider: CapabilityProvider;
   capabilityType: CapabilityType;
   capabilityPurpose?: CapabilityPurpose;
+  /**
+   * VNext 服务分类元数据。
+   *
+   * 这些字段用于 Capability Discovery / Admin / Trace 治理，不授权执行。
+   * 真实执行仍必须通过 route + semantic frame + capability + execution gate。
+   */
+  center?: ServiceCenter;
+  serviceLine?: string;
+  automationLevel?: AutomationLevel;
+  owner?: string;
+  toolContractRefs?: string[];
+  evidenceNeed?: string[];
+  outputSurface?: ServiceOutputSurface[];
+  approvalPolicy?: ApprovalPolicyRef;
   /** 执行类别：read_only（只读查询）/ write（状态变更）/ workflow（多步骤）/ diagnostic（诊断证据） */
   executionClass?: 'read_only' | 'write' | 'workflow' | 'diagnostic';
   /** 支持的语义任务（来自 SemanticTask）。用于 planner capability grounding 匹配。 */

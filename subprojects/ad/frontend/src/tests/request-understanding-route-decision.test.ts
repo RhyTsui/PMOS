@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { deriveRequestRouteDecision } from '../src/lib/request-understanding';
+import type { RequestSemanticFrame } from '../src/contracts/request-understanding/semantic-frame-contract';
+import { deriveRequestRouteDecision, deriveUserRequirement } from '../src/lib/request-understanding';
 
 describe('request-understanding route decision', () => {
   it('marks report query route as execution-required', () => {
@@ -15,6 +16,46 @@ describe('request-understanding route decision', () => {
 
     expect(decision.intent_type).toBe('general');
     expect(decision.requiresExecution).toBe(false);
+  });
+
+  it('uses client report intent only when governed report signals agree', () => {
+    const decision = deriveRequestRouteDecision('2026-03-25 广告小时报表中，按自定义时段查看激活数', {
+      clientIntent: 'report_query',
+    });
+
+    expect(decision.intent_type).toBe('report_query');
+    expect(decision.requiresExecution).toBe(true);
+    expect(decision.reason).toContain('客户端候选');
+  });
+
+  it('does not let client report intent hijack unrelated public questions', () => {
+    const decision = deriveRequestRouteDecision('How is the weather today?', {
+      clientIntent: 'report_query',
+    });
+
+    expect(decision.intent_type).toBe('general');
+    expect(decision.requiresExecution).toBe(false);
+  });
+
+  it('keeps structured report service intent when semantic frame service intent is non-data', () => {
+    const semanticFrame: RequestSemanticFrame = {
+      speechAct: 'request_operation',
+      semanticTask: 'retrieve_report_data',
+      executionMode: 'data_execution',
+      serviceIntent: 'system_operation',
+      evidenceNeed: ['data_mcp'],
+      riskLevel: 'L1',
+      requiredSlots: [],
+      missingSlots: [],
+      confidence: 'medium',
+      frameSource: 'semantic_frame',
+      frameVersion: 'test',
+    };
+    const requirement = deriveUserRequirement('最近 14 天的投放日报效果综合评估', null, semanticFrame);
+
+    expect(requirement.task).toBe('report_query');
+    expect(['data_query', 'report_delivery']).toContain(requirement.serviceIntent);
+    expect(requirement.serviceIntent).not.toBe('system_operation');
   });
 
   it('does not route open factual questions to internal business paths without governed business signals', () => {

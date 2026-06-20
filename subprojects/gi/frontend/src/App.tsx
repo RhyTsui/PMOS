@@ -3,12 +3,14 @@ import { Layout, Menu } from 'antd';
 import {
   FileTextOutlined,
   SettingOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  DatabaseOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventListPage from './pages/EventListPage';
 import EventDetailPage from './pages/EventDetailPage';
 import AdminPage from './pages/AdminPage';
+import SourcesPage from './pages/SourcesPage';
 import DashboardPage from './pages/DashboardPage';
 
 const { Header, Content, Sider } = Layout;
@@ -20,6 +22,7 @@ function AppLayout() {
   const menuItems = [
     { key: '/', icon: <ThunderboltOutlined />, label: '情报流' },
     { key: '/events', icon: <FileTextOutlined />, label: '事件分析' },
+    { key: '/sources', icon: <DatabaseOutlined />, label: '信源/种子' },
     { key: '/admin', icon: <SettingOutlined />, label: '系统管理' },
   ];
 
@@ -46,6 +49,7 @@ function AppLayout() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/events" element={<EventListPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/sources" element={<SourcesPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

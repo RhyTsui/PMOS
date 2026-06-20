@@ -283,6 +283,7 @@ export function createSubQuery(params: {
   dimensions: string[];
   filters?: Record<string, string[]>;
   timeRange?: { start: string; end: string };
+  extraInputs?: Record<string, unknown>;
 }): SubQuery {
   return {
     subQueryId: `sq-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
@@ -293,5 +294,6 @@ export function createSubQuery(params: {
     dimensions: params.dimensions,
     filters: params.filters ?? {},
     timeRange: params.timeRange,
+    extraInputs: params.extraInputs,
   };
 }

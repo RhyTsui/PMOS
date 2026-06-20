@@ -36,6 +36,7 @@ export interface ReportQuerySchemaAdapter {
     media_default_internal?: string;
     source_terms?: Record<string, string[]>;
     external_values?: Record<string, string[]>;
+    filter_values?: Record<string, Record<string, string[]>>;
   };
   modeled_argument_keys?: string[];
 }
@@ -165,6 +166,17 @@ function normalizeStringRecord(value: unknown, fallback: Record<string, string[]
   return Object.keys(output).length ? output : fallback;
 }
 
+function normalizeNestedStringRecord(value: unknown, base: Record<string, Record<string, string[]>>): Record<string, Record<string, string[]>> {
+  const entries = value && typeof value === 'object' && !Array.isArray(value)
+    ? Object.entries(value as Record<string, unknown>)
+    : [];
+  const output = entries.reduce<Record<string, Record<string, string[]>>>((next, [key, raw]) => {
+    next[key] = normalizeStringRecord(raw, base[key] || {});
+    return next;
+  }, {});
+  return entries.length ? output : base;
+}
+
 function normalizeToolRule(input: Partial<ReportQueryToolSelectionRule>, fallback?: Partial<ReportQueryToolSelectionRule>): ReportQueryToolSelectionRule {
   const questionType = (input.question_type || fallback?.question_type || 'daily') as ReportQuestionType;
   return {
@@ -182,7 +194,8 @@ function normalizeToolRule(input: Partial<ReportQueryToolSelectionRule>, fallbac
 }
 
 function normalizeSchemaAdapter(input: Partial<ReportQuerySchemaAdapter>, fallback?: Partial<ReportQuerySchemaAdapter>): ReportQuerySchemaAdapter {
-  const promotionSource = input.promotion_source || fallback?.promotion_source;
+  const inheritedPromotionSource = fallback?.promotion_source;
+  const promotionSource = input.promotion_source || inheritedPromotionSource;
   return {
     id: String(input.id || fallback?.id || 'schema-adapter').trim(),
     question_type: (input.question_type || fallback?.question_type || 'default') as ReportQuerySchemaAdapter['question_type'],
@@ -192,14 +205,15 @@ function normalizeSchemaAdapter(input: Partial<ReportQuerySchemaAdapter>, fallba
       : fallback?.required_defaults || {},
     promotion_source: promotionSource && typeof promotionSource === 'object' && !Array.isArray(promotionSource)
       ? {
-        argument_key: String(promotionSource.argument_key || fallback?.promotion_source?.argument_key || '').trim() || undefined,
-        internal_values: normalizeList(promotionSource.internal_values, fallback?.promotion_source?.internal_values || []),
-        default_internal: String(promotionSource.default_internal || fallback?.promotion_source?.default_internal || '').trim() || undefined,
-        media_default_internal: String(promotionSource.media_default_internal || fallback?.promotion_source?.media_default_internal || '').trim() || undefined,
-        source_terms: normalizeStringRecord(promotionSource.source_terms, fallback?.promotion_source?.source_terms || {}),
-        external_values: normalizeStringRecord(promotionSource.external_values, fallback?.promotion_source?.external_values || {}),
+        argument_key: String(promotionSource.argument_key || inheritedPromotionSource?.argument_key || '').trim() || undefined,
+        internal_values: normalizeList(promotionSource.internal_values, inheritedPromotionSource?.internal_values || []),
+        default_internal: String(promotionSource.default_internal || inheritedPromotionSource?.default_internal || '').trim() || undefined,
+        media_default_internal: String(promotionSource.media_default_internal || inheritedPromotionSource?.media_default_internal || '').trim() || undefined,
+        source_terms: normalizeStringRecord(promotionSource.source_terms, inheritedPromotionSource?.source_terms || {}),
+        external_values: normalizeStringRecord(promotionSource.external_values, inheritedPromotionSource?.external_values || {}),
+        filter_values: normalizeNestedStringRecord(promotionSource.filter_values, inheritedPromotionSource?.filter_values || {}),
       }
-      : fallback?.promotion_source,
+      : inheritedPromotionSource,
     modeled_argument_keys: normalizeList(input.modeled_argument_keys, fallback?.modeled_argument_keys || []),
   };
 }

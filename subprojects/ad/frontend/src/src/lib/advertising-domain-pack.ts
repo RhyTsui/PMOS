@@ -562,7 +562,14 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
       },
       external_values: {
         AD: ['AD'],
-        ORGANIC: ['ORGANIC', 'ORGANIC,AD'],
+        ORGANIC: ['ORGANIC,AD,MKT,OP', 'ORGANIC', 'ORGANIC,AD'],
+      },
+      filter_values: {
+        ORGANIC: {
+          mediaId: ['99999'],
+          mediaIds: ['99999'],
+          media_id: ['99999'],
+        },
       },
     },
   },

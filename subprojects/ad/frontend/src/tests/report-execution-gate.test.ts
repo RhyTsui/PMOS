@@ -89,6 +89,29 @@ describe('report execution gate', () => {
       });
       expect(result.shouldEnter).toBe(true);
     });
+
+    it('enters when Request Understanding contract confirms report_query even without route-rule match', () => {
+      const route = deriveRequestRouteDecision('2026-03-25 广告小时报表中，按自定义时段查看激活数', {
+        clientIntent: 'report_query',
+      });
+      const requirement = deriveUserRequirement('2026-03-25 广告小时报表中，按自定义时段查看激活数');
+      const semanticFrame = deriveRequestSemanticFrame({ message: '2026-03-25 广告小时报表中，按自定义时段查看激活数' });
+
+      const result = shouldEnterReportExecution({
+        route,
+        userRequirement: requirement,
+        semanticFrame,
+        selectedCapability: mockReportCapability(),
+        capabilityReportMatch: false,
+        reportRouteMatch: false,
+      });
+
+      expect(route.intent_type).toBe('report_query');
+      expect(route.requiresExecution).toBe(true);
+      expect(requirement.task).toBe('report_query');
+      expect(result.shouldEnter).toBe(true);
+      expect(result.reasons).toContain('route_evidence_override:strong_report_contract');
+    });
   });
 
   describe('capabilityReportMatch alone should NOT trigger execution', () => {

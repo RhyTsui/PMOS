@@ -27,6 +27,46 @@ export const SERVICE_FAMILIES = [
 ] as const;
 export type ServiceFamily = typeof SERVICE_FAMILIES[number];
 
+// ─── VNext Service Center（能力中心）────────────────────
+
+export const SERVICE_CENTERS = [
+  'conversation',
+  'data_intelligence',
+  'intelligence_center',
+  'delivery_integration',
+  'ai_service_runtime',
+] as const;
+export type ServiceCenter = typeof SERVICE_CENTERS[number];
+
+export type AutomationLevel = 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+
+export interface ApprovalPolicyRef {
+  /** OperationSafetyPolicy / Admin policy 中的策略 ID。 */
+  policyId: string;
+  /** 用户确认、审批、审计或回滚要求摘要。 */
+  summary: string;
+}
+
+export type ServiceOutputSurface =
+  | 'chat_answer'
+  | 'structured_result'
+  | 'task_center'
+  | 'asset_library'
+  | 'disclosure_panel'
+  | 'admin_governance';
+
+export interface ServiceGovernanceMetadata {
+  center: ServiceCenter;
+  serviceLine: string;
+  automationLevel: AutomationLevel;
+  riskLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  owner?: string;
+  toolContractRefs?: string[];
+  evidenceNeed?: string[];
+  outputSurface?: ServiceOutputSurface[];
+  approvalPolicy?: ApprovalPolicyRef;
+}
+
 // ─── Service Type（服务类型）────────────────────────────
 
 export const SERVICE_TYPES = [
@@ -116,6 +156,181 @@ export const SERVICE_TYPE_FAMILY: Record<ServiceType, ServiceFamily> = {
   clarification: 'chat',
 };
 
+export const SERVICE_TYPE_GOVERNANCE: Record<ServiceType, ServiceGovernanceMetadata> = {
+  data_query: {
+    center: 'data_intelligence',
+    serviceLine: 'query',
+    automationLevel: 'L0',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'metric_catalog', 'permission_context'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  aggregate_analysis: {
+    center: 'data_intelligence',
+    serviceLine: 'analytics',
+    automationLevel: 'L1',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'metric_catalog', 'comparison_baseline'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  join_table_report: {
+    center: 'data_intelligence',
+    serviceLine: 'report',
+    automationLevel: 'L3',
+    riskLevel: 'medium',
+    evidenceNeed: ['template_contract', 'tool_result', 'permission_context'],
+    outputSurface: ['structured_result', 'asset_library', 'task_center'],
+    approvalPolicy: {
+      policyId: 'report-generation-confirmation',
+      summary: '生成报表或创建定时任务前需要用户确认模板和数据范围。',
+    },
+  },
+  data_issue_diagnosis: {
+    center: 'ai_service_runtime',
+    serviceLine: 'diagnosis',
+    automationLevel: 'L1',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'diagnostic_evidence', 'source_ref'],
+    outputSurface: ['structured_result', 'disclosure_panel', 'task_center'],
+  },
+  config_issue_diagnosis: {
+    center: 'ai_service_runtime',
+    serviceLine: 'inspection',
+    automationLevel: 'L1',
+    riskLevel: 'low',
+    evidenceNeed: ['config_check', 'log_check', 'tool_result'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  troubleshooting_answer: {
+    center: 'conversation',
+    serviceLine: 'service_explanation',
+    automationLevel: 'L2',
+    riskLevel: 'low',
+    evidenceNeed: ['diagnostic_evidence', 'source_ref'],
+    outputSurface: ['chat_answer', 'disclosure_panel'],
+  },
+  roi_diagnosis: {
+    center: 'ai_service_runtime',
+    serviceLine: 'diagnosis',
+    automationLevel: 'L1',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'comparison_baseline', 'diagnostic_evidence'],
+    outputSurface: ['structured_result', 'task_center', 'disclosure_panel'],
+  },
+  creative_diagnosis: {
+    center: 'intelligence_center',
+    serviceLine: 'creative_insight',
+    automationLevel: 'L1',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'creative_catalog', 'source_ref'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  package_fetch: {
+    center: 'delivery_integration',
+    serviceLine: 'package_delivery',
+    automationLevel: 'L0',
+    riskLevel: 'low',
+    evidenceNeed: ['package_status', 'permission_context'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  integration_workflow: {
+    center: 'delivery_integration',
+    serviceLine: 'integration_sop',
+    automationLevel: 'L3',
+    riskLevel: 'medium',
+    evidenceNeed: ['workflow_trace', 'tool_result', 'approval_record'],
+    outputSurface: ['task_center', 'structured_result', 'disclosure_panel'],
+    approvalPolicy: {
+      policyId: 'integration-workflow-confirmation',
+      summary: '触发联调或生成配置前需要用户确认项目、媒体和联调范围。',
+    },
+  },
+  creative_data_query: {
+    center: 'data_intelligence',
+    serviceLine: 'creative_data',
+    automationLevel: 'L0',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'creative_catalog'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  creative_analysis: {
+    center: 'intelligence_center',
+    serviceLine: 'creative_insight',
+    automationLevel: 'L1',
+    riskLevel: 'low',
+    evidenceNeed: ['tool_result', 'creative_catalog', 'source_ref'],
+    outputSurface: ['structured_result', 'disclosure_panel'],
+  },
+  requirement_draft: {
+    center: 'conversation',
+    serviceLine: 'requirement_intake',
+    automationLevel: 'L2',
+    riskLevel: 'low',
+    evidenceNeed: ['user_input', 'context_history'],
+    outputSurface: ['chat_answer', 'task_center'],
+  },
+  feasibility_check: {
+    center: 'conversation',
+    serviceLine: 'service_triage',
+    automationLevel: 'L2',
+    riskLevel: 'low',
+    evidenceNeed: ['capability_manifest', 'tool_contract'],
+    outputSurface: ['chat_answer', 'disclosure_panel'],
+  },
+  current_usage_assist: {
+    center: 'conversation',
+    serviceLine: 'usage_assist',
+    automationLevel: 'L0',
+    riskLevel: 'none',
+    evidenceNeed: ['knowledge', 'capability_summary'],
+    outputSurface: ['chat_answer'],
+  },
+  field_definition: {
+    center: 'data_intelligence',
+    serviceLine: 'metric_definition',
+    automationLevel: 'L0',
+    riskLevel: 'none',
+    evidenceNeed: ['metric_catalog', 'schema_registry', 'knowledge'],
+    outputSurface: ['chat_answer', 'disclosure_panel'],
+  },
+  knowledge_answer: {
+    center: 'conversation',
+    serviceLine: 'knowledge_assist',
+    automationLevel: 'L0',
+    riskLevel: 'none',
+    evidenceNeed: ['knowledge', 'source_ref'],
+    outputSurface: ['chat_answer', 'disclosure_panel'],
+  },
+  automation_task: {
+    center: 'ai_service_runtime',
+    serviceLine: 'task_center',
+    automationLevel: 'L3',
+    riskLevel: 'medium',
+    evidenceNeed: ['task_contract', 'approval_record', 'run_history'],
+    outputSurface: ['task_center', 'asset_library', 'disclosure_panel'],
+    approvalPolicy: {
+      policyId: 'automation-task-confirmation',
+      summary: '创建或启用自动任务前需要确认范围、频率、通知和风险等级。',
+    },
+  },
+  general_chat: {
+    center: 'conversation',
+    serviceLine: 'general_assist',
+    automationLevel: 'L0',
+    riskLevel: 'none',
+    evidenceNeed: ['model_only_or_source_ref'],
+    outputSurface: ['chat_answer'],
+  },
+  clarification: {
+    center: 'conversation',
+    serviceLine: 'clarification',
+    automationLevel: 'L0',
+    riskLevel: 'none',
+    evidenceNeed: ['user_input'],
+    outputSurface: ['chat_answer'],
+  },
+};
+
 // ─── Service Input Contract ────────────────────────────
 
 /**
@@ -144,6 +359,13 @@ export interface ServiceDefinition {
   description: string;
   /** 所属服务族 */
   family: ServiceFamily;
+  /**
+   * VNext 治理元数据。
+   *
+   * 五大能力中心只是服务分类和治理标签，不引入新的运行时总协议。
+   * 运行链路仍以 Enterprise AI Chat OS 的 Planner / Evidence / ContractSafety 为准。
+   */
+  governance?: ServiceGovernanceMetadata;
   /** 输入契约 */
   input: ServiceInputContract;
   /** 前置条件（需要哪些上下文就绪） */
@@ -709,7 +931,11 @@ export const BUILTIN_SERVICE_DEFINITIONS: Record<ServiceType, ServiceDefinition>
  * 获取服务定义
  */
 export function getServiceDefinition(type: ServiceType): ServiceDefinition {
-  return BUILTIN_SERVICE_DEFINITIONS[type];
+  const definition = BUILTIN_SERVICE_DEFINITIONS[type];
+  return {
+    ...definition,
+    governance: definition.governance || SERVICE_TYPE_GOVERNANCE[type],
+  };
 }
 
 /**

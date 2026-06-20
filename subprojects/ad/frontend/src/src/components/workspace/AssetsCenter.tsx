@@ -79,7 +79,7 @@ export function AssetsCenter(props: AssetsCenterProps) {
               name="asset_search"
               value={assetSearch}
               onChange={(event) => setAssetSearch(event.target.value)}
-              placeholder="搜索资料库"
+              placeholder="搜索资料与结果"
               style={{ width: '100%', minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: c.textPrimary, fontSize: 13 }}
             />
           </label>
@@ -97,14 +97,14 @@ export function AssetsCenter(props: AssetsCenterProps) {
               value={assetSourceFilter}
               options={ASSET_SOURCE_FILTERS}
               onChange={setAssetSourceFilter}
-              ariaLabel="资产来源筛选"
+              ariaLabel="资料来源筛选"
               width={118}
             />
             <FilterSelect
               value={assetFormatFilter}
               options={ASSET_FORMAT_FILTERS}
               onChange={setAssetFormatFilter}
-              ariaLabel="资产类型筛选"
+              ariaLabel="资料类型筛选"
               width={112}
             />
             <button type="button" onClick={() => assetUploadInputRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 34, borderRadius: 12, border: 'none', background: '#f3f4f6', color: c.textSecondary, padding: '0 12px', fontSize: 13, cursor: 'pointer' }}>
@@ -168,7 +168,7 @@ export function AssetsCenter(props: AssetsCenterProps) {
               >
                 <button
                   type="button"
-                  aria-label="选择资产"
+                  aria-label="选择资料"
                   onClick={() => {
                     setSelectedAssetIds((prev) => {
                       if (prev.includes(asset.id)) return prev.filter((id) => id !== asset.id);
@@ -228,7 +228,7 @@ export function AssetsCenter(props: AssetsCenterProps) {
 
           {filteredAssets.length === 0 && (
             <div style={{ padding: '34px 0', textAlign: 'center', color: c.textMuted, fontSize: 13 }}>
-              没有找到匹配的资产。
+              没有找到匹配的资料。
             </div>
           )}
         </div>

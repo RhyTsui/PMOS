@@ -5,6 +5,10 @@ import {
   hasConfiguredKnowledgeCredentials,
   resolveKnowledgeBaseIds,
 } from '../src/lib/runtime-config';
+import {
+  hasConfiguredPublicSearchProvider,
+  hasEnabledSearchAdapterProvider,
+} from '../src/lib/search-orchestrator';
 
 async function main(): Promise<void> {
   const model = await getModelServiceConfig();
@@ -23,6 +27,11 @@ async function main(): Promise<void> {
     kb_ids_sample: knowledgeBaseIds.slice(0, 2).map((item) => `${String(item).slice(0, 8)}***`),
     public_web_enabled: publicWeb.enabled,
     public_web_endpoint_set: Boolean(publicWeb.searchEndpoint),
+    public_web_search_provider_configured: hasConfiguredPublicSearchProvider(publicWeb),
+    public_web_adapter_provider_enabled: hasEnabledSearchAdapterProvider(publicWeb),
+    public_web_adapter_providers_count: (publicWeb.providers || [])
+      .filter(provider => provider.enabled && provider.endpoint && provider.kind !== 'weather')
+      .length,
     public_web_provider: publicWeb.providerLabel,
     public_web_method: publicWeb.method,
     public_web_allowed_domains_count: publicWeb.allowedDomains.length,

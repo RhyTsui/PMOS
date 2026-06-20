@@ -136,6 +136,7 @@ export async function executeDiagnosisStage(
   });
   // Stage 2: 诊断结果入账 Evidence Ledger
   const updatedLedger = recordEvidence(io.getEvidenceLedger(), {
+    stage: 'diagnosis',
     source: 'tool_result',
     sourceId: selectedSkill.skill_id,
     confidence: execution.status === 'success' ? 'confirmed_fact' : 'high_probability',
@@ -225,7 +226,7 @@ export async function executeDiagnosisStage(
     })
     : undefined;
   if (routeObservation) io.pushEvent(buildRouteObservationEvent(routeObservation));
-  await emitPlannerShadowObservationIfEnabled({ message, history: body.history, pushEvent: io.pushEvent, route: { intent_type: route.intent_type as any, confidence: route.confidence as any, serviceIntent: routeServiceIntent as string }, onShadowResult: (result) => { io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), { source: 'planner_inference', sourceId: 'planner_shadow', confidence: result.status === 'succeeded' ? 'high_probability' : 'unverified', content: { status: result.status, task_type: result.plan?.task_type, service_intent: result.plan?.service_intent, confidence: result.plan?.confidence, duration_ms: result.durationMs } })); } });
+  await emitPlannerShadowObservationIfEnabled({ message, history: body.history, pushEvent: io.pushEvent, route: { intent_type: route.intent_type as any, confidence: route.confidence as any, serviceIntent: routeServiceIntent as string }, onShadowResult: (result) => { io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), { stage: 'planning', source: 'planner_inference', sourceId: 'planner_shadow', confidence: result.status === 'succeeded' ? 'high_probability' : 'unverified', content: { status: result.status, task_type: result.plan?.task_type, service_intent: result.plan?.service_intent, confidence: result.plan?.confidence, duration_ms: result.durationMs } })); } });
   await io.endPlanningAndStartExecution();
 
   const runtimeState = createRuntimeState(

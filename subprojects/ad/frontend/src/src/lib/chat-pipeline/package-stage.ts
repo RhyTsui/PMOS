@@ -156,6 +156,7 @@ export async function executePackageStage(
 
   // ─── Record Evidence ──────────────────────────────────
   io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), {
+    stage: 'package',
     source: 'planner_inference',
     sourceId: 'package_skill',
     confidence: 'high_probability',

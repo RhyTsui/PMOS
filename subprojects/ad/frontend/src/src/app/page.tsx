@@ -337,9 +337,9 @@ function WorkspaceContent() {
   const topBarTitle = sharedConversationId
     ? '这是已分享的 小乔智投 对话副本'
     : workspaceView === 'assets'
-      ? '我的资产'
+      ? '资料与结果'
       : workspaceView === 'automation'
-        ? '自动化'
+        ? '自动任务'
         : activeConversation?.title || '';
 
   useEffect(() => {
@@ -1009,9 +1009,9 @@ function WorkspaceContent() {
   const applySelectedAssets = useCallback(async () => {
     const picked = selectedAssets.slice(0, 10);
     if (selectedAssets.length > 10) {
-      message.warning('一次最多引用 10 个资产，已保留前 10 个继续进入会话。');
+      message.warning('一次最多引用 10 个资料，已保留前 10 个继续进入会话。');
     }
-    await createConversation('基于资产的新对话');
+    await createConversation('基于资料的新对话');
     setReferencedAssets(picked);
     switchWorkspaceView('chat');
   }, [createConversation, selectedAssets, switchWorkspaceView]);
@@ -1035,12 +1035,12 @@ function WorkspaceContent() {
       .forEach((id) => {
         void fetch(`/api/xiaoqiao/attachments/${id}`, { method: 'DELETE' }).catch(() => undefined);
       });
-    message.success('已删除选中的资产');
+    message.success('已删除选中的资料');
   }, []);
 
   const handleConfirmDeleteAsset = useCallback((asset: AssetRecord) => {
     Modal.confirm({
-      title: '删除资产',
+      title: '删除资料',
       content: (
         <div style={{ color: c.textPrimary, fontSize: 14, lineHeight: '22px' }}>
           这会删除“{getAssetFileName(asset)}”。
@@ -1061,7 +1061,7 @@ function WorkspaceContent() {
 
   const handleCreateAutomationInChat = useCallback(() => {
     switchWorkspaceView('chat');
-    setComposerDraft('我想创建一个自动化报表任务，请先帮我确认项目、周期、指标、维度、筛选条件和输出格式。');
+    setComposerDraft('我想创建一个自动报表任务，请先帮我确认项目、周期、指标、维度、筛选条件和输出格式。');
   }, [switchWorkspaceView]);
 
   const handleOpenManualAutomationCreate = useCallback(() => {
@@ -1085,7 +1085,7 @@ function WorkspaceContent() {
     void automationApi.draft({
       conversation_id: activeConversationId || undefined,
       attachment_ids: attachmentIds,
-      message: composerDraft || '创建自动化任务',
+      message: composerDraft || '创建自动任务',
     }).then((draft) => {
       setAutomationTaskDraft({
         name: draft.name || '',
@@ -1186,7 +1186,7 @@ function WorkspaceContent() {
     const name = automationTaskDraft.name.trim();
     try {
       const payload: Partial<ScheduledTask> = {
-        name: name || editingAutomationTask?.name || '自定义自动化报表',
+        name: name || editingAutomationTask?.name || '自定义自动报表',
         description: automationTaskDraft.description.trim(),
         task_type: 'report_generate' as const,
         status: editingAutomationTask?.status || 'active',
@@ -1222,7 +1222,7 @@ function WorkspaceContent() {
       ));
       setEditingAutomationTask(null);
       setCreatingAutomationTask(false);
-      message.success(editingAutomationTask ? '已保存' : '已创建自动化任务');
+      message.success(editingAutomationTask ? '已保存' : '已创建自动任务');
     } catch {
       message.error(editingAutomationTask ? '保存失败，请稍后重试' : '创建失败，请稍后重试');
     }
@@ -1332,7 +1332,7 @@ function WorkspaceContent() {
       switchWorkspaceView('chat');
       setReferencedAssets([]);
       setOpenedAsset(null);
-      sendMessage(`[引用资产] ${getAssetFileName(openedAsset)}（${openedAsset.format}）\n\n${messageText || '请结合此文件继续处理。'}`, conversation.conversation_id, {
+      sendMessage(`[引用资料] ${getAssetFileName(openedAsset)}（${openedAsset.format}）\n\n${messageText || '请结合此文件继续处理。'}`, conversation.conversation_id, {
         projectContext: resolvedExplicitProject ? projectContextForTurn : projectContextText,
         currentProject: resolvedExplicitProject || currentProject,
         projectLoadStatus: projectContextLoadStatus,
@@ -1342,7 +1342,7 @@ function WorkspaceContent() {
 
     switchWorkspaceView('chat');
     const assetPrefix = referencedAssets.length > 0
-      ? `${referencedAssets.map((asset) => `[引用资产] ${asset.title}（${asset.format}）`).join('\n')}\n\n`
+      ? `${referencedAssets.map((asset) => `[引用资料] ${asset.title}（${asset.format}）`).join('\n')}\n\n`
       : '';
     const attachmentPrefix = attachments.length > 0
       ? `${attachments

@@ -146,6 +146,16 @@ describe('report capability chain regression', () => {
     expect(route.requiresExecution).toBe(true);
   });
 
+  it('routes explicit hourly metric report requests to the report chain', () => {
+    const route = deriveRequestRouteDecision('2026-03-25 广告小时报表中，按自定义时段查看激活数');
+    const requirement = deriveUserRequirement('2026-03-25 广告小时报表中，按自定义时段查看激活数');
+
+    expect(route.intent_type).toBe('report_query');
+    expect(route.requiresExecution).toBe(true);
+    expect(requirement.task).toBe('report_query');
+    expect(requirement.metrics).toContain('activation');
+  });
+
   it('builds capability gap as business summary consumed by the main presentation path', () => {
     const requirement = deriveUserRequirement('近30天巨量每天激活数');
     const unsupportedCapability = reportCapability();

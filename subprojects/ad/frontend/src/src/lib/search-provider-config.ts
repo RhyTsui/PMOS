@@ -9,6 +9,8 @@ function isSyntheticPublicWebHost(host: string): boolean {
   const normalizedHost = host.trim().toLowerCase();
   return normalizedHost === 'example.test'
     || normalizedHost.endsWith('.example.test')
+    || normalizedHost === 'example.org'
+    || normalizedHost.endsWith('.example.org')
     || normalizedHost === 'localhost'
     || normalizedHost === '127.0.0.1'
     || normalizedHost === '0.0.0.0';

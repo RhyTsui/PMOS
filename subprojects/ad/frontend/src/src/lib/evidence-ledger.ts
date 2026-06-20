@@ -31,6 +31,12 @@ export type EvidenceConfidence =
 export interface EvidenceEntry {
   /** 唯一 ID */
   id: string;
+  /** 证据所属 case，可与 CaseFrame 对齐。 */
+  caseId?: string;
+  /** 证据所属会话。 */
+  conversationId?: string;
+  /** 产生证据的 pipeline stage。 */
+  stage?: 'understanding' | 'planning' | 'public_web' | 'diagnosis' | 'package' | 'open_answer' | 'multi_query' | 'report_query' | 'automation' | 'unknown';
   /** 来源类型 */
   source: EvidenceSource;
   /** 来源标识（tool_name / knowledge_base_id / url 等） */
@@ -50,15 +56,21 @@ export interface EvidenceEntry {
 // ─── Evidence Ledger ─────────────────────────────────────
 
 export interface EvidenceLedger {
+  caseId?: string;
+  conversationId?: string;
   entries: EvidenceEntry[];
   /** 按来源类型统计 */
   counts: Record<EvidenceSource, number>;
+  /** 按 pipeline stage 统计，用于跨 stage case 证据链。 */
+  stageCounts: Record<string, number>;
   /** 总条目数 */
   total: number;
 }
 
-export function createEmptyEvidenceLedger(): EvidenceLedger {
+export function createEmptyEvidenceLedger(meta: { caseId?: string; conversationId?: string } = {}): EvidenceLedger {
   return {
+    caseId: meta.caseId,
+    conversationId: meta.conversationId,
     entries: [],
     counts: {
       tool_result: 0,
@@ -68,6 +80,7 @@ export function createEmptyEvidenceLedger(): EvidenceLedger {
       user_input: 0,
       context_history: 0,
     },
+    stageCounts: {},
     total: 0,
   };
 }
@@ -79,18 +92,29 @@ export function recordEvidence(
   ledger: EvidenceLedger,
   entry: Omit<EvidenceEntry, 'id' | 'recorded_at'>,
 ): EvidenceLedger {
+  const counts = ledger.counts || createEmptyEvidenceLedger().counts;
+  const stageCounts = ledger.stageCounts || {};
+  const entries = Array.isArray(ledger.entries) ? ledger.entries : [];
   const newEntry: EvidenceEntry = {
     ...entry,
     id: `ev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     recorded_at: new Date().toISOString(),
   };
   return {
-    entries: [...ledger.entries, newEntry],
+    caseId: ledger.caseId || newEntry.caseId,
+    conversationId: ledger.conversationId || newEntry.conversationId,
+    entries: [...entries, newEntry],
     counts: {
-      ...ledger.counts,
-      [entry.source]: ledger.counts[entry.source] + 1,
+      ...counts,
+      [entry.source]: (counts[entry.source] || 0) + 1,
     },
-    total: ledger.total + 1,
+    stageCounts: newEntry.stage
+      ? {
+        ...stageCounts,
+        [newEntry.stage]: (stageCounts[newEntry.stage] || 0) + 1,
+      }
+      : stageCounts,
+    total: (ledger.total || entries.length) + 1,
   };
 }
 
@@ -131,6 +155,9 @@ export function serializeLedgerForMetadata(ledger: EvidenceLedger): Record<strin
   return {
     total: ledger.total,
     counts: ledger.counts,
+    stage_counts: ledger.stageCounts,
+    case_id: ledger.caseId,
+    conversation_id: ledger.conversationId,
     has_business_evidence: hasBusinessEvidence(ledger),
     last_entry_at: ledger.entries.length > 0
       ? ledger.entries[ledger.entries.length - 1].recorded_at

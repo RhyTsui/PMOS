@@ -81,6 +81,14 @@ export class SignalRepository extends BaseRepository<Signal, SignalRow> {
     return rows.map(row => this.toModel(row));
   }
 
+  // 根据证据事件 ID 查找（防止重复生成信号）
+  findByEvidenceEventId(evidenceEventId: string): Signal | null {
+    const row = this.db.prepare(
+      `SELECT * FROM ${this.tableName} WHERE evidence_event_id = ? ORDER BY created_at DESC LIMIT 1`
+    ).get(evidenceEventId) as SignalRow | undefined;
+    return row ? this.toModel(row) : null;
+  }
+
   // 按优先级查找
   findByPriority(priority: Priority, limit: number = 100): Signal[] {
     const rows = this.db.prepare(

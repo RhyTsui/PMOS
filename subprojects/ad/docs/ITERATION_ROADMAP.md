@@ -5,6 +5,21 @@
 
 ---
 
+## VNext 关系说明
+
+2026-06-20 起，产品定位升级为“面向游戏发行体系的 AI 服务平台”。当前 VNext P0-P3 迭代真源见：
+
+- `docs/小乔智投-VNext-P0-P3迭代计划-2026-06-20.md`
+- `docs/review/xiaoqiao-vnext-p0-p3-review-docket-2026-06-20.md`
+
+本文仍保留为 runtime 缺陷治理和工程阶段路线图。两者关系如下：
+
+- VNext 文档定义产品定位、五大能力中心、P0-P3 业务与治理门禁。
+- 本文定义 Enterprise AI Chat OS 主链路的工程缺陷修复顺序。
+- VNext 五大中心不得绕开本文中的 Evidence、Guardrail、Capability、Trace、Admin 治理阶段。
+
+---
+
 ## 一、缺陷全景
 
 | # | 缺陷 | 来源 | 严重度 |

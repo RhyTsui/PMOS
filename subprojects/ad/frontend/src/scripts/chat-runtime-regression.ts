@@ -302,6 +302,13 @@ async function main(): Promise<void> {
   });
   const sanitizedPublicWebConfig = await getPublicWebConfig();
   assert.equal(sanitizedPublicWebConfig.searchEndpoint, '', 'unsafe public web endpoint must be cleared during normalization');
+  await updatePublicWebConfig({
+    ...originalPublicWebConfig,
+    enabled: true,
+    searchEndpoint: 'https://search.example.org/query',
+  });
+  const placeholderPublicWebConfig = await getPublicWebConfig();
+  assert.equal(placeholderPublicWebConfig.searchEndpoint, '', 'placeholder example.org public web endpoint must be cleared during normalization');
   const withWeb = await runChatRuntimeForEvaluation({ message: '下周日南京的天气', scenario: 'general_chat' });
   printCase('下周日南京的天气 - unsafe web endpoint', withWeb);
   const withWebMetadata = isRecord(withWeb.done_payload?.metadata) ? withWeb.done_payload.metadata : {};

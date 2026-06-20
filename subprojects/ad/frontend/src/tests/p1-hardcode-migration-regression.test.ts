@@ -57,10 +57,10 @@ describe('P1 hardcode migration regression', () => {
   });
 
   it('keeps successful public web results as composer evidence instead of direct answer authority', () => {
-    const routeSource = fs.readFileSync(path.resolve(__dirname, '../src/app/api/chat/route.ts'), 'utf8');
+    const publicWebStageSource = fs.readFileSync(path.resolve(__dirname, '../src/lib/chat-pipeline/public-web-stage.ts'), 'utf8');
 
-    expect(routeSource).toContain("const publicWebEvidenceRole: OpenAnswerPublicWebCandidate['evidence_role'] = 'candidate_evidence';");
-    expect(routeSource).not.toContain("publicWebEvidenceRole === 'direct_answer_candidate'");
+    expect(publicWebStageSource).toContain("const publicWebEvidenceRole: OpenAnswerPublicWebCandidate['evidence_role'] = 'candidate_evidence';");
+    expect(publicWebStageSource).not.toContain("publicWebEvidenceRole === 'direct_answer_candidate'");
   });
 
   it('keeps migrated route fallback phrases in governed route rule seed', () => {

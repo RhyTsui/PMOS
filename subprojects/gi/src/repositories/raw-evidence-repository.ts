@@ -151,7 +151,7 @@ export class RawEvidenceRepository extends BaseRepository<RawEvidence, RawEviden
 
     const result: Record<string, number> = {
       collected: 0, extracting: 0, extracted: 0,
-      failed: 0, duplicate: 0, filtered: 0,
+      failed: 0, duplicate: 0, filtered: 0, processed_no_value: 0,
     };
     for (const row of rows) {
       result[row.status] = row.count;

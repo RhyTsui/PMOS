@@ -28,6 +28,23 @@ function shiftDate(days: number): Date {
   return date;
 }
 
+function rangeForContextDate(text: string, date: Date, day: string): ParsedDateRange | null {
+  if (/(那一周|所在周|当周|这一周)/.test(text)) {
+    const start = new Date(date);
+    const weekDay = start.getDay() || 7;
+    start.setDate(start.getDate() - weekDay + 1);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { start_date: formatDate(start), end_date: formatDate(end), period_type: 'week', is_explicit: true, requested_days: 7 };
+  }
+  if (/(那一月|所在月|当月|这一月)/.test(text)) {
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return { start_date: formatDate(start), end_date: formatDate(end), period_type: 'month', is_explicit: true, requested_days: end.getDate() };
+  }
+  return null;
+}
+
 export function parseRelativeDateRange(message: string): ParsedDateRange {
   const text = String(message || '').replace(/\s+/g, '');
   const explicit = text.match(/(\d{4}-\d{1,2}-\d{1,2})(?:至|到|~|—|-)(\d{4}-\d{1,2}-\d{1,2})/);
@@ -45,14 +62,18 @@ export function parseRelativeDateRange(message: string): ParsedDateRange {
     const end = `${cnRange[4]}-${cnRange[5].padStart(2, '0')}-${cnRange[6].padStart(2, '0')}`;
     return { start_date: start, end_date: end, period_type: 'day', is_explicit: true };
   }
-  const cnSingle = text.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  const cnSingle = text.match(/(\d{4})年(\d{1,2})月(\d{1,2})(?:日|号)?/);
   if (cnSingle) {
     const day = normalizeIsoDate(cnSingle[1], cnSingle[2], cnSingle[3]);
+    const contextRange = rangeForContextDate(text, new Date(Number(cnSingle[1]), Number(cnSingle[2]) - 1, Number(cnSingle[3])), day);
+    if (contextRange) return contextRange;
     return { start_date: day, end_date: day, period_type: 'day', is_explicit: true, requested_days: 1 };
   }
   const isoSingle = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (isoSingle) {
     const day = normalizeIsoDate(isoSingle[1], isoSingle[2], isoSingle[3]);
+    const contextRange = rangeForContextDate(text, new Date(Number(isoSingle[1]), Number(isoSingle[2]) - 1, Number(isoSingle[3])), day);
+    if (contextRange) return contextRange;
     return { start_date: day, end_date: day, period_type: 'day', is_explicit: true, requested_days: 1 };
   }
   const compactRange = text.match(/(\d{8})(?:至|到|~|—|-)(\d{8})/);
@@ -67,6 +88,12 @@ export function parseRelativeDateRange(message: string): ParsedDateRange {
   const compactSingle = text.match(/(?:^|[^\d])(\d{8})(?:[^\d]|$)/);
   if (compactSingle) {
     const day = normalizeCompactDate(compactSingle[1]);
+    const contextRange = rangeForContextDate(
+      text,
+      new Date(Number(compactSingle[1].slice(0, 4)), Number(compactSingle[1].slice(4, 6)) - 1, Number(compactSingle[1].slice(6, 8))),
+      day,
+    );
+    if (contextRange) return contextRange;
     return { start_date: day, end_date: day, period_type: 'day', is_explicit: true, requested_days: 1 };
   }
   const cnMonth = text.match(/(\d{4})年(\d{1,2})月/);
@@ -77,11 +104,13 @@ export function parseRelativeDateRange(message: string): ParsedDateRange {
     const end = new Date(year, month, 0);
     return { start_date: formatDate(start), end_date: formatDate(end), period_type: 'month', is_explicit: true, requested_days: end.getDate() };
   }
-  const shortDate = text.match(/(\d{1,2})月(\d{1,2})日/);
+  const shortDate = text.match(/(\d{1,2})月(\d{1,2})(?:日|号)?/);
   if (shortDate && !cnSingle && !cnMonth) {
     const now = new Date();
     const year = now.getFullYear();
     const day = `${year}-${shortDate[1].padStart(2, '0')}-${shortDate[2].padStart(2, '0')}`;
+    const contextRange = rangeForContextDate(text, new Date(year, Number(shortDate[1]) - 1, Number(shortDate[2])), day);
+    if (contextRange) return contextRange;
     return { start_date: day, end_date: day, period_type: 'day', is_explicit: true, requested_days: 1 };
   }
   if (/(今天|今日)/.test(text)) {
