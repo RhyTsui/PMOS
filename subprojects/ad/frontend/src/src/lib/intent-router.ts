@@ -25,6 +25,11 @@ export interface IntentRouteDecision {
   clarification_needed: boolean;
   suggested_actions: string[];
   tracking_target?: string;
+  route_policy_id?: string;
+  route_policy_version?: number;
+  route_decision_scope?: string;
+  route_execution_authority?: string;
+  route_candidate_only?: boolean;
 }
 
 const TRACKING_TARGETS: Record<Exclude<IntentType, 'general'>, string | undefined> = {
@@ -743,8 +748,18 @@ function applyContextBias(
 
 export function routeUserIntent(content: string, context?: IntentRoutingContext): IntentRouteDecision {
   const decision = applyContextBias(content, routeUserIntentCore(content, context?.routeRules), context);
+  const legacyConfidence = decision.confidence === 'high' && !context?.businessContext
+    ? 'medium'
+    : decision.confidence;
   return {
     ...decision,
+    confidence: legacyConfidence,
+    reason: `Legacy adapter candidate: ${decision.reason}`,
     required_slots: [],
+    route_policy_id: `legacy-intent-router:${decision.intent_type}`,
+    route_policy_version: 1,
+    route_decision_scope: 'fallback',
+    route_execution_authority: 'requires_arbitration',
+    route_candidate_only: true,
   };
 }

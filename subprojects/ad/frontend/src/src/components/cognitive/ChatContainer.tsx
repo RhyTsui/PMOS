@@ -13,6 +13,7 @@ import {
   DislikeOutlined,
   DownOutlined,
   EyeOutlined,
+  FileExcelOutlined,
   InfoCircleOutlined,
   LikeOutlined,
   LoadingOutlined,
@@ -125,6 +126,18 @@ interface CapabilityRefView {
   arguments?: string;
   result?: string;
   status?: string;
+}
+
+interface AutomationResultReferenceView {
+  key: string;
+  taskName: string;
+  summary: string;
+  qualityStatus: string;
+  artifactName?: string;
+  artifactUrl?: string;
+  attachmentId?: string;
+  finishedAt?: number;
+  evidenceCount: number;
 }
 
 export interface SourcePanelPayload {
@@ -1014,6 +1027,179 @@ function collectSourceRefs(message: Message): SourceRefView[] {
     .slice(0, 5);
 }
 
+function asRecordValue(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function firstText(...values: unknown[]) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return '';
+}
+
+function collectAutomationResultReferences(message: Message): AutomationResultReferenceView[] {
+  const meta = message.metadata || {};
+  const responseContract = asRecordValue(meta.response_contract);
+  const contractMeta = asRecordValue(responseContract?.metadata);
+  const rawCandidates = [
+    meta.automation_result_candidates,
+    contractMeta?.automation_result_candidates,
+  ].find((value) => Array.isArray(value)) as unknown[] | undefined;
+
+  if (!rawCandidates?.length) return [];
+
+  const seen = new Set<string>();
+  return rawCandidates
+    .reduce<AutomationResultReferenceView[]>((acc, item) => {
+      const candidate = asRecordValue(item);
+      if (!candidate) return acc;
+
+      const executionId = firstText(candidate.execution_id, candidate.id);
+      const attachmentId = firstText(candidate.artifact_attachment_id, candidate.attachment_id);
+      const artifactUrl = firstText(candidate.artifact_url, candidate.url);
+      if (!executionId && !attachmentId && !artifactUrl) return acc;
+
+      const key = executionId || attachmentId || artifactUrl;
+      if (seen.has(key)) return acc;
+      seen.add(key);
+
+      const evidenceRefs = Array.isArray(candidate.evidence_refs) ? candidate.evidence_refs : [];
+      const sourceRefs = Array.isArray(candidate.source_refs) ? candidate.source_refs : [];
+      acc.push({
+        key,
+        taskName: firstText(candidate.task_name, candidate.name) || '自动化任务',
+        summary: firstText(candidate.result_summary, candidate.summary) || '已生成可查看的结果文件。',
+        qualityStatus: firstText(candidate.quality_status) || 'unknown',
+        artifactName: firstText(candidate.artifact_name, candidate.file_name) || undefined,
+        artifactUrl: artifactUrl || undefined,
+        attachmentId: attachmentId || undefined,
+        finishedAt: typeof candidate.finished_at === 'number' ? candidate.finished_at : undefined,
+        evidenceCount: evidenceRefs.length + sourceRefs.length,
+      });
+      return acc;
+    }, [])
+    .slice(0, 3);
+}
+
+function automationQualityText(status: string) {
+  if (status === 'complete') return '结果完整';
+  if (status === 'partial') return '部分数据可用';
+  if (status === 'failed') return '结果未完成';
+  return '已生成';
+}
+
+function formatAutomationFinishedAt(value?: number) {
+  if (!value) return '';
+  try {
+    return new Date(value).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+function AutomationResultReferenceCard({
+  items,
+  onSubmitFollowUp,
+}: {
+  items: AutomationResultReferenceView[];
+  onSubmitFollowUp?: (content: string) => void;
+}) {
+  const c = useThemeColors();
+  if (items.length === 0) return null;
+  const primary = items[0];
+  const fileHref = primary.artifactUrl || (primary.attachmentId ? `/api/xiaoqiao/attachments/${encodeURIComponent(primary.attachmentId)}/file` : '');
+  const finishedAt = formatAutomationFinishedAt(primary.finishedAt);
+
+  return (
+    <div
+      style={{
+        border: `1px solid ${c.accentBorder}`,
+        background: c.accentBgFaint,
+        borderRadius: 14,
+        padding: 12,
+        display: 'grid',
+        gap: 10,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0 }}>
+        <span
+          aria-hidden="true"
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 10,
+            background: '#fff',
+            color: c.accent,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: c.chat.shadow.panel,
+          }}
+        >
+          <FileExcelOutlined />
+        </span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: c.textPrimary }}>
+            {items.length > 1 ? `已引用 ${items.length} 个自动化结果文件` : '已引用最近一次自动化结果文件'}
+          </div>
+          <div style={{ marginTop: 3, fontSize: 12, color: c.textSecondary, lineHeight: 1.6 }}>
+            {primary.summary}
+          </div>
+          <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap', color: c.textMuted, fontSize: 11 }}>
+            <span>{primary.taskName}</span>
+            {finishedAt ? <span>{finishedAt}</span> : null}
+            <span>{automationQualityText(primary.qualityStatus)}</span>
+            {primary.evidenceCount > 0 ? <span>{primary.evidenceCount} 条依据</span> : null}
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {fileHref ? (
+          <a
+            href={fileHref}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              border: `1px solid ${c.borderFaint}`,
+              background: '#fff',
+              color: c.textPrimary,
+              borderRadius: 999,
+              padding: '6px 10px',
+              fontSize: 12,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            打开文件
+          </a>
+        ) : null}
+        {onSubmitFollowUp ? (
+          <button
+            type="button"
+            onClick={() => onSubmitFollowUp(`请继续分析「${primary.artifactName || primary.taskName}」这个结果文件。`)}
+            style={{
+              border: 'none',
+              background: c.accent,
+              color: '#fff',
+              borderRadius: 999,
+              padding: '6px 10px',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            继续分析
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function collectCapabilities(message: Message): CapabilityRefView[] {
   const calls = message.tool_calls || [];
   const capabilities = calls
@@ -1658,6 +1844,7 @@ function MessageSurface({
     ? item.rawMessage.metadata.turn_status_label
     : '';
   const hasAssistantContent = item.content.trim().length > 0;
+  const automationResultReferences = collectAutomationResultReferences(item.rawMessage);
 
   if (!isAi) {
     return (
@@ -1696,6 +1883,10 @@ function MessageSurface({
           label={turnLabel}
           presentationResult={presentationResult}
           onOpenDisclosure={onOpenDisclosure}
+        />
+        <AutomationResultReferenceCard
+          items={automationResultReferences}
+          onSubmitFollowUp={onSubmitFollowUp}
         />
         {presentationResult ? (
           <div style={{ display: 'grid', gap: c.chat.spacing.sectionGap }}>
@@ -2145,7 +2336,7 @@ export default function ChatContainer({
       : DEFAULT_CHAT_DISPLAY_CONFIG.starters,
   }), [chatDisplayConfig]);
 
-  // 欢迎语随机选取：后台配置加载完成后更新，之后在组件生命周期内保持稳定
+  // 欢迎语随机选取：管理端设置加载完成后更新，之后在组件生命周期内保持稳定
   const randomWelcomeText = useMemo<string>(() => {
     const pool = effectiveChatDisplayConfig.welcomeTexts?.length
       ? effectiveChatDisplayConfig.welcomeTexts

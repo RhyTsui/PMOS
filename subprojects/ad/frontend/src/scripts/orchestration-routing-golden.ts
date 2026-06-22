@@ -327,6 +327,22 @@ function assertMultipleCapabilityCandidates(): void {
   assert.ok(decision.candidates.length >= 2, 'multi-candidate state should be visible in trace');
 }
 
+function assertRoutePolicyMetadata(): void {
+  const message = '昨天巨量激活多少？';
+  const backendRoute = deriveRequestRouteDecision(message);
+  assert.ok(backendRoute.route_policy_id, 'backend route must expose governed policy id');
+  assert.ok(backendRoute.route_policy_version, 'backend route must expose governed policy version');
+  assert.equal(backendRoute.route_execution_authority, 'requires_arbitration', 'backend route policy must not directly authorize execution');
+  assert.equal(backendRoute.route_candidate_only, true, 'backend route remains candidate-only before execution gate');
+
+  const legacyRoute = routeUserIntent(message);
+  assert.ok(legacyRoute.route_policy_id?.startsWith('legacy-intent-router:'), 'legacy route must disclose legacy policy id');
+  assert.equal(legacyRoute.route_decision_scope, 'fallback', 'legacy route must be scoped as fallback');
+  assert.equal(legacyRoute.route_execution_authority, 'requires_arbitration', 'legacy route must require arbitration');
+  assert.equal(legacyRoute.route_candidate_only, true, 'legacy route must not be execution authority');
+  assert.notEqual(legacyRoute.confidence, 'high', 'legacy route must not remain high-confidence execution signal');
+}
+
 async function assertMissingSlotExecution(): Promise<void> {
   const compiledContext = {
     project: { currentProject: null },
@@ -370,6 +386,7 @@ async function main(): Promise<void> {
   assertCapabilityUnavailable();
   assertCapabilitySupportQuestionRoutesToHelp();
   assertMultipleCapabilityCandidates();
+  assertRoutePolicyMetadata();
   await assertMissingSlotExecution();
   console.log('orchestration routing golden cases passed');
 }

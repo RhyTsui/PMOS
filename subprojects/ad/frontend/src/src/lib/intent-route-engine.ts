@@ -20,6 +20,8 @@ export interface CompositeRouteDecision extends IntentRouteDecision {
     selected_score: number;
     candidates: Array<{
       rule_id: string;
+      policy_id: string;
+      policy_version: number;
       rule_name: string;
       intent_type: IntentType;
       score: number;
@@ -28,6 +30,8 @@ export interface CompositeRouteDecision extends IntentRouteDecision {
       tool_available: boolean;
       tool_matches: string[];
       rollout_percent: number;
+      decision_scope: string;
+      execution_authority: string;
       reasons: string[];
     }>;
     llm_verdict?: LlmRouteVerdict;
@@ -99,6 +103,11 @@ export function resolveCompositeIntentRoute(params: {
     confidence: selected?.confidence || baseDecision.confidence,
     reason: selected?.reason || baseDecision.reason,
     is_business_related: selectedIntent !== 'general' || baseDecision.is_business_related,
+    route_policy_id: selected?.policy_id || baseDecision.route_policy_id,
+    route_policy_version: selected?.policy_version || baseDecision.route_policy_version,
+    route_decision_scope: selected?.decision_scope || baseDecision.route_decision_scope,
+    route_execution_authority: selected?.execution_authority || baseDecision.route_execution_authority,
+    route_candidate_only: selected?.execution_authority ? selected.execution_authority !== 'execution_authorized' : baseDecision.route_candidate_only,
   };
 
   return {
@@ -110,6 +119,8 @@ export function resolveCompositeIntentRoute(params: {
       selected_score: selected?.score || 0,
       candidates: candidates.map(candidate => ({
         rule_id: candidate.rule.id,
+        policy_id: candidate.policy_id,
+        policy_version: candidate.policy_version,
         rule_name: candidate.rule.name,
         intent_type: candidate.rule.intent_type,
         score: candidate.score,
@@ -118,6 +129,8 @@ export function resolveCompositeIntentRoute(params: {
         tool_available: candidate.tool_available,
         tool_matches: candidate.tool_matches,
         rollout_percent: candidate.rule.rollout_percent,
+        decision_scope: candidate.decision_scope,
+        execution_authority: candidate.execution_authority,
         reasons: candidate.reasons,
       })),
       llm_verdict: params.llmVerdict || undefined,
@@ -161,6 +174,10 @@ function scoreCandidates(params: {
       confidence: candidate.rule.confidence,
       reason: candidate.rule.reason_template,
       score,
+      policy_id: candidate.policy_id,
+      policy_version: candidate.policy_version,
+      decision_scope: candidate.decision_scope,
+      execution_authority: candidate.execution_authority,
     };
   });
 
@@ -172,6 +189,10 @@ function scoreCandidates(params: {
       confidence: params.llmVerdict.confidence,
       reason: params.llmVerdict.reason,
       score: params.llmVerdict.confidence === 'high' ? 70 : params.llmVerdict.confidence === 'medium' ? 45 : 25,
+      policy_id: `llm-route:${params.llmVerdict.intent_type}`,
+      policy_version: 1,
+      decision_scope: 'candidate',
+      execution_authority: 'requires_arbitration',
     });
   }
 
@@ -182,6 +203,14 @@ function scoreCandidates(params: {
     confidence: params.fallback.confidence,
     reason: params.fallback.reason,
     score: params.fallback.confidence === 'high' ? 60 : params.fallback.confidence === 'medium' ? 40 : 10,
+    policy_id: params.fallback.route_policy_id || `runtime-fallback:${params.fallback.intent_type}`,
+    policy_version: params.fallback.route_policy_version || 1,
+    decision_scope: params.fallback.route_decision_scope === 'candidate' || params.fallback.route_decision_scope === 'execution_gate'
+      ? params.fallback.route_decision_scope
+      : 'fallback',
+    execution_authority: params.fallback.route_execution_authority === 'candidate_only' || params.fallback.route_execution_authority === 'execution_authorized'
+      ? params.fallback.route_execution_authority
+      : 'requires_arbitration',
   });
 
   return rows.sort((a, b) => b.score - a.score);

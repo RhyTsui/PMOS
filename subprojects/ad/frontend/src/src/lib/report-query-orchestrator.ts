@@ -138,6 +138,13 @@ export interface ReportToolSelectionTrace {
   report_shape?: ReportToolCapability['report_shape'];
   projection_contract?: ReportToolCapability['projection_contract'];
   grouping_contract?: ReportToolCapability['grouping_contract'];
+  pipeline_stages?: Array<{
+    stage: 'plan_input' | 'capability_discovery' | 'argument_preflight' | 'execution_gate' | 'mcp_call' | 'result_normalization' | 'answer_assembly';
+    status: 'planned' | 'success' | 'skipped' | 'failed';
+    policy_id?: string;
+    contract_version?: string;
+    detail?: string;
+  }>;
   candidate_tools?: Array<{
     capability_id: string;
     tool_name: string;
@@ -698,7 +705,18 @@ function inferRequestedView(message: string): 'trend' | 'detail' | 'comparison' 
 
 function matchTerms(message: string, terms: string[]): string[] {
   const lower = message.toLowerCase();
-  return terms.reduce<string[]>((items, term) => term && lower.indexOf(term.toLowerCase()) >= 0 ? [...items, term] : items, []);
+  return terms.reduce<string[]>((items, term) => {
+    if (!term) return items;
+    const termLower = term.toLowerCase();
+    // For ASCII-only terms, use word boundary to avoid false positives
+    // e.g., 'roi' should not match inside 'android'
+    if (/^[a-z0-9_]+$/i.test(termLower)) {
+      const escaped = termLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
+      return re.test(lower) ? [...items, term] : items;
+    }
+    return lower.indexOf(termLower) >= 0 ? [...items, term] : items;
+  }, []);
 }
 
 function normalizeText(value: unknown): string {
@@ -716,7 +734,11 @@ function inferQuestionTypeFromTerms(message: string, policy = loadReportQueryPol
   const routableText = glossary.normalized_text;
   const roiRules = policy.tool_selection_rules.filter(rule => rule.question_type === 'roi');
   const dailyRules = policy.tool_selection_rules.filter(rule => rule.question_type === 'daily');
-  const hasRoiNeed = roiRules.some(rule => matchTerms(routableText, rule.include_terms).length > 0);
+  const roiGenericTrendTerms = ['趋势', '趋势图', '对比图'];
+  const hasRoiNeed = roiRules.some(rule => {
+    const matched = matchTerms(routableText, rule.include_terms);
+    return matched.some(term => !roiGenericTrendTerms.includes(term));
+  });
   const hasGenericTrendNeed = dailyRules.some(rule => matchTerms(routableText, rule.include_terms).length > 0);
   const scores = policy.tool_selection_rules.map((rule) => {
     const matched = matchTerms(routableText, rule.include_terms);
@@ -1116,66 +1138,145 @@ function scoreCapabilityMatch(params: {
   signalTerms?: string[];
   entryPriority?: number;
   expectedDomain?: ReportCapabilityDomain;
-}): { score: number; reason: string } {
-  const text = normalizeRoutingText(params.message).normalized_text.toLowerCase();
+}): CapabilityMatchScore {
   const signalTerms = params.signalTerms || capabilitySignalTerms(params.type);
-  const routeHits = params.capability.route_terms.filter(term => signalTerms.some(signal => term.toLowerCase().includes(signal.toLowerCase()) || text.includes(term.toLowerCase())));
+  const routeHits = params.capability.route_terms.filter(term => signalTerms.some(signal => term.toLowerCase().includes(signal.toLowerCase()) || signal.toLowerCase().includes(term.toLowerCase())));
   const domainMatch = params.expectedDomain
-    ? params.capability.report_domains.includes(params.expectedDomain)
+    ? params.capability.report_shape.report_domains.includes(params.expectedDomain)
     : false;
-  const granularityHint = /小时|分时|实时|hour|hourly/i.test(params.message)
-    ? params.capability.supported_granularity.includes('hour')
-    : /周|week|weekly/.test(params.message)
-      ? params.capability.supported_granularity.includes('natural_week')
-      : /月|month|monthly/.test(params.message)
-        ? params.capability.supported_granularity.includes('natural_month')
-        : params.capability.supported_granularity.includes('day');
+  const expectedQuestionType = params.expectedDomain ? capabilityDomainToQuestionType(params.expectedDomain) : undefined;
+  const questionCoverage = expectedQuestionType
+    ? params.capability.question_type_coverage.find(item => item.question_type === expectedQuestionType)
+    : undefined;
+  const coverageAccepted = !expectedQuestionType || questionCoverage?.coverage === 'full' || questionCoverage?.coverage === 'partial';
+  const granularityAccepted = params.expectedDomain === 'hourly'
+    ? params.capability.report_shape.supported_granularity.includes('hour')
+    : params.expectedDomain === 'weekly'
+      ? params.capability.report_shape.supported_granularity.includes('natural_week')
+      : params.expectedDomain === 'monthly'
+        ? params.capability.report_shape.supported_granularity.includes('natural_month')
+        : params.capability.report_shape.supported_granularity.includes('day') || params.capability.report_shape.supported_granularity.length > 0;
+  const projectionScore = params.capability.projection_contract.display_fields.length > 0 ? 20 : 0;
+  const groupingScore = params.capability.grouping_contract.supported_dimensions.length > 0
+    || params.capability.grouping_contract.time_dimension_keys.length > 0
+    ? 12
+    : 0;
   const requestedDimensions = extractRequestedDimensionKeys(params.message);
-  const dimensionHits = params.capability.supported_dimensions.filter(dimension => requestedDimensions.includes(dimension));
-  const timeDimensionTokens = new Set(['date', 'day', 'dt', 'time', 'hour']);
-  let hasSpecializedDimension = false;
-  for (const dimension of params.capability.supported_dimensions) {
-    const normalizedDimension = normalizeFieldToken(dimension);
-    hasSpecializedDimension = hasSpecializedDimension || Boolean(normalizedDimension && !timeDimensionTokens.has(normalizedDimension));
-  }
-  const unrequestedSpecializedDimensionPenalty = params.type === 'business_report'
-    && requestedDimensions.length === 0
-    && hasSpecializedDimension
-    && params.capability.supported_dimensions.length <= 2
-    ? -140
-    : 0;
-  const granularityScore = params.type === 'business_report' && granularityHint ? 60 : 0;
-  const versatilityScore = params.type === 'business_report'
-    ? (params.capability.supported_granularity.length * 4) + (params.capability.report_domains.filter(domain => domain !== 'dictionary' && domain !== 'project').length * 3)
-    : 0;
-  const descriptionHit = params.type === 'business_report'
-    && params.capability.description
-    && text.split(/\s+/).some(word => word.length >= 2 && params.capability.description.toLowerCase().includes(word))
-    ? 15
-    : 0;
+  const dimensionHits = params.capability.grouping_contract.supported_dimensions
+    .filter(dimension => requestedDimensions.includes(dimension));
+  const dimensionScore = dimensionHits.length * 90;
   const baselineScore = params.type === 'business_report'
     && params.capability.capability_kind === 'report_query'
-    && granularityHint
-    ? 30
+    && coverageAccepted
+    ? 45
     : 0;
-  const signalScore = (domainMatch ? 220 : 0)
-    + (routeHits.length * 35)
-    + granularityScore
-    + versatilityScore
-    + (dimensionHits.length * 12)
-    + descriptionHit
+  const contractCandidateScore = params.type === 'business_report'
+    && !params.expectedDomain
+    && params.capability.capability_kind === 'report_query'
+    && granularityAccepted
+    && (params.capability.projection_contract.display_fields.length > 0 || params.capability.report_shape.supported_granularity.length > 0)
+    ? 70
+    : 0;
+  const rejected_reasons = [
+    params.expectedDomain && !domainMatch ? `domain_not_covered:${params.expectedDomain}` : '',
+    expectedQuestionType && !coverageAccepted ? `question_type_unsupported:${expectedQuestionType}` : '',
+    params.type === 'business_report' && !granularityAccepted ? 'granularity_not_covered' : '',
+    params.capability.capability_kind !== expectedCapabilityKindForType(params.type) && expectedCapabilityKindForType(params.type)
+      ? `capability_kind_mismatch:${params.capability.capability_kind}`
+      : '',
+  ].filter(Boolean);
+  const risk_flags = [
+    params.capability.confidence === 'description_inferred' ? 'description_inferred_contract' : '',
+    !params.capability.projection_contract.display_fields.length ? 'projection_contract_empty' : '',
+    params.capability.grouping_contract.allow_unrequested_specialized_grouping ? 'allows_unrequested_specialized_grouping' : '',
+  ].filter(Boolean);
+  const signalScore = rejected_reasons.length
+    ? 0
+    : (domainMatch ? 220 : 0)
+    + (questionCoverage?.coverage === 'full' ? 80 : questionCoverage?.coverage === 'partial' ? 40 : 0)
+    + (routeHits.length * 8)
+    + (granularityAccepted ? 35 : 0)
+    + projectionScore
+    + groupingScore
+    + dimensionScore
     + baselineScore
+    + contractCandidateScore
     + (params.capability.confidence === 'manual_override' ? 10 : 0)
-    + unrequestedSpecializedDimensionPenalty;
+    + (params.capability.tool_purpose === 'data_fetch' || params.capability.tool_purpose === 'report_generate' ? 20 : 0);
   const score = signalScore > 0 ? signalScore + (params.entryPriority || 0) : 0;
+  const coverage_basis = [
+    `policy:${params.capability.selection_policy_id}`,
+    `contract:${params.capability.contract_version}`,
+    params.expectedDomain ? `expected_domain:${params.expectedDomain}` : '',
+    questionCoverage ? `question_type:${questionCoverage.question_type}:${questionCoverage.coverage}` : '',
+    params.capability.report_shape.shape_type ? `shape:${params.capability.report_shape.shape_type}` : '',
+    params.capability.projection_contract.display_fields.length ? `projection_fields:${params.capability.projection_contract.display_fields.length}` : '',
+    params.capability.grouping_contract.supported_dimensions.length ? `grouping_dimensions:${params.capability.grouping_contract.supported_dimensions.join(',')}` : '',
+    dimensionHits.length ? `requested_dimensions:${dimensionHits.join(',')}` : '',
+    contractCandidateScore ? 'contract_candidate:business_report' : '',
+  ].filter(Boolean);
   return {
     score,
     reason: [
       domainMatch ? `domain:${params.expectedDomain}` : '',
-      routeHits.length ? `terms:${routeHits.join(',')}` : '',
-      granularityHint ? 'granularity:match' : '',
+      questionCoverage ? `coverage:${questionCoverage.question_type}:${questionCoverage.coverage}` : '',
+      routeHits.length ? `policy_terms:${routeHits.join(',')}` : '',
+      granularityAccepted ? 'granularity:contract_match' : '',
+      projectionScore ? 'projection:declared' : '',
+      groupingScore ? 'grouping:declared' : '',
       dimensionHits.length ? `dimensions:${dimensionHits.join(',')}` : '',
+      contractCandidateScore ? 'contract_candidate:business_report' : '',
+      rejected_reasons.length ? `rejected:${rejected_reasons.join(',')}` : '',
     ].filter(Boolean).join(';') || 'no_match',
+    policy_id: params.capability.selection_policy_id,
+    contract_version: params.capability.contract_version,
+    coverage_basis,
+    rejected_reasons,
+    risk_flags,
+  };
+}
+
+function toCandidateScoreTrace(params: {
+  entry: ReportQueryToolSelectionRule;
+  score: CapabilityMatchScore;
+  toolName: string;
+  matched_terms?: string[];
+}): NonNullable<ReportToolSelectionTrace['candidate_scores']>[number] {
+  return {
+    rule_id: params.entry.id,
+    question_type: params.entry.question_type,
+    score: params.score.score,
+    matched_terms: params.matched_terms || [],
+    tool_matches: [params.toolName],
+    policy_id: params.score.policy_id,
+    contract_version: params.score.contract_version,
+    coverage_basis: params.score.coverage_basis,
+    rejected_reasons: params.score.rejected_reasons,
+    risk_flags: params.score.risk_flags,
+  };
+}
+
+function toCandidateToolTrace(candidate: {
+  capability: ReportToolCapability;
+  score: number;
+  reason: string;
+  policy_id?: string;
+  contract_version?: string;
+  coverage_basis?: string[];
+  rejected_reasons?: string[];
+  risk_flags?: string[];
+}): NonNullable<ReportToolSelectionTrace['candidate_tools']>[number] {
+  return {
+    capability_id: candidate.capability.capability_id,
+    tool_name: candidate.capability.tool_name,
+    domains: candidate.capability.report_domains,
+    score: candidate.score,
+    reason: candidate.reason,
+    policy_id: candidate.policy_id || candidate.capability.selection_policy_id,
+    contract_version: candidate.contract_version || candidate.capability.contract_version,
+    coverage_basis: candidate.coverage_basis,
+    rejected_reasons: candidate.rejected_reasons,
+    risk_flags: candidate.risk_flags,
   };
 }
 
@@ -1202,6 +1303,8 @@ function buildCandidateLifecycle(params: {
     reason: string;
     questionType: ReportQuestionType;
     expectedDomain?: ReportCapabilityDomain;
+    policy_id?: string;
+    contract_version?: string;
   }>;
   selectedCapabilityId?: string;
 }): NonNullable<ReportToolSelectionTrace['candidate_lifecycle']> {
@@ -1248,6 +1351,8 @@ function buildCandidateLifecycle(params: {
         score: scored?.score,
         question_type: scored?.questionType,
         expected_domain: scored?.expectedDomain,
+        policy_id: scored?.policy_id || capability.selection_policy_id,
+        contract_version: scored?.contract_version || capability.contract_version,
       });
       continue;
     }
@@ -1269,6 +1374,8 @@ function buildCandidateLifecycle(params: {
       rank: rankByCapabilityId.get(capability.capability_id),
       question_type: scored.questionType,
       expected_domain: scored.expectedDomain,
+      policy_id: scored.policy_id || capability.selection_policy_id,
+      contract_version: scored.contract_version || capability.contract_version,
     });
   }
 
@@ -1405,13 +1512,12 @@ function selectReportToolForType(params: {
       tool: runtimeTool.tool,
       entry,
       reason: `${entry.id}:${entry.description}; manifest:${item.reason}`,
-      candidate_scores: [{
-        rule_id: entry.id,
-        question_type: entry.question_type,
-        score: item.score,
+      candidate_scores: [toCandidateScoreTrace({
+        entry,
+        score: item,
+        toolName: item.capability.tool_name,
         matched_terms: matchTerms(params.glossary.normalized_text, entry.include_terms),
-        tool_matches: [item.capability.tool_name],
-      }],
+      })],
       manifest: params.manifest,
       capability: item.capability,
       candidate_lifecycle: buildCandidateLifecycle({
@@ -1421,13 +1527,7 @@ function selectReportToolForType(params: {
         selectedCapabilityId: item.capability.capability_id,
       }),
       glossary: params.glossary,
-      candidate_tools: scored.slice(0, 5).map(candidate => ({
-        capability_id: candidate.capability.capability_id,
-        tool_name: candidate.capability.tool_name,
-        domains: candidate.capability.report_domains,
-        score: candidate.score,
-        reason: candidate.reason,
-      })),
+      candidate_tools: scored.slice(0, 5).map(toCandidateToolTrace),
     };
   }
   const fallback = params.manifest.tools
@@ -1452,23 +1552,24 @@ function selectReportToolForType(params: {
     tool: fallbackRuntimeTool.tool,
     entry,
     reason: `${entry.id}:${entry.description}; fallback:capability`,
-    candidate_scores: [{
-      rule_id: entry.id,
-      question_type: entry.question_type,
-      score: fallback?.score || entry.priority,
+    candidate_scores: fallback ? [toCandidateScoreTrace({
+      entry,
+      score: fallback,
+      toolName: fallback.capability.tool_name,
       matched_terms: matchTerms(params.glossary.normalized_text, entry.include_terms),
-      tool_matches: [fallback?.capability.tool_name || fallbackRuntimeTool.tool.name],
-      }],
+    })] : [],
+    manifest: params.manifest,
+    capability: fallback.capability,
+    candidate_lifecycle: buildCandidateLifecycle({
+      servers: params.servers,
       manifest: params.manifest,
-      candidate_lifecycle: buildCandidateLifecycle({
-        servers: params.servers,
-        manifest: params.manifest,
-        scored,
-        selectedCapabilityId: fallback.capability.capability_id,
-      }),
-      glossary: params.glossary,
-    };
-  }
+      scored,
+      selectedCapabilityId: fallback.capability.capability_id,
+    }),
+    glossary: params.glossary,
+    candidate_tools: scored.slice(0, 5).map(toCandidateToolTrace),
+  };
+}
 
 function isReportDefinitionOrHelpQuestion(message: string): boolean {
   const normalized = normalizeRoutingText(message).normalized_text;
@@ -1536,8 +1637,26 @@ export function selectReportTool(servers: McpServerConfig[], message: string, op
         : 0;
       const finalScore = ruleScore + llmBoost;
       return best
-        ? { capability, score: finalScore, reason: `${best.entry.id}:${best.reason}${llmBoost ? `;llm:${llmU!.relevance}(+${llmBoost})` : ''}` }
-        : { capability, score: finalScore, reason: llmBoost ? `llm:${llmU!.relevance}(+${llmBoost})` : 'no_match' };
+        ? {
+          capability,
+          score: finalScore,
+          reason: `${best.entry.id}:${best.reason}${llmBoost ? `;llm:${llmU!.relevance}(+${llmBoost})` : ''}`,
+          policy_id: best.policy_id,
+          contract_version: best.contract_version,
+          coverage_basis: best.coverage_basis,
+          rejected_reasons: best.rejected_reasons,
+          risk_flags: best.risk_flags,
+        }
+        : {
+          capability,
+          score: finalScore,
+          reason: llmBoost ? `llm:${llmU!.relevance}(+${llmBoost})` : 'no_match',
+          policy_id: capability.selection_policy_id,
+          contract_version: capability.contract_version,
+          coverage_basis: [`policy:${capability.selection_policy_id}`, `contract:${capability.contract_version}`],
+          rejected_reasons: finalScore > 0 ? [] : ['no_contract_coverage_match'],
+          risk_flags: [],
+        };
     })
     .sort((a, b) => b.score - a.score);
   const candidateTools = scoredCandidates.filter(item => item.score > 0);
@@ -1550,6 +1669,8 @@ export function selectReportTool(servers: McpServerConfig[], message: string, op
       reason: candidate.reason,
       questionType: inferred.type,
       expectedDomain: questionTypeToCapabilityDomain(inferred.type),
+      policy_id: candidate.policy_id,
+      contract_version: candidate.contract_version,
     })),
     selectedCapabilityId,
   });
@@ -1559,16 +1680,15 @@ export function selectReportTool(servers: McpServerConfig[], message: string, op
         capability: preferredCapability,
         score: 999,
         reason: 'preferred_capability',
+        policy_id: preferredCapability.selection_policy_id,
+        contract_version: preferredCapability.contract_version,
+        coverage_basis: [`policy:${preferredCapability.selection_policy_id}`, `contract:${preferredCapability.contract_version}`, 'preferred_capability'],
+        rejected_reasons: [],
+        risk_flags: [],
       }] : []),
       ...candidateTools.filter(item => item.capability.capability_id !== preferredCapability?.capability_id),
     ];
-    return ordered.slice(0, 8).map(candidate => ({
-      capability_id: candidate.capability.capability_id,
-      tool_name: candidate.capability.tool_name,
-      domains: candidate.capability.report_domains,
-      score: candidate.score,
-      reason: candidate.reason,
-    }));
+    return ordered.slice(0, 8).map(toCandidateToolTrace);
   };
   if (options?.preferredToolName || options?.preferredCapabilityId) {
     const normalizedPreferredCapabilityId = options.preferredCapabilityId
@@ -1587,6 +1707,16 @@ export function selectReportTool(servers: McpServerConfig[], message: string, op
           const candidate_scores = (inferred.scores || []).map(score => ({
             ...score,
             tool_matches: score.tool_matches.includes(preferredCapability.tool_name) ? score.tool_matches : [...score.tool_matches, preferredCapability.tool_name],
+            policy_id: preferredCapability.selection_policy_id,
+            contract_version: preferredCapability.contract_version,
+            coverage_basis: [
+              ...(score.coverage_basis || []),
+              `policy:${preferredCapability.selection_policy_id}`,
+              `contract:${preferredCapability.contract_version}`,
+              'preferred_capability',
+            ],
+            rejected_reasons: score.rejected_reasons || [],
+            risk_flags: score.risk_flags || [],
           }));
           return {
             server: runtimeTool.server,
@@ -1615,6 +1745,11 @@ export function selectReportTool(servers: McpServerConfig[], message: string, op
     const candidate_scores = (inferred.scores || []).map(score => ({
       ...score,
       tool_matches: score.rule_id === entry.id ? [item.capability.tool_name] : score.tool_matches,
+      policy_id: item.policy_id || item.capability.selection_policy_id,
+      contract_version: item.contract_version || item.capability.contract_version,
+      coverage_basis: item.coverage_basis || score.coverage_basis || [],
+      rejected_reasons: item.rejected_reasons || score.rejected_reasons || [],
+      risk_flags: item.risk_flags || score.risk_flags || [],
     }));
     return {
       server: runtimeTool.server,
@@ -2453,6 +2588,8 @@ export function buildReportToolInput(
 
 function buildTrace(message: string, selected: SelectedReportTool): ReportToolSelectionTrace {
   const explicitHour = hasExplicitHourNeed(message);
+  const policyId = selected.capability?.selection_policy_id;
+  const contractVersion = selected.capability?.contract_version;
   return {
     selected_question_type: selected.entry.question_type,
     selected_tool: selected.tool.name,
@@ -2469,11 +2606,34 @@ function buildTrace(message: string, selected: SelectedReportTool): ReportToolSe
     candidate_scores: selected.candidate_scores,
     manifest_version: selected.manifest?.manifest_version,
     capability_id: selected.capability?.capability_id,
+    selection_policy_id: selected.capability?.selection_policy_id,
+    capability_contract_version: selected.capability?.contract_version,
+    report_shape: selected.capability?.report_shape,
+    projection_contract: selected.capability?.projection_contract,
+    grouping_contract: selected.capability?.grouping_contract,
+    pipeline_stages: [
+      { stage: 'plan_input', status: 'success', policy_id: policyId, contract_version: contractVersion, detail: 'compatible_entrypoint_received' },
+      { stage: 'capability_discovery', status: 'success', policy_id: policyId, contract_version: contractVersion, detail: selected.capability?.capability_id || selected.tool.name },
+      { stage: 'argument_preflight', status: 'planned', policy_id: policyId, contract_version: contractVersion },
+      { stage: 'execution_gate', status: 'planned', policy_id: policyId, contract_version: contractVersion },
+      { stage: 'mcp_call', status: 'planned', policy_id: policyId, contract_version: contractVersion },
+      { stage: 'result_normalization', status: 'planned', policy_id: policyId, contract_version: contractVersion },
+      { stage: 'answer_assembly', status: 'planned', policy_id: policyId, contract_version: contractVersion },
+    ],
     candidate_tools: selected.candidate_tools,
     candidate_lifecycle: selected.candidate_lifecycle,
     glossary: selected.glossary,
     warnings: selected.warnings,
   };
+}
+
+function markTraceStage(
+  trace: ReportToolSelectionTrace,
+  stage: NonNullable<ReportToolSelectionTrace['pipeline_stages']>[number]['stage'],
+  status: NonNullable<ReportToolSelectionTrace['pipeline_stages']>[number]['status'],
+  detail?: string,
+): void {
+  trace.pipeline_stages = (trace.pipeline_stages || []).map(item => item.stage === stage ? { ...item, status, detail: detail || item.detail } : item);
 }
 
 function runtimeToolRef(server: McpServerConfig, tool: McpToolConfig): NonNullable<ReportToolArgumentContractTrace['selectedTool']> {
@@ -3655,8 +3815,8 @@ function attachReportAnswerContractToSemanticResult(params: {
   return {
     ...params.semanticResult,
     regions: [
-      summary.regions[0],
       ...params.semanticResult.regions.filter(region => region.id !== 'report-answer-summary'),
+      summary.regions[0],
     ],
     evidenceRefs: [
       ...(summary.evidenceRefs || []).filter(item => !existingEvidenceIds.has(item.id)),
@@ -4822,6 +4982,17 @@ export function normalizeReportQueryResult(params: {
     dataCoverage,
   });
   const contractAnswerMarkdown = renderReportAnswerContractMarkdown(answerContract);
+  const detailAnswerMarkdown = status === 'success' && requestedView === 'detail'
+    ? buildDetailAnswerMarkdown({
+      rows,
+      displayFields,
+      fallbackMessage: successMessage,
+      rowDisplayLimit: 500,
+    })
+    : undefined;
+  const answerMarkdown = detailAnswerMarkdown
+    ? `${detailAnswerMarkdown}\n\n${contractAnswerMarkdown}`
+    : contractAnswerMarkdown;
   const baseResult: ReportQueryResult = {
     result_type: 'ReportQueryResult',
     status,
@@ -4854,8 +5025,8 @@ export function normalizeReportQueryResult(params: {
         : status === 'empty'
           ? '没有查到符合条件的数据。可以换个日期，或减少媒体等限制后再查。'
           : (businessFailedMessage || empty_diagnosis?.explanation || params.call_result.business_error || params.call_result.error || params.call_result.message || '报表查询失败。'),
-    answer_markdown: contractAnswerMarkdown,
-    business_summary_markdown: contractAnswerMarkdown,
+    answer_markdown: answerMarkdown,
+    business_summary_markdown: answerMarkdown,
     answer_contract: answerContract,
     display_fields: displayFields.length ? displayFields : undefined,
     raw_result_preview: summarizeRawPreview(rawPayload),
@@ -5030,6 +5201,7 @@ export async function executeReportQueryStep(params: {
     ...resolvedFilters.trace_warnings,
   ];
   selection_trace.argument_contract = buildArgumentContractTrace({ selected, adapted });
+  markTraceStage(selection_trace, 'argument_preflight', adapted.preflight.ok ? 'success' : 'failed', adapted.preflight.status);
   const requestedTypes = inferRequestedQuestionTypes(params.message, selected.entry.question_type);
   const selectedTools = requestedTypes
     .map(type => type === selected.entry.question_type
@@ -5099,6 +5271,10 @@ export async function executeReportQueryStep(params: {
   ]));
   const hasInvalidArgumentPreflight = subQueryInputs.some(item => !item.adapted.preflight.ok && item.adapted.preflight.status !== 'missing_required_input');
   if ((missing_capabilities.length > 0 || blockingMissingFields.length > 0) && !hasInvalidArgumentPreflight) {
+    markTraceStage(selection_trace, 'execution_gate', 'skipped', 'missing_capability_or_input');
+    markTraceStage(selection_trace, 'mcp_call', 'skipped', 'blocked_before_call');
+    markTraceStage(selection_trace, 'result_normalization', 'skipped', 'blocked_before_call');
+    markTraceStage(selection_trace, 'answer_assembly', 'skipped', 'blocked_before_call');
     const knowledge = await buildKnowledgeFallbackStep({
       message: params.message,
       reasons: [...missing_capabilities, ...blockingMissingFields],
@@ -5146,6 +5322,10 @@ export async function executeReportQueryStep(params: {
   }
   const blockedByArgumentPreflight = subQueryInputs.filter(item => !item.adapted.preflight.ok);
   if (blockedByArgumentPreflight.length > 0) {
+    markTraceStage(selection_trace, 'execution_gate', 'failed', 'argument_preflight_blocked');
+    markTraceStage(selection_trace, 'mcp_call', 'skipped', 'blocked_before_call');
+    markTraceStage(selection_trace, 'result_normalization', 'skipped', 'blocked_before_call');
+    markTraceStage(selection_trace, 'answer_assembly', 'skipped', 'blocked_before_call');
     const primaryBlocked = blockedByArgumentPreflight.find(item => item.selected.tool.name === selected.tool.name) || blockedByArgumentPreflight[0];
     const blockingIssues = primaryBlocked.adapted.preflight.issues;
     const blockingRequirements = Array.from(new Set(blockingIssues.map(item => `${item.field}:${item.code}`)));
@@ -5449,6 +5629,11 @@ export async function executeReportQueryStep(params: {
     adapted: primaryExecution.adapted,
     called: primaryExecution.selected,
   });
+  markTraceStage(finalSelectionTrace, 'argument_preflight', primaryExecution.adapted.preflight.ok ? 'success' : 'failed', primaryExecution.adapted.preflight.status);
+  markTraceStage(finalSelectionTrace, 'execution_gate', primaryExecution.adapted.preflight.ok ? 'success' : 'failed', primaryExecution.adapted.preflight.ok ? 'preflight_passed' : 'preflight_failed');
+  markTraceStage(finalSelectionTrace, 'mcp_call', primaryExecution.call_result.status === 'success' ? 'success' : 'failed', primaryExecution.call_result.error_code || primaryExecution.call_result.status);
+  markTraceStage(finalSelectionTrace, 'result_normalization', report_query_result.status === 'success' ? 'success' : report_query_result.status === 'empty' ? 'success' : 'failed', report_query_result.status);
+  markTraceStage(finalSelectionTrace, 'answer_assembly', report_query_result.status === 'success' ? 'success' : 'failed', report_query_result.message);
   if (primaryExecution.selected.tool.name !== selected.tool.name || fallbackReason || fallbackSkippedCandidates.length) {
     finalSelectionTrace.fallback = {
       originalTool: selected.tool.name,

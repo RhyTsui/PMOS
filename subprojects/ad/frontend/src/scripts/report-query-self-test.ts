@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import { buildCapabilityPreflight, buildReportToolInput, executeReportQueryStep, normalizeConfiguredMcpToolCallResult, selectReportQuestionType, selectReportTool, shouldAttemptReportToolFallback, type ReportQueryResult } from '../src/lib/report-query-orchestrator';
+import { buildCapabilityPreflight, buildReportToolInput, executeReportQueryStep, normalizeConfiguredMcpToolCallResult, normalizeRows, selectReportQuestionType, selectReportTool, shouldAttemptReportToolFallback, type ReportQueryResult } from '../src/lib/report-query-orchestrator';
 import { routeUserIntent } from '../src/lib/intent-router';
+import { deriveRequestRouteDecision, deriveUserRequirement } from '../src/lib/request-understanding';
 import { normalizeQuestionWithGlossary } from '../src/lib/controlled-glossary-index';
 import { buildSemanticMessageContract, buildSemanticWorkflowResult } from '../src/contracts/result-assembly/semantic-result-assembly';
 import { resolveKnowledgeBaseIds, type ModelServiceConfig } from '../src/lib/runtime-config';
@@ -8,7 +9,10 @@ import { resolveDictionaryEntity } from '../src/lib/entity-resolution';
 import { buildReportCapabilityManifest, isExecutableReportCapability } from '../src/lib/report-capability-manifest';
 import { findEntityResolutionCandidates } from '../src/lib/entity-resolution-config-store';
 import { loadReportQueryPolicySync } from '../src/lib/report-query-policy-store';
+import { buildReportQueryInput } from '../src/lib/chat-runtime/report-query-input';
+import { parseRelativeDateRange } from '../src/lib/date-range-resolver';
 import { projectMessagePresentation } from '../src/components/cognitive/message-presentation-projection';
+import { resolveEnumParameter, isHintAllowedField, toParameterResolutionEvent } from '../src/lib/enum-parameter-resolver';
 import type { SemanticResultContract } from '../src/contracts/semantic/semantic-result-contract';
 import type { McpServerConfig, McpToolConfig, Message } from '../src/types';
 
@@ -56,8 +60,9 @@ function reportSchemaWithRequiredPromotionSource() {
       appId: { type: 'string' },
       startDate: { type: 'string' },
       endDate: { type: 'string' },
-      promotionSource: { type: 'string' },
+      promotionSource: { type: 'string', enum: ['AD', 'ORGANIC', 'ORGANIC,AD'] },
       timeType: { type: 'string' },
+      dataType: { type: 'string' },
       mediaId: { type: 'array', items: { type: 'string' } },
       subGroup: { type: 'string' },
     },
@@ -98,6 +103,7 @@ function ztDayReportSchema() {
       endDate: { type: 'string' },
       timeType: { type: 'string' },
       mediaId: { type: 'array', items: { type: 'string' } },
+      subGroup: { type: 'string' },
       metrics: { type: 'array', items: { type: 'string' } },
       dimensions: { type: 'array', items: { type: 'string' } },
     },
@@ -177,6 +183,24 @@ function assertSelection(message: string, expectedType: string, expectedTool: st
   }
 }
 
+function assertReportSelectionUsesCapabilityContract(): void {
+  const selected = selectReportTool(fakeReportServers(), '换一种说法：按时间拆开项目表现，列出花费明细');
+  assert.ok(selected, 'contract-backed selection should still discover a report tool');
+  assert.ok(selected!.capability?.selection_policy_id, 'selected capability must expose selection policy id');
+  assert.equal(selected!.capability?.contract_version, 'capability-contract/v1', 'selected capability must expose contract version');
+  assert.ok(selected!.capability?.report_shape?.shape_type, 'selected capability must expose report shape');
+  assert.ok(selected!.capability?.projection_contract?.display_fields.length, 'selected capability must expose projection contract fields');
+  assert.ok(selected!.capability?.grouping_contract?.time_dimension_keys.length, 'selected capability must expose grouping contract');
+  assert.ok(
+    selected!.candidate_tools?.some(candidate => candidate.policy_id && candidate.contract_version && candidate.coverage_basis?.length),
+    'candidate tools must carry policy id, contract version, and coverage basis',
+  );
+  assert.ok(
+    selected!.candidate_lifecycle?.some(item => item.policy_id && item.contract_version),
+    'candidate lifecycle must carry policy id and contract version',
+  );
+}
+
 function daysBetween(start: string, end: string): number {
   const startTime = new Date(`${start}T00:00:00.000Z`).getTime();
   const endTime = new Date(`${end}T00:00:00.000Z`).getTime();
@@ -230,6 +254,37 @@ function assertReportCapabilityGate(): void {
   const adapted = buildReportToolInput(selected!.tool, reportMessage, { appId: '10100335' });
   assert.equal(daysBetween(String(adapted.date_range.start_date), String(adapted.date_range.end_date)), 10, '近10日 must preserve requested range length');
   assert.notDeepEqual(adapted.input, {}, 'report input must not be empty');
+}
+
+function assertUnspecifiedBreakdownPrefersAggregateDailyReport(): void {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_account_daily_report', 'daily report by account dimension', {
+      type: 'object',
+      required: ['appId', 'startDate', 'endDate', 'timeType'],
+      properties: {
+        appId: { type: 'string' },
+        startDate: { type: 'string' },
+        endDate: { type: 'string' },
+        timeType: { type: 'string' },
+        accountId: { type: 'string' },
+      },
+    }),
+    tool('get_zt_ad_day_report', 'daily aggregate ad day report', ztDayReportSchema()),
+  ];
+  const aggregateSelected = selectReportTool(servers, '昨天消耗是多少');
+  assert.equal(
+    aggregateSelected?.tool.name,
+    'get_zt_ad_day_report',
+    'unspecified breakdown should prefer aggregate daily report over dimension-specific report',
+  );
+
+  const accountSelected = selectReportTool(servers, '昨天各账户消耗是多少');
+  assert.equal(
+    accountSelected?.tool.name,
+    'get_account_daily_report',
+    'explicit account breakdown may select the account-dimension report',
+  );
 }
 
 function assertGlossaryAndComposer(): void {
@@ -552,8 +607,12 @@ async function assertAppScopeFallbackUsesAlternateReportTool(): Promise<void> {
       },
     });
     assert.equal(result.status, 'success', 'fallback result should succeed');
+    assert.equal(result.business_outcome, 'partial_success', 'fallback success must be exposed as degraded/partial success');
     assert.deepEqual(calledTools, ['get_dw_zt_rs_app_report', 'get_zt_ad_day_report'], 'app scope failure must try fallback tool');
     assert.equal(result.report_query_result?.tool_name, 'get_zt_ad_day_report', 'final result must come from fallback tool');
+    assert.equal(result.report_query_result?.business_outcome, 'partial_success', 'report result must keep fallback degradation');
+    assert.ok(!String(result.message).includes('已改用可用的数据能力继续查询'), 'main message must not expose internal fallback process copy');
+    assert.ok(result.report_query_result?.quality_check.issues.some(issue => issue.includes('已改用可用能力继续查询')), 'quality check must keep fallback process note for disclosure/trace');
     assert.equal(result.selection_trace?.selected_tool, 'get_zt_ad_day_report', 'top trace must record final tool');
     assert.equal(result.selection_trace?.fallback?.originalTool, 'get_dw_zt_rs_app_report', 'trace must keep original tool');
     assert.equal(result.selection_trace?.fallback?.fallbackTool, 'get_zt_ad_day_report', 'trace must keep fallback tool');
@@ -595,6 +654,61 @@ async function assertFallbackCandidateMissingParamsAreRecorded(): Promise<void> 
   } finally {
     globalThis.fetch = originalFetch;
   }
+}
+
+function assertInvalidCalendarDateBlocksBeforeMcpCall(): void {
+  const input = buildReportToolInput(
+    tool('get_zt_ad_day_report', 'daily ocean engine ad day report', ztDayReportSchema()),
+    '查询指间2026年2月30日广告投放部激活数',
+    { appId: '10100042' },
+  );
+  assert.equal(input.date_range.start_date, '2026-02-30', 'invalid date should be preserved for user-facing correction');
+  assert.equal(input.preflight.ok, false, 'invalid date must block argument preflight');
+  assert.equal(input.preflight.status, 'invalid_params', 'invalid date should be an invalid_params preflight failure');
+  assert.ok(input.preflight.issues.some(item => item.code === 'invalid_date'), 'preflight must record invalid_date issue');
+  assert.equal(input.finalArgs.startDate, '2026-02-30', 'draft MCP args should keep the invalid date for trace only');
+}
+
+async function assertInvalidCalendarDateReturnsUserCorrection(): Promise<void> {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_zt_ad_day_report', 'daily ocean engine ad day report', ztDayReportSchema()),
+  ];
+  const result = await executeReportQueryStep({
+    servers,
+    message: '指间山海 2026 年 2 月 29 日的数据',
+    baseInput: { appId: '10100042' },
+    capabilityDecision: {
+      selected: { source: { toolName: 'get_zt_ad_day_report' } },
+    },
+  });
+  assert.equal(result.status, 'business_failed', 'runtime status should keep execution failure semantics');
+  assert.equal(result.contract_status, 'attempted', 'invalid user input should produce degraded response contract');
+  assert.equal(result.tool_execution_status, 'not_called', 'invalid date must not call report MCP');
+  assert.match(result.message, /不是有效日历日期/, 'message should ask the user to correct the invalid date');
+  assert.ok(result.tool_chain.some(item => item.status === 'skipped'), 'tool chain should record skipped business report');
+}
+
+function assertMediaBreakdownRoiDoesNotUseNarrowDefaultPromotionSource(): void {
+  const input = buildReportToolInput(
+    tool('get_zt_ad_roi_report', 'roi report', reportSchemaWithRequiredPromotionSource()),
+    '指间山海 20250325 哪个媒体的 首日ROI 最高？数据是多少？',
+    { appId: '10100042' },
+    {},
+    {
+      capability_id: 'roi',
+      tool_name: 'get_zt_ad_roi_report',
+      report_domains: ['roi'],
+      supported_metrics: ['d1_roi'],
+      supported_dimensions: ['media'],
+      identifier_keys: ['media_id'],
+    } as any,
+  );
+  assert.deepEqual(input.metrics, ['d1_roi'], '首日ROI should not also request generic ROI');
+  assert.equal(input.finalArgs.promotionSource, 'ORGANIC,AD', 'media ranking without explicit source should query the broad media scope');
+  assert.equal(input.finalArgs.subGroup, 'media_id', 'media ranking should request media breakdown from the ROI tool');
+  assert.equal(input.sourceMapping['promotionSource.source'], 'promotion_source_resolver.breakdown_scope', 'promotion scope source must be traceable');
+  assert.equal(input.preflight.ok, true, 'broad media scope must pass tool argument preflight');
 }
 
 async function assertDetailReportAnswerKeepsRequestedFields(): Promise<void> {
@@ -650,12 +764,58 @@ async function assertDetailReportAnswerKeepsRequestedFields(): Promise<void> {
     assert.equal(reportResult?.rows[0]?.media_id, '巨量广告', 'normalized rows must keep media_id');
     assert.ok(reportResult?.display_fields?.some(field => field.key === 'cost_amount' && field.displayName === '消耗'), 'cost metric must map to cost_amount via columnConfig');
     assert.ok(/2026-06-05/.test(reportResult?.answer_markdown || ''), 'answer markdown should include date');
-    assert.ok(/巨量广告/.test(reportResult?.answer_markdown || ''), 'answer markdown should include media');
+    assert.ok(!/巨量广告/.test(reportResult?.answer_markdown || ''), 'answer markdown must not add media breakdown when user did not request it');
     assert.ok(/3,338\.59/.test(reportResult?.answer_markdown || ''), 'answer markdown should include formatted cost');
     assert.ok(/元/.test(reportResult?.answer_markdown || ''), 'answer markdown should include currency unit');
     assert.notEqual(reportResult?.answer_markdown, reportResult?.message, 'answer markdown must not be row-count-only message');
     const regions = Array.isArray(reportResult?.semantic_result?.regions) ? reportResult?.semantic_result?.regions : [];
     assert.ok(regions.some(region => region.componentBinding === 'data-visualization' && (region.data as { chartType?: string }).chartType === 'table'), 'detail result should generate table data region');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+async function assertDetailReportUsesD1RoiFieldForFirstDayRoi(): Promise<void> {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_zt_ad_roi_report', 'roi report', reportSchemaWithRequiredPromotionSource()),
+  ];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockMcpFetch((toolName, args) => {
+    assert.equal(toolName, 'get_zt_ad_roi_report', 'first-day ROI detail should call ROI report');
+    assert.equal(args.promotionSource, 'ORGANIC,AD', 'first-day ROI media ranking should use broad media scope');
+    assert.equal(args.subGroup, 'media_id', 'first-day ROI media ranking should request media breakdown');
+    return {
+      code: 0,
+      msg: 'ok',
+      data: {
+        rows: [
+          { dt: '2025-03-25', media_id: '苹果广告', roi1_rate: 0.559, roi3_rate: 0 },
+        ],
+        columnConfig: {
+          dt: { columnName: '日期' },
+          media_id: { columnName: '媒体' },
+          roi1_rate: { columnName: '首日ROI' },
+          roi3_rate: { columnName: '3日ROI' },
+        },
+      },
+    };
+  });
+  try {
+    const result = await executeReportQueryStep({
+      servers,
+      message: '指间山海 20250325 哪个媒体的 首日ROI 最高？数据是多少？',
+      baseInput: { appId: '10100042' },
+      capabilityDecision: {
+        selected: { source: { toolName: 'get_zt_ad_roi_report' } },
+      },
+    });
+    const reportResult = result.report_query_result;
+    assert.equal(result.status, 'success', 'first-day ROI detail query should succeed');
+    assert.ok(reportResult?.display_fields?.some(field => field.key === 'roi1_rate' && field.displayName === '首日ROI'), 'd1_roi must map to roi1_rate');
+    assert.ok((reportResult?.answer_markdown || '').includes('苹果广告'), 'answer should include media winner');
+    assert.ok((reportResult?.answer_markdown || '').includes('首日ROI为 55.90%'), 'answer should include first-day ROI value');
+    assert.ok(!(reportResult?.answer_markdown || '').includes('3日ROI'), 'answer must not project 3-day ROI for first-day ROI request');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -696,8 +856,105 @@ async function assertDetailReportMultiRowAnswerUsesTable(): Promise<void> {
       },
     });
     const answer = result.report_query_result?.answer_markdown || '';
-    assert.ok(answer.includes('| 日期 | 媒体 | 消耗 |'), 'multi-row detail answer should render a concise markdown table');
+    assert.ok(answer.includes('| 日期 | 消耗 |'), 'multi-row detail answer should render a concise markdown table');
+    assert.ok(!answer.includes('| 日期 | 媒体 | 消耗 |'), 'multi-row detail answer must not add media breakdown without an explicit dimension request');
     assert.ok(answer.includes('3,338.59 元'), 'multi-row table should include formatted cost');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+async function assertExplicitMediaBreakdownKeepsDateAndMediaDimensions(): Promise<void> {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_zt_ad_day_report', 'daily ocean engine ad day report', ztDayReportSchema()),
+  ];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockMcpFetch((_toolName, args) => {
+    assert.equal(args.subGroup, 'media_id', 'explicit media breakdown should request media subGroup');
+    return {
+      code: 0,
+      msg: 'ok',
+      data: {
+        reportDetails: {
+          5: {
+            tableContent: [
+              { dt: '2026-06-05', media_id: '巨量广告', cost_amount: 3338.59 },
+              { dt: '2026-06-05', media_id: '腾讯广告', cost_amount: 1000 },
+            ],
+            columnConfig: {
+              dt: { columnName: '日期' },
+              media_id: { columnName: '媒体' },
+              cost_amount: { columnName: '消耗' },
+            },
+          },
+        },
+      },
+    };
+  });
+  try {
+    const result = await executeReportQueryStep({
+      servers,
+      message: '昨天各媒体消耗',
+      baseInput: { appId: '10100042' },
+      capabilityDecision: {
+        selected: { source: { toolName: 'get_zt_ad_day_report' } },
+      },
+    });
+    const reportResult = result.report_query_result;
+    const answer = reportResult?.answer_markdown || '';
+    assert.equal(result.status, 'success', 'explicit media breakdown should succeed');
+    assert.ok(answer.includes('| 日期 | 媒体 | 消耗 |'), 'explicit breakdown should render date + media dimensions');
+    const tableData = reportResult?.semantic_result?.regions.find(region => region.componentBinding === 'data-visualization')?.data as { dimensions?: string[] } | undefined;
+    assert.deepEqual(tableData?.dimensions, ['dt', 'media_id'], 'semantic table should expose both date and media dimensions');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+async function assertCompleteDetailRequestShowsFiveHundredRowsAndDisclosesTruncation(): Promise<void> {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_zt_ad_day_report', 'daily ocean engine ad day report', ztDayReportSchema()),
+  ];
+  const rows = Array.from({ length: 505 }, (_, index) => ({
+    dt: '2026-06-05',
+    media_id: `媒体${index + 1}`,
+    cost_amount: index + 1,
+  }));
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockMcpFetch(() => ({
+    code: 0,
+    msg: 'ok',
+    data: {
+      reportDetails: {
+        5: {
+          tableContent: rows,
+          columnConfig: {
+            dt: { columnName: '日期' },
+            media_id: { columnName: '媒体' },
+            cost_amount: { columnName: '消耗' },
+          },
+        },
+      },
+    },
+  }));
+  try {
+    const result = await executeReportQueryStep({
+      servers,
+      message: '继续查看昨天的完整日报数据',
+      baseInput: { appId: '10100042', metrics: ['cost'] },
+      capabilityDecision: {
+        selected: { source: { toolName: 'get_zt_ad_day_report' } },
+      },
+    });
+    const answer = result.report_query_result?.answer_markdown || '';
+    assert.equal(result.status, 'success', 'complete detail query should succeed');
+    assert.ok(answer.includes('当前回复展示前 500 行，共 505 行'), 'truncated full-detail answer should disclose visible and total row counts');
+    assert.ok(answer.includes('500.00 元'), 'complete detail answer should show up to 500 rows');
+    assert.ok(!answer.includes('501.00 元'), 'complete detail answer should still cap very large inline replies');
+    const dataset = (result.report_query_result?.semantic_result?.regions[0]?.data as { dataset?: unknown[] } | undefined)?.dataset || [];
+    assert.equal(dataset.length, 505, 'semantic detail dataset should retain all rows for detail/export surfaces');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -963,23 +1220,520 @@ async function assertTrendFormattedLastDayValueDoesNotBecomeZero(): Promise<void
   }
 }
 
+async function assertTruncatedMcpTextPayloadStillBuildsTrend(): Promise<void> {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_zt_ad_roi_report', 'daily ROI trend report', ztDayReportSchema()),
+  ];
+  const truncatedText = '{"code":0,"data":{"rows":[{"date":"2026-06-01","roi1_rate":"10.00%"},{"date":"2026-06-02","roi1_rate":"12.50%"},{"date":"2026-06-03","roi1_rate":"11.00%"}...[truncated]';
+  assert.equal(normalizeRows(truncatedText).length, 3, 'truncated JSON text should recover complete row objects');
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockMcpFetch((toolName) => {
+    assert.equal(toolName, 'get_zt_ad_roi_report', 'truncated ROI trend regression should call ROI report tool');
+    return {
+      content: [
+        {
+          type: 'text',
+          text: truncatedText,
+        },
+      ],
+    };
+  });
+  try {
+    const result = await executeReportQueryStep({
+      servers,
+      message: '近七天的首日ROI趋势',
+      baseInput: { appId: '10100335' },
+      capabilityDecision: {
+        selected: { source: { toolName: 'get_zt_ad_roi_report' } },
+      },
+    });
+    const reportResult = result.report_query_result;
+    assert.equal(result.status, 'success', 'truncated ROI trend query should still succeed when complete rows are recoverable');
+    assert.equal(reportResult?.rows.length, 3, 'report rows should come from recoverable truncated MCP text');
+    assert.equal(reportResult?.quality_check.empty_table, false, 'recoverable truncated MCP text must not be marked as empty');
+    const dataRegion = reportResult?.semantic_result?.regions.find(region => region.componentBinding === 'data-visualization');
+    const data = dataRegion?.data as {
+      dataCoverage?: { availablePoints?: number; status?: string };
+      series?: Array<{ metricKey?: string; points?: Array<Record<string, unknown>> }>;
+    } | undefined;
+    assert.equal(data?.dataCoverage?.availablePoints, 3, 'trend coverage should count recovered dates');
+    assert.notEqual(data?.dataCoverage?.status, 'insufficient', 'three recovered dates should be sufficient for trend');
+    const roiSeries = data?.series?.find(series => series.metricKey === 'roi1_rate');
+    assert.equal(roiSeries?.points?.at(1)?.value, 12.5, 'percent ROI values should be parsed from recovered rows');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+async function assertEmptyPrimaryReportDoesNotHideRoiTrendResult(): Promise<void> {
+  const servers = fakeReportServers();
+  servers[0].tools = [
+    tool('get_zt_ad_account_report', 'account daily report', ztDayReportSchema()),
+    tool('get_zt_ad_roi_report', 'daily ROI trend report', ztDayReportSchema()),
+  ];
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockMcpFetch((toolName) => {
+    if (toolName === 'get_zt_ad_account_report') {
+      return {
+        code: 0,
+        msg: 'ok',
+        data: {
+          rows: [],
+        },
+      };
+    }
+    assert.equal(toolName, 'get_zt_ad_roi_report', 'ROI candidate should be executed when ROI trend is requested');
+    return {
+      code: 0,
+      msg: 'ok',
+      data: {
+        rows: [
+          { date: '2026-06-01', roi1_rate: '10.00%' },
+          { date: '2026-06-02', roi1_rate: '12.50%' },
+          { date: '2026-06-03', roi1_rate: '11.00%' },
+        ],
+      },
+    };
+  });
+  try {
+    const result = await executeReportQueryStep({
+      servers,
+      message: '近七天的首日ROI趋势',
+      baseInput: { appId: '10100335' },
+      capabilityDecision: {
+        selected: { source: { toolName: 'get_zt_ad_account_report' } },
+      },
+    });
+    const reportResult = result.report_query_result;
+    assert.equal(result.status, 'success', 'data-bearing ROI candidate should prevent final empty result');
+    assert.equal(reportResult?.tool_name, 'get_zt_ad_roi_report', 'final result should use the data-bearing ROI report');
+    assert.equal(reportResult?.rows.length, 3, 'final ROI result should keep returned trend rows');
+    assert.equal(reportResult?.query_plan?.sub_queries.some(item => item.tool_name === 'get_zt_ad_account_report' && item.status === 'empty'), true, 'empty primary candidate should stay visible in query plan');
+    const dataRegion = reportResult?.semantic_result?.regions.find(region => region.componentBinding === 'data-visualization');
+    const data = dataRegion?.data as { dataCoverage?: { availablePoints?: number; status?: string } } | undefined;
+    assert.equal(data?.dataCoverage?.availablePoints, 3, 'final semantic trend should use ROI report dates');
+    assert.notEqual(data?.dataCoverage?.status, 'insufficient', 'ROI trend should not be degraded when enough points exist');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+function assertSameYearChineseRangeKeepsEndDate(): void {
+  const parsed = parseRelativeDateRange('指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数');
+  assert.equal(parsed.start_date, '2026-03-01', 'same-year Chinese range should keep start date');
+  assert.equal(parsed.end_date, '2026-03-15', 'same-year Chinese range should keep omitted-year end date');
+  assert.equal(parsed.invalid_reason, undefined, 'valid same-year Chinese range should not be invalid');
+}
+
+function assertMetricDateSentenceRoutesToReportQuery(): void {
+  const message = '指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数';
+  const businessContext = {};
+  const requirement = deriveUserRequirement(message, businessContext as any);
+  const route = deriveRequestRouteDecision(message, {
+    businessContext: businessContext as any,
+    slotState: { missingSlots: [], filledSlots: {}, confidence: 1 } as any,
+    routeRules: { rules: [] } as any,
+  });
+  assert.equal(requirement.task, 'report_query', 'absolute date plus governed metrics should be a report requirement');
+  assert.equal(requirement.serviceIntent, 'data_query', 'metric date report requirement should map to data_query');
+  assert.equal(route.intent_type, 'report_query', 'metric date sentence should enter report_query route');
+  assert.equal(route.requiresExecution, true, 'metric date report route should require execution');
+}
+
+function assertConcatenatedProjectMentionOverridesCurrentProject(): void {
+  const input = buildReportQueryInput('指间山海2026-03-25日报中，查询广告投放部 各媒体激活数、注册数和消耗', {
+    businessContext: {
+      app: { value: '10100552' },
+      timeRange: { value: '2026-03-25~2026-03-25' },
+      metrics: { value: ['activation', 'register', 'cost'] },
+      dimensions: { value: ['media'] },
+    },
+    project: {
+      currentProject: {
+        appId: '10100552',
+        appName: '另一个当前项目',
+        projectName: '另一个当前项目',
+      },
+      availableProjects: [
+        {
+          appId: '10100042',
+          appName: '指间山海-国内',
+          projectName: '指间山海',
+          packageName: '指间山海国内包',
+        },
+        {
+          appId: '10100552',
+          appName: '指间山海-港澳台',
+          projectName: '指间山海港澳台',
+        },
+      ],
+    },
+  } as any);
+  assert.equal(input.appId, '10100042', 'concatenated project mention should override stale current project');
+  assert.deepEqual(input.project_scope, ['10100042'], 'project scope should follow matched project');
+  assert.equal((input.project_context as any)?.appId, '10100042', 'project context should describe matched project');
+}
+
+// ─── EnumParameterResolver 单元测试 ──────────────────────────
+
+const RETENTION_SCHEMA_ENUM = ['DEVICE_RETENTION', 'REG_RETENTION', 'PAY_D1_RETENTION'];
+const DATA_TYPE_SCHEMA_ENUM = ['total', 'section'];
+const RETENTION_POLICY_SIGNALS = [
+  {
+    field: 'retentionType',
+    signals: {
+      DEVICE_RETENTION: ['设备留存', '新增设备留存', '新增设备次留', '设备次留'],
+      REG_RETENTION: ['注册留存', '注册用户留存'],
+      PAY_D1_RETENTION: ['首日付费留存', '首日付费账号留存', '付费账号留存', '付费留存'],
+    },
+  },
+];
+const DATA_TYPE_POLICY_SIGNALS = [
+  {
+    field: 'dataType',
+    signals: {
+      section: ['区间ROI'],
+      total: ['累计ROI'],
+    },
+  },
+];
+
+function assertEnumResolverRejectsHighRiskField(): void {
+  // H2 + H3: appId 是高风险字段，hint 不允许覆盖
+  assert.equal(isHintAllowedField('appId'), false, 'appId must not be hint-allowed');
+  assert.equal(isHintAllowedField('mediaId'), false, 'mediaId must not be hint-allowed');
+  assert.equal(isHintAllowedField('startDate'), false, 'startDate must not be hint-allowed');
+  assert.equal(isHintAllowedField('retentionType'), true, 'retentionType must be hint-allowed');
+  assert.equal(isHintAllowedField('dataType'), true, 'dataType must be hint-allowed');
+}
+
+function assertEnumResolverRejectsIllegalEnum(): void {
+  // H1: 非法 enum 一律拒绝（用户原文不明确，让 hint 进入 schema gate 被拒）
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下这个留存', // 不明确，不触发 policy signal
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'DEVICE' }, // 非法值
+      confidence: 0.9,
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  // hint 被 schema gate 拒绝，最终进入 needs_user_input（无 schema default / safe default）
+  assert.equal(result.accepted, false, 'illegal enum hint should not be accepted');
+  assert.equal(result.source, 'needs_user_input', 'source should be needs_user_input after all paths fail');
+  assert.ok(
+    result.conflict_trace.some(record => record.reason === 'not_in_schema_enum'),
+    'rejected hint should be recorded with not_in_schema_enum',
+  );
+}
+
+function assertEnumResolverAcceptsIntentOrchHint(): void {
+  // 路径 A: hint 合法 + tool_name 匹配 + confidence 高 → 接受
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'DEVICE_RETENTION' },
+      confidence: 0.9,
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'should accept hint value');
+  assert.equal(result.source, 'intentorch_hint', 'source should be intentorch_hint');
+  assert.equal(result.accepted, true, 'should be accepted');
+}
+
+function assertEnumResolverRejectsLowConfidence(): void {
+  // hint confidence 低于阈值 → 拒绝，降级到 policy signal
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下设备留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'REG_RETENTION' },
+      confidence: 0.3, // 低于默认 0.7 阈值
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'low confidence hint should fall through to policy signal');
+  assert.equal(result.source, 'policy_enum_signal', 'should fall back to policy_enum_signal');
+  assert.ok(
+    result.conflict_trace.some(record => record.reason === 'low_confidence'),
+    'low_confidence rejection should be recorded',
+  );
+}
+
+function assertEnumResolverRejectsToolNameMismatch(): void {
+  // hint tool_name 不匹配当前 selected tool → 拒绝
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下设备留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_ads_daily_report', // 不匹配
+      parameters: { retentionType: 'DEVICE_RETENTION' },
+      confidence: 0.9,
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'tool mismatch should fall through to policy signal');
+  assert.equal(result.source, 'policy_enum_signal', 'should fall back to policy_enum_signal');
+  assert.ok(
+    result.conflict_trace.some(record => record.reason === 'tool_name_mismatch'),
+    'tool_name_mismatch should be recorded',
+  );
+}
+
+function assertEnumResolverUserTextBeatsHint(): void {
+  // H5-1: 用户原文被 policy 明确命中单一 enum，且 hint 不一致 → 用户原文优先
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '验证指间山海新增设备留存日报中的次留计算是否正确',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'REG_RETENTION' }, // hint 与用户原文冲突
+      confidence: 0.9,
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'user text should win over conflicting hint');
+  assert.equal(result.source, 'policy_enum_signal', 'source should be policy_enum_signal');
+  assert.ok(
+    result.conflict_trace.some(record => record.reason === 'conflicts_with_user_text'),
+    'conflicts_with_user_text should be recorded',
+  );
+}
+
+function assertEnumResolverAmbiguousUserText(): void {
+  // H5-2: 用户原文命中多个 enum → needs_user_input
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下设备留存和注册留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.accepted, false, 'ambiguous user text should not resolve');
+  assert.equal(result.source, 'needs_user_input', 'should fall back to needs_user_input');
+  assert.ok(
+    result.conflict_trace.some(record => record.reason === 'ambiguous_user_text'),
+    'ambiguous_user_text should be recorded',
+  );
+}
+
+function assertEnumResolverHintBeatsSchemaDefault(): void {
+  // H5-4: hint 与 schema default 冲突 → hint 优先
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下留存', // 用户原文不明确
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    schemaDefault: 'REG_RETENTION', // schema default
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'DEVICE_RETENTION' }, // hint 与 schema default 冲突
+      confidence: 0.9,
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'hint should beat schema default');
+  assert.equal(result.source, 'intentorch_hint', 'source should be intentorch_hint');
+}
+
+function assertEnumResolverHintBeatsPolicyDefault(): void {
+  // H5-5: hint 与 policy required_default 冲突 → hint 优先
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'DEVICE_RETENTION' },
+      confidence: 0.9,
+    },
+    policyEnumSignals: [], // 无 policy signal
+    policySafeDefault: 'REG_RETENTION', // policy 默认
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'hint should beat policy safe default');
+  assert.equal(result.source, 'intentorch_hint', 'source should be intentorch_hint');
+}
+
+function assertEnumResolverSchemaDefaultUsed(): void {
+  // schema 显式 default 在无 hint、无 policy signal 时使用
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    schemaDefault: 'DEVICE_RETENTION',
+    explicitInput: {},
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'DEVICE_RETENTION', 'schema default should be used when no hint/signal');
+  assert.equal(result.source, 'schema_default', 'source should be schema_default');
+}
+
+function assertEnumResolverNoEnum0Fallback(): void {
+  // H4: enum[0] 不作为业务字段默认兜底
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM, // enum[0] 是 DEVICE_RETENTION
+    explicitInput: {},
+    selectedToolName: 'get_zt_ad_retention_report',
+    // 注意：不传 schemaDefault、不传 policySafeDefault
+  });
+  assert.equal(result.accepted, false, 'should not resolve without schema default or safe default');
+  assert.equal(result.source, 'needs_user_input', 'should fall back to needs_user_input');
+  assert.notEqual(result.resolved_value, 'DEVICE_RETENTION', 'must not silently use enum[0]');
+}
+
+function assertEnumResolverSafeDefaultUsed(): void {
+  // policy safe_default 在 schema 无 default 时使用
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    policySafeDefault: 'REG_RETENTION',
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'REG_RETENTION', 'policy safe default should be used');
+  assert.equal(result.source, 'policy_safe_default', 'source should be policy_safe_default');
+}
+
+function assertEnumResolverDataTypeSignalMatching(): void {
+  // ROI 数据类型：区间 ROI → section
+  const sectionResult = resolveEnumParameter({
+    field: 'dataType',
+    message: '查询区间ROI',
+    schemaEnum: DATA_TYPE_SCHEMA_ENUM,
+    explicitInput: {},
+    policyEnumSignals: DATA_TYPE_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_roi_report',
+  });
+  assert.equal(sectionResult.resolved_value, 'section', '"区间ROI" should resolve to section');
+  assert.equal(sectionResult.source, 'policy_enum_signal', 'source should be policy_enum_signal');
+
+  // 累计 ROI → total
+  const totalResult = resolveEnumParameter({
+    field: 'dataType',
+    message: '查询累计ROI',
+    schemaEnum: DATA_TYPE_SCHEMA_ENUM,
+    explicitInput: {},
+    policyEnumSignals: DATA_TYPE_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_roi_report',
+  });
+  assert.equal(totalResult.resolved_value, 'total', '"累计ROI" should resolve to total');
+}
+
+function assertEnumResolverEventTraceFormat(): void {
+  // H6: resolver 输出格式正确，可进入 process_events.parameter_resolution
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下设备留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: {},
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  const event = toParameterResolutionEvent(result);
+  assert.equal(event.type, 'parameter_resolution', 'event type should be parameter_resolution');
+  assert.equal(event.stage, 'tool_input_building', 'stage should be tool_input_building');
+  assert.equal(event.field, 'retentionType', 'field should match');
+  assert.equal(event.accepted, true, 'accepted should be true');
+  assert.ok(Array.isArray(event.fallback_chain), 'fallback_chain should be array');
+  // H3: event 不暴露 hint 原文，只展示结果 + 来源
+  assert.ok(!JSON.stringify(event).includes('intentOrchHint'), 'event should not expose raw hint');
+}
+
+function assertEnumResolverExplicitInputWins(): void {
+  // explicit_slot 优先级最高
+  const result = resolveEnumParameter({
+    field: 'retentionType',
+    message: '看下设备留存',
+    schemaEnum: RETENTION_SCHEMA_ENUM,
+    explicitInput: { retentionType: 'PAY_D1_RETENTION' }, // 用户已显式指定
+    intentOrchHint: {
+      toolName: 'get_zt_ad_retention_report',
+      parameters: { retentionType: 'DEVICE_RETENTION' }, // hint 与 explicit 冲突
+      confidence: 0.9,
+    },
+    policyEnumSignals: RETENTION_POLICY_SIGNALS,
+    selectedToolName: 'get_zt_ad_retention_report',
+  });
+  assert.equal(result.resolved_value, 'PAY_D1_RETENTION', 'explicit input should win');
+  assert.equal(result.source, 'explicit_slot', 'source should be explicit_slot');
+}
+
 async function main(): Promise<void> {
   assertGlossaryAndComposer();
   assertDictionaryEntityResolution();
   assertReportCapabilityGate();
+  assertReportSelectionUsesCapabilityContract();
+  assertUnspecifiedBreakdownPrefersAggregateDailyReport();
   assertToolArgumentContractMapping();
   assertMcpBusinessErrorNormalization();
   assertPreferredSelectionKeepsFullFallbackCandidates();
   await assertNestedKnowledgeBaseDiscovery();
   await assertAppScopeFallbackUsesAlternateReportTool();
   await assertFallbackCandidateMissingParamsAreRecorded();
+  assertInvalidCalendarDateBlocksBeforeMcpCall();
+  await assertInvalidCalendarDateReturnsUserCorrection();
+  assertMediaBreakdownRoiDoesNotUseNarrowDefaultPromotionSource();
   await assertDetailReportAnswerKeepsRequestedFields();
+  await assertDetailReportUsesD1RoiFieldForFirstDayRoi();
   await assertDetailReportMultiRowAnswerUsesTable();
+  await assertExplicitMediaBreakdownKeepsDateAndMediaDimensions();
+  await assertCompleteDetailRequestShowsFiveHundredRowsAndDisclosesTruncation();
   await assertDetailReportMainProjectionUsesMarkdown();
   await assertDetailMetricAliasDisplayNames();
   await assertSchemaOnlyEntityFiltersDoNotRequireDictionaries();
   await assertExplicitEntityMentionsTriggerDictionaries();
   await assertTrendFormattedLastDayValueDoesNotBecomeZero();
+  await assertTruncatedMcpTextPayloadStillBuildsTrend();
+  await assertEmptyPrimaryReportDoesNotHideRoiTrendResult();
+  assertSameYearChineseRangeKeepsEndDate();
+  assertMetricDateSentenceRoutesToReportQuery();
+  assertConcatenatedProjectMentionOverridesCurrentProject();
+  // EnumParameterResolver 测试
+  assertEnumResolverRejectsHighRiskField();
+  assertEnumResolverRejectsIllegalEnum();
+  assertEnumResolverAcceptsIntentOrchHint();
+  assertEnumResolverRejectsLowConfidence();
+  assertEnumResolverRejectsToolNameMismatch();
+  assertEnumResolverUserTextBeatsHint();
+  assertEnumResolverAmbiguousUserText();
+  assertEnumResolverHintBeatsSchemaDefault();
+  assertEnumResolverHintBeatsPolicyDefault();
+  assertEnumResolverSchemaDefaultUsed();
+  assertEnumResolverNoEnum0Fallback();
+  assertEnumResolverSafeDefaultUsed();
+  assertEnumResolverDataTypeSignalMatching();
+  assertEnumResolverEventTraceFormat();
+  assertEnumResolverExplicitInputWins();
   assertSelection('近30天媒体安卓日消耗和首日ROI趋势对比', 'roi', 'get_ads_roi_trend_report');
   assert.equal(
     routeUserIntent('近30天媒体安卓日消耗和首日ROI趋势对比').intent_type,

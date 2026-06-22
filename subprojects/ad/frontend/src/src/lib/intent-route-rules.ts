@@ -9,9 +9,16 @@ import {
 
 export type IntentRuleMatchMode = 'contains' | 'regex';
 export type IntentRuleStatus = 'active' | 'inactive' | 'draft' | 'archived';
+export type IntentRouteDecisionScope = 'candidate' | 'fallback' | 'execution_gate';
+export type IntentRouteExecutionAuthority = 'candidate_only' | 'requires_arbitration' | 'execution_authorized';
 
 export interface IntentRouteRule {
   id: string;
+  policy_id?: string;
+  policy_version?: number;
+  decision_scope?: IntentRouteDecisionScope;
+  candidate_only?: boolean;
+  execution_authority?: IntentRouteExecutionAuthority;
   name: string;
   description: string;
   intent_type: IntentType;
@@ -57,6 +64,10 @@ export interface IntentRuleCandidate {
   tool_matches: string[];
   rollout_hit: boolean;
   reasons: string[];
+  policy_id: string;
+  policy_version: number;
+  decision_scope: IntentRouteDecisionScope;
+  execution_authority: IntentRouteExecutionAuthority;
 }
 
 export const CORE_INTENT_ROUTE_RULES: IntentRouteRule[] = [
@@ -96,6 +107,11 @@ export function normalizeIntentRouteRule(input: Partial<IntentRouteRule>, fallba
   const id = String(input.id || fallbackId || `rule-${Date.now()}`).trim();
   return {
     id,
+    policy_id: String(input.policy_id || `intent-route:${id}`).trim(),
+    policy_version: Number.isFinite(input.policy_version) ? Number(input.policy_version) : 1,
+    decision_scope: input.decision_scope || 'candidate',
+    candidate_only: input.candidate_only !== false,
+    execution_authority: input.execution_authority || 'requires_arbitration',
     name: String(input.name || id).trim(),
     description: String(input.description || '').trim(),
     intent_type: input.intent_type || 'general',
@@ -187,6 +203,10 @@ export function evaluateIntentRouteRules(params: {
         tool_matches: toolMatches,
         rollout_hit: rolloutHit,
         reasons,
+        policy_id: rule.policy_id || `intent-route:${rule.id}`,
+        policy_version: rule.policy_version || 1,
+        decision_scope: rule.decision_scope || 'candidate',
+        execution_authority: rule.execution_authority || 'requires_arbitration',
       };
     })
     .filter((candidate) => candidate.matched_terms.length > 0 && candidate.rollout_hit)

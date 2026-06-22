@@ -85,6 +85,23 @@ const typographyGuardrailTargets = [
 const goldenRoots = [
   path.resolve(repoRoot, '..', '..', 'golden'),
   path.join(projectRoot, 'golden'),
+  path.join(activeFrontendRoot, 'contracts', 'examples', 'golden'),
+];
+const requiredUiScreenIds = [
+  'xiaoqiao-chat-workbench',
+  'xiaoqiao-runtime-disclosure',
+  'xiaoqiao-task-center',
+  'admin-center-navigation-workbench',
+  'xiaoqiao-result-region',
+];
+const requiredUiSchemaFields = [
+  'screenId',
+  'screenType',
+  'layout',
+  'regions',
+  'sourceRefs',
+  'evidenceRefs',
+  'recommendedActions',
 ];
 
 const ignoredPathParts = [
@@ -111,8 +128,12 @@ const mustNotUse = [
 ];
 
 const visibleEngineeringWords = [
-  { pattern: />[^<]*(子项目|聚合|首页聚合|主链|会话主链|全局状态|任务回看|接口|联调状态|独立子项目)[^<]*</u, reason: '用户可见 JSX 文案不要出现工程词' },
+  { pattern: />[^\n<{}]*(子项目|聚合|首页聚合|主链|会话主链|全局状态|任务回看|接口|联调状态|独立子项目)[^\n<{}]*</u, reason: '用户可见 JSX 文案不要出现工程词' },
   { pattern: /title=["'][^"']*(子项目|聚合|首页聚合|主链|会话主链|全局状态|任务回看|接口|联调状态|独立子项目)[^"']*["']/u, reason: '用户可见 title 不要出现工程词' },
+];
+const activeVisibleEngineeringWords = [
+  { pattern: />[^\n<{}]*(子项目|聚合|首页聚合|主链|会话主链|全局状态|任务回看|接口|联调状态|独立子项目|\bschema\b|\bcontract\b|\bmock\b|\bworkspace\b)[^\n<{}]*</iu, reason: '用户可见 JSX 文案不要出现工程词' },
+  { pattern: /title=["'][^"']*(子项目|聚合|首页聚合|主链|会话主链|全局状态|任务回看|接口|联调状态|独立子项目|\bschema\b|\bcontract\b|\bmock\b|\bworkspace\b)[^"']*["']/iu, reason: '用户可见 title 不要出现工程词' },
 ];
 
 function walk(dir) {
@@ -127,13 +148,36 @@ function walk(dir) {
   });
 }
 
-function collectGoldenSchemas() {
-  return goldenRoots.flatMap((dir) => {
-    if (!fs.existsSync(dir)) return [];
-    return fs.readdirSync(dir)
-      .filter((name) => name.endsWith('.schema.json'))
-      .map((name) => path.join(dir, name));
+function walkVisible(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).flatMap((name) => {
+    const full = path.join(dir, name);
+    const stat = fs.statSync(full);
+    if (stat.isDirectory()) return walkVisible(full);
+    if (!/\.(tsx|ts|jsx|js)$/iu.test(full)) return [];
+    if (full.includes(`${path.sep}src${path.sep}app${path.sep}api${path.sep}`)
+      || full.includes(`${path.sep}tests${path.sep}`)
+      || full.includes(`${path.sep}.next${path.sep}`)
+      || full.includes(`${path.sep}dist${path.sep}`)
+      || full.includes(`${path.sep}node_modules${path.sep}`)
+    ) {
+      return [];
+    }
+    return [full];
   });
+}
+
+function collectGoldenSchemas() {
+  const walkGolden = (dir) => {
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir).flatMap((name) => {
+      const full = path.join(dir, name);
+      const stat = fs.statSync(full);
+      if (stat.isDirectory()) return walkGolden(full);
+      return name.endsWith('.schema.json') ? [full] : [];
+    });
+  };
+  return goldenRoots.flatMap(walkGolden);
 }
 
 function relative(file) {
@@ -143,6 +187,18 @@ function relative(file) {
 const violations = [];
 const sourceFiles = sourceRoots.flatMap(walk);
 const activeFrontendFiles = activeFrontendSourceRoots.flatMap(walk);
+const activeUserFacingVisibleFiles = [
+  path.join(activeFrontendRoot, 'app', 'page.tsx'),
+  path.join(activeFrontendRoot, 'app', 'admin', 'page.tsx'),
+  path.join(activeFrontendRoot, 'components', 'workspace'),
+  path.join(activeFrontendRoot, 'components', 'cognitive'),
+  path.join(activeFrontendRoot, 'components', 'admin'),
+  path.join(activeFrontendRoot, 'renderers', 'disclosure'),
+].flatMap((target) => {
+  if (!fs.existsSync(target)) return [];
+  const stat = fs.statSync(target);
+  return stat.isDirectory() ? walkVisible(target) : [target];
+});
 const goldenSchemas = collectGoldenSchemas();
 const typographyTokenFile = path.join(activeFrontendRoot, 'app', 'globals.css');
 const colorTokenFile = path.join(activeFrontendRoot, 'lib', 'zhitou-chat-colors.ts');
@@ -294,6 +350,32 @@ for (const file of sourceFiles) {
   }
 }
 
+for (const file of [...new Set(activeUserFacingVisibleFiles)]) {
+  const content = fs.readFileSync(file, 'utf8');
+  const rel = relative(file);
+
+  for (const rule of mustNotUse) {
+    if (rule.pattern.test(content)) {
+      violations.push(`${rel}: ${rule.reason}`);
+    }
+  }
+
+  for (const rule of activeVisibleEngineeringWords) {
+    if (rule.pattern.test(content)) {
+      violations.push(`${rel}: ${rule.reason}`);
+    }
+  }
+
+  const hasDashboardTriplet =
+    /<Table\b/iu.test(content)
+    && /(Statistic|Card)/u.test(content)
+    && /(Filter|Select|DatePicker|RangePicker)/u.test(content);
+
+  if (hasDashboardTriplet && !rel.includes('/admin/')) {
+    violations.push(`${rel}: 疑似“筛选 + 指标卡 + 表格”传统后台结构，用户工作台需改为会话/任务驱动表面`);
+  }
+}
+
 for (const file of activeFrontendFiles) {
   const content = fs.readFileSync(file, 'utf8');
   const rel = relative(file);
@@ -403,6 +485,53 @@ if (userFacingPageFiles.length && !goldenSchemas.length) {
 const schemaText = goldenSchemas.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
 if (userFacingPageFiles.length && !/ui-guardrail\.md/u.test(schemaText)) {
   violations.push('golden schema 未引用 subprojects/ad/docs/operations/ui-guardrail.md');
+}
+
+const parsedGoldenSchemas = [];
+for (const file of goldenSchemas) {
+  const rel = relative(file);
+  let schema;
+  try {
+    schema = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    violations.push(`${rel}: golden schema JSON 解析失败：${error.message}`);
+    continue;
+  }
+  parsedGoldenSchemas.push({ file, rel, schema });
+
+  if (!requiredUiScreenIds.includes(schema.screenId)) {
+    continue;
+  }
+
+  for (const field of requiredUiSchemaFields) {
+    if (!(field in schema)) {
+      violations.push(`${rel}: 缺少 UISchema 必填字段 ${field}`);
+    }
+  }
+  if (!schema.layout || typeof schema.layout !== 'object' || !schema.layout.desktop || !schema.layout.mobile) {
+    violations.push(`${rel}: layout 必须同时声明 desktop 和 mobile`);
+  }
+  for (const field of ['regions', 'sourceRefs', 'evidenceRefs', 'recommendedActions']) {
+    if (!Array.isArray(schema[field]) || schema[field].length === 0) {
+      violations.push(`${rel}: ${field} 必须是非空数组`);
+    }
+  }
+  if (Array.isArray(schema.sourceRefs)) {
+    const hasUiGuardrailRef = schema.sourceRefs.some((ref) => {
+      if (typeof ref === 'string') return ref.includes('ui-guardrail.md');
+      return ref && typeof ref === 'object' && typeof ref.path === 'string' && ref.path.includes('ui-guardrail.md');
+    });
+    if (!hasUiGuardrailRef) {
+      violations.push(`${rel}: sourceRefs 必须引用 docs/operations/ui-guardrail.md`);
+    }
+  }
+}
+
+const screenIds = new Set(parsedGoldenSchemas.map(({ schema }) => schema.screenId).filter(Boolean));
+for (const screenId of requiredUiScreenIds) {
+  if (!screenIds.has(screenId)) {
+    violations.push(`缺少必需 UISchema/golden screenId: ${screenId}`);
+  }
 }
 
 if (violations.length) {
