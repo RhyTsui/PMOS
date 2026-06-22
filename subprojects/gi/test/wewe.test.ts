@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WeWeService } from '../src/services/wewe/wewe-service.js';
 import { IntelSourceRepository } from '../src/repositories/intel-source-repository.js';
+import { RawEvidenceRepository } from '../src/repositories/raw-evidence-repository.js';
 import { getDatabase, initializeDatabase } from '../src/lib/database.js';
 
 // Mock rss-parser
@@ -54,11 +55,13 @@ global.fetch = vi.fn();
 describe('WeWeService', () => {
   let service: WeWeService;
   let sourceRepo: IntelSourceRepository;
+  let evidenceRepo: RawEvidenceRepository;
 
   beforeEach(() => {
     initializeDatabase();
     const db = getDatabase();
     db.exec('PRAGMA foreign_keys = OFF');
+    db.exec('DELETE FROM raw_evidence');
     db.exec('DELETE FROM intel_sources');
 
     service = new WeWeService({
@@ -68,6 +71,7 @@ describe('WeWeService', () => {
     });
 
     sourceRepo = new IntelSourceRepository();
+    evidenceRepo = new RawEvidenceRepository();
     vi.clearAllMocks();
   });
 
@@ -144,6 +148,42 @@ describe('WeWeService', () => {
   it('应该正确处理公众号获取失败', async () => {
     const feed = await service.fetchAccount('invalid');
     expect(feed).toBeNull();
+  });
+
+  it('应该在 WeWe 文章 API 数据中返回文章链接', () => {
+    const source = service.registerAccount({
+      id: 'gamelook',
+      name: 'GameLook',
+      tags: ['行业媒体', 'P0'],
+      priority: 'P0' as const,
+    }, 'http://wewe.test/feeds/gamelook.xml', 'GameLook');
+
+    evidenceRepo.create({
+      sourceId: source.id,
+      seedIds: [],
+      url: 'https://mp.weixin.qq.com/s/test-article',
+      title: '带链接的 WeWe 文章',
+      content: '正文内容',
+      summary: '正文摘要',
+      publishedAt: '2026-06-22T00:00:00.000Z',
+      collectedAt: '2026-06-22T01:00:00.000Z',
+      images: [],
+      metadata: {
+        collectorType: 'rss',
+        source: 'wewe',
+        accountId: 'gamelook',
+      },
+      hash: 'wewe-link-hash',
+      status: 'collected',
+    } as any);
+
+    const result = service.listArticles({ accountId: 'gamelook' });
+
+    expect(result.total).toBe(1);
+    expect(result.articles[0].url).toBe('https://mp.weixin.qq.com/s/test-article');
+    expect(result.articles[0].link).toBe('https://mp.weixin.qq.com/s/test-article');
+    expect(result.articles[0].articleUrl).toBe('https://mp.weixin.qq.com/s/test-article');
+    expect(result.articles[0].accountId).toBe('gamelook');
   });
 
   it('应该检查 WeWe RSS 实例健康状态', async () => {

@@ -88,6 +88,36 @@ router.get('/health', async (req, res) => {
 });
 
 /**
+ * GET /api/v1/wewe/articles
+ * 获取已经入库的 WeWe RSS 文章列表，包含原文链接
+ */
+router.get('/articles', (req, res) => {
+  try {
+    const { accountId, limit, offset } = req.query;
+    const result = service.listArticles({
+      accountId: accountId as string | undefined,
+      limit: limit ? parseInt(limit as string, 10) : undefined,
+      offset: offset ? parseInt(offset as string, 10) : undefined,
+    });
+    res.json({
+      success: true,
+      data: result.articles,
+      meta: {
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'FETCH_ARTICLES_FAILED', message },
+    });
+  }
+});
+
+/**
  * GET /api/v1/wewe/feed/:accountId
  * 获取指定公众号的 RSS 内容
  */
@@ -110,12 +140,18 @@ router.get('/feed/:accountId', async (req, res) => {
         title: feed.title,
         description: feed.description,
         link: feed.link,
-        items: feed.items?.slice(0, 20).map(item => ({
-          title: item.title,
-          link: item.link,
-          pubDate: item.pubDate,
-          content: item.contentSnippet || item.content,
-        })),
+        items: feed.items?.slice(0, 20).map((item: any) => {
+          const articleUrl = item.link || item.guid || '';
+          return {
+            title: item.title,
+            url: articleUrl,
+            link: articleUrl,
+            articleUrl,
+            guid: item.guid,
+            pubDate: item.pubDate,
+            content: item.contentSnippet || item.content,
+          };
+        }),
       },
     });
   } catch (error) {

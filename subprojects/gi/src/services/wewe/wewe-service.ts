@@ -12,6 +12,7 @@
  */
 import Parser from 'rss-parser';
 import { IntelSourceRepository } from '../../repositories/intel-source-repository.js';
+import { RawEvidenceRepository } from '../../repositories/raw-evidence-repository.js';
 import type { IntelSource, AccessMethod } from '../../models/types.js';
 
 /**
@@ -122,18 +123,35 @@ export interface WeWeDiscoveryResult {
   failedAccounts: Array<{ account: WeChatAccount; error: string }>;
 }
 
+export interface WeWeArticle {
+  id: string;
+  sourceId: string;
+  sourceName: string;
+  accountId?: string;
+  title: string;
+  url: string;
+  link: string;
+  articleUrl: string;
+  publishedAt?: string;
+  collectedAt: string;
+  summary?: string;
+  status: string;
+}
+
 /**
  * WeWe RSS 集成服务
  */
 export class WeWeService {
   private config: WeWeConfig;
   private sourceRepo: IntelSourceRepository;
-  private parser: Parser;
+  private evidenceRepo: RawEvidenceRepository;
+  private parser: Parser<Record<string, unknown>>;
 
   constructor(config: Partial<WeWeConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.sourceRepo = new IntelSourceRepository();
-    this.parser = new Parser({
+    this.evidenceRepo = new RawEvidenceRepository();
+    this.parser = new Parser<Record<string, unknown>>({
       timeout: this.config.timeout,
       headers: {
         'User-Agent': this.config.userAgent,
@@ -247,7 +265,7 @@ export class WeWeService {
   /**
    * 获取指定公众号的 RSS 内容
    */
-  async fetchAccount(accountId: string): Promise<Parser.Output | null> {
+  async fetchAccount(accountId: string): Promise<Parser.Output<Record<string, unknown>> | null> {
     try {
       const feedUrl = `${this.config.baseUrl}/feeds/${accountId}.xml`;
       return await this.parser.parseURL(feedUrl);
@@ -255,6 +273,74 @@ export class WeWeService {
       console.error(`[WeWe] 获取公众号失败: ${accountId}`, error);
       return null;
     }
+  }
+
+  /**
+   * 获取已经入库的 WeWe RSS 文章。文章链接同时以 url/link/articleUrl 返回，方便前端和外部调用方使用。
+   */
+  listArticles(options: { accountId?: string; limit?: number; offset?: number } = {}): {
+    articles: WeWeArticle[];
+    total: number;
+    limit: number;
+    offset: number;
+  } {
+    const limit = Math.min(Math.max(options.limit || 100, 1), 500);
+    const offset = Math.max(options.offset || 0, 0);
+    const sources = this.sourceRepo.findAll({ limit: 5000 });
+    const weweSources = sources.filter(source => (
+      source.sourceType === 'wechat_mp'
+      || source.tags.includes('wewe')
+      || Boolean((source.config as Record<string, unknown>)?.weweAccountId)
+    ));
+    const sourceById = new Map(weweSources.map(source => [source.id, source]));
+    const sourceIds = new Set(weweSources
+      .filter(source => !options.accountId || (source.config as Record<string, unknown>)?.weweAccountId === options.accountId)
+      .map(source => source.id));
+
+    const allWeweArticles = this.evidenceRepo.findAll({
+      limit: 10000,
+      orderBy: 'collected_at',
+      order: 'DESC',
+    }).filter(evidence => {
+      const source = sourceById.get(evidence.sourceId);
+      const metadata = evidence.metadata as unknown as Record<string, unknown>;
+      const sourceAccountId = (source?.config as Record<string, unknown> | undefined)?.weweAccountId;
+      const accountMatches = !options.accountId
+        || metadata.accountId === options.accountId
+        || sourceAccountId === options.accountId;
+      return sourceIds.has(evidence.sourceId)
+        && accountMatches
+        && (metadata.source === 'wewe' || sourceById.has(evidence.sourceId));
+    });
+
+    const articles = allWeweArticles.slice(offset, offset + limit).map(evidence => {
+      const source = sourceById.get(evidence.sourceId);
+      const metadata = evidence.metadata as unknown as Record<string, unknown>;
+      const articleUrl = evidence.url;
+      return {
+        id: evidence.id,
+        sourceId: evidence.sourceId,
+        sourceName: source?.name || '',
+        accountId: typeof metadata.accountId === 'string'
+          ? metadata.accountId
+          : (source?.config as Record<string, unknown> | undefined)?.weweAccountId as string | undefined,
+        title: evidence.title,
+        url: articleUrl,
+        link: articleUrl,
+        articleUrl,
+        publishedAt: evidence.publishedAt,
+        collectedAt: evidence.collectedAt,
+        summary: evidence.summary,
+        status: evidence.status,
+      };
+    });
+
+    return {
+      articles,
+      total: allWeweArticles.length,
+      limit,
+      offset,
+    };
   }
 
   /**
