@@ -203,4 +203,5 @@ export interface CollectionResult {
   duration: number;
   evidences: RawEvidence[];
   errorMessage?: string;
+  errors?: string[];
 }

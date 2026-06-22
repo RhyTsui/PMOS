@@ -13,18 +13,22 @@
  */
 import cron, { type ScheduledTask } from 'node-cron';
 import { IntelSourceRepository } from '../repositories/intel-source-repository.js';
+import { SystemSettingsRepository } from '../repositories/system-settings-repository.js';
 import { CollectionService } from '../services/collection/index.js';
 import { SeedService } from '../services/seed/index.js';
 import { GapDetectionService } from '../services/gap-detection/index.js';
 import { SourceHealthService } from '../services/health/index.js';
 import { SourceDiscoveryService } from '../services/source-discovery/index.js';
 import { DailyReportService } from '../services/daily-report/index.js';
+import { getDatabase } from './database.js';
 import type { IntelSource } from '../models/types.js';
 
 /**
  * 调度器配置
  */
 export interface SchedulerConfig {
+  enabled: boolean;             // 服务启动后是否自动运行调度器
+
   // 全局调度
   healthCheckCron: string;      // 健康检查 cron（默认每小时）
   evolutionCron: string;        // 种子进化 cron（默认每周一）
@@ -38,7 +42,8 @@ export interface SchedulerConfig {
   defaultCron: string;          // 默认采集 cron（如果源没配置）
 }
 
-const DEFAULT_CONFIG: SchedulerConfig = {
+export const DEFAULT_SCHEDULER_CONFIG: SchedulerConfig = {
+  enabled: true,
   healthCheckCron: '0 * * * *',     // 每小时
   evolutionCron: '0 3 * * 1',       // 每周一凌晨 3 点
   cleanupCron: '0 2 * * *',         // 每天凌晨 2 点
@@ -49,11 +54,14 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   defaultCron: '*/30 * * * *',      // 每 30 分钟
 };
 
+const SCHEDULER_CONFIG_KEY = 'scheduler.config';
+
 /**
  * 调度器服务
  */
 export class Scheduler {
   private config: SchedulerConfig;
+  private settingsRepo: SystemSettingsRepository;
   private sourceRepo: IntelSourceRepository;
   private collectionService: CollectionService;
   private seedService: SeedService;
@@ -65,7 +73,12 @@ export class Scheduler {
   private isRunning = false;
 
   constructor(config: Partial<SchedulerConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.settingsRepo = new SystemSettingsRepository();
+    const persisted = this.settingsRepo.getJson<SchedulerConfig | null>(SCHEDULER_CONFIG_KEY, null);
+    this.config = normalizeSchedulerConfig({ ...DEFAULT_SCHEDULER_CONFIG, ...(persisted || {}), ...config });
+    if (!persisted || Object.keys(config).length > 0) {
+      this.persistConfig();
+    }
     this.sourceRepo = new IntelSourceRepository();
     this.collectionService = new CollectionService();
     this.seedService = new SeedService();
@@ -78,10 +91,15 @@ export class Scheduler {
   /**
    * 启动调度器
    */
-  start(): void {
+  start(persist = true): void {
     if (this.isRunning) {
       console.log('[Scheduler] 已在运行中');
       return;
+    }
+
+    if (persist && !this.config.enabled) {
+      this.config = { ...this.config, enabled: true };
+      this.persistConfig();
     }
 
     console.log('[Scheduler] 启动调度器...');
@@ -101,7 +119,12 @@ export class Scheduler {
   /**
    * 停止调度器
    */
-  stop(): void {
+  stop(persist = true): void {
+    if (persist && this.config.enabled) {
+      this.config = { ...this.config, enabled: false };
+      this.persistConfig();
+    }
+
     if (!this.isRunning) return;
 
     console.log('[Scheduler] 停止调度器...');
@@ -122,7 +145,37 @@ export class Scheduler {
       isRunning: this.isRunning,
       jobCount: this.jobs.size,
       jobs: Array.from(this.jobs.keys()),
+      config: this.getConfig(),
     };
+  }
+
+  /**
+   * 获取持久化调度器配置
+   */
+  getConfig(): SchedulerConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * 更新配置并按 enabled 状态热重载任务
+   */
+  updateConfig(updates: Partial<SchedulerConfig>): SchedulerConfig {
+    const next = normalizeSchedulerConfig({ ...this.config, ...updates });
+    validateSchedulerConfig(next);
+
+    this.config = next;
+    this.persistConfig();
+
+    if (this.config.enabled) {
+      if (this.isRunning) {
+        this.stop(false);
+      }
+      this.start(false);
+    } else if (this.isRunning) {
+      this.stop(false);
+    }
+
+    return this.getConfig();
   }
 
   /**
@@ -157,6 +210,13 @@ export class Scheduler {
   }
 
   // ===== 私有方法 =====
+
+  private persistConfig(): void {
+    this.settingsRepo.setJson(SCHEDULER_CONFIG_KEY, this.config, {
+      schemaVersion: 1,
+      description: 'Scheduler runtime and cron configuration',
+    });
+  }
 
   /**
    * 注册全局任务
@@ -327,9 +387,30 @@ export class Scheduler {
    */
   private async runCleanup(): Promise<void> {
     console.log('  → 运行清理任务...');
-    // TODO: 实现清理逻辑
-    // - 清理过期的 retired 种子
-    // - 清理过期的重复证据
+    const startedAt = Date.now();
+    const db = getDatabase();
+
+    const result = db.transaction(() => {
+      const oldJobs = db.prepare(`
+        DELETE FROM collection_jobs
+        WHERE status IN ('completed', 'failed', 'cancelled')
+          AND started_at < datetime('now', '-30 days')
+      `).run();
+
+      const orphanDedupRecords = db.prepare(`
+        DELETE FROM dedup_records
+        WHERE evidence_id NOT IN (SELECT id FROM raw_evidence)
+      `).run();
+
+      return {
+        oldCollectionJobs: oldJobs.changes,
+        orphanDedupRecords: orphanDedupRecords.changes,
+      };
+    })();
+
+    console.log(
+      `  → 清理完成: 旧采集任务 ${result.oldCollectionJobs} 条, 孤儿去重记录 ${result.orphanDedupRecords} 条, 耗时 ${Date.now() - startedAt}ms`,
+    );
   }
 
   /**
@@ -439,8 +520,48 @@ export interface SchedulerStatus {
   isRunning: boolean;
   jobCount: number;
   jobs: string[];
+  config: SchedulerConfig;
 }
 
+export function validateSchedulerConfig(config: SchedulerConfig): void {
+  const cronFields: Array<keyof SchedulerConfig> = [
+    'healthCheckCron',
+    'evolutionCron',
+    'cleanupCron',
+    'gapDetectionCron',
+    'sourceDiscoveryCron',
+    'dailyReportCron',
+    'defaultCron',
+  ];
+
+  for (const field of cronFields) {
+    const value = config[field];
+    if (typeof value !== 'string' || !cron.validate(value)) {
+      throw new Error(`无效的 cron 表达式: ${String(field)}`);
+    }
+  }
+
+  if (typeof config.enabled !== 'boolean') {
+    throw new Error('enabled 必须是 boolean');
+  }
+  if (typeof config.enableAutoCollection !== 'boolean') {
+    throw new Error('enableAutoCollection 必须是 boolean');
+  }
+}
+
+function normalizeSchedulerConfig(config: Partial<SchedulerConfig>): SchedulerConfig {
+  return {
+    enabled: config.enabled ?? DEFAULT_SCHEDULER_CONFIG.enabled,
+    healthCheckCron: config.healthCheckCron ?? DEFAULT_SCHEDULER_CONFIG.healthCheckCron,
+    evolutionCron: config.evolutionCron ?? DEFAULT_SCHEDULER_CONFIG.evolutionCron,
+    cleanupCron: config.cleanupCron ?? DEFAULT_SCHEDULER_CONFIG.cleanupCron,
+    gapDetectionCron: config.gapDetectionCron ?? DEFAULT_SCHEDULER_CONFIG.gapDetectionCron,
+    sourceDiscoveryCron: config.sourceDiscoveryCron ?? DEFAULT_SCHEDULER_CONFIG.sourceDiscoveryCron,
+    dailyReportCron: config.dailyReportCron ?? DEFAULT_SCHEDULER_CONFIG.dailyReportCron,
+    enableAutoCollection: config.enableAutoCollection ?? DEFAULT_SCHEDULER_CONFIG.enableAutoCollection,
+    defaultCron: config.defaultCron ?? DEFAULT_SCHEDULER_CONFIG.defaultCron,
+  };
+}
 /**
  * 创建全局调度器实例
  */

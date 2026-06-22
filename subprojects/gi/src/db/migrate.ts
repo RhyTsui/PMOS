@@ -17,6 +17,7 @@ import type { Database } from 'better-sqlite3';
 import * as m001 from './migrations/001-vnext-intelligence-assets.js';
 import * as m002 from './migrations/002-llm-providers.js';
 import * as m003 from './migrations/003-add-model-base-url.js';
+import * as m004 from './migrations/004-system-settings.js';
 
 // —— 迁移注册表 ——
 // 新增迁移时，在这里按顺序追加一条记录
@@ -46,6 +47,11 @@ export const MIGRATIONS: Migration[] = [
     id: '003',
     name: 'add-model-base-url',
     up: m003.up,
+  },
+  {
+    id: '004',
+    name: 'system-settings',
+    up: m004.up,
   },
 ];
 

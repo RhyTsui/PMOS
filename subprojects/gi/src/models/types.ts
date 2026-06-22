@@ -38,7 +38,8 @@ export type AccessMethod =
   | 'api'
   | 'static_crawl'
   | 'dynamic'
-  | 'search';
+  | 'search'
+  | 'sogou_wechat';
 
 // ===== 情报源 =====
 
@@ -55,6 +56,7 @@ export interface IntelSource {
   enabled: boolean;
   priority: Priority;
   tags: string[];
+  category?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,13 +75,16 @@ export interface SourceConfig {
   headers?: Record<string, string>;
   requiresAuth?: boolean;
   authMethod?: 'cookie' | 'token' | 'none';
+  searchQuery?: string;
+  tags?: string[];
+  [key: string]: unknown;
 }
 
 export interface ScheduleConfig {
   cron: string;
-  retryOnFail: boolean;
-  maxRetries: number;
-  backoffMinutes: number;
+  retryOnFail?: boolean;
+  maxRetries?: number;
+  backoffMinutes?: number;
 }
 
 // ===== 种子 =====
@@ -99,6 +104,7 @@ export interface BaseSeed {
   lastEffectiveAt?: string;
   failCount: number;
   tags: string[];
+  category?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -175,7 +181,7 @@ export interface ImageRef {
 }
 
 export interface EvidenceMetadata {
-  collectorType: AccessMethod;
+  collectorType: AccessMethod | string;
   responseTime?: number;
   httpStatus?: number;
   language?: string;
@@ -185,6 +191,10 @@ export interface EvidenceMetadata {
   searchQuery?: string;
   searchRank?: number;
   isSummaryOnly?: boolean;
+  account?: string;
+  accountId?: string;
+  source?: string;
+  [key: string]: unknown;
 }
 
 // ===== 结构化事件 =====
@@ -332,7 +342,7 @@ export interface CollectionJob {
   sourceId: string;
   seedIds: string[];
   trigger: JobTrigger;
-  collectorType: AccessMethod;
+  collectorType: AccessMethod | string;
   startedAt: string;
   completedAt?: string;
   duration?: number;
@@ -372,6 +382,251 @@ export interface Feedback {
   relatedIds?: string[];
   adminNotes?: string;
   processedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ===== VNext 情报资产 =====
+
+export type ProfileStatus = 'active' | 'paused' | 'archived';
+export type BriefFormat = 'daily_digest' | 'weekly_digest' | 'topic_brief' | 'alert' | 'custom';
+
+export interface RequirementProfile {
+  id: string;
+  name: string;
+  owner: string;
+  industry: string;
+  purpose: string[];
+  focusTopics: string[];
+  entities: {
+    companies: string[];
+    products: string[];
+    platforms: string[];
+    persons?: string[];
+  };
+  sourcePolicy: {
+    preferredSourceIds: string[];
+    excludeSourceIds: string[];
+    minReliability?: number | string;
+  };
+  verificationPolicy: {
+    required: boolean;
+    minSources: number;
+  };
+  deliveryPolicy: {
+    format: BriefFormat;
+    frequency: string;
+    channels: string[];
+    excludeContent: string[];
+  };
+  priority: Record<string, Priority | number | 'high' | 'medium' | 'low'>;
+  timeWindow: string;
+  status: ProfileStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ModelTaskType =
+  | 'discover_sources'
+  | 'discover_trend_hypothesis'
+  | 'generate_verification_queries'
+  | 'benchmark_estimation'
+  | 'fact_check'
+  | 'insight_synthesis';
+export type ModelTaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface ModelSpec {
+  provider: string;
+  model: string;
+  weight?: number;
+}
+
+export interface ModelQueryTask {
+  id: string;
+  profileId: string;
+  taskType: ModelTaskType;
+  promptTemplateId: string;
+  promptVariables: Record<string, string>;
+  models: ModelSpec[];
+  schedule: Record<string, unknown>;
+  status: ModelTaskStatus;
+  lastRunAt?: string;
+  nextRunAt?: string;
+  createdAt: string;
+}
+
+export type AnswerStatus = 'success' | 'failed' | 'timeout' | 'rate_limited';
+export interface TokenCost {
+  input: number;
+  output: number;
+  total: number;
+}
+
+export interface ModelAnswer {
+  id: string;
+  taskId: string;
+  modelProvider: string;
+  modelName: string;
+  promptVersion: string;
+  answerText: string;
+  answerJson?: unknown;
+  tokenCost: TokenCost;
+  latencyMs: number;
+  status: AnswerStatus;
+  errorMessage?: string;
+  createdAt: string;
+}
+
+export type ClaimType = 'fact' | 'prediction' | 'opinion' | 'trend' | 'benchmark' | 'source_recommendation';
+export type Freshness = 'breaking' | 'recent' | 'dated' | 'stale';
+export type VerificationStatus = 'unverified' | 'verified' | 'conflicted' | 'low_confidence' | 'rejected' | 'expired';
+
+export interface ClaimEntity {
+  name: string;
+  type: string;
+  role?: string;
+}
+
+export interface ModelClaim {
+  id: string;
+  answerId: string;
+  claimType: ClaimType;
+  summary: string;
+  entities: ClaimEntity[];
+  confidence: number;
+  freshness: Freshness;
+  verificationRequired: boolean;
+  verificationStatus: VerificationStatus;
+  verifiedAt?: string;
+  verifiedEvidenceIds: string[];
+  createdAt: string;
+}
+
+export type DiscoveryStatus = 'new' | 'candidate' | 'trial' | 'accepted' | 'rejected';
+
+export interface ModelSourceMention {
+  id: string;
+  answerId: string;
+  sourceName: string;
+  sourceType: SourceType | 'unknown';
+  reason: string;
+  recommendedUse: string;
+  confidence: number;
+  matchedSourceId?: string;
+  discoveryStatus: DiscoveryStatus;
+  createdAt: string;
+}
+
+export type LedgerTargetType = 'structured_event' | 'model_claim' | 'benchmark' | 'intelligence_brief' | 'trend_cluster';
+export type LedgerEvidenceType = 'raw_article' | 'raw_image_ocr' | 'raw_rss' | 'model_answer' | 'model_claim' | 'cross_verified' | 'benchmark_source' | 'human_feedback';
+
+export interface EvidenceLedger {
+  id: string;
+  targetType: LedgerTargetType;
+  targetId: string;
+  evidenceType: LedgerEvidenceType;
+  sourceId?: string;
+  rawEvidenceId?: string;
+  structuredEventId?: string;
+  modelAnswerId?: string;
+  modelClaimId?: string;
+  url?: string;
+  title: string;
+  snippet?: string;
+  publishedAt?: string;
+  collectedAt: string;
+  verificationStatus: VerificationStatus;
+  confidence: number;
+  conflictNotes?: string;
+  verifiedBy?: string[];
+  verifiedAt?: string;
+  createdAt: string;
+}
+
+export type BenchmarkSourceType = 'article' | 'report' | 'ranking' | 'database' | 'internal' | 'model' | 'expert';
+export interface ValueRange {
+  min?: number;
+  max?: number;
+  p25?: number;
+  p50?: number;
+  p75?: number;
+  unit?: string;
+}
+
+export interface BenchmarkParameter {
+  id: string;
+  industry: string;
+  segment: string;
+  metricName: string;
+  metricValue?: number;
+  valueRange?: ValueRange;
+  timeWindow: string;
+  sourceType: BenchmarkSourceType;
+  evidenceIds: string[];
+  confidence: number;
+  applicableConditions: string[];
+  expiredAt?: string;
+  createdAt: string;
+}
+
+export type BriefType = 'daily' | 'topic' | 'alert' | 'custom';
+export type BriefStatus = 'draft' | 'published' | 'archived' | 'superseded';
+
+export interface BriefItem {
+  id: string;
+  title: string;
+  summary: string;
+  eventType: EventType;
+  priority: Priority;
+  evidenceIds: string[];
+  sourceCount: number;
+  audienceTags: string[];
+}
+
+export interface BriefSection {
+  id: string;
+  title: string;
+  order: number;
+  items: BriefItem[];
+}
+
+export interface IntelligenceBrief {
+  id: string;
+  profileId: string;
+  briefType: BriefType;
+  title: string;
+  sections: BriefSection[];
+  evidenceIds: string[];
+  generatedAt: string;
+  publishedAt?: string;
+  status: BriefStatus;
+  feedbackScore?: number;
+  feedbackNotes?: string;
+  supersededBy?: string;
+}
+
+export type LLMProviderType = 'qwen' | 'minimax' | 'deepseek' | 'openai' | 'anthropic' | 'custom';
+export type LLMProviderStatus = 'active' | 'inactive' | 'error';
+
+export interface LLMProvider {
+  id: string;
+  name: string;
+  providerType: LLMProviderType;
+  apiKey: string;
+  baseUrl: string;
+  modelBaseUrl?: string;
+  models: string[];
+  defaultModel?: string;
+  enabled: boolean;
+  rateLimitRpm: number;
+  rateLimitDaily: number;
+  priority: number;
+  costPer1mInput?: number;
+  costPer1mOutput?: number;
+  config?: Record<string, unknown>;
+  status: LLMProviderStatus;
+  lastError?: string;
+  lastUsedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

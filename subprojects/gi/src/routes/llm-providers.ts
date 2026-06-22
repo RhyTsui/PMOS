@@ -152,6 +152,7 @@ router.patch('/:id/toggle', (req, res) => {
  * 测试供应商连通性
  */
 router.post('/:id/test', async (req, res) => {
+  const startedAt = Date.now();
   try {
     const provider = repo.findById(req.params.id);
     if (!provider) {
@@ -174,7 +175,7 @@ router.post('/:id/test', async (req, res) => {
         response: result.content,
         model: result.model,
         usage: result.usage,
-        latencyMs: Date.now() - Date.now(), // 占位，实际应该测量
+        latencyMs: Date.now() - startedAt,
       },
     });
   } catch (error) {

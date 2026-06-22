@@ -134,12 +134,12 @@ export interface RSSHubDiscoveryResult {
 export class RSSHubService {
   private config: RSSHubConfig;
   private sourceRepo: IntelSourceRepository;
-  private parser: Parser;
+  private parser: Parser<Record<string, unknown>>;
 
   constructor(config: Partial<RSSHubConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.sourceRepo = new IntelSourceRepository();
-    this.parser = new Parser({
+    this.parser = new Parser<Record<string, unknown>>({
       timeout: this.config.timeout,
       headers: { 'User-Agent': this.config.userAgent },
     });
@@ -247,7 +247,7 @@ export class RSSHubService {
   /**
    * 获取指定路由的 RSS 内容
    */
-  async fetchRoute(routePath: string): Promise<Parser.Output | null> {
+  async fetchRoute(routePath: string): Promise<Parser.Output<Record<string, unknown>> | null> {
     try {
       const feedUrl = `${this.config.baseUrl}${routePath}`;
       return await this.parser.parseURL(feedUrl);

@@ -12,13 +12,42 @@ import { IntelligenceApiService } from '../services/intelligence/index.js';
 import { BriefGenerationService } from '../services/brief/index.js';
 import { BenchmarkParameterRepository } from '../repositories/benchmark-parameter-repository.js';
 import { IntelSourceRepository } from '../repositories/intel-source-repository.js';
-import type { BriefType, LedgerTargetType } from '../models/types.js';
+import { KeywordExpansionService } from '../services/intelligence/keyword-expansion-service.js';
+import type { BriefType, LedgerTargetType, SourceType, SeedType } from '../models/types.js';
 
 const router = Router();
 const intelligence = new IntelligenceApiService();
 const briefGen = new BriefGenerationService();
 const benchmarkRepo = new BenchmarkParameterRepository();
 const sourceRepo = new IntelSourceRepository();
+const keywordExpansionService = new KeywordExpansionService();
+
+const validateSourceType = (value: string): SourceType | undefined => {
+  if (value === 'wechat_mp' || value === 'wewe') return 'wechat_mp';
+  return (['media', 'community', 'official', 'social', 'wechat_mp', 'forum', 'api'] as SourceType[]).includes(value as SourceType)
+    ? (value as SourceType)
+    : undefined;
+};
+
+const splitQueryList = (value: unknown): string[] => {
+  if (!value || typeof value !== 'string') return [];
+  return value
+    .split(',')
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0);
+};
+
+const normalizeScope = (value: unknown): 'seed' | 'source' | 'all' => {
+  if (value === 'seed' || value === 'source' || value === 'all') return value;
+  return 'all';
+};
+
+const normalizeSeedType = (value: unknown): SeedType | undefined => {
+  if (value === 'entity' || value === 'event' || value === 'topic' || value === 'source') {
+    return value;
+  }
+  return undefined;
+};
 
 // ===== 资讯流 =====
 
@@ -26,15 +55,42 @@ const sourceRepo = new IntelSourceRepository();
  * GET /api/v1/intelligence/feed
  */
 router.get('/feed', (req, res) => {
-  const { profileId, since, priority, eventType, audienceTag, limit } = req.query;
+  const {
+    profileId,
+    since,
+    priority,
+    eventType,
+    audienceTag,
+    limit,
+    sourceType,
+    sourceId,
+    keyword,
+  } = req.query;
+
+  const limitValue = limit ? parseInt(limit as string, 10) : undefined;
+  if (limit && (!Number.isFinite(limitValue!) || limitValue! <= 0)) {
+    res.status(400).json({ error: { code: 'INVALID_INPUT', message: 'limit 需为正整数' } });
+    return;
+  }
+
+  const sourceTypeList = splitQueryList(sourceType)
+    .map((item) => validateSourceType(item.toLowerCase()))
+    .filter((item): item is SourceType => Boolean(item));
+  const sourceIds = splitQueryList(sourceId);
 
   const options: any = {};
-  if (profileId) options.profileId = profileId;
-  if (since) options.since = since;
-  if (priority) options.priority = (priority as string).split(',');
-  if (eventType) options.eventType = (eventType as string).split(',');
-  if (audienceTag) options.audienceTag = audienceTag;
-  if (limit) options.limit = parseInt(limit as string);
+  if (profileId) options.profileId = profileId as string;
+  if (since) options.since = since as string;
+  if (audienceTag) options.audienceTag = audienceTag as string;
+  if (limitValue) options.limit = limitValue;
+
+  const priorityList = splitQueryList(priority);
+  const eventTypeList = splitQueryList(eventType);
+  if (priorityList.length > 0) options.priority = priorityList;
+  if (eventTypeList.length > 0) options.eventType = eventTypeList;
+  if (sourceTypeList.length > 0) options.sourceType = sourceTypeList;
+  if (sourceIds.length > 0) options.sourceIds = sourceIds;
+  if (keyword) options.keyword = (keyword as string).trim();
 
   res.json({ data: intelligence.getFeed(options) });
 });
@@ -47,6 +103,42 @@ router.get('/feed/highlights', (req, res) => {
   const limit = parseInt(req.query.limit as string) || 20;
   const data = intelligence.getFeed({ priority: ['P0', 'P1'], limit });
   res.json({ data });
+});
+
+/**
+ * POST /api/v1/intelligence/expansion/keyword
+ * 关键词实时拓展（可触发种子和/或信源创建）
+ */
+router.post('/expansion/keyword', (req, res) => {
+  const {
+    keyword,
+    scope,
+    seedType,
+    sourceType,
+    createSeed,
+    createSource,
+    dryRun,
+  } = req.body || {};
+
+  try {
+    const resolvedScope = normalizeScope(scope);
+    const expanded = keywordExpansionService.expandByKeyword({
+      keyword: String(keyword || ''),
+      scope: resolvedScope,
+      seedType: normalizeSeedType(seedType),
+      sourceType: validateSourceType(String(sourceType || '').toLowerCase()) || 'media',
+      createSeed: createSeed !== false,
+      createSource: createSource !== false,
+      dryRun: dryRun === true,
+    });
+
+    res.json({ data: expanded });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const errCode = message.includes('keyword 不能为空') ? 'INVALID_INPUT' : 'CREATE_FAILED';
+    const status = message.includes('keyword 不能为空') ? 400 : 500;
+    res.status(status).json({ error: { code: errCode, message } });
+  }
 });
 
 // ===== 简报 / 日报 =====
@@ -135,7 +227,19 @@ router.get('/topics', (_req, res) => {
  */
 router.get('/topics/:id/updates', (req, res) => {
   const since = (req.query.since as string) || '7d';
-  const data = intelligence.getTopicUpdates(req.params.id, since);
+  const limit = parseInt(req.query.limit as string, 10);
+  const sourceTypeList = splitQueryList(req.query.sourceType)
+    .map((item) => validateSourceType(item.toLowerCase()))
+    .filter((item): item is SourceType => Boolean(item));
+  const sourceIds = splitQueryList(req.query.sourceId);
+
+  const options: any = {};
+  if (Number.isFinite(limit) && limit > 0) options.limit = limit;
+  if (sourceTypeList.length > 0) options.sourceType = sourceTypeList;
+  if (sourceIds.length > 0) options.sourceIds = sourceIds;
+  if (req.query.keyword) options.keyword = (req.query.keyword as string).trim();
+
+  const data = intelligence.getTopicUpdates(req.params.id, since, options);
   res.json({ data });
 });
 

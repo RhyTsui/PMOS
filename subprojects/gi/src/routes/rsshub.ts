@@ -93,7 +93,7 @@ router.get('/health', async (req, res) => {
  */
 router.get('/feed/*', async (req, res) => {
   try {
-    const routePath = '/' + req.params[0];
+    const routePath = '/' + ((req.params as unknown as Record<string, string>)[0] ?? '');
     const feed = await service.fetchRoute(routePath);
 
     if (!feed) {
@@ -110,7 +110,7 @@ router.get('/feed/*', async (req, res) => {
         title: feed.title,
         description: feed.description,
         link: feed.link,
-        items: feed.items?.slice(0, 20).map(item => ({
+        items: feed.items?.slice(0, 20).map((item: any) => ({
           title: item.title,
           link: item.link,
           pubDate: item.pubDate,

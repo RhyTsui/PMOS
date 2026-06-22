@@ -14,7 +14,7 @@ const gapService = new GapDetectionService();
  */
 gapDetectionRouter.get('/', (req, res) => {
   const report = gapService.detect();
-  res.json(report);
+  res.json({ data: report });
 });
 
 /**
@@ -23,5 +23,5 @@ gapDetectionRouter.get('/', (req, res) => {
  */
 gapDetectionRouter.get('/stats', (req, res) => {
   const stats = gapService.getStats();
-  res.json(stats);
+  res.json({ data: stats });
 });
