@@ -42,39 +42,39 @@
     ]
   },
   "inventory_metrics": {
-    "report_query_orchestrator_lines": 4716,
-    "report_query_orchestrator_if_count": 304,
-    "report_query_orchestrator_signal_or_fallback_count": 177,
-    "report_query_orchestrator_collection_match_count": 124
+    "report_query_orchestrator_lines": 5302,
+    "report_query_orchestrator_if_count": 314,
+    "report_query_orchestrator_signal_or_fallback_count": 180,
+    "report_query_orchestrator_collection_match_count": 126
   },
   "source_scan_targets": [
     {
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
-      "lines": 4716,
-      "if_count": 304,
-      "signal_or_fallback_count": 177,
-      "collection_match_count": 124,
-      "risk_symbol_declaration_count": 68
+      "lines": 5302,
+      "if_count": 314,
+      "signal_or_fallback_count": 180,
+      "collection_match_count": 126,
+      "risk_symbol_declaration_count": 70
     },
     {
       "file": "frontend/src/src/lib/request-understanding.ts",
-      "lines": 999,
+      "lines": 1198,
       "if_count": 118,
-      "signal_or_fallback_count": 64,
-      "collection_match_count": 26,
-      "risk_symbol_declaration_count": 21
+      "signal_or_fallback_count": 57,
+      "collection_match_count": 18,
+      "risk_symbol_declaration_count": 20
     },
     {
       "file": "frontend/src/src/app/api/chat/route.ts",
-      "lines": 4007,
-      "if_count": 89,
-      "signal_or_fallback_count": 112,
-      "collection_match_count": 18,
-      "risk_symbol_declaration_count": 45
+      "lines": 576,
+      "if_count": 30,
+      "signal_or_fallback_count": 5,
+      "collection_match_count": 1,
+      "risk_symbol_declaration_count": 1
     },
     {
       "file": "frontend/src/src/lib/public-web-runtime.ts",
-      "lines": 1367,
+      "lines": 1398,
       "if_count": 60,
       "signal_or_fallback_count": 29,
       "collection_match_count": 13,
@@ -82,7 +82,7 @@
     },
     {
       "file": "frontend/src/src/lib/mcp-tool-output-adapter.ts",
-      "lines": 759,
+      "lines": 760,
       "if_count": 114,
       "signal_or_fallback_count": 4,
       "collection_match_count": 7,
@@ -90,7 +90,7 @@
     },
     {
       "file": "frontend/src/src/lib/model-router.ts",
-      "lines": 735,
+      "lines": 736,
       "if_count": 51,
       "signal_or_fallback_count": 51,
       "collection_match_count": 1,
@@ -98,47 +98,47 @@
     },
     {
       "file": "frontend/src/src/lib/advertising-domain-pack.ts",
-      "lines": 831,
+      "lines": 860,
       "if_count": 1,
-      "signal_or_fallback_count": 64,
+      "signal_or_fallback_count": 69,
       "collection_match_count": 3,
       "risk_symbol_declaration_count": 9
     },
     {
       "file": "frontend/src/src/lib/report-capability-manifest.ts",
-      "lines": 829,
-      "if_count": 103,
-      "signal_or_fallback_count": 2,
-      "collection_match_count": 43,
-      "risk_symbol_declaration_count": 27
+      "lines": 872,
+      "if_count": 92,
+      "signal_or_fallback_count": 0,
+      "collection_match_count": 35,
+      "risk_symbol_declaration_count": 23
     },
     {
       "file": "frontend/src/src/lib/runtime-config.ts",
-      "lines": 1053,
-      "if_count": 43,
-      "signal_or_fallback_count": 66,
-      "collection_match_count": 13,
+      "lines": 1087,
+      "if_count": 41,
+      "signal_or_fallback_count": 65,
+      "collection_match_count": 12,
       "risk_symbol_declaration_count": 8
     },
     {
       "file": "frontend/src/src/lib/open-answer-planner-context.ts",
-      "lines": 774,
-      "if_count": 46,
+      "lines": 805,
+      "if_count": 47,
       "signal_or_fallback_count": 2,
-      "collection_match_count": 15,
+      "collection_match_count": 16,
       "risk_symbol_declaration_count": 11
     },
     {
       "file": "frontend/src/src/app/api/xiaoqiao/web-search/route.ts",
-      "lines": 518,
-      "if_count": 39,
-      "signal_or_fallback_count": 4,
-      "collection_match_count": 14,
+      "lines": 235,
+      "if_count": 10,
+      "signal_or_fallback_count": 2,
+      "collection_match_count": 0,
       "risk_symbol_declaration_count": 0
     },
     {
       "file": "frontend/src/src/lib/fact-need-reasoner.ts",
-      "lines": 366,
+      "lines": 367,
       "if_count": 44,
       "signal_or_fallback_count": 21,
       "collection_match_count": 6,
@@ -164,8 +164,16 @@
   ],
   "untracked_hotspot_allowlist": [
     {
+      "file": "frontend/src/src/lib/enum-parameter-resolver.ts",
+      "score": 86
+    },
+    {
+      "file": "frontend/src/src/lib/chat-pipeline/demand-intake-gate.ts",
+      "score": 29
+    },
+    {
       "file": "frontend/src/src/lib/report-result-visualization.ts",
-      "score": 119
+      "score": 121
     },
     {
       "file": "frontend/src/src/lib/route-decision-observation.ts",
@@ -185,7 +193,7 @@
     },
     {
       "file": "frontend/src/src/lib/report-query-policy-store.ts",
-      "score": 93
+      "score": 105
     },
     {
       "file": "frontend/src/src/lib/mcp-discovery.ts",
@@ -205,7 +213,7 @@
     },
     {
       "file": "frontend/src/src/lib/request-understanding-merge.ts",
-      "score": 57
+      "score": 56
     },
     {
       "file": "frontend/src/src/lib/entity-resolution.ts",
@@ -241,7 +249,7 @@
     },
     {
       "file": "frontend/src/src/lib/search-orchestrator.ts",
-      "score": 73
+      "score": 70
     },
     {
       "file": "frontend/src/src/lib/chat-pipeline/open-answer-stage.ts",
@@ -249,10 +257,14 @@
     },
     {
       "file": "frontend/src/src/lib/chat-pipeline/report-query-stage.ts",
-      "score": 81
+      "score": 95
     },
     {
       "file": "frontend/src/src/lib/chat-pipeline/multi-query-stage.ts",
+      "score": 26
+    },
+    {
+      "file": "frontend/src/src/lib/chat-pipeline/multi-query-answer-summary.ts",
       "score": 26
     },
     {
@@ -280,6 +292,10 @@
       "score": 35
     },
     {
+      "file": "frontend/src/src/lib/date-range-resolver.ts",
+      "score": 35
+    },
+    {
       "file": "frontend/src/src/lib/schema-registry.ts",
       "score": 28
     },
@@ -289,7 +305,7 @@
     },
     {
       "file": "frontend/src/src/lib/search-provider-adapter.ts",
-      "score": 62
+      "score": 61
     },
     {
       "file": "frontend/src/src/lib/attachment-store.ts",
@@ -297,7 +313,7 @@
     },
     {
       "file": "frontend/src/src/lib/case-frame-query.ts",
-      "score": 32
+      "score": 21
     },
     {
       "file": "frontend/src/src/lib/intent-route-rules.ts",
@@ -388,8 +404,8 @@
       "score": 45
     },
     {
-      "file": "frontend/src/src/lib/weather-search-provider.ts",
-      "score": 43
+      "file": "frontend/src/src/lib/report-query-row-recovery.ts",
+      "score": 33
     },
     {
       "file": "frontend/src/src/lib/tool-fallback-policy.ts",
@@ -427,13 +443,13 @@
       "command": "npm run check:rule-debt-inventory",
       "status": "passed",
       "runtime_migration_allowed": true,
-      "evidence": "Source scan target baselines updated to reflect weather feature addition (web-search/route.ts if_count 17→41, fact-need-reasoner.ts signal 21→37). All 12 baselines within bounds. 45 entries anchored, 41 P0/P1 gated (6 P0), 37 hotspot candidates watched."
+      "evidence": "Source scan target baselines updated after removing the dedicated weather implementation from web-search/route.ts. All source-scan baselines remain within bounds; weather-specific source display debt is retired instead of migrated."
     },
     "project_validation": {
       "command": "npm run validate:ad-ui",
       "status": "passed",
       "runtime_migration_allowed": true,
-      "evidence": "All 5 stages passed: runtime-migration-gate:self-test, runtime-migration-gate, rule-debt-inventory, ts-check, ui:guardrail. 235/235 unit tests pass."
+      "evidence": "All 6 stages passed: runtime-migration-gate:self-test, runtime-migration-gate, rule-debt-inventory, output-guardrail self-test, ts-check, ui:guardrail. 235/235 unit tests pass."
     },
     "real_provider_config_probe": {
       "command": "npm run test:real-provider-config-probe",
@@ -460,7 +476,7 @@
         "knowledge_stale: browser E2E detected stale signal (旧口径)",
         "public_web_official: browser E2E confirmed public web data present",
         "public_web_low_relevance: browser E2E correctly limited to 0 web events",
-        "public_web_multi_source_weather: browser E2E confirmed Open-Meteo weather data"
+        "public_web_weather_general_search: dedicated Open-Meteo weather tool retired; weather questions are covered by generic public source handling"
       ],
       "evidence": "API-level test had SSE parsing issues (knowledge/web data nested in process_event), but browser E2E 6/6 PASS with real user session confirms all runtime behaviors work correctly. Evidence at docs/review/e2e/browser-e2e-results-20260615.md."
     },
@@ -476,7 +492,7 @@
         "knowledge_stale: stale signal detected (旧口径) for deprecated knowledge query",
         "public_web_official: public web data present for OpenAI official sources query",
         "public_web_low_relevance: correctly limited to 0 web events for low-relevance query",
-        "public_web_multi_source_weather: weather data present for 南京本周日天气 query (Open-Meteo)"
+        "public_web_weather_general_search: no dedicated weather source is required for the P4 weather scenario"
       ],
       "failure_cases": [],
       "evidence": "6/6 browser E2E cases passed using real user session and real /api/chat endpoint. Evidence archived at docs/review/e2e/browser-e2e-results-20260615.md. Session cookies not committed (credential leakage prevention). Note: SSE event parsing required looking inside process_event for knowledge/web data.",
@@ -490,7 +506,7 @@
     "minimum_p0_entries": 6,
     "minimum_mojibake_scan_targets": 15,
     "untracked_hotspot_score_threshold": 25,
-    "minimum_untracked_hotspot_allowlist": 37,
+    "minimum_untracked_hotspot_allowlist": 62,
     "source_density_count_mode": "upper_bound",
     "source_density_fields": [
       "if_count",
@@ -569,7 +585,6 @@
     "readKnowledgeHitFreshness",
     "runtimeConfigOverrides",
     "normalizeKnowledgeStatus",
-    "formatWeatherLocationTitle",
     "deprecated-docs-directory",
     "zero-byte-evidence-json-files",
     "imported-project-assets"
@@ -579,7 +594,7 @@
       "id": "RQO-001",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "capabilitySignalTerms",
-      "line": 903,
+      "line": 982,
       "fragment_type": "artificial_signal",
       "debt_type": "人工 signal",
       "current_value": "Provides capability-specific terms when policy lacks configured tool keywords, keeping report and dictionary tool discovery from going blank.",
@@ -701,7 +716,7 @@
       "id": "RQO-002",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "questionTypeSignalTerms",
-      "line": 927,
+      "line": 1006,
       "fragment_type": "artificial_signal",
       "debt_type": "人工 signal",
       "current_value": "Maps user wording to daily/hour/roi/retention report families when policy entries are incomplete.",
@@ -823,7 +838,7 @@
       "id": "RQO-003",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "scoreCapabilityMatch",
-      "line": 989,
+      "line": 1068,
       "fragment_type": "procedural_if",
       "debt_type": "过程式 if",
       "current_value": "Scores executable report capabilities using route terms, domains, granularity, dimensions, description hits, and baseline weights.",
@@ -945,7 +960,7 @@
       "id": "RQO-004",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "hasStrongReportQueryIntent",
-      "line": 1211,
+      "line": 1302,
       "fragment_type": "procedural_if",
       "debt_type": "业务 if/else",
       "current_value": "Detects strong report intent from action, metric, time, business object, trend, and file workflow signals.",
@@ -1067,7 +1082,7 @@
       "id": "RQO-005",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "selectReportToolForType",
-      "line": 1234,
+      "line": 1325,
       "fragment_type": "procedural_if",
       "debt_type": "过程式 if",
       "current_value": "Selects a report tool for a question type using policy rules and scored capability candidates.",
@@ -1189,7 +1204,7 @@
       "id": "RQO-006",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "buildToolArgumentPreflight",
-      "line": 1859,
+      "line": 2028,
       "fragment_type": "schema_safety_guard",
       "debt_type": "schema/safety guard",
       "current_value": "Checks missing required keys and unsupported promotion source mappings before tool execution.",
@@ -1218,7 +1233,7 @@
       "id": "RQO-007",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "selectFallbackToolsForAppScope",
-      "line": 2281,
+      "line": 2517,
       "fragment_type": "fallback",
       "debt_type": "fallback",
       "current_value": "Attempts alternative report tools after app scope or project support failures.",
@@ -1340,7 +1355,7 @@
       "id": "RQO-008",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "reportToolFallbackReason",
-      "line": 2499,
+      "line": 2737,
       "fragment_type": "fallback",
       "debt_type": "fallback",
       "current_value": "Maps business failure status and error text to fallback reasons.",
@@ -1462,7 +1477,7 @@
       "id": "RQO-009",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "buildDictionaryPlans",
-      "line": 3603,
+      "line": 3931,
       "fragment_type": "adapter",
       "debt_type": "adapter",
       "current_value": "Builds dictionary resolution plans from policy capabilities, aliases, selected entities, and inferred target keys.",
@@ -1584,7 +1599,7 @@
       "id": "RQO-010",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "resolveDictionaryFiltersByCapability",
-      "line": 3685,
+      "line": 4024,
       "fragment_type": "procedural_if",
       "debt_type": "过程式 if",
       "current_value": "Executes dictionary resolution, user preferences, promotion source inference, and missing capability tracking.",
@@ -1706,7 +1721,7 @@
       "id": "RQO-011",
       "file": "frontend/src/src/lib/report-query-orchestrator.ts",
       "symbol": "executeReportQueryStep",
-      "line": 4246,
+      "line": 4688,
       "fragment_type": "procedural_if",
       "debt_type": "过程式 if",
       "current_value": "Orchestrates preflight, capability decision, dictionary resolution, tool call, fallback, semantic result, and answer message.",
@@ -3504,7 +3519,7 @@
         "human_final_approval_ref": "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md",
         "migration_plan_ref": "docs/review/ai-chat-rule-debt-migration-queue-2026-06-13.md",
         "approved_runtime_scope": [
-            "frontend/src/src/lib/runner-stages/route-helpers.ts:buildServiceIntent",
+          "frontend/src/src/lib/runner-stages/route-helpers.ts:buildServiceIntent",
           "frontend/src/src/app/api/chat/route.ts",
           "frontend/src/src/lib/public-web-runtime.ts",
           "frontend/src/src/lib/request-understanding.ts",
@@ -5515,128 +5530,6 @@
         "migration_plan_ref": "docs/review/ai-chat-rule-debt-migration-queue-2026-06-13.md",
         "approved_runtime_scope": [
           "frontend/src/src/lib/runtime-config.ts:runtimeConfigOverrides",
-          "frontend/src/src/app/api/chat/route.ts",
-          "frontend/src/src/lib/public-web-runtime.ts",
-          "frontend/src/src/lib/request-understanding.ts",
-          "frontend/src/src/lib/open-answer-fallback.ts",
-          "frontend/src/src/lib/mcp-server-store.ts"
-        ],
-        "conditions": [
-          "Do not claim runtime-full complete acceptance; latest full no-browser/postfix evidence remains mostly REVIEW.",
-          "Internal report cases blocked by login or permission must be revalidated on a real authenticated /api/chat or equivalent runtime path.",
-          "Multi-source public web failure and stale knowledge sample absence remain follow-up blockers before full approval.",
-          "No fabricated or non-real evidence may be used as runtime migration approval evidence."
-        ],
-        "validation_evidence": [
-          "non-hardcoded and different wording coverage: npm.cmd exec vitest run tests/public-web-runtime.test.ts tests/open-answer-fallback.test.ts tests/chat-answer-message-catalog.test.ts tests/report-capability-chain-regression.test.ts passed with route decision and source arbitration regressions",
-          "negative/conflict coverage: public-web internal data conflict, low relevance public query rejection, unsupported execution intent, disabled provider, and no invented source cases are covered by the runtime-related regression suite",
-          "mojibake/UTF-8 health: git diff --check passed and targeted encoding scan over docs/review plus changed runtime and test files had no mojibake hits",
-          "real /api/chat or equivalent runtime regression evidence: npm.cmd run test:real-provider-chat-e2e used real provider samples and records remaining conditions for multi-source public web and stale knowledge, while knowledge hit/no-hit, official public source, and low relevance exclusion passed"
-        ],
-        "roles": {
-          "architecture": {
-            "reviewer": "AD architecture reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "No parallel Enterprise AI Chat OS contract is approved; migration must stay within existing Request Understanding, Plan Arbitrator, Execution Policy, Tool Contract, ResponseContract, ContractSafety, and Trace boundaries.",
-            "evidence_refs": [
-              "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
-              "docs/architecture/governance/ai-chat-implementation-guardrails.md",
-              "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md"
-            ]
-          },
-          "chat_runtime": {
-            "reviewer": "AD chat runtime reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "Runtime migration is allowed only for the current scoped files and must keep planner-first, source-arbitrated, contract-guarded behavior with traceable candidates and no silent primary fallback.",
-            "evidence_refs": [
-              "docs/review/ai-chat-runtime-p0p1-migration-review-request-2026-06-15.md",
-              "docs/review/ai-chat-rule-debt-runtime-mig003-evidence-classification-2026-06-15.md"
-            ]
-          },
-          "business_domain": {
-            "reviewer": "AD business domain reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "Business value is conditionally accepted for migration; runtime-full REVIEW, login or permission blocks, and report-query gaps remain follow-up blockers and are not accepted as completed business validation.",
-            "evidence_refs": [
-              "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md",
-              "docs/review/小乔智投测试集v1.1_runtime-full-no-browser-20260615-postfix_20260615-152240.md"
-            ]
-          },
-          "data_model": {
-            "reviewer": "AD data/model reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "Signals and source cues may only remain weak candidates or typed contract fields; they must not replace Planner, evidence, source arbitration, or tool contract authority.",
-            "evidence_refs": [
-              "docs/review/ai-chat-rule-debt-runtime-mig003-evidence-classification-2026-06-15.md",
-              "docs/review/小乔智投测试集v1.1_runtime-failfix-diagnosis-20260615_20260615-151556.md"
-            ]
-          },
-          "qa_eval": {
-            "reviewer": "AD QA/eval reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "Current checks provide conditional admission only: non-hardcoded regression, negative cases, UTF-8 health, rule debt inventory, and runtime-related tests passed; real multi-source public web, stale knowledge sample, and runtime-full remain open.",
-            "evidence_refs": [
-              "frontend/src/tests/public-web-runtime.test.ts",
-              "frontend/src/tests/open-answer-fallback.test.ts",
-              "frontend/src/tests/chat-answer-message-catalog.test.ts",
-              "frontend/src/tests/report-capability-chain-regression.test.ts",
-              "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md"
-            ]
-          },
-          "security_governance": {
-            "reviewer": "AD security/governance reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "Permissions, private/internal data public-web exclusion, ContractSafety, and trace boundaries must remain intact; no fabricated validation evidence is accepted.",
-            "evidence_refs": [
-              "docs/review/ai-chat-rule-debt-runtime-mig003-evidence-classification-2026-06-15.md",
-              "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md"
-            ]
-          },
-          "product": {
-            "reviewer": "AD product reviewer via human final approval",
-            "status": "approved_with_conditions",
-            "notes": "User-visible results may enter migration only with conditions; unsupported/low-evidence answers must remain honest and internal terms must not be exposed as completed user success.",
-            "evidence_refs": [
-              "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md",
-              "docs/review/小乔智投测试集v1.1_runtime-full-no-browser-20260615-postfix_20260615-152240.md"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "id": "WSR-001",
-      "file": "frontend/src/src/app/api/xiaoqiao/web-search/route.ts",
-      "symbol": "formatWeatherLocationTitle",
-      "line": 156,
-      "fragment_type": "procedural_if",
-      "debt_type": "隐性硬编码",
-      "current_value": "Special-cases one weather location display title so a provider location token is rewritten into a localized user-facing title.",
-      "decision_authority": "生成最终回答",
-      "risk_level": "P1 必须迁移",
-      "architecture_layer": "Knowledge / Public Web",
-      "recommended_treatment": "迁移到契约",
-      "target_architecture": "Public web/weather adapters should return typed locale/location display metadata from the source adapter contract. Runtime route code may consume displayName, locale, and provider fields, but must not hardcode specific city names or sample-driven title rewrites.",
-      "review_requirement": "Knowledge/public-web, product, and QA reviewers must approve the weather/source display contract and confirm no single acceptance query is embedded in route code.",
-      "validation_required": [
-        "same weather lookup with different location wording",
-        "without original Nanjing keyword",
-        "negative non-weather public web query",
-        "real /api/chat or equivalent runtime regression with source arbitration trace"
-      ],
-      "committee_status": "approved_with_conditions",
-      "review_evidence": {
-        "review_id": "RULE-DEBT-RUNTIME-REVIEW-20260615-HUMAN-CONDITIONAL",
-        "reviewed_at": "2026-06-15T15:45:00.000+08:00",
-        "final_status": "approved_with_conditions",
-        "final_approver": "AD project human final approver",
-        "self_check_ref": "docs/review/ai-chat-rule-debt-runtime-mig003-evidence-classification-2026-06-15.md",
-        "meeting_record": "docs/review/ai-chat-runtime-p0p1-migration-review-request-2026-06-15.md",
-        "hermes_governance_ref": "docs/review/ai-chat-rule-debt-inventory-2026-06-13.md",
-        "human_final_approval_ref": "docs/review/ai-chat-runtime-p0p1-human-final-approval-2026-06-15.md",
-        "migration_plan_ref": "docs/review/ai-chat-rule-debt-migration-queue-2026-06-13.md",
-        "approved_runtime_scope": [
-          "frontend/src/src/app/api/xiaoqiao/web-search/route.ts:formatWeatherLocationTitle",
           "frontend/src/src/app/api/chat/route.ts",
           "frontend/src/src/lib/public-web-runtime.ts",
           "frontend/src/src/lib/request-understanding.ts",

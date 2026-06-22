@@ -1,5 +1,6 @@
 import { callMcpTool, type McpDiscoveryInput, type McpToolCallResult } from '@/lib/mcp-discovery';
 import { findEntityResolutionCandidates, getEntityResolutionAliasMaps, loadEntityResolutionConfigSync } from '@/lib/entity-resolution-config-store';
+import { resolveEnumParameter, toParameterResolutionEvent, type IntentOrchParameterHint, type EnumParameterResolution } from '@/lib/enum-parameter-resolver';
 import {
   buildReportCapabilityManifest,
   findRuntimeToolByCapability,
@@ -35,10 +36,16 @@ import type { ReportTrendData, ReportTrendDataPoint } from '@/contracts/validati
 import type { EntityResolution, EntityResolutionTraceStep, EntityType, IdentifierKey } from '@/contracts/request-understanding/entity-resolution';
 import { identifierKeyForEntityType } from '@/contracts/request-understanding/entity-resolution';
 import type { McpServerConfig, McpToolConfig } from '@/types';
-import { parseRelativeDateRange } from './date-range-resolver';
+import { parseRelativeDateRange, type ParsedDateRange } from './date-range-resolver';
 import { resolveDictionaryEntity } from './entity-resolution';
 import { adaptDictionaryToolOutput, normalizeMcpBusinessError } from './mcp-tool-output-adapter';
 import { selectTrendMetricColumns } from './trend-metric-selection';
+import { recoverRowsFromLooseText } from './report-query-row-recovery';
+import {
+  buildReportAnswerContract,
+  renderReportAnswerContractMarkdown,
+  type ReportAnswerContract,
+} from './report-query-answer-summary';
 import { getEntitySelectionPreferenceMap } from './user-memory-store';
 import {
   buildAdvertisingRequestSignals,
@@ -92,8 +99,15 @@ export interface ReportQualityCheck {
   anomaly_warnings: string[];
   metric_risks: string[];
   issues: string[];
-  root_cause?: 'none' | 'tool_missing' | 'missing_context' | 'dictionary_unmatched' | 'needs_user_selection' | 'needs_enrichment' | 'output_invalid' | 'capability_unavailable' | 'permission_or_scope' | 'no_matching_data' | 'response_unparsed' | 'tool_failed';
+  root_cause?: 'none' | 'tool_missing' | 'missing_context' | 'dictionary_unmatched' | 'needs_user_selection' | 'needs_enrichment' | 'output_invalid' | 'capability_unavailable' | 'permission_or_scope' | 'no_matching_data' | 'response_unparsed' | 'tool_failed' | 'request_timeout' | 'field_missing';
   recommended_next_actions?: string[];
+  metric_coverage?: Array<{
+    requestedMetric: string;
+    displayName: string;
+    dayOffset?: number;
+    matchedField: string | null;
+    status: 'covered' | 'field_missing';
+  }>;
 }
 
 export interface ReportToolSelectionTrace {
@@ -105,10 +119,37 @@ export interface ReportToolSelectionTrace {
   hour_reason: string;
   requested_granularity: 'hour' | 'day';
   rule_id?: string;
-  candidate_scores?: Array<{ rule_id: string; question_type: ReportQuestionType; score: number; matched_terms: string[]; tool_matches: string[] }>;
+  candidate_scores?: Array<{
+    rule_id: string;
+    question_type: ReportQuestionType;
+    score: number;
+    matched_terms: string[];
+    tool_matches: string[];
+    policy_id?: string;
+    contract_version?: string;
+    coverage_basis?: string[];
+    rejected_reasons?: string[];
+    risk_flags?: string[];
+  }>;
   manifest_version?: string;
   capability_id?: string;
-  candidate_tools?: Array<{ capability_id: string; tool_name: string; domains: ReportCapabilityDomain[]; score: number; reason: string }>;
+  selection_policy_id?: string;
+  capability_contract_version?: string;
+  report_shape?: ReportToolCapability['report_shape'];
+  projection_contract?: ReportToolCapability['projection_contract'];
+  grouping_contract?: ReportToolCapability['grouping_contract'];
+  candidate_tools?: Array<{
+    capability_id: string;
+    tool_name: string;
+    domains: ReportCapabilityDomain[];
+    score: number;
+    reason: string;
+    policy_id?: string;
+    contract_version?: string;
+    coverage_basis?: string[];
+    rejected_reasons?: string[];
+    risk_flags?: string[];
+  }>;
   candidate_lifecycle?: Array<{
     capability_id?: string;
     tool_name: string;
@@ -119,6 +160,8 @@ export interface ReportToolSelectionTrace {
     rank?: number;
     question_type?: ReportQuestionType;
     expected_domain?: ReportCapabilityDomain;
+    policy_id?: string;
+    contract_version?: string;
   }>;
   glossary?: RoutingTextNormalizationResult;
   argument_contract?: ReportToolArgumentContractTrace;
@@ -169,6 +212,7 @@ export interface ReportQueryResult {
   message: string;
   answer_markdown?: string;
   business_summary_markdown?: string;
+  answer_contract?: ReportAnswerContract;
   display_fields?: ReportDisplayField[];
   semantic_result?: SemanticResultContract<ReportTrendData>;
   raw_result_preview?: unknown;
@@ -250,6 +294,44 @@ export interface ReportEmptyDiagnosis {
   next_actions: string[];
 }
 
+export interface RequestedMetric {
+  canonicalMetric: string;
+  metricFamily: 'roi_day' | 'roi_cumulative' | 'roi';
+  dayOffset?: number;
+  displayName: string;
+  originalText: string;
+}
+
+export function parseRequestedMetrics(message: string): RequestedMetric[] {
+  const compact = String(message || '').replace(/\s+/g, '');
+  const metrics: RequestedMetric[] = [];
+  const roiDayPattern = /累计(\d{1,3})(?:日|天)roi|(\d{1,3})(?:日|天)(累计)?roi/gi;
+  let match: RegExpExecArray | null;
+  while ((match = roiDayPattern.exec(compact)) !== null) {
+    if (match[1]) {
+      const day = Number(match[1]);
+      metrics.push({
+        canonicalMetric: 'roi',
+        metricFamily: 'roi_cumulative',
+        dayOffset: day,
+        displayName: `累计${day}日ROI`,
+        originalText: match[0],
+      });
+    } else if (match[2]) {
+      const day = Number(match[2]);
+      const isCumulative = Boolean(match[3]);
+      metrics.push({
+        canonicalMetric: 'roi',
+        metricFamily: isCumulative ? 'roi_cumulative' : 'roi_day',
+        dayOffset: day,
+        displayName: isCumulative ? `累计${day}日ROI` : `${day}日ROI`,
+        originalText: match[0],
+      });
+    }
+  }
+  return metrics;
+}
+
 interface SelectedReportTool {
   server: McpServerConfig;
   tool: McpToolConfig;
@@ -262,6 +344,16 @@ interface SelectedReportTool {
   candidate_lifecycle?: NonNullable<ReportToolSelectionTrace['candidate_lifecycle']>;
   glossary?: RoutingTextNormalizationResult;
   warnings?: ReportToolSelectionTrace['warnings'];
+}
+
+interface CapabilityMatchScore {
+  score: number;
+  reason: string;
+  policy_id: string;
+  contract_version: string;
+  coverage_basis: string[];
+  rejected_reasons: string[];
+  risk_flags: string[];
 }
 
 interface ReportFallbackTrace {
@@ -335,12 +427,14 @@ export interface ReportToolInputBuildResult {
   missing_fields: string[];
   metrics: string[];
   dimensions: string[];
-  date_range: { start_date: string; end_date: string };
+  date_range: ParsedDateRange;
+  /** Enum 字段解析 trace（H6：不进 Evidence Ledger，只进 process_events.parameter_resolution）。 */
+  parameter_resolutions?: EnumParameterResolution[];
 }
 
 export interface ReportToolArgumentPreflightIssue {
   field: string;
-  code: 'missing_required_input' | 'invalid_internal_enum' | 'invalid_external_enum' | 'source_mapping_violation' | 'unsupported_query';
+  code: 'missing_required_input' | 'invalid_internal_enum' | 'invalid_external_enum' | 'source_mapping_violation' | 'unsupported_query' | 'invalid_date';
   message: string;
   source?: string;
   internal?: unknown;
@@ -357,6 +451,7 @@ export interface ReportToolArgumentPreflight {
 
 export interface ExecuteReportQueryStepResult {
   status: ReportQueryStatus | 'not_configured' | 'missing_input';
+  contract_status?: 'attempted';
   business_outcome?: ReportBusinessOutcome;
   step_status?: ReportQueryPlanStatus;
   tool_execution_status?: 'not_called' | 'called_success' | 'called_failed' | 'business_failed';
@@ -551,10 +646,11 @@ function shiftDate(days: number): Date {
   return date;
 }
 
-function parseDateRange(message: string): { start_date: string; end_date: string; period_type: 'day' | 'week' | 'month' | 'hour'; is_explicit: boolean; requested_days?: number } {
+function parseDateRange(message: string): ParsedDateRange {
   const parsed = parseRelativeDateRange(message);
   if (parsed.is_explicit && parsed.start_date && parsed.end_date) {
     return {
+      ...parsed,
       start_date: parsed.start_date,
       end_date: parsed.end_date,
       period_type: parsed.period_type,
@@ -701,9 +797,9 @@ function resolveSemanticDefault(
   const propSchema = toolProperties[key];
   if (propSchema && typeof propSchema === 'object' && !Array.isArray(propSchema)) {
     const schemaDefault = (propSchema as { default?: unknown }).default;
+    // H4：仅使用 schema 显式声明的 default，禁止把 enum[0] 作为业务字段默认兜底。
+    // "查询成功但查错口径" 比 missing_input 更危险。
     if (schemaDefault !== undefined) return schemaDefault;
-    const enumValues = (propSchema as { enum?: unknown[] }).enum;
-    if (Array.isArray(enumValues) && enumValues.length > 0) return enumValues[0];
   }
   return undefined;
 }
@@ -784,7 +880,12 @@ function listValueForSchema(properties: Record<string, unknown>, key: string, va
   if (schema && typeof schema === 'object' && !Array.isArray(schema) && (schema as { type?: unknown }).type === 'string') {
     return values.join(',');
   }
-  return values;
+  const output: string[] = [];
+  const seen: Record<string, true> = {};
+  for (const value of values) {
+    value && !seen[value] ? (seen[value] = true, output.push(value)) : undefined;
+  }
+  return output;
 }
 
 function formatSlotValue(properties: Record<string, unknown>, key: string, values: string[], format?: 'array' | 'string' | 'csv'): string[] | string {
@@ -821,6 +922,10 @@ function applyCapabilitySlotMappings(
     const values = resolvedValuesForEntity(resolvedFilters, mapping.entity_type);
     if (!values.length) continue;
     for (const key of mapping.target_keys) {
+      switch (key) {
+        case 'subGroup':
+          continue;
+      }
       if (trace) {
         assignReportArg({
           target: input,
@@ -1027,6 +1132,18 @@ function scoreCapabilityMatch(params: {
         : params.capability.supported_granularity.includes('day');
   const requestedDimensions = extractRequestedDimensionKeys(params.message);
   const dimensionHits = params.capability.supported_dimensions.filter(dimension => requestedDimensions.includes(dimension));
+  const timeDimensionTokens = new Set(['date', 'day', 'dt', 'time', 'hour']);
+  let hasSpecializedDimension = false;
+  for (const dimension of params.capability.supported_dimensions) {
+    const normalizedDimension = normalizeFieldToken(dimension);
+    hasSpecializedDimension = hasSpecializedDimension || Boolean(normalizedDimension && !timeDimensionTokens.has(normalizedDimension));
+  }
+  const unrequestedSpecializedDimensionPenalty = params.type === 'business_report'
+    && requestedDimensions.length === 0
+    && hasSpecializedDimension
+    && params.capability.supported_dimensions.length <= 2
+    ? -140
+    : 0;
   const granularityScore = params.type === 'business_report' && granularityHint ? 60 : 0;
   const versatilityScore = params.type === 'business_report'
     ? (params.capability.supported_granularity.length * 4) + (params.capability.report_domains.filter(domain => domain !== 'dictionary' && domain !== 'project').length * 3)
@@ -1048,7 +1165,8 @@ function scoreCapabilityMatch(params: {
     + (dimensionHits.length * 12)
     + descriptionHit
     + baselineScore
-    + (params.capability.confidence === 'manual_override' ? 10 : 0);
+    + (params.capability.confidence === 'manual_override' ? 10 : 0)
+    + unrequestedSpecializedDimensionPenalty;
   const score = signalScore > 0 ? signalScore + (params.entryPriority || 0) : 0;
   return {
     score,
@@ -1211,13 +1329,12 @@ function questionTypeToCapabilityDomain(type: ReportQuestionType): ReportCapabil
   return type;
 }
 
-function inferRequestedQuestionTypes(message: string, primary: ReportQuestionType): ReportQuestionType[] {
+export function inferRequestedQuestionTypes(message: string, primary: ReportQuestionType): ReportQuestionType[] {
   const normalized = normalizeRoutingText(message).normalized_text;
   const output = new Set<ReportQuestionType>([primary]);
   if (/留存|次留|ARPPU|retention/i.test(normalized)) output.add('retention');
   if (!/留存|次留|ARPPU|retention/i.test(normalized) && /ROI|ROAS|roi|roas|投入产出|回收|回本|首日/i.test(normalized)) output.add('roi');
   if (hasExplicitHourNeed(normalized)) output.add('hour');
-  if (/消耗|花费|成本|激活|注册|付费|支付|收入|日报|周报|月报|数据|趋势|报表|大盘|表现|经营/i.test(normalized)) output.add('daily');
   return [primary, ...Array.from(output).filter(type => type !== primary)];
 }
 
@@ -1518,7 +1635,14 @@ export function selectReportTool(servers: McpServerConfig[], message: string, op
 
 function extractMetrics(message: string, fallback: string[]): string[] {
   const configured = matchDomainSignalTerms(message, buildAdvertisingRequestSignals().metrics).map(hit => hit.key);
-  return Array.from(new Set(configured.length ? configured : fallback));
+  const metrics = configured.length ? configured : fallback;
+  const normalized = Array.from(new Set(metrics));
+  return normalized.indexOf('d1_roi') >= 0
+    ? normalized.reduce<string[]>((output, metric) => {
+      metric !== 'roi' && output.push(metric);
+      return output;
+    }, [])
+    : normalized;
 }
 
 function extractDimensions(message: string, type: ReportQuestionType, fallback: string[]): string[] {
@@ -1538,9 +1662,80 @@ function extractAppId(message: string, baseInput: Record<string, unknown>): stri
 }
 
 function extractAliasKeys(message: string, aliases: Record<string, string[]>): string[] {
-  return Object.entries(aliases)
-    .filter(([, terms]) => terms.some(term => new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(message)))
-    .map(([key]) => key);
+  const keys: string[] = [];
+  const matched = matchAliasTerms(message, aliases);
+  for (const key in matched) keys.push(key);
+  return keys;
+}
+
+function matchAliasTerms(message: string, aliases: Record<string, string[]>): Record<string, string[]> {
+  const matched: Record<string, string[]> = {};
+  for (const key in aliases) {
+    const hits: string[] = [];
+    for (const term of aliases[key] || []) {
+      new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(message) && hits.push(term);
+    }
+    hits.length > 0 && (matched[key] = hits);
+  }
+  return matched;
+}
+
+function disambiguateTerminalAliasKeys(params: {
+  message: string;
+  terminalKeys: string[];
+  semanticAliases: ReturnType<typeof mergedEntityAliasMaps>;
+}): string[] {
+  const appPackageHits = matchAliasTerms(params.message, params.semanticAliases.app_package_type_aliases);
+  const appPackageKeys: string[] = [];
+  for (const key in appPackageHits) appPackageKeys.push(key.toLowerCase());
+  const terminalHits = matchAliasTerms(params.message, params.semanticAliases.terminal_aliases);
+  let hasAppPackageSpecificAliasHit = false;
+  for (const key in appPackageHits) {
+    let terminalAliasKey = key;
+    for (const candidate in params.semanticAliases.terminal_aliases) {
+      terminalAliasKey = candidate.toLowerCase() === key.toLowerCase() ? candidate : terminalAliasKey;
+    }
+    for (const term of appPackageHits[key] || []) {
+      let existsInTerminalTerms = false;
+      for (const terminalTerm of params.semanticAliases.terminal_aliases[terminalAliasKey] || []) {
+        existsInTerminalTerms = existsInTerminalTerms || terminalTerm.toLowerCase() === term.toLowerCase();
+      }
+      hasAppPackageSpecificAliasHit = hasAppPackageSpecificAliasHit || !existsInTerminalTerms;
+    }
+  }
+  const hasExplicitAppPackageContext = Boolean(appPackageHits.app_package_type?.length) || hasAppPackageSpecificAliasHit;
+
+  let hasExplicitTerminalContext = false;
+  for (const key of params.terminalKeys) {
+    hasExplicitTerminalContext = hasExplicitTerminalContext || (appPackageKeys.indexOf(key.toLowerCase()) < 0 && Boolean(terminalHits[key]?.length));
+  }
+  const shouldSuppressAmbiguousTerminalKeys = params.terminalKeys.length > 0
+    && appPackageKeys.length > 0
+    && hasExplicitAppPackageContext
+    && !hasExplicitTerminalContext;
+  const filteredTerminalKeys: string[] = [];
+  for (const key of params.terminalKeys) {
+    appPackageKeys.indexOf(key.toLowerCase()) < 0 && filteredTerminalKeys.push(key);
+  }
+  return shouldSuppressAmbiguousTerminalKeys
+    ? filteredTerminalKeys
+    : params.terminalKeys;
+}
+
+export function resolveReportAliasSummary(message: string, policy: ReportQueryProjectResolutionPolicy): {
+  terminalKeys: string[];
+  appPackageTypeKeys: string[];
+} {
+  const semanticAliases = mergedEntityAliasMaps(policy);
+  const terminalKeys = disambiguateTerminalAliasKeys({
+    message,
+    terminalKeys: extractAliasKeys(message, semanticAliases.terminal_aliases),
+    semanticAliases,
+  });
+  return {
+    terminalKeys,
+    appPackageTypeKeys: extractAliasKeys(message, semanticAliases.app_package_type_aliases),
+  };
 }
 
 function createCapabilityCheck(params: {
@@ -1739,6 +1934,19 @@ function schemaEnumValues(properties: Record<string, unknown>, key: string): str
   return Array.isArray(values) ? values.map(String).filter(Boolean) : [];
 }
 
+function firstSchemaAllowedValue(properties: Record<string, unknown>, key: string, candidates: string[]): string | undefined {
+  const values = schemaEnumValues(properties, key);
+  const allowedValues: Record<string, true> = {};
+  for (const value of values) {
+    allowedValues[value] = true;
+  }
+  let selected: string | undefined;
+  for (const candidate of candidates) {
+    selected = selected || (values.length ? (allowedValues[candidate] ? candidate : undefined) : (candidate || undefined));
+  }
+  return selected;
+}
+
 function valueForSchemaType(properties: Record<string, unknown>, key: string, value: string | undefined): string | string[] | undefined {
   const schema = properties[key];
   const expectsArray = Boolean(schema && typeof schema === 'object' && !Array.isArray(schema) && (schema as { type?: unknown }).type === 'array');
@@ -1791,6 +1999,7 @@ function hasInvalidPromotionMediaMapping(values: string[], mediaIds: string[]): 
 function inferPromotionSourceInternal(params: {
   message: string;
   mediaKeys: string[];
+  dimensions?: string[];
   adapter?: NonNullable<ReportQuerySchemaAdapter['promotion_source']>;
   policy: ReportQueryProjectResolutionPolicy;
 }): { value: PromotionSourceInternal; source: string; internalValues: string[] } {
@@ -1802,6 +2011,10 @@ function inferPromotionSourceInternal(params: {
     if (terms.some(term => term && normalized.includes(term.toLowerCase()))) {
       return { value: internal, source: 'promotion_source_resolver', internalValues };
     }
+  }
+  const requestsMediaBreakdown = (params.dimensions || []).map(normalizeFieldToken).indexOf('media') >= 0;
+  if (requestsMediaBreakdown && !params.mediaKeys.length && internalValues.indexOf('ALL') >= 0) {
+    return { value: 'ALL', source: 'promotion_source_resolver.breakdown_scope', internalValues };
   }
   if (params.mediaKeys.length && params.adapter?.media_default_internal) {
     return { value: params.adapter.media_default_internal, source: 'promotion_source_resolver', internalValues };
@@ -1872,8 +2085,9 @@ export function buildToolArgumentPreflight(params: {
     allowedExternalValues: string[];
     unsupported: boolean;
   };
+  extraIssues?: ReportToolArgumentPreflightIssue[];
 }): ReportToolArgumentPreflight {
-  const issues: ReportToolArgumentPreflightIssue[] = [];
+  const issues: ReportToolArgumentPreflightIssue[] = [...(params.extraIssues || [])];
   for (const key of params.missingRequiredKeysBeforeCall) {
     issues.push({
       field: key,
@@ -2002,6 +2216,8 @@ export function buildReportToolInput(
   baseInput: Record<string, unknown>,
   resolvedFilters: Partial<ResolvedFilters> = {},
   capability?: ReportToolCapability,
+  parameterHints?: IntentOrchParameterHint,
+  parameterResolutions?: EnumParameterResolution[],
 ): ReportToolInputBuildResult {
   const policy = loadReportQueryPolicySync();
   const semanticAliases = mergedEntityAliasMaps(policy);
@@ -2019,12 +2235,13 @@ export function buildReportToolInput(
   const entry = policy.tool_selection_rules.find(item => item.question_type === type) || policy.tool_selection_rules[policy.tool_selection_rules.length - 1];
   const parsedRange = parseDateRange(message);
   const useParsedDateRange = parsedRange.is_explicit || hasExplicitDateRangeNeed(message);
-  const dateRange = {
+  const dateRange: ParsedDateRange = {
+    ...parsedRange,
     start_date: !useParsedDateRange && typeof baseInput.start_date === 'string' ? baseInput.start_date : parsedRange.start_date,
     end_date: !useParsedDateRange && typeof baseInput.end_date === 'string' ? baseInput.end_date : parsedRange.end_date,
   };
   const metrics = extractMetrics(message, Array.isArray(baseInput.metrics) ? baseInput.metrics.map(String) : entry.default_metrics);
-  const dimensions = extractDimensions(message, type, entry.default_dimensions);
+  const dimensions = extractDimensions(message, type, Array.isArray(baseInput.dimensions) ? baseInput.dimensions.map(String) : entry.default_dimensions);
   const mediaKeys = extractAliasKeys(message, semanticAliases.media_aliases);
   const appId = extractAppId(message, baseInput);
   const properties = schemaProperties(tool);
@@ -2042,6 +2259,7 @@ export function buildReportToolInput(
   const promotionInternal = inferPromotionSourceInternal({
     message,
     mediaKeys,
+    dimensions,
     adapter: promotionAdapter,
     policy,
   });
@@ -2072,6 +2290,12 @@ export function buildReportToolInput(
     value,
     source,
   });
+  const assignSubGroup = (candidates: string[], source: string) => {
+    const value = firstSchemaAllowedValue(properties, 'subGroup', candidates);
+    value ? assign('subGroup', value, source) : undefined;
+  };
+  const shouldGroupOutput = /(?:按|以|在).{0,12}(?:维度|分布|拆分|汇总|分组|对比)|各.{0,12}(?:媒体|渠道|团队|应用|终端|账号|账户|素材|维度)|(?:维度|分布|拆分|汇总|分组|对比|哪个|哪类|最高|最低|排名|排行)|\b(?:top|rank|ranking)\b/i.test(message);
+  const hasOutputDimension = (...keys: string[]) => shouldGroupOutput && dimensions.some(item => keys.includes(item));
 
   for (const [key, value] of Object.entries(defaults)) {
     if (key === promotionExternal.argumentKey) continue;
@@ -2128,29 +2352,70 @@ export function buildReportToolInput(
     assign('mediaIds', listValueForSchema(properties, 'mediaIds', resolvedFilters.mediaId), 'resolved_filters.mediaId');
     assign('media_id', listValueForSchema(properties, 'media_id', resolvedFilters.mediaId), 'resolved_filters.mediaId');
   }
-  if (resolvedFilters.osTypes?.length) assign('osTypes', resolvedFilters.osTypes, 'resolved_filters.osTypes');
+  if (resolvedFilters.osTypes?.length) assign('osTypes', listValueForSchema(properties, 'osTypes', resolvedFilters.osTypes), 'resolved_filters.osTypes');
   if (resolvedFilters.terminalOs?.length) {
-    assign('osTypes', resolvedFilters.terminalOs, 'resolved_filters.terminalOs');
+    assign('osTypes', listValueForSchema(properties, 'osTypes', resolvedFilters.terminalOs), 'resolved_filters.terminalOs');
     assign('osType', listValueForSchema(properties, 'osType', resolvedFilters.terminalOs), 'resolved_filters.terminalOs');
   }
-  if (resolvedFilters.teamIds?.length) assign('teamIds', resolvedFilters.teamIds, 'resolved_filters.teamIds');
+  if (resolvedFilters.teamIds?.length) {
+    assign('teamIds', listValueForSchema(properties, 'teamIds', resolvedFilters.teamIds), 'resolved_filters.teamIds');
+    assign('teamId', listValueForSchema(properties, 'teamId', resolvedFilters.teamIds), 'resolved_filters.teamIds');
+  }
   if (resolvedFilters.appPackageType?.length) {
     assign('appPackageType', listValueForSchema(properties, 'appPackageType', resolvedFilters.appPackageType), 'resolved_filters.appPackageType');
     assign('appPackageTypes', listValueForSchema(properties, 'appPackageTypes', resolvedFilters.appPackageType), 'resolved_filters.appPackageType');
   }
-  if (resolvedFilters.accountId?.length) assign('accountId', resolvedFilters.accountId, 'resolved_filters.accountId');
-  if (resolvedFilters.pkgId?.length) assign('pkgId', resolvedFilters.pkgId, 'resolved_filters.pkgId');
-  if (resolvedFilters.optimizerIds?.length) assign('optimizerIds', resolvedFilters.optimizerIds, 'resolved_filters.optimizerIds');
-  if (mediaKeys.length && resolvedFilters.mediaId?.length) {
-    assign('subGroup', 'media_id', 'request_understanding.media_dimension');
+  if (resolvedFilters.accountId?.length) assign('accountId', listValueForSchema(properties, 'accountId', resolvedFilters.accountId), 'resolved_filters.accountId');
+  if (resolvedFilters.pkgId?.length) assign('pkgId', listValueForSchema(properties, 'pkgId', resolvedFilters.pkgId), 'resolved_filters.pkgId');
+  if (resolvedFilters.optimizerIds?.length) assign('optimizerIds', listValueForSchema(properties, 'optimizerIds', resolvedFilters.optimizerIds), 'resolved_filters.optimizerIds');
+  if (hasOutputDimension('media_id', 'media')) {
+    assignSubGroup(['media_id'], 'request_understanding.media_dimension');
   }
-  if (dimensions.some(item => item === 'app_package_type') && resolvedFilters.appPackageType?.length) {
-    assign('subGroup', 'app_package_type', 'request_understanding.app_package_type_dimension');
+  if (hasOutputDimension('app_package_type')) {
+    assignSubGroup(['app_package_type'], 'request_understanding.app_package_type_dimension');
   }
-  if (resolvedFilters.teamIds?.length) assign('subGroup', 'team_id', 'resolved_filters.teamIds');
-  if (resolvedFilters.accountId?.length) assign('subGroup', 'account_id', 'resolved_filters.accountId');
-  if (resolvedFilters.pkgId?.length) assign('subGroup', 'pkg_id', 'resolved_filters.pkgId');
-  if (resolvedFilters.optimizerIds?.length) assign('subGroup', 'optimizer_id', 'resolved_filters.optimizerIds');
+  if (resolvedFilters.teamIds?.length && hasOutputDimension('team_id', 'team')) assignSubGroup(['team_ids', 'team_id'], 'request_understanding.team_dimension');
+  if (resolvedFilters.accountId?.length && hasOutputDimension('account_id', 'account')) assignSubGroup(['account_id'], 'request_understanding.account_dimension');
+  if (resolvedFilters.pkgId?.length && hasOutputDimension('pkg_id', 'package')) assignSubGroup(['pkg_id'], 'request_understanding.package_dimension');
+  if (resolvedFilters.optimizerIds?.length && hasOutputDimension('optimizer_id', 'optimizer')) assignSubGroup(['optimizer_id'], 'request_understanding.optimizer_dimension');
+
+  // ─── Enum 字段解析（三层架构：A 主 / B 兜 / C 安全降级）───────────────
+  // 在 missingRequiredKeysBeforeCall 判定前，尝试通过 resolver 填充 enum 字段。
+  //  resolver 输出不进入主消息，只进入 parameterResolutions 用于 trace（H6）。
+  const localResolutions: EnumParameterResolution[] = [];
+  const adaptersForType = schemaAdaptersForType(policy, type);
+  const policyEnumSignals = adaptersForType.flatMap(a => a.enum_signal_mappings || []);
+  // 合并 policy 中 business-确认安全的默认值（最后一级兜底）
+  const policySafeDefaults = adaptersForType.reduce<Record<string, unknown>>(
+    (acc, adapter) => ({ ...acc, ...(adapter.safe_defaults || {}) }),
+    {},
+  );
+  for (const key of requiredKeys) {
+    if (!isEmptyValue(input[key])) continue;                  // 已有值，跳过
+    const propSchema = properties[key];
+    if (!propSchema || typeof propSchema !== 'object' || Array.isArray(propSchema)) continue;
+    const enumValues = (propSchema as { enum?: unknown[] }).enum;
+    const schemaDefault = (propSchema as { default?: unknown }).default;
+    if (!Array.isArray(enumValues) || enumValues.length === 0) continue; // 非 enum 字段，跳过
+    const resolution = resolveEnumParameter({
+      field: key,
+      message,
+      schemaEnum: enumValues,
+      schemaDefault,
+      explicitInput: baseInput,
+      resolvedFilters: resolvedFilters as Record<string, unknown>,
+      intentOrchHint: parameterHints,
+      policyEnumSignals,
+      policySafeDefault: policySafeDefaults[key],
+      selectedToolName: tool.name,
+    });
+    localResolutions.push(resolution);
+    if (resolution.accepted && resolution.resolved_value !== undefined) {
+      assign(key, resolution.resolved_value, `enum_resolver.${resolution.source}`);
+    }
+  }
+  if (parameterResolutions) parameterResolutions.push(...localResolutions);
+
   const missingRequiredKeysBeforeCall = requiredKeys.filter(key => isEmptyValue(input[key]));
   const preflight = buildToolArgumentPreflight({
     finalArgs: input,
@@ -2159,6 +2424,13 @@ export function buildReportToolInput(
     sourceMapping,
     resolvedFilters,
     promotionMapping,
+    extraIssues: dateRange.invalid_reason ? [{
+      field: 'date_range',
+      code: 'invalid_date',
+      message: `日期 ${dateRange.start_date} 是无效日期（不是有效日历日期），不返回数据。请换一个有效日期后再查。`,
+      source: dateRange.invalid_reason,
+      external: `${dateRange.start_date}~${dateRange.end_date}`,
+    }] : undefined,
   });
   const finalArgKeys = Object.keys(input).sort();
   const missing_fields = missingRequiredKeysBeforeCall;
@@ -2175,6 +2447,7 @@ export function buildReportToolInput(
     metrics,
     dimensions,
     date_range: dateRange,
+    parameter_resolutions: localResolutions.length > 0 ? localResolutions : undefined,
   };
 }
 
@@ -2233,9 +2506,16 @@ function buildArgumentContractTrace(params: {
 }
 
 function preflightSuggestedAction(preflight: ReportToolArgumentPreflight): string {
-  if (preflight.issues.some(item => item.code === 'missing_required_input')) return 'complete_required_input';
-  if (preflight.issues.some(item => item.code === 'unsupported_query')) return 'select_supported_tool_or_check_project_capability';
-  return 'fix_argument_mapping';
+  const actionByCode: Partial<Record<ReportToolArgumentPreflightIssue['code'], string>> = {
+    invalid_date: 'fix_date_range',
+    missing_required_input: 'complete_required_input',
+    unsupported_query: 'select_supported_tool_or_check_project_capability',
+  };
+  let action = 'fix_argument_mapping';
+  for (const issue of preflight.issues) {
+    action = action === 'fix_argument_mapping' ? actionByCode[issue.code] || action : action;
+  }
+  return action;
 }
 
 function preflightErrorCode(preflight: ReportToolArgumentPreflight): string {
@@ -2474,6 +2754,7 @@ export function normalizeConfiguredMcpToolCallResult(params: {
       retry: retryAllowed,
     };
   }
+  const isTimeoutFailure = !params.ok && /调用超时|abort|timeout/i.test(params.msg || '');
   return {
     status: params.ok ? 'success' : 'failed',
     execution_contract: params.execution_contract,
@@ -2490,9 +2771,10 @@ export function normalizeConfiguredMcpToolCallResult(params: {
     latency_ms: params.latency_ms,
     token_expired: /token|unauthor|forbidden|401|403|过期|失效|重新登录/i.test(params.msg || ''),
     raw_response_preview: params.raw_response_preview,
-    normalizedErrorCode: undefined,
+    normalizedErrorCode: isTimeoutFailure ? 'request_timeout' : undefined,
     normalizedStatus: params.ok ? 'success' : 'failed',
-    retry: params.retry,
+    canRetryWithSameTool: isTimeoutFailure ? true : undefined,
+    retry: params.retry || isTimeoutFailure,
   };
 }
 
@@ -2733,12 +3015,12 @@ async function buildKnowledgeFallbackStep(params: {
   }
 }
 
-function normalizeRows(payload: unknown): Array<Record<string, unknown>> {
+export function normalizeRows(payload: unknown): Array<Record<string, unknown>> {
   if (typeof payload === 'string') {
     try {
       return normalizeRows(JSON.parse(payload));
     } catch {
-      return [];
+      return recoverRowsFromLooseText(payload, normalizeRows);
     }
   }
   if (Array.isArray(payload)) {
@@ -2749,13 +3031,12 @@ function normalizeRows(payload: unknown): Array<Record<string, unknown>> {
       try {
         return normalizeRows(JSON.parse(text));
       } catch {
-        return [];
+        return recoverRowsFromLooseText(text, normalizeRows);
       }
     });
-    if (parsedContentRows.length) return parsedContentRows;
     const objectRows = payload.filter(item => item && typeof item === 'object') as Array<Record<string, unknown>>;
     const looksLikeMcpContent = objectRows.length > 0 && objectRows.every((item) => 'type' in item && 'text' in item);
-    return looksLikeMcpContent ? [] : objectRows;
+    return parsedContentRows.length ? parsedContentRows : looksLikeMcpContent ? [] : objectRows;
   }
   if (!payload || typeof payload !== 'object') return [];
   const record = payload as Record<string, unknown>;
@@ -2769,7 +3050,8 @@ function normalizeRows(payload: unknown): Array<Record<string, unknown>> {
         const nested = normalizeRows(parsed);
         if (nested.length) return nested;
       } catch {
-        // Ignore non-JSON text chunks.
+        const recovered = recoverRowsFromLooseText(text, normalizeRows);
+        if (recovered.length) return recovered;
       }
     }
   }
@@ -2832,11 +3114,13 @@ const DETAIL_METRIC_ALIASES: Record<string, string[]> = {
   rebate_cost: ['rebate_cost_amount', 'rebate_cash_cost_amount', 'cost_amount'],
   active: ['active', 'activation', 'active_count', 'activation_count'],
   activation: ['activation', 'active', 'activation_count', 'active_count'],
-  register: ['register', 'register_count'],
+  register: ['register', 'register_count', 'reg_cnt', 'composite_reg_cnt', 'consuming_composite_reg_cnt'],
   revenue: ['revenue', 'income', 'pay_amount'],
   income: ['income', 'revenue', 'pay_amount'],
   roi: ['roi', 'roas'],
   roas: ['roas', 'roi'],
+  d1_roi: ['roi1_rate', 'cash_roi1_rate', 'composite_start_total_roi_rate', 'composite_start_total_roi_cash_rate', 'd1_roi', 'first_day_roi', 'roi_d1_rate'],
+  d1roi: ['roi1_rate', 'cash_roi1_rate', 'composite_start_total_roi_rate', 'composite_start_total_roi_cash_rate', 'd1_roi', 'first_day_roi', 'roi_d1_rate'],
 };
 
 const DETAIL_FIELD_DISPLAY_NAMES: Record<string, string> = {
@@ -2857,11 +3141,21 @@ const DETAIL_FIELD_DISPLAY_NAMES: Record<string, string> = {
   activation_count: '激活',
   register: '注册',
   register_count: '注册',
+  reg_cnt: '注册',
+  composite_reg_cnt: '注册',
+  consuming_composite_reg_cnt: '注册',
   pay_amount: '收入',
   revenue: '收入',
   income: '收入',
   roi: 'ROI',
   roas: 'ROI',
+  roi1_rate: '首日ROI',
+  cash_roi1_rate: '首日ROI',
+  composite_start_total_roi_rate: '首日ROI',
+  composite_start_total_roi_cash_rate: '首日ROI',
+  d1_roi: '首日ROI',
+  first_day_roi: '首日ROI',
+  roi_d1_rate: '首日ROI',
 };
 
 const DETAIL_REQUEST_DISPLAY_ALIASES: Record<string, string[]> = {
@@ -2878,6 +3172,8 @@ const DETAIL_REQUEST_DISPLAY_ALIASES: Record<string, string[]> = {
   income: ['收入'],
   roi: ['ROI'],
   roas: ['ROI'],
+  d1_roi: ['首日ROI', 'D1ROI', '首日回收'],
+  d1roi: ['首日ROI', 'D1ROI', '首日回收'],
 };
 
 function parseJsonPayload(value: unknown): unknown {
@@ -2978,11 +3274,20 @@ function formatterForField(key: string, displayName: string, requestedKey?: stri
   return 'number-2';
 }
 
+function roiDayColumnCandidates(day: number): string[] {
+  return [
+    `roi${day}_rate`, `cash_roi${day}_rate`,
+    `composite_roi${day}_rate`, `composite_cash_roi${day}_rate`,
+    `composite_start_total_roi${day}_rate`, `composite_start_total_roi${day}_cash_rate`,
+  ];
+}
+
 function selectBestField(params: {
   requestedKey: string;
   role: ReportDisplayField['role'];
   rows: Array<Record<string, unknown>>;
   columnMeta: Map<string, ReportColumnMeta>;
+  requestedMetric?: RequestedMetric;
 }): ReportDisplayField | null {
   const requestedToken = normalizeFieldToken(params.requestedKey);
   const aliases = params.role === 'dimension'
@@ -2992,6 +3297,24 @@ function selectBestField(params: {
   const displayAliasTokens = (DETAIL_REQUEST_DISPLAY_ALIASES[requestedToken] || []).map(normalizeFieldToken);
   const keys = availableRowKeys(params.rows).filter(key => hasUsefulValue(params.rows, key));
   if (!keys.length) return null;
+
+  // N日ROI strict mode: 只允许精确匹配 day offset 的列，禁止 fallback
+  if (params.requestedMetric?.dayOffset && params.role === 'metric') {
+    const day = params.requestedMetric.dayOffset;
+    const candidates = roiDayColumnCandidates(day).map(normalizeFieldToken);
+    const matchedKey = keys.find(key => candidates.includes(normalizeFieldToken(key)));
+    if (!matchedKey) return null;
+    const meta = params.columnMeta.get(matchedKey);
+    const displayName = meta?.displayName || params.requestedMetric.displayName;
+    return {
+      key: matchedKey,
+      displayName,
+      role: 'metric',
+      requestedKey: params.requestedKey,
+      formatter: formatterForField(matchedKey, displayName, params.requestedKey),
+      unit: meta?.unit,
+    };
+  }
 
   const ranked = keys
     .map((key) => {
@@ -3036,6 +3359,7 @@ function buildReportDisplayFields(params: {
   metrics: string[];
   dimensions: string[];
   columnMeta: Map<string, ReportColumnMeta>;
+  message?: string;
 }): ReportDisplayField[] {
   const fields: ReportDisplayField[] = [];
   const seen = new Set<string>();
@@ -3045,16 +3369,28 @@ function buildReportDisplayFields(params: {
     fields.push(field);
   };
 
+  const requestedDayMetrics = params.message ? parseRequestedMetrics(params.message) : [];
+
   for (const dimension of params.dimensions) {
     push(selectBestField({ requestedKey: dimension, role: 'dimension', rows: params.rows, columnMeta: params.columnMeta }));
   }
-  for (const preferredDimension of ['date', 'media']) {
+  for (const preferredDimension of ['date']) {
     if (!fields.some(item => item.role === 'dimension' && normalizeFieldToken(item.requestedKey || '') === preferredDimension)) {
       push(selectBestField({ requestedKey: preferredDimension, role: 'dimension', rows: params.rows, columnMeta: params.columnMeta }));
     }
   }
   for (const metric of params.metrics) {
-    push(selectBestField({ requestedKey: metric, role: 'metric', rows: params.rows, columnMeta: params.columnMeta }));
+    const dayMetric = requestedDayMetrics.find(rm =>
+      rm.canonicalMetric === metric
+      || rm.originalText.toLowerCase().includes(metric),
+    );
+    push(selectBestField({
+      requestedKey: metric,
+      role: 'metric',
+      rows: params.rows,
+      columnMeta: params.columnMeta,
+      requestedMetric: dayMetric,
+    }));
   }
   if (!fields.some(item => item.role === 'metric')) {
     push(selectBestField({ requestedKey: 'cost', role: 'metric', rows: params.rows, columnMeta: params.columnMeta }));
@@ -3092,14 +3428,25 @@ function parseReportMetricNumber(value: unknown): number | null {
   return Number(normalized);
 }
 
+function isSummaryRow(row: Record<string, unknown>): boolean {
+  for (const key of ['date', 'dt', 'stat_date', 'day']) {
+    const value = String(row[key] ?? '').trim();
+    if (!value) continue;
+    if (/^(汇总|合计|总计|total|summary|小计)$/i.test(value)) return true;
+  }
+  return false;
+}
+
 function buildDetailAnswerMarkdown(params: {
   rows: Array<Record<string, unknown>>;
   displayFields: ReportDisplayField[];
   fallbackMessage: string;
+  rowDisplayLimit?: number;
 }): string | undefined {
   const metricFields = params.displayFields.filter(field => field.role === 'metric');
   if (!params.rows.length || metricFields.length === 0) return undefined;
   const dimensionFields = params.displayFields.filter(field => field.role === 'dimension');
+  const rowDisplayLimit = Math.max(1, Math.min(params.rowDisplayLimit || 500, 500));
   if (params.rows.length === 1) {
     const row = params.rows[0];
     const prefix = dimensionFields
@@ -3113,11 +3460,19 @@ function buildDetailAnswerMarkdown(params: {
     return `${prefix ? `${prefix}${separator}` : ''}${metricsText}。`;
   }
 
+  // 分离汇总行和数据行：汇总行始终展示，不受截断影响
+  const summaryRows = params.rows.filter(isSummaryRow);
+  const dataRows = params.rows.filter(row => !isSummaryRow(row));
+  const truncatedDataRows = dataRows.slice(0, rowDisplayLimit);
+  const allDisplayRows = [...truncatedDataRows, ...summaryRows];
+
   const fields = [...dimensionFields, ...metricFields].slice(0, 8);
   const header = `| ${fields.map(field => field.displayName).join(' | ')} |`;
   const align = `| ${fields.map(field => field.role === 'metric' ? '---:' : '---').join(' | ')} |`;
-  const rows = params.rows.slice(0, 10).map(row => `| ${fields.map(field => toDisplayText(row[field.key], field).replace(/\|/g, '\\|')).join(' | ')} |`);
-  const note = params.rows.length > 10 ? '\n\n仅展示前 10 行，完整数据可打开明细或导出。' : '';
+  const rows = allDisplayRows.map(row => `| ${fields.map(field => toDisplayText(row[field.key], field).replace(/\|/g, '\\|')).join(' | ')} |`);
+  const note = dataRows.length > rowDisplayLimit
+    ? `\n\n当前回复展示前 ${rowDisplayLimit} 行，共 ${params.rows.length} 行；完整数据已保留在明细结果中，可继续查看或导出。`
+    : '';
   return [header, align, ...rows].join('\n') + note;
 }
 
@@ -3179,6 +3534,143 @@ function buildReportDetailSemanticResult(params: {
     metadata: {
       useCase: 'report-detail',
       requestedView: 'detail',
+    },
+  };
+}
+
+function reportAnswerEvidenceRef(contract: ReportAnswerContract, result: ReportQueryResult) {
+  return {
+    id: contract.evidenceRefIds[0] || `ev-${result.tool_name}-${result.server_name}`,
+    type: result.status === 'success' || result.status === 'empty' ? 'query-result' as const : 'tool-output' as const,
+    title: result.status === 'success' ? '报表查询结果' : '报表查询状态',
+    summary: contract.conclusions[0]?.summary || result.message,
+    sourceRefIds: contract.sourceRefIds,
+    confidence: {
+      level: contract.confidence,
+      basis: result.status === 'success' ? 'source' as const : 'mixed' as const,
+    },
+    freshness: {
+      asOf: result.date_range.end_date,
+      generatedAt: new Date().toISOString(),
+      status: 'fresh' as const,
+    },
+    metadata: {
+      reportAnswerContract: contract.contractType,
+      rowCount: result.rows.length,
+      status: result.status,
+    },
+  };
+}
+
+function reportAnswerSourceRef(contract: ReportAnswerContract, result: ReportQueryResult) {
+  return {
+    id: contract.sourceRefIds[0] || `src-${result.tool_name}-${result.server_name}`,
+    type: 'report' as const,
+    title: `${result.server_name}.${result.tool_name}`,
+    description: result.message,
+    retrievedAt: new Date().toISOString(),
+    freshness: {
+      asOf: result.date_range.end_date,
+      status: 'fresh' as const,
+    },
+    reliability: {
+      level: result.status === 'success' || result.status === 'empty' ? 'trusted' as const : 'unknown' as const,
+    },
+    metadata: {
+      reportStatus: result.status,
+      businessOutcome: result.business_outcome,
+    },
+  };
+}
+
+function buildReportAnswerSemanticSummary(params: {
+  result: ReportQueryResult;
+  answerContract: ReportAnswerContract;
+}): SemanticResultContract<ReportTrendData> {
+  const now = new Date().toISOString();
+  const evidenceRef = reportAnswerEvidenceRef(params.answerContract, params.result);
+  const sourceRef = reportAnswerSourceRef(params.answerContract, params.result);
+  return {
+    contractType: 'semantic-result',
+    version: '1.0.0',
+    resultId: `report-answer-${Date.now()}`,
+    screenType: 'report-result',
+    title: '报表回答',
+    createdAt: now,
+    producer: { kind: 'backend', name: 'report-answer-contract', version: '1.0.0' },
+    regions: [{
+      id: 'report-answer-summary',
+      type: 'summary',
+      componentBinding: 'markdown-result',
+      title: '报表回答',
+      state: params.result.status === 'success' ? 'ready' : params.result.status === 'empty' ? 'empty' : 'degraded',
+      data: {
+        markdown: renderReportAnswerContractMarkdown(params.answerContract),
+        answerContract: params.answerContract,
+      } as unknown as ReportTrendData,
+      evidenceRefs: params.answerContract.evidenceRefIds,
+      sourceRefs: params.answerContract.sourceRefIds,
+      layoutHints: {
+        placement: 'main',
+        width: 'full',
+        density: 'comfortable',
+        priority: 0,
+      },
+      metadata: {
+        reportAnswerContract: params.answerContract.contractType,
+        confidence: params.answerContract.confidence,
+      },
+    }],
+    evidenceRefs: [evidenceRef],
+    sourceRefs: [sourceRef],
+    freshness: {
+      asOf: params.result.date_range.end_date,
+      generatedAt: now,
+      status: 'fresh',
+    },
+    confidence: {
+      level: params.answerContract.confidence,
+      basis: params.result.status === 'success' ? 'source' : 'mixed',
+    },
+    metadata: {
+      useCase: 'report-answer',
+      reportAnswerContract: params.answerContract,
+      status: params.result.status,
+    },
+  };
+}
+
+function attachReportAnswerContractToSemanticResult(params: {
+  result: ReportQueryResult;
+  answerContract: ReportAnswerContract;
+  semanticResult?: SemanticResultContract<ReportTrendData> | null;
+}): SemanticResultContract<ReportTrendData> {
+  const summary = buildReportAnswerSemanticSummary({
+    result: params.result,
+    answerContract: params.answerContract,
+  });
+  if (!params.semanticResult) return summary;
+  const existingEvidenceIds = new Set((params.semanticResult.evidenceRefs || []).map(item => item.id));
+  const existingSourceIds = new Set((params.semanticResult.sourceRefs || []).map(item => item.id));
+  return {
+    ...params.semanticResult,
+    regions: [
+      summary.regions[0],
+      ...params.semanticResult.regions.filter(region => region.id !== 'report-answer-summary'),
+    ],
+    evidenceRefs: [
+      ...(summary.evidenceRefs || []).filter(item => !existingEvidenceIds.has(item.id)),
+      ...(params.semanticResult.evidenceRefs || []),
+    ],
+    sourceRefs: [
+      ...(summary.sourceRefs || []).filter(item => !existingSourceIds.has(item.id)),
+      ...(params.semanticResult.sourceRefs || []),
+    ],
+    freshness: params.semanticResult.freshness || summary.freshness,
+    confidence: params.semanticResult.confidence || summary.confidence,
+    metadata: {
+      ...(params.semanticResult.metadata || {}),
+      reportAnswerContract: params.answerContract,
     },
   };
 }
@@ -3574,6 +4066,23 @@ function inferTargetKeysFromReportTool(tool: McpToolConfig | undefined, capabili
   });
 }
 
+type ReportQuerySlotMapping = NonNullable<ReportQueryCapabilityConfig['slot_mappings']>[number];
+
+function hasEntityFilterSurface(tool: McpToolConfig | undefined, capability: ReportQueryCapabilityConfig, slotMapping?: ReportQuerySlotMapping): boolean {
+  const configuredTargets = [
+    ...(slotMapping?.target_keys || []),
+    ...(capability.target_keys || []),
+    slotMapping?.summary_key,
+    capability.summary_key,
+    legacySummaryKeyForCapability(capability.capability_type),
+  ].filter(Boolean).map(String);
+  const hasConfiguredTargets = configuredTargets.length > 0;
+  const properties = tool ? schemaProperties(tool) : {};
+  return !hasConfiguredTargets || !tool
+    ? hasConfiguredTargets
+    : Object.keys(properties).length === 0 || configuredTargets.some(key => key in properties);
+}
+
 function legacySummaryKeyForCapability(type: ReportQueryCapabilityType): string | undefined {
   const mapping: Record<string, string> = {
     media_dictionary: 'mediaId',
@@ -3615,13 +4124,22 @@ function buildDictionaryPlans(params: {
     if (!entityType || !identifierKey) return [];
     const slotMapping = capability.slot_mappings?.find(mapping => mapping.entity_type === entityType && mapping.identifier_key === identifierKey);
     const aliases = semanticAliasRecord(params.policy, params.semanticAliases, capability.alias_record);
-    const aliasKeys = extractAliasKeys(params.message, aliases);
+    const rawAliasKeys = extractAliasKeys(params.message, aliases);
+    const aliasKeys = entityType === 'terminal_os'
+      ? disambiguateTerminalAliasKeys({
+        message: params.message,
+        terminalKeys: rawAliasKeys,
+        semanticAliases: params.semanticAliases,
+      })
+      : rawAliasKeys;
     const genericAliasKeys = new Set([entityType, identifierKey, capability.capability_type]);
     const concreteAliasKeys = aliasKeys.filter(key => !genericAliasKeys.has(key));
     const inferredTargetKeys = inferTargetKeysFromReportTool(params.reportTool, capability);
     const selectedEntity = selectedEntities.find(item => item.entityType === entityType);
     const preferredEntity = params.preferredEntitySelections?.[entityType];
+    const hasGenericEntityMention = aliasKeys.length > concreteAliasKeys.length && hasEntityFilterSurface(params.reportTool, capability, slotMapping);
     const shouldTryDictionary = concreteAliasKeys.length > 0
+      || hasGenericEntityMention
       || Boolean(selectedEntity)
       || Boolean(preferredEntity);
     if (!shouldTryDictionary) return [];
@@ -3630,6 +4148,8 @@ function buildDictionaryPlans(params: {
       capability,
       keys: concreteAliasKeys.length
         ? concreteAliasKeys
+        : hasGenericEntityMention
+          ? aliasKeys
         : selectedEntity?.name
           ? [selectedEntity.name]
           : preferredEntity?.candidateName
@@ -3703,6 +4223,11 @@ async function resolveDictionaryFiltersByCapability(params: {
     adapter: promotionSourceAdapter(selectReportQuestionType(params.message), params.policy),
     policy: params.policy,
   });
+  const terminalKeys = disambiguateTerminalAliasKeys({
+    message: params.message,
+    terminalKeys: extractAliasKeys(params.message, semanticAliases.terminal_aliases),
+    semanticAliases,
+  });
   const plans = buildDictionaryPlans({
     message: params.message,
     policy: params.policy,
@@ -3726,7 +4251,7 @@ async function resolveDictionaryFiltersByCapability(params: {
     summary: {
       appId: params.appId || undefined,
       mediaKeys: extractAliasKeys(params.message, semanticAliases.media_aliases),
-      terminalKeys: extractAliasKeys(params.message, semanticAliases.terminal_aliases),
+      terminalKeys,
       teamKeys: extractAliasKeys(params.message, semanticAliases.team_aliases),
       appPackageTypeKeys: extractAliasKeys(params.message, semanticAliases.app_package_type_aliases),
       accountKeys: extractAliasKeys(params.message, semanticAliases.account_aliases),
@@ -3790,7 +4315,7 @@ async function resolveDictionaryFiltersByCapability(params: {
       setResolvedFilterValue(output, plan.summaryKey, resolved.ids);
       output.summary.source[plan.sourceKey] = `${plan.label}匹配能力`;
       for (const targetKey of plan.targetKeys) {
-        if (isModeledReportArgumentKey(targetKey, configuredModeledArgumentKeys(params.policy, selectReportQuestionType(params.message), {}))) continue;
+        if (targetKey === 'subGroup' || isModeledReportArgumentKey(targetKey, configuredModeledArgumentKeys(params.policy, selectReportQuestionType(params.message), {}))) continue;
         output.dynamicFilters[targetKey] = resolved.ids;
         output.summary.dynamicFilters![targetKey] = resolved.ids;
       }
@@ -3805,7 +4330,7 @@ async function resolveDictionaryFiltersByCapability(params: {
   return output;
 }
 
-async function resolveDictionaryFilters(params: {
+export async function resolveDictionaryFilters(params: {
   servers: McpServerConfig[];
   message: string;
   appId: string;
@@ -3949,6 +4474,7 @@ function buildRecommendedActions(params: {
   if (params.root_cause === 'dictionary_unmatched') return ['请确认媒体平台或终端名称是否正确', '也可以直接提供媒体编号或终端范围'];
   if (params.root_cause === 'permission_or_scope') return ['请确认当前账号是否有该项目和媒体的数据权限', '必要时切换项目或联系管理员开通'];
   if (params.root_cause === 'response_unparsed') return ['请检查数据返回格式或字段映射', '我会保留本次返回供排查'];
+  if (params.root_cause === 'request_timeout') return ['可以缩小查询时间范围后再试', '如果持续超时，请联系管理员检查数据服务状态'];
   if (params.root_cause === 'tool_failed') return ['请稍后重试', '如果持续失败，请检查数据服务连接和授权'];
   return ['请确认查询条件是否过窄', '可以扩大日期范围或去掉媒体、终端限制后再查一次'];
 }
@@ -3974,7 +4500,13 @@ function buildEmptyDiagnosis(params: {
   else if (params.quality_risks.some(item => /匹配|编号|终端/.test(item))) root_cause = 'dictionary_unmatched';
   else if (params.call_result.status !== 'success') {
     const message = params.call_result.business_error || params.call_result.error || params.call_result.message || '';
-    root_cause = /token|unauthor|forbidden|401|403|权限|授权|登录/i.test(message) ? 'permission_or_scope' : 'tool_failed';
+    if (/timeout|超时|abort/i.test(message)) {
+      root_cause = 'request_timeout';
+    } else if (/token|unauthor|forbidden|401|403|权限|授权|登录/i.test(message)) {
+      root_cause = 'permission_or_scope';
+    } else {
+      root_cause = 'tool_failed';
+    }
   } else if (params.rows.length === 0 && params.call_result.status === 'success') {
     root_cause = 'no_matching_data';
   }
@@ -4005,6 +4537,8 @@ function buildEmptyDiagnosis(params: {
     no_matching_data: `已按${conditionText}查询，但没有查到符合条件的数据。`,
     response_unparsed: '数据服务有返回，但当前无法识别成可展示的数据表。',
     tool_failed: '数据服务调用失败，暂时无法返回报表结果。',
+    request_timeout: '数据服务响应超时，可能是查询时间范围较大或数据量较多。建议缩小时间范围后再试。',
+    field_missing: '数据服务返回的字段不包含请求的指标字段，无法用其他字段代替。',
   };
   return {
     root_cause,
@@ -4041,7 +4575,9 @@ export function buildBusinessFailedMessage(params: {
     return '当前报表工具不支持你选择的项目，暂时无法完成这次查询。请检查该项目是否已接入对应报表能力，或切换到支持该项目的报表工具。';
   }
   if (params.call_result.error_code === 'business_failed_invalid_argument' || params.call_result.error_code === 'invalid_params') {
-    return '查询参数映射异常，系统未能完成查询。';
+    return params.call_result.suggestedAction === 'fix_date_range' && params.call_result.message
+      ? params.call_result.message
+      : '查询参数映射异常，系统未能完成查询。';
   }
   return params.empty_diagnosis?.explanation
     || params.call_result.business_error
@@ -4084,6 +4620,68 @@ function detectMissingOutputIdentifierFields(params: {
   })));
 }
 
+function withAlternateRouteDisclosure(result: ReportQueryResult, alternateRouteReason?: string): ReportQueryResult {
+  const alternateRouteIssue = '原候选数据能力不支持当前项目范围，已改用可用能力继续查询。';
+  const risks = [...result.quality_check.metric_risks];
+  if (alternateRouteReason) risks.push(`alternate_route:${alternateRouteReason}`);
+  return {
+    ...result,
+    business_outcome: 'partial_success',
+    quality_check: {
+      ...result.quality_check,
+      ok: false,
+      issues: Array.from(new Set([...result.quality_check.issues, alternateRouteIssue])),
+      metric_risks: Array.from(new Set(risks)),
+    },
+  };
+}
+
+function reportBusinessOutcomeForStep(params: {
+  result: ReportQueryResult;
+  callResult: ConfiguredMcpToolCallResult;
+  usedAlternateRouteSuccess: boolean;
+}): ReportBusinessOutcome {
+  const status = params.result.status;
+  const outcomeByStatus: Partial<Record<ReportQueryResult['status'], ReportBusinessOutcome>> = {
+    success: 'success',
+    empty: 'empty',
+    blocked: 'blocked',
+    failed: 'failed',
+  };
+  return params.usedAlternateRouteSuccess
+    ? 'partial_success'
+    : status === 'business_failed'
+      ? params.callResult.business_outcome || 'execution_failed'
+      : outcomeByStatus[status] ?? 'partial_success';
+}
+
+function checkMetricCoverage(params: {
+  requestedMetrics: RequestedMetric[];
+  displayFields: ReportDisplayField[];
+  columns: string[];
+}): ReportQualityCheck['metric_coverage'] {
+  if (!params.requestedMetrics.length) return undefined;
+  return params.requestedMetrics.map(rm => {
+    if (!rm.dayOffset) return { requestedMetric: rm.canonicalMetric, displayName: rm.displayName, status: 'covered' as const, matchedField: null };
+    const candidates = roiDayColumnCandidates(rm.dayOffset).map(normalizeFieldToken);
+    const matched = params.displayFields.find(field => candidates.includes(normalizeFieldToken(field.key)));
+    return {
+      requestedMetric: rm.canonicalMetric,
+      displayName: rm.displayName,
+      dayOffset: rm.dayOffset,
+      matchedField: matched?.key || null,
+      status: matched ? 'covered' as const : 'field_missing' as const,
+    };
+  });
+}
+
+function buildFieldMissingMessage(metricCoverage: NonNullable<ReportQualityCheck['metric_coverage']>): string {
+  const missingItems = metricCoverage.filter(item => item.status === 'field_missing');
+  if (!missingItems.length) return '';
+  const names = missingItems.map(item => item.displayName);
+  return `当前结果中未找到${names.join('、')}字段，无法用其他天数 ROI 代替。请确认该报表工具是否返回 ${names.join('、')}。`;
+}
+
 export function normalizeReportQueryResult(params: {
   question_type: ReportQuestionType;
   server: McpServerConfig;
@@ -4113,6 +4711,7 @@ export function normalizeReportQueryResult(params: {
       metrics: params.metrics,
       dimensions: params.dimensions,
       columnMeta,
+      message: params.message,
     })
     : [];
   const parsedRequestedRange = parseDateRange(params.message);
@@ -4157,9 +4756,6 @@ export function normalizeReportQueryResult(params: {
     dimensions: params.dimensions,
     columns,
   });
-  const answerMarkdown = requestedView === 'detail'
-    ? buildDetailAnswerMarkdown({ rows, displayFields, fallbackMessage: successMessage })
-    : undefined;
   const businessFailedMessage = status === 'business_failed'
     ? buildBusinessFailedMessage({
       input: params.input,
@@ -4168,6 +4764,13 @@ export function normalizeReportQueryResult(params: {
       empty_diagnosis,
     })
     : undefined;
+  const requestedMetrics = parseRequestedMetrics(params.message);
+  const metricCoverage = checkMetricCoverage({ requestedMetrics, displayFields, columns });
+  const hasFieldMissing = metricCoverage?.some(item => item.status === 'field_missing') ?? false;
+  if (hasFieldMissing) {
+    const missingNames = metricCoverage!.filter(item => item.status === 'field_missing').map(item => item.displayName);
+    issues.push(`当前结果中未找到${missingNames.join('、')}字段，无法用其他天数ROI代替。`);
+  }
   const quality_check: ReportQualityCheck = {
     ok: status === 'success' && issues.length === 0 && params.quality_risks.length === 0,
     empty_table: rows.length === 0,
@@ -4179,7 +4782,7 @@ export function normalizeReportQueryResult(params: {
     metric_risks: params.quality_risks,
     issues,
     root_cause: status === 'success'
-      ? (missingOutputFields.length ? 'output_invalid' : 'none')
+      ? (hasFieldMissing ? 'field_missing' : missingOutputFields.length ? 'output_invalid' : 'none')
       : empty_diagnosis?.root_cause,
     recommended_next_actions: status === 'success' && missingOutputFields.length
       ? buildRecommendedActions({
@@ -4189,7 +4792,36 @@ export function normalizeReportQueryResult(params: {
         error_code: params.call_result.error_code,
       })
       : empty_diagnosis?.next_actions,
+    metric_coverage: metricCoverage,
   };
+  const answerContract = buildReportAnswerContract({
+    status,
+    businessOutcome: status === 'success'
+      ? 'success'
+      : status === 'empty'
+        ? 'empty'
+        : params.call_result.business_outcome || (status === 'blocked' ? 'blocked' : 'failed'),
+    message: hasFieldMissing
+      ? buildFieldMissingMessage(metricCoverage!)
+      : status === 'success'
+        ? successMessage
+        : status === 'empty'
+          ? '没有查到符合条件的数据。可以换个日期，或减少媒体等限制后再查。'
+          : (businessFailedMessage || empty_diagnosis?.explanation || params.call_result.business_error || params.call_result.error || params.call_result.message || '报表查询失败。'),
+    rows,
+    metrics: params.metrics,
+    dimensions: params.dimensions,
+    displayFields,
+    dateRange: params.date_range,
+    requestedView,
+    questionType: params.question_type,
+    serverName: params.server.name,
+    toolName: params.tool.name,
+    resolvedFilters: params.resolved_filters,
+    qualityCheck: quality_check,
+    dataCoverage,
+  });
+  const contractAnswerMarkdown = renderReportAnswerContractMarkdown(answerContract);
   const baseResult: ReportQueryResult = {
     result_type: 'ReportQueryResult',
     status,
@@ -4215,13 +4847,16 @@ export function normalizeReportQueryResult(params: {
     date_range: params.date_range,
     data_coverage: dataCoverage,
     quality_check,
-    message: status === 'success'
-      ? successMessage
-      : status === 'empty'
-        ? '没有查到符合条件的数据。可以换个日期，或减少媒体等限制后再查。'
-        : (businessFailedMessage || empty_diagnosis?.explanation || params.call_result.business_error || params.call_result.error || params.call_result.message || '报表查询失败。'),
-    answer_markdown: status === 'success' ? answerMarkdown : undefined,
-    business_summary_markdown: status === 'success' ? answerMarkdown : undefined,
+    message: hasFieldMissing
+      ? buildFieldMissingMessage(metricCoverage!)
+      : status === 'success'
+        ? successMessage
+        : status === 'empty'
+          ? '没有查到符合条件的数据。可以换个日期，或减少媒体等限制后再查。'
+          : (businessFailedMessage || empty_diagnosis?.explanation || params.call_result.business_error || params.call_result.error || params.call_result.message || '报表查询失败。'),
+    answer_markdown: contractAnswerMarkdown,
+    business_summary_markdown: contractAnswerMarkdown,
+    answer_contract: answerContract,
     display_fields: displayFields.length ? displayFields : undefined,
     raw_result_preview: summarizeRawPreview(rawPayload),
     selection_trace: params.selection_trace,
@@ -4235,11 +4870,15 @@ export function normalizeReportQueryResult(params: {
       suggestedAction: params.call_result.suggestedAction,
     } : undefined,
   };
-  if (status === 'success') {
-    baseResult.semantic_result = buildReportTrendSemanticResult(baseResult)
+  const dataSemanticResult = status === 'success'
+    ? buildReportTrendSemanticResult(baseResult)
       ?? buildReportDetailSemanticResult({ result: baseResult, displayFields })
-      ?? undefined;
-  }
+    : null;
+  baseResult.semantic_result = attachReportAnswerContractToSemanticResult({
+    result: baseResult,
+    answerContract,
+    semanticResult: dataSemanticResult,
+  });
   return baseResult;
 }
 
@@ -4259,6 +4898,7 @@ export async function executeReportQueryStep(params: {
     dataCoverage?: { covered?: boolean; missing?: string[]; reasons?: string[]; supportLevel?: string };
     presentationCoverage?: { covered?: boolean; missing?: string[]; reasons?: string[] };
   } | null;
+  parameterHints?: IntentOrchParameterHint;
 }): Promise<ExecuteReportQueryStepResult> {
   const policy = loadReportQueryPolicySync();
   if (params.capabilityDecision && !params.capabilityDecision.selected) {
@@ -4382,7 +5022,8 @@ export async function executeReportQueryStep(params: {
     reportTool: selected.tool,
     userScopeKey: params.userScopeKey,
   });
-  const adapted = buildReportToolInput(selected.tool, params.message, params.baseInput, resolvedFilters, selected.capability);
+  const adaptedParameterResolutions: EnumParameterResolution[] = [];
+  const adapted = buildReportToolInput(selected.tool, params.message, params.baseInput, resolvedFilters, selected.capability, params.parameterHints, adaptedParameterResolutions);
   const selection_trace = buildTrace(params.message, selected);
   selection_trace.warnings = [
     ...(selection_trace.warnings || []),
@@ -4404,7 +5045,7 @@ export async function executeReportQueryStep(params: {
     .filter((item, index, list) => list.findIndex(candidate => candidate?.tool.name === item?.tool.name) === index) as SelectedReportTool[];
   const subQueryInputs = selectedTools.map((toolSelection) => ({
     selected: toolSelection,
-    adapted: buildReportToolInput(toolSelection.tool, params.message, params.baseInput, resolvedFilters, toolSelection.capability),
+    adapted: buildReportToolInput(toolSelection.tool, params.message, params.baseInput, resolvedFilters, toolSelection.capability, params.parameterHints, adaptedParameterResolutions),
   }));
   const query_plan = buildInitialReportQueryPlan({
     message: params.message,
@@ -4440,12 +5081,14 @@ export async function executeReportQueryStep(params: {
       item.adapted.missingRequiredKeysBeforeCall = item.adapted.missingRequiredKeysBeforeCall
         .filter(key => !(key in autoFilled));
       if (Object.keys(autoFilled).length > 0) {
+        const persistentIssues = item.adapted.preflight.issues.filter(issue => issue.code !== 'missing_required_input');
         item.adapted.preflight = buildToolArgumentPreflight({
           finalArgs: item.adapted.finalArgs as Record<string, unknown>,
           requiredKeys: item.adapted.requiredKeys,
           missingRequiredKeysBeforeCall: item.adapted.missingRequiredKeysBeforeCall,
           sourceMapping: item.adapted.sourceMapping,
           resolvedFilters: {},
+          extraIssues: persistentIssues,
         });
       }
     }
@@ -4506,6 +5149,10 @@ export async function executeReportQueryStep(params: {
     const primaryBlocked = blockedByArgumentPreflight.find(item => item.selected.tool.name === selected.tool.name) || blockedByArgumentPreflight[0];
     const blockingIssues = primaryBlocked.adapted.preflight.issues;
     const blockingRequirements = Array.from(new Set(blockingIssues.map(item => `${item.field}:${item.code}`)));
+    const invalidDateMessage = blockingIssues.find(item => item.code === 'invalid_date')?.message;
+    const blockedMessage = primaryBlocked.adapted.preflight.status === 'unsupported_query'
+      ? '当前数据能力不支持这类流量来源，已停止本次查询。'
+      : invalidDateMessage || '查询参数映射异常，系统未能完成查询。';
     const blockedBusinessStep = {
       ...tool_chain.find(item => item.key === 'business_report')!,
       status: 'skipped' as const,
@@ -4521,12 +5168,11 @@ export async function executeReportQueryStep(params: {
         missingRequiredKeysBeforeCall: primaryBlocked.adapted.missingRequiredKeysBeforeCall,
         sourceMapping: primaryBlocked.adapted.sourceMapping,
       },
-      message: primaryBlocked.adapted.preflight.status === 'unsupported_query'
-        ? '当前数据能力不支持这类流量来源，已停止本次查询。'
-        : '查询参数映射异常，系统未能完成查询。',
+      message: blockedMessage,
     };
     return {
       status: 'business_failed',
+      contract_status: invalidDateMessage ? 'attempted' : undefined,
       business_outcome: 'execution_failed',
       step_status: 'failed',
       tool_execution_status: 'not_called',
@@ -4550,7 +5196,7 @@ export async function executeReportQueryStep(params: {
         ...tool_chain.filter(item => item.key !== 'business_report'),
         blockedBusinessStep,
       ],
-      message: blockedBusinessStep.message,
+      message: blockedMessage,
     };
   }
   const executions: Array<{
@@ -4601,7 +5247,7 @@ export async function executeReportQueryStep(params: {
     for (const fallbackSelection of fallbackTools) {
       attemptedToolNames.add(fallbackSelection.tool.name);
       fallbackAttemptedTools = Array.from(attemptedToolNames);
-      const fallbackAdapted = buildReportToolInput(fallbackSelection.tool, params.message, params.baseInput, resolvedFilters, fallbackSelection.capability);
+      const fallbackAdapted = buildReportToolInput(fallbackSelection.tool, params.message, params.baseInput, resolvedFilters, fallbackSelection.capability, params.parameterHints, adaptedParameterResolutions);
       fallbackDiagnosticSteps.push({
         key: `fallback_attempt:${fallbackSelection.tool.name}`,
         tool_name: fallbackSelection.tool.name,
@@ -4711,6 +5357,22 @@ export async function executeReportQueryStep(params: {
     }
   }
   const selectedExecution = executions.find(item => item.selected.tool.name === selected.tool.name) || executions[0];
+  const selectedExecutionHasRows = Boolean(selectedExecution?.result.status === 'success' && selectedExecution.result.rows.length > 0);
+  const sameTypeDataSuccessExecution = selectedExecutionHasRows
+    ? undefined
+    : executions.find(item =>
+      item.selected.tool.name !== selected.tool.name
+      && item.result.status === 'success'
+      && item.result.rows.length > 0
+      && item.selected.entry.question_type === selected.entry.question_type
+    );
+  const anyDataSuccessExecution = selectedExecutionHasRows || sameTypeDataSuccessExecution
+    ? undefined
+    : executions.find(item =>
+      item.selected.tool.name !== selected.tool.name
+      && item.result.status === 'success'
+      && item.result.rows.length > 0
+    );
   const fallbackSuccessExecution = selectedExecution?.result.status === 'business_failed'
     ? executions.find(item =>
       item.selected.tool.name !== selected.tool.name
@@ -4718,7 +5380,9 @@ export async function executeReportQueryStep(params: {
       && item.selected.entry.question_type === selected.entry.question_type
     )
     : undefined;
-  const primaryExecution = fallbackSuccessExecution || selectedExecution;
+  const primaryExecution = selectedExecutionHasRows
+    ? selectedExecution
+    : sameTypeDataSuccessExecution || fallbackSuccessExecution || anyDataSuccessExecution || selectedExecution;
   const report_query_result = primaryExecution.result;
   const successfulExecutions = executions.filter(item => item.result.status === 'success');
   const failedExecutions = executions.filter(item => item.result.status !== 'success');
@@ -4799,19 +5463,20 @@ export async function executeReportQueryStep(params: {
   if (report_query_result) {
     report_query_result.selection_trace = finalSelectionTrace;
   }
+  const selectedToolChanged = primaryExecution.selected.tool.name !== selected.tool.name;
+  const finalResultSucceeded = report_query_result.status === 'success';
+  const usedAlternateRouteSuccess = selectedToolChanged ? finalResultSucceeded : false;
+  const finalReportQueryResult: ReportQueryResult = usedAlternateRouteSuccess
+    ? withAlternateRouteDisclosure(report_query_result)
+    : report_query_result;
+  const businessOutcome = reportBusinessOutcomeForStep({
+    result: finalReportQueryResult,
+    callResult: primaryExecution.call_result,
+    usedAlternateRouteSuccess,
+  });
   return {
-    status: report_query_result.status,
-    business_outcome: report_query_result.status === 'success'
-      ? 'success'
-      : report_query_result.status === 'empty'
-        ? 'empty'
-        : report_query_result.status === 'blocked'
-          ? 'blocked'
-          : report_query_result.status === 'business_failed'
-            ? (primaryExecution.call_result.business_outcome || 'execution_failed')
-          : report_query_result.status === 'failed'
-            ? 'failed'
-            : 'partial_success',
+    status: finalReportQueryResult.status,
+    business_outcome: businessOutcome,
     step_status: planStatus,
     tool_execution_status: primaryExecution.call_result.status === 'business_failed'
       ? 'business_failed'
@@ -4821,13 +5486,13 @@ export async function executeReportQueryStep(params: {
     blocking_requirements: Array.from(new Set([
       ...missing_context_fields,
       ...missing_capabilities,
-      ...(primaryExecution.result.status === 'success' ? [] : primaryExecution.result.quality_check.missing_fields),
+      ...(finalReportQueryResult.status === 'success' ? [] : finalReportQueryResult.quality_check.missing_fields),
     ])),
     selected,
     input: primaryExecution.adapted.finalArgs,
     call_result: primaryExecution.call_result,
     report_query_result: {
-      ...report_query_result,
+      ...finalReportQueryResult,
       query_plan: completedPlan,
     },
     query_plan: completedPlan,
@@ -4881,6 +5546,6 @@ export async function executeReportQueryStep(params: {
       })),
       ...fallbackDiagnosticSteps,
     ],
-    message: report_query_result.message,
+    message: finalReportQueryResult.message,
   };
 }

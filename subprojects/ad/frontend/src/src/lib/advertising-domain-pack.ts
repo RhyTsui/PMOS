@@ -88,6 +88,7 @@ export const ADVERTISING_REQUEST_SIGNALS: DomainPackRequestSignals = {
   metrics: [
     { key: 'cost', terms: ['消耗', '花费', '成本', 'cost', 'spend'], source_key: 'requestSignals.metrics.cost' },
     { key: 'd1_roi', terms: ['首日ROI', '首日 ROI', '首日回收', '首日广告回收', 'd1 roi', 'first day roi'], source_key: 'requestSignals.metrics.d1_roi' },
+    { key: 'roi_day', terms: ['区间ROI', 'N日ROI', '第N日ROI'], source_key: 'requestSignals.metrics.roi_day' },
     { key: 'roi', terms: ['ROI', 'roi', '投产', '投入产出', '回收'], source_key: 'requestSignals.metrics.roi' },
     { key: 'roas', terms: ['ROAS', 'roas'], source_key: 'requestSignals.metrics.roas' },
     { key: 'activation', terms: ['激活', 'activation'], source_key: 'requestSignals.metrics.activation' },
@@ -125,6 +126,7 @@ export const ADVERTISING_REQUEST_SIGNALS: DomainPackRequestSignals = {
     { key: 'query', terms: ['查数', '查询', '查看', '看下', '统计', '取数', '数据', '多少'], source_key: 'requestSignals.reportActions.query' },
     { key: 'delivery', terms: ['报表', '生成', '导出', '订阅', '拼表', '下载'], source_key: 'requestSignals.reportActions.delivery' },
     { key: 'trend', terms: ['趋势', '走势', '对比', '排名', '环比', '同比'], source_key: 'requestSignals.reportActions.trend' },
+    { key: 'evaluation', terms: ['分析', '评估', '表现', '效果', '复盘'], source_key: 'requestSignals.reportActions.evaluation' },
   ],
   routePhrases: [
     { key: 'package_fetch', terms: ['投放包', '广告包', '可交付包', '可投放包', '包地址', '下载地址', '分包', 'package', 'pkg', 'apk', 'ipa', 'download'], source_key: 'requestSignals.routePhrases.package_fetch' },
@@ -453,7 +455,7 @@ export const ADVERTISING_REPORT_TOOL_SELECTION_RULES: ReportQueryToolSelectionRu
     id: 'retention',
     question_type: 'retention',
     priority: 80,
-    include_terms: ['留存', '次留', '留存率', '注册留存', '设备留存', '付费留存', '7日留存', '3日留存', '30日留存', 'ARPPU', 'retention', 'LTV', '次日留存', '1日留存', 'D1留存', 'd1留存', '新增留存', '活跃留存'],
+    include_terms: ['留存', '次留', '留存率', '注册留存', '设备留存', '付费留存', '7日留存', '3日留存', '30日留存', 'ARPPU', 'retention', 'LTV', '次日留存', '1日留存', 'D1留存', '新增留存', '活跃留存'],
     exclude_terms: ['小时', '分时', '实时'],
     tool_keywords: ['get_zt_ad_retention_report', 'retention'],
     default_metrics: ['retention_d1', 'arppu'],
@@ -506,7 +508,7 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
     },
     promotion_source: {
       argument_key: 'promotionSource',
-      internal_values: ['AD', 'ORGANIC'],
+      internal_values: ['AD', 'ORGANIC', 'ALL'],
       default_internal: 'AD',
       media_default_internal: 'AD',
       source_terms: {
@@ -516,6 +518,7 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
       external_values: {
         AD: ['AD'],
         ORGANIC: ['ORGANIC', 'ORGANIC,AD'],
+        ALL: ['ORGANIC,AD'],
       },
     },
     modeled_argument_keys: ['promotionSource', 'mediaId', 'mediaIds', 'media_id', 'osTypes', 'osType', 'terminalOs', 'appId', 'projectId', 'project_id', 'startDate', 'start_date', 'endDate', 'end_date', 'timeType', 'dataType'],
@@ -528,9 +531,18 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
       dataType: 'total',
       timeType: 'DAY',
     },
+    enum_signal_mappings: [
+      {
+        field: 'dataType',
+        signals: {
+          section: ['区间ROI'],
+          total: ['累计ROI'],
+        },
+      },
+    ],
     promotion_source: {
       argument_key: 'promotionSource',
-      internal_values: ['AD', 'ORGANIC'],
+      internal_values: ['AD', 'ORGANIC', 'ALL'],
       default_internal: 'AD',
       media_default_internal: 'AD',
       source_terms: {
@@ -540,6 +552,7 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
       external_values: {
         AD: ['AD'],
         ORGANIC: ['ORGANIC', 'ORGANIC,AD'],
+        ALL: ['ORGANIC,AD'],
       },
     },
   },
@@ -551,9 +564,19 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
       retentionType: 'REG_RETENTION',
       timeType: 'DAY',
     },
+    enum_signal_mappings: [
+      {
+        field: 'retentionType',
+        signals: {
+          DEVICE_RETENTION: ['设备留存', '新增设备留存', '新增设备次留', '设备次留'],
+          REG_RETENTION: ['注册留存', '注册用户留存'],
+          PAY_D1_RETENTION: ['首日付费留存', '首日付费账号留存', '付费账号留存', '付费留存'],
+        },
+      },
+    ],
     promotion_source: {
       argument_key: 'promotionSource',
-      internal_values: ['AD', 'ORGANIC'],
+      internal_values: ['AD', 'ORGANIC', 'ALL'],
       default_internal: 'AD',
       media_default_internal: 'AD',
       source_terms: {
@@ -563,13 +586,7 @@ export const ADVERTISING_REPORT_SCHEMA_ADAPTERS: ReportQuerySchemaAdapter[] = [
       external_values: {
         AD: ['AD'],
         ORGANIC: ['ORGANIC,AD,MKT,OP', 'ORGANIC', 'ORGANIC,AD'],
-      },
-      filter_values: {
-        ORGANIC: {
-          mediaId: ['99999'],
-          mediaIds: ['99999'],
-          media_id: ['99999'],
-        },
+        ALL: ['ORGANIC,AD,MKT,OP', 'ORGANIC,AD'],
       },
     },
   },
@@ -736,7 +753,7 @@ export const ADVERTISING_REPORT_CAPABILITIES: ReportQueryCapabilityConfig[] = [
     missing_message: '当前没有可用的项目匹配能力，只能使用当前会话已选项目。',
   },
   {
-    id: 'knowledge-fallback',
+    id: 'knowledge-reference',
     capability_type: 'knowledge_fallback',
     required: false,
     tool_keywords: ['knowledge.search', 'search_knowledge', 'knowledge_search', '知识库'],
@@ -786,9 +803,13 @@ export const ADVERTISING_REPORT_SEMANTIC_DEFAULTS: ReportQuerySemanticDefaults =
   },
   team_aliases: {
     team: ['团队', 'team'],
+    ad_delivery_team: ['广告投放部', '投放部', '投放团队', '买量团队'],
   },
   app_package_type_aliases: {
     app_package_type: ['应用类型'],
+    ios: ['iOS应用类型', 'IOS应用类型', 'iOS包体', 'IOS包体', 'iOS', 'IOS'],
+    android: ['安卓应用类型', 'Android应用类型', '安卓包体', 'Android包体', '安卓', 'Android', 'android'],
+    harmony: ['鸿蒙应用类型', 'Harmony应用类型', '鸿蒙包体', 'Harmony包体', '鸿蒙', 'Harmony', 'harmony'],
   },
   account_aliases: {
     account: ['账户', '账号', 'account'],

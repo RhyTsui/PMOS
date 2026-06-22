@@ -22,7 +22,6 @@ import type {
   ToolSelectionResult,
   SelectedCapability,
 } from '@/contracts/multi-query';
-import type { BusinessMetric } from '@/contracts/business-semantics/metric-catalog';
 import type { ReportToolCapability, ReportCapabilityDomain } from './report-capability-manifest';
 import { createSubQuery } from '@/contracts/multi-query';
 
@@ -38,7 +37,10 @@ const METRIC_TO_DOMAIN: Record<string, ReportCapabilityDomain> = {
   activation: 'daily',
   register: 'daily',
   payment: 'daily',
+  first_day_payment: 'daily',
+  valid: 'daily',
   revenue: 'daily',
+  discounted_cost: 'daily',
   arppu: 'daily',
 
   // ROI 域
@@ -66,7 +68,7 @@ const METRIC_TO_DOMAIN: Record<string, ReportCapabilityDomain> = {
  * 域到指标的映射（反向查找用）
  */
 const DOMAIN_TO_METRICS: Record<ReportCapabilityDomain, string[]> = {
-  daily: ['cost', 'activation', 'register', 'payment', 'revenue', 'arppu', 'first_day_paid_account_cutoff_hour'],
+  daily: ['cost', 'activation', 'register', 'payment', 'first_day_payment', 'valid', 'revenue', 'discounted_cost', 'arppu', 'first_day_paid_account_cutoff_hour'],
   roi: ['roi', 'roas', 'roi_day', 'roi_week', 'roi_month', 'roi_cumulative'],
   retention: ['retention_d1', 'retention_d7', 'retention_d30', 'retention_device', 'retention_register', 'retention_pay_d1'],
   weekly: [],
@@ -82,7 +84,7 @@ const DOMAIN_TO_METRICS: Record<ReportCapabilityDomain, string[]> = {
  * 常见指标别名映射。
  * 用户说"消耗" → cost, "ROI" → roi, "次留" → retention_d1 等
  */
-const METRIC_ALIASES: Record<string, BusinessMetric> = {
+const METRIC_ALIASES: Record<string, string> = {
   '消耗': 'cost',
   '花费': 'cost',
   'cost': 'cost',
@@ -93,8 +95,11 @@ const METRIC_ALIASES: Record<string, BusinessMetric> = {
   'register': 'register',
   '付费': 'payment',
   'payment': 'payment',
+  '首日付费': 'first_day_payment',
+  '有效': 'valid',
   '收入': 'revenue',
   'revenue': 'revenue',
+  '折后消耗': 'discounted_cost',
   'roi': 'roi',
   'ROI': 'roi',
   'roas': 'roas',
@@ -124,12 +129,15 @@ const METRIC_KEY_ALIASES: Record<string, string> = {
 const TEXT_METRIC_PATTERNS: Array<{ pattern: RegExp; metric: string }> = [
   { pattern: /激活/, metric: 'activation' },
   { pattern: /注册(?!留存)/, metric: 'register' },
+  { pattern: /首日付费数|首日付费人数(?!留存)|首日付费用户数/, metric: 'first_day_payment' },
   { pattern: /付费(?!留存|账号)/, metric: 'payment' },
+  { pattern: /有效数|有效用户|有效人数/, metric: 'valid' },
+  { pattern: /折后消耗|折后花费|现金消耗|现金花费/, metric: 'discounted_cost' },
   { pattern: /消耗|花费|成本/, metric: 'cost' },
   { pattern: /roi|roas/i, metric: 'roi' },
   { pattern: /累计\d+(?:日|天|周|月)?roi/i, metric: 'roi_cumulative' },
   { pattern: /\d+(?:日|天|周|月)?累计roi/i, metric: 'roi_cumulative' },
-  { pattern: /(?:^|[^第])\d+(?:日|天|周|月)roi/i, metric: 'roi_cumulative' },
+  { pattern: /\d{1,3}(?:日|天)(?!累计)roi/i, metric: 'roi_day' },
   { pattern: /第\d+(?:日|天)roi/i, metric: 'roi_day' },
   { pattern: /\d+周roi|第\d+周roi/i, metric: 'roi_week' },
   { pattern: /\d+月roi|第\d+月roi/i, metric: 'roi_month' },
@@ -149,6 +157,10 @@ const TEXT_DIMENSION_PATTERNS: Array<{ pattern: RegExp; dimension: string }> = [
 ];
 
 const METRIC_EXTRA_INPUTS: Record<string, Record<string, unknown>> = {
+  roi_cumulative: { dataType: 'total' },
+  roi_day: { dataType: 'section' },
+  roi_week: { dataType: 'section' },
+  roi_month: { dataType: 'section' },
   retention_device: { retentionType: 'DEVICE_RETENTION' },
   retention_register: { retentionType: 'REG_RETENTION' },
   retention_pay_d1: { retentionType: 'PAY_D1_RETENTION' },
@@ -157,6 +169,15 @@ const METRIC_EXTRA_INPUTS: Record<string, Record<string, unknown>> = {
 function metricExtraInputs(metric: string): Record<string, unknown> | undefined {
   return METRIC_EXTRA_INPUTS[metric];
 }
+
+type RequestedTimeSlice = {
+  key: 'day' | 'week' | 'month';
+  label: string;
+  timeType: 'DAY' | 'NATURAL_WEEK' | 'NATURAL_MONTH';
+  timeRange: { start: string; end: string };
+};
+
+const TIME_SLICE_DIMENSION = 'time_slice';
 
 function assignmentKey(capabilityId: string, metric: string): string {
   const extraInputs = metricExtraInputs(metric);
@@ -187,6 +208,10 @@ export function extractMetricKeysFromText(text: string): string[] {
     item.pattern.test(compact) && output.add(item.metric);
   }
   return Array.from(output);
+}
+
+export function hasMultipleTimeSliceRequest(text: string): boolean {
+  return extractRequestedTimeSlices(text).length > 1;
 }
 
 export function canonicalDimensionKey(raw: string): string {
@@ -292,7 +317,7 @@ export function resolveDimensionKey(raw: string): string {
 
 function supportsDimension(supportedDimensions: string[], dimension: string): boolean {
   const required = canonicalDimensionKey(dimension);
-  return supportedDimensions.some(item => canonicalDimensionKey(item) === required);
+  return supportedDimensions.map(canonicalDimensionKey).indexOf(required) >= 0;
 }
 
 // ─── Tool Selection ────────────────────────────────────────
@@ -330,8 +355,11 @@ export function selectToolsForQuery(
     }
 
     // 在维度合格的工具中，找 domain 匹配的工具
-    const matchingTool = dimensionCapable
-      .filter(cap => cap.report_domains.includes(targetDomain))
+    const domainCapable: ReportToolCapability[] = [];
+    for (const cap of dimensionCapable) {
+      cap.report_domains.indexOf(targetDomain) >= 0 ? domainCapable.push(cap) : undefined;
+    }
+    const matchingTool = domainCapable
       .sort((a, b) => domainAffinityScore(b, targetDomain) - domainAffinityScore(a, targetDomain))[0];
 
     if (!matchingTool) {
@@ -364,9 +392,10 @@ export function selectToolsForQuery(
     }
   }
   const normalizedSupportedDims = new Set(Array.from(allSupportedDims).map(canonicalDimensionKey));
-  const uncoveredDimensions = requiredDimensions.filter(
-    dim => !normalizedSupportedDims.has(canonicalDimensionKey(dim)),
-  );
+  const uncoveredDimensions: string[] = [];
+  for (const dim of requiredDimensions) {
+    normalizedSupportedDims.has(canonicalDimensionKey(dim)) ? undefined : uncoveredDimensions.push(dim);
+  }
 
   const selectedCapabilities = Array.from(selectedMap.values());
 
@@ -378,6 +407,85 @@ export function selectToolsForQuery(
       ? `Selected ${selectedCapabilities.length} tool(s) covering ${requiredMetrics.length - uncoveredMetrics.length}/${requiredMetrics.length} metrics`
       : 'No tool can cover all required dimensions',
   };
+}
+
+export function extractRequestedTimeSlices(text: string, fallbackTimeRange?: { start: string; end: string }): RequestedTimeSlice[] {
+  const compact = String(text || '').replace(/\s+/g, '');
+  const anchor = extractAnchorDate(compact, fallbackTimeRange);
+  const sliceKeys: RequestedTimeSlice['key'][] = [];
+  /日报|日数据|当天|当日/.test(compact) && sliceKeys.push('day');
+  /所在周|那一周|自然周|本周/.test(compact) && sliceKeys.push('week');
+  /所在月|那一月|自然月|本月/.test(compact) && sliceKeys.push('month');
+  const uniqueKeys = Array.from(new Set(sliceKeys));
+  return anchor && uniqueKeys.length > 1
+    ? uniqueKeys.map(key => buildTimeSlice(key, anchor))
+    : [];
+}
+
+function extractAnchorDate(text: string, fallbackTimeRange?: { start: string; end: string }): string | null {
+  const matchers: Array<[RegExp, (match: RegExpExecArray) => string]> = [
+    [/(?:^|[^0-9])(\d{4})(\d{2})(\d{2})(?:[^0-9]|$)/, match => `${match[1]}-${match[2]}-${match[3]}`],
+    [/(\d{4})-(\d{2})-(\d{2})/, match => match[0]],
+    [/(\d{4})年(\d{1,2})月(\d{1,2})[日号]?/, match => `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`],
+  ];
+  for (const [pattern, format] of matchers) {
+    const match = pattern.exec(text);
+    if (match) return format(match);
+  }
+  return fallbackTimeRange && fallbackTimeRange.start === fallbackTimeRange.end ? fallbackTimeRange.start : null;
+}
+
+function buildTimeSlice(key: RequestedTimeSlice['key'], anchor: string): RequestedTimeSlice {
+  const date = parseUtcDate(anchor);
+  const labels: Record<RequestedTimeSlice['key'], string> = {
+    day: '日报',
+    week: '所在周',
+    month: '所在月',
+  };
+  const timeTypes: Record<RequestedTimeSlice['key'], RequestedTimeSlice['timeType']> = {
+    day: 'DAY',
+    week: 'NATURAL_WEEK',
+    month: 'NATURAL_MONTH',
+  };
+  return {
+    key,
+    label: labels[key],
+    timeType: timeTypes[key],
+    timeRange: key === 'day'
+      ? { start: anchor, end: anchor }
+      : key === 'week'
+        ? weekRange(date)
+        : monthRange(date),
+  };
+}
+
+function parseUtcDate(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatUtcDate(value: Date): string {
+  return value.toISOString().slice(0, 10);
+}
+
+function addUtcDays(value: Date, days: number): Date {
+  const next = new Date(value.getTime());
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function weekRange(date: Date): { start: string; end: string } {
+  const day = date.getUTCDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const start = addUtcDays(date, mondayOffset);
+  const end = addUtcDays(start, 6);
+  return { start: formatUtcDate(start), end: formatUtcDate(end) };
+}
+
+function monthRange(date: Date): { start: string; end: string } {
+  const start = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+  return { start: formatUtcDate(start), end: formatUtcDate(end) };
 }
 
 // ─── Query Decomposition ──────────────────────────────────
@@ -403,6 +511,10 @@ export function decomposeQuery(params: {
   const startTime = Date.now();
 
   const { originalQuery, metrics, dimensions, capabilities, filters, timeRange } = params;
+  const requestedTimeSlices = extractRequestedTimeSlices(originalQuery, timeRange);
+  const decompositionDimensions = requestedTimeSlices.length > 1
+    ? Array.from(new Set([...dimensions, TIME_SLICE_DIMENSION]))
+    : dimensions;
 
   // 1. 工具选择
   const selection = selectToolsForQuery(
@@ -411,18 +523,31 @@ export function decomposeQuery(params: {
   );
 
   // 2. 为每个选中的工具生成 SubQuery
-  const subQueries: SubQuery[] = selection.selectedCapabilities.map(cap =>
+  const buildSubQuery = (cap: SelectedCapability, slice?: RequestedTimeSlice) =>
     createSubQuery({
       toolName: cap.toolName,
       serverName: cap.serverName,
       capabilityId: cap.capabilityId,
       metrics: cap.assignedMetrics,
-      dimensions: dimensions, // 所有子查询共享同一组维度
+      dimensions,
       filters,
-      timeRange,
-      extraInputs: cap.assignedMetrics.reduce((acc, metric) => ({ ...acc, ...metricExtraInputs(metric) }), {} as Record<string, unknown>),
-    }),
-  );
+      timeRange: slice?.timeRange || timeRange,
+      extraInputs: {
+        ...cap.assignedMetrics.reduce((acc, metric) => ({ ...acc, ...metricExtraInputs(metric) }), {} as Record<string, unknown>),
+        ...(slice ? {
+          timeType: slice.timeType,
+          timeSlice: slice.key,
+          timeSliceLabel: slice.label,
+          startDate: slice.timeRange.start,
+          endDate: slice.timeRange.end,
+          start_date: slice.timeRange.start,
+          end_date: slice.timeRange.end,
+        } : {}),
+      },
+    });
+  const subQueries: SubQuery[] = requestedTimeSlices.length > 1
+    ? requestedTimeSlices.flatMap(slice => selection.selectedCapabilities.map(cap => buildSubQuery(cap, slice)))
+    : selection.selectedCapabilities.map(cap => buildSubQuery(cap));
 
   const confidence = selection.uncoveredMetrics.length === 0
     ? 0.9
@@ -430,7 +555,7 @@ export function decomposeQuery(params: {
 
   return {
     originalQuery,
-    requiredDimensions: dimensions,
+    requiredDimensions: decompositionDimensions,
     requiredMetrics: metrics,
     subQueries,
     confidence,
