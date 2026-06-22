@@ -7,9 +7,14 @@ import './lib/load-env.js';
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { initializeDatabase, closeDatabase } from './lib/database.js';
 import { createApiRouter } from './routes/index.js';
 import { getScheduler } from './lib/scheduler.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 初始化数据库
 initializeDatabase();
@@ -21,26 +26,9 @@ const PORT = parseInt(process.env.PORT || '8003', 10);
 app.use(cors());
 app.use(express.json());
 
-// 根路由
-app.get('/', (req, res) => {
-  const scheduler = getScheduler();
-  const schedulerStatus = scheduler.getStatus();
-
-  res.json({
-    name: '游戏内参 Game Insider',
-    shortName: 'GI',
-    version: '0.4.0',
-    description: '游戏行业情报信号源平台',
-    scheduler: schedulerStatus,
-    endpoints: {
-      sources: '/api/v1/sources',
-      seeds: '/api/v1/seeds',
-      evidence: '/api/v1/evidence',
-      collection: '/api/v1/collection',
-      extraction: '/api/v1/extraction',
-      system: '/api/v1/system',
-    },
-  });
+// 根路由（前端入口）
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // 健康检查
@@ -51,8 +39,21 @@ app.get('/health', (req, res) => {
 // API v1 路由
 app.use('/api/v1', createApiRouter());
 
-// 404 处理
-app.use((req, res) => {
+// 前端静态文件服务
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// SPA 路由：所有非 API 路由返回 index.html
+app.get('*', (req, res, next) => {
+  // 跳过 API 路径
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// 404 处理（仅 API 路径）
+app.use('/api/*', (req, res) => {
   res.status(404).json({
     error: {
       code: 'NOT_FOUND',
@@ -74,7 +75,8 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`GI (游戏内参) server running on port ${PORT}`);
-  console.log(`API 文档: http://localhost:${PORT}/`);
+  console.log(`前端界面: http://localhost:${PORT}/`);
+  console.log(`API 文档: http://localhost:${PORT}/api/v1/`);
 
   // 启动调度器
   const scheduler = getScheduler();

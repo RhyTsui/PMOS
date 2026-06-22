@@ -8,7 +8,6 @@ import api from '../services/api';
 import FeedbackDialog from '../components/FeedbackDialog';
 
 const { Search } = Input;
-const { TabPane } = Tabs;
 
 interface Source {
   id: string;
@@ -20,7 +19,7 @@ interface Source {
   feedUrl?: string;
   enabled: boolean;
   priority: string;
-  tags: string[];
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -30,12 +29,12 @@ interface Seed {
   seedType: string;
   text: string;
   entityType?: string;
-  aliases: string[];
+  aliases?: string[];
   category?: string;
   market?: string;
   score: number;
   status: string;
-  tags: string[];
+  tags?: string[];
   discoveryCount: number;
   failCount: number;
   lastUsedAt?: string;
@@ -63,7 +62,7 @@ export default function SourcesPage() {
     setLoading(true);
     try {
       const response = await api.get('/sources?limit=1000');
-      setSources(response.data);
+      setSources(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Failed to load sources:', error);
       message.error('加载信源失败');
@@ -80,7 +79,7 @@ export default function SourcesPage() {
         params.append('seedType', seedTypeFilter);
       }
       const response = await api.get(`/seeds?${params}`);
-      setSeeds(response.data);
+      setSeeds(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Failed to load seeds:', error);
       message.error('加载种子失败');
@@ -94,17 +93,17 @@ export default function SourcesPage() {
     setFeedbackDialogVisible(true);
   };
 
-  const filteredSources = sources.filter(s =>
+  const filteredSources = (Array.isArray(sources) ? sources : []).filter(s =>
     s.name.toLowerCase().includes(sourceSearch.toLowerCase()) ||
     s.shortName.toLowerCase().includes(sourceSearch.toLowerCase()) ||
-    s.tags.some(tag => tag.toLowerCase().includes(sourceSearch.toLowerCase()))
+    (s.tags || []).some(tag => tag.toLowerCase().includes(sourceSearch.toLowerCase()))
   );
 
-  const filteredSeeds = seeds.filter(s =>
+  const filteredSeeds = (Array.isArray(seeds) ? seeds : []).filter(s =>
     s.text.toLowerCase().includes(seedSearch.toLowerCase()) ||
-    s.aliases.some(alias => alias.toLowerCase().includes(seedSearch.toLowerCase())) ||
+    (s.aliases || []).some(alias => alias.toLowerCase().includes(seedSearch.toLowerCase())) ||
     (s.category && s.category.toLowerCase().includes(seedSearch.toLowerCase())) ||
-    s.tags.some(tag => tag.toLowerCase().includes(seedSearch.toLowerCase()))
+    (s.tags || []).some(tag => tag.toLowerCase().includes(seedSearch.toLowerCase()))
   );
 
   const sourceColumns = [
@@ -182,12 +181,12 @@ export default function SourcesPage() {
       title: '标签',
       dataIndex: 'tags',
       key: 'tags',
-      render: (tags: string[]) => (
+      render: (tags: string[] | undefined) => (
         <Space size={[0, 4]} wrap>
-          {tags.slice(0, 3).map(tag => (
+          {(tags || []).slice(0, 3).map(tag => (
             <Tag key={tag} color="processing">{tag}</Tag>
           ))}
-          {tags.length > 3 && <Tag>+{tags.length - 3}</Tag>}
+          {(tags || []).length > 3 && <Tag>+{(tags || []).length - 3}</Tag>}
         </Space>
       ),
     },
@@ -238,12 +237,12 @@ export default function SourcesPage() {
       title: '别名',
       dataIndex: 'aliases',
       key: 'aliases',
-      render: (aliases: string[]) => (
+      render: (aliases: string[] | undefined) => (
         <Space size={[0, 4]} wrap>
-          {aliases.slice(0, 3).map(alias => (
+          {(aliases || []).slice(0, 3).map(alias => (
             <Tag key={alias} color="processing">{alias}</Tag>
           ))}
-          {aliases.length > 3 && <Tag>+{aliases.length - 3}</Tag>}
+          {(aliases || []).length > 3 && <Tag>+{(aliases || []).length - 3}</Tag>}
         </Space>
       ),
     },
@@ -306,12 +305,12 @@ export default function SourcesPage() {
       title: '标签',
       dataIndex: 'tags',
       key: 'tags',
-      render: (tags: string[]) => (
+      render: (tags: string[] | undefined) => (
         <Space size={[0, 4]} wrap>
-          {tags.slice(0, 3).map(tag => (
+          {(tags || []).slice(0, 3).map(tag => (
             <Tag key={tag} color="processing">{tag}</Tag>
           ))}
-          {tags.length > 3 && <Tag>+{tags.length - 3}</Tag>}
+          {(tags || []).length > 3 && <Tag>+{(tags || []).length - 3}</Tag>}
         </Space>
       ),
     },
@@ -336,70 +335,85 @@ export default function SourcesPage() {
           </Space>
         }
       >
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab={`情报源 (${filteredSources.length})`} key="sources">
-            <div style={{ marginBottom: 16 }}>
-              <Search
-                placeholder="搜索信源名称、简称、标签..."
-                value={sourceSearch}
-                onChange={e => setSourceSearch(e.target.value)}
-                style={{ width: 400 }}
-                allowClear
-              />
-            </div>
-            <Table
-              columns={sourceColumns}
-              dataSource={filteredSources}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 20,
-                showSizeChanger: true,
-                showTotal: total => `共 ${total} 条`,
-              }}
-              scroll={{ x: 1200 }}
-            />
-          </TabPane>
-
-          <TabPane tab={`种子 (${filteredSeeds.length})`} key="seeds">
-            <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
-              <Search
-                placeholder="搜索种子文本、别名、分类、标签..."
-                value={seedSearch}
-                onChange={e => setSeedSearch(e.target.value)}
-                style={{ width: 400 }}
-                allowClear
-              />
-              <Select
-                placeholder="按类型筛选"
-                value={seedTypeFilter}
-                onChange={value => {
-                  setSeedTypeFilter(value);
-                  setTimeout(loadSeeds, 0);
-                }}
-                style={{ width: 200 }}
-                allowClear
-              >
-                <Select.Option value="entity">实体</Select.Option>
-                <Select.Option value="event">事件</Select.Option>
-                <Select.Option value="topic">话题</Select.Option>
-                <Select.Option value="source">信源</Select.Option>
-              </Select>
-            </div>
-            <Table
-              columns={seedColumns}
-              dataSource={filteredSeeds}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 20,
-                showSizeChanger: true,
-                showTotal: total => `共 ${total} 条`,
-              }}
-              scroll={{ x: 1400 }}
-            />
-          </TabPane>
-        </Tabs>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'sources',
+              label: `情报源 (${filteredSources.length})`,
+              children: (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <Search
+                      placeholder="搜索信源名称、简称、标签..."
+                      value={sourceSearch}
+                      onChange={e => setSourceSearch(e.target.value)}
+                      style={{ width: 400 }}
+                      allowClear
+                    />
+                  </div>
+                  <Table
+                    columns={sourceColumns}
+                    dataSource={filteredSources}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={{
+                      pageSize: 20,
+                      showSizeChanger: true,
+                      showTotal: total => `共 ${total} 条`,
+                    }}
+                    scroll={{ x: 1200 }}
+                  />
+                </>
+              ),
+            },
+            {
+              key: 'seeds',
+              label: `种子 (${filteredSeeds.length})`,
+              children: (
+                <>
+                  <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
+                    <Search
+                      placeholder="搜索种子文本、别名、分类、标签..."
+                      value={seedSearch}
+                      onChange={e => setSeedSearch(e.target.value)}
+                      style={{ width: 400 }}
+                      allowClear
+                    />
+                    <Select
+                      placeholder="按类型筛选"
+                      value={seedTypeFilter}
+                      onChange={value => {
+                        setSeedTypeFilter(value);
+                        setTimeout(loadSeeds, 0);
+                      }}
+                      style={{ width: 200 }}
+                      allowClear
+                    >
+                      <Select.Option value="entity">实体</Select.Option>
+                      <Select.Option value="event">事件</Select.Option>
+                      <Select.Option value="topic">话题</Select.Option>
+                      <Select.Option value="source">信源</Select.Option>
+                    </Select>
+                  </div>
+                  <Table
+                    columns={seedColumns}
+                    dataSource={filteredSeeds}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={{
+                      pageSize: 20,
+                      showSizeChanger: true,
+                      showTotal: total => `共 ${total} 条`,
+                    }}
+                    scroll={{ x: 1400 }}
+                  />
+                </>
+              ),
+            },
+          ]}
+        />
       </Card>
 
       <FeedbackDialog
