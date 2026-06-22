@@ -630,3 +630,5 @@ export interface LLMProvider {
   createdAt: string;
   updatedAt: string;
 }
+export type KeywordExpansionSourceTypeInput = SourceType | 'wewe';
+
