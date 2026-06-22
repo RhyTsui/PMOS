@@ -6,25 +6,37 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { runMigrations } from '../db/migrate.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../data/gi.db');
+
+function resolveDatabasePath(): string {
+  return process.env.DB_PATH || path.join(__dirname, '../../data/gi.db');
+}
 
 let db: Database.Database | null = null;
+let activeDbPath: string | null = null;
 
 /**
  * 获取数据库实例（单例）
  */
 export function getDatabase(): Database.Database {
+  const dbPath = resolveDatabasePath();
+
+  if (db && activeDbPath !== dbPath) {
+    closeDatabase();
+  }
+
   if (!db) {
-    db = new Database(DB_PATH);
+    db = new Database(dbPath);
+    activeDbPath = dbPath;
 
     // 启用 WAL 模式（并发读写性能更好）
     db.pragma('journal_mode = WAL');
     // 启用外键约束
     db.pragma('foreign_keys = ON');
 
-    console.log(`[DB] 数据库已连接: ${DB_PATH}`);
+    console.log(`[DB] 数据库已连接: ${dbPath}`);
   }
   return db;
 }
@@ -36,6 +48,7 @@ export function closeDatabase(): void {
   if (db) {
     db.close();
     db = null;
+    activeDbPath = null;
     console.log('[DB] 数据库已关闭');
   }
 }
@@ -48,6 +61,7 @@ export function initializeDatabase(): void {
 
   // 执行建表 SQL
   db.exec(SCHEMA_SQL);
+  runMigrations(db);
 
   console.log('[DB] 数据库表结构初始化完成');
 }

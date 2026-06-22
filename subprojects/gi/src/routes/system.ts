@@ -2,7 +2,7 @@
  * 系统 API 路由
  */
 import { Router } from 'express';
-import { getScheduler } from '../lib/scheduler.js';
+import { getScheduler, validateSchedulerConfig, type SchedulerConfig } from '../lib/scheduler.js';
 
 const router = Router();
 
@@ -24,13 +24,52 @@ router.get('/status', (req, res) => {
 });
 
 /**
+ * GET /api/v1/system/settings/scheduler
+ * 获取持久化调度器配置
+ */
+router.get('/settings/scheduler', (_req, res) => {
+  const scheduler = getScheduler();
+  res.json({
+    data: {
+      config: scheduler.getConfig(),
+      status: scheduler.getStatus(),
+    },
+  });
+});
+
+/**
+ * PUT /api/v1/system/settings/scheduler
+ * 更新持久化调度器配置并热重载
+ */
+router.put('/settings/scheduler', (req, res) => {
+  const scheduler = getScheduler();
+
+  try {
+    const updates = parseSchedulerConfigUpdates(req.body);
+    const merged = { ...scheduler.getConfig(), ...updates };
+    validateSchedulerConfig(merged);
+    const config = scheduler.updateConfig(updates);
+
+    res.json({
+      data: {
+        config,
+        status: scheduler.getStatus(),
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(400).json({ error: { code: 'INVALID_SCHEDULER_CONFIG', message } });
+  }
+});
+
+/**
  * POST /api/v1/system/scheduler/start
  * 启动调度器
  */
 router.post('/scheduler/start', (req, res) => {
   const scheduler = getScheduler();
   scheduler.start();
-  res.json({ data: { success: true, message: '调度器已启动' } });
+  res.json({ data: { success: true, message: '调度器已启动', status: scheduler.getStatus() } });
 });
 
 /**
@@ -40,7 +79,7 @@ router.post('/scheduler/start', (req, res) => {
 router.post('/scheduler/stop', (req, res) => {
   const scheduler = getScheduler();
   scheduler.stop();
-  res.json({ data: { success: true, message: '调度器已停止' } });
+  res.json({ data: { success: true, message: '调度器已停止', status: scheduler.getStatus() } });
 });
 
 /**
@@ -69,5 +108,44 @@ router.post('/scheduler/trigger/:jobName', async (req, res) => {
     res.status(400).json({ error: { code: 'TRIGGER_FAILED', message } });
   }
 });
+
+function parseSchedulerConfigUpdates(body: unknown): Partial<SchedulerConfig> {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new Error('请求体必须是对象');
+  }
+
+  const input = body as Record<string, unknown>;
+  const updates: Partial<SchedulerConfig> = {};
+  const booleanFields = ['enabled', 'enableAutoCollection'] as const;
+  const cronFields = [
+    'healthCheckCron',
+    'evolutionCron',
+    'cleanupCron',
+    'gapDetectionCron',
+    'sourceDiscoveryCron',
+    'dailyReportCron',
+    'defaultCron',
+  ] as const;
+
+  for (const field of booleanFields) {
+    if (input[field] !== undefined) {
+      if (typeof input[field] !== 'boolean') {
+        throw new Error(`${field} 必须是 boolean`);
+      }
+      updates[field] = input[field];
+    }
+  }
+
+  for (const field of cronFields) {
+    if (input[field] !== undefined) {
+      if (typeof input[field] !== 'string') {
+        throw new Error(`${field} 必须是 string`);
+      }
+      updates[field] = input[field];
+    }
+  }
+
+  return updates;
+}
 
 export { router as systemRouter };
