@@ -24,8 +24,10 @@ export type {
 export { createStreamIO } from './stream-io';
 export { executeUnderstandingStage, type UnderstandingInput, type UnderstandingResult, type UnderstandingBlockedResult, type UnderstandingOutput } from './understanding-stage';
 export { executePublicWebStage } from './public-web-stage';
+export { executeGiIntelligenceStage, shouldEnterGiIntelligenceStage } from './gi-intelligence-stage';
 export { executeDiagnosisStage } from './diagnosis-stage';
 export { executePackageStage, shouldEnterPackageStage } from './package-stage';
 export { executeOpenAnswerStage } from './open-answer-stage';
 export { executeReportQueryStage } from './report-query-stage';
 export { executeMultiQueryStage, shouldEnterMultiQueryStage } from './multi-query-stage';
+export { executeAutomationStage } from './automation-stage';

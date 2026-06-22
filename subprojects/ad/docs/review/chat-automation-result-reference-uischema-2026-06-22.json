@@ -1,0 +1,48 @@
+{
+  "screenId": "xiaoqiao-chat-automation-result-reference",
+  "screenType": "chat-message-result-reference",
+  "layout": {
+    "desktop": "Message bubble inline reference card before answer content",
+    "mobile": "Single-column inline reference card with wrapped actions"
+  },
+  "regions": [
+    {
+      "id": "automation-result-reference",
+      "componentBinding": "attachments-inline-reference",
+      "purpose": "Show the result file already used by the assistant and let the user open it or continue analysis.",
+      "states": ["empty", "single-result", "multi-result", "missing-file-link"],
+      "sourceRefs": ["response_contract.metadata.automation_result_candidates", "message.metadata.automation_result_candidates"],
+      "evidenceRefs": ["automation-task-run-source-ref", "automation-task-evidence-ref"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "id": "current-chat-message-surface",
+      "title": "Existing ChatContainer message surface",
+      "path": "frontend/src/src/components/cognitive/ChatContainer.tsx"
+    },
+    {
+      "id": "automation-result-candidates",
+      "title": "Automation reusable result metadata",
+      "path": "frontend/src/src/lib/automation-result-reuse-store.ts"
+    }
+  ],
+  "evidenceRefs": [
+    "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md#ai-service-os-automation",
+    "docs/operations/ui-guardrail.md#component-contract"
+  ],
+  "lastUpdatedAt": "2026-06-22",
+  "recommendedActions": [
+    "Open referenced file",
+    "Continue analysis in the current conversation"
+  ],
+  "copyGuardrail": {
+    "userVisibleLanguage": [
+      "已引用最近一次自动化结果文件",
+      "打开文件",
+      "继续分析",
+      "条依据"
+    ],
+    "forbiddenEngineeringTerms": ["contract", "schema", "mock", "接口", "主链"]
+  }
+}

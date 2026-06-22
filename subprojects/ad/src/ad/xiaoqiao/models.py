@@ -65,6 +65,11 @@ class RoutingDecisionRecord(BaseModel):
     workflow_level: WorkflowLevel = "none"
     clarification_needed: bool = False
     decision_reason: str
+    source: str = "legacy_keyword_adapter"
+    decision_scope: str = "candidate_only"
+    deprecation_target: str | None = None
+    final_route_authority: str = "requires_arbitration"
+    matched_signal_groups: list[str] = Field(default_factory=list)
     created_at: datetime
 
 

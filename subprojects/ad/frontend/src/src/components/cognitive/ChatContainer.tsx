@@ -50,6 +50,8 @@ import { buildMessagePresentationResult, extractMessageContract, extractSemantic
 import { projectMessagePresentation, type ComposerRecommendation } from './message-presentation-projection';
 import { buildMessageDisclosureView } from './messageState';
 import { buildRuntimeDisclosurePresentation, type RuntimeDisclosurePresentation } from '@/contracts/disclosure/runtime-presentation';
+import { TaskMessageRenderer } from './task-cards/TaskMessageRenderer';
+import { DemandConfirmCard } from './DemandConfirmCard';
 import {
   MetricExplainerRenderer,
   isMetricExplainerUISchema,
@@ -1835,6 +1837,7 @@ function MessageSurface({
   onSubmitFollowUp?: (content: string) => void;
   onOpenDisclosure?: (message: Message) => void;
 }) {
+  const { message: antMessage } = App.useApp();
   const c = useThemeColors();
   const isAi = item.role === 'ai';
   const shellRadius = isAi ? c.chat.radius.message : c.chat.radius.section;
@@ -1863,6 +1866,70 @@ function MessageSurface({
       >
         <MarkdownRenderer content={visibleChatContent(item.content)} codeStyle={codeStyle} showLineNumbers={showLineNumbers} />
       </section>
+    );
+  }
+
+  // ─── Chat-first Task Center: 任务消息分发 ───
+  const taskMessageType = item.rawMessage.message_type;
+  if (
+    taskMessageType === 'task_proposal'
+    || taskMessageType === 'task_created'
+    || taskMessageType === 'task_updated'
+    || taskMessageType === 'task_paused'
+    || taskMessageType === 'task_resumed'
+    || taskMessageType === 'task_deleted'
+    || taskMessageType === 'task_run_completed'
+    || taskMessageType === 'task_run_failed'
+    || taskMessageType === 'task_run_skipped'
+    || taskMessageType === 'task_needs_action'
+  ) {
+    return (
+      <TaskMessageRenderer
+        message={item.rawMessage}
+        onSubmitFollowUp={onSubmitFollowUp}
+        onOpenDisclosure={onOpenDisclosure}
+      />
+    );
+  }
+
+  // ─── P2: Demand Intake 确认卡 ───
+  const demandConfirmCard = item.rawMessage.metadata?.demand_confirm_card;
+  if (demandConfirmCard && typeof demandConfirmCard === 'object') {
+    return (
+      <DemandConfirmCard
+        card={demandConfirmCard as any}
+        onConfirm={async () => {
+          try {
+            const response = await fetch('/api/xiaoqiao/admin/demand-pool', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                intakeDraft: (demandConfirmCard as any).structured,
+                caseId: item.rawMessage.metadata?.case_id,
+                conversationId: item.rawMessage.conversation_id,
+                evidenceRefs: item.rawMessage.metadata?.evidence_refs || [],
+                sourceRefs: item.rawMessage.metadata?.source_refs || [],
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              antMessage.success(`需求单 ${result.item.id} 已创建`);
+            } else {
+              antMessage.error(`创建失败: ${result.error || '未知错误'}`);
+            }
+          } catch (error) {
+            console.error('[demand-confirm] create failed:', error);
+            antMessage.error('创建需求单失败，请稍后重试');
+          }
+        }}
+        onEdit={() => {
+          // TODO: 实现编辑回调，返回编辑模式
+          antMessage.info('编辑功能待实现');
+        }}
+        canConfirm={true}
+      />
     );
   }
 

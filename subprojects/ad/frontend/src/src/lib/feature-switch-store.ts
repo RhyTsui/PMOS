@@ -9,9 +9,16 @@ export interface AdminFeatureSwitch {
   enabled: boolean;
   config: Record<string, unknown>;
   description: string;
+  scope: 'global' | 'role' | 'environment' | 'runtime';
+  runtimeBinding: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  owner: string;
+  updatedAt: string;
+  configVersion: string;
+  checksum: string;
 }
 
-const DEFAULT_SWITCHES: AdminFeatureSwitch[] = [
+const DEFAULT_SWITCHES: Array<Partial<AdminFeatureSwitch>> = [
   { key: 'auto_debug_full', name: '全自动联调开关', type: 'boolean', enabled: true, config: {}, description: '开启后联调任务自动执行，无需人工确认' },
   { key: 'auto_debug_takeover', name: '人工接管开关', type: 'boolean', enabled: true, config: {}, description: '允许在联调失败时由人工接管' },
   { key: 'evidence_auto_collect', name: '证据自动采集', type: 'boolean', enabled: true, config: {}, description: '自动采集排查所需日志和数据' },
@@ -33,13 +40,21 @@ interface SwitchesFile {
 }
 
 function normalizeSwitch(input: Partial<AdminFeatureSwitch>): AdminFeatureSwitch {
+  const key = input.key || 'switch-' + Date.now();
   return {
-    key: input.key || `switch-${Date.now()}`,
+    key,
     name: input.name || input.key || '未命名开关',
     type: input.type || 'boolean',
     enabled: Boolean(input.enabled),
     config: input.config || {},
     description: input.description || '',
+    scope: input.scope || 'runtime',
+    runtimeBinding: input.runtimeBinding || 'feature_flags.' + key,
+    riskLevel: input.riskLevel === 'low' || input.riskLevel === 'high' ? input.riskLevel : 'medium',
+    owner: input.owner || 'admin-control-plane',
+    updatedAt: input.updatedAt || new Date().toISOString(),
+    configVersion: input.configVersion || 'feature-switch/v1',
+    checksum: input.checksum || key + ':feature-switch/v1',
   };
 }
 
@@ -63,7 +78,10 @@ async function writeSwitchesFile(file: SwitchesFile): Promise<void> {
 
 export async function listFeatureSwitches(): Promise<AdminFeatureSwitch[]> {
   const file = await readSwitchesFile();
-  const byKey = new Map(DEFAULT_SWITCHES.map(item => [item.key, item]));
+  const byKey = new Map(DEFAULT_SWITCHES.map(item => {
+    const normalized = normalizeSwitch(item);
+    return [normalized.key, normalized] as const;
+  }));
   for (const item of file.switches) byKey.set(item.key, normalizeSwitch(item));
   const merged = [...byKey.values()];
   await writeSwitchesFile({ switches: merged });

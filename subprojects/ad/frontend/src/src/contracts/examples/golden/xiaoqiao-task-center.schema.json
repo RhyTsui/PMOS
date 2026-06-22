@@ -1,0 +1,125 @@
+{
+  "screenId": "xiaoqiao-task-center",
+  "screenType": "ai-task-center",
+  "title": "自动任务",
+  "lastUpdatedAt": "2026-06-22",
+  "layout": {
+    "desktop": {
+      "shell": "workspace-surface",
+      "content": "task-list-run-records-template-gallery",
+      "taskCard": "multi-column-row"
+    },
+    "mobile": {
+      "shell": "workspace-surface",
+      "content": "single-column-task-cards",
+      "stackOrder": ["headerActions", "tabs", "taskCards", "runRecords", "templates"],
+      "overflowPolicy": "actions-wrap-without-title-overlap"
+    }
+  },
+  "regions": [
+    {
+      "id": "headerActions",
+      "componentBinding": "task-center-header-actions",
+      "purpose": "提供从本次结果创建、在对话中创建和手动新建的入口。",
+      "states": ["ready", "disabledWithoutResult"]
+    },
+    {
+      "id": "taskTabs",
+      "componentBinding": "task-center-tabs",
+      "purpose": "在已配置任务、运行记录和模板之间切换。",
+      "states": ["configured", "runs", "templates"]
+    },
+    {
+      "id": "configuredTasks",
+      "componentBinding": "automation-task-list",
+      "purpose": "展示任务名称、说明、下次运行、最近结果、状态和可执行动作。",
+      "states": ["loading", "empty", "ready", "error"]
+    },
+    {
+      "id": "runRecords",
+      "componentBinding": "automation-run-record-list",
+      "purpose": "展示运行摘要、结果文件、可带回对话标记和依据数量。",
+      "states": ["empty", "ready"]
+    },
+    {
+      "id": "templates",
+      "componentBinding": "automation-template-gallery",
+      "purpose": "帮助用户从常见任务模板创建自动任务。",
+      "states": ["empty", "ready"]
+    },
+    {
+      "id": "taskActions",
+      "componentBinding": "task-action-buttons",
+      "purpose": "运行、暂停、开启和修改任务；移动端动作换行但不遮挡关键信息。",
+      "states": ["run", "pause", "resume", "edit", "disabled"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "type": "architecture",
+      "path": "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
+      "note": "Task Center 属于 AI Service OS 的用户可见任务承接面。"
+    },
+    {
+      "type": "guardrail",
+      "path": "docs/operations/ui-guardrail.md",
+      "note": "任务列表必须服务于明确任务和下一步动作，不做静态后台浏览。"
+    },
+    {
+      "type": "domain-contract",
+      "path": "docs/architecture/automation/automation-task-protocol.md",
+      "note": "自动任务必须有运行记录、证据引用、结果入口和复用策略。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/automation-center-uischema-2026-06-02.json",
+      "note": "已有自动任务中心 UISchema 作为历史基准。"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "task-center-component",
+      "path": "frontend/src/src/components/workspace/AutomationCenter.tsx",
+      "note": "自动任务、运行记录和模板的用户可见组件。"
+    },
+    {
+      "id": "task-api-loading",
+      "path": "frontend/src/src/app/page.tsx",
+      "note": "任务、模板、未读和运行记录读取逻辑。"
+    },
+    {
+      "id": "task-contract-types",
+      "path": "frontend/src/src/contracts/automation/automation-task.ts",
+      "note": "任务状态、执行结果和复用字段的契约来源。"
+    }
+  ],
+  "recommendedActions": [
+    {
+      "id": "create-from-current-result",
+      "label": "用本次结果创建",
+      "target": "headerActions"
+    },
+    {
+      "id": "create-in-chat",
+      "label": "在对话中创建",
+      "target": "headerActions"
+    },
+    {
+      "id": "open-run-result",
+      "label": "查看运行结果",
+      "target": "runRecords"
+    },
+    {
+      "id": "reuse-result-in-chat",
+      "label": "带回对话继续处理",
+      "target": "runRecords"
+    }
+  ],
+  "acceptance": {
+    "noTraditionalDashboardShell": true,
+    "noEngineeringJargonInUserCopy": true,
+    "noBusinessKeywordRoutingInUi": true,
+    "supportsMobileStacking": true,
+    "coversLoadingErrorEmptyPermission": true
+  }
+}

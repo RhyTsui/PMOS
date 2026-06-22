@@ -1,0 +1,93 @@
+{
+  "timestamp": "2026-06-22T06:52:08.909Z",
+  "selectedCaseIds": null,
+  "selectedExcelRows": [
+    20
+  ],
+  "currentProjectOverride": null,
+  "total": 1,
+  "passCount": 0,
+  "failCount": 0,
+  "blockedCount": 1,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-22T06:52:08.909Z",
+    "guardMb": 3072,
+    "pids": [
+      40696
+    ],
+    "processes": [
+      {
+        "pid": 40696,
+        "workingSetMb": 368
+      }
+    ],
+    "maxWorkingSetMb": 368
+  },
+  "memoryPeakMb": 368,
+  "memorySamples": [
+    {
+      "phase": "block_all",
+      "caseId": "R20-MIG-004-广告报表-日期识别-DATE-F001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T06:52:08.535Z",
+      "guardMb": 3072,
+      "pids": [
+        40696
+      ],
+      "processes": [
+        {
+          "pid": 40696,
+          "workingSetMb": 368
+        }
+      ],
+      "maxWorkingSetMb": 368
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T06:52:08.909Z",
+      "guardMb": 3072,
+      "pids": [
+        40696
+      ],
+      "processes": [
+        {
+          "pid": 40696,
+          "workingSetMb": 368
+        }
+      ],
+      "maxWorkingSetMb": 368
+    }
+  ],
+  "results": [
+    {
+      "excelRow": 20,
+      "caseKey": "R20-MIG-004-广告报表-日期识别-DATE-F001",
+      "caseId": "MIG-004",
+      "scene": "广告报表-日期识别-DATE-F001",
+      "prompt": "指间山海2026-03-25日报中，查询广告投放部 各媒体激活数、注册数和消耗",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量：激活126 注册106 消耗115000 tap: 激活71，注册64，消耗7010.83\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：日报+媒体+团队",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-22T06:52:08.535Z",
+        "guardMb": 3072,
+        "pids": [
+          40696
+        ],
+        "processes": [
+          {
+            "pid": 40696,
+            "workingSetMb": 368
+          }
+        ],
+        "maxWorkingSetMb": 368
+      }
+    }
+  ]
+}

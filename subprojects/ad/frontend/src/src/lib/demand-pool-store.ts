@@ -34,6 +34,21 @@ function normalizeItem(input: Partial<DemandPoolItem>): DemandPoolItem {
     owner: input.owner?.trim() || 'user-001',
     created_at: input.created_at || now,
     updated_at: input.updated_at || now,
+    // P1: Demand Intake 关联字段（可选）
+    caseId: input.caseId,
+    conversationId: input.conversationId,
+    messageId: input.messageId,
+    serviceType: input.serviceType,
+    intakeDraftStatus: input.intakeDraftStatus,
+    intakeSlots: input.intakeSlots,
+    intakeMissingInputs: input.intakeMissingInputs,
+    intakeArtifacts: input.intakeArtifacts,
+    intakeRiskWarnings: input.intakeRiskWarnings,
+    originalMessageSummary: input.originalMessageSummary,
+    confirmedAt: input.confirmedAt,
+    submittedAt: input.submittedAt,
+    evidenceRefs: input.evidenceRefs,
+    sourceRefs: input.sourceRefs,
   };
 }
 

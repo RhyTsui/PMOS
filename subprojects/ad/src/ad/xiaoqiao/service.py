@@ -534,13 +534,24 @@ def post_message(conversation_id: str, payload: MessageCreateRequest) -> Message
         workflow_level=route.workflow_level,
         clarification_needed=route.clarification_needed,
         decision_reason=route.decision_reason,
+        source=route.source,
+        decision_scope=route.decision_scope,
+        deprecation_target=route.deprecation_target,
+        final_route_authority=route.final_route_authority,
+        matched_signal_groups=list(route.matched_signal_groups),
         created_at=_now(),
     )
     STORE.routings[routing.id] = routing
     STORE.conversation_routings[conversation_id].append(routing.id)
 
     task = None
-    if routing.is_business_related and routing.intent_type and routing.workflow_level in ("light", "heavy"):
+    if (
+        routing.is_business_related
+        and routing.intent_type
+        and routing.workflow_level in ("light", "heavy")
+        and routing.final_route_authority == "execution_authorized"
+        and routing.decision_scope != "candidate_only"
+    ):
         task = _create_task(conversation_id, message.id, routing.intent_type, routing.workflow_level)
         _create_task_context(task, payload.attachments, routing.clarification_needed)
         _create_result(task, payload.content)

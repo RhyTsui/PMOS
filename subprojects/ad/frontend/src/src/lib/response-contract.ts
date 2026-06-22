@@ -479,6 +479,16 @@ export function buildResponseContract(params: {
     tool_call_trace: toolCallTrace,
     disclaimers: safetyResult.safety.disclaimers,
     contract_safety: safetyResult.safety,
+    candidate_source: readString(params.metadata?.candidate_source),
+    final_route_decision: isRecord(params.metadata?.final_route_decision)
+      ? params.metadata.final_route_decision
+      : isRecord(params.metadata?.arbitrated_route)
+        ? params.metadata.arbitrated_route
+        : undefined,
+    execution_decision: readString(params.metadata?.execution_decision),
+    fallback_reason: readString(params.metadata?.fallback_reason),
+    evidence_ids: evidenceRefs,
+    contract_safety_trace_ref: params.traceId ? `contract_safety:${params.traceId}` : undefined,
     next_actions: nextActions,
     answer_origin: params.answerOrigin,
     metadata: params.metadata,

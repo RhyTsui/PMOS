@@ -177,6 +177,16 @@ export async function emitChatMessageTrace(args: {
     route_reason: args.routeReason,
     final_answer: args.finalAnswer ? truncate(args.finalAnswer, 1000) : undefined,
     ...args.extra,
+    candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null,
+    final_route_decision: args.extra?.final_route_decision || args.extra?.arbitrated_route || args.extra?.arbitration_summary || null,
+    execution_decision: args.extra?.execution_decision || args.extra?.capability_decision || null,
+    fallback_reason: args.extra?.fallback_reason || null,
+    evidence_ids: args.extra?.evidence_ids || args.extra?.evidence_refs || null,
+    contract_safety: args.extra?.contract_safety || (
+      args.extra?.response_contract && typeof args.extra.response_contract === 'object'
+        ? (args.extra.response_contract as Record<string, unknown>).contract_safety
+        : null
+    ),
     trace_url: traceUrl,
   };
 
@@ -230,14 +240,14 @@ export async function emitChatMessageTrace(args: {
       safeSetOutput(span, output);
 
       const projectedSpans = [
-        { name: 'agent.intent_route', input: { route_reason: args.routeReason, intent_type: args.intentType }, output: { intent_type: args.intentType, conversation_id: args.conversationId } },
+        { name: 'agent.intent_route', input: { route_reason: args.routeReason, intent_type: args.intentType, candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null }, output: { intent_type: args.intentType, conversation_id: args.conversationId, route_candidate_only: args.extra?.route_candidate_only || null } },
         { name: 'agent.prompt_resolve', input: { prompt_config: args.runtimeProjection?.prompt_hits || args.extra?.prompt_config || {}, prompt_runtime_policy: args.extra?.prompt_runtime_policy || {} }, output: { prompt_hits: args.runtimeProjection?.prompt_hits || [], trace_url: traceUrl } },
         { name: 'agent.context_prepare', input: { conversation_id: args.conversationId, task_id: args.taskId, run_id: args.runId }, output: { compiled_context: args.extra?.compiled_context || null, project_context_summary: args.extra?.project_context_summary || null } },
-        { name: 'agent.plan_arbitration', input: { planner_candidates: args.extra?.planner_candidates || args.extra?.reasoning_artifacts || null }, output: { arbitration_summary: args.extra?.arbitration_summary || args.extra?.info_source_arbitration || null, trace_url: traceUrl } },
+        { name: 'agent.plan_arbitration', input: { planner_candidates: args.extra?.planner_candidates || args.extra?.reasoning_artifacts || null, candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null }, output: { arbitration_summary: args.extra?.arbitration_summary || args.extra?.info_source_arbitration || args.extra?.final_route_decision || null, arbitration_rule_id: args.extra?.arbitration_rule_id || null, fallback_reason: args.extra?.fallback_reason || null, trace_url: traceUrl } },
         { name: 'agent.query_plan', input: { query_plan: args.extra?.query_plan || args.runtimeProjection?.query_plan_summary || {}, selected_tool: args.runtimeProjection?.query_plan_summary?.selected_tool }, output: { selection_trace: args.extra?.selection_trace || null, resolved_filters: args.extra?.resolved_filters || null, trace_url: traceUrl } },
         { name: 'agent.answer_compose', input: { final_answer: args.finalAnswer ? truncate(args.finalAnswer, 1000) : '', status: args.status }, output: { final_answer: args.finalAnswer ? truncate(args.finalAnswer, 1000) : '', trace_url: traceUrl } },
         { name: 'agent.view_model_build', input: { message_contract: args.extra?.message_contract || null, semantic_result: args.extra?.semantic_result || null }, output: args.runtimeProjection?.view_model_summary || { status: args.status, trace_url: traceUrl } },
-        { name: 'agent.render_contract_validate', input: { render_consumption: args.runtimeProjection?.render_consumption || [] }, output: { quality_checks: args.runtimeProjection?.quality_checks || [], trace_url: traceUrl } },
+        { name: 'agent.render_contract_validate', input: { render_consumption: args.runtimeProjection?.render_consumption || [], contract_safety: args.extra?.contract_safety || null }, output: { quality_checks: args.runtimeProjection?.quality_checks || [], evidence_ids: args.extra?.evidence_ids || args.extra?.evidence_refs || null, trace_url: traceUrl } },
       ];
 
       for (const stage of projectedSpans) {

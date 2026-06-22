@@ -4,6 +4,7 @@ export interface ParsedDateRange {
   period_type: 'day' | 'week' | 'month' | 'hour';
   is_explicit: boolean;
   requested_days?: number;
+  invalid_reason?: string;
 }
 
 function formatDate(date: Date): string {

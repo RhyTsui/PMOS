@@ -39,6 +39,7 @@ import { deriveRequestRouteDecision } from '@/lib/request-understanding';
 import { getActiveCaseFrame, createCaseFrame } from '@/lib/case-frame-store';
 import { addMessageId, updateBusinessContext } from '@/lib/case-frame-helpers';
 import { hasInternalBusinessContext, shouldUsePublicWebBeforeAuth } from './auth-public-web-deferral';
+import { detectAutomationIntent, isAutomationIntent } from '@/lib/automation-intent-router';
 import type { StreamIO } from './pipeline-types';
 
 // ─── 输入类型 ─────────────────────────────────────────────
@@ -180,6 +181,11 @@ export async function executeUnderstandingStage(
     || userRequirement.task === 'diagnosis'
     || AUTH_REQUIRED_SERVICE_INTENTS.has(earlyServiceIntent)
   );
+  const automationPreflightIntent = detectAutomationIntent({
+    message: typeof body.message === 'string' && body.message.trim() ? body.message : question,
+    history: body.history as Array<{ role: string; content: string; intent_type?: string }> | undefined,
+  });
+  const shouldDeferAuthForAutomation = isAutomationIntent(automationPreflightIntent);
   const shouldDeferAuthForPublicWeb = await shouldUsePublicWebBeforeAuth({
     question,
     conversationIntent: body.intent,
@@ -187,7 +193,7 @@ export async function executeUnderstandingStage(
     authRequired: earlyAuthRequired,
     businessContext: compiledContext.businessContext,
   });
-  if (!userScope && earlyAuthRequired && !shouldDeferAuthForPublicWeb) {
+  if (!userScope && earlyAuthRequired && !shouldDeferAuthForAutomation && !shouldDeferAuthForPublicWeb) {
     const authRequiredAnswer = authRequiredAnswerForServiceIntent(earlyServiceIntent);
     io.pushEvent(createProcessEvent({
       type: 'context.prepared',

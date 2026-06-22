@@ -29,6 +29,11 @@ export interface ReportQuerySchemaAdapter {
   question_type: ReportQuestionType | 'default';
   tool_keywords: string[];
   required_defaults: Record<string, unknown>;
+  safe_defaults?: Record<string, unknown>;
+  enum_signal_mappings?: Array<{
+    field: string;
+    signals: Record<string, string[]>;
+  }>;
   promotion_source?: {
     argument_key?: string;
     internal_values?: string[];
@@ -203,6 +208,12 @@ function normalizeSchemaAdapter(input: Partial<ReportQuerySchemaAdapter>, fallba
     required_defaults: input.required_defaults && typeof input.required_defaults === 'object' && !Array.isArray(input.required_defaults)
       ? input.required_defaults as Record<string, unknown>
       : fallback?.required_defaults || {},
+    safe_defaults: input.safe_defaults && typeof input.safe_defaults === 'object' && !Array.isArray(input.safe_defaults)
+      ? input.safe_defaults as Record<string, unknown>
+      : fallback?.safe_defaults,
+    enum_signal_mappings: Array.isArray(input.enum_signal_mappings)
+      ? input.enum_signal_mappings
+      : fallback?.enum_signal_mappings,
     promotion_source: promotionSource && typeof promotionSource === 'object' && !Array.isArray(promotionSource)
       ? {
         argument_key: String(promotionSource.argument_key || inheritedPromotionSource?.argument_key || '').trim() || undefined,

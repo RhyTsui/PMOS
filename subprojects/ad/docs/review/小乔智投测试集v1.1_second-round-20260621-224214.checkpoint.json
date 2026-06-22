@@ -1,0 +1,723 @@
+{
+  "timestamp": "2026-06-21T14:42:22.472Z",
+  "selectedCaseIds": null,
+  "selectedExcelRows": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "currentProjectOverride": null,
+  "total": 15,
+  "passCount": 0,
+  "failCount": 0,
+  "blockedCount": 15,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-21T14:42:22.472Z",
+    "guardMb": 3072,
+    "pids": [
+      52116
+    ],
+    "processes": [
+      {
+        "pid": 52116,
+        "workingSetMb": 874
+      }
+    ],
+    "maxWorkingSetMb": 874
+  },
+  "memoryPeakMb": 1064,
+  "memorySamples": [
+    {
+      "phase": "block_all",
+      "caseId": "R2-MIG-000-连通",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:16.300Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 708
+        }
+      ],
+      "maxWorkingSetMb": 708
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R3-MIG-001-天气",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:16.776Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 708
+        }
+      ],
+      "maxWorkingSetMb": 708
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R4-MIG-002-新闻解读",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:17.166Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 708
+        }
+      ],
+      "maxWorkingSetMb": 708
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R5-MIG-003-行业文档解读",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:17.812Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 732
+        }
+      ],
+      "maxWorkingSetMb": 732
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R6-MIG-004-行业知识问答",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:18.446Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 1064
+        }
+      ],
+      "maxWorkingSetMb": 1064
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R7-MIG-005-系统知识问答",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:19.075Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 869
+        }
+      ],
+      "maxWorkingSetMb": 869
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R8-MIG-006-系统操作帮助",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:19.426Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 869
+        }
+      ],
+      "maxWorkingSetMb": 869
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R9-MIG-007-指标解释",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:19.823Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 869
+        }
+      ],
+      "maxWorkingSetMb": 869
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R10-MIG-008-系统说明",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:20.179Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R11-MIG-009-查大盘数据",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:20.589Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R12-MIG-010-查维度数据",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:20.897Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R13-MIG-011-查明细数据",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:21.320Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R14-MIG-012-查维度数据",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:21.564Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R15-MIG-013-查多日数据",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:21.838Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "block_all",
+      "caseId": "R16-MIG-014-查多日数据",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:22.045Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-21T14:42:22.472Z",
+      "guardMb": 3072,
+      "pids": [
+        52116
+      ],
+      "processes": [
+        {
+          "pid": 52116,
+          "workingSetMb": 874
+        }
+      ],
+      "maxWorkingSetMb": 874
+    }
+  ],
+  "results": [
+    {
+      "excelRow": 2,
+      "caseKey": "R2-MIG-000-连通",
+      "caseId": "MIG-000",
+      "scene": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:16.300Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 708
+          }
+        ],
+        "maxWorkingSetMb": 708
+      }
+    },
+    {
+      "excelRow": 3,
+      "caseKey": "R3-MIG-001-天气",
+      "caseId": "MIG-001",
+      "scene": "天气",
+      "prompt": "南京本周日天气如何",
+      "keyPoint": "联网搜索",
+      "note": "回答说没联网能力。这是 bug，系统增加了联网搜索能力但没有生效，可检查API、MCP等链路",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:16.776Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 708
+          }
+        ],
+        "maxWorkingSetMb": 708
+      }
+    },
+    {
+      "excelRow": 4,
+      "caseKey": "R4-MIG-002-新闻解读",
+      "caseId": "MIG-002",
+      "scene": "新闻解读",
+      "prompt": "最近有哪些游戏上线",
+      "keyPoint": "联网搜索",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:17.166Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 708
+          }
+        ],
+        "maxWorkingSetMb": 708
+      }
+    },
+    {
+      "excelRow": 5,
+      "caseKey": "R5-MIG-003-行业文档解读",
+      "caseId": "MIG-003",
+      "scene": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:17.812Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 732
+          }
+        ],
+        "maxWorkingSetMb": 732
+      }
+    },
+    {
+      "excelRow": 6,
+      "caseKey": "R6-MIG-004-行业知识问答",
+      "caseId": "MIG-004",
+      "scene": "行业知识问答",
+      "prompt": "腾讯iOS要接sdk吗",
+      "keyPoint": "知识库 联网搜索",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:18.446Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 1064
+          }
+        ],
+        "maxWorkingSetMb": 1064
+      }
+    },
+    {
+      "excelRow": 7,
+      "caseKey": "R7-MIG-005-系统知识问答",
+      "caseId": "MIG-005",
+      "scene": "系统知识问答",
+      "prompt": "我们支持鸿蒙吗",
+      "keyPoint": "知识库 多轮会话",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:19.075Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 869
+          }
+        ],
+        "maxWorkingSetMb": 869
+      }
+    },
+    {
+      "excelRow": 8,
+      "caseKey": "R8-MIG-006-系统操作帮助",
+      "caseId": "MIG-006",
+      "scene": "系统操作帮助",
+      "prompt": "能不能选一个事件作为付费回传",
+      "keyPoint": "知识库 多轮会话",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:19.426Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 869
+          }
+        ],
+        "maxWorkingSetMb": 869
+      }
+    },
+    {
+      "excelRow": 9,
+      "caseKey": "R9-MIG-007-指标解释",
+      "caseId": "MIG-007",
+      "scene": "指标解释",
+      "prompt": "有效是哪个点位",
+      "keyPoint": "知识库",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:19.823Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 869
+          }
+        ],
+        "maxWorkingSetMb": 869
+      }
+    },
+    {
+      "excelRow": 10,
+      "caseKey": "R10-MIG-008-系统说明",
+      "caseId": "MIG-008",
+      "scene": "系统说明",
+      "prompt": "素材报表的未知是什么",
+      "keyPoint": "知识库",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:20.179Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    },
+    {
+      "excelRow": 11,
+      "caseKey": "R11-MIG-009-查大盘数据",
+      "caseId": "MIG-009",
+      "scene": "查大盘数据",
+      "prompt": "看下近7天的日报数据",
+      "keyPoint": "时间、tool发现",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:20.589Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    },
+    {
+      "excelRow": 12,
+      "caseKey": "R12-MIG-010-查维度数据",
+      "caseId": "MIG-010",
+      "scene": "查维度数据",
+      "prompt": "巨量iOS创新的投放效果，带自然量",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:20.897Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    },
+    {
+      "excelRow": 13,
+      "caseKey": "R13-MIG-011-查明细数据",
+      "caseId": "MIG-011",
+      "scene": "查明细数据",
+      "prompt": "查一下直播包的数据",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:21.320Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    },
+    {
+      "excelRow": 14,
+      "caseKey": "R14-MIG-012-查维度数据",
+      "caseId": "MIG-012",
+      "scene": "查维度数据",
+      "prompt": "三国杀小游戏 鸿蒙端的数据",
+      "keyPoint": "终端",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:21.564Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    },
+    {
+      "excelRow": 15,
+      "caseKey": "R15-MIG-013-查多日数据",
+      "caseId": "MIG-013",
+      "scene": "查多日数据",
+      "prompt": "查询近7日数据",
+      "keyPoint": "数据分析",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:21.838Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    },
+    {
+      "excelRow": 16,
+      "caseKey": "R16-MIG-014-查多日数据",
+      "caseId": "MIG-014",
+      "scene": "查多日数据",
+      "prompt": "查询近30日趋势、分日",
+      "keyPoint": "趋势图、数据分析",
+      "note": "",
+      "verdict": "阻断",
+      "reason": "登录态失效，非交互模式不弹出浏览器",
+      "answer": "",
+      "elapsed": "",
+      "memoryGuard": {
+        "sampledAt": "2026-06-21T14:42:22.045Z",
+        "guardMb": 3072,
+        "pids": [
+          52116
+        ],
+        "processes": [
+          {
+            "pid": 52116,
+            "workingSetMb": 874
+          }
+        ],
+        "maxWorkingSetMb": 874
+      }
+    }
+  ]
+}

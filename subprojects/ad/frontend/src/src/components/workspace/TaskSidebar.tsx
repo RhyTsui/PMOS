@@ -28,7 +28,7 @@ interface TaskSidebarProps {
   defaultCollapsed?: boolean;
   floating?: boolean;
   onCreateConversation: () => Promise<void> | void;
-  onSelectConversation: (conversationId: string) => void;
+  onSelectConversation: (conversationId: string, options?: { anchor?: string }) => void;
   onRenameConversation: (conversationId: string, title: string) => Promise<void> | void;
   onDeleteConversation: (conversationId: string) => Promise<void> | void;
   onOpenAssetCenter?: () => void;
@@ -69,6 +69,65 @@ function SharePlaneIcon({ className = '' }: { className?: string }) {
 
 function PlusCircleIcon({ className = '', size = 18 }: { className?: string; size?: number }) {
   return <IconAsset name="plus-circle" size={size} className={className} />;
+}
+
+// ─── Chat-first Task Center: 会话任务角标 ───
+
+function TaskBadgeIndicator({ taskBadge }: { taskBadge: NonNullable<Conversation['task_badge']> }) {
+  const statusLabels: Record<string, { label: string; color: string; bg: string }> = {
+    active: { label: '⚙ 自动化', color: '#1d4ed8', bg: '#eff6ff' },
+    paused: { label: '⏸ 已暂停', color: '#92400e', bg: '#fef3c7' },
+    failed: { label: '✕ 失败', color: '#991b1b', bg: '#fee2e2' },
+    needs_action: { label: '⚠ 需处理', color: '#92400e', bg: '#fef3c7' },
+  };
+  const config = statusLabels[taskBadge.status] || statusLabels.active;
+  return (
+    <span
+      className="shrink-0 inline-flex items-center text-[10px] leading-none px-1 py-0.5 rounded font-medium whitespace-nowrap"
+      style={{ backgroundColor: config.bg, color: config.color }}
+      title={taskBadge.label}
+    >
+      {config.label}
+    </span>
+  );
+}
+
+function UnreadAutomationBadge({ unread }: { unread: NonNullable<Conversation['unread_automation']> }) {
+  const severityConfig: Record<string, { color: string; bg: string }> = {
+    success: { color: '#15803d', bg: '#dcfce7' },
+    info: { color: '#1d4ed8', bg: '#dbeafe' },
+    warning: { color: '#92400e', bg: '#fef3c7' },
+    error: { color: '#991b1b', bg: '#fee2e2' },
+  };
+  const config = severityConfig[unread.severity] || severityConfig.info;
+  const dotColor = unread.severity === 'error' ? '#dc2626'
+    : unread.severity === 'warning' ? '#b45309'
+    : unread.severity === 'success' ? '#16a34a'
+    : '#2563eb';
+
+  if (unread.count === 1) {
+    return (
+      <span
+        className="shrink-0 inline-flex items-center gap-1 text-[10px] leading-none px-1 py-0.5 rounded font-medium whitespace-nowrap"
+        style={{ backgroundColor: config.bg, color: config.color }}
+        title={unread.label}
+      >
+        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
+        {unread.severity === 'error' ? '待处理' : unread.severity === 'warning' ? '需确认' : '新结果'}
+      </span>
+    );
+  }
+  return (
+    <span
+      className="shrink-0 inline-flex items-center gap-1 text-[10px] leading-none px-1 py-0.5 rounded font-medium whitespace-nowrap"
+      style={{ backgroundColor: config.bg, color: config.color }}
+      title={unread.label}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
+      {unread.count}
+      {unread.severity === 'error' ? ' 条待处理' : ' 条新结果'}
+    </span>
+  );
 }
 
 function CollapsedBrandToggle() {
@@ -497,7 +556,12 @@ export function TaskSidebar({
       >
         <button
           type="button"
-          onClick={() => onSelectConversation(conversation.conversation_id)}
+          onClick={() => {
+            const anchor = conversation.unread_automation && conversation.unread_automation.count > 0
+              ? 'latest_unread_automation'
+              : undefined;
+            onSelectConversation(conversation.conversation_id, anchor ? { anchor } : undefined);
+          }}
           className={`block min-h-8 w-full min-w-0 rounded-[10px] px-2 text-left ${isEditing ? 'py-[5px]' : 'py-[7px]'}`}
         >
           {isEditing ? (
@@ -524,7 +588,17 @@ export function TaskSidebar({
               className="h-[22px] w-full rounded-[8px] border border-[#c8d7f2] bg-white px-1.5 text-[14px] font-normal leading-[20px] text-[#111827] outline-none shadow-none"
             />
           ) : (
-            <ConversationTitleText title={conversation.title} active={active} />
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="min-w-0 flex-1">
+                <ConversationTitleText title={conversation.title} active={active} />
+              </span>
+              {conversation.task_badge && (
+                <TaskBadgeIndicator taskBadge={conversation.task_badge} />
+              )}
+              {conversation.unread_automation && conversation.unread_automation.count > 0 && (
+                <UnreadAutomationBadge unread={conversation.unread_automation} />
+              )}
+            </div>
           )}
         </button>
 

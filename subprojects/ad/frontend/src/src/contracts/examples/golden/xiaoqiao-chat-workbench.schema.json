@@ -1,0 +1,133 @@
+{
+  "screenId": "xiaoqiao-chat-workbench",
+  "screenType": "ai-chat-workbench",
+  "title": "小乔智投会话工作台",
+  "lastUpdatedAt": "2026-06-22",
+  "layout": {
+    "desktop": {
+      "shell": "left-history-center-chat-right-context",
+      "left": "recent-conversations",
+      "center": "chat-thread-and-composer",
+      "right": "result-or-disclosure-panel",
+      "stickyRegions": ["history", "composer"]
+    },
+    "mobile": {
+      "shell": "top-context-chat-bottom-composer",
+      "history": "drawer",
+      "rightPanel": "full-height-drawer",
+      "stackOrder": ["projectContext", "chatThread", "resultEntry", "composer"],
+      "overflowPolicy": "no-horizontal-main-content-scroll"
+    }
+  },
+  "regions": [
+    {
+      "id": "historyNavigation",
+      "componentBinding": "conversation-history",
+      "purpose": "让用户开启新对话、搜索历史记录，并回到正在处理的事项。",
+      "states": ["empty", "ready", "renaming", "deleting", "running"]
+    },
+    {
+      "id": "projectContext",
+      "componentBinding": "project-context-selector",
+      "purpose": "展示当前处理范围，项目范围读取失败时提示用户刷新或重新选择。",
+      "states": ["loading", "ready", "failed", "permissionDenied"]
+    },
+    {
+      "id": "chatThread",
+      "componentBinding": "antd-x-bubble-thread",
+      "purpose": "承载用户问题、助手回答、来源入口和可继续追问的建议。",
+      "states": ["empty", "loadingMessages", "streaming", "ready", "sharedReadonly", "blocked"]
+    },
+    {
+      "id": "composer",
+      "componentBinding": "antd-x-sender-compatible-input",
+      "purpose": "输入问题、上传文件、引用资料，并在生成中提供停止入口。",
+      "states": ["idle", "withAttachments", "withReferencedAssets", "sending", "disabled"]
+    },
+    {
+      "id": "quickPrompts",
+      "componentBinding": "antd-x-prompts-compatible-row",
+      "purpose": "提供用户可直接发起的常用任务入口，点击后回到当前对话继续处理。",
+      "states": ["hidden", "ready"]
+    },
+    {
+      "id": "rightContext",
+      "componentBinding": "result-or-disclosure-panel",
+      "purpose": "展示本次结果、依据或运行过程；移动端通过抽屉进入，不挤压会话主体。",
+      "states": ["closed", "resultReady", "disclosureReady", "agentPanelReady", "collapsed"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "type": "architecture",
+      "path": "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
+      "note": "Frontend Presentation 只消费契约，不反推业务状态。"
+    },
+    {
+      "type": "guardrail",
+      "path": "docs/operations/ui-guardrail.md",
+      "note": "会话工作台必须有任务上下文、证据、建议动作和带回对话的入口。"
+    },
+    {
+      "type": "design-system",
+      "path": "docs/小乔智投-Ant-Design-X默认规范-2026-05-09.md",
+      "note": "会话入口、提示和回答优先采用 Ant Design X 语义或等价封装。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/frontend-delivery-regression-homepage-final-desktop.json",
+      "note": "桌面视觉和布局验收记录。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/frontend-delivery-regression-homepage-final-mobile.json",
+      "note": "移动端堆叠验收记录。"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "page-shell",
+      "path": "frontend/src/src/app/page.tsx",
+      "note": "会话、资料、自动任务和右侧承接面板的工作台入口。"
+    },
+    {
+      "id": "chat-thread",
+      "path": "frontend/src/src/components/cognitive/ChatContainer.tsx",
+      "note": "消息、来源入口、继续追问和生成中状态的会话主体。"
+    },
+    {
+      "id": "composer",
+      "path": "frontend/src/src/components/cognitive/InputArea.tsx",
+      "note": "输入、附件、引用资料和停止生成入口。"
+    },
+    {
+      "id": "history",
+      "path": "frontend/src/src/components/workspace/TaskSidebar.tsx",
+      "note": "历史记录、新对话、搜索和用户菜单入口。"
+    }
+  ],
+  "recommendedActions": [
+    {
+      "id": "start-new-conversation",
+      "label": "开启新对话",
+      "target": "historyNavigation"
+    },
+    {
+      "id": "continue-with-current-context",
+      "label": "继续处理当前问题",
+      "target": "composer"
+    },
+    {
+      "id": "open-disclosure",
+      "label": "查看依据和过程",
+      "target": "rightContext"
+    }
+  ],
+  "acceptance": {
+    "noTraditionalDashboardShell": true,
+    "noEngineeringJargonInUserCopy": true,
+    "noBusinessKeywordRoutingInUi": true,
+    "supportsMobileStacking": true,
+    "coversLoadingErrorEmptyPermission": true
+  }
+}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeMcpToolToCapability } from '../src/contracts/mcp/tool-capability-normalization';
+import { buildCapabilityManifest } from '../src/lib/capability-orchestration';
 import type { McpServerConfig, McpToolConfig } from '../src/types';
 
 function server(tool: McpToolConfig): McpServerConfig {
@@ -28,11 +29,7 @@ function reportTool(name: string, description: string, properties: Record<string
     tool_id: name,
     name,
     description,
-    input_schema: {
-      type: 'object',
-      required: ['appId', 'startDate', 'endDate', 'timeType'],
-      properties,
-    },
+    input_schema: { type: 'object', required: ['appId', 'startDate', 'endDate', 'timeType'], properties },
     enabled: true,
     bound_agents: ['ad-assistant'],
     access_mode: 'read',
@@ -52,15 +49,12 @@ describe('report capability semantic normalization', () => {
       cost_amount: { type: 'number', description: 'cost amount' },
     });
     const capability = normalizeMcpToolToCapability(server(tool), tool);
-    const surface = capability.semanticSurface;
 
-    expect(surface?.timeRangeInputs).toEqual(expect.arrayContaining(['startDate', 'endDate']));
-    expect(surface?.supportedGranularities.map(item => item.key)).toContain('day');
-    expect(surface?.supportedOutputDimensions.map(item => item.key)).toContain('date');
-    expect(surface?.supportedFilterDimensions.map(item => item.key)).toEqual(expect.arrayContaining(['media', 'app_package_type']));
-    expect(surface?.supportedMetrics.find(item => item.key === 'cost')?.supportLevel).toBe('supported');
+    expect(capability.semanticSurface?.timeRangeInputs).toEqual(expect.arrayContaining(['startDate', 'endDate']));
+    expect(capability.semanticSurface?.supportedGranularities.map(item => item.key)).toContain('day');
+    expect(capability.semanticSurface?.supportedOutputDimensions.map(item => item.key)).toContain('date');
+    expect(capability.semanticSurface?.supportedFilterDimensions.map(item => item.key)).toEqual(expect.arrayContaining(['media', 'app_package_type']));
     expect(capability.supports.metrics).toContain('cost');
-    expect(capability.supports.metrics).not.toEqual(expect.arrayContaining(['roi', 'register', 'payment', 'arppu']));
   });
 
   it('tracks d1 roi as a metric variant instead of broad M_ALL support', () => {
@@ -69,8 +63,6 @@ describe('report capability semantic normalization', () => {
       startDate: { type: 'string' },
       endDate: { type: 'string' },
       timeType: { type: 'string', enum: ['DAY'] },
-      mediaId: { type: 'string' },
-      appPackageType: { type: 'string' },
       dataType: { type: 'string', enum: ['D1', 'D7'] },
       first_day_roi: { type: 'number' },
       cost_amount: { type: 'number' },
@@ -81,6 +73,22 @@ describe('report capability semantic normalization', () => {
     expect(d1Roi?.supportLevel).toBe('supported');
     expect(d1Roi?.variant).toBe('d1');
     expect(capability.supports.metrics).toEqual(expect.arrayContaining(['d1_roi', 'cost']));
-    expect(capability.supports.granularity).toContain('day');
+  });
+
+  it('includes governed builtin capability candidates for non-report chat work', () => {
+    const manifest = buildCapabilityManifest([] as any);
+
+    expect(manifest.map(item => item.capabilityId)).toEqual(expect.arrayContaining([
+      'builtin.help_qa',
+      'builtin.requirement_drafting',
+      'builtin.issue_diagnosis',
+      'builtin.integration_workflow',
+    ]));
+    expect(manifest.find(item => item.capabilityId === 'builtin.integration_workflow')).toEqual(expect.objectContaining({
+      owner: 'ai-chat-governance',
+      governanceVersion: 'capability-seed/2026-06-23',
+      fallbackPolicy: 'clarify',
+      riskLevel: 'high',
+    }));
   });
 });

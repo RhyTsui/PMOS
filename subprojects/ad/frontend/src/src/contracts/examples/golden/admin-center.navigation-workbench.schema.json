@@ -1,0 +1,115 @@
+{
+  "screenId": "admin-center-navigation-workbench",
+  "screenType": "admin-control-plane",
+  "title": "智能体配置中枢",
+  "lastUpdatedAt": "2026-06-22",
+  "layout": {
+    "desktop": {
+      "shell": "left-sidebar-navigation",
+      "sidebarWidth": 292,
+      "content": "single-active-config-surface",
+      "stickyRegions": ["sidebar", "pageHeader"]
+    },
+    "mobile": {
+      "shell": "top-compact-navigation",
+      "content": "single-column-config-surface",
+      "stackOrder": ["topHeader", "centerTabs", "activePageTabs", "configSurface"],
+      "overflowPolicy": "horizontal-scroll-for-navigation-only"
+    }
+  },
+  "regions": [
+    {
+      "id": "adminSidebar",
+      "componentBinding": "admin-navigation",
+      "purpose": "按治理领域组织配置入口，避免顶部菜单随入口增加而溢出。",
+      "states": ["loadingAccess", "canView", "canEdit", "noAccess"]
+    },
+    {
+      "id": "mobileNavigation",
+      "componentBinding": "admin-mobile-navigation",
+      "purpose": "移动端使用顶部横向导航和当前领域二级入口，不挤压配置表单。",
+      "states": ["ready", "empty"]
+    },
+    {
+      "id": "pageHeader",
+      "componentBinding": "admin-context-header",
+      "purpose": "展示当前位置、当前配置页说明和运行影响标签。",
+      "states": ["default"]
+    },
+    {
+      "id": "configSurface",
+      "componentBinding": "admin-config-tab",
+      "purpose": "承载具体配置页；同一时间只加载当前页，降低首屏负担。",
+      "states": ["loading", "empty", "ready", "saving", "saved", "error", "permissionDenied"]
+    },
+    {
+      "id": "crudScaffold",
+      "componentBinding": "admin-crud-scaffold",
+      "purpose": "统一配置页的标题、刷新、加载、空态、错误、保存中和保存完成反馈。",
+      "states": ["loading", "empty", "ready", "saving", "saved", "error"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "type": "architecture",
+      "path": "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
+      "note": "Admin Control Plane、Frontend Presentation 和 Trace 分层真源。"
+    },
+    {
+      "type": "guardrail",
+      "path": "docs/operations/ui-guardrail.md",
+      "note": "管理入口必须有明确任务、状态和下一步动作。"
+    },
+    {
+      "type": "design-system",
+      "path": "docs/小乔智投-Ant-Design-X默认规范-2026-05-09.md",
+      "note": "Ant Design + Ant Design X 为默认产品交互基线。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/admin-direct-check-fixed.png",
+      "note": "没有专属新截图时采用最近管理中心浏览器验收截图作为视觉基准。"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "page-shell",
+      "path": "frontend/src/src/app/admin/page.tsx",
+      "note": "管理中心桌面与移动端导航壳。"
+    },
+    {
+      "id": "menu-metadata",
+      "path": "frontend/src/src/components/admin/admin-menu.tsx",
+      "note": "导航入口来自 ADMIN_CENTERS 与 ADMIN_MENU_ITEMS，不在页面壳写业务菜单分支。"
+    },
+    {
+      "id": "tab-persistence",
+      "path": "frontend/src/src/components/admin/admin-tab-helpers.ts",
+      "note": "当前页签使用本地存储和 URL tab 参数恢复。"
+    },
+    {
+      "id": "crud-scaffold",
+      "path": "frontend/src/src/components/admin/AdminCrudScaffold.tsx",
+      "note": "管理页通用状态组件，覆盖标题、工具条、加载、错误、空态和保存状态。"
+    }
+  ],
+  "recommendedActions": [
+    {
+      "id": "continue-edit-current-config",
+      "label": "继续编辑当前配置",
+      "target": "configSurface"
+    },
+    {
+      "id": "review-operation-log",
+      "label": "查看操作记录",
+      "target": "operation-logs"
+    }
+  ],
+  "acceptance": {
+    "noTraditionalDashboardShell": true,
+    "noEngineeringJargonInUserCopy": true,
+    "noBusinessKeywordRoutingInUi": true,
+    "supportsMobileStacking": true,
+    "coversLoadingErrorEmptyPermission": true
+  }
+}

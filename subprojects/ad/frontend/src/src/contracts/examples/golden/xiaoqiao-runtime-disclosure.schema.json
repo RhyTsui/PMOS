@@ -1,0 +1,125 @@
+{
+  "screenId": "xiaoqiao-runtime-disclosure",
+  "screenType": "runtime-disclosure-panel",
+  "title": "运行过程",
+  "lastUpdatedAt": "2026-06-22",
+  "layout": {
+    "desktop": {
+      "shell": "right-side-disclosure-panel",
+      "content": "tabbed-runtime-disclosure",
+      "stickyRegions": ["tabList"]
+    },
+    "mobile": {
+      "shell": "full-height-drawer",
+      "entry": "message-source-action",
+      "stackOrder": ["overview", "execution", "evidence", "fields", "qualityChecks", "rawInfo"],
+      "overflowPolicy": "drawer-scrolls-without-composer-overlap"
+    }
+  },
+  "regions": [
+    {
+      "id": "overview",
+      "componentBinding": "disclosure-overview",
+      "purpose": "用用户可理解的摘要展示本次处理状态、关键提示和质量标签。",
+      "states": ["ready", "partial", "empty", "blocked", "failed", "degraded"]
+    },
+    {
+      "id": "execution",
+      "componentBinding": "runtime-timeline",
+      "purpose": "展示计划、执行步骤、工具调用和失败归一化信息。",
+      "states": ["idle", "planning", "running", "succeeded", "partially-succeeded", "failed", "cancelled"]
+    },
+    {
+      "id": "evidence",
+      "componentBinding": "source-and-evidence-list",
+      "purpose": "展示来源和证据引用，缺少依据时给出安全空态。",
+      "states": ["ready", "empty", "redacted", "permissionDenied"]
+    },
+    {
+      "id": "fields",
+      "componentBinding": "field-catalog",
+      "purpose": "展示本次处理使用和缺失的关键字段，不用于决定执行路径。",
+      "states": ["ready", "empty", "partial"]
+    },
+    {
+      "id": "qualityChecks",
+      "componentBinding": "quality-check-list",
+      "purpose": "展示低置信、来源不足、权限遮罩和安全检查结果。",
+      "states": ["pass", "warn", "fail", "pending", "empty"]
+    },
+    {
+      "id": "rawInfo",
+      "componentBinding": "redacted-raw-info",
+      "purpose": "仅对有权限用户展示脱敏后的原始信息引用。",
+      "states": ["available", "redacted", "blocked", "empty"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "type": "architecture",
+      "path": "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
+      "note": "运行过程进入 DisclosureProjection 和 Runtime Display Protocol，不污染主消息。"
+    },
+    {
+      "type": "guardrail",
+      "path": "docs/operations/ui-guardrail.md",
+      "note": "前端只能渲染契约字段，不从回答正文反推业务状态。"
+    },
+    {
+      "type": "contract",
+      "path": "frontend/src/src/contracts/disclosure/types.ts",
+      "note": "MessageDisclosureView 字段真源。"
+    },
+    {
+      "type": "contract",
+      "path": "frontend/src/src/contracts/runtime/runtime-display-protocol.ts",
+      "note": "运行事件、工具状态和工作流步骤字段真源。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/runtime-panel-current-1781317697398.json",
+      "note": "最近运行过程面板检查记录。"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "drawer-entry",
+      "path": "frontend/src/src/components/cognitive/MessageDisclosureDrawer.tsx",
+      "note": "消息侧运行过程抽屉入口。"
+    },
+    {
+      "id": "renderer",
+      "path": "frontend/src/src/renderers/disclosure/DisclosurePanelRenderer.tsx",
+      "note": "运行过程分区渲染器。"
+    },
+    {
+      "id": "builder",
+      "path": "frontend/src/src/contracts/disclosure/builders/buildDisclosureView.ts",
+      "note": "DisclosureProjection 到前端视图的构建入口。"
+    }
+  ],
+  "recommendedActions": [
+    {
+      "id": "review-execution",
+      "label": "查看处理步骤",
+      "target": "execution"
+    },
+    {
+      "id": "review-evidence",
+      "label": "查看依据",
+      "target": "evidence"
+    },
+    {
+      "id": "continue-in-chat",
+      "label": "回到对话继续追问",
+      "target": "chatThread"
+    }
+  ],
+  "acceptance": {
+    "noTraditionalDashboardShell": true,
+    "noEngineeringJargonInUserCopy": true,
+    "noBusinessKeywordRoutingInUi": true,
+    "supportsMobileStacking": true,
+    "coversLoadingErrorEmptyPermission": true
+  }
+}

@@ -1,0 +1,4043 @@
+{
+  "timestamp": "2026-06-22T18:06:54.732Z",
+  "selectedCaseIds": null,
+  "total": 107,
+  "passCount": 14,
+  "failCount": 2,
+  "blockedCount": 0,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-22T18:06:54.732Z",
+    "guardMb": 8192,
+    "pids": [
+      14996
+    ],
+    "processes": [
+      {
+        "pid": 14996,
+        "workingSetMb": 1881
+      }
+    ],
+    "maxWorkingSetMb": 1881
+  },
+  "memoryPeakMb": 2900,
+  "memorySamples": [
+    {
+      "phase": "case_start",
+      "caseId": "MIG-000",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:44:22.058Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2205
+        }
+      ],
+      "maxWorkingSetMb": 2205
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-000",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:44:22.972Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2205
+        }
+      ],
+      "maxWorkingSetMb": 2205
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-000",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:44:55.412Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2249
+        }
+      ],
+      "maxWorkingSetMb": 2249
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:44:56.048Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2249
+        }
+      ],
+      "maxWorkingSetMb": 2249
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:44:57.328Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2249
+        }
+      ],
+      "maxWorkingSetMb": 2249
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:44:58.137Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2249
+        }
+      ],
+      "maxWorkingSetMb": 2249
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:45:42.411Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2345
+        }
+      ],
+      "maxWorkingSetMb": 2345
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:45:42.966Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2345
+        }
+      ],
+      "maxWorkingSetMb": 2345
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-002",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:45:44.447Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2345
+        }
+      ],
+      "maxWorkingSetMb": 2345
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-002",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:45:45.748Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2345
+        }
+      ],
+      "maxWorkingSetMb": 2345
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-002",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:31.589Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2381
+        }
+      ],
+      "maxWorkingSetMb": 2381
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:32.023Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2381
+        }
+      ],
+      "maxWorkingSetMb": 2381
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-003",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:33.429Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2381
+        }
+      ],
+      "maxWorkingSetMb": 2381
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-003",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:34.838Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2381
+        }
+      ],
+      "maxWorkingSetMb": 2381
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-003",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:45.239Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2432
+        }
+      ],
+      "maxWorkingSetMb": 2432
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:45.956Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2432
+        }
+      ],
+      "maxWorkingSetMb": 2432
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-004",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:47.426Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2406
+        }
+      ],
+      "maxWorkingSetMb": 2406
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-004",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:46:49.140Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2408
+        }
+      ],
+      "maxWorkingSetMb": 2408
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-004",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:47:26.808Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2358
+        }
+      ],
+      "maxWorkingSetMb": 2358
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:47:27.275Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2357
+        }
+      ],
+      "maxWorkingSetMb": 2357
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-005",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:47:29.002Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2357
+        }
+      ],
+      "maxWorkingSetMb": 2357
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-005",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:47:30.008Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2357
+        }
+      ],
+      "maxWorkingSetMb": 2357
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-005",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:48:15.899Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2442
+        }
+      ],
+      "maxWorkingSetMb": 2442
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:48:16.396Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2442
+        }
+      ],
+      "maxWorkingSetMb": 2442
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-006",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:48:17.608Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2442
+        }
+      ],
+      "maxWorkingSetMb": 2442
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-006",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:48:18.448Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2442
+        }
+      ],
+      "maxWorkingSetMb": 2442
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-006",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:02.131Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2408
+        }
+      ],
+      "maxWorkingSetMb": 2408
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:03.215Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2410
+        }
+      ],
+      "maxWorkingSetMb": 2410
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-007",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:04.934Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2410
+        }
+      ],
+      "maxWorkingSetMb": 2410
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-007",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:06.722Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2410
+        }
+      ],
+      "maxWorkingSetMb": 2410
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-007",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:48.392Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2425
+        }
+      ],
+      "maxWorkingSetMb": 2425
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:49.856Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2425
+        }
+      ],
+      "maxWorkingSetMb": 2425
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-008",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:52.001Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2335
+        }
+      ],
+      "maxWorkingSetMb": 2335
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-008",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:55.495Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2336
+        }
+      ],
+      "maxWorkingSetMb": 2336
+    },
+    {
+      "phase": "attempt_error",
+      "caseId": "MIG-008",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:49:56.391Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2336
+        }
+      ],
+      "maxWorkingSetMb": 2336
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-008",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T17:49:56.990Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2336
+        }
+      ],
+      "maxWorkingSetMb": 2336
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-008",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T17:50:21.032Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2568
+        }
+      ],
+      "maxWorkingSetMb": 2568
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:50:21.799Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2568
+        }
+      ],
+      "maxWorkingSetMb": 2568
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-009",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:50:23.153Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2568
+        }
+      ],
+      "maxWorkingSetMb": 2568
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-009",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:50:24.662Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2568
+        }
+      ],
+      "maxWorkingSetMb": 2568
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-009",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:52:55.880Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2900
+        }
+      ],
+      "maxWorkingSetMb": 2900
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:52:56.466Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2900
+        }
+      ],
+      "maxWorkingSetMb": 2900
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-010",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:52:57.760Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2900
+        }
+      ],
+      "maxWorkingSetMb": 2900
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-010",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:52:58.771Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2900
+        }
+      ],
+      "maxWorkingSetMb": 2900
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-010",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:53:09.527Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2533
+        }
+      ],
+      "maxWorkingSetMb": 2533
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:53:10.097Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2675
+        }
+      ],
+      "maxWorkingSetMb": 2675
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-011",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:53:11.546Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2794
+        }
+      ],
+      "maxWorkingSetMb": 2794
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-011",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:53:12.495Z",
+      "guardMb": 8192,
+      "pids": [
+        36936
+      ],
+      "processes": [
+        {
+          "pid": 36936,
+          "workingSetMb": 2378
+        }
+      ],
+      "maxWorkingSetMb": 2378
+    },
+    {
+      "phase": "attempt_error",
+      "caseId": "MIG-011",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:53:20.280Z",
+      "guardMb": 8192,
+      "pids": [],
+      "processes": [],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-011",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T17:53:39.402Z",
+      "guardMb": 8192,
+      "pids": [
+        61472
+      ],
+      "processes": [
+        {
+          "pid": 61472,
+          "workingSetMb": 870
+        }
+      ],
+      "maxWorkingSetMb": 870
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-011",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T17:56:09.626Z",
+      "guardMb": 8192,
+      "pids": [
+        61472
+      ],
+      "processes": [
+        {
+          "pid": 61472,
+          "workingSetMb": 2230
+        }
+      ],
+      "maxWorkingSetMb": 2230
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:56:10.124Z",
+      "guardMb": 8192,
+      "pids": [
+        61472
+      ],
+      "processes": [
+        {
+          "pid": 61472,
+          "workingSetMb": 2230
+        }
+      ],
+      "maxWorkingSetMb": 2230
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-012",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:56:11.502Z",
+      "guardMb": 8192,
+      "pids": [
+        61472
+      ],
+      "processes": [
+        {
+          "pid": 61472,
+          "workingSetMb": 2180
+        }
+      ],
+      "maxWorkingSetMb": 2180
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-012",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:56:12.799Z",
+      "guardMb": 8192,
+      "pids": [
+        61472
+      ],
+      "processes": [
+        {
+          "pid": 61472,
+          "workingSetMb": 2179
+        }
+      ],
+      "maxWorkingSetMb": 2179
+    },
+    {
+      "phase": "attempt_error",
+      "caseId": "MIG-012",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:56:29.438Z",
+      "guardMb": 8192,
+      "pids": [],
+      "processes": [],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-012",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T17:56:48.528Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 1371
+        }
+      ],
+      "maxWorkingSetMb": 1371
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-012",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T17:59:22.397Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2143
+        }
+      ],
+      "maxWorkingSetMb": 2143
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:59:23.814Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2143
+        }
+      ],
+      "maxWorkingSetMb": 2143
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-013",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:59:25.302Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2140
+        }
+      ],
+      "maxWorkingSetMb": 2140
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-013",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T17:59:26.726Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2140
+        }
+      ],
+      "maxWorkingSetMb": 2140
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-013",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:02:02.997Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2219
+        }
+      ],
+      "maxWorkingSetMb": 2219
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:02:03.741Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2219
+        }
+      ],
+      "maxWorkingSetMb": 2219
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-014",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:02:05.214Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2221
+        }
+      ],
+      "maxWorkingSetMb": 2221
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-014",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:02:07.078Z",
+      "guardMb": 8192,
+      "pids": [
+        55120
+      ],
+      "processes": [
+        {
+          "pid": 55120,
+          "workingSetMb": 2196
+        }
+      ],
+      "maxWorkingSetMb": 2196
+    },
+    {
+      "phase": "attempt_error",
+      "caseId": "MIG-014",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:03:32.846Z",
+      "guardMb": 8192,
+      "pids": [],
+      "processes": [],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-014",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T18:03:52.928Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 782
+        }
+      ],
+      "maxWorkingSetMb": 782
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-014",
+      "attempt": 1,
+      "sampledAt": "2026-06-22T18:06:28.798Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 2153
+        }
+      ],
+      "maxWorkingSetMb": 2153
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:06:29.548Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 2153
+        }
+      ],
+      "maxWorkingSetMb": 2153
+    },
+    {
+      "phase": "case_start",
+      "caseId": "MIG-001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:06:31.157Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 2126
+        }
+      ],
+      "maxWorkingSetMb": 2126
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:06:32.531Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 2126
+        }
+      ],
+      "maxWorkingSetMb": 2126
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-001",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:06:54.181Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 1881
+        }
+      ],
+      "maxWorkingSetMb": 1881
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T18:06:54.732Z",
+      "guardMb": 8192,
+      "pids": [
+        14996
+      ],
+      "processes": [
+        {
+          "pid": 14996,
+          "workingSetMb": 1881
+        }
+      ],
+      "maxWorkingSetMb": 1881
+    }
+  ],
+  "results": [
+    {
+      "caseId": "MIG-000",
+      "scene": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "note": "",
+      "verdict": "通过",
+      "reason": "回答长度 98",
+      "answer": "你好！我是小乔智投通用 AI 助手。看到你当前关注的是《指间山海》项目，如果你需要了解近期的素材表现、创意方向分析，或者查看相关视频数据，随时可以告诉我，我会帮你梳理和查询。有什么我可以帮你的吗？",
+      "intentType": "general",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（103ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入general链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：无需外部证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 general_chat，实际 general_chat，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "32.0",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:44:22.058Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2205
+          }
+        ],
+        "maxWorkingSetMb": 2205
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:44:55.412Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2249
+          }
+        ],
+        "maxWorkingSetMb": 2249
+      }
+    },
+    {
+      "caseId": "MIG-001",
+      "scene": "天气",
+      "prompt": "南京本周日天气如何",
+      "keyPoint": "联网搜索",
+      "note": "回答说没联网能力。这是 bug，系统增加了联网搜索能力但没有生效，可检查API、MCP等链路",
+      "verdict": "通过",
+      "reason": "含天气信息",
+      "answer": "目前无法为您提供南京本周日的准确天气预报。当前系统未接入实时天气查询工具，且知识库与公开网络均未检索到本周日（6月28日左右）的最新天气证据。历史记忆中仅存留6月11日左右的过期天气数据，无法作为本周日的参考。建议您直接通过手机天气App或专业气象网站获取最新预报。",
+      "intentType": "general",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（122ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入general链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：无需外部证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 general_chat，实际 general_chat，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "43.8",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:44:57.328Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2249
+          }
+        ],
+        "maxWorkingSetMb": 2249
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:45:42.411Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2345
+          }
+        ],
+        "maxWorkingSetMb": 2345
+      }
+    },
+    {
+      "caseId": "MIG-002",
+      "scene": "新闻解读",
+      "prompt": "最近有哪些游戏上线",
+      "keyPoint": "联网搜索",
+      "note": "",
+      "verdict": "通过",
+      "reason": "有信息支撑",
+      "answer": "这次结果没有通过证据和安全检查，我已停止输出原回答。请补充更多信息或稍后重试，我会重新按可追溯来源处理。",
+      "intentType": "",
+      "contractStatus": "blocked",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "blocked",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（114ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入general链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：混合上下文证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 general_chat，实际 general_chat，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "45.3",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:45:44.447Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2345
+          }
+        ],
+        "maxWorkingSetMb": 2345
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:46:31.589Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2381
+          }
+        ],
+        "maxWorkingSetMb": 2381
+      }
+    },
+    {
+      "caseId": "MIG-003",
+      "scene": "行业文档解读",
+      "prompt": "https://open.oceanengine.com/labels/7 监测回传文档在哪",
+      "keyPoint": "知识库 联网搜索",
+      "note": "",
+      "verdict": "通过",
+      "reason": "有信息支撑",
+      "answer": "当前没有取得可验证的公开来源结果，因此不能把它当作已确认结论。",
+      "intentType": "help",
+      "contractStatus": "degraded",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "degraded",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 1,
+        "processEventCount": 10,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（119ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入help链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "web.search",
+            "label": "检查联网查询能力",
+            "status": "error",
+            "toolName": "",
+            "summary": "当前没有取得可验证的公开实时来源结果。",
+            "outputSummary": "object(capability_status,provider_unavailable_reason,sourceRequired,fact_need,provider_eligibility,search_plan)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 general_chat，实际 general_chat；另有 3 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "9.6",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:46:33.429Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2381
+          }
+        ],
+        "maxWorkingSetMb": 2381
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:46:45.239Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2432
+          }
+        ],
+        "maxWorkingSetMb": 2432
+      }
+    },
+    {
+      "caseId": "MIG-004",
+      "scene": "行业知识问答",
+      "prompt": "腾讯iOS要接sdk吗",
+      "keyPoint": "知识库 联网搜索",
+      "note": "",
+      "verdict": "通过",
+      "reason": "有信息支撑",
+      "answer": "这次结果没有通过证据和安全检查，我已停止输出原回答。请补充更多信息或稍后重试，我会重新按可追溯来源处理。",
+      "intentType": "",
+      "contractStatus": "blocked",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "blocked",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（204ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入help链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：混合上下文证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 help_qa，实际 help_qa；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "36.8",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:46:47.426Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2406
+          }
+        ],
+        "maxWorkingSetMb": 2406
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:47:26.808Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2358
+          }
+        ],
+        "maxWorkingSetMb": 2358
+      }
+    },
+    {
+      "caseId": "MIG-005",
+      "scene": "系统知识问答",
+      "prompt": "我们支持鸿蒙吗",
+      "keyPoint": "知识库 多轮会话",
+      "note": "",
+      "verdict": "通过",
+      "reason": "知识库回答长度 52",
+      "answer": "这次结果没有通过证据和安全检查，我已停止输出原回答。请补充更多信息或稍后重试，我会重新按可追溯来源处理。",
+      "intentType": "",
+      "contractStatus": "blocked",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "blocked",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（70ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入help链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：混合上下文证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 help_qa，实际 help_qa，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "45.2",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:47:29.002Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2357
+          }
+        ],
+        "maxWorkingSetMb": 2357
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:48:15.899Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2442
+          }
+        ],
+        "maxWorkingSetMb": 2442
+      }
+    },
+    {
+      "caseId": "MIG-006",
+      "scene": "系统操作帮助",
+      "prompt": "能不能选一个事件作为付费回传",
+      "keyPoint": "知识库 多轮会话",
+      "note": "",
+      "verdict": "通过",
+      "reason": "知识库回答长度 52",
+      "answer": "这次结果没有通过证据和安全检查，我已停止输出原回答。请补充更多信息或稍后重试，我会重新按可追溯来源处理。",
+      "intentType": "",
+      "contractStatus": "blocked",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "blocked",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（76ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入help链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：混合上下文证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 help_qa，实际 help_qa；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "43.1",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:48:17.608Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2442
+          }
+        ],
+        "maxWorkingSetMb": 2442
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:49:02.131Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2408
+          }
+        ],
+        "maxWorkingSetMb": 2408
+      }
+    },
+    {
+      "caseId": "MIG-007",
+      "scene": "指标解释",
+      "prompt": "有效是哪个点位",
+      "keyPoint": "知识库",
+      "note": "",
+      "verdict": "通过",
+      "reason": "知识库回答长度 140",
+      "answer": "当前知识库和上下文中没有关于“有效是哪个点位”的明确证据或定义。为了更准确地为您解答，能否补充一下具体的业务背景？例如，您是指广告投放中“有效转化”（如有效激活、有效付费）对应的监测事件点位，还是指某个具体的广告位、素材或游戏内的特定位置？提供更多上下文后，我可以帮您进一步确认。",
+      "intentType": "general",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（128ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入general链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：无需外部证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 general_chat，实际 general_chat，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "41.1",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:49:04.934Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2410
+          }
+        ],
+        "maxWorkingSetMb": 2410
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:49:48.392Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2425
+          }
+        ],
+        "maxWorkingSetMb": 2425
+      }
+    },
+    {
+      "caseId": "MIG-008",
+      "scene": "系统说明",
+      "prompt": "素材报表的未知是什么",
+      "keyPoint": "知识库",
+      "note": "",
+      "verdict": "通过",
+      "reason": "知识库回答长度 52",
+      "answer": "这次结果没有通过证据和安全检查，我已停止输出原回答。请补充更多信息或稍后重试，我会重新按可追溯来源处理。",
+      "intentType": "",
+      "contractStatus": "blocked",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "blocked",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（163ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入help链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：混合上下文证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 field_definition，实际 field_definition；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "23.3",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:49:52.001Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2335
+          }
+        ],
+        "maxWorkingSetMb": 2335
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:50:21.032Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2568
+          }
+        ],
+        "maxWorkingSetMb": 2568
+      }
+    },
+    {
+      "caseId": "MIG-009",
+      "scene": "查大盘数据",
+      "prompt": "看下近7天的日报数据",
+      "keyPoint": "时间、tool发现",
+      "note": "",
+      "verdict": "通过",
+      "reason": "包含数据内容且契约证据完整",
+      "answer": "**结论**\n- 2026-06-17 至 2026-06-23 的趋势结果已生成，共 56 条数据；核心指标为 消耗、激活成本、3日ROI。\n\n**证据**\n- 本次返回 56 条结果。\n- 统计范围为 2026-06-17 至 2026-06-23。\n- 指标：消耗、激活成本、3日ROI；维度：日期。\n\n**口径**\n- 时间范围：2026-06-17 至 2026-06-23\n- 指标：消耗、激活成本、3日ROI\n- 维度：日期\n- 数据来源：报表MCP.get_zt_ad_account_report\n\n**风险**\n- 结果缺少 appId 字段，相关结论需要复核。\n- 结果缺少标识字段：appId\n\n**下一步**\n- 查看明细数据\n- 继续下钻分析\n- 请检查归一化工具输出协议\n- 修正后我再继续查数",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 1,
+        "evidenceRefCount": 2,
+        "toolCallTraceCount": 2,
+        "processEventCount": 19,
+        "processEventSummary": [
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "Planner 候选：用户请求查看近7天的日报数据，属于广告数据报表查询和趋势分析范畴，匹配 report_query 意图。",
+            "outputSummary": "object(route)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "outputSummary": "object(enabled_server_count,slot_state,user_requirement,required_identifiers,capability_selected)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "outputSummary": "object(selected_capability_id,selected_tool_name,execution_decision,data_coverage,presentation_coverage,fallback_used)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "mcp.tool_result",
+            "label": "查询报表数据",
+            "status": "success",
+            "toolName": "get_zt_ad_account_report",
+            "summary": "已查到 2026-06-17 至 2026-06-23 的趋势结果，共 56 条数据。",
+            "outputSummary": "{\"message\":\"已查到 2026-06-17 至 2026-06-23 的趋势结果，共 56 条数据。\",\"status\":\"success\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "存在需要注意的数据口径或匹配风险。",
+            "outputSummary": "object(quality_check)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "ui.component_rendered",
+            "label": "生成趋势图：",
+            "status": "success",
+            "toolName": "",
+            "summary": "已生成可视化趋势结果。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "已查到 2026-06-17 至 2026-06-23 的趋势结果，共 56 条数据。",
+            "outputSummary": "{\"status\":\"success\"}",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "150.7",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:50:23.153Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2568
+          }
+        ],
+        "maxWorkingSetMb": 2568
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:52:55.880Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2900
+          }
+        ],
+        "maxWorkingSetMb": 2900
+      }
+    },
+    {
+      "caseId": "MIG-010",
+      "scene": "查维度数据",
+      "prompt": "巨量iOS创新的投放效果，带自然量",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "note": "",
+      "verdict": "失败",
+      "reason": "缺少有效 response_contract",
+      "answer": "我还不能直接完成这类请求，请补充目标、范围或要使用的数据来源，我会按可用能力继续处理。",
+      "intentType": "report_query",
+      "contractStatus": "not_configured",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "not_configured",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 9,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（90ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入report_query链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 system_operation，实际 system_operation；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "10.2",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:52:57.760Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2900
+          }
+        ],
+        "maxWorkingSetMb": 2900
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:53:09.527Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2533
+          }
+        ],
+        "maxWorkingSetMb": 2533
+      }
+    },
+    {
+      "caseId": "MIG-011",
+      "scene": "查明细数据",
+      "prompt": "查一下直播包的数据",
+      "keyPoint": "模糊意图、tool发现、参数补全",
+      "note": "",
+      "verdict": "通过",
+      "reason": "包含数据内容且契约证据完整",
+      "answer": "| 日期 | 消耗 | 激活成本 | 首日ROI |\n| --- | ---: | ---: | ---: |\n| 2026-06-23 | 34.46 元 | 16.79 元 | 0.00% |\n| 2026-06-23 | 29.72 元 | 0.00 元 | 0.00% |\n| 2026-06-23 | 21.67 元 | 21.12 元 | 0.00% |\n| 2026-06-23 | 14.52 元 | 0.00 元 | 0.00% |\n| 2026-06-23 | 1.75 元 | 0.00 元 | 0.00% |\n| 2026-06-23 | 0.00 元 | 0.00 元 | 0.00% |\n| 2026-06-23 | 0.00 元 | 0.00 元 | 0.00% |\n\n**结论**\n- 2026-06-23 的明细结果已生成，共 7 条数据；核心指标为 消耗、激活成本、首日ROI。\n\n**证据**\n- 本次返回 7 条结果。\n- 统计范围为 2026-06-23。\n- 指标：消耗、激活成本、首日ROI；维度：日期。\n- 明细预览：\n| 日期 | 消耗 | 激活成本 | 首日ROI |\n| --- | --- | --- | --- |\n| 2026-06-23 | 34.46 元 | 16.79 元 | 0.00% |\n| 2026-06-23 | 29.72 元 | 0.00 元 | 0.00% |\n| 2026-06-23 | 21.67 元 | 21.12 元 | 0.00% |\n| 2026-06-23 | 14.52 元 | 0.00 元 | 0.00% |\n| 2026-06-23 | 1.75 元 | 0.00 元 | 0.00% |\n\n**口径**\n- 时间范围：2026-06-23\n- 指标：消耗、激活成本、首日ROI\n- 维度：日期\n- 数据来源：报表MCP.get_zt_ad_account_report\n\n**风险**\n- 结果缺少 appId 字段，相关结论需要复核。\n- 结果缺少标识字段：appId\n\n**下一步**\n- 继续下钻分析\n- 请检查归一化工具输出协议\n- 修正后我再继续查数",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 1,
+        "evidenceRefCount": 2,
+        "toolCallTraceCount": 2,
+        "processEventCount": 19,
+        "processEventSummary": [
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "Planner 候选：用户请求查询直播包的数据，属于广告数据报表查询范畴，匹配报表MCP中的直播或包相关报表查询能力。",
+            "outputSummary": "object(route)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "outputSummary": "object(enabled_server_count,slot_state,user_requirement,required_identifiers,capability_selected)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "outputSummary": "object(selected_capability_id,selected_tool_name,execution_decision,data_coverage,presentation_coverage,fallback_used)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "mcp.tool_result",
+            "label": "查询报表数据",
+            "status": "success",
+            "toolName": "get_zt_ad_account_report",
+            "summary": "已查到 2026-06-23 至 2026-06-23 的明细结果，共 7 条数据。",
+            "outputSummary": "{\"message\":\"已查到 2026-06-23 至 2026-06-23 的明细结果，共 7 条数据。\",\"status\":\"success\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "存在需要注意的数据口径或匹配风险。",
+            "outputSummary": "object(quality_check)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "ui.component_rendered",
+            "label": "生成数据表：",
+            "status": "success",
+            "toolName": "",
+            "summary": "已生成结构化数据表。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "已查到 2026-06-23 至 2026-06-23 的明细结果，共 7 条数据。",
+            "outputSummary": "{\"status\":\"success\"}",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "149.5",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:53:11.546Z",
+        "guardMb": 8192,
+        "pids": [
+          36936
+        ],
+        "processes": [
+          {
+            "pid": 36936,
+            "workingSetMb": 2794
+          }
+        ],
+        "maxWorkingSetMb": 2794
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:56:09.626Z",
+        "guardMb": 8192,
+        "pids": [
+          61472
+        ],
+        "processes": [
+          {
+            "pid": 61472,
+            "workingSetMb": 2230
+          }
+        ],
+        "maxWorkingSetMb": 2230
+      }
+    },
+    {
+      "caseId": "MIG-012",
+      "scene": "查维度数据",
+      "prompt": "三国杀小游戏 鸿蒙端的数据",
+      "keyPoint": "终端",
+      "note": "",
+      "verdict": "通过",
+      "reason": "合理追问",
+      "answer": "还需要补充应用类型解析输出后才能继续。",
+      "intentType": "report_query",
+      "contractStatus": "missing_input",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "missing_input",
+        "sourceRefCount": 3,
+        "evidenceRefCount": 1,
+        "toolCallTraceCount": 5,
+        "processEventCount": 19,
+        "processEventSummary": [
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "Planner 候选：用户明确请求查询特定游戏（三国杀小游戏）和特定端（鸿蒙端）的数据，属于典型的数据报表查询需求，符合 report_query 意图。",
+            "outputSummary": "object(route)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "outputSummary": "object(enabled_server_count,slot_state,user_requirement,required_identifiers,capability_selected)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "outputSummary": "object(selected_capability_id,selected_tool_name,execution_decision,data_coverage,presentation_coverage,fallback_used)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "mcp.tool_result",
+            "label": "匹配查询条件",
+            "status": "waiting",
+            "toolName": "get_dict_zt_app_package_type",
+            "summary": "dictionary invalid output: 应用类型 harmony",
+            "outputSummary": "{\"message\":\"调用成功\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "mcp.tool_result",
+            "label": "查询报表数据",
+            "status": "waiting",
+            "toolName": "get_zt_ad_account_report",
+            "summary": "查询条件或能力未补齐，已停止本次报表查询。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "success",
+            "toolName": "",
+            "summary": "还需要补充应用类型解析输出后才能继续。",
+            "outputSummary": "object(missing_fields)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "还需要补充应用类型解析输出后才能继续。",
+            "outputSummary": "{\"status\":\"missing_input\"}",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "153.1",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:56:11.502Z",
+        "guardMb": 8192,
+        "pids": [
+          61472
+        ],
+        "processes": [
+          {
+            "pid": 61472,
+            "workingSetMb": 2180
+          }
+        ],
+        "maxWorkingSetMb": 2180
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T17:59:22.397Z",
+        "guardMb": 8192,
+        "pids": [
+          55120
+        ],
+        "processes": [
+          {
+            "pid": 55120,
+            "workingSetMb": 2143
+          }
+        ],
+        "maxWorkingSetMb": 2143
+      }
+    },
+    {
+      "caseId": "MIG-013",
+      "scene": "查多日数据",
+      "prompt": "查询近7日数据",
+      "keyPoint": "数据分析",
+      "note": "",
+      "verdict": "通过",
+      "reason": "包含数据内容且契约证据完整",
+      "answer": "**结论**\n- 2026-06-17 至 2026-06-23 的趋势结果已生成，共 56 条数据；核心指标为 消耗、激活成本、3日ROI。\n\n**证据**\n- 本次返回 56 条结果。\n- 统计范围为 2026-06-17 至 2026-06-23。\n- 指标：消耗、激活成本、3日ROI；维度：日期。\n\n**口径**\n- 时间范围：2026-06-17 至 2026-06-23\n- 指标：消耗、激活成本、3日ROI\n- 维度：日期\n- 数据来源：报表MCP.get_zt_ad_account_report\n\n**风险**\n- 结果缺少 appId 字段，相关结论需要复核。\n- 结果缺少标识字段：appId\n\n**下一步**\n- 查看明细数据\n- 继续下钻分析\n- 请检查归一化工具输出协议\n- 修正后我再继续查数",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 1,
+        "evidenceRefCount": 2,
+        "toolCallTraceCount": 2,
+        "processEventCount": 19,
+        "processEventSummary": [
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "Planner 候选：用户请求查询近7日数据，属于广告数据报表查询和趋势分析范畴，意图明确为report_query。",
+            "outputSummary": "object(route)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "outputSummary": "object(enabled_server_count,slot_state,user_requirement,required_identifiers,capability_selected)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "outputSummary": "object(selected_capability_id,selected_tool_name,execution_decision,data_coverage,presentation_coverage,fallback_used)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "mcp.tool_result",
+            "label": "查询报表数据",
+            "status": "success",
+            "toolName": "get_zt_ad_account_report",
+            "summary": "已查到 2026-06-17 至 2026-06-23 的趋势结果，共 56 条数据。",
+            "outputSummary": "{\"message\":\"已查到 2026-06-17 至 2026-06-23 的趋势结果，共 56 条数据。\",\"status\":\"success\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "存在需要注意的数据口径或匹配风险。",
+            "outputSummary": "object(quality_check)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "ui.component_rendered",
+            "label": "生成趋势图：",
+            "status": "success",
+            "toolName": "",
+            "summary": "已生成可视化趋势结果。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "已查到 2026-06-17 至 2026-06-23 的趋势结果，共 56 条数据。",
+            "outputSummary": "{\"status\":\"success\"}",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "155.2",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T17:59:25.302Z",
+        "guardMb": 8192,
+        "pids": [
+          55120
+        ],
+        "processes": [
+          {
+            "pid": 55120,
+            "workingSetMb": 2140
+          }
+        ],
+        "maxWorkingSetMb": 2140
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T18:02:02.997Z",
+        "guardMb": 8192,
+        "pids": [
+          55120
+        ],
+        "processes": [
+          {
+            "pid": 55120,
+            "workingSetMb": 2219
+          }
+        ],
+        "maxWorkingSetMb": 2219
+      }
+    },
+    {
+      "caseId": "MIG-014",
+      "scene": "查多日数据",
+      "prompt": "查询近30日趋势、分日",
+      "keyPoint": "趋势图、数据分析",
+      "note": "",
+      "verdict": "通过",
+      "reason": "包含数据内容且契约证据完整",
+      "answer": "**结论**\n- 2026-05-25 至 2026-06-23 的趋势结果已生成，共 100 条数据；核心指标为 消耗、激活成本、3日ROI。\n\n**证据**\n- 本次返回 100 条结果。\n- 统计范围为 2026-05-25 至 2026-06-23。\n- 指标：消耗、激活成本、3日ROI；维度：日期。\n\n**口径**\n- 时间范围：2026-05-25 至 2026-06-23\n- 指标：消耗、激活成本、3日ROI\n- 维度：日期\n- 数据来源：报表MCP.get_zt_ad_account_report\n\n**风险**\n- 结果缺少 appId 字段，相关结论需要复核。\n- 结果缺少标识字段：appId\n\n**下一步**\n- 查看明细数据\n- 继续下钻分析\n- 请检查归一化工具输出协议\n- 修正后我再继续查数",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 1,
+        "evidenceRefCount": 2,
+        "toolCallTraceCount": 2,
+        "processEventCount": 19,
+        "processEventSummary": [
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "Planner 候选：用户请求查询近30日的分日趋势数据，属于典型的广告数据报表查询和趋势分析需求，匹配report_query意图。",
+            "outputSummary": "object(route)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "outputSummary": "object(enabled_server_count,slot_state,user_requirement,required_identifiers,capability_selected)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "outputSummary": "object(selected_capability_id,selected_tool_name,execution_decision,data_coverage,presentation_coverage,fallback_used)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "mcp.tool_result",
+            "label": "查询报表数据",
+            "status": "success",
+            "toolName": "get_zt_ad_account_report",
+            "summary": "已查到 2026-05-25 至 2026-06-23 的趋势结果，共 100 条数据。",
+            "outputSummary": "{\"message\":\"已查到 2026-05-25 至 2026-06-23 的趋势结果，共 100 条数据。\",\"status\":\"success\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "存在需要注意的数据口径或匹配风险。",
+            "outputSummary": "object(quality_check)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "ui.component_rendered",
+            "label": "生成趋势图：",
+            "status": "success",
+            "toolName": "",
+            "summary": "已生成可视化趋势结果。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "已查到 2026-05-25 至 2026-06-23 的趋势结果，共 100 条数据。",
+            "outputSummary": "{\"status\":\"success\"}",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "155.2",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T18:02:05.214Z",
+        "guardMb": 8192,
+        "pids": [
+          55120
+        ],
+        "processes": [
+          {
+            "pid": 55120,
+            "workingSetMb": 2221
+          }
+        ],
+        "maxWorkingSetMb": 2221
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T18:06:28.798Z",
+        "guardMb": 8192,
+        "pids": [
+          14996
+        ],
+        "processes": [
+          {
+            "pid": 14996,
+            "workingSetMb": 2153
+          }
+        ],
+        "maxWorkingSetMb": 2153
+      }
+    },
+    {
+      "caseId": "MIG-001",
+      "scene": "广告报表-日期识别-DATE-001",
+      "prompt": "指间山海 2026 年 3 月 1 日至 3 月 15 日的激活数和注册数",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：激活 11,819 注册 10,554\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：日期解析正确",
+      "note": "",
+      "verdict": "失败",
+      "reason": "缺少执行证据 source=0, evidence=0, tool=0, process=11",
+      "answer": "我可以先基于开放式回答、写作、总结、解释和需求整理、可用工具和 MCP 能力、内部知识库和资料检索上下文、当前项目和用户权限上下文帮你拆解问题、整理结论和下一步；需要实时或内部事实时，会按可用证据说明边界。",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（139ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入report_query链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：无需外部证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "20.9",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T18:06:31.157Z",
+        "guardMb": 8192,
+        "pids": [
+          14996
+        ],
+        "processes": [
+          {
+            "pid": 14996,
+            "workingSetMb": 2126
+          }
+        ],
+        "maxWorkingSetMb": 2126
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T18:06:54.181Z",
+        "guardMb": 8192,
+        "pids": [
+          14996
+        ],
+        "processes": [
+          {
+            "pid": 14996,
+            "workingSetMb": 1881
+          }
+        ],
+        "maxWorkingSetMb": 1881
+      }
+    }
+  ]
+}

@@ -100,6 +100,14 @@ export interface CapabilityManifest {
   serviceLine?: string;
   automationLevel?: AutomationLevel;
   owner?: string;
+  governanceVersion?: string;
+  routeRuleRefs?: string[];
+  fallbackPolicy?: 'clarify' | 'degrade' | 'manual_review' | 'not_applicable';
+  inputContract?: {
+    requiredFields?: string[];
+    optionalFields?: string[];
+    description?: string;
+  };
   toolContractRefs?: string[];
   evidenceNeed?: string[];
   outputSurface?: ServiceOutputSurface[];

@@ -108,6 +108,19 @@ export function resolveCompositeIntentRoute(params: {
     route_decision_scope: selected?.decision_scope || baseDecision.route_decision_scope,
     route_execution_authority: selected?.execution_authority || baseDecision.route_execution_authority,
     route_candidate_only: selected?.execution_authority ? selected.execution_authority !== 'execution_authorized' : baseDecision.route_candidate_only,
+    candidate_source: selected ? 'route_rule_arbitration' : baseDecision.candidate_source || 'request_understanding_fallback',
+    decision_scope: selected?.decision_scope || baseDecision.decision_scope || 'candidate_only',
+    deprecation_target: baseDecision.deprecation_target,
+    execution_decision: selected?.execution_authority === 'execution_authorized' ? 'needs_arbitration' : selectedIntent === 'general' ? 'no_executable_capability' : 'needs_arbitration',
+    fallback_reason: selected ? undefined : baseDecision.fallback_reason || 'request_understanding_fallback_candidate',
+    arbitrated_route: {
+      status: selectedIntent === 'general' && !selected ? 'clarify_required' : 'pending_arbitration',
+      selected_intent_type: selectedIntent,
+      selected_agent: selected?.agent || baseDecision.agent,
+      capability_id: null,
+      arbitration_rule_id: selected?.policy_id || baseDecision.route_policy_id || 'request-understanding-fallback',
+      reason: selected?.reason || baseDecision.reason,
+    },
   };
 
   return {

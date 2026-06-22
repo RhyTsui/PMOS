@@ -3,30 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ad.xiaoqiao.models import WorkflowLevel
-
-
-BUSINESS_KEYWORDS = (
-    "广告",
-    "归因",
-    "投放",
-    "联调",
-    "回传",
-    "回推",
-    "数据",
-    "素材",
-    "roi",
-    "ltv",
-    "媒体",
-    "计划",
-    "监控",
-    "bi",
-    "激活",
-)
-
-HELP_KEYWORDS = ("什么意思", "怎么", "哪里看", "在哪看", "逻辑", "指标", "口径", "帮助", "说明")
-DIAGNOSIS_KEYWORDS = ("为什么", "异常", "少了", "不对", "对不上", "gap", "排查", "归因")
-DEMAND_KEYWORDS = ("需求", "接入", "对接", "配置", "提单", "新增", "支持")
-DEBUGGING_KEYWORDS = ("联调", "白名单", "设备", "浏览器", "自动化", "回放")
+from ad.xiaoqiao.legacy_route_signals import match_legacy_route_signals
 
 
 @dataclass
@@ -37,6 +14,11 @@ class RoutingDecision:
     workflow_level: WorkflowLevel
     clarification_needed: bool
     decision_reason: str
+    source: str = "legacy_keyword_adapter"
+    decision_scope: str = "candidate_only"
+    deprecation_target: str = "Enterprise AI Chat OS capability discovery / planner arbitration"
+    final_route_authority: str = "requires_arbitration"
+    matched_signal_groups: tuple[str, ...] = ()
 
 
 def route_message(content: str) -> RoutingDecision:
@@ -48,34 +30,37 @@ def route_message(content: str) -> RoutingDecision:
             intent_type=None,
             workflow_level="none",
             clarification_needed=True,
-            decision_reason="输入为空，先追问用户要处理什么问题。",
+            decision_reason="Legacy adapter candidate: 输入为空，只能建议澄清，不授权业务工作流。",
         )
 
-    if not any(keyword in text for keyword in BUSINESS_KEYWORDS):
+    matched_groups = match_legacy_route_signals(text)
+
+    if "business_domain_signal" not in matched_groups:
         return RoutingDecision(
             is_business_related=False,
             business_domain=None,
             intent_type=None,
             workflow_level="none",
             clarification_needed=False,
-            decision_reason="未命中广告业务关键词，按普通自然问答处理。",
+            decision_reason="Legacy adapter candidate: 未发现业务候选信号，建议交由 Planner/Capability Discovery 继续判断。",
+            matched_signal_groups=tuple(matched_groups),
         )
 
-    if any(keyword in text for keyword in DEBUGGING_KEYWORDS):
-        return RoutingDecision(True, "ad", "debugging", "heavy", False, "命中联调/自动化关键词，进入广告联调重工作流。")
-    if any(keyword in text for keyword in DEMAND_KEYWORDS):
-        return RoutingDecision(True, "ad", "demand", "heavy", False, "命中需求/接入关键词，进入需求沟通重工作流。")
-    if any(keyword in text for keyword in DIAGNOSIS_KEYWORDS):
-        return RoutingDecision(True, "ad", "diagnosis", "heavy", False, "命中异常/原因/排查关键词，进入问题排查重工作流。")
-    if any(keyword in text for keyword in HELP_KEYWORDS):
-        return RoutingDecision(True, "ad", "help", "light", False, "命中帮助/指标/逻辑关键词，进入使用帮助轻工作流。")
+    if "debugging_signal" in matched_groups:
+        return RoutingDecision(True, "ad", "debugging", "none", False, "Legacy adapter candidate: 发现联调/自动化候选信号，仅供仲裁参考。", matched_signal_groups=tuple(matched_groups))
+    if "demand_signal" in matched_groups:
+        return RoutingDecision(True, "ad", "demand", "none", False, "Legacy adapter candidate: 发现需求/接入候选信号，仅供仲裁参考。", matched_signal_groups=tuple(matched_groups))
+    if "help_signal" in matched_groups:
+        return RoutingDecision(True, "ad", "help", "none", False, "Legacy adapter candidate: 发现帮助/指标/逻辑候选信号，仅供仲裁参考。", matched_signal_groups=tuple(matched_groups))
+    if "diagnosis_signal" in matched_groups:
+        return RoutingDecision(True, "ad", "diagnosis", "none", False, "Legacy adapter candidate: 发现异常/原因/排查候选信号，仅供仲裁参考。", matched_signal_groups=tuple(matched_groups))
 
     return RoutingDecision(
         is_business_related=True,
         business_domain="ad",
-        intent_type="help",
-        workflow_level="light",
+        intent_type=None,
+        workflow_level="none",
         clarification_needed=True,
-        decision_reason="可判断为广告域，但诉求类型不够明确，先按轻工作流追问。",
+        decision_reason="Legacy adapter candidate: 可判断为广告域候选，但诉求类型不够明确，建议 Planner 追问或继续发现能力。",
+        matched_signal_groups=tuple(matched_groups),
     )
-

@@ -1,0 +1,282 @@
+{
+  "timestamp": "2026-06-22T09:10:34.232Z",
+  "selectedCaseIds": null,
+  "selectedExcelRows": [
+    24
+  ],
+  "currentProjectOverride": null,
+  "total": 1,
+  "passCount": 0,
+  "failCount": 1,
+  "blockedCount": 0,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-22T09:10:34.232Z",
+    "guardMb": 3072,
+    "pids": [
+      40696
+    ],
+    "processes": [
+      {
+        "pid": 40696,
+        "workingSetMb": 339
+      }
+    ],
+    "maxWorkingSetMb": 339
+  },
+  "memoryPeakMb": 339,
+  "memorySamples": [
+    {
+      "phase": "case_start",
+      "caseId": "R24-MIG-008-广告报表-日期识别-DATE-F005",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T09:10:23.562Z",
+      "guardMb": 3072,
+      "pids": [
+        40696
+      ],
+      "processes": [
+        {
+          "pid": 40696,
+          "workingSetMb": 219
+        }
+      ],
+      "maxWorkingSetMb": 219
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "R24-MIG-008-广告报表-日期识别-DATE-F005",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T09:10:24.076Z",
+      "guardMb": 3072,
+      "pids": [
+        40696
+      ],
+      "processes": [
+        {
+          "pid": 40696,
+          "workingSetMb": 219
+        }
+      ],
+      "maxWorkingSetMb": 219
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "R24-MIG-008-广告报表-日期识别-DATE-F005",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T09:10:33.971Z",
+      "guardMb": 3072,
+      "pids": [
+        40696
+      ],
+      "processes": [
+        {
+          "pid": 40696,
+          "workingSetMb": 339
+        }
+      ],
+      "maxWorkingSetMb": 339
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-22T09:10:34.232Z",
+      "guardMb": 3072,
+      "pids": [
+        40696
+      ],
+      "processes": [
+        {
+          "pid": 40696,
+          "workingSetMb": 339
+        }
+      ],
+      "maxWorkingSetMb": 339
+    }
+  ],
+  "results": [
+    {
+      "excelRow": 24,
+      "caseKey": "R24-MIG-008-广告报表-日期识别-DATE-F005",
+      "caseId": "MIG-008",
+      "scene": "广告报表-日期识别-DATE-F005",
+      "prompt": "指间山海二月同期广告投放部的累计ROI和合计第2日ROI",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：上月同期：20260201-20260227 累计ROI:39.01 合计第2日ROI:8.38%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：ROI报表+月累计/区间",
+      "note": "",
+      "verdict": "失败",
+      "reason": "response_contract.status=not_configured",
+      "answer": "我还不能直接完成这类请求，请补充目标、范围或要使用的数据来源，我会按可用能力继续处理。",
+      "intentType": "report_query",
+      "contractStatus": "not_configured",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "not_configured",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "evidenceRefs": [],
+        "toolCallTraceCount": 0,
+        "toolCallTraceSummary": [],
+        "processEventCount": 9,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（92ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入report_query链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 system_operation，实际 system_operation；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "subQueryId": "",
+            "inputKeys": [],
+            "inputPreview": "",
+            "inputSummary": "",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "9.5",
+      "memoryBefore": {
+        "sampledAt": "2026-06-22T09:10:23.562Z",
+        "guardMb": 3072,
+        "pids": [
+          40696
+        ],
+        "processes": [
+          {
+            "pid": 40696,
+            "workingSetMb": 219
+          }
+        ],
+        "maxWorkingSetMb": 219
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-22T09:10:33.971Z",
+        "guardMb": 3072,
+        "pids": [
+          40696
+        ],
+        "processes": [
+          {
+            "pid": 40696,
+            "workingSetMb": 339
+          }
+        ],
+        "maxWorkingSetMb": 339
+      }
+    }
+  ]
+}

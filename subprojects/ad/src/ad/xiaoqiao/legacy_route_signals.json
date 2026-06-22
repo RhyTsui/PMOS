@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "owner": "ai-chat-governance",
+  "updated_at": "2026-06-23T00:00:00.000Z",
+  "deprecation_target": "Enterprise AI Chat OS capability discovery / planner arbitration",
+  "decision_scope": "candidate_only",
+  "signals": {
+    "business_domain_signal": ["广告", "归因", "投放", "联调", "回传", "回推", "数据", "素材", "roi", "ltv", "媒体", "计划", "监控", "bi", "激活"],
+    "help_signal": ["什么意思", "怎么", "哪里看", "在哪看", "逻辑", "指标", "口径", "帮助", "说明"],
+    "diagnosis_signal": ["为什么", "异常", "少了", "不对", "对不上", "gap", "排查", "归因"],
+    "demand_signal": ["需求", "接入", "对接", "配置", "提单", "新增", "支持"],
+    "debugging_signal": ["联调", "白名单", "设备", "浏览器", "自动化", "回放"]
+  }
+}

@@ -19,8 +19,24 @@ export type WorkflowLevel = 'light' | 'heavy';
 /** 任务所有者类型（数据对象真源 5.6） */
 export type OwnerType = 'xiaoqiao' | 'sub-agent' | 'human-escalation';
 
-/** 消息类型（数据对象真源 4.3） */
-export type MessageType = 'user_input' | 'assistant_reply' | 'clarification' | 'system_notice' | 'workflow_summary';
+/** 消息类型（数据对象真源 4.3 + Chat-first Task Center 扩展） */
+export type MessageType =
+  | 'user_input'
+  | 'assistant_reply'
+  | 'clarification'
+  | 'system_notice'
+  | 'workflow_summary'
+  | 'task_proposal'
+  | 'task_created'
+  | 'task_updated'
+  | 'task_paused'
+  | 'task_resumed'
+  | 'task_deleted'
+  | 'task_run_started'
+  | 'task_run_completed'
+  | 'task_run_failed'
+  | 'task_run_skipped'
+  | 'task_needs_action';
 
 export type PresentationMessageType =
   | 'chat'
@@ -328,6 +344,23 @@ export interface Conversation {
   // 前端扩展
   message_count?: number;
   latest_task_id?: string;
+  /** Chat-first Task Center: 会话类型 */
+  conversation_type?: 'normal' | 'automation';
+  /** Chat-first Task Center: 任务状态角标 */
+  task_badge?: {
+    task_id: string;
+    status: 'active' | 'paused' | 'failed' | 'needs_action';
+    label: string;
+    next_run_at?: string;
+  };
+  /** Chat-first Task Center: 未读自动化结果 */
+  unread_automation?: {
+    count: number;
+    latest_run_id: string;
+    latest_message_id: string;
+    severity: 'info' | 'success' | 'warning' | 'error';
+    label: string;
+  };
 }
 
 /** 消息对象（数据对象真源 4） */
@@ -561,6 +594,12 @@ export interface ResponseContract {
   tool_call_trace?: ToolCallTrace[];
   disclaimers?: string[];
   contract_safety?: ContractSafetyResult;
+  candidate_source?: string;
+  final_route_decision?: Record<string, unknown>;
+  execution_decision?: string;
+  fallback_reason?: string;
+  evidence_ids?: string[];
+  contract_safety_trace_ref?: string;
   next_actions: AiNextAction[];
   answer_origin?: MessageRuntimeProjection['answer_origin'];
   metadata?: Record<string, unknown>;
@@ -1038,6 +1077,46 @@ export interface DemandPoolItem {
   owner: string;
   created_at: number;
   updated_at: number;
+
+  // ─── 需求 Intake 关联字段（P1 新增）──────────────────
+
+  /** 关联的 CaseFrame ID */
+  caseId?: string;
+  /** 关联的会话 ID */
+  conversationId?: string;
+  /** 关联的消息 ID */
+  messageId?: string;
+  /** 服务类型（monitoring_callback / data_collection） */
+  serviceType?: string;
+  /** 需求 intake 状态 */
+  intakeDraftStatus?: 'collecting' | 'ready_for_confirmation' | 'confirmed' | 'submitted';
+  /** 已收集的槽位 */
+  intakeSlots?: Record<string, {
+    value?: string;
+    source?: string;
+    confirmed?: boolean;
+  }>;
+  /** 缺失项 */
+  intakeMissingInputs?: string[];
+  /** 产物（文档 URL 等） */
+  intakeArtifacts?: Array<{
+    type: string;
+    url?: string;
+    title?: string;
+    storedAt?: string;
+  }>;
+  /** 风险提示 */
+  intakeRiskWarnings?: string[];
+  /** 原始用户消息摘要 */
+  originalMessageSummary?: string;
+  /** 确认时间戳 */
+  confirmedAt?: number;
+  /** 提交时间戳 */
+  submittedAt?: number;
+  /** 关联的证据引用 */
+  evidenceRefs?: string[];
+  /** 关联的来源引用 */
+  sourceRefs?: string[];
 }
 
 // ==========================================
@@ -1292,6 +1371,20 @@ export interface ScheduledTaskExecution {
   failure_case_id?: string;
   /** 执行步骤 */
   step_runs?: AutomationExecutionStep[];
+  /** Chat-first Task Center: 输出消息 ID */
+  output_message_id?: string;
+  /** Chat-first Task Center: Trace ID */
+  trace_id?: string;
+  /** Chat-first Task Center: 产物引用 */
+  artifact_refs?: Array<{ type: string; uri: string; name?: string }>;
+  /** Chat-first Task Center: 证据引用 */
+  evidence_refs?: Array<{ type: string; id: string; label?: string }>;
+  /** Chat-first Task Center: 来源引用 */
+  source_refs?: Array<{ type: string; uri: string; title?: string }>;
+  /** 结果复用：可在 Chat 中复用 */
+  result_reusable_in_chat?: boolean;
+  /** 质量状态 */
+  quality_status?: string;
 }
 
 /** 定时任务 */
@@ -1353,6 +1446,32 @@ export interface ScheduledTask {
   enabled: boolean;
   created_at: number;
   updated_at: number;
+  /** Chat-first Task Center: 来源会话 ID */
+  source_conversation_id?: string;
+  /** Chat-first Task Center: 创建该任务的消息 ID */
+  created_by_message_id?: string;
+  /** Chat-first Task Center: 风险等级 */
+  risk_level?: 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+  /** Chat-first Task Center: 模板 ID */
+  template_id?: 'scheduled_join_table' | 'scheduled_aggregate_table' | 'gi_keyword_daily_digest' | 'scheduled_metric_monitor' | 'custom';
+  /** Chat-first Task Center: 最近一次结果摘要 */
+  last_result_summary?: string;
+  /** Chat-first Task Center: 最近一次结果消息 ID */
+  last_result_message_id?: string;
+  /** Chat-first Task Center: 最近一次运行状态 */
+  last_run_status?: 'completed' | 'failed' | 'partial' | 'skipped' | 'needs_action';
+  /** 自动化触发方式 */
+  automation_trigger?: 'manual' | 'schedule' | 'event' | 'webhook';
+  /** 自动化可见性 */
+  automation_visibility?: 'admin_only' | 'owner_visible' | 'public' | 'silent';
+  /** 所有者范围 */
+  owner_scope?: string;
+  /** 结果复用策略 */
+  result_reuse_policy?: {
+    freshness_seconds?: number;
+    reusable_in_chat?: boolean;
+    requires_evidence_refs?: boolean;
+  };
 }
 
 export interface AutomationNotification {
@@ -1435,6 +1554,22 @@ export interface AutomationDraftSuggestion {
   missing_fields: string[];
   confidence: 'high' | 'medium' | 'low';
   reason: string;
+  /** 模板布局（多 sheet） */
+  template_layout?: {
+    sheets: Array<{
+      sheet_name: string;
+      headers: string[];
+      source?: string;
+    }>;
+    required_fields?: string[];
+    missing_fields?: string[];
+  };
+  /** 模板来源 */
+  template_source?: string;
+  /** 报表模板名称 */
+  report_template_name?: string;
+  /** 报表模板 ID */
+  report_template_id?: string;
 }
 
 // ==========================================
@@ -2307,4 +2442,115 @@ export interface McpServerConfig {
   error_message?: string;
   created_at: number;
   updated_at: number;
+}
+
+// ==========================================
+// Chat-first Task Center 扩展类型
+// ==========================================
+
+/** 任务结果消息载荷 */
+export interface TaskResultMessagePayload {
+  task_id: string;
+  run_id: string;
+  task_title: string;
+  run_status: 'completed' | 'failed' | 'partial' | 'skipped' | 'needs_action';
+  completed_at?: string;
+  /** 用户可读摘要 */
+  summary: string;
+  /** 关键发现 */
+  key_findings?: string[];
+  /** 建议动作 */
+  next_actions?: Array<{ label: string; action: string; payload?: Record<string, unknown> }>;
+  /** 产物引用 */
+  artifacts?: Array<{ type: string; uri: string; name?: string }>;
+  /** 证据引用 */
+  evidence_refs?: Array<{ type: string; id: string; label?: string }>;
+  /** 来源引用 */
+  source_refs?: Array<{ type: string; uri: string; title?: string }>;
+  /** Trace ID */
+  trace_id?: string;
+  /** 展示模式 */
+  display_mode: 'compact' | 'expanded';
+  /** 模板 ID */
+  template_id?: string;
+  /** 模板专用数据 */
+  template_data?: Record<string, unknown>;
+}
+
+/** 会话高亮记录 */
+export interface ConversationHighlight {
+  id: string;
+  conversation_id: string;
+  message_id: string;
+  task_id: string;
+  run_id: string;
+  severity: 'info' | 'success' | 'warning' | 'error';
+  label: string;
+  read: boolean;
+  created_at: string;
+  read_at?: string;
+  read_by?: string;
+}
+
+/** 任务模板定义 */
+export interface TaskTemplateDefinition {
+  template_id: 'scheduled_join_table' | 'scheduled_aggregate_table' | 'gi_keyword_daily_digest' | 'scheduled_metric_monitor' | 'custom';
+  name: string;
+  description: string;
+  /** 必填槽位 */
+  required_slots: Array<{
+    key: string;
+    label: string;
+    type: 'string' | 'string[]' | 'schedule' | 'object';
+    description: string;
+    required: boolean;
+  }>;
+  /** 输出契约 */
+  output_contract: {
+    message_type: MessageType;
+    supports_artifacts: boolean;
+    supports_charts: boolean;
+    supports_table_preview: boolean;
+  };
+  /** 风险等级 */
+  risk_level: 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+  /** 执行器绑定 */
+  executor_binding: string;
+  /** 意图识别关键词（辅助） */
+  intent_keywords?: string[];
+}
+
+/** 任务 Proposal 载荷 */
+export interface TaskProposalPayload {
+  task_title: string;
+  description: string;
+  template_id?: string;
+  schedule_label: string;
+  risk_level: 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+  risk_description?: string;
+  scope_summary: string;
+  output_summary: string;
+  missing_slots?: string[];
+  clarifying_question?: string;
+}
+
+/** 自动化意图识别结果 */
+export interface AutomationIntentResult {
+  automation_intent: 'create' | 'update' | 'pause' | 'resume' | 'delete' | 'rerun' | 'ask_status' | 'ask_history' | 'none';
+  target_task_ref: 'current' | 'latest' | 'explicit_title' | 'unknown';
+  requires_confirmation: boolean;
+  risk_level: 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+  template_id?: string;
+  slots: {
+    schedule?: string;
+    condition?: string;
+    scope?: string;
+    metrics?: string[];
+    media?: string[];
+    project?: string;
+    time_range?: string;
+    output_preference?: string;
+  };
+  missing_slots: string[];
+  clarifying_question?: string;
 }

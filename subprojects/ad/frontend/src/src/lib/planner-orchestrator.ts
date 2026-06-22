@@ -35,6 +35,14 @@ export interface PlannerOrchestratorResult {
   warnings: Array<{ code: string; message: string }>;
   durationMs: number;
   modelName?: string;
+  plannerMode?: 'shadow' | 'main';
+  promptSource?: 'managed' | 'builtin_local_degrade';
+  fallbackPolicy?: 'fail_open_contract_guarded';
+  comparisonTrace?: {
+    route_candidate_only: boolean;
+    can_execute_tools: boolean;
+    can_change_user_visible_result: boolean;
+  };
   debugSummary?: {
     output_length: number;
     starts_with_char_type: 'brace' | 'bracket' | 'backtick' | 'letter' | 'whitespace' | 'other' | 'empty';
@@ -235,7 +243,7 @@ function buildDebugSummary(
  * Built-in fallback planner prompt (used when prompt store is unavailable)
  */
 const PLANNER_PROMPT_BUILTIN = [
-  '你是一个任务规划器。分析用户消息并生成结构化执行计划。',
+  '你是一个任务规划器。分析用户消息并生成 PlannerPlanContract 结构化执行计划。',
   '',
   '【严格规则 - 必须遵守】',
   '1. 只输出一个 JSON 对象，不要输出任何其他内容',
@@ -384,7 +392,7 @@ const PLANNER_PROMPT_BUILTIN = [
  * Build Planner prompt without business-specific keywords
  * P0 治理：从 prompt store 读取 managed prompt，失败时 fallback 到原始内置文案
  */
-async function buildPlannerPrompt(input: PlannerOrchestratorInput): Promise<string> {
+async function buildPlannerPrompt(input: PlannerOrchestratorInput): Promise<{ prompt: string; source: 'managed' | 'builtin_local_degrade' }> {
   const { message, conversationHistory, now, locale } = input;
 
   const managedPrompt = await getPromptContent('planner_shadow.plan', '').catch(() => '');
@@ -415,9 +423,27 @@ async function buildPlannerPrompt(input: PlannerOrchestratorInput): Promise<stri
   parts.push('');
   parts.push('Output ONLY the JSON object, no explanations.');
 
-  return parts.join('\n');
+  return {
+    prompt: parts.join('\n'),
+    source: managedPrompt ? 'managed' : 'builtin_local_degrade',
+  };
 }
 
+function buildPlannerGovernanceMeta(params: {
+  plannerMode: 'shadow' | 'main';
+  promptSource?: 'managed' | 'builtin_local_degrade';
+}): Pick<PlannerOrchestratorResult, 'plannerMode' | 'promptSource' | 'fallbackPolicy' | 'comparisonTrace'> {
+  return {
+    plannerMode: params.plannerMode,
+    promptSource: params.promptSource,
+    fallbackPolicy: 'fail_open_contract_guarded',
+    comparisonTrace: {
+      route_candidate_only: true,
+      can_execute_tools: false,
+      can_change_user_visible_result: false,
+    },
+  };
+}
 /**
  * Run Planner Orchestrator in shadow mode
  *
@@ -434,6 +460,7 @@ export async function runPlannerOrchestratorShadow(
   const startTime = Date.now();
   const errors: Array<{ code: string; message: string }> = [];
   const warnings: Array<{ code: string; message: string }> = [];
+  const plannerMode = process.env.PLANNER_FIRST_MODE === 'main' ? 'main' : 'shadow';
 
   try {
     // Check if shadow mode is enabled
@@ -443,6 +470,7 @@ export async function runPlannerOrchestratorShadow(
         errors,
         warnings,
         durationMs: Date.now() - startTime,
+      ...buildPlannerGovernanceMeta({ plannerMode }),
       };
     }
 
@@ -453,11 +481,16 @@ export async function runPlannerOrchestratorShadow(
         errors: [{ code: 'llm_client_missing', message: 'LLM client not provided' }],
         warnings,
         durationMs: Date.now() - startTime,
+      ...buildPlannerGovernanceMeta({ plannerMode }),
       };
     }
 
     const timeoutMs = input.timeoutMs ?? 3000;
-    const prompt = await buildPlannerPrompt(input);
+    const promptBuild = await buildPlannerPrompt(input);
+    const prompt = promptBuild.prompt;
+    if (promptBuild.source === 'builtin_local_degrade') {
+      warnings.push({ code: 'planner_prompt_builtin_degrade', message: 'Managed planner prompt unavailable; using local builtin prompt as governed degrade fallback.' });
+    }
 
     // Call LLM with timeout
     let llmResult: { text: string; modelName?: string; latencyMs?: number };
@@ -483,6 +516,7 @@ export async function runPlannerOrchestratorShadow(
           errors: [{ code: 'llm_timeout', message: `LLM call timed out after ${timeoutMs}ms` }],
           warnings,
           durationMs: Date.now() - startTime,
+          ...buildPlannerGovernanceMeta({ plannerMode }),
         };
       }
 
@@ -492,6 +526,7 @@ export async function runPlannerOrchestratorShadow(
         warnings,
         durationMs: Date.now() - startTime,
         modelName: input.modelName,
+        ...buildPlannerGovernanceMeta({ plannerMode }),
       };
     }
 
@@ -508,6 +543,7 @@ export async function runPlannerOrchestratorShadow(
         warnings,
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
+        ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
         debugSummary: buildDebugSummary('', llmResult.modelName, Date.now() - startTime, {
           code: 'empty_llm_output',
           message: 'LLM returned empty output',
@@ -524,6 +560,7 @@ export async function runPlannerOrchestratorShadow(
         warnings,
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
+        ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
         debugSummary: buildDebugSummary(llmResult.text, llmResult.modelName, Date.now() - startTime, {
           code: 'json_extraction_failed',
           message: 'Could not extract JSON from LLM output',
@@ -547,6 +584,7 @@ export async function runPlannerOrchestratorShadow(
         warnings,
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
+        ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
         debugSummary: buildDebugSummary(llmResult.text, llmResult.modelName, Date.now() - startTime, {
           code: 'json_parse_error',
           message: errorMessage,
@@ -565,6 +603,7 @@ export async function runPlannerOrchestratorShadow(
         warnings: validation.warnings.map(w => ({ code: w.code, message: `${w.path}: ${w.message}` })),
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
+      ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
       };
     }
 
@@ -577,6 +616,7 @@ export async function runPlannerOrchestratorShadow(
       warnings: [...warnings, ...validation.warnings.map(w => ({ code: w.code, message: `${w.path}: ${w.message}` }))],
       durationMs: Date.now() - startTime,
       modelName: llmResult.modelName,
+      ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
     };
 
   } catch (error) {
@@ -587,6 +627,7 @@ export async function runPlannerOrchestratorShadow(
       errors: [{ code: 'unexpected_error', message: errorMessage }],
       warnings,
       durationMs: Date.now() - startTime,
+      ...buildPlannerGovernanceMeta({ plannerMode }),
     };
   }
 }

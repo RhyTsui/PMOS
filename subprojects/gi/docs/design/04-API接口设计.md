@@ -663,13 +663,35 @@ POST /api/v1/intelligence/expansion/keyword
 |------|------|
 | `keyword` | 关键词（必填） |
 | `scope` | `seed` / `source` / `all`，默认 `all` |
-| `seedType` | 种子类型：`entity`/`event`/`topic`/`source` |
-| `sourceType` | 信源类型：`media`/`community`/`official`/`social`/`wechat_mp`（兼容 `wewe`） |
+| `seedType` | 种子类型：`entity` / `event` / `topic` / `source` |
+| `sourceType` | 信源类型：`media` / `community` / `official` / `social` / `wechat_mp`（兼容 `wewe`） |
 | `createSeed` | 是否创建种子（默认 true） |
 | `createSource` | 是否创建信源（默认 true） |
 | `dryRun` | true 时仅预览，不落库 |
 
+**参数约束**：
+| 参数 | 枚举/取值 | 默认值 |
+|------|-----------|--------|
+| `scope` | `seed` / `source` / `all` | `all` |
+| `seedType` | `entity` / `event` / `topic` / `source` | `event` |
+| `sourceType` | `media` / `community` / `official` / `social` / `forum` / `wechat_mp` | `media` |
+| `createSeed` | `true` / `false` | `true` |
+| `createSource` | `true` / `false` | `true` |
+| `dryRun` | `true` / `false` | `false` |
+
+**路由对照**：
+| 目标 | 路由 |
+|------|------|
+| 关键词实时拓展 | `POST /api/v1/intelligence/expansion/keyword` |
+
 **返回建议**：`candidates`（候选）、`created`（已创建）、`skipped`（跳过原因）、`meta`（创建计数）。
+
+**错误码（客户端侧）**：
+
+| HTTP 状态 | 错误码 | 说明 |
+|-----------|--------|------|
+| 400 | `INVALID_INPUT` | `keyword` 为空、非法字符、长度不足 |
+| 500 | `CREATE_FAILED` | 信源/种子创建异常，需重试或切换 `dryRun` |
 
 ### 4.5 接口路由对照
 
@@ -679,6 +701,7 @@ POST /api/v1/intelligence/expansion/keyword
 | GET | `/api/v1/intelligence/topics/:id/updates` | 专题动态 |
 | GET | `/api/v1/intelligence/briefs/daily` | 当日日报 |
 | POST | `/api/v1/intelligence/expansion/keyword` | 用户提交关键词后，实时拓展种子/信源 |
+
 ## 十二、路由注册
 
 ```typescript

@@ -53,6 +53,24 @@ export interface RequestRouteDecision {
   clarification_needed: boolean;
   suggested_actions: string[];
   tracking_target?: string;
+  route_policy_id?: string;
+  route_policy_version?: number;
+  route_decision_scope?: 'candidate' | 'execution_gate' | 'fallback' | string;
+  route_execution_authority?: 'candidate_only' | 'requires_arbitration' | 'execution_authorized' | string;
+  route_candidate_only?: boolean;
+  candidate_source?: string;
+  decision_scope?: string;
+  deprecation_target?: string;
+  arbitrated_route?: {
+    status: 'pending_arbitration' | 'clarify_required' | 'not_applicable';
+    selected_intent_type?: IntentType;
+    selected_agent?: AgentType;
+    capability_id?: string | null;
+    arbitration_rule_id?: string;
+    reason: string;
+  };
+  execution_decision?: 'candidate_only' | 'needs_arbitration' | 'needs_clarification' | 'no_executable_capability';
+  fallback_reason?: string;
 }
 
 export interface LlmIntentSignal {

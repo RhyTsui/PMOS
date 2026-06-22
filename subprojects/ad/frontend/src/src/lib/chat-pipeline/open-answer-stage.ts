@@ -146,20 +146,60 @@ export async function executeOpenAnswerStage(
     }));
   }
   if (!isUnsupportedExecutionIntent && route.intent_type === 'demand') {
-    chatAnswerAssist = await runChatModelNode({
-      useCase: 'requirement_drafting',
-      fallbackText: unavailableFallback,
-      modelServiceConfig: nonReportModelServiceConfig,
-      input: { message, route, compiledContext, plannerContext, baseDraft: composerBase },
-      consume: {
-        enabled: true,
-        consumedBy: 'requirement_answer_composer',
-        textField: 'draftText',
-        consumedFields: ['draftText'],
-      },
-      traceMeta: { intent: (route.intent_type as any) || 'demand' },
-    });
-    content = chatAnswerAssist.text;
+    // P2: 检查是否有 demand intake 确认卡
+    const demandIntakeConfirmCard = (ctx as Record<string, unknown>).demandIntakeConfirmCard as any;
+    const demandIntakeDraft = (ctx as Record<string, unknown>).demandIntakeDraft as any;
+    const demandIntakeGateMessage = (ctx as Record<string, unknown>).demandIntakeGateMessage as string | undefined;
+
+    // 如果有确认卡，返回结构化数据供前端渲染 DemandConfirmCard 组件
+    if (demandIntakeConfirmCard && demandIntakeDraft?.intakeDraftStatus === 'ready_for_confirmation') {
+      content = demandIntakeConfirmCard.markdown || '需求信息已齐全，请确认。';
+      chatAnswerAssist = {
+        text: content,
+        modelUsed: false,
+        consumed: false,
+        blocked: false,
+        warnings: [],
+        participation: {
+          model_use_case: 'requirement_drafting',
+          status: 'template',
+          model_name: nonReportModelServiceConfig?.modelName || 'unknown',
+        },
+      };
+      // 将确认卡数据附加到 metadata 供前端使用
+      (ctx as Record<string, unknown>).demandConfirmCardData = demandIntakeConfirmCard;
+    } else if (demandIntakeGateMessage && demandIntakeDraft?.intakeDraftStatus === 'collecting') {
+      // 信息不全，返回追问提示
+      content = demandIntakeGateMessage;
+      chatAnswerAssist = {
+        text: content,
+        modelUsed: false,
+        consumed: false,
+        blocked: false,
+        warnings: [],
+        participation: {
+          model_use_case: 'requirement_drafting',
+          status: 'template',
+          model_name: nonReportModelServiceConfig?.modelName || 'unknown',
+        },
+      };
+    } else {
+      // 回退到模型生成
+      chatAnswerAssist = await runChatModelNode({
+        useCase: 'requirement_drafting',
+        fallbackText: unavailableFallback,
+        modelServiceConfig: nonReportModelServiceConfig,
+        input: { message, route, compiledContext, plannerContext, baseDraft: composerBase },
+        consume: {
+          enabled: true,
+          consumedBy: 'requirement_answer_composer',
+          textField: 'draftText',
+          consumedFields: ['draftText'],
+        },
+        traceMeta: { intent: (route.intent_type as any) || 'demand' },
+      });
+      content = chatAnswerAssist.text;
+    }
   } else if (!isUnsupportedExecutionIntent) {
     const chatAnswerBoundary = evaluateChatAnswerBoundary({
       serviceIntent: routeDecisionMetadata.serviceIntent,
@@ -502,7 +542,29 @@ export async function executeOpenAnswerStage(
       runtime_state: runtimeState,
       answer_policy: defaultAnswerPolicy(),
     },
-    metadata: { process_events: processEvents, routing_decision_observation: routeObservation, info_source_arbitration: openAnswerInformationSourceArbitration, project_context_summary: projectContextSummary, compiled_context: compiledContext, prompt_config: promptConfigMetadata, runtime_state: runtimeState, workflow_result: workflowResult, message_contract: messageContract, response_contract: responseContract, semantic_result: semanticResult, business_summary: businessSummary, trace_meta: traceMeta, thread_id: conversationId, message_id: traceId, turn_id: traceId, trace_url: traceMeta?.trace_url, message_runtime_projection: runtimeProjection, service_proposal: ctx.serviceProposal },
+    metadata: {
+      process_events: processEvents,
+      routing_decision_observation: routeObservation,
+      info_source_arbitration: openAnswerInformationSourceArbitration,
+      project_context_summary: projectContextSummary,
+      compiled_context: compiledContext,
+      prompt_config: promptConfigMetadata,
+      runtime_state: runtimeState,
+      workflow_result: workflowResult,
+      message_contract: messageContract,
+      response_contract: responseContract,
+      semantic_result: semanticResult,
+      business_summary: businessSummary,
+      trace_meta: traceMeta,
+      thread_id: conversationId,
+      message_id: traceId,
+      turn_id: traceId,
+      trace_url: traceMeta?.trace_url,
+      message_runtime_projection: runtimeProjection,
+      service_proposal: ctx.serviceProposal,
+      // P2: 附加 demand confirm card 数据供前端渲染
+      demand_confirm_card: (ctx as Record<string, unknown>).demandConfirmCardData,
+    },
   });
   io.close();
 

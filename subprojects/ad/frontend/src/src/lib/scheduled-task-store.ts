@@ -126,6 +126,14 @@ function normalizeTask(input: Partial<ScheduledTask>): ScheduledTask {
     enabled,
     created_at: input.created_at ?? timestamp,
     updated_at: timestamp,
+    // ─── Chat-first Task Center 扩展字段 ───
+    source_conversation_id: input.source_conversation_id?.trim() || undefined,
+    created_by_message_id: input.created_by_message_id?.trim() || undefined,
+    risk_level: input.risk_level,
+    template_id: input.template_id,
+    last_result_summary: input.last_result_summary,
+    last_result_message_id: input.last_result_message_id,
+    last_run_status: input.last_run_status,
   };
 }
 
@@ -379,7 +387,7 @@ export async function resumeScheduledTask(id: string): Promise<ScheduledTask | u
 export async function runScheduledTask(
   id: string,
   scopeKey: string,
-): Promise<{ task: ScheduledTask; execution: ScheduledTaskExecution; artifact?: { id: string; url: string; name: string }; notificationId: string } | undefined> {
+): Promise<{ task: ScheduledTask; execution: ScheduledTaskExecution; artifact?: { id: string; url: string; name: string }; notificationId: string; taskMessageId?: string } | undefined> {
   const store = await readStore();
   const index = store.tasks.findIndex((item) => item.id === id);
   if (index < 0) return undefined;
@@ -641,6 +649,67 @@ export async function runScheduledTask(
     targets: current.alert_targets,
   });
 
+  // ─── Chat-first Task Center: 写入会话消息 + 标记高亮 ──────────
+  // Trace exporter 失败必须 fail-open，不影响任务结果写入
+  let taskMessageId: string | undefined;
+  try {
+    if (current.source_conversation_id) {
+      const { writeTaskRunMessage } = await import('./task-message-writer');
+      const { markAutomationUnread } = await import('./conversation-highlight-store');
+
+      const runStatus = finalStatus === 'success' ? 'completed'
+        : finalStatus === 'failed' ? 'failed'
+        : finalStatus === 'partial_succeeded' ? 'partial'
+        : 'completed';
+
+      const writeResult = await writeTaskRunMessage({
+        conversationId: current.source_conversation_id,
+        scopeKey,
+        taskId: current.id,
+        runId: execution.id,
+        taskTitle: current.name,
+        status: runStatus,
+        summary: execution.result_summary,
+        artifacts: artifactAttachment.id ? [{ type: 'file', uri: artifactAttachment.asset_url || artifactAttachment.url || '', name: artifactName }] : undefined,
+        traceId: `task-run-${execution.id}`,
+        templateId: current.template_id,
+      });
+
+      if (writeResult.success && writeResult.messageId) {
+        taskMessageId = writeResult.messageId;
+
+        // 标记会话未读高亮
+        const severity = runStatus === 'failed' ? 'error'
+          : runStatus === 'partial' ? 'warning'
+          : 'success';
+
+        await markAutomationUnread({
+          scopeKey,
+          conversationId: current.source_conversation_id,
+          messageId: writeResult.messageId,
+          taskId: current.id,
+          runId: execution.id,
+          severity,
+          label: `${current.name} ${runStatus === 'completed' ? '已完成' : runStatus === 'failed' ? '执行失败' : '部分完成'}`,
+        });
+
+        // 回填 output_message_id 到 task
+        const taskIndex = store.tasks.findIndex((t) => t.id === current.id);
+        if (taskIndex >= 0) {
+          store.tasks[taskIndex] = {
+            ...store.tasks[taskIndex],
+            last_result_message_id: writeResult.messageId,
+            last_result_summary: execution.result_summary,
+            last_run_status: runStatus,
+          };
+          await writeStore(store);
+        }
+      }
+    }
+  } catch {
+    // fail-open: trace/message 写入失败不影响任务结果
+  }
+
   return {
     task: nextTask,
     execution: executionWithSteps,
@@ -650,6 +719,7 @@ export async function runScheduledTask(
       name: artifactName,
     },
     notificationId: notification.id,
+    taskMessageId,
   };
 }
 

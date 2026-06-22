@@ -4,6 +4,7 @@ import { BarChart3, CalendarClock, Clock3, FileSpreadsheet, Play } from 'lucide-
 import type { AutomationRunRecord, AutomationTemplate, AutomationTab } from '@/lib/page-helpers';
 import type { ScheduledTask } from '@/types';
 import { AUTOMATION_TABS, LoadingSkeletonRows } from '@/lib/page-helpers';
+import { LightweightTaskList } from './LightweightTaskList';
 
 type ThemeColors = {
   textPrimary: string;
@@ -217,22 +218,64 @@ export function AutomationCenter(props: AutomationCenterProps) {
 
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
           {automationTab === 'configured' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {automationLoading ? (
-                <div data-automation-loading style={{ display: 'grid', gap: 12 }}>
-                  <div style={{ fontSize: 12, color: c.textMuted }}>正在读取自动任务...</div>
-                  <LoadingSkeletonRows rows={4} minHeight={300} />
-                </div>
-              ) : automationReportTasks.length > 0 ? (
-                automationReportTasks.map(renderTaskCard)
-              ) : (
-                <div style={{ minHeight: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: c.textMuted, fontSize: 13 }}>
-                  <Clock3 size={22} color="#9ca3af" />
-                  <div style={{ marginTop: 12 }}>尚未配置自动任务。</div>
-                  <button type="button" onClick={() => setAutomationTab('templates')} style={{ marginTop: 18, height: 34, borderRadius: 10, border: 'none', background: '#111827', color: '#fff', padding: '0 14px', fontSize: 13, cursor: 'pointer' }}>从模板创建</button>
-                </div>
-              )}
-            </div>
+            automationLoading ? (
+              <div data-automation-loading style={{ display: 'grid', gap: 12 }}>
+                <div style={{ fontSize: 12, color: c.textMuted }}>正在读取自动任务...</div>
+                <LoadingSkeletonRows rows={4} minHeight={300} />
+              </div>
+            ) : (
+              <LightweightTaskList
+                tasks={automationReportTasks}
+                onOpenConversation={(conversationId) => {
+                  // 触发父级切换到会话（通过点击自动化 tab 的 "打开原会话" 触发）
+                  const event = new CustomEvent('xiaoqiao:open-conversation', { detail: { conversationId } });
+                  window.dispatchEvent(event);
+                }}
+                onPauseTask={async (taskId) => {
+                  try {
+                    const response = await fetch(`/api/xiaoqiao/automations/${encodeURIComponent(taskId)}/actions`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'pause' }),
+                    });
+                    if (response.ok) {
+                      // 刷新列表
+                      window.dispatchEvent(new CustomEvent('xiaoqiao:automation-changed'));
+                    }
+                  } catch {
+                    // fail-open
+                  }
+                }}
+                onResumeTask={async (taskId) => {
+                  try {
+                    const response = await fetch(`/api/xiaoqiao/automations/${encodeURIComponent(taskId)}/actions`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'resume' }),
+                    });
+                    if (response.ok) {
+                      window.dispatchEvent(new CustomEvent('xiaoqiao:automation-changed'));
+                    }
+                  } catch {
+                    // fail-open
+                  }
+                }}
+                onDeleteTask={async (taskId) => {
+                  try {
+                    const response = await fetch(`/api/xiaoqiao/automations/${encodeURIComponent(taskId)}/actions`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'delete', confirmed: true }),
+                    });
+                    if (response.ok) {
+                      window.dispatchEvent(new CustomEvent('xiaoqiao:automation-changed'));
+                    }
+                  } catch {
+                    // fail-open
+                  }
+                }}
+              />
+            )
           )}
 
           {automationTab === 'runs' && (

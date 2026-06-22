@@ -97,6 +97,24 @@ export interface ReportToolCapability {
   supported_service_intents: ServiceIntent[];
   tool_purpose: ToolPurpose;
   contract_version: 'capability-contract/v1';
+  selection_policy_id: string;
+  report_shape: {
+    shape_type: 'table' | 'timeseries' | 'dictionary' | 'project_lookup' | 'generic';
+    report_domains: ReportCapabilityDomain[];
+    supported_granularity: Array<'hour' | 'day' | 'natural_week' | 'natural_month'>;
+  };
+  projection_contract: {
+    display_fields: string[];
+  };
+  grouping_contract: {
+    supported_dimensions: string[];
+    time_dimension_keys: string[];
+    allow_unrequested_specialized_grouping: boolean;
+  };
+  question_type_coverage: Array<{
+    question_type: string;
+    coverage: 'full' | 'partial' | 'none';
+  }>;
   authority?: {
     authoritative_for: IdentifierKey[];
   };
@@ -369,6 +387,35 @@ function inferDimensions(tool: McpToolConfig): string[] {
   return keys.filter(key => /media|team|account|appPackageType|app_package_type|package|pkg|optimizer|os|terminal|material|creative|campaign|group|date/i.test(key));
 }
 
+function inferDisplayFields(tool: McpToolConfig): string[] {
+  const keys = Object.keys(schemaProperties(tool));
+  const preferred = keys.filter(key => /date|day|hour|cost|spend|roi|roas|revenue|retention|activation|register|payment|media|team|account|material|creative|campaign|package|os|terminal/i.test(key));
+  return Array.from(new Set(preferred.length ? preferred : keys)).slice(0, 24);
+}
+
+function inferShapeType(domains: ReportCapabilityDomain[]): ReportToolCapability['report_shape']['shape_type'] {
+  if (domains.includes('dictionary')) return 'dictionary';
+  if (domains.includes('project')) return 'project_lookup';
+  if (domains.includes('hourly') || domains.includes('daily') || domains.includes('weekly') || domains.includes('monthly')) return 'timeseries';
+  if (domains.includes('roi') || domains.includes('retention')) return 'table';
+  return 'generic';
+}
+
+function inferQuestionTypeCoverage(domains: ReportCapabilityDomain[]): ReportToolCapability['question_type_coverage'] {
+  const questionTypes = ['daily', 'hour', 'roi', 'retention'] as const;
+  return questionTypes.map(questionType => {
+    const covered = questionType === 'hour'
+      ? domains.includes('hourly')
+      : domains.includes(questionType);
+    const partial = questionType === 'daily'
+      && domains.some(domain => ['weekly', 'monthly'].includes(domain));
+    return {
+      question_type: questionType,
+      coverage: covered ? 'full' : partial ? 'partial' : 'none',
+    };
+  });
+}
+
 function identifierKeysFromText(text: string): IdentifierKey[] {
   const identifiers = new Set<IdentifierKey>();
   if (/\bmedia\b|media[_-]?id|媒体/.test(text)) identifiers.add('media_id');
@@ -583,6 +630,9 @@ function applyCapabilityOverride(
   override?: ReportCapabilityOverride,
 ): ReportToolCapability {
   if (!override) return capability;
+  const reportDomains = override.report_domains?.length ? override.report_domains : capability.report_domains;
+  const supportedGranularity = inferGranularity(reportDomains);
+  const supportedDimensions = capability.supported_dimensions;
   return {
     ...capability,
     capability_kind: override.capability_kind || capability.capability_kind,
@@ -591,7 +641,20 @@ function applyCapabilityOverride(
     label_keys: override.label_keys?.length ? override.label_keys : capability.label_keys,
     output_adapter: override.output_adapter || capability.output_adapter,
     slot_mappings: override.slot_mappings?.length ? override.slot_mappings : capability.slot_mappings,
-    report_domains: override.report_domains?.length ? override.report_domains : capability.report_domains,
+    report_domains: reportDomains,
+    supported_granularity: supportedGranularity,
+    report_shape: {
+      ...capability.report_shape,
+      shape_type: inferShapeType(reportDomains),
+      report_domains: reportDomains,
+      supported_granularity: supportedGranularity,
+    },
+    grouping_contract: {
+      ...capability.grouping_contract,
+      supported_dimensions: supportedDimensions,
+      time_dimension_keys: supportedDimensions.filter(key => /date|day|hour|time/i.test(key)),
+    },
+    question_type_coverage: inferQuestionTypeCoverage(reportDomains),
     required_dictionary_tools: override.required_dictionary_tools?.length
       ? override.required_dictionary_tools
       : capability.required_dictionary_tools,
@@ -680,6 +743,8 @@ export function buildReportCapabilityManifest(
         JSON.stringify(schemaProperties(tool)),
       ].join(' '));
       const labelKeys = inferLabelKeys(tool);
+      const supportedGranularity = inferGranularity(domains);
+      const supportedDimensions = inferDimensions(tool);
       const metadata = tool as ToolWithCapabilityMetadata;
       const toolPurpose = metadata.toolPurpose || inferToolPurpose(capabilityText, tool);
       const inferredCapabilityKind = inferCapabilityKind(capabilityText, domains, identifierKeys, labelKeys, tool);
@@ -697,8 +762,8 @@ export function buildReportCapabilityManifest(
         report_domains: domains,
         required_fields: required,
         optional_fields: properties.filter(key => !required.includes(key)),
-        supported_granularity: inferGranularity(domains),
-        supported_dimensions: inferDimensions(tool),
+        supported_granularity: supportedGranularity,
+        supported_dimensions: supportedDimensions,
         supported_entity_types: inferSupportedEntityTypes(identifierKeys),
         identifier_keys: identifierKeys,
         label_keys: labelKeys,
@@ -710,6 +775,21 @@ export function buildReportCapabilityManifest(
         supported_service_intents: metadata.supportedServiceIntents || inferSupportedServiceIntents(toolPurpose, capabilityKind),
         tool_purpose: toolPurpose,
         contract_version: 'capability-contract/v1',
+        selection_policy_id: 'manifest:' + server.id + ':' + tool.name,
+        report_shape: {
+          shape_type: inferShapeType(domains),
+          report_domains: domains,
+          supported_granularity: supportedGranularity,
+        },
+        projection_contract: {
+          display_fields: inferDisplayFields(tool),
+        },
+        grouping_contract: {
+          supported_dimensions: supportedDimensions,
+          time_dimension_keys: supportedDimensions.filter(key => /date|day|hour|time/i.test(key)),
+          allow_unrequested_specialized_grouping: false,
+        },
+        question_type_coverage: inferQuestionTypeCoverage(domains),
         authority: identifierKeys.length ? { authoritative_for: identifierKeys } : undefined,
       };
       const override = findCapabilityOverride(capability, overrides);

@@ -21,11 +21,13 @@
   GET /api/v1/intelligence/topics/{topicId}/updates?since=7d      —— 专题动态（返回趋势）
   GET /api/v1/intelligence/benchmarks?segment=小游戏     —— 行业基准
   GET /api/v1/intelligence/evidence/:type/:id           —— 证据依据
+  POST /api/v1/intelligence/expansion/keyword           —— 关键词实时拓展（种子/信源）
 
 其中：
 - 今日日报：只做当日汇总（可指定 `date`）。
 - 资讯流：支持按时间窗（since）、信源类型（sourceType）、信源ID（sourceId）、关键词（keyword）。
 - 专题动态：topic/eventType 专用视角，保留趋势信号。
+- 扩展：`POST /api/v1/intelligence/expansion/keyword` 用于把用户关键词转为可复用种子/信源（支持干跑）。
 
 所有响应格式统一：
   {
@@ -35,6 +37,18 @@
 ```
 
 ---
+
+### 30 秒对接示例（最小三联）
+
+```bash
+curl -s "http://localhost:8003/api/v1/intelligence/briefs/daily?profileId=demo_profile&date=2026-06-22"
+
+curl -s "http://localhost:8003/api/v1/intelligence/feed?keyword=买量&sourceType=wechat_mp&since=7d&limit=10"
+
+curl -X POST "http://localhost:8003/api/v1/intelligence/expansion/keyword" \
+  -H "Content-Type: application/json" \
+  -d '{"keyword":"小游戏买量","scope":"all","seedType":"topic","sourceType":"wechat_mp","createSeed":true,"createSource":true,"dryRun":false}'
+```
 
 ## 1. 为什么需要 GI 情报服务
 
@@ -480,6 +494,9 @@ POST /api/v1/intelligence/expansion/keyword
 - `createSeed`: 是否真的创建种子（默认 `true`）
 - `createSource`: 是否真的创建信源（默认 `true`）
 - `dryRun`: `true` 时只返回候选，不落库（默认 `false`）
+- `keyword`：空字符串会触发 `400 INVALID_INPUT`。
+- `scope` 为空默认 `all`，`sourceType` 为空默认 `media`。
+- `scope=seed` 仅处理种子；`scope=source` 仅处理信源；`scope=all` 同时处理。
 
 **响应摘要**：返回候选 `candidates`、已创建 `created` 与跳过 `skipped`，以及 `meta` 创建计数。
 
@@ -542,6 +559,12 @@ curl -X POST "http://localhost:8003/api/v1/intelligence/expansion/keyword" \
 |-----------|--------|------|----------|
 | 400 | `INVALID_INPUT` | `keyword` 为空或缺失 | 提示用户补充关键词 |
 | 500 | `CREATE_FAILED` | 种子/信源创建过程异常 | 展示失败原因，可引导用户稍后重试或改用 `dryRun` |
+
+### 一分钟对接流程（含错误码）
+
+1. 先调 `GET /api/v1/intelligence/feed` 做检索；无结果时再调 `POST /api/v1/intelligence/expansion/keyword`。
+2. 若返回 `400 INVALID_INPUT`，返回前提示补充关键词。
+3. 若返回 `500 CREATE_FAILED`，建议重试并先尝试 `dryRun=true`。
 
 **说明**：
 - 关键词检索仍建议优先使用 `GET /api/v1/intelligence/feed?keyword=...`

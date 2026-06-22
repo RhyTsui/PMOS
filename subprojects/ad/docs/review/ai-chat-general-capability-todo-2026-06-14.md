@@ -161,3 +161,24 @@ npm.cmd exec tsx scripts/real-public-web-focused-debug.ts
 - stale/expired case 当前是治理待补样本，不是运行时失败。
 - 公开联网 provider 波动不等同于解析失败；成功样本已证明解析和 SourceRef 组装可用。
 - 后续不能通过加入“乌克兰、NBA、智投、巨量”等场景词修问题；只能继续按 FactNeed、ProviderEligibility、SearchPlan、Evidence Ledger 和仲裁理由推进。
+
+## 2026-06-23 实施任务化追踪
+
+状态：已转为可执行 checklist，后续 review 按条关闭。
+
+| 优先级 | 任务 | 关联文件 | 验收命令 | 退出条件 |
+|---|---|---|---|---|
+| P0 | legacy 路由只作为候选信号，不授权最终 workflow | `src/ad/xiaoqiao/routing.py`; `src/ad/xiaoqiao/service.py`; `frontend/src/src/lib/intent-router.ts` | `python -m unittest tests.test_xiaoqiao_routing`; `npm.cmd exec vitest run tests/intent-router-governance.test.ts` | Trace / routing record 中出现 `candidate_only`，且不会由 legacy adapter 直接创建业务任务。 |
+| P0 | 能力差异进入 Capability Manifest，而不是通用 Chat Core 关键词分支 | `frontend/src/src/contracts/capability/capability-manifest.ts`; `frontend/src/src/lib/capability-orchestration.ts` | `npm.cmd exec vitest run tests/capability-normalization.test.ts tests/report-query-capability-coverage.test.ts` | Capability Discovery 能看到帮助、需求、诊断、联调等受治理 builtin candidate，且字段含 owner/version/fallback policy。 |
+| P1 | ResponseContract 标准化候选来源、执行决策、fallback 与 ContractSafety 引用 | `frontend/src/src/types/index.ts`; `frontend/src/src/lib/response-contract.ts` | `npm.cmd exec vitest run tests/response-contract-boundary.test.ts` | response contract 暴露 `candidate_source`、`final_route_decision`、`execution_decision`、`fallback_reason`、`contract_safety_trace_ref`。 |
+| P1 | Trace 可复盘候选、仲裁、fallback、证据与安全检查 | `frontend/src/src/app/api/chat/chat-trace.ts` | `npm.cmd exec vitest run tests/model-participation-trace.test.ts` | trace output 与 `agent.plan_arbitration` span 包含 candidate source / arbitration / fallback / evidence ids / contract safety。 |
+| P1 | Planner shadow/main 阶段目标可观测 | `frontend/src/src/lib/planner-orchestrator.ts` | `npm.cmd exec vitest run tests/planner-orchestrator.test.ts tests/planner-shadow-trace.test.ts` | Planner result 包含 `plannerMode`、`promptSource`、`fallbackPolicy`、`comparisonTrace`，失败仍 fail-open。 |
+
+MIG-050~060 回归矩阵：
+
+| Case | 关注点 | 必测场景 | 退出条件 |
+|---|---|---|---|
+| MIG-050 | 口径与证据一致性 | 同一指标不同表达、无原始关键词表达、低相关来源 | 回答中的结论、source_refs、evidence_refs 一致；无证据时降级。 |
+| MIG-052 | 工具失败与超时 | MCP 不可用、模型不可用、公开来源为空 | ResponseContract 不伪装成功，fallback_reason 可追踪。 |
+| MIG-053 | 长链路内存与过程披露 | 多步骤问数/诊断、history 较长 | Trace 记录阶段，主消息不泄露 raw payload / prompt / tool args。 |
+| MIG-054~060 | 非硬编码迁移健康 | 删除单个关键词后用同义表达重放 | 仍由 Planner/Capability candidate 命中；源码不新增样例硬编码。 |

@@ -1,0 +1,114 @@
+{
+  "screenId": "xiaoqiao-result-region",
+  "screenType": "chat-result-region",
+  "title": "结果区域",
+  "lastUpdatedAt": "2026-06-22",
+  "layout": {
+    "desktop": {
+      "shell": "right-side-or-inline-result-panel",
+      "content": "summary-evidence-actions",
+      "stickyRegions": ["summaryHeader"]
+    },
+    "mobile": {
+      "shell": "single-column-result-cards",
+      "entry": "chat-result-action",
+      "stackOrder": ["summary", "missingFields", "evidence", "nextActions", "pendingChecks"],
+      "overflowPolicy": "cards-stack-without-horizontal-scroll"
+    }
+  },
+  "regions": [
+    {
+      "id": "summary",
+      "componentBinding": "result-summary-card",
+      "purpose": "展示当前结论、结果类型、置信度和附件数量。",
+      "states": ["empty", "ready", "lowConfidence", "insufficientEvidence"]
+    },
+    {
+      "id": "missingFields",
+      "componentBinding": "missing-fields-card",
+      "purpose": "列出继续处理所需的信息，点击后回到对话补充。",
+      "states": ["hidden", "ready"]
+    },
+    {
+      "id": "evidence",
+      "componentBinding": "evidence-card-group",
+      "purpose": "展示证据与来源，来源不足时提示需要补充依据。",
+      "states": ["hidden", "ready", "empty", "redacted"]
+    },
+    {
+      "id": "nextActions",
+      "componentBinding": "action-contract-list",
+      "purpose": "展示可继续追问、升级处理或创建任务的下一步动作。",
+      "states": ["hidden", "ready", "requiresConfirmation"]
+    },
+    {
+      "id": "pendingChecks",
+      "componentBinding": "pending-check-list",
+      "purpose": "展示待确认项和低置信说明，避免把未验证内容写成结论。",
+      "states": ["hidden", "ready", "warning"]
+    }
+  ],
+  "sourceRefs": [
+    {
+      "type": "architecture",
+      "path": "docs/architecture/ENTERPRISE_AI_CHAT_OS_SPEC.md",
+      "note": "主消息承载用户可消费答案，结果区域消费 ResponseContract 和 SemanticResultContract。"
+    },
+    {
+      "type": "guardrail",
+      "path": "docs/operations/ui-guardrail.md",
+      "note": "结论、证据、风险和建议动作必须有来源和下一步承接。"
+    },
+    {
+      "type": "contract",
+      "path": "frontend/src/src/contracts/semantic/semantic-result-contract.ts",
+      "note": "结构化结果、来源、证据和动作字段真源。"
+    },
+    {
+      "type": "visual-reference",
+      "path": "docs/review/frontend-delivery-regression-desktop.json",
+      "note": "桌面结果区域验收记录。"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "result-panel",
+      "path": "frontend/src/src/components/workspace/ResultPanel.tsx",
+      "note": "结果摘要、证据、待补信息和下一步建议展示组件。"
+    },
+    {
+      "id": "evidence-card",
+      "path": "frontend/src/src/components/cognitive/EvidenceCard.tsx",
+      "note": "证据卡片展示组件。"
+    },
+    {
+      "id": "missing-fields",
+      "path": "frontend/src/src/components/cognitive/MissingFieldsCard.tsx",
+      "note": "待补信息展示和回到对话补充入口。"
+    }
+  ],
+  "recommendedActions": [
+    {
+      "id": "fill-missing-info",
+      "label": "补充缺少信息",
+      "target": "missingFields"
+    },
+    {
+      "id": "review-evidence",
+      "label": "查看证据与来源",
+      "target": "evidence"
+    },
+    {
+      "id": "continue-follow-up",
+      "label": "继续追问",
+      "target": "nextActions"
+    }
+  ],
+  "acceptance": {
+    "noTraditionalDashboardShell": true,
+    "noEngineeringJargonInUserCopy": true,
+    "noBusinessKeywordRoutingInUi": true,
+    "supportsMobileStacking": true,
+    "coversLoadingErrorEmptyPermission": true
+  }
+}

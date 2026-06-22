@@ -25,20 +25,78 @@ let traceFailureCount = 0;
 let traceDisabledUntil = 0;
 let lastTraceWarning = '';
 
-function isIgnorableTraceExporterError(reason: unknown): boolean {
-  const message = reason instanceof Error ? reason.message : String(reason);
-  return /no spans provided|no access permission|socket hang up|Cannot set property message of Error which has only a getter|600904002/i.test(message)
-    || /connect EACCES .*:443/i.test(message)
-    || /ENOTFOUND .*liannu/i.test(message)
-    || /timeout|timed out|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EPIPE|broken pipe/i.test(message);
+function getReadableErrorText(reason: unknown): string {
+  if (reason === undefined) return 'undefined';
+  if (reason === null) return 'null';
+  if (typeof reason === 'string') return reason || '(empty string)';
+  if (typeof reason === 'number' || typeof reason === 'boolean' || typeof reason === 'bigint') {
+    return String(reason);
+  }
+
+  const parts: string[] = [];
+  const errorLike = reason as { name?: unknown; message?: unknown; code?: unknown; stack?: unknown };
+  try {
+    if (typeof errorLike.name === 'string' && errorLike.name) parts.push(errorLike.name);
+  } catch {
+    // Ignore hostile getters.
+  }
+  try {
+    if (typeof errorLike.code === 'string' && errorLike.code) parts.push(`code=${errorLike.code}`);
+  } catch {
+    // Ignore hostile getters.
+  }
+  try {
+    if (typeof errorLike.message === 'string' && errorLike.message) parts.push(errorLike.message);
+  } catch {
+    parts.push('(message unavailable)');
+  }
+  try {
+    if (parts.length === 0 && typeof errorLike.stack === 'string' && errorLike.stack) {
+      parts.push(errorLike.stack.split('\n')[0] || errorLike.stack);
+    }
+  } catch {
+    // Ignore hostile getters.
+  }
+
+  if (parts.length > 0) return parts.join(': ');
+
+  try {
+    const serialized = JSON.stringify(reason);
+    if (serialized) return serialized;
+  } catch {
+    // Ignore circular or hostile objects.
+  }
+
+  try {
+    return String(reason);
+  } catch {
+    return Object.prototype.toString.call(reason);
+  }
+}
+
+function getErrorSearchText(reason: unknown): string {
+  const errorLike = reason as { name?: unknown; message?: unknown; code?: unknown; stack?: unknown };
+  const parts = [getReadableErrorText(reason)];
+  try {
+    if (typeof errorLike.stack === 'string') parts.push(errorLike.stack);
+  } catch {
+    // Ignore hostile getters.
+  }
+  return parts.join('\n');
+}
+
+function isTraceInfrastructureError(reason: unknown): boolean {
+  const message = getErrorSearchText(reason);
+  const hasTraceSource = /cozeloop|opentelemetry|otlp|trace exporter|span exporter|@cozeloop\/ai/i.test(message);
+  const knownTraceSdkError = /no spans provided|no access permission|Cannot set property message of Error which has only a getter|600904002/i.test(message);
+  const knownTraceEndpointError = /connect EACCES .*:443|ENOTFOUND .*liannu/i.test(message);
+  const networkFailure = /socket hang up|timeout|timed out|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EPIPE|broken pipe/i.test(message);
+  return knownTraceSdkError || knownTraceEndpointError || (hasTraceSource && networkFailure);
 }
 
 function recordTraceFailure(error: unknown): void {
-  if (isIgnorableTraceExporterError(error)) {
-    return;
-  }
   traceFailureCount += 1;
-  lastTraceWarning = error instanceof Error ? error.message : String(error);
+  lastTraceWarning = getReadableErrorText(error);
   if (traceFailureCount >= 3) {
     traceDisabledUntil = Date.now() + 30_000;
   }
@@ -72,13 +130,16 @@ function installTraceRejectionHandler(): void {
   if (rejectionHandlerInstalled) return;
 
   process.on('unhandledRejection', (reason) => {
-    if (isIgnorableTraceExporterError(reason)) {
+    if (isTraceInfrastructureError(reason)) {
+      recordTraceFailure(reason);
       return;
     }
+    throw reason;
   });
 
   process.on('uncaughtException', (reason) => {
-    if (isIgnorableTraceExporterError(reason)) {
+    if (isTraceInfrastructureError(reason)) {
+      recordTraceFailure(reason);
       return;
     }
     throw reason;
@@ -117,7 +178,7 @@ export function initTrace(config?: Partial<TraceConfig>): void {
     initialized = true;
     initializedConfigKey = nextConfigKey;
   } catch (err) {
-    console.error('[Trace] Init failed:', err);
+    console.error('[Trace] Init failed:', getReadableErrorText(err));
   }
 }
 
@@ -146,7 +207,7 @@ export async function safeTraceable<T>(
     recordTraceSuccess();
     return result;
   } catch (error) {
-    if (!isIgnorableTraceExporterError(error)) {
+    if (!isTraceInfrastructureError(error)) {
       throw error;
     }
     recordTraceFailure(error);
@@ -379,7 +440,6 @@ export async function flushTrace(timeoutMs = 1500) {
     ]);
     recordTraceSuccess();
   } catch (error) {
-    if (isIgnorableTraceExporterError(error)) return;
     recordTraceFailure(error);
   }
 }

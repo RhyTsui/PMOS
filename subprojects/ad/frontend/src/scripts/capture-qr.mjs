@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+console.log('Navigating (timeout 120s)...');
+await page.goto('http://127.0.0.1:8002/login', { waitUntil: 'domcontentloaded', timeout: 120000 });
+console.log('Page loaded, waiting for render...');
+await page.waitForTimeout(5000);
+await page.screenshot({ path: '.auth/qr-login-page.png', fullPage: true });
+console.log('Screenshot saved to .auth/qr-login-page.png');
+console.log('URL:', page.url());
+await browser.close();

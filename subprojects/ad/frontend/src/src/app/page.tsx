@@ -1006,6 +1006,28 @@ function WorkspaceContent() {
     void notificationApi.markRead().then(() => setAutomationUnreadCount(0)).catch(() => undefined);
   }, [reloadAutomationTasks, reloadAutomationUnreadCount, workspaceView]);
 
+  // ─── Chat-first Task Center: LightweightTaskList 跨组件事件监听 ───
+  useEffect(() => {
+    const handleOpenConversation = (event: Event) => {
+      const detail = (event as CustomEvent<{ conversationId: string }>).detail;
+      if (detail?.conversationId) {
+        clearSharedConversationMode();
+        switchWorkspaceView('chat');
+        selectConversation(detail.conversationId);
+      }
+    };
+    const handleAutomationChanged = () => {
+      void reloadAutomationTasks();
+      void reloadAutomationUnreadCount();
+    };
+    window.addEventListener('xiaoqiao:open-conversation', handleOpenConversation);
+    window.addEventListener('xiaoqiao:automation-changed', handleAutomationChanged);
+    return () => {
+      window.removeEventListener('xiaoqiao:open-conversation', handleOpenConversation);
+      window.removeEventListener('xiaoqiao:automation-changed', handleAutomationChanged);
+    };
+  }, [selectConversation, switchWorkspaceView, reloadAutomationTasks, reloadAutomationUnreadCount]);
+
   const applySelectedAssets = useCallback(async () => {
     const picked = selectedAssets.slice(0, 10);
     if (selectedAssets.length > 10) {
@@ -1276,6 +1298,44 @@ function WorkspaceContent() {
     }, 420);
     message.success(`已打开「${asset.anchorText}」所在会话`);
   }, [selectConversation, switchWorkspaceView]);
+
+  // ─── Chat-first Task Center: 导航到最新未读任务结果并标记已读 ───
+  const navigateToLatestUnreadAutomation = useCallback(async (conversationId: string) => {
+    // 等待消息加载
+    await new Promise((resolve) => window.setTimeout(resolve, 500));
+    // 滚动到最新的任务结果消息（带 task_run_completed / task_run_failed / task_needs_action 的消息）
+    const messageSurfaces = document.querySelectorAll('[data-message-surface]');
+    let targetElement: Element | null = null;
+    for (let i = messageSurfaces.length - 1; i >= 0; i--) {
+      const el = messageSurfaces[i];
+      // 查找包含任务结果消息
+      const text = el.textContent || '';
+      if (text && (text.includes('已完成') || text.includes('执行失败') || text.includes('需要处理') || text.includes('任务确认'))) {
+        targetElement = el;
+        break;
+      }
+    }
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 标记已读
+    try {
+      // 获取最新任务消息 ID
+      const targetMsgId = targetElement?.getAttribute('data-message-surface');
+      if (targetMsgId) {
+        await fetch(`/api/xiaoqiao/messages/${encodeURIComponent(targetMsgId)}/read`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id: conversationId }),
+        });
+        // 刷新会话列表
+        await reloadAutomationUnreadCount();
+      }
+    } catch {
+      // fail-open: 标记已读失败不影响用户体验
+    }
+  }, [reloadAutomationUnreadCount]);
 
   const handleSendWithAssets = useCallback(async (rawMessage: string) => {
     const messageText = rawMessage.trim();
@@ -1756,10 +1816,14 @@ function WorkspaceContent() {
             switchWorkspaceView('chat');
             return handleCreateConversationRequest();
           }}
-          onSelectConversation={(conversationId) => {
+          onSelectConversation={(conversationId, options) => {
             clearSharedConversationMode();
             switchWorkspaceView('chat');
             selectConversation(conversationId);
+            // anchor 定位: 如果带有 latest_unread_automation，导航到最新消息后标记已读
+            if (options?.anchor === 'latest_unread_automation') {
+              void navigateToLatestUnreadAutomation(conversationId);
+            }
           }}
           onRenameConversation={renameConversation}
           onDeleteConversation={(conversationId) => void deleteConversation(conversationId)}
@@ -1822,11 +1886,14 @@ function WorkspaceContent() {
                 closeSidebarDrawer();
                 await handleCreateConversationRequest();
               }}
-              onSelectConversation={(conversationId) => {
+              onSelectConversation={(conversationId, options) => {
                 clearSharedConversationMode();
                 switchWorkspaceView('chat');
                 closeSidebarDrawer();
                 selectConversation(conversationId);
+                if (options?.anchor === 'latest_unread_automation') {
+                  void navigateToLatestUnreadAutomation(conversationId);
+                }
               }}
               onRenameConversation={renameConversation}
               onDeleteConversation={(conversationId) => void deleteConversation(conversationId)}

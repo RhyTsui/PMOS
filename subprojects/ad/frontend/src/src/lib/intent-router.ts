@@ -1,5 +1,5 @@
 import type { AgentType, BusinessContextSnapshot, IntentType, MissingField, RoleProfile, SlotState, UserPreferenceProfile } from '@/types';
-import { matchesDebuggingRoute, matchesReportQueryRoute, type IntentRouteRulesConfig } from './intent-route-rules';
+import { evaluateIntentRouteRules, matchesDebuggingRoute, matchesReportQueryRoute, normalizeIntentRouteRulesConfig, type IntentRouteRulesConfig } from './intent-route-rules';
 import { missingSlotsToFields } from './slot-resolver';
 import { hasAdvertisingDomainSignal } from './advertising-domain-pack';
 
@@ -30,7 +30,19 @@ export interface IntentRouteDecision {
   route_decision_scope?: string;
   route_execution_authority?: string;
   route_candidate_only?: boolean;
-}
+  candidate_source?: string;
+  decision_scope?: string;
+  deprecation_target?: string;
+  arbitrated_route?: {
+    status: 'pending_arbitration' | 'clarify_required' | 'not_applicable';
+    selected_intent_type?: IntentType;
+    selected_agent?: AgentType;
+    capability_id?: string | null;
+    arbitration_rule_id?: string;
+    reason: string;
+  };
+  execution_decision?: 'candidate_only' | 'needs_arbitration' | 'needs_clarification' | 'no_executable_capability';
+  fallback_reason?: string;}
 
 const TRACKING_TARGETS: Record<Exclude<IntentType, 'general'>, string | undefined> = {
   help: undefined,
@@ -320,8 +332,46 @@ export function isDeliveryPackagesIntent(content: string) {
   ]);
 }
 
+function buildGovernedRouteRuleCandidate(text: string, routeRules?: Partial<IntentRouteRulesConfig> | null): IntentRouteDecision | null {
+  const config = normalizeIntentRouteRulesConfig(routeRules || undefined);
+  const [selected] = evaluateIntentRouteRules({ message: text, rules: config.rules });
+  if (!selected) return null;
+  return {
+    intent_type: selected.rule.intent_type,
+    agent: selected.rule.agent,
+    is_business_related: selected.rule.intent_type !== 'general',
+    workflow_level: selected.rule.workflow_level,
+    confidence: selected.rule.confidence,
+    reason: `命中治理配置候选规则：${selected.rule.reason_template}`,
+    required_slots: [],
+    missing_fields: [],
+    clarification_needed: false,
+    suggested_actions: ['进入能力仲裁', '确认证据需求', '继续补充上下文'],
+    tracking_target: TRACKING_TARGETS[selected.rule.intent_type as Exclude<IntentType, 'general'>],
+    route_policy_id: selected.policy_id,
+    route_policy_version: selected.policy_version,
+    route_decision_scope: selected.decision_scope,
+    route_execution_authority: selected.execution_authority,
+    route_candidate_only: true,
+    candidate_source: 'governed_intent_route_rules',
+    decision_scope: 'candidate_only',
+    deprecation_target: 'Enterprise AI Chat OS Plan Arbitrator + Capability Discovery',
+    execution_decision: 'needs_arbitration',
+    fallback_reason: 'route_rule_candidate_requires_arbitration',
+    arbitrated_route: {
+      status: 'pending_arbitration',
+      selected_intent_type: selected.rule.intent_type,
+      selected_agent: selected.rule.agent,
+      capability_id: null,
+      arbitration_rule_id: selected.policy_id,
+      reason: 'Route rule is a governed candidate; final execution requires arbitration.',
+    },
+  };
+}
 function routeUserIntentCore(content: string, routeRules?: Partial<IntentRouteRulesConfig> | null): IntentRouteDecision {
   const text = content.trim();
+  const governedCandidate = buildGovernedRouteRuleCandidate(text, routeRules);
+  if (governedCandidate) return governedCandidate;
   const lower = text.toLowerCase();
 
   if (isDeliverableWritingRequest(text)) {
@@ -751,15 +801,33 @@ export function routeUserIntent(content: string, context?: IntentRoutingContext)
   const legacyConfidence = decision.confidence === 'high' && !context?.businessContext
     ? 'medium'
     : decision.confidence;
+  const isNoHit = decision.intent_type === 'general' && !decision.is_business_related;
+  const candidateSource = decision.candidate_source || 'legacy_intent_router';
+  const reasonPrefix = candidateSource === 'governed_intent_route_rules' ? 'Governed route candidate' : 'Legacy adapter candidate';
   return {
     ...decision,
     confidence: legacyConfidence,
-    reason: `Legacy adapter candidate: ${decision.reason}`,
+    reason: `${reasonPrefix}: ${decision.reason}`,
     required_slots: [],
-    route_policy_id: `legacy-intent-router:${decision.intent_type}`,
-    route_policy_version: 1,
-    route_decision_scope: 'fallback',
-    route_execution_authority: 'requires_arbitration',
+    route_policy_id: decision.route_policy_id || `legacy-intent-router:${decision.intent_type}`,
+    route_policy_version: decision.route_policy_version || 1,
+    route_decision_scope: decision.route_decision_scope || 'candidate',
+    route_execution_authority: decision.route_execution_authority || 'requires_arbitration',
     route_candidate_only: true,
+    candidate_source: candidateSource,
+    decision_scope: 'candidate_only',
+    deprecation_target: decision.deprecation_target || 'Enterprise AI Chat OS Plan Arbitrator + Capability Discovery',
+    execution_decision: decision.execution_decision || (isNoHit ? 'no_executable_capability' : decision.clarification_needed ? 'needs_clarification' : 'needs_arbitration'),
+    fallback_reason: decision.fallback_reason || (isNoHit ? 'legacy_no_hit_candidate_only' : 'legacy_candidate_requires_arbitration'),
+    arbitrated_route: decision.arbitrated_route || {
+      status: isNoHit ? 'clarify_required' : 'pending_arbitration',
+      selected_intent_type: isNoHit ? undefined : decision.intent_type,
+      selected_agent: isNoHit ? undefined : decision.agent,
+      capability_id: null,
+      arbitration_rule_id: 'pending-plan-arbitrator',
+      reason: isNoHit
+        ? 'Legacy adapter did not find an executable capability; final answer must clarify or continue discovery.'
+        : 'Legacy adapter only provides an intent candidate; final execution requires Plan Arbitrator and Capability Discovery.',
+    },
   };
 }
