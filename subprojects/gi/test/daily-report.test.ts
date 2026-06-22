@@ -302,4 +302,65 @@ describe('DailyReportService', () => {
     expect(report.summary.recommendations.length).toBeGreaterThan(0);
     expect(report.summary.recommendations.some(r => r.includes('健康状态异常'))).toBe(true);
   });
+  it('应该生成提示词控制的每日速览', async () => {
+    const source = sourceRepo.create({
+      name: '游戏葡萄',
+      shortName: '葡萄',
+      sourceType: 'media',
+      accessMethod: 'rss',
+      baseUrl: 'https://example.com',
+      config: {},
+      schedule: { cron: '0 * * * *' },
+      enabled: true,
+      priority: 'P1',
+      tags: [],
+    } as any);
+
+    const today = new Date().toISOString().split('T')[0];
+    evidenceRepo.create({
+      sourceId: source.id,
+      seedIds: [],
+      url: 'https://example.com/digest-1',
+      title: '某新品开启预约并进入买量测试',
+      content: '新品开启预约，素材投放节奏提前，可能意味着发行窗口临近。',
+      summary: '新品预约和买量节奏同时出现，值得跟踪发行窗口。',
+      hash: 'digest-hash-1',
+      status: 'collected',
+      collectedAt: `${today}T09:00:00.000Z`,
+      metadata: {},
+      images: [],
+    } as any);
+
+    signalRepo.create({
+      evidenceEventId: 'digest-event-1',
+      sourceId: source.id,
+      title: '新品预约与买量同步升温',
+      summary: '发行侧可能正在验证核心卖点和投放素材。',
+      eventType: '预约',
+      priority: 'P0',
+      impactScore: 88,
+      audienceTags: ['发行'],
+      topicTags: ['新游'],
+      entityTags: ['某新品'],
+      status: 'new',
+      readByRoles: [],
+      createdAt: `${today}T10:00:00.000Z`,
+    } as any);
+
+    const digest = await service.generateDigest(today, {
+      prompt: '请给 {{date}} 写速览。统计={{stats}} 内容={{items}} 信号={{signals}}',
+      useLLM: false,
+    });
+
+    expect(digest.reportDate).toBe(today);
+    expect(digest.source).toBe('fallback');
+    expect(digest.prompt).toContain(today);
+    expect(digest.prompt).toContain('某新品开启预约');
+    expect(digest.shortArticle).toContain('共采集 1 条内容');
+    expect(digest.qualityImpressions.length).toBeGreaterThan(0);
+    expect(digest.highlights[0].title).toBe('某新品开启预约并进入买量测试');
+    expect(digest.keySignals[0].priority).toBe('P0');
+    expect(digest.stats.evidenceCount).toBe(1);
+    expect(digest.stats.signalCount).toBe(1);
+  });
 });
