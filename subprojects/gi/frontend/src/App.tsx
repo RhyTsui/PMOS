@@ -8,7 +8,8 @@ import {
   MessageOutlined,
   SearchOutlined,
   AlertOutlined,
-  LineChartOutlined
+  LineChartOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventListPage from './pages/EventListPage';
@@ -20,6 +21,7 @@ import FeedbackPage from './pages/FeedbackPage';
 import SourceDiscoveryPage from './pages/SourceDiscoveryPage';
 import GapDetectionPage from './pages/GapDetectionPage';
 import TrendsPage from './pages/TrendsPage';
+import LLMProvidersPage from './pages/LLMProvidersPage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -40,6 +42,7 @@ function AppLayout() {
         { key: '/feedback', icon: <MessageOutlined />, label: '反馈管理' },
         { key: '/discovery', icon: <SearchOutlined />, label: '源发现' },
         { key: '/gaps', icon: <AlertOutlined />, label: '漏采告警' },
+        { key: '/llm-providers', icon: <ApiOutlined />, label: 'LLM 供应商' },
         { key: '/admin', icon: <SettingOutlined />, label: '系统管理' },
       ],
     },
@@ -73,6 +76,7 @@ function AppLayout() {
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/discovery" element={<SourceDiscoveryPage />} />
             <Route path="/gaps" element={<GapDetectionPage />} />
+            <Route path="/llm-providers" element={<LLMProvidersPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

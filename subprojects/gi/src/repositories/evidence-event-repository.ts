@@ -33,6 +33,14 @@ interface EvidenceEventRow {
   merge_count: number;
 }
 
+interface EvidenceEventQueryOptions {
+  eventTypes?: EventType[];
+  priorities?: Priority[];
+  since?: string;
+  keyword?: string;
+  limit?: number;
+}
+
 export class EvidenceEventRepository extends BaseRepository<EvidenceEvent, EvidenceEventRow> {
   protected tableName = 'evidence_events';
 
@@ -123,4 +131,51 @@ export class EvidenceEventRepository extends BaseRepository<EvidenceEvent, Evide
     ).all(limit) as EvidenceEventRow[];
     return rows.map(row => this.toModel(row));
   }
+
+  // 按复合条件查询（feed/专题动态用）
+  findByFilter(options: EvidenceEventQueryOptions = {}): EvidenceEvent[] {
+    const {
+      eventTypes,
+      priorities,
+      since,
+      keyword,
+      limit = 500,
+    } = options;
+
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    if (eventTypes && eventTypes.length > 0) {
+      const placeholders = eventTypes.map(() => '?').join(', ');
+      clauses.push(`event_type IN (${placeholders})`);
+      params.push(...eventTypes);
+    }
+
+    if (priorities && priorities.length > 0) {
+      const placeholders = priorities.map(() => '?').join(', ');
+      clauses.push(`priority IN (${placeholders})`);
+      params.push(...priorities);
+    }
+
+    if (since) {
+      clauses.push('last_seen_at >= ?');
+      params.push(since);
+    }
+
+    const loweredKeyword = keyword?.trim().toLowerCase();
+    if (loweredKeyword) {
+      const pattern = `%${loweredKeyword}%`;
+      clauses.push('(LOWER(event_title) LIKE ? OR LOWER(event_type) LIKE ? OR LOWER(key_facts) LIKE ?)');
+      params.push(pattern, pattern, pattern);
+    }
+
+    const sql = clauses.length
+      ? `SELECT * FROM ${this.tableName} WHERE ${clauses.join(' AND ')} ORDER BY last_seen_at DESC LIMIT ?`
+      : `SELECT * FROM ${this.tableName} ORDER BY last_seen_at DESC LIMIT ?`;
+
+    const rows = this.db.prepare(sql).all(...params, limit) as EvidenceEventRow[];
+    return rows.map(row => this.toModel(row));
+  }
 }
+
+

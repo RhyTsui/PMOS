@@ -101,6 +101,20 @@ export class IntelSourceRepository extends BaseRepository<IntelSource, IntelSour
   }
 
   /**
+   * 按来源类型查找启用的源
+   */
+  findByTypes(sourceTypes: SourceType[]): IntelSource[] {
+    if (sourceTypes.length === 0) return [];
+
+    const placeholders = sourceTypes.map(() => '?').join(', ');
+    const rows = this.db.prepare(
+      `SELECT * FROM ${this.tableName} WHERE enabled = 1 AND source_type IN (${placeholders})`
+    ).all(...sourceTypes) as IntelSourceRow[];
+
+    return rows.map((row) => this.toModel(row));
+  }
+
+  /**
    * 按优先级统计
    */
   countByPriority(): Record<Priority, number> {

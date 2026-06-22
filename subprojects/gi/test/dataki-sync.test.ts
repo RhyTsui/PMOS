@@ -107,10 +107,10 @@ describe('DatakiSyncService', () => {
       mergeCount: 0,
     };
 
-    evidenceEventRepo.create(evidenceEvent);
+    const createdEvent = evidenceEventRepo.create(evidenceEvent as any);
 
     const signalData: Omit<Signal, 'id' | 'createdAt'> = {
-      evidenceEventId: 'event-1',
+      evidenceEventId: createdEvent.id,
       sourceId: 'source-1',
       title: '原神4.0版本上线',
       summary: '原神4.0版本正式上线，带来全新内容',
@@ -189,11 +189,11 @@ describe('DatakiSyncService', () => {
       mergeCount: 0,
     };
 
-    evidenceEventRepo.create(evidenceEvent);
+    const createdEvent = evidenceEventRepo.create(evidenceEvent as any);
 
     const signal: Signal = {
       id: 'signal-1',
-      evidenceEventId: 'event-1',
+      evidenceEventId: createdEvent.id,
       sourceId: 'source-1',
       title: '测试信号',
       summary: '测试摘要',
@@ -208,7 +208,7 @@ describe('DatakiSyncService', () => {
       createdAt: new Date().toISOString(),
     };
 
-    signalRepo.create(signal);
+    const createdSignal = signalRepo.create(signal as any);
 
     // Mock fetch 失败响应
     (global.fetch as any).mockResolvedValue({
@@ -225,7 +225,7 @@ describe('DatakiSyncService', () => {
     expect(result.errors.length).toBeGreaterThan(0);
 
     // 验证信号状态未更新
-    const updatedSignal = signalRepo.findById('signal-1');
+    const updatedSignal = signalRepo.findById(createdSignal.id);
     expect(updatedSignal?.status).toBe('new');
   });
 
@@ -258,10 +258,10 @@ describe('DatakiSyncService', () => {
         mergeCount: 0,
       };
 
-      evidenceEventRepo.create(evidenceEvent);
+      const createdEvent = evidenceEventRepo.create(evidenceEvent as any);
 
       const signalData: Omit<Signal, 'id' | 'createdAt'> = {
-        evidenceEventId: `event-${i}`,
+        evidenceEventId: createdEvent.id,
         sourceId: 'source-1',
         title: `信号${i}`,
         summary: `摘要${i}`,

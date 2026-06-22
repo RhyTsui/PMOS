@@ -19,6 +19,13 @@ import { rsshubRouter } from './rsshub.js';
 import { weweRouter } from './wewe.js';
 import { dailyReportRouter } from './daily-report.js';
 import { trendsRouter } from './trends.js';
+// VNext 路由
+import { profilesRouter } from './profiles.js';
+import { ledgerRouter } from './ledger.js';
+import { intelligenceRouter } from './intelligence.js';
+import { modelRouter } from './model.js';
+import { llmProvidersRouter } from './llm-providers.js';
+import { distillationRouter } from './distillation.js';
 
 export function createApiRouter(): Router {
   const router = Router();
@@ -40,6 +47,14 @@ export function createApiRouter(): Router {
   router.use('/wewe', weweRouter);
   router.use('/daily-report', dailyReportRouter);
   router.use('/trends', trendsRouter);
+
+  // VNext 路由
+  router.use('/profiles', profilesRouter);
+  router.use('/ledger', ledgerRouter);
+  router.use('/intelligence', intelligenceRouter);
+  router.use('/model', modelRouter);
+  router.use('/admin/llm-providers', llmProvidersRouter);
+  router.use('/distillation', distillationRouter);
 
   return router;
 }

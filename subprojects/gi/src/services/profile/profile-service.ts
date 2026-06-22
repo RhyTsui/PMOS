@@ -107,7 +107,7 @@ export class RequirementProfileService {
       priority: input.priority ?? {},
       timeWindow: input.timeWindow ?? '最近7天',
       status: 'active',
-    } as RequirementProfile);
+    } as unknown as RequirementProfile);
 
     return profile;
   }

@@ -17,10 +17,15 @@
 
 最常用的 5 个端点：
   GET /api/v1/intelligence/briefs/daily?profileId=xxx   —— 今日日报
-  GET /api/v1/intelligence/feed?eventType=上线          —— 资讯流
-  GET /api/v1/intelligence/topics/:id/updates           —— 专题动态
+  GET /api/v1/intelligence/feed?eventType=上线,买量&sourceType=wechat_mp&since=7d&keyword=买量 —— 资讯流（支持历史+源+关键词）
+  GET /api/v1/intelligence/topics/{topicId}/updates?since=7d      —— 专题动态（返回趋势）
   GET /api/v1/intelligence/benchmarks?segment=小游戏     —— 行业基准
   GET /api/v1/intelligence/evidence/:type/:id           —— 证据依据
+
+其中：
+- 今日日报：只做当日汇总（可指定 `date`）。
+- 资讯流：支持按时间窗（since）、信源类型（sourceType）、信源ID（sourceId）、关键词（keyword）。
+- 专题动态：topic/eventType 专用视角，保留趋势信号。
 
 所有响应格式统一：
   {
@@ -194,7 +199,10 @@ GET /api/v1/intelligence/feed?eventType=上线,买量&priority=P0,P1&limit=20
 | `eventType` | 事件类型过滤（多值逗号分隔） |
 | `priority` | 优先级过滤（`P0`/`P1`/`P2`/`P3`） |
 | `audienceTag` | 适用角色过滤（`老板`/`发行`/`运营` 等） |
-| `since` | 时间范围（`24h` / `7d`） |
+| `sourceType` | 信源类型过滤：`media`/`community`/`official`/`social`/`forum`/`wechat_mp`（兼容 `wewe`） |
+| `sourceId` | 信源ID过滤（多值逗号分隔） |
+| `keyword` | 关键词过滤（标题/事件类型/摘要） |
+| `since` | 时间范围（`24h` / `7d` / ISO8601） |
 | `limit` | 返回条数 |
 
 **响应示例**：
@@ -230,6 +238,12 @@ GET /api/v1/intelligence/feed?eventType=上线,买量&priority=P0,P1&limit=20
 ---
 
 ### 3.3 专题动态
+
+**补充：专题动态的定位**
+- 专题是“topicId 语义层”，本质上是对 `eventType`/topic 的专题化查询。
+- 如果只是希望“按 topic + 时间 + 信源 + 关键词”检索，推荐使用 `/api/v1/intelligence/feed`。
+- 如果你要拿趋势建议（上升/下降）保留，继续用 `/topics/{id}/updates`。
+
 
 ```
 GET /api/v1/intelligence/topics/{topicId}/updates?since=7d
@@ -438,6 +452,103 @@ POST /api/v1/intelligence/briefs/generate
 
 ---
 
+
+### 3.8 关键词实时拓展（种子/信源）
+
+```
+POST /api/v1/intelligence/expansion/keyword
+```
+
+当用户提交关键词后，可按关键词实时创建种子或信源（支持干跑）。
+
+**请求体**：
+```json
+{
+  "keyword": "原神",
+  "scope": "all",
+  "seedType": "event",
+  "sourceType": "media",
+  "createSeed": true,
+  "createSource": true,
+  "dryRun": false
+}
+```
+
+- `scope`: `seed` | `source` | `all`（默认 `all`）
+- `seedType`: `entity` / `event` / `topic` / `source`（默认 `event`）
+- `sourceType`: `media` / `community` / `official` / `social` / `wechat_mp`（兼容 `wewe`）
+- `createSeed`: 是否真的创建种子（默认 `true`）
+- `createSource`: 是否真的创建信源（默认 `true`）
+- `dryRun`: `true` 时只返回候选，不落库（默认 `false`）
+
+**响应摘要**：返回候选 `candidates`、已创建 `created` 与跳过 `skipped`，以及 `meta` 创建计数。
+
+```json
+{
+  "data": {
+    "keyword": "原神",
+    "scope": "all",
+    "request": {
+      "seedType": "event",
+      "sourceType": "media",
+      "createSeed": true,
+      "createSource": true,
+      "dryRun": false
+    },
+    "created": {
+      "seeds": [{ "id": "seed-001", "seedType": "event", "text": "原神" }],
+      "sources": [{ "id": "src-001", "name": "原神", "baseUrl": "https://原神.com" }]
+    },
+    "skipped": { "seeds": [], "sources": [] },
+    "candidates": {
+      "seeds": [{ "seedType": "event", "text": "原神" }],
+      "sources": [{ "sourceType": "media", "name": "原神" }]
+    },
+    "meta": { "createdSeedCount": 1, "createdSourceCount": 1 }
+  }
+}
+```
+
+**curl 样例**：
+```bash
+# 真实创建：按关键词同时拓展种子和信源
+curl -X POST "http://localhost:8003/api/v1/intelligence/expansion/keyword" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "keyword": "原神",
+    "scope": "all",
+    "seedType": "event",
+    "sourceType": "media",
+    "createSeed": true,
+    "createSource": true,
+    "dryRun": false
+  }'
+
+# 预览模式：只返回候选，不落库
+curl -X POST "http://localhost:8003/api/v1/intelligence/expansion/keyword" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "keyword": "小游戏买量",
+    "scope": "all",
+    "seedType": "topic",
+    "sourceType": "wechat_mp",
+    "dryRun": true
+  }'
+```
+
+**错误码**：
+
+| HTTP 状态 | 错误码 | 场景 | 建议处理 |
+|-----------|--------|------|----------|
+| 400 | `INVALID_INPUT` | `keyword` 为空或缺失 | 提示用户补充关键词 |
+| 500 | `CREATE_FAILED` | 种子/信源创建过程异常 | 展示失败原因，可引导用户稍后重试或改用 `dryRun` |
+
+**说明**：
+- 关键词检索仍建议优先使用 `GET /api/v1/intelligence/feed?keyword=...`
+- 该接口用于“提交关键词后，触发拓展动作（种子/信源）”
+
+---
+
 ## 4. 完整端点清单
 
 ### 4.1 情报服务 `/intelligence`（Chat 主力）
@@ -459,6 +570,7 @@ POST /api/v1/intelligence/briefs/generate
 | GET | `/intelligence/benchmarks/segments` | 细分领域列表 |
 | GET | `/intelligence/model-opinions` | 模型观点 |
 | GET | `/intelligence/evidence/:type/:id` | **证据摘要** ⭐ |
+| POST | `/api/v1/intelligence/expansion/keyword` | 关键词实时拓展（种子/信源） |
 | GET | `/intelligence/sources` | 信源总览 |
 
 ### 4.2 画像管理 `/profiles`（运营配置）
@@ -806,3 +918,19 @@ export class GIClient {
   }
 }
 ```
+
+### 4.2 接口差异与建议
+
+- `briefs/daily`：仅保留“今日日报”语义，不做通用检索。
+- `topics/:id/updates`：保留“专题视图 + 趋势信号”语义，适合卡片化专题呈现。
+- `feed`：新增通用检索参数，支持 `since/sourceType/sourceId/keyword`，可替代大部分“按条件查 feed”的场景。
+- `wewe` 场景建议统一写法：`sourceType=wechat_mp`（兼容 `sourceType=wewe`）。
+
+
+
+
+
+
+
+
+

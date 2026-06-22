@@ -21,6 +21,7 @@ import { ModelClaimRepository } from '../../repositories/model-claim-repository.
 import { ModelAnswerRepository } from '../../repositories/model-answer-repository.js';
 import { IntelligenceBriefRepository } from '../../repositories/intelligence-brief-repository.js';
 import { RequirementProfileRepository } from '../../repositories/requirement-profile-repository.js';
+import { IntelSourceRepository } from '../../repositories/intel-source-repository.js';
 import type {
   EvidenceEvent,
   Signal,
@@ -31,6 +32,7 @@ import type {
   LedgerTargetType,
   VerificationStatus,
   BriefType,
+  SourceType,
 } from '../../models/types.js';
 
 // ===== API 响应 DTO =====
@@ -81,7 +83,7 @@ export interface BenchmarksResponse {
   parameters: Array<{
     id: string;
     name: string;
-    valueRange?: { min: number; max: number; p50?: number };
+    valueRange?: { min?: number; max?: number; p50?: number };
     confidence: number;
     timeWindow: string;
     evidenceIds: string[];
@@ -154,6 +156,9 @@ export interface FeedQueryOptions {
   eventType?: string[];      // ['上线', '买量']
   audienceTag?: string;
   limit?: number;
+  sourceType?: SourceType[];
+  sourceIds?: string[];
+  keyword?: string;
 }
 
 export interface BenchmarkQueryOptions {
@@ -181,6 +186,7 @@ export class IntelligenceApiService {
   private answerRepo = new ModelAnswerRepository();
   private briefRepo = new IntelligenceBriefRepository();
   private profileRepo = new RequirementProfileRepository();
+  private sourceRepo = new IntelSourceRepository();
 
   /**
    * 情报资讯流
@@ -188,32 +194,50 @@ export class IntelligenceApiService {
    */
   getFeed(options: FeedQueryOptions = {}): FeedResponse {
     const limit = options.limit ?? 50;
+    const since = this.resolveSinceToTimestamp(options.since);
+    const sourceIds = this.resolveSourceIds(options.sourceType, options.sourceIds);
 
-    // 1. 拉取最近的 evidence events
-    let events: EvidenceEvent[];
+    let events: EvidenceEvent[] = [];
+
+    // 1. 拉取事件（先按时间/事件类型/优先级做主筛）
     if (options.eventType && options.eventType.length > 0) {
-      events = [];
-      for (const t of options.eventType) {
-        events.push(...this.evidenceEventRepo.findByEventType(t as any, limit));
-      }
-      events = events.sort((a, b) => b.impactScore - a.impactScore).slice(0, limit);
+      const fetchLimit = Math.max(limit * 20, 500);
+      events = this.evidenceEventRepo.findByFilter({
+        eventTypes: options.eventType as any,
+        since,
+        keyword: options.keyword,
+        limit: fetchLimit,
+      });
     } else if (options.priority && options.priority.length > 0) {
-      events = [];
-      for (const p of options.priority) {
-        const pEvents = this.evidenceEventRepo.findTopPriority(limit);
-        events.push(...pEvents.filter((e) => e.priority === p));
-      }
-      events = events.slice(0, limit);
+      const fetchLimit = Math.max(limit * 20, 500);
+      events = this.evidenceEventRepo.findByFilter({
+        priorities: options.priority as any,
+        since,
+        keyword: options.keyword,
+        limit: fetchLimit,
+      });
     } else {
-      events = this.evidenceEventRepo.findRecent(limit);
+      events = this.evidenceEventRepo.findByFilter({
+        since,
+        keyword: options.keyword,
+        limit: Math.max(limit * 20, 500),
+      });
     }
 
-    // 2. 按 audienceTag 过滤
+    // 2. 按源类型/sourceId 过滤
+    if (sourceIds) {
+      events = events.filter((event) => sourceIds.some((id) => event.sourceIds.includes(id)));
+    }
+
+    // 3. 按 audienceTag 过滤
     if (options.audienceTag) {
       events = events.filter((e) => e.audienceTags.includes(options.audienceTag!));
     }
 
-    // 3. 转换为 FeedItem
+    // 4. 去重/截断
+    events = events.slice(0, limit);
+
+    // 5. 转换为 FeedItem
     const items: FeedItem[] = events.map((e) => this.eventToFeedItem(e));
 
     return {
@@ -250,10 +274,17 @@ export class IntelligenceApiService {
    * 专题动态
    * GET /api/v1/intelligence/topics/:id/updates
    */
-  getTopicUpdates(topicId: string, since: string = '7d'): TopicUpdatesResponse {
-    // 把 topicId 当作话题标签（topic_tag）或事件类型处理
-    const events = this.evidenceEventRepo.findByEventType(topicId as any, 50);
-    const items = events.map((e) => this.eventToFeedItem(e));
+  getTopicUpdates(
+    topicId: string,
+    since: string = '7d',
+    options: Omit<FeedQueryOptions, 'eventType' | 'since'> = {},
+  ): TopicUpdatesResponse {
+    const feed = this.getFeed({
+      ...options,
+      eventType: [topicId],
+      since,
+      limit: options.limit,
+    });
 
     // 查找相关趋势簇
     const trends = this.trendRepo.findByEventType(topicId as any);
@@ -267,7 +298,7 @@ export class IntelligenceApiService {
       topicId,
       topicName: topicId,
       period: since,
-      updates: items,
+      updates: feed.items,
       trendSignals,
     };
   }
@@ -384,6 +415,48 @@ export class IntelligenceApiService {
   }
 
   // ===== 私有辅助方法 =====
+
+  private resolveSinceToTimestamp(since?: string): string | undefined {
+    if (!since) return undefined;
+
+    if (since === 'today') {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      return start.toISOString();
+    }
+
+    const relativeMatch = since.match(/^(\d+)([hdm])$/i);
+    if (relativeMatch) {
+      const amount = Number.parseInt(relativeMatch[1], 10);
+      const unit = relativeMatch[2].toLowerCase();
+      const now = Date.now();
+      const multiplier = unit === 'd' ? 24 * 60 * 60_000 : unit === 'h' ? 60 * 60_000 : 60_000;
+      return new Date(now - amount * multiplier).toISOString();
+    }
+
+    const ts = Date.parse(since);
+    if (Number.isNaN(ts)) {
+      return undefined;
+    }
+
+    return new Date(ts).toISOString();
+  }
+
+  private resolveSourceIds(sourceTypes?: SourceType[], sourceIds?: string[]): string[] | undefined {
+    const idsFromRequest = (sourceIds ?? []).filter(Boolean);
+    const hasSourceFilter = (idsFromRequest.length > 0) || (sourceTypes ?? []).length > 0;
+    if (!hasSourceFilter) return undefined;
+
+    const filterByType = sourceTypes && sourceTypes.length > 0
+      ? this.sourceRepo.findByTypes(sourceTypes).map((s) => s.id)
+      : undefined;
+
+    if (idsFromRequest.length === 0) return filterByType;
+    if (!filterByType) return [...new Set(idsFromRequest)];
+
+    const typeIdSet = new Set(filterByType);
+    return idsFromRequest.filter((id) => typeIdSet.has(id));
+  }
 
   private eventToFeedItem(event: EvidenceEvent): FeedItem {
     // 查询该事件的核验状态

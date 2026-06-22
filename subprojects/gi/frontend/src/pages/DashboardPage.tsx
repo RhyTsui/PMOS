@@ -4,15 +4,12 @@
  * 情报看板，展示系统核心指标和趋势
  */
 import { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Tag, Space, Alert, List, Typography, Progress } from 'antd';
+import { Card, Row, Col, Statistic, Tag, Space, List, Typography, Progress } from 'antd';
 import {
   FileTextOutlined,
-  ThunderboltOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined,
   AlertOutlined,
   WarningOutlined,
-  TrendingUpOutlined,
   DatabaseOutlined,
   SafetyOutlined
 } from '@ant-design/icons';

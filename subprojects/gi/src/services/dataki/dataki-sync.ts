@@ -97,7 +97,7 @@ export class DatakiSyncService {
    */
   private getSignalsToSync(): Signal[] {
     // 获取新的信号
-    const newSignals = this.signalRepo.findNew(this.config.syncBatchSize);
+    const newSignals = this.signalRepo.findByStatus('new', 10000);
 
     // 如果之前同步过，也获取上次同步后更新已推送状态的信号
     // 这里简化处理，只同步新信号

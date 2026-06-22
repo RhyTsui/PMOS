@@ -607,6 +607,78 @@ GET    /api/v1/dataki/queue         # 同步队列状态
 
 ---
 
+## 十二点五、情报查询 API（客户端侧）
+
+在对接小乔等消费端时，情报查询分 3 类：
+
+### 4.1 信息流查询（推荐）
+
+```
+GET /api/v1/intelligence/feed
+```
+
+**查询参数**
+
+| 参数 | 说明 |
+|------|------|
+| `since` | 时间窗口（`24h` / `7d` / ISO8601） |
+| `eventType` | 多值（逗号分隔） |
+| `priority` | 多值（`P0,P1`） |
+| `sourceType` | 信源类型过滤（`media`/`community`/`official`/`social`/`forum`/`wechat_mp`，兼容 `wewe`） |
+| `sourceId` | 信源 ID 过滤（逗号分隔） |
+| `keyword` | 标题、事件类型、关键事实关键字过滤 |
+| `profileId` | 可选：画像过滤 |
+| `audienceTag` | 可选：受众标签 |
+| `limit` | 返回条数 |
+
+
+### 4.2 专题动态
+
+```
+GET /api/v1/intelligence/topics/:id/updates?since=7d
+```
+
+**说明**：返回专题事件与趋势信号，适合需要专题结构的场景；
+若只做通用检索，可改用 `feed` 并带上 `eventType=<topicId>`。
+
+
+### 4.3 今日日报
+
+```
+GET /api/v1/intelligence/briefs/daily?profileId=xxx
+```
+
+**说明**：仅返回 profile 的当日日报（`date` 不传默认当天）。
+
+### 4.4 关键词实时拓展（种子 / 信源）
+
+**用途**：当用户输入新关键词后，服务端可按该关键词实时尝试创建种子与信源。
+
+```
+POST /api/v1/intelligence/expansion/keyword
+```
+
+**字段说明**：
+| 参数 | 说明 |
+|------|------|
+| `keyword` | 关键词（必填） |
+| `scope` | `seed` / `source` / `all`，默认 `all` |
+| `seedType` | 种子类型：`entity`/`event`/`topic`/`source` |
+| `sourceType` | 信源类型：`media`/`community`/`official`/`social`/`wechat_mp`（兼容 `wewe`） |
+| `createSeed` | 是否创建种子（默认 true） |
+| `createSource` | 是否创建信源（默认 true） |
+| `dryRun` | true 时仅预览，不落库 |
+
+**返回建议**：`candidates`（候选）、`created`（已创建）、`skipped`（跳过原因）、`meta`（创建计数）。
+
+### 4.5 接口路由对照
+
+| 方法 | 路径 | 用途 |
+|------|------|------|
+| GET | `/api/v1/intelligence/feed` | 情报流检索 |
+| GET | `/api/v1/intelligence/topics/:id/updates` | 专题动态 |
+| GET | `/api/v1/intelligence/briefs/daily` | 当日日报 |
+| POST | `/api/v1/intelligence/expansion/keyword` | 用户提交关键词后，实时拓展种子/信源 |
 ## 十二、路由注册
 
 ```typescript
@@ -652,3 +724,7 @@ export { router as apiRouter };
 | 信号 vs 事件 | 分开 API | 信号是面向用户的最终产出 |
 | 手动操作 | 独立端点 | 和自动流程分开，方便追踪 |
 | 漏采反馈 | POST 接口 | 接受人工输入，自动分析归因 |
+
+
+
+

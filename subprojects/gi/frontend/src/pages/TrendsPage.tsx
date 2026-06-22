@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react';
 import { Card, Table, Tag, Space, Statistic, Row, Col, Button, message, Tabs, Empty } from 'antd';
-import { TrendingUpOutlined, TrendingDownOutlined, FireOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined, FireOutlined, ReloadOutlined } from '@ant-design/icons';
 import api from '../services/api';
 
 interface TrendCluster {
@@ -79,9 +79,9 @@ export default function TrendsPage() {
 
   const getDirectionTag = (direction: string) => {
     const config: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
-      rising: { color: 'green', icon: <TrendingUpOutlined />, label: '上升' },
+      rising: { color: 'green', icon: <ArrowUpOutlined />, label: '上升' },
       stable: { color: 'blue', icon: null, label: '稳定' },
-      declining: { color: 'red', icon: <TrendingDownOutlined />, label: '下降' },
+      declining: { color: 'red', icon: <ArrowDownOutlined />, label: '下降' },
       emerging: { color: 'orange', icon: <FireOutlined />, label: '新兴' },
     };
     const cfg = config[direction] || config.stable;
@@ -208,7 +208,7 @@ export default function TrendsPage() {
                   value={stats.rising}
                   suffix="个"
                   valueStyle={{ color: '#52c41a' }}
-                  prefix={<TrendingUpOutlined />}
+                  prefix={<ArrowUpOutlined />}
                 />
               </Card>
             </Col>
@@ -229,7 +229,7 @@ export default function TrendsPage() {
                   value={stats.declining}
                   suffix="个"
                   valueStyle={{ color: '#f5222d' }}
-                  prefix={<TrendingDownOutlined />}
+                  prefix={<ArrowDownOutlined />}
                 />
               </Card>
             </Col>

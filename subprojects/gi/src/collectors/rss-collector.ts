@@ -20,6 +20,7 @@ import { normalizeUrl } from '../lib/url-normalizer.js';
 export class RssCollector implements Collector {
   readonly type = 'rss' as const;
   private parser: Parser;
+  private readonly minFullContentLength = 100;
 
   constructor() {
     this.parser = new Parser({
@@ -47,7 +48,7 @@ export class RssCollector implements Collector {
       // 3. 转为 RawEvidence
       const evidences: RawEvidence[] = [];
       for (const item of filteredItems) {
-        const evidence = this.toEvidence(item, source, seeds);
+        const evidence = await this.toEvidence(item, source, seeds);
         if (evidence) {
           evidences.push(evidence);
         }
@@ -112,22 +113,35 @@ export class RssCollector implements Collector {
   /**
    * 将 RSS 条目转为 RawEvidence
    */
-  private toEvidence(
+  private async toEvidence(
     item: Parser.Item,
     source: IntelSource,
     seeds: Seed[]
-  ): RawEvidence | null {
+  ): Promise<RawEvidence | null> {
     // 必须有 URL
     if (!item.link) return null;
 
     const url = normalizeUrl(item.link);
     const title = item.title || '';
     // 优先使用完整内容（HTML），而非摘要（contentSnippet）
-    const rawContent = item.content || item.contentSnippet || '';
-    const content = this.cleanContent(rawContent);
+    let rawContent = item.content || item.contentSnippet || '';
+    let content = this.cleanContent(rawContent);
 
-    // 内容太短时（< 100字），可能是纯摘要，标记以便后续获取全文
-    const isSummaryOnly = content.length < 100 && !!item.link;
+    // 内容太短时（< 100字），RSS 很可能只给摘要或链接；主动下载文章页补全文。
+    let isSummaryOnly = content.length < this.minFullContentLength && !!item.link;
+    let responseTime: number | undefined;
+    let httpStatus: number | undefined;
+
+    if (isSummaryOnly) {
+      const fetched = await this.fetchFullArticle(url, source).catch(() => null);
+      if (fetched && fetched.content.length > content.length) {
+        rawContent = fetched.html;
+        content = fetched.content;
+        responseTime = fetched.responseTime;
+        httpStatus = fetched.httpStatus;
+        isSummaryOnly = content.length < this.minFullContentLength;
+      }
+    }
 
     // 提取图片
     const images = this.extractImages(rawContent);
@@ -143,6 +157,9 @@ export class RssCollector implements Collector {
         typeof c === 'string' ? c : (c._ || c.name || '')
       ).filter(Boolean),
       isSummaryOnly,
+      responseTime,
+      httpStatus,
+      wordCount: content.length,
     };
 
     return {
@@ -190,6 +207,76 @@ export class RssCollector implements Collector {
     }
 
     return images;
+  }
+
+  /**
+   * 下载 RSS 条目链接并提取文章正文。
+   */
+  private async fetchFullArticle(
+    url: string,
+    source: IntelSource
+  ): Promise<{ html: string; content: string; httpStatus: number; responseTime: number } | null> {
+    const startedAt = Date.now();
+    const headers = {
+      'User-Agent': source.config.userAgent || 'GI-Bot/1.0 (Game Insider Intelligence)',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      ...source.config.headers,
+    };
+
+    const response = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(30000),
+    });
+
+    const responseTime = Date.now() - startedAt;
+    const httpStatus = response.status;
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType && !contentType.includes('text/html') && !contentType.includes('application/xhtml')) {
+      return null;
+    }
+
+    const html = await response.text();
+    if (this.isBlockedArticlePage(html, response.url)) return null;
+    const articleHtml = this.extractArticleHtml(html);
+    const content = this.cleanContent(articleHtml);
+
+    if (!content) return null;
+    return { html: articleHtml || html, content, httpStatus, responseTime };
+  }
+
+  /**
+   * 微信风控/验证码页不能作为正文入库。
+   */
+  private isBlockedArticlePage(html: string, url: string): boolean {
+    return url.includes('wappoc_appmsgcaptcha')
+      || html.includes('环境异常')
+      || html.includes('当前环境异常')
+      || html.includes('暂无权限查看')
+      || html.includes('未知错误，请稍后再试');
+  }
+
+  /**
+   * 从页面 HTML 中截取最像正文的区域。
+   */
+  private extractArticleHtml(html: string): string {
+    const candidates = [
+      new RegExp('\\x3cdiv[\\s\\S]*?id=[\\x22\\x27]js_content[\\x22\\x27][\\s\\S]*?\\x3e([\\\\s\\\\S]*?)\\x3c\\\\/div\\x3e\\\\s*\\x3cscript', 'i'),
+      new RegExp('\\x3cdiv[\\s\\S]*?id=[\\x22\\x27]js_content[\\x22\\x27][\\s\\S]*?\\x3e([\\\\s\\\\S]*?)\\x3c\\\\/div\\x3e', 'i'),
+      new RegExp('\\x3carticle[\\s\\S]*?\\x3e([\\\\s\\\\S]*?)\\x3c\\\\/article\\x3e', 'i'),
+      new RegExp('\\x3cmain[\\s\\S]*?\\x3e([\\\\s\\\\S]*?)\\x3c\\\\/main\\x3e', 'i'),
+      new RegExp('\\x3cbody[\\s\\S]*?\\x3e([\\\\s\\\\S]*?)\\x3c\\\\/body\\x3e', 'i'),
+    ];
+
+    for (const pattern of candidates) {
+      const match = html.match(pattern);
+      if (match?.[1]) {
+        return match[1];
+      }
+    }
+
+    return html;
   }
 
   /**
