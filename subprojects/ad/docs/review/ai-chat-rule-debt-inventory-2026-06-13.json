@@ -169,7 +169,11 @@
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/chat-pipeline/demand-intake-gate.ts",
-                                            "score":  11
+                                            "score":  21
+                                        },
+                                        {
+                                            "file":  "frontend/src/src/lib/demand-capability-status.ts",
+                                            "score":  46
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/report-result-visualization.ts",
@@ -201,7 +205,7 @@
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/intent-router.ts",
-                                            "score":  72
+                                            "score":  75
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/attachment-understanding.ts",
@@ -253,7 +257,7 @@
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/chat-pipeline/open-answer-stage.ts",
-                                            "score":  47
+                                            "score":  51
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/chat-pipeline/report-query-stage.ts",
@@ -389,6 +393,10 @@
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/planner-orchestrator.ts",
+                                            "score":  54
+                                        },
+                                        {
+                                            "file":  "frontend/src/src/lib/planner-orchestrator.base.ts",
                                             "score":  53
                                         },
                                         {
@@ -413,15 +421,15 @@
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/automation-intent-router.ts",
-                                            "score":  31
+                                            "score":  43
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/automation-task-lifecycle.ts",
-                                            "score":  32
+                                            "score":  35
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/demand-intake-structurer.ts",
-                                            "score":  36
+                                            "score":  42
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/report-query-answer-summary.ts",
@@ -437,7 +445,7 @@
                                         },
                                         {
                                             "file":  "frontend/src/src/lib/gi-intelligence-client.ts",
-                                            "score":  37
+                                            "score":  54
                                         }
                                     ],
     "review_chain":  [
