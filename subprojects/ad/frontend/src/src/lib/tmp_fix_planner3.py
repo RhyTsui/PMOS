@@ -1,0 +1,10 @@
+from pathlib import Path  
+path = Path('frontend/src/src/lib/planner-orchestrator.ts')  
+text = path.read_text(encoding='utf-8')  
+text = text.replace(\"errors: [{ code: 'llm_client_missing', message: 'LLM client not provided' }]\", \"errors: [{ code: 'planner_llm_missing', message: 'LLM client not provided' }]\")  
+text = text.replace(\"code: 'llm_timeout'\", \"code: 'planner_timeout'\")  
+text = text.replace(\"code: 'llm_error'\", \"code: 'planner_llm_exception'\")  
+text = text.replace('empty_llm_output', 'planner_empty_output')  
+text = text.replace('json_extraction_failed', 'planner_json_extraction_failed')  
+text = text.replace('json_parse_error', 'planner_json_parse_error')  
+text = text.replace(\"code: 'unexpected_error'\", \"code: 'planner_unexpected_error'\")  

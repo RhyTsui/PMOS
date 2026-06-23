@@ -1,0 +1,365 @@
+{
+  "timestamp": "2026-06-23T02:00:34.071Z",
+  "selectedCaseIds": null,
+  "startFromCaseId": null,
+  "startFromExcelRow": 22,
+  "caseLimit": 1,
+  "total": 1,
+  "passCount": 0,
+  "failCount": 1,
+  "blockedCount": 0,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-23T02:00:34.071Z",
+    "guardMb": 8192,
+    "pids": [
+      37092
+    ],
+    "processes": [
+      {
+        "pid": 37092,
+        "workingSetMb": 4494
+      }
+    ],
+    "maxWorkingSetMb": 4494
+  },
+  "memoryPeakMb": 5640,
+  "memorySamples": [
+    {
+      "phase": "case_start",
+      "caseId": "MIG-006",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:50:44.052Z",
+      "guardMb": 8192,
+      "pids": [
+        16296
+      ],
+      "processes": [
+        {
+          "pid": 16296,
+          "workingSetMb": 5444
+        }
+      ],
+      "maxWorkingSetMb": 5444
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-006",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:50:44.956Z",
+      "guardMb": 8192,
+      "pids": [
+        16296
+      ],
+      "processes": [
+        {
+          "pid": 16296,
+          "workingSetMb": 5640
+        }
+      ],
+      "maxWorkingSetMb": 5640
+    },
+    {
+      "phase": "attempt_error",
+      "caseId": "MIG-006",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:55:58.536Z",
+      "guardMb": 8192,
+      "pids": [],
+      "processes": [],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-006",
+      "attempt": 1,
+      "sampledAt": "2026-06-23T01:56:17.958Z",
+      "guardMb": 8192,
+      "pids": [
+        57568
+      ],
+      "processes": [
+        {
+          "pid": 57568,
+          "workingSetMb": 1223
+        }
+      ],
+      "maxWorkingSetMb": 1223
+    },
+    {
+      "phase": "attempt_error",
+      "caseId": "MIG-006",
+      "attempt": 1,
+      "sampledAt": "2026-06-23T01:57:22.089Z",
+      "guardMb": 8192,
+      "pids": [],
+      "processes": [],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-006",
+      "attempt": 2,
+      "sampledAt": "2026-06-23T01:57:41.452Z",
+      "guardMb": 8192,
+      "pids": [
+        37092
+      ],
+      "processes": [
+        {
+          "pid": 37092,
+          "workingSetMb": 929
+        }
+      ],
+      "maxWorkingSetMb": 929
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-006",
+      "attempt": 2,
+      "sampledAt": "2026-06-23T02:00:33.516Z",
+      "guardMb": 8192,
+      "pids": [
+        37092
+      ],
+      "processes": [
+        {
+          "pid": 37092,
+          "workingSetMb": 4494
+        }
+      ],
+      "maxWorkingSetMb": 4494
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T02:00:34.071Z",
+      "guardMb": 8192,
+      "pids": [
+        37092
+      ],
+      "processes": [
+        {
+          "pid": 37092,
+          "workingSetMb": 4494
+        }
+      ],
+      "maxWorkingSetMb": 4494
+    }
+  ],
+  "results": [
+    {
+      "caseId": "MIG-006",
+      "scene": "广告报表-日期识别-DATE-F003",
+      "prompt": "指间山海2026年2月月报中，广告投放部按媒体细分的累计ROI情况",
+      "keyPoint": "1、识别为广告报表查询，并调用广告报表 MCP。\r\n2、正确解析项目、日期、媒体、应用类型、团队、指标等关键入参；缺少必要条件时先追问。\r\n3、返回结果：巨量 :31.13% tap:62.03% 苹果：54.06%\r\n4、输出查询口径、筛选条件和数据来源，便于复核。\r\n5、校验点：功能测试点：月报+媒体+应用类型+团队",
+      "note": "",
+      "verdict": "失败",
+      "reason": "关键结果覆盖不足 0/3，缺少 巨量:31.13%；tap:62.03%；苹果:54.06%",
+      "answer": "| 日期 | 媒体 | 3日ROI |\n| --- | --- | ---: |\n| 2026-02 | 巨量广告 | 12.78% |\n| 2026-02 | 巨量广告 | 10.64% |\n| 2026-02 | 巨量广告 | 13.54% |\n| 2026-02 | 巨量广告 | 19.15% |\n| 2026-02 | 巨量广告 | 21.44% |\n| 2026-02 | 巨量广告 | 8.72% |\n| 2026-02 | 巨量广告 | 9.33% |\n| 2026-02 | 巨量广告 | 35.59% |\n| 2026-02 | 巨量广告 | 12.14% |\n| 2026-02 | 巨量广告 | 7.29% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 巨量广告 | 0.00% |\n| 2026-02 | 腾讯广告 | 0.00% |\n| 2026-02 | 腾讯广告 | 0.00% |\n\n**结论**\n- 2026-02-01 至 2026-02-28 的明细结果已生成，共 22 条数据；核心指标为 3日ROI。\n\n**证据**\n- 本次返回 22 条结果。\n- 统计范围为 2026-02-01 至 2026-02-28。\n- 指标：3日ROI；维度：日期、媒体。\n- 明细预览：\n| 日期 | 媒体 | 3日ROI |\n| --- | --- | --- |\n| 2026-02 | 巨量广告 | 12.78% |\n| 2026-02 | 巨量广告 | 10.64% |\n| 2026-02 | 巨量广告 | 13.54% |\n| 2026-02 | 巨量广告 | 19.15% |\n| 2026-02 | 巨量广告 | 21.44% |\n\n**口径**\n- 时间范围：2026-02-01 至 2026-02-28\n- 指标：3日ROI\n- 维度：日期、媒体\n- 数据来源：报表MCP.get_zt_ad_account_report\n\n**风险**\n- 结果缺少 appId 字段，相关结论需要复核。\n- 结果缺少标识字段：appId\n\n**下一步**\n- 继续下钻分析\n- 请检查归一化工具输出协议\n- 修正后我再继续查数",
+      "intentType": "report_query",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 3,
+        "evidenceRefCount": 3,
+        "toolCallTraceCount": 6,
+        "processEventCount": 21,
+        "processEventSummary": [
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent.detected",
+            "label": "识别问数意图",
+            "status": "success",
+            "toolName": "",
+            "summary": "Planner 候选：用户请求查询特定项目、时间、部门和维度下的累计ROI报表数据，属于典型的广告数据查询意图。",
+            "outputSummary": "object(route)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "context.prepared",
+            "label": "准备查询上下文。",
+            "status": "success",
+            "toolName": "",
+            "summary": "读取当前会话项目范围和可用报表工具。",
+            "outputSummary": "object(enabled_server_count,slot_state,user_requirement,required_identifiers,capability_selected)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "capability.checked",
+            "label": "检查可用能力。",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成能力检查。",
+            "outputSummary": "object(selected_capability_id,selected_tool_name,execution_decision,data_coverage,presentation_coverage,fallback_used)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "内部数据能力优先作为问数证据来源。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "skill.started",
+            "label": "编排报表查询",
+            "status": "success",
+            "toolName": "",
+            "summary": "按查询策略选择数据能力，补齐必要字段并执行媒体、终端等匹配。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 11,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 12,
+            "type": "mcp.tool_result",
+            "label": "匹配查询条件",
+            "status": "success",
+            "toolName": "get_dict_zt_label_team",
+            "summary": "dictionary matched: 团队 2",
+            "outputSummary": "{\"message\":\"调用成功\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 13,
+            "type": "mcp.tool_result",
+            "label": "查询报表数据",
+            "status": "success",
+            "toolName": "get_zt_ad_account_report",
+            "summary": "已查到 2026-02-01 至 2026-02-28 的明细结果，共 22 条数据。",
+            "outputSummary": "{\"message\":\"已查到 2026-02-01 至 2026-02-28 的明细结果，共 22 条数据。\",\"status\":\"success\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 14,
+            "type": "mcp.tool_result",
+            "label": "调用数据能力",
+            "status": "success",
+            "toolName": "get_zt_ad_roi_report",
+            "summary": "已查到 2026-02-01 至 2026-02-28 的明细结果，共 1 条数据。",
+            "outputSummary": "{\"message\":\"已查到 2026-02-01 至 2026-02-28 的明细结果，共 1 条数据。\",\"status\":\"success\"}",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 15,
+            "type": "model.step",
+            "label": "检查数据质量：",
+            "status": "waiting",
+            "toolName": "",
+            "summary": "存在需要注意的数据口径或匹配风险。",
+            "outputSummary": "object(quality_check)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 16,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 data_query，实际 data_query；另有 1 个非阻断提醒。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 17,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 18,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 19,
+            "type": "ui.component_rendered",
+            "label": "生成数据表：",
+            "status": "success",
+            "toolName": "",
+            "summary": "已生成结构化数据表。",
+            "outputSummary": "",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 20,
+            "type": "answer.final",
+            "label": "生成回复",
+            "status": "success",
+            "toolName": "",
+            "summary": "已查到 2026-02-01 至 2026-02-28 的明细结果，共 22 条数据。",
+            "outputSummary": "{\"status\":\"success\"}",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": true
+      },
+      "elapsed": "171.6",
+      "memoryBefore": {
+        "sampledAt": "2026-06-23T01:50:44.052Z",
+        "guardMb": 8192,
+        "pids": [
+          16296
+        ],
+        "processes": [
+          {
+            "pid": 16296,
+            "workingSetMb": 5444
+          }
+        ],
+        "maxWorkingSetMb": 5444
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-23T02:00:33.516Z",
+        "guardMb": 8192,
+        "pids": [
+          37092
+        ],
+        "processes": [
+          {
+            "pid": 37092,
+            "workingSetMb": 4494
+          }
+        ],
+        "maxWorkingSetMb": 4494
+      }
+    }
+  ]
+}

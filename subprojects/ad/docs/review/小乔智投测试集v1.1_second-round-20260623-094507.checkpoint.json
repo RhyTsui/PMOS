@@ -1,0 +1,260 @@
+{
+  "timestamp": "2026-06-23T01:45:53.486Z",
+  "selectedCaseIds": null,
+  "startFromCaseId": "MIG-005",
+  "caseLimit": 1,
+  "total": 107,
+  "passCount": 1,
+  "failCount": 0,
+  "blockedCount": 0,
+  "errorCount": 0,
+  "memoryGuard": {
+    "sampledAt": "2026-06-23T01:45:53.486Z",
+    "guardMb": 8192,
+    "pids": [
+      16296
+    ],
+    "processes": [
+      {
+        "pid": 16296,
+        "workingSetMb": 0
+      }
+    ],
+    "maxWorkingSetMb": 0
+  },
+  "memoryPeakMb": 0,
+  "memorySamples": [
+    {
+      "phase": "case_start",
+      "caseId": "MIG-000",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:45:09.737Z",
+      "guardMb": 8192,
+      "pids": [
+        16296
+      ],
+      "processes": [
+        {
+          "pid": 16296,
+          "workingSetMb": 0
+        }
+      ],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_start",
+      "caseId": "MIG-000",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:45:10.443Z",
+      "guardMb": 8192,
+      "pids": [
+        16296
+      ],
+      "processes": [
+        {
+          "pid": 16296,
+          "workingSetMb": 0
+        }
+      ],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "attempt_end",
+      "caseId": "MIG-000",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:45:53.217Z",
+      "guardMb": 8192,
+      "pids": [
+        16296
+      ],
+      "processes": [
+        {
+          "pid": 16296,
+          "workingSetMb": 0
+        }
+      ],
+      "maxWorkingSetMb": 0
+    },
+    {
+      "phase": "checkpoint",
+      "caseId": "",
+      "attempt": 0,
+      "sampledAt": "2026-06-23T01:45:53.486Z",
+      "guardMb": 8192,
+      "pids": [
+        16296
+      ],
+      "processes": [
+        {
+          "pid": 16296,
+          "workingSetMb": 0
+        }
+      ],
+      "maxWorkingSetMb": 0
+    }
+  ],
+  "results": [
+    {
+      "caseId": "MIG-000",
+      "scene": "连通",
+      "prompt": "你好",
+      "keyPoint": "LLM理解+简单回应",
+      "note": "",
+      "verdict": "通过",
+      "reason": "回答长度 71",
+      "answer": "你好！我是小乔智投通用 AI 助手。请问有什么我可以帮你的吗？如果你想了解“指间山海”项目的素材表现、创意方向或相关广告数据，随时可以告诉我。",
+      "intentType": "general",
+      "contractStatus": "success",
+      "contractEvidence": {
+        "hasResponseContract": true,
+        "status": "success",
+        "sourceRefCount": 0,
+        "evidenceRefCount": 0,
+        "toolCallTraceCount": 0,
+        "processEventCount": 11,
+        "processEventSummary": [
+          {
+            "index": 0,
+            "type": "stage.ended",
+            "label": "请求准备阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "请求准备阶段已完成（2007ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 1,
+            "type": "stage.started",
+            "label": "进入意图理解阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "understanding 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 2,
+            "type": "intent.detected",
+            "label": "确定路由",
+            "status": "success",
+            "toolName": "",
+            "summary": "进入general链路。",
+            "outputSummary": "object(clientIntent,resolvedIntent,serviceIntent,ignoredClientIntentReason,routeEvidence,matchedRules)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 3,
+            "type": "planner.arbitrated",
+            "label": "信息源仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已完成内部能力、公开信息和上下文候选仲裁。",
+            "outputSummary": "object(policy,stage,selected_source,priority_order,candidates,rejected_authorities)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 4,
+            "type": "stage.ended",
+            "label": "意图理解阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "意图理解阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 5,
+            "type": "stage.started",
+            "label": "进入候选规划阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "planning 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 6,
+            "type": "intent_orch.candidate",
+            "label": "IntentOrch 候选",
+            "status": "rejected",
+            "toolName": "",
+            "summary": "IntentOrch 增强候选暂不可用，开放式回答已继续由 Planner/Composer 主链处理。",
+            "outputSummary": "object(candidate,arbitration_summary)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 7,
+            "type": "model.step",
+            "label": "开放式回答仲裁",
+            "status": "success",
+            "toolName": "",
+            "summary": "已汇总 请求理解、IntentOrch、内部知识库 候选；证据模式：无需外部证据；上下文采纳 6 项、淘汰 2 项；风险标记 3 项。",
+            "outputSummary": "object(planner_candidates,arbitration_summary,context_selection)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 8,
+            "type": "route_observation",
+            "label": "路由观测",
+            "status": "success",
+            "toolName": "",
+            "summary": "路由观测通过：预期 general_chat，实际 general_chat，无阻断差异。",
+            "outputSummary": "object(mode,decisionId,traceId,serviceIntent,resolvedIntent,primaryDeliverable)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 9,
+            "type": "stage.ended",
+            "label": "候选规划阶段完成",
+            "status": "success",
+            "toolName": "",
+            "summary": "候选规划阶段已完成（0ms）。",
+            "outputSummary": "object(stage,stage_label,duration_ms,result_status)",
+            "sourceRefCount": 0
+          },
+          {
+            "index": 10,
+            "type": "stage.started",
+            "label": "进入工具执行阶段",
+            "status": "success",
+            "toolName": "",
+            "summary": "execution 阶段开始。",
+            "outputSummary": "object(stage,stage_label)",
+            "sourceRefCount": 0
+          }
+        ],
+        "hasGroundedExecution": false
+      },
+      "elapsed": "42.6",
+      "memoryBefore": {
+        "sampledAt": "2026-06-23T01:45:09.737Z",
+        "guardMb": 8192,
+        "pids": [
+          16296
+        ],
+        "processes": [
+          {
+            "pid": 16296,
+            "workingSetMb": 0
+          }
+        ],
+        "maxWorkingSetMb": 0
+      },
+      "memoryAfter": {
+        "sampledAt": "2026-06-23T01:45:53.217Z",
+        "guardMb": 8192,
+        "pids": [
+          16296
+        ],
+        "processes": [
+          {
+            "pid": 16296,
+            "workingSetMb": 0
+          }
+        ],
+        "maxWorkingSetMb": 0
+      }
+    }
+  ]
+}

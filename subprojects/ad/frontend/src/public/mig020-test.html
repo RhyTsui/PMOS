@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIG-020 E2E测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+        .test-case {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .test-case h3 {
+            margin: 0 0 12px 0;
+            color: #333;
+        }
+        .test-input {
+            background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #1677ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 8px 8px 8px 0;
+        }
+        button:hover {
+            background: #4096ff;
+        }
+        button:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f0f0f0;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .result h3 {
+            margin: 0 0 12px 0;
+        }
+        .check-item {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+        }
+        .check-pass {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+        .check-fail {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+        .check-warn {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            color: #faad14;
+        }
+        .answer-box {
+            background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 16px;
+            margin: 12px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .metadata {
+            background: #f5f5f5;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 12px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .loading {
+            text-align: center;
+            padding: 24px;
+            color: #666;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1677ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MIG-020 E2E验收测试</h1>
+
+        <div class="test-case">
+            <h3>测试用例: MIG-020</h3>
+            <p><strong>场景:</strong> 广告报表-语义理解-SEM-025</p>
+            <p><strong>测试输入:</strong></p>
+            <div class="test-input">指间山海 - 国内2026-05-01~2026-05-07哪个媒体的激活成本最低</div>
+            <p><strong>预期结果:</strong></p>
+            <ul>
+                <li>识别为广告报表查询，并调用广告报表 MCP</li>
+                <li>正确解析项目、日期、媒体、应用类型、团队、指标等关键入参</li>
+                <li>返回结果：巨量广告</li>
+                <li>输出查询口径、筛选条件和数据来源</li>
+            </ul>
+            <button id="runTest" onclick="runMig020Test()">运行测试</button>
+            <button onclick="clearResults()">清除结果</button>
+        </div>
+
+        <div id="resultArea"></div>
+    </div>
+
+    <script>
+        function randomToken() {
+            return Math.random().toString(36).slice(2, 12);
+        }
+
+        function isRecord(value) {
+            return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+        }
+
+        function parseSse(raw) {
+            return raw
+                .split(/\n\n+/)
+                .map(block => block.trim())
+                .filter(Boolean)
+                .flatMap(block => block
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.startsWith('data:'))
+                    .map((line) => {
+                        try {
+                            return JSON.parse(line.slice(5).trim());
+                        } catch {
+                            return null;
+                        }
+                    })
+                    .filter((item) => Boolean(item)));
+        }
+
+        async function chat(message, conversationId) {
+            const response = await fetch('/api/chat', {
+                signal: AbortSignal.timeout(120000),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-conversation-id': conversationId,
+                    'x-pathname': '/mig020-e2e-test',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    message: message,
+                    intent: 'general_chat',
+                    history: [],
+                    metadata: {},
+                }),
+            });
+
+            const raw = await response.text();
+            if (!response.ok) {
+                throw new Error('chat http ' + response.status + ': ' + raw.slice(0, 220));
+            }
+
+            const payloads = parseSse(raw);
+            let answer = '';
+            let done = null;
+            const events = [];
+
+            for (const payload of payloads) {
+                if (payload.type === 'content' && typeof payload.content === 'string') {
+                    answer += payload.content;
+                }
+                if (payload.type === 'process_event' && isRecord(payload.event)) {
+                    events.push(payload.event);
+                }
+                if (payload.type === 'done') {
+                    done = payload;
+                }
+            }
+
+            const metadata = isRecord(done?.metadata) ? done.metadata : {};
+            const responseContract = isRecord(metadata.response_contract) ? metadata.response_contract : {};
+            const responseMetadata = isRecord(responseContract.metadata) ? responseContract.metadata : {};
+
+            return { answer, done, events, responseContract, responseMetadata };
+        }
+
+        async function runMig020Test() {
+            const button = document.getElementById('runTest');
+            const resultArea = document.getElementById('resultArea');
+
+            button.disabled = true;
+            button.textContent = '测试中...';
+
+            resultArea.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>正在执行MIG-020测试，请稍候...</div>
+                </div>
+            `;
+
+            try {
+                const conversationId = `mig020-e2e-${randomToken()}`;
+                const startTime = Date.now();
+                const result = await chat(
+                    '指间山海 - 国内2026-05-01~2026-05-07哪个媒体的激活成本最低',
+                    conversationId
+                );
+                const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                // 分析结果
+                const intent = result.responseContract?.intent || result.responseMetadata?.intent || 'unknown';
+                const isReportIntent = typeof intent === 'string' && (
+                    intent.toLowerCase().includes('report') ||
+                    intent.toLowerCase().includes('query') ||
+                    intent.toLowerCase().includes('数据') ||
+                    intent.toLowerCase().includes('报表')
+                );
+
+                const events = result.events || [];
+                const mcpEvents = events.filter(e =>
+                    e.type === 'mcp.call' ||
+                    e.type === 'mcp.result' ||
+                    (typeof e.type === 'string' && e.type.includes('mcp'))
+                );
+
+                const answerLower = result.answer.toLowerCase();
+                const hasExpectedAnswer = answerLower.includes('巨量') || answerLower.includes('巨量广告');
+
+                const hasSourceRefs = result.responseContract?.source_refs ||
+                    (result.done && isRecord(result.done.result) &&
+                     isRecord(result.done.result.structured_payload) &&
+                     Array.isArray(result.done.result.structured_payload.source_refs));
+
+                // 显示结果
+                resultArea.innerHTML = `
+                    <div class="result">
+                        <h3>测试结果 (响应时间: ${duration}s)</h3>
+
+                        <div class="check-item ${isReportIntent ? 'check-pass' : 'check-fail'}">
+                            ${isReportIntent ? '✓' : '✗'} 意图识别: ${intent}
+                        </div>
+
+                        <div class="check-item ${mcpEvents.length > 0 ? 'check-pass' : 'check-fail'}">
+                            ${mcpEvents.length > 0 ? '✓' : '✗'} MCP调用: ${mcpEvents.length} 个事件
+                            ${mcpEvents.length > 0 ? `<br><small>${mcpEvents.map((e, i) => `[${i + 1}] ${e.type}`).join(', ')}</small>` : ''}
+                        </div>
+
+                        <div class="check-item ${hasExpectedAnswer ? 'check-pass' : 'check-fail'}">
+                            ${hasExpectedAnswer ? '✓' : '✗'} 返回结果包含"巨量广告": ${hasExpectedAnswer ? '是' : '否'}
+                        </div>
+
+                        <div class="check-item ${hasSourceRefs ? 'check-pass' : 'check-warn'}">
+                            ${hasSourceRefs ? '✓' : '△'} 输出查询口径/数据来源: ${hasSourceRefs ? '是' : '否'}
+                        </div>
+
+                        <h3>回答内容:</h3>
+                        <div class="answer-box">${result.answer || '(无回答)'}</div>
+
+                        <h3>响应元数据:</h3>
+                        <div class="metadata">${JSON.stringify(result.responseMetadata, null, 2)}</div>
+
+                        <h3>事件列表 (${events.length}个):</h3>
+                        <div class="metadata">${JSON.stringify(events, null, 2)}</div>
+                    </div>
+                `;
+
+                // 保存到本地存储
+                const testData = {
+                    caseId: 'MIG-020',
+                    timestamp: new Date().toISOString(),
+                    duration: `${duration}s`,
+                    result: {
+                        intent,
+                        mcpEvents: mcpEvents.length,
+                        hasExpectedAnswer,
+                        hasSourceRefs,
+                        answer: result.answer,
+                        metadata: result.responseMetadata,
+                        events: events
+                    }
+                };
+                localStorage.setItem(`mig020-test-${Date.now()}`, JSON.stringify(testData));
+
+            } catch (error) {
+                resultArea.innerHTML = `
+                    <div class="result">
+                        <div class="check-item check-fail">
+                            ✗ 测试失败: ${error.message}
+                        </div>
+                    </div>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '运行测试';
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('resultArea').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
