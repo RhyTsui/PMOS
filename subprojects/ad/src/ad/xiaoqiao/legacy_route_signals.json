@@ -1,6 +1,7 @@
-{
+﻿{
   "schema_version": 1,
   "owner": "ai-chat-governance",
+  "route_mode": "candidate_only",
   "updated_at": "2026-06-23T00:00:00.000Z",
   "deprecation_target": "Enterprise AI Chat OS capability discovery / planner arbitration",
   "decision_scope": "candidate_only",
@@ -12,3 +13,8 @@
     "debugging_signal": ["联调", "白名单", "设备", "浏览器", "自动化", "回放"]
   }
 }
+
+
+
+
+

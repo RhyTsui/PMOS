@@ -9,7 +9,7 @@ from typing import Any
 @lru_cache(maxsize=1)
 def load_legacy_route_signal_config() -> dict[str, Any]:
     resource = files(__package__).joinpath("legacy_route_signals.json")
-    with resource.open("r", encoding="utf-8") as file:
+    with resource.open("r", encoding="utf-8-sig") as file:
         data = json.load(file)
     if not isinstance(data, dict):
         return {"signals": {}}
@@ -31,3 +31,5 @@ def match_legacy_route_signals(text: str) -> list[str]:
         if any(term in text for term in normalized_terms):
             matched.append(group)
     return matched
+
+
