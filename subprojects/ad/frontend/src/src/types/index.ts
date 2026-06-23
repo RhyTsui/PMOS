@@ -1,4 +1,4 @@
-// 小乔智投 Type Definitions
+﻿// 小乔智投 Type Definitions
 // Based on: 数据对象真源, 接口真源, 使用帮助设计, 会话支撑能力设计, 提示词管理设计
 // ==========================================
 // Core Enums
@@ -2536,7 +2536,7 @@ export interface TaskProposalPayload {
 
 /** 自动化意图识别结果 */
 export interface AutomationIntentResult {
-  automation_intent: 'create' | 'update' | 'pause' | 'resume' | 'delete' | 'rerun' | 'ask_status' | 'ask_history' | 'none';
+  automation_intent: 'create' | 'update' | 'pause' | 'resume' | 'delete' | 'rerun' | 'ask_status' | 'ask_history' | 'confirm' | 'cancel' | 'none';
   target_task_ref: 'current' | 'latest' | 'explicit_title' | 'unknown';
   requires_confirmation: boolean;
   risk_level: 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
@@ -2554,3 +2554,4 @@ export interface AutomationIntentResult {
   missing_slots: string[];
   clarifying_question?: string;
 }
+

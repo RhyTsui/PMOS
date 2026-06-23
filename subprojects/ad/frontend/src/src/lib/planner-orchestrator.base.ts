@@ -41,7 +41,6 @@ export interface PlannerOrchestratorResult {
   comparisonTrace?: {
     route_candidate_only: boolean;
     can_execute_tools: boolean;
-    shadow_mode: boolean;
     can_change_user_visible_result: boolean;
   };
   debugSummary?: {
@@ -441,7 +440,6 @@ function buildPlannerGovernanceMeta(params: {
     comparisonTrace: {
       route_candidate_only: true,
       can_execute_tools: false,
-      shadow_mode: params.plannerMode === 'shadow',
       can_change_user_visible_result: false,
     },
   };
@@ -462,13 +460,7 @@ export async function runPlannerOrchestratorShadow(
   const startTime = Date.now();
   const errors: Array<{ code: string; message: string }> = [];
   const warnings: Array<{ code: string; message: string }> = [];
-  const plannerMode = 'shadow';
-  if (process.env.PLANNER_FIRST_MODE === 'main') {
-    warnings.push({
-      code: 'planner_main_mode_blocked',
-      message: 'PLANNER_FIRST_MODE=main is not supported for shadow orchestrator; keeping shadow-only observability path.',
-    });
-  }
+  const plannerMode = process.env.PLANNER_FIRST_MODE === 'main' ? 'main' : 'shadow';
 
   try {
     // Check if shadow mode is enabled
@@ -486,7 +478,7 @@ export async function runPlannerOrchestratorShadow(
     if (!input.llm) {
       return {
         status: 'llm_unavailable',
-        errors: [{ code: 'planner_llm_missing', message: 'LLM client not provided' }],
+        errors: [{ code: 'llm_client_missing', message: 'LLM client not provided' }],
         warnings,
         durationMs: Date.now() - startTime,
       ...buildPlannerGovernanceMeta({ plannerMode }),
@@ -521,7 +513,7 @@ export async function runPlannerOrchestratorShadow(
       if (errorMessage === 'LLM_TIMEOUT') {
         return {
           status: 'timeout',
-          errors: [{ code: 'planner_timeout', message: `LLM call timed out after ${timeoutMs}ms` }],
+          errors: [{ code: 'llm_timeout', message: `LLM call timed out after ${timeoutMs}ms` }],
           warnings,
           durationMs: Date.now() - startTime,
           ...buildPlannerGovernanceMeta({ plannerMode }),
@@ -530,7 +522,7 @@ export async function runPlannerOrchestratorShadow(
 
       return {
         status: 'llm_unavailable',
-        errors: [{ code: 'planner_llm_exception', message: errorMessage }],
+        errors: [{ code: 'llm_error', message: errorMessage }],
         warnings,
         durationMs: Date.now() - startTime,
         modelName: input.modelName,
@@ -547,13 +539,13 @@ export async function runPlannerOrchestratorShadow(
       }
       return {
         status: 'json_parse_failed',
-        errors: [{ code: 'planner_empty_output', message: 'LLM returned empty output. This may indicate API quota exceeded, timeout, or model service error.' }],
+        errors: [{ code: 'empty_llm_output', message: 'LLM returned empty output. This may indicate API quota exceeded, timeout, or model service error.' }],
         warnings,
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
         ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
         debugSummary: buildDebugSummary('', llmResult.modelName, Date.now() - startTime, {
-          code: 'planner_empty_output',
+          code: 'empty_llm_output',
           message: 'LLM returned empty output',
         }),
       };
@@ -564,13 +556,13 @@ export async function runPlannerOrchestratorShadow(
     if (!extractionResult) {
       return {
         status: 'json_parse_failed',
-        errors: [{ code: 'planner_json_extraction_failed', message: 'Could not extract JSON from LLM output. The model may have output explanation text, multiple JSON objects, or malformed JSON.' }],
+        errors: [{ code: 'json_extraction_failed', message: 'Could not extract JSON from LLM output. The model may have output explanation text, multiple JSON objects, or malformed JSON.' }],
         warnings,
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
         ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
         debugSummary: buildDebugSummary(llmResult.text, llmResult.modelName, Date.now() - startTime, {
-          code: 'planner_json_extraction_failed',
+          code: 'json_extraction_failed',
           message: 'Could not extract JSON from LLM output',
         }),
       };
@@ -588,13 +580,13 @@ export async function runPlannerOrchestratorShadow(
       const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         status: 'json_parse_failed',
-        errors: [{ code: 'planner_json_parse_error', message: errorMessage }],
+        errors: [{ code: 'json_parse_error', message: errorMessage }],
         warnings,
         durationMs: Date.now() - startTime,
         modelName: llmResult.modelName,
         ...buildPlannerGovernanceMeta({ plannerMode, promptSource: promptBuild.source }),
         debugSummary: buildDebugSummary(llmResult.text, llmResult.modelName, Date.now() - startTime, {
-          code: 'planner_json_parse_error',
+          code: 'json_parse_error',
           message: errorMessage,
         }),
       };
@@ -632,7 +624,7 @@ export async function runPlannerOrchestratorShadow(
     const errorMessage = error instanceof Error ? error.message : String(error);
     return {
       status: 'json_parse_failed',
-      errors: [{ code: 'planner_unexpected_error', message: errorMessage }],
+      errors: [{ code: 'unexpected_error', message: errorMessage }],
       warnings,
       durationMs: Date.now() - startTime,
       ...buildPlannerGovernanceMeta({ plannerMode }),

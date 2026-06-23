@@ -3,17 +3,6 @@
  *
  * 需求 intake 门禁，在 route.intent_type === 'demand' 时执行。
  * 受 feature flag 控制，支持 shadow 和 active 两种模式。
- *
- * 硬条件：
- * - featureFlags.enableDemandIntakeGate === true
- * - route.intent_type === 'demand'
- * - !isReportQuery
- * - 不影响其他路由（report_query, diagnosis, debugging, package, monitor）
- *
- * 行为：
- * - shadow 模式：记录 metadata + 生成门禁提示供后续 stage 参考，不 terminal
- * - active 模式：生成门禁提示并返回给前端（非 terminal，open-answer-stage 可补充）
- * - 不自动创建 DemandPoolItem（需 enableDemandPoolCreateOnConfirm + 用户确认）
  */
 
 import type { StreamIO, ChatPipelineContext, ChatPipelineResult } from './pipeline-types';
@@ -28,23 +17,45 @@ import {
   generateMissingInputsPrompt,
   isConfirmationIntent,
 } from '@/lib/demand-intake-confirmation';
+import { resolveDemandCapabilityStatus } from '@/lib/demand-capability-status';
 import { createProcessEvent } from '@/lib/chat-route-primitives';
 import { saveCaseFrame } from '@/lib/case-frame-store';
 
-// ─── 入口条件 ──────────────────────────────────────────
+const CAPABILITY_CHECK_SERVICE_TYPES = new Set(['monitoring_callback', 'data_collection']);
 
 function shouldEnterDemandIntake(ctx: ChatPipelineContext): boolean {
   const flags = getDemandIntakeFlags();
   if (!flags.enableDemandIntakeGate) return false;
   if (ctx.route.intent_type !== 'demand') return false;
   if (ctx.isReportQuery) return false;
-  // 排除其他意图，不改变它们的路由
   const excludedIntents = new Set(['report_query', 'diagnosis', 'debugging', 'get_delivery_packages', 'monitor']);
   if (excludedIntents.has(String(ctx.route.intent_type))) return false;
   return true;
 }
 
-// ─── 主函数 ────────────────────────────────────────────
+function projectScopeFromDraft(draft: DemandIntakeDraft): string[] | undefined {
+  const project = draft.collectedSlots.project?.value;
+  return project ? [project] : undefined;
+}
+
+function buildCapabilityGateMessage(draft: DemandIntakeDraft): string | undefined {
+  const result = draft.capabilityStatusResult;
+  if (!result) return undefined;
+
+  if (result.nextAction === 'ask_missing_media') {
+    return '请先补充媒体平台，我会根据媒体和应用类型确认当前能力是否已接好。';
+  }
+  if (result.nextAction === 'ask_missing_app_type') {
+    return '请先补充应用类型（例如 Android 或 iOS），我会根据媒体和应用类型确认当前能力是否已接好。';
+  }
+  if (result.requestMode === 'change_request') {
+    return '当前媒体和应用类型的能力已接好。你这次是变更诉求，请补充要调整的事件、字段、口径、期望生效时间和验收方式。';
+  }
+  if (result.requestMode === 'usage_help') {
+    return '当前媒体和应用类型的能力已接好。你可以直接说明要查看配置方法、测试步骤或验收口径，我会按现有配置给出下一步。';
+  }
+  return undefined;
+}
 
 export async function executeDemandIntakeGate(
   ctx: ChatPipelineContext,
@@ -56,10 +67,8 @@ export async function executeDemandIntakeGate(
   const caseFrame = ctx.caseFrame;
   const message = ctx.question || ctx.message;
 
-  // 检查是否为用户确认意图（当 CaseFrame 已有 demandIntake metadata 时）
   const existingIntakeMeta = caseFrame?.metadata?.demandIntake as any;
   if (existingIntakeMeta?.intakeDraftStatus === 'ready_for_confirmation' && isConfirmationIntent(message)) {
-    // 用户确认意图，标记为待建单状态
     (ctx as Record<string, unknown>).demandIntakeUserConfirmed = true;
     (ctx as Record<string, unknown>).demandIntakeDraft = existingIntakeMeta;
 
@@ -78,10 +87,8 @@ export async function executeDemandIntakeGate(
     return {};
   }
 
-  // 结构化 intake draft
   const draft = structureDemandIntake(message, ctx.compiledContext?.businessContext);
 
-  // 记录 process event
   io.pushEvent(createProcessEvent({
     type: 'intent.detected',
     label: '需求门禁',
@@ -103,9 +110,48 @@ export async function executeDemandIntakeGate(
     return {};
   }
 
-  // 记录到 CaseFrame metadata
+  if (flags.enableDemandCapabilityStatusCheck && CAPABILITY_CHECK_SERVICE_TYPES.has(draft.serviceType)) {
+    const capabilityStatusResult = await resolveDemandCapabilityStatus({
+      media: draft.media,
+      appType: draft.appType,
+      serviceType: draft.serviceType,
+      message,
+      projectScope: projectScopeFromDraft(draft),
+    });
+
+    if (capabilityStatusResult) {
+      draft.capabilityStatusResult = capabilityStatusResult;
+      if (capabilityStatusResult.nextAction === 'ask_missing_media') {
+        draft.missingInputs = ['媒体平台'];
+        draft.intakeDraftStatus = 'collecting';
+      } else if (capabilityStatusResult.nextAction === 'ask_missing_app_type') {
+        draft.missingInputs = ['应用类型'];
+        draft.intakeDraftStatus = 'collecting';
+      }
+
+      io.pushEvent(createProcessEvent({
+        type: 'stage.ended',
+        label: '能力状态查询',
+        summary: `能力状态：${capabilityStatusResult.status}。`,
+        status: 'success',
+        visibility: 'internal',
+        output: {
+          status: capabilityStatusResult.status,
+          requestMode: capabilityStatusResult.requestMode,
+          nextAction: capabilityStatusResult.nextAction,
+          source: capabilityStatusResult.source,
+          media: capabilityStatusResult.media,
+          appType: capabilityStatusResult.appType,
+          matchedConfig: capabilityStatusResult.matchedConfig,
+          reason: capabilityStatusResult.reason,
+        },
+      }));
+    }
+  }
+
   if (caseFrame) {
     const intakeMeta = toCaseFrameMetadata(draft);
+    intakeMeta.capabilityStatusResult = draft.capabilityStatusResult;
     caseFrame.metadata.demandIntake = intakeMeta;
     caseFrame.stage = draft.intakeDraftStatus === 'ready_for_confirmation'
       ? 'waiting_user'
@@ -114,29 +160,17 @@ export async function executeDemandIntakeGate(
     await saveCaseFrame(ctx.userScopeKey, caseFrame);
   }
 
-  // 生成门禁提示
-  let gateMessage: string;
+  let gateMessage = buildCapabilityGateMessage(draft) || '';
 
-  if (draft.intakeDraftStatus === 'ready_for_confirmation') {
-    // 所有必填槽位齐全，生成确认卡
+  if (!gateMessage && draft.intakeDraftStatus === 'ready_for_confirmation') {
     const confirmationCard = generateDemandConfirmationCard(draft);
     gateMessage = confirmationCard?.markdown || '需求信息已齐全，请确认。';
     (ctx as Record<string, unknown>).demandIntakeConfirmCard = confirmationCard;
     (ctx as Record<string, unknown>).demandIntakeConfirmCandidate = true;
-  } else {
-    // 缺失项追问
+  } else if (!gateMessage) {
     gateMessage = generateMissingInputsPrompt(draft);
   }
 
-  // shadow 模式：记录但不改变回答，让 open-answer-stage 继续处理
-  if (flags.enableDemandIntakeShadow) {
-    // 将门禁信息存入 pipeline context 供后续 stage 参考
-    (ctx as Record<string, unknown>).demandIntakeGateMessage = gateMessage;
-    (ctx as Record<string, unknown>).demandIntakeDraft = draft;
-    return {};
-  }
-
-  // active 模式：将结构化 draft 和门禁提示传递给后续 stage
   (ctx as Record<string, unknown>).demandIntakeGateMessage = gateMessage;
   (ctx as Record<string, unknown>).demandIntakeDraft = draft;
 

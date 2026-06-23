@@ -1,4 +1,4 @@
-import type { AutomationIntentResult } from '@/types';
+﻿import type { AutomationIntentResult, TaskProposalPayload } from '@/types';
 import { guessTemplateFromInput } from '@/contracts/automation/task-template-registry';
 
 /**
@@ -10,7 +10,7 @@ import { guessTemplateFromInput } from '@/contracts/automation/task-template-reg
 
 interface AutomationIntentInput {
   message: string;
-  history?: Array<{ role: string; content: string; intent_type?: string }>;
+  history?: Array<{ role: string; content: string; intent_type?: string; metadata?: Record<string, unknown> }>;
   currentTaskId?: string;
 }
 
@@ -23,6 +23,30 @@ export function detectAutomationIntent(input: AutomationIntentInput): Automation
   const message = input.message.trim();
   const lowerMessage = message.toLowerCase();
   const templateId = guessTemplateFromInput(message);
+  const latestProposal = extractTaskProposalFromHistory(input.history);
+
+  if (isConfirmationIntent(lowerMessage) && latestProposal) {
+    return {
+      automation_intent: 'confirm',
+      target_task_ref: resolveTargetRef(input),
+      requires_confirmation: false,
+      risk_level: 'L0',
+      template_id: latestProposal.template_id,
+      slots: {},
+      missing_slots: [],
+    };
+  }
+
+  if (isCancellationIntent(lowerMessage) && latestProposal) {
+    return {
+      automation_intent: 'cancel',
+      target_task_ref: resolveTargetRef(input),
+      requires_confirmation: false,
+      risk_level: 'L0',
+      slots: {},
+      missing_slots: [],
+    };
+  }
 
   if (matchesAny(lowerMessage, ACTION_PATTERNS.delete)) {
     return {
@@ -124,10 +148,87 @@ export function detectAutomationIntent(input: AutomationIntentInput): Automation
 }
 
 /**
+ * 从历史消息中提取最近的 task_proposal 结构化卡片。
+ */
+export function extractTaskProposalFromHistory(
+  history?: Array<{ role: string; content: string; metadata?: Record<string, unknown> }>,
+): TaskProposalPayload | undefined {
+  if (!Array.isArray(history)) return undefined;
+
+  for (let i = history.length - 1; i >= 0; i--) {
+    const item = history[i];
+    if (!item || item.role !== 'assistant') continue;
+
+    const metadata = item.metadata;
+    if (!metadata || typeof metadata !== 'object') continue;
+
+    const taskProposal = metadata.task_proposal;
+    if (!taskProposal || typeof taskProposal !== 'object') continue;
+
+    const proposal = taskProposal as Partial<TaskProposalPayload>;
+    if (
+      typeof proposal.task_title === 'string'
+      && proposal.task_title.trim()
+      && typeof proposal.schedule_label === 'string'
+      && proposal.schedule_label.trim()
+      && typeof proposal.risk_level === 'string'
+      && typeof proposal.scope_summary === 'string'
+      && typeof proposal.output_summary === 'string'
+    ) {
+      return {
+        task_title: proposal.task_title,
+        description: typeof proposal.description === 'string' ? proposal.description : '',
+        template_id: typeof proposal.template_id === 'string' ? proposal.template_id : undefined,
+        schedule_label: proposal.schedule_label,
+        risk_level: proposal.risk_level as 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5',
+        risk_description: typeof proposal.risk_description === 'string' ? proposal.risk_description : undefined,
+        scope_summary: proposal.scope_summary,
+        output_summary: proposal.output_summary,
+        missing_slots: Array.isArray(proposal.missing_slots)
+          ? proposal.missing_slots.filter((slot): slot is string => typeof slot === 'string')
+          : undefined,
+        clarifying_question: typeof proposal.clarifying_question === 'string' ? proposal.clarifying_question : undefined,
+      };
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * 是否是自动化意图
  */
 export function isAutomationIntent(result: AutomationIntentResult): boolean {
   return result.automation_intent !== 'none';
+}
+
+function isConfirmationIntent(message: string): boolean {
+  const confirmPatterns = [
+    /^确认$/,
+    /^确定$/,
+    /^是的$/,
+    /^好$/,
+    /^好的$/,
+    /^可以$/,
+    /^confirm$/,
+    /^yes$/,
+  ];
+
+  return confirmPatterns.some((pattern) => pattern.test(message));
+}
+
+function isCancellationIntent(message: string): boolean {
+  const cancelPatterns = [
+    /^取消$/,
+    /^放弃$/,
+    /^不用了$/,
+    /^不需要了$/,
+    /^算了$/,
+    /^取消创建$/,
+    /^别创建$/,
+  ];
+
+  return cancelPatterns.some((pattern) => pattern.test(message));
 }
 
 // ─── 通用动作匹配 ─────────────────────────────────────

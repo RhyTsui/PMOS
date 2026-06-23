@@ -13,6 +13,28 @@ export type ServiceIntakeType = 'data_collection' | 'monitoring_callback';
 
 export type SecurityLevel = 'public' | 'internal' | 'secret';
 
+export type CapabilityStatus = 'integrated' | 'not_integrated' | 'unknown';
+
+export type DemandCapabilityRequestMode = 'collect_inputs' | 'change_request' | 'usage_help' | 'unknown';
+
+export type DemandCapabilityNextAction =
+  | 'ask_missing_media'
+  | 'ask_missing_app_type'
+  | 'change_request'
+  | 'usage_help'
+  | 'collect_inputs';
+
+export interface DemandCapabilityLookupResult {
+  status: CapabilityStatus;
+  requestMode: DemandCapabilityRequestMode;
+  source: 'zhitou_config_report' | 'zhitou_config_error' | 'override_registry' | 'default';
+  media: string;
+  appType: string;
+  matchedConfig?: Record<string, unknown>;
+  reason?: string;
+  nextAction: DemandCapabilityNextAction;
+}
+
 export interface DemandIntakeSlotDef {
   slotId: string;
   label: string;
@@ -31,6 +53,7 @@ export const DEMAND_INTAKE_SLOT_DEFS: Record<ServiceIntakeType, DemandIntakeSlot
   monitoring_callback: [
     { slotId: 'project', label: '项目/游戏', required: true, securityLevel: 'public' },
     { slotId: 'media', label: '媒体平台', required: true, securityLevel: 'public' },
+    { slotId: 'appType', label: '应用类型', required: true, securityLevel: 'public' },
     { slotId: 'integration_type', label: '对接类型（监测/回传/监测+回传）', required: true, securityLevel: 'public' },
     { slotId: 'document_url', label: '对接文档', required: true, securityLevel: 'public' },
     { slotId: 'auth_method', label: '授权方式或授权文档', required: true, securityLevel: 'internal' },
@@ -49,15 +72,12 @@ export const DEMAND_INTAKE_SLOT_DEFS: Record<ServiceIntakeType, DemandIntakeSlot
   data_collection: [
     { slotId: 'project', label: '项目/游戏', required: true, securityLevel: 'public' },
     { slotId: 'media', label: '媒体平台', required: true, securityLevel: 'public' },
+    { slotId: 'appType', label: '应用类型', required: true, securityLevel: 'public' },
     { slotId: 'data_source', label: '数据源', required: true, securityLevel: 'public' },
     { slotId: 'timeline', label: '期望上线时间', required: false, securityLevel: 'public' },
     { slotId: 'contact', label: '联系人', required: false, securityLevel: 'public' },
   ],
 };
-
-// ─── 能力状态 ─────────────────────────────────────────
-
-export type IntegrationStatus = 'integrated' | 'not_integrated' | 'unknown';
 
 // ─── CaseFrame Metadata 扩展 ─────────────────────────
 
@@ -80,7 +100,9 @@ export type IntakeDraftStatus = 'collecting' | 'ready_for_confirmation' | 'confi
 export interface DemandIntakeMetadata {
   serviceIntakeCandidate: boolean;
   serviceType?: ServiceIntakeType;
-  integrationStatus?: IntegrationStatus;
+  media?: string;
+  appType?: string;
+  capabilityStatusResult?: DemandCapabilityLookupResult;
   businessDocumentUrl?: string;
   missingInputs: string[];
   intakeDraftStatus: IntakeDraftStatus;

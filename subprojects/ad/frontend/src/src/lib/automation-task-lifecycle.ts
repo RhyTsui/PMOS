@@ -1,5 +1,7 @@
-import { createScheduledTask, getScheduledTask, updateScheduledTask, deleteScheduledTask, listScheduledTasks } from './scheduled-task-store';
+import { createScheduledTask, updateScheduledTask, deleteScheduledTask, listScheduledTasks } from './scheduled-task-store';
 import { writeTaskStatusMessage, writeTaskProposalMessage } from './task-message-writer';
+import { listMessages } from './conversation-store';
+import { extractTaskProposalFromHistory } from './automation-intent-router';
 import { getTaskRiskPolicy } from '@/contracts/automation/task-risk-policy';
 import type { AutomationIntentResult, ScheduledTask, TaskProposalPayload } from '@/types';
 import type { TaskMessageStatus } from '@/contracts/automation/task-message-contract';
@@ -32,8 +34,12 @@ export async function handleAutomationIntent(
 }> {
   switch (intent.automation_intent) {
     case 'create':
-      return handleCreateTask(intent, ctx);
-    case 'update':
+ return handleCreateTask(intent, ctx);
+ case 'confirm':
+ return handleConfirmTask(intent, ctx);
+ case 'cancel':
+ return handleCancelTask(intent, ctx);
+ case 'update':
       return handleUpdateTask(intent, ctx);
     case 'pause':
       return handlePauseTask(intent, ctx);
@@ -146,6 +152,52 @@ export async function confirmCreateTask(input: {
   });
 
   return { success: true, taskId: task.id };
+}
+
+
+async function handleConfirmTask(
+  intent: AutomationIntentResult,
+  ctx: TaskLifecycleContext,
+) {
+  const latestProposal = await getLatestPendingProposal(ctx.conversationId, ctx.scopeKey);
+  if (!latestProposal) {
+    return { success: false, messageType: 'assistant_reply', content: '没有可确认的任务提案，请先生成任务确认卡再发送确认。' };
+  }
+  const result = await confirmCreateTask({
+    scopeKey: ctx.scopeKey,
+    conversationId: ctx.conversationId,
+    userId: ctx.userId,
+    proposal: latestProposal,
+  });
+  if (!result.success) {
+    return { success: false, messageType: 'assistant_reply', content: result.error ? result.error : '确认任务失败，请重试。', error: result.error };
+  }
+  return {
+    success: true,
+    messageType: 'assistant_reply',
+    content: '已确认并创建任务"' + latestProposal.task_title + '"。',
+    taskId: result.taskId,
+  };
+}
+
+async function handleCancelTask(
+  intent: AutomationIntentResult,
+  ctx: TaskLifecycleContext,
+) {
+  const latestProposal = await getLatestPendingProposal(ctx.conversationId, ctx.scopeKey);
+  if (!latestProposal) {
+    return { success: false, messageType: 'assistant_reply', content: '没有可取消的任务提案，请先生成任务确认卡再发送取消。', error: 'no pending proposal' };
+  }
+  const title = latestProposal.task_title ? latestProposal.task_title : '任务';
+  return { success: true, messageType: 'assistant_reply', content: '已取消创建"' + title + '"。如需继续，可重新描述任务需求。' };
+}
+
+async function getLatestPendingProposal(
+  conversationId: string,
+  scopeKey: string,
+) {
+  const history = await listMessages(conversationId, scopeKey, { limit: 20 });
+  return extractTaskProposalFromHistory(history);
 }
 
 // ─── Update ─────────────────────────────────────

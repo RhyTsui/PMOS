@@ -31,3 +31,4 @@ export { executeOpenAnswerStage } from './open-answer-stage';
 export { executeReportQueryStage } from './report-query-stage';
 export { executeMultiQueryStage, shouldEnterMultiQueryStage } from './multi-query-stage';
 export { executeAutomationStage } from './automation-stage';
+export { executeDemandIntakeGate } from './demand-intake-gate';

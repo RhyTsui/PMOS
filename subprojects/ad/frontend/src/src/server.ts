@@ -5,13 +5,21 @@ import { startAutomationScheduler } from './lib/automation-scheduler';
 // Default to production unless explicitly running in development.
 // This avoids Turbopack/dev chunk instability when the environment sets COZE_PROJECT_ENV.
 const dev = process.env.NODE_ENV === 'development';
-// Force webpack dev server to avoid Turbopack chunk 500 flakiness.
-process.env.NEXT_DISABLE_TURBOPACK = process.env.NEXT_DISABLE_TURBOPACK || '1';
+const bundler = process.env.NEXT_DEV_BUNDLER === 'turbopack' ? 'turbopack' : 'webpack';
+// Force webpack dev server by default to avoid Turbopack chunk 500 flakiness.
+if (dev && bundler === 'webpack') {
+  process.env.NEXT_DISABLE_TURBOPACK = process.env.NEXT_DISABLE_TURBOPACK || '1';
+}
 const hostname = process.env.HOSTNAME || process.env.HOST || '0.0.0.0';
 const port = parseInt(process.env.PORT || '8002', 10);
 
 // Create Next.js app
-const app = next({ dev, hostname, port });
+const app = next({
+  dev,
+  hostname,
+  port,
+  ...(dev ? { webpack: bundler === 'webpack', turbopack: bundler === 'turbopack' } : {}),
+});
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {

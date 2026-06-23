@@ -1,4 +1,4 @@
-import { SpanKind } from '@cozeloop/ai';
+﻿import { SpanKind } from '@cozeloop/ai';
 import { getTraceConfigSync } from '@/lib/trace-config-store';
 import type { MessageRuntimeProjection } from '@/types';
 import {
@@ -181,6 +181,7 @@ export async function emitChatMessageTrace(args: {
     final_route_decision: args.extra?.final_route_decision || args.extra?.arbitrated_route || args.extra?.arbitration_summary || null,
     execution_decision: args.extra?.execution_decision || args.extra?.capability_decision || null,
     fallback_reason: args.extra?.fallback_reason || null,
+    arbitration_rule_id: args.extra?.arbitration_rule_id || args.extra?.arbitration_rule_ids || null,
     evidence_ids: args.extra?.evidence_ids || args.extra?.evidence_refs || null,
     contract_safety: args.extra?.contract_safety || (
       args.extra?.response_contract && typeof args.extra.response_contract === 'object'
@@ -240,7 +241,7 @@ export async function emitChatMessageTrace(args: {
       safeSetOutput(span, output);
 
       const projectedSpans = [
-        { name: 'agent.intent_route', input: { route_reason: args.routeReason, intent_type: args.intentType, candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null }, output: { intent_type: args.intentType, conversation_id: args.conversationId, route_candidate_only: args.extra?.route_candidate_only || null } },
+        { name: 'agent.intent_route', input: { route_reason: args.routeReason, intent_type: args.intentType, candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null, arbitration_rule_id: args.extra?.arbitration_rule_id || args.extra?.arbitration_rule_ids || null }, output: { intent_type: args.intentType, conversation_id: args.conversationId, route_candidate_only: args.extra?.route_candidate_only || null, candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null, arbitration_rule_id: args.extra?.arbitration_rule_id || args.extra?.arbitration_rule_ids || null, } },
         { name: 'agent.prompt_resolve', input: { prompt_config: args.runtimeProjection?.prompt_hits || args.extra?.prompt_config || {}, prompt_runtime_policy: args.extra?.prompt_runtime_policy || {} }, output: { prompt_hits: args.runtimeProjection?.prompt_hits || [], trace_url: traceUrl } },
         { name: 'agent.context_prepare', input: { conversation_id: args.conversationId, task_id: args.taskId, run_id: args.runId }, output: { compiled_context: args.extra?.compiled_context || null, project_context_summary: args.extra?.project_context_summary || null } },
         { name: 'agent.plan_arbitration', input: { planner_candidates: args.extra?.planner_candidates || args.extra?.reasoning_artifacts || null, candidate_source: args.extra?.candidate_source || args.extra?.route_candidate_source || null }, output: { arbitration_summary: args.extra?.arbitration_summary || args.extra?.info_source_arbitration || args.extra?.final_route_decision || null, arbitration_rule_id: args.extra?.arbitration_rule_id || null, fallback_reason: args.extra?.fallback_reason || null, trace_url: traceUrl } },
@@ -333,3 +334,9 @@ export async function emitChatMessageTrace(args: {
     trace_warnings: warnings.length ? warnings : undefined,
   };
 }
+
+
+
+
+
+

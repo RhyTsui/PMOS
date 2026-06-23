@@ -67,6 +67,12 @@ const AGENT_MAP: Record<IntentType, AgentType> = {
   general: 'hub',
 };
 
+const NO_HIT_CANDIDATE_ACTIONS = [
+  '先澄清你要处理的业务目标',
+  '我先列出当前可用能力供你选择',
+  '补充项目/时间/对象后继续处理',
+];
+
 function hit(text: string, patterns: RegExp[]) {
   return patterns.some((pattern) => pattern.test(text));
 }
@@ -350,7 +356,7 @@ function buildGovernedRouteRuleCandidate(text: string, routeRules?: Partial<Inte
     tracking_target: TRACKING_TARGETS[selected.rule.intent_type as Exclude<IntentType, 'general'>],
     route_policy_id: selected.policy_id,
     route_policy_version: selected.policy_version,
-    route_decision_scope: selected.decision_scope,
+    route_decision_scope: 'candidate_only',
     route_execution_authority: selected.execution_authority,
     route_candidate_only: true,
     candidate_source: 'governed_intent_route_rules',
@@ -700,11 +706,11 @@ function routeUserIntentCore(content: string, routeRules?: Partial<IntentRouteRu
     is_business_related: false,
     workflow_level: 'light',
     confidence: 'low',
-    reason: '未命中明确业务流程，保持普通对话。',
+    reason: '未命中明确业务流程，作为 no-hit 候选返回，优先做能力说明与澄清。',
     required_slots: [],
     missing_fields: [],
-    clarification_needed: false,
-    suggested_actions: ['继续对话'],
+    clarification_needed: true,
+    suggested_actions: NO_HIT_CANDIDATE_ACTIONS,
   };
 }
 
@@ -803,22 +809,35 @@ export function routeUserIntent(content: string, context?: IntentRoutingContext)
     : decision.confidence;
   const isNoHit = decision.intent_type === 'general' && !decision.is_business_related;
   const candidateSource = decision.candidate_source || 'legacy_intent_router';
+  const legacyPolicySource = candidateSource === 'governed_intent_route_rules'
+    ? candidateSource
+    : 'legacy-intent-router';
   const reasonPrefix = candidateSource === 'governed_intent_route_rules' ? 'Governed route candidate' : 'Legacy adapter candidate';
+  const executionDecision = isNoHit
+    ? 'no_executable_capability'
+    : decision.clarification_needed
+      ? 'needs_clarification'
+      : 'needs_arbitration';
+  const fallbackReason = isNoHit
+    ? 'no_matching_executable_capability'
+    : decision.clarification_needed
+      ? 'legacy_candidate_requires_clarification'
+      : decision.fallback_reason || 'legacy_candidate_requires_arbitration';
   return {
     ...decision,
     confidence: legacyConfidence,
     reason: `${reasonPrefix}: ${decision.reason}`,
     required_slots: [],
-    route_policy_id: decision.route_policy_id || `legacy-intent-router:${decision.intent_type}`,
+    route_policy_id: decision.route_policy_id || `${legacyPolicySource}:${decision.intent_type}`,
     route_policy_version: decision.route_policy_version || 1,
-    route_decision_scope: decision.route_decision_scope || 'candidate',
+    route_decision_scope: decision.route_decision_scope || 'candidate_only',
     route_execution_authority: decision.route_execution_authority || 'requires_arbitration',
     route_candidate_only: true,
     candidate_source: candidateSource,
     decision_scope: 'candidate_only',
     deprecation_target: decision.deprecation_target || 'Enterprise AI Chat OS Plan Arbitrator + Capability Discovery',
-    execution_decision: decision.execution_decision || (isNoHit ? 'no_executable_capability' : decision.clarification_needed ? 'needs_clarification' : 'needs_arbitration'),
-    fallback_reason: decision.fallback_reason || (isNoHit ? 'legacy_no_hit_candidate_only' : 'legacy_candidate_requires_arbitration'),
+    execution_decision: decision.execution_decision || executionDecision,
+    fallback_reason: decision.fallback_reason || fallbackReason,
     arbitrated_route: decision.arbitrated_route || {
       status: isNoHit ? 'clarify_required' : 'pending_arbitration',
       selected_intent_type: isNoHit ? undefined : decision.intent_type,

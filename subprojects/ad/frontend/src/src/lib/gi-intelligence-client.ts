@@ -93,6 +93,22 @@ function pickNumber(record: Record<string, unknown>, keys: string[]): number | u
   return undefined;
 }
 
+
+function buildErrorMessage(status: number, payload?: unknown): string {
+  if (status === 400) {
+    const message = pickString(asRecord(asRecord(payload).error), ['message', 'error']) || pickString(asRecord(payload), ['message']);
+    return message
+      ? `关键词拓展请求参数不合法（HTTP 400）：${message}`
+      : '关键词拓展请求参数不合法（HTTP 400）。';
+  }
+  if (status === 500) {
+    return '关键词拓展服务异常（HTTP 500），请稍后重试或联系管理员。';
+  }
+  if (status === 0) {
+    return '关键词拓展请求失败，请检查 GI 网络与超时配置。';
+  }
+  return `关键词扩展接口返回异常（HTTP ${status}）。`;
+}
 function stringArray(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String).map((item) => item.trim()).filter(Boolean);
   if (typeof value === 'string' && value.trim()) return value.split(',').map((item) => item.trim()).filter(Boolean);
@@ -323,29 +339,93 @@ async function expandSeeds(baseUrl: string, query: GiQueryOptions): Promise<GiIn
   if (!query.keyword || !query.expandSeeds) {
     return { status: 'skipped', createdSeedIds: [], expandedSeedIds: [], message: '未请求关键词种子拓展。' };
   }
-  const created = await fetchJsonWithTimeout(`${baseUrl}/seeds`, {
+
+  const payload = {
+    keyword: query.keyword,
+    scope: 'all',
+    seedType: 'event',
+    sourceType: query.sourceType || 'media',
+    createSeed: true,
+    createSource: true,
+    dryRun: false,
+  };
+
+  const expanded = await fetchJsonWithTimeout(`${baseUrl}/intelligence/expansion/keyword`, {
     method: 'POST',
-    body: JSON.stringify({
-      seedType: 'keyword',
-      text: query.keyword,
-      tags: ['chat-requested', 'realtime-expansion'],
-    }),
+    body: JSON.stringify(payload),
   }).catch((error) => ({ ok: false, status: 0, data: { error: { message: String(error) } } }));
-  if (!created.ok) {
-    return { status: 'failed', createdSeedIds: [], expandedSeedIds: [], message: `关键词种子创建失败（HTTP ${created.status}）。` };
+
+  if (expanded.ok) {
+    const expandedPayload = asRecord(asRecord(expanded.data).data);
+    const created = asRecord(expandedPayload.created);
+    const seeds = asArray(created.seeds);
+    const sources = asArray(created.sources);
+    const createdSeedIds = seeds
+      .map((item) => pickString(asRecord(item), ['id', 'seedId']) || pickString(asRecord(item), ['text']))
+      .filter(Boolean) as string[];
+    const createdSourceIds = sources
+      .map((item) => pickString(asRecord(item), ['id', 'sourceId']) || pickString(asRecord(item), ['name']))
+      .filter(Boolean) as string[];
+
+    return {
+      status: createdSeedIds.length || createdSourceIds.length ? 'success' : 'partial',
+      createdSeedIds,
+      expandedSeedIds: createdSeedIds,
+      message: pickString(expandedPayload, ['message'])
+        || (createdSeedIds.length || createdSourceIds.length
+          ? '已提交关键词实时拓展（种子/信源）。'
+          : '关键词实时拓展已执行，但未返回可落库对象。'),
+    };
   }
-  const createdPayload = asRecord(asRecord(created.data).data);
-  const seedId = pickString(createdPayload, ['id']);
-  if (!seedId) {
-    return { status: 'partial', createdSeedIds: [], expandedSeedIds: [], message: 'GI 已接受关键词，但未返回种子 ID。' };
+
+  if (expanded.status === 404) {
+    const fallbackSeed = await fetchJsonWithTimeout(`${baseUrl}/seeds`, {
+      method: 'POST',
+      body: JSON.stringify({
+        seedType: 'keyword',
+        text: query.keyword,
+        tags: ['chat-requested', 'realtime-expansion'],
+      }),
+    }).catch((error) => ({ ok: false, status: 0, data: { error: { message: String(error) } } }));
+
+    if (!fallbackSeed.ok) {
+      return {
+        status: 'failed',
+        createdSeedIds: [],
+        expandedSeedIds: [],
+        message: `关键词种子创建失败（HTTP ${fallbackSeed.status}）。`,
+      };
+    }
+
+    const fallbackCreatedPayload = asRecord(asRecord(fallbackSeed.data).data);
+    const seedId = pickString(fallbackCreatedPayload, ['id']);
+    if (!seedId) {
+      return {
+        status: 'partial',
+        createdSeedIds: [],
+        expandedSeedIds: [],
+        message: 'GI 已接受关键词，但未返回种子 ID。',
+      };
+    }
+
+    const fallbackExpanded = await fetchJsonWithTimeout(`${baseUrl}/seeds/${encodeURIComponent(seedId)}/expand`, { method: 'POST' })
+      .catch(() => ({ ok: false, status: 0, data: {} }));
+
+    return {
+      status: fallbackExpanded.ok ? 'success' : 'failed',
+      createdSeedIds: [seedId],
+      expandedSeedIds: fallbackExpanded.ok ? [seedId] : [],
+      message: fallbackExpanded.ok
+        ? '已提交关键词种子拓展（兼容链路）。'
+        : `关键词种子已创建，拓展触发失败（HTTP ${fallbackExpanded.status}）。`,
+    };
   }
-  const expanded = await fetchJsonWithTimeout(`${baseUrl}/seeds/${encodeURIComponent(seedId)}/expand`, { method: 'POST' })
-    .catch(() => ({ ok: false, status: 0, data: {} }));
+
   return {
-    status: expanded.ok ? 'success' : 'failed',
-    createdSeedIds: [seedId],
-    expandedSeedIds: expanded.ok ? [seedId] : [],
-    message: expanded.ok ? '已提交关键词种子拓展。' : `关键词种子已创建，拓展触发失败（HTTP ${expanded.status}）。`,
+    status: 'failed',
+    createdSeedIds: [],
+    expandedSeedIds: [],
+    message: buildErrorMessage(expanded.status, expanded.data),
   };
 }
 

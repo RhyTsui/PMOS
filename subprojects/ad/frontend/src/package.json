@@ -4,7 +4,11 @@
   "private": true,
   "scripts": {
     "build": "next build && tsup src/server.ts --format cjs --platform node --target node20 --outDir dist --no-splitting --no-minify",
-    "dev": "chcp 65001 >nul 2>&1 & set NODE_ENV=development&& set NODE_OPTIONS=--enable-source-maps&& tsx src/server.ts",
+    "dev": "node scripts/dev-server.cjs --kill-port --turbopack",
+    "dev:clean": "node scripts/dev-server.cjs --clean --kill-port --turbopack",
+    "dev:turbopack": "node scripts/dev-server.cjs --kill-port --turbopack",
+    "dev:webpack": "node scripts/dev-server.cjs --kill-port --webpack",
+    "dev:stop": "node scripts/dev-server.cjs --stop",
     "preinstall": "npx only-allow pnpm",
     "lint": "eslint",
     "ui:guardrail": "node ../../scripts/check-ad-ui-guardrail.cjs",

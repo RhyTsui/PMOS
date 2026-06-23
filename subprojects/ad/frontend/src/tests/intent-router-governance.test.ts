@@ -39,7 +39,8 @@ describe('intent router governance', () => {
     expect(decision.confidence).toBe('medium');
     expect(decision.route_candidate_only).toBe(true);
     expect(decision.candidate_source).toBe('governed_intent_route_rules');
-    expect(decision.route_decision_scope).toBe('candidate');
+    expect(decision.route_decision_scope).toBe('candidate_only');
+    expect(decision.route_execution_authority).toBe('requires_arbitration');
     expect(decision.execution_decision).toBe('needs_arbitration');
     expect(decision.arbitrated_route?.status).toBe('pending_arbitration');
   });
@@ -49,8 +50,9 @@ describe('intent router governance', () => {
 
     expect(decision.intent_type).toBe('general');
     expect(decision.route_candidate_only).toBe(true);
+    expect(decision.route_decision_scope).toBe('candidate_only');
     expect(decision.execution_decision).toBe('no_executable_capability');
-    expect(decision.fallback_reason).toBe('legacy_no_hit_candidate_only');
+    expect(decision.fallback_reason).toBe('no_matching_executable_capability');
     expect(decision.arbitrated_route?.status).toBe('clarify_required');
   });
   it('uses governed route rules before legacy adapter heuristics', () => {
@@ -81,7 +83,9 @@ describe('intent router governance', () => {
     expect(decision.intent_type).toBe('demand');
     expect(decision.candidate_source).toBe('governed_intent_route_rules');
     expect(decision.route_candidate_only).toBe(true);
+    expect(decision.route_decision_scope).toBe('candidate_only');
     expect(decision.execution_decision).toBe('needs_arbitration');
+    expect(decision.fallback_reason).toBe('route_rule_candidate_requires_arbitration');
     expect(decision.arbitrated_route?.arbitration_rule_id).toBe('intent-route:alpha-capability-candidate');
   });
 });

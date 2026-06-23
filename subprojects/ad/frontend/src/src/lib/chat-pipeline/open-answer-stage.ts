@@ -151,9 +151,9 @@ export async function executeOpenAnswerStage(
     const demandIntakeDraft = (ctx as Record<string, unknown>).demandIntakeDraft as any;
     const demandIntakeGateMessage = (ctx as Record<string, unknown>).demandIntakeGateMessage as string | undefined;
 
-    // 如果有确认卡，返回结构化数据供前端渲染 DemandConfirmCard 组件
-    if (demandIntakeConfirmCard && demandIntakeDraft?.intakeDraftStatus === 'ready_for_confirmation') {
-      content = demandIntakeConfirmCard.markdown || '需求信息已齐全，请确认。';
+    const capabilityStatusResult = demandIntakeDraft?.capabilityStatusResult;
+    const useTemplateAnswer = (text: string) => {
+      content = text;
       chatAnswerAssist = {
         text: content,
         modelUsed: false,
@@ -166,23 +166,21 @@ export async function executeOpenAnswerStage(
           model_name: nonReportModelServiceConfig?.modelName || 'unknown',
         },
       };
-      // 将确认卡数据附加到 metadata 供前端使用
+    };
+
+    if (capabilityStatusResult?.nextAction === 'ask_missing_media' && demandIntakeGateMessage) {
+      useTemplateAnswer(demandIntakeGateMessage);
+    } else if (capabilityStatusResult?.nextAction === 'ask_missing_app_type' && demandIntakeGateMessage) {
+      useTemplateAnswer(demandIntakeGateMessage);
+    } else if (capabilityStatusResult?.requestMode === 'change_request' && demandIntakeGateMessage) {
+      useTemplateAnswer(demandIntakeGateMessage);
+    } else if (capabilityStatusResult?.requestMode === 'usage_help' && demandIntakeGateMessage) {
+      useTemplateAnswer(demandIntakeGateMessage);
+    } else if (demandIntakeConfirmCard && demandIntakeDraft?.intakeDraftStatus === 'ready_for_confirmation') {
+      useTemplateAnswer(demandIntakeConfirmCard.markdown || '需求信息已齐全，请确认。');
       (ctx as Record<string, unknown>).demandConfirmCardData = demandIntakeConfirmCard;
     } else if (demandIntakeGateMessage && demandIntakeDraft?.intakeDraftStatus === 'collecting') {
-      // 信息不全，返回追问提示
-      content = demandIntakeGateMessage;
-      chatAnswerAssist = {
-        text: content,
-        modelUsed: false,
-        consumed: false,
-        blocked: false,
-        warnings: [],
-        participation: {
-          model_use_case: 'requirement_drafting',
-          status: 'template',
-          model_name: nonReportModelServiceConfig?.modelName || 'unknown',
-        },
-      };
+      useTemplateAnswer(demandIntakeGateMessage);
     } else {
       // 回退到模型生成
       chatAnswerAssist = await runChatModelNode({
@@ -564,6 +562,7 @@ export async function executeOpenAnswerStage(
       service_proposal: ctx.serviceProposal,
       // P2: 附加 demand confirm card 数据供前端渲染
       demand_confirm_card: (ctx as Record<string, unknown>).demandConfirmCardData,
+      demand_capability_status: ((ctx as Record<string, any>).demandIntakeDraft)?.capabilityStatusResult,
     },
   });
   io.close();

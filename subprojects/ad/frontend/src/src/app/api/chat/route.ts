@@ -28,6 +28,7 @@ import {
   shouldEnterPackageStage,
   shouldEnterMultiQueryStage,
   executeAutomationStage,
+  executeDemandIntakeGate,
   type StreamIO,
 } from '@/lib/chat-pipeline';
 import { createProcessEvent } from '@/lib/chat-route-primitives';
@@ -452,6 +453,12 @@ export async function POST(request: NextRequest) {
             if (packageResult.terminal) {
               return;
             }
+          }
+
+          // ─── Demand Intake Gate ───
+          const demandIntakeResult = await executeDemandIntakeGate(pipelineCtx, streamIO);
+          if (demandIntakeResult.terminal) {
+            return;
           }
 
           // ─── Open Answer Stage ───

@@ -127,6 +127,7 @@ export async function writeTaskStatusMessage(input: {
       message_type: messageTypeMap[input.action] as MessageType,
       metadata: {
         task_id: input.taskId,
+        task_title: input.taskTitle,
         task_action: input.action,
         changes: input.changes,
         effective_at: input.effectiveAt,

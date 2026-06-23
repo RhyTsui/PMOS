@@ -63,13 +63,16 @@ function createMockLLM(response: string, options?: { delay?: number; shouldThrow
 
 describe('runPlannerOrchestratorShadow', () => {
   const originalEnv = process.env.PLANNER_FIRST_SHADOW_ENABLED;
+  const originalPlannerMode = process.env.PLANNER_FIRST_MODE;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.PLANNER_FIRST_MODE = originalPlannerMode;
   });
 
   afterEach(() => {
     process.env.PLANNER_FIRST_SHADOW_ENABLED = originalEnv;
+    process.env.PLANNER_FIRST_MODE = originalPlannerMode;
   });
 
   // Test 1: disabled when env is not true
@@ -96,7 +99,7 @@ describe('runPlannerOrchestratorShadow', () => {
 
     expect(result.status).toBe('llm_unavailable');
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].code).toBe('llm_client_missing');
+    expect(result.errors[0].code).toBe('planner_llm_missing');
   });
 
   // Test 3: succeeded with valid JSON
@@ -145,7 +148,7 @@ describe('runPlannerOrchestratorShadow', () => {
 
     expect(result.status).toBe('json_parse_failed');
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].code).toBe('json_extraction_failed');
+    expect(result.errors[0].code).toBe('planner_json_extraction_failed');
   });
 
   // Test 6: contract_validation_failed with invalid contract
@@ -180,7 +183,7 @@ describe('runPlannerOrchestratorShadow', () => {
 
     expect(result.status).toBe('timeout');
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].code).toBe('llm_timeout');
+    expect(result.errors[0].code).toBe('planner_timeout');
   });
 
   // Test 8: fail-open when LLM throws
@@ -195,7 +198,28 @@ describe('runPlannerOrchestratorShadow', () => {
 
     expect(result.status).toBe('llm_unavailable');
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].code).toBe('llm_error');
+    expect(result.errors[0].code).toBe('planner_llm_exception');
+  });
+  it('keeps shadow orchestrator observation-only when main mode is requested', async () => {
+    process.env.PLANNER_FIRST_SHADOW_ENABLED = 'true';
+    process.env.PLANNER_FIRST_MODE = 'main';
+    const validPlan = createValidPlan();
+    const llm = createMockLLM(JSON.stringify(validPlan));
+
+    const result = await runPlannerOrchestratorShadow({
+      message: 'test',
+      llm,
+    });
+
+    expect(result.status).toBe('succeeded');
+    expect(result.plannerMode).toBe('shadow');
+    expect(result.comparisonTrace).toMatchObject({
+      route_candidate_only: true,
+      can_execute_tools: false,
+      shadow_mode: true,
+      can_change_user_visible_result: false,
+    });
+    expect(result.warnings.some(w => w.code === 'planner_main_mode_blocked')).toBe(true);
   });
 
   // Test 9: prompt does not contain business-specific keywords
@@ -321,7 +345,7 @@ ${JSON.stringify(validPlan)}
     });
 
     expect(result.status).toBe('json_parse_failed');
-    expect(result.errors[0].code).toBe('json_extraction_failed');
+    expect(result.errors[0].code).toBe('planner_json_extraction_failed');
   });
 
   // Test 13: Multiple fenced blocks rejected
@@ -337,7 +361,7 @@ ${JSON.stringify(validPlan)}
     });
 
     expect(result.status).toBe('json_parse_failed');
-    expect(result.errors[0].code).toBe('json_extraction_failed');
+    expect(result.errors[0].code).toBe('planner_json_extraction_failed');
   });
 
   // Test 14: Array JSON rejected
@@ -351,7 +375,7 @@ ${JSON.stringify(validPlan)}
     });
 
     expect(result.status).toBe('json_parse_failed');
-    expect(result.errors[0].code).toBe('json_extraction_failed');
+    expect(result.errors[0].code).toBe('planner_json_extraction_failed');
   });
 
   // Test 15: Malformed JSON returns json_parse_failed
@@ -366,7 +390,7 @@ ${JSON.stringify(validPlan)}
     });
 
     expect(result.status).toBe('json_parse_failed');
-    expect(result.errors[0].code).toBe('json_parse_error');
+    expect(result.errors[0].code).toBe('planner_json_parse_error');
   });
 
   // Test 16: debugSummary only in development or PLANNER_DEBUG=true
