@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Refresh the real auth state used by scripts/run-second-round-tests.cjs.
  * The script never prints token or session values.
  */
@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const repoRoot = path.resolve(__dirname, '..');
-const baseUrl = process.env.SECOND_ROUND_BASE_URL || 'http://127.0.0.1:8011';
+const baseUrl = process.env.SECOND_ROUND_BASE_URL || 'http://10.236.14.27:8002';
 const authFile = path.resolve(process.env.SECOND_ROUND_AUTH_FILE || path.join(repoRoot, '.auth-state', 'auth-tokens.json'));
 const profileDir = path.resolve(process.env.SECOND_ROUND_AUTH_PROFILE || path.join(repoRoot, '.auth-state'));
 const usePersistentProfile = process.env.SECOND_ROUND_AUTH_PROFILE !== 'none';
@@ -95,3 +95,4 @@ main().catch(error => {
   console.error('刷新登录态失败:', error instanceof Error ? error.message : String(error));
   process.exit(1);
 });
+

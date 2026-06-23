@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 第二轮全量测试脚本 v3
  * - 带登录态自动测试
  * - 检测到登录失效时自动弹出浏览器让用户扫码
@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-const BASE_URL = process.env.SECOND_ROUND_BASE_URL || 'http://localhost:8002';
+const BASE_URL = process.env.SECOND_ROUND_BASE_URL || 'http://10.236.14.27:8002';
 const TIMEOUT_MS = 90000;
 const MAX_RETRIES = 2;
 const SERVER_RESTART_WAIT = 15000;
@@ -19,8 +19,11 @@ const SERVER_MEMORY_GUARD_MB = Number(process.env.SECOND_ROUND_MAX_SERVER_RSS_MB
 const MEMORY_SAMPLE_LIMIT = Number(process.env.SECOND_ROUND_MEMORY_SAMPLE_LIMIT || 200);
 const NON_INTERACTIVE = process.env.SECOND_ROUND_NON_INTERACTIVE === '1';
 const ALLOW_SERVER_RESTART = process.env.SECOND_ROUND_ALLOW_SERVER_RESTART === '1';
+const START_FROM_CASE_ID = String(process.env.SECOND_ROUND_START_FROM_CASE_ID || '').trim();
+const START_FROM_EXCEL_ROW = Number(process.env.SECOND_ROUND_START_FROM_EXCEL_ROW || 0);
+const CASE_LIMIT = Number(process.env.SECOND_ROUND_LIMIT || 0);
 
-const INPUT_FILE = path.resolve('E:/AI/ai-os/docs/sources/inbox/小乔智投测试集v1.1.xlsx');
+const INPUT_FILE = path.resolve(process.env.SECOND_ROUND_INPUT_FILE || 'E:/AI/ai-os/subprojects/ad/docs/review/testcase-prompts-v1.1-renumbered.md');
 const OUTPUT_DIR = path.resolve('E:/AI/ai-os/subprojects/ad/docs/review');
 const DEFAULT_AUTH_FILE = 'E:/AI/ai-os/subprojects/ad/tmp/auth-state.json';
 const AUTH_FILE = path.resolve(process.env.SECOND_ROUND_AUTH_FILE || DEFAULT_AUTH_FILE);
@@ -168,13 +171,46 @@ function isAuthRequired(answer, contractStatus) {
   return false;
 }
 
-// ── 读取测试集 ──
-const wb = XLSX.readFile(INPUT_FILE);
-const ws = wb.Sheets[wb.SheetNames[0]];
-const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-const headers = rows[0];
-console.log(`📋 读取测试集: ${wb.SheetNames[0]}, ${rows.length - 1} 条用例`);
+function decodeMarkdownCell(value) {
+  return String(value || '').replace(/<br\s*\/?>/gi, '\n').replace(/\\\|/g, '|').trim();
+}
 
+function parseMarkdownPromptTable(file) {
+  const text = fs.readFileSync(file, 'utf8');
+  const parsedRows = [];
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) continue;
+    if (/^\|\s*-+\s*\|\s*-+\s*\|$/.test(trimmed)) continue;
+    const cells = trimmed.slice(1, -1).split(/(?<!\\)\|/).map(decodeMarkdownCell);
+    if (cells.length < 2 || cells[0] === '编号') continue;
+    const id = cells[0];
+    const prompt = cells[1];
+    if (!id || !prompt) continue;
+    parsedRows.push([id, '', prompt, '', '', '', '']);
+  }
+  return parsedRows;
+}
+
+function loadTestSuite(file) {
+  if (/\.md$/i.test(file)) {
+    const mdRows = parseMarkdownPromptTable(file);
+    const mdHeaders = ['用例ID', '测试场景', '测试输入Prompt', '关键点', '第一轮', '第二轮', '备注'];
+    console.log(`📋 读取测试集: ${path.basename(file)}, ${mdRows.length} 条用例`);
+    return { rows: [mdHeaders, ...mdRows], headers: mdHeaders, sourceType: 'markdown' };
+  }
+  const wb = XLSX.readFile(file);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const xlsxRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+  console.log(`📋 读取测试集: ${wb.SheetNames[0]}, ${xlsxRows.length - 1} 条用例`);
+  return { rows: xlsxRows, headers: xlsxRows[0], sourceType: 'xlsx' };
+}
+
+// ── 读取测试集 ──
+const testSuite = loadTestSuite(INPUT_FILE);
+const rows = testSuite.rows;
+const headers = testSuite.headers;
+const sourceType = testSuite.sourceType;
 const COL = {
   id: headers.indexOf('用例ID'),
   scene: headers.indexOf('测试场景'),
@@ -194,6 +230,32 @@ function requestedCaseIdSet() {
   const raw = process.env.SECOND_ROUND_CASE_IDS || '';
   const ids = raw.split(',').map(item => item.trim()).filter(Boolean);
   return ids.length ? new Set(ids) : null;
+}
+
+function rowsFromStartExcelRow(inputRows, excelRowNumber) {
+  if (!excelRowNumber) return inputRows;
+  if (!Number.isInteger(excelRowNumber) || excelRowNumber < 2) {
+    throw new Error(`SECOND_ROUND_START_FROM_EXCEL_ROW must be an Excel data row >= 2, got: ${excelRowNumber}`);
+  }
+  const startIndex = excelRowNumber - 2;
+  if (startIndex >= inputRows.length) {
+    throw new Error(`SECOND_ROUND_START_FROM_EXCEL_ROW out of range: ${excelRowNumber}`);
+  }
+  return inputRows.slice(startIndex);
+}
+
+function rowsFromStartCaseId(inputRows, startCaseId) {
+  if (!startCaseId) return inputRows;
+  const startIndex = inputRows.findIndex(row => String(row?.[COL.id] || '').trim() === startCaseId);
+  if (startIndex < 0) {
+    throw new Error(`SECOND_ROUND_START_FROM_CASE_ID not found: ${startCaseId}`);
+  }
+  return inputRows.slice(startIndex);
+}
+
+function rowsFromConfiguredStart(inputRows) {
+  if (START_FROM_EXCEL_ROW) return rowsFromStartExcelRow(inputRows, START_FROM_EXCEL_ROW);
+  return rowsFromStartCaseId(inputRows, START_FROM_CASE_ID);
 }
 
 function parseListeningPidsFromNetstat(text, port) {
@@ -322,6 +384,43 @@ async function ensureServer() {
   return await checkServer();
 }
 
+function readDoneAnswer(doneEvent) {
+  const result = doneEvent?.result && typeof doneEvent.result === 'object' ? doneEvent.result : {};
+  const metadata = doneEvent?.metadata && typeof doneEvent.metadata === 'object' ? doneEvent.metadata : {};
+  const contract = result.response_contract && typeof result.response_contract === 'object'
+    ? result.response_contract
+    : metadata.response_contract && typeof metadata.response_contract === 'object'
+      ? metadata.response_contract
+      : {};
+  const candidates = [
+    result.answer,
+    result.content,
+    result.message,
+    result.summary,
+    result.answer_markdown,
+    doneEvent?.content,
+    doneEvent?.answer,
+    contract.answer,
+    contract.content,
+    contract.message,
+    contract.summary,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) return value;
+  }
+  return '';
+}
+
+function readContractField(doneEvent, snakeKey, camelKey) {
+  const result = doneEvent?.result && typeof doneEvent.result === 'object' ? doneEvent.result : {};
+  const metadata = doneEvent?.metadata && typeof doneEvent.metadata === 'object' ? doneEvent.metadata : {};
+  const contract = result.response_contract && typeof result.response_contract === 'object'
+    ? result.response_contract
+    : metadata.response_contract && typeof metadata.response_contract === 'object'
+      ? metadata.response_contract
+      : {};
+  return contract[snakeKey] || contract[camelKey] || '';
+}
 // ── SSE 请求 ──
 function sendChat(prompt) {
   return new Promise((resolve, reject) => {
@@ -355,29 +454,55 @@ function sendChat(prompt) {
         const lines = buffer.split('\n');
         buffer = lines.pop();
         for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
+          if (!line.startsWith('data:')) continue;
           try {
-            const evt = JSON.parse(line.slice(6));
+            const evt = JSON.parse(line.slice(5).trim());
             streamEvents.push(evt);
+            if (evt.type === 'content' && typeof evt.content === 'string') {
+              answer += evt.content;
+            }
             if (evt.type === 'done') {
               doneEvent = evt;
-              answer = evt.result?.answer || '';
-              intentType = evt.result?.response_contract?.intent_type || '';
-              resultType = evt.result?.response_contract?.result_type || '';
-              contractStatus = evt.result?.response_contract?.status || '';
+              if (!answer.trim()) answer = readDoneAnswer(doneEvent);
+              intentType = readContractField(doneEvent, 'intent_type', 'intentType');
+              resultType = readContractField(doneEvent, 'result_type', 'resultType');
+              contractStatus = readContractField(doneEvent, 'status', 'status');
             }
           } catch {}
         }
       });
 
-      res.on('end', () => resolve({
-        answer,
-        intentType,
-        resultType,
-        contractStatus,
-        contractEvidence: summarizeContractEvidence(doneEvent, streamEvents),
-        ok: true,
-      }));
+      res.on('end', () => {
+        if (buffer.trim()) {
+          for (const line of buffer.split('\n')) {
+            if (!line.startsWith('data:')) continue;
+            try {
+              const evt = JSON.parse(line.slice(5).trim());
+              streamEvents.push(evt);
+              if (evt.type === 'content' && typeof evt.content === 'string') {
+                answer += evt.content;
+              }
+              if (evt.type === 'done') {
+                doneEvent = evt;
+                if (!answer.trim()) answer = readDoneAnswer(doneEvent);
+                intentType = readContractField(doneEvent, 'intent_type', 'intentType');
+                resultType = readContractField(doneEvent, 'result_type', 'resultType');
+                contractStatus = readContractField(doneEvent, 'status', 'status');
+              }
+            } catch {}
+          }
+        }
+        if (!answer.trim()) answer = readDoneAnswer(doneEvent);
+        resolve({
+          answer,
+          intentType,
+          resultType,
+          contractStatus,
+          contractEvidence: summarizeContractEvidence(doneEvent, streamEvents),
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          httpStatus: res.statusCode,
+        });
+      });
       res.on('error', reject);
     });
 
@@ -722,9 +847,12 @@ async function runAll() {
   const selectedCaseIds = requestedCaseIdSet();
   const runnableRows = rows
     .slice(1)
+    .filter(row => row && row[COL.id]);
+  const filteredRows = rowsFromConfiguredStart(runnableRows)
     .filter(row => row && row[COL.id])
     .filter(row => !selectedCaseIds || selectedCaseIds.has(String(row[COL.id]).trim()));
-  const total = runnableRows.length;
+  const scopedRows = CASE_LIMIT > 0 ? filteredRows.slice(0, CASE_LIMIT) : filteredRows;
+  const total = scopedRows.length;
   let passCount = 0, failCount = 0, blockedCount = 0, errorCount = 0;
   const allResults = [];
   const memorySamples = [];
@@ -749,6 +877,9 @@ async function runAll() {
     fs.writeFileSync(checkpointFile, JSON.stringify({
       timestamp: new Date().toISOString(),
       selectedCaseIds: selectedCaseIds ? Array.from(selectedCaseIds) : null,
+      startFromCaseId: START_FROM_CASE_ID || null,
+      startFromExcelRow: START_FROM_EXCEL_ROW || null,
+      caseLimit: CASE_LIMIT || null,
       total,
       passCount,
       failCount,
@@ -762,7 +893,7 @@ async function runAll() {
   }
 
   function blockAll(reason) {
-    for (const row of runnableRows) {
+    for (const row of scopedRows) {
       const caseId = String(row[COL.id]).trim();
       const scene = row[COL.scene] || '';
       const prompt = row[COL.prompt] || '';
@@ -814,8 +945,8 @@ async function runAll() {
 
   let authRetryCount = 0;
 
-  for (let index = 0; index < runnableRows.length; index++) {
-    const row = runnableRows[index];
+  for (let index = 0; index < scopedRows.length; index++) {
+    const row = scopedRows[index];
 
     const caseId = String(row[COL.id]).trim();
     const scene = row[COL.scene] || '';
@@ -923,46 +1054,66 @@ async function runAll() {
   }
 
   // ── 保存结果 ──
-  const outputFile = path.join(OUTPUT_DIR, `小乔智投测试集v1.1_second-round-${ts}.xlsx`);
+  let outputFile;
 
-  const outputRows = [headers];
-  for (let i = 1; i < rows.length; i++) {
-    if (rows[i] && rows[i][COL.id]) outputRows.push(rows[i]);
+  if (sourceType === 'markdown') {
+    outputFile = path.join(OUTPUT_DIR, `testcase-prompts-v1.1-results-${ts}.md`);
+    const escapeMd = (value) => String(value || '').replace(/\r?\n/g, '<br>').replace(/\|/g, '\\|').slice(0, 500);
+    const detailRows = [
+      '# 第二轮测试结果',
+      '',
+      `测试集：${INPUT_FILE}`,
+      '',
+      `总计：${total} 条`,
+      '',
+      '| 编号 | Prompt | 结果 | 耗时(s) | 原因 | 回答摘要 |',
+      '| --- | --- | --- | --- | --- | --- |',
+      ...allResults.map(r => `| ${escapeMd(r.caseId)} | ${escapeMd(r.prompt)} | ${escapeMd(r.verdict)} | ${escapeMd(r.elapsed)} | ${escapeMd(r.reason)} | ${escapeMd((r.answer || '').slice(0, 200))} |`),
+      '',
+    ];
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    fs.writeFileSync(outputFile, detailRows.join('\n'), 'utf8');
+  } else {
+    outputFile = path.join(OUTPUT_DIR, `小乔智投测试集v1.1_second-round-${ts}.xlsx`);
+
+    const outputRows = [headers];
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i] && rows[i][COL.id]) outputRows.push(rows[i]);
+    }
+    const newWb = XLSX.utils.book_new();
+    const mainWs = XLSX.utils.aoa_to_sheet(outputRows);
+    mainWs['!cols'] = [{ wch: 12 }, { wch: 30 }, { wch: 45 }, { wch: 25 }, { wch: 8 }, { wch: 8 }, { wch: 50 }];
+    XLSX.utils.book_append_sheet(newWb, mainWs, '广告业务测试集');
+
+    const detailHeaders = ['用例ID', '测试场景', 'Prompt', '关键点', '第一轮', '第二轮', '耗时(s)', '意图类型', '合约状态', '来源数', '证据数', '工具调用数', '过程事件数', '评估原因', '回答摘要(200字)'];
+    const detailRows = [detailHeaders];
+    for (const r of allResults) {
+      const r1 = rows.find(rw => rw && String(rw[COL.id]).trim() === r.caseId)?.[COL.round1] || '';
+      const evidence = r.contractEvidence || {};
+      detailRows.push([
+        r.caseId,
+        r.scene,
+        r.prompt,
+        r.keyPoint,
+        r1,
+        r.verdict,
+        r.elapsed,
+        r.intentType || '',
+        r.contractStatus || evidence.status || '',
+        evidence.sourceRefCount || 0,
+        evidence.evidenceRefCount || 0,
+        evidence.toolCallTraceCount || 0,
+        evidence.processEventCount || 0,
+        r.reason,
+        (r.answer || '').slice(0, 200),
+      ]);
+    }
+    const detailWs = XLSX.utils.aoa_to_sheet(detailRows);
+    detailWs['!cols'] = [{ wch: 12 }, { wch: 25 }, { wch: 40 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 15 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 25 }, { wch: 60 }];
+    XLSX.utils.book_append_sheet(newWb, detailWs, '详细结果');
+
+    XLSX.writeFile(newWb, outputFile);
   }
-  const newWb = XLSX.utils.book_new();
-  const mainWs = XLSX.utils.aoa_to_sheet(outputRows);
-  mainWs['!cols'] = [{ wch: 12 }, { wch: 30 }, { wch: 45 }, { wch: 25 }, { wch: 8 }, { wch: 8 }, { wch: 50 }];
-  XLSX.utils.book_append_sheet(newWb, mainWs, '广告业务测试集');
-
-  const detailHeaders = ['用例ID', '测试场景', 'Prompt', '关键点', '第一轮', '第二轮', '耗时(s)', '意图类型', '合约状态', '来源数', '证据数', '工具调用数', '过程事件数', '评估原因', '回答摘要(200字)'];
-  const detailRows = [detailHeaders];
-  for (const r of allResults) {
-    const r1 = rows.find(rw => rw && String(rw[COL.id]).trim() === r.caseId)?.[COL.round1] || '';
-    const evidence = r.contractEvidence || {};
-    detailRows.push([
-      r.caseId,
-      r.scene,
-      r.prompt,
-      r.keyPoint,
-      r1,
-      r.verdict,
-      r.elapsed,
-      r.intentType || '',
-      r.contractStatus || evidence.status || '',
-      evidence.sourceRefCount || 0,
-      evidence.evidenceRefCount || 0,
-      evidence.toolCallTraceCount || 0,
-      evidence.processEventCount || 0,
-      r.reason,
-      (r.answer || '').slice(0, 200),
-    ]);
-  }
-  const detailWs = XLSX.utils.aoa_to_sheet(detailRows);
-  detailWs['!cols'] = [{ wch: 12 }, { wch: 25 }, { wch: 40 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 15 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 25 }, { wch: 60 }];
-  XLSX.utils.book_append_sheet(newWb, detailWs, '详细结果');
-
-  XLSX.writeFile(newWb, outputFile);
-
   // ── 汇总 ──
   console.log('\n' + '='.repeat(60));
   console.log('📊 第二轮测试完成');
@@ -983,3 +1134,9 @@ if (process.env.SECOND_ROUND_EVAL_SELF_TEST === '1') {
 } else {
   runAll().catch(console.error);
 }
+
+
+
+
+
+

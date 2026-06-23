@@ -1,4 +1,4 @@
-# docs/review/ — 评审与验收文档索引
+﻿# docs/review/ — 评审与验收文档索引
 
 > 本目录包含项目评审、验收、测试运行、设计审查等文档。
 > 最后整理时间：2026-06-16
@@ -112,3 +112,4 @@
 ### 评审截图与 JSON
 - `frontend-delivery-regression-desktop/` — Playwright 验证截图
 - `tmp-browser-check.*` — 临时浏览器检查
+
