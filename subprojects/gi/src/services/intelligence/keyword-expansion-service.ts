@@ -6,11 +6,15 @@
 import { IntelSourceRepository } from '../../repositories/intel-source-repository.js';
 import { SourceDiscoveryService } from '../source-discovery/index.js';
 import { SeedService } from '../seed/index.js';
-import type { IntelSource, SeedType, SourceType } from '../../models/types.js';
+import type {
+  IntelSource,
+  KeywordExpansionSourceTypeInput,
+  SeedType,
+  SourceType,
+} from '../../models/types.js';
 import type { CreateSeedInput } from '../seed/seed-service.js';
 import type { DiscoveredSource } from '../source-discovery/source-discovery-service.js';
 
-export type KeywordExpansionSourceTypeInput = SourceType | 'wewe';
 
 export interface KeywordExpansionInput {
   keyword: string;
