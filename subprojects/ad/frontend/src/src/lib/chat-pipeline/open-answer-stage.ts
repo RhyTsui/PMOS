@@ -39,10 +39,30 @@ import {
   buildRouteObservationEvent,
   emitPlannerShadowObservationIfEnabled,
 } from '@/lib/runner-stages/route-helpers';
-import type { ServiceIntent, ToolPurpose } from '@/contracts/request-understanding/route-decision-contract';
+import {
+  PROGRESSIVE_METADATA_KEYS,
+  PROGRESSIVE_TRACE_KEYS,
+  PROGRESSIVE_NON_BLOCKING_REASONING_POLICIES,
+} from '@/lib/runner-stages/progressive-service-metadata';
+import type { ProgressiveServicePolicy, ServiceIntent, ToolPurpose } from '@/contracts/request-understanding/route-decision-contract';
 import type { MessageContract } from '@/types';
 import { recordEvidence } from '@/lib/evidence-ledger';
 import { transitionCaseFrameStage, addEvidenceRef } from '@/lib/case-frame-helpers';
+
+function buildProgressiveOpenAnswerHint(policy?: ProgressiveServicePolicy): string | undefined {
+  if (!policy) return undefined;
+  const policyTexts: string[] = [];
+  if (policy.minimumViableQuery?.executableTarget) {
+    policyTexts.push(`我将按默认范围先给出「${policy.minimumViableQuery.queryType}」结果。`);
+  }
+  if (policy.defaultScope?.scopeHints?.length) {
+    policyTexts.push(`默认范围：${policy.defaultScope.scopeHints.join('、')}。`);
+  }
+  if ((policy.unresolvedAmbiguities?.length || 0) > 0) {
+    policyTexts.push('仍有以下关键未决项，建议优先确认以继续深入。');
+  }
+  return policyTexts.length ? policyTexts.join('\n') : undefined;
+}
 
 export async function executeOpenAnswerStage(
   ctx: ChatPipelineContext,
@@ -51,6 +71,7 @@ export async function executeOpenAnswerStage(
 ): Promise<ChatPipelineResult> {
   const route = ctx.route;
   const routeDecisionMetadata = ctx.routeDecisionMetadata;
+  const progressivePolicy = routeDecisionMetadata?.progressivePolicy as ProgressiveServicePolicy | undefined;
   const skillSelection = ctx.skillSelection;
   const selectedSkill = skillSelection.selected?.skill;
   const caseFrame = ctx.caseFrame;
@@ -95,13 +116,60 @@ export async function executeOpenAnswerStage(
       ? resolvedNonReportIntent
       : routeDecisionMetadata.serviceIntent
   ) as ServiceIntent | undefined;
-  const isUnsupportedExecutionIntent = nonReportServiceIntent === 'issue_diagnosis'
+  const canProgressiveFallback = Boolean(
+    progressivePolicy
+    && (PROGRESSIVE_NON_BLOCKING_REASONING_POLICIES as readonly string[]).includes(progressivePolicy.reasoningPolicy)
+  );
+  const isUnsupportedExecutionIntent = (nonReportServiceIntent === 'issue_diagnosis'
     || nonReportServiceIntent === 'system_operation'
     || nonReportServiceIntent === 'package_fetch'
-    || nonReportServiceIntent === 'integration_workflow';
+    || nonReportServiceIntent === 'integration_workflow')
+    && !canProgressiveFallback;
+  const missingFieldCount = (userRequirement.missingFields || []).length;
+  const progressiveTraceFallbackReasons: string[] = [];
+  if (!progressivePolicy) {
+    progressiveTraceFallbackReasons.push('missing_progressive_policy');
+  }
+  if (!routeDecisionMetadata.policyTrace) {
+    progressiveTraceFallbackReasons.push('missing_route_decision_policy_trace');
+  }
+  if (!routeDecisionMetadata.unresolvedAmbiguities?.length) {
+    progressiveTraceFallbackReasons.push('missing_unresolved_ambiguities');
+  }
+  const progressiveTracePayload = {
+    response_contract: {
+      progressivePolicy,
+      unresolvedAmbiguities: routeDecisionMetadata.unresolvedAmbiguities,
+      followUpMode: progressivePolicy?.followUpMode,
+      minimumViableQuery: progressivePolicy?.minimumViableQuery,
+      missingFieldCount,
+      fallbackReasons: progressiveTraceFallbackReasons,
+    },
+    routeDecisionMetadata: {
+      policyTrace: routeDecisionMetadata.policyTrace,
+      unresolvedAmbiguities: routeDecisionMetadata.unresolvedAmbiguities,
+      missingFieldCount,
+      warnings: routeDecisionMetadata.warnings,
+      fallbackReasons: progressiveTraceFallbackReasons,
+      coverage: {
+        hasPolicy: Boolean(progressivePolicy),
+        hasPolicyTrace: Boolean(routeDecisionMetadata.policyTrace),
+        hasUnresolvedAmbiguities: Boolean(routeDecisionMetadata.unresolvedAmbiguities?.length),
+      },
+    },
+    traceEvent: {
+      progressivePolicy,
+      missingFieldCount,
+      unresolvedAmbiguities: routeDecisionMetadata.unresolvedAmbiguities,
+      fallbackReasons: progressiveTraceFallbackReasons,
+      thinkingChain: routeDecisionMetadata.thinkingChain,
+      urlFactLoop: routeDecisionMetadata.urlFactLoop,
+    },
+  };
+  const progressiveHint = buildProgressiveOpenAnswerHint(progressivePolicy);
   const composerBase = isUnsupportedExecutionIntent
     ? resolveNonReportFallbackMessage(nonReportServiceIntent, route.intent_type as any)
-    : '基于 plannerContext 和 answerStrategy 组织自然中文回答；不要使用固定模板，不要罗列内部上下文字段。';
+    : progressiveHint || '基于 plannerContext 和 answerStrategy 组织自然中文回答；不要使用固定模板，不要罗列内部上下文字段。';
   let unavailableFallback = isUnsupportedExecutionIntent
     ? composerBase
     : buildOpenAnswerUnavailableFallback({ serviceIntent: nonReportServiceIntent });
@@ -507,6 +575,11 @@ export async function executeOpenAnswerStage(
       info_source_arbitration: openAnswerInformationSourceArbitration,
       capability_status: isUnsupportedExecutionIntent ? 'not_configured' : undefined,
       semantic_result: semanticResult,
+      [PROGRESSIVE_METADATA_KEYS.responseContract.progressiveServicePolicy]: progressivePolicy,
+      [PROGRESSIVE_METADATA_KEYS.responseContract.unresolvedAmbiguities]: routeDecisionMetadata.unresolvedAmbiguities,
+      [PROGRESSIVE_METADATA_KEYS.responseContract.followUpMode]: progressivePolicy?.followUpMode,
+      [PROGRESSIVE_METADATA_KEYS.responseContract.minimumViableQuery]: progressivePolicy?.minimumViableQuery,
+      [PROGRESSIVE_TRACE_KEYS.responseContractMetadata]: progressiveTracePayload.response_contract,
     },
   });
   const traceMeta = await emitChatMessageTrace({
@@ -525,6 +598,9 @@ export async function executeOpenAnswerStage(
       project_context_summary: projectContextSummary,
       message_contract: messageContract,
       semantic_result: semanticResult,
+      [PROGRESSIVE_TRACE_KEYS.responseContractMetadata]: progressiveTracePayload.response_contract,
+      [PROGRESSIVE_TRACE_KEYS.routeDecisionObservation]: progressiveTracePayload.routeDecisionMetadata,
+      [PROGRESSIVE_TRACE_KEYS.traceEvent]: progressiveTracePayload.traceEvent,
       info_source_arbitration: openAnswerInformationSourceArbitration,
     },
   });
@@ -563,6 +639,12 @@ export async function executeOpenAnswerStage(
       // P2: 附加 demand confirm card 数据供前端渲染
       demand_confirm_card: (ctx as Record<string, unknown>).demandConfirmCardData,
       demand_capability_status: ((ctx as Record<string, any>).demandIntakeDraft)?.capabilityStatusResult,
+      [PROGRESSIVE_METADATA_KEYS.responseContract.progressiveServicePolicy]: progressivePolicy,
+      [PROGRESSIVE_METADATA_KEYS.routeMetadata.assumedContext]: routeDecisionMetadata.assumedContext,
+      [PROGRESSIVE_METADATA_KEYS.routeMetadata.resolvedContext]: routeDecisionMetadata.resolvedContext,
+      [PROGRESSIVE_METADATA_KEYS.routeMetadata.unresolvedAmbiguities]: routeDecisionMetadata.unresolvedAmbiguities,
+      [PROGRESSIVE_TRACE_KEYS.responseContractMetadata]: progressiveTracePayload.response_contract,
+      [PROGRESSIVE_TRACE_KEYS.routeDecisionObservation]: progressiveTracePayload.routeDecisionMetadata,
     },
   });
   io.close();

@@ -33,14 +33,15 @@ import { runReportModelNode } from '@/lib/runner-stages/assembly-helpers';
 import { getModelServiceConfig } from '@/lib/runtime-config';
 import { generateServiceProposal } from '@/contracts/service-proposal';
 import { discoverServices } from '@/lib/service-discovery';
-import { fromLegacyServiceIntent } from '@/contracts/service-catalog';
+import { fromLegacyServiceIntent, isValidServiceType, type ServiceType } from '@/contracts/service-catalog';
 import { intentToServiceType } from '@/contracts/service-catalog/intent-to-service-type';
 import { deriveRequestRouteDecision } from '@/lib/request-understanding';
 import { getActiveCaseFrame, createCaseFrame } from '@/lib/case-frame-store';
-import { addMessageId, updateBusinessContext } from '@/lib/case-frame-helpers';
+import { addMessageId, updateBusinessContext, updateServiceIntent } from '@/lib/case-frame-helpers';
 import { hasInternalBusinessContext, shouldUsePublicWebBeforeAuth } from './auth-public-web-deferral';
 import { detectAutomationIntent, isAutomationIntent } from '@/lib/automation-intent-router';
-import type { StreamIO } from './pipeline-types';
+import { extractUrlCues, generateUrlHypotheses } from '@/lib/url-fact-loop';
+import type { PipelineRouteDecisionMetadata, StreamIO } from './pipeline-types';
 
 // ─── 输入类型 ─────────────────────────────────────────────
 
@@ -108,6 +109,22 @@ const AUTH_REQUIRED_SERVICE_INTENTS = new Set<string>([
   'package_fetch',
   'integration_workflow',
 ]);
+
+function resolvePublicWebServiceType(params?: {
+  required?: boolean;
+  capabilityType?: string;
+} | null): string | null {
+  if (!params?.required) return null;
+  const capabilityType = String(params.capabilityType || '').toLowerCase();
+  if (!capabilityType) return 'public_web_search';
+  if (capabilityType === 'realtime_public_info' || capabilityType === 'external_doc_lookup') {
+    return 'realtime_public_info';
+  }
+  if (capabilityType === 'web_search' || capabilityType === 'web_fetch' || capabilityType === 'public_web_qa') {
+    return 'public_web_search';
+  }
+  return 'public_web_search';
+}
 
 // ─── 主函数 ───────────────────────────────────────────────
 
@@ -337,11 +354,28 @@ export async function executeUnderstandingStage(
 
   // ─── Public Web Need ────────────────────────────────
   const routeServiceKind = SERVICE_INTENT_BY_ROUTE_INTENT[route.intent_type] || 'general_chat';
+  const routeServiceTypeByIntent = fromLegacyServiceIntent(routeServiceKind)
+    || fromLegacyServiceIntent(String(userRequirement.serviceIntent || ''));
+  const fallbackServiceType = intentToServiceType(route.intent_type);
   const internalContextPresent = hasInternalBusinessContext(compiledContext.businessContext);
+
+  // P0.5 Batch 2.1: Detect controlled entity candidates for routing
+  // When user mentions specific team/account/campaign entities, this is strong evidence
+  // for internal report query, not public web lookup.
+  let controlledEntityCandidatesDetected = false;
+  try {
+    const { collectEntityCandidates } = await import('@/lib/entity-candidate-collector');
+    const entityResult = collectEntityCandidates({ message: question });
+    controlledEntityCandidatesDetected = entityResult.strongFilters.length > 0;
+  } catch {
+    // Silently ignore if import fails
+  }
+
   const strongInternalRouteEvidence = Boolean(
     reportRouteMatch
     || reportContinuationContext
     || (reportCandidateMatch && internalContextPresent)
+    || controlledEntityCandidatesDetected  // P0.5: Controlled entities are strong internal evidence
   );
   const internalBusinessCueForPublicWeb = Boolean(
     internalContextPresent
@@ -356,6 +390,15 @@ export async function executeUnderstandingStage(
       hasInternalBusinessSignal: internalBusinessCueForPublicWeb,
     },
   });
+  const resolvedPublicWebServiceType = publicWebAccess.required
+    && !internalContextPresent
+    && !strongInternalRouteEvidence
+    ? resolvePublicWebServiceType(publicWebAccess)
+    : null;
+  const routeServiceType = resolvedPublicWebServiceType
+    || routeServiceTypeByIntent
+    || fallbackServiceType;
+  const caseFrameServiceType = isValidServiceType(routeServiceType || '') ? (routeServiceType as ServiceType) : fallbackServiceType;
 
   // ─── Report Gate ────────────────────────────────────
   const routeSelectedCandidate = routeCandidates[0]?.capability || null;
@@ -396,11 +439,18 @@ export async function executeUnderstandingStage(
   });
 
   // ─── Route Decision Metadata ─────────────────────────
-  const routeDecisionMetadata = buildRouteDecisionMetadata({
+  // URL 外部事实循环：提取 URL 线索并生成搜索假设
+  const urlCues = extractUrlCues(message);
+  const urlFactLoopResult = urlCues.length > 0
+    ? generateUrlHypotheses(urlCues, { serviceType: routeServiceType })
+    : undefined;
+
+  const routeDecisionMetadata: PipelineRouteDecisionMetadata = buildRouteDecisionMetadata({
     clientIntent: clientRouteHint,
     routeIntent: route.intent_type,
     resolvedIntent: isReportQuery ? 'report_query' : route.intent_type,
     routeReason: route.reason,
+    executionConfidence: route.confidence,
     matchedRules: matchedRouteRules,
     reportRouteMatch,
     reportContinuation,
@@ -413,8 +463,40 @@ export async function executeUnderstandingStage(
     capabilityDecision: null,
     isReportQuery,
     routeWarnings,
+    missingFieldCount: (userRequirement.missingFields || []).length,
+    serviceType: routeServiceType || undefined,
     message,
+    urlFactLoop: urlFactLoopResult,
   });
+
+  const unresolvedAmbiguities = (userRequirement.missingFields || []).map((item, index) => ({
+    key: `missing_field_${index + 1}`,
+    question: `请确认 ${item} 的准确范围`,
+    impact: '结果口径可能变化',
+    defaultAssumption: '使用默认口径和最近活跃上下文继续执行',
+    options: ['按默认口径继续', '补充更准确的范围'],
+    priority: 'medium' as const,
+  }));
+  routeDecisionMetadata.assumedContext = {
+    project: compiledContext.businessContext?.project,
+    media: compiledContext.businessContext?.media,
+    timeRange: compiledContext.businessContext?.timeRange,
+  };
+  routeDecisionMetadata.resolvedContext = {
+    project: compiledContext.businessContext?.project,
+    media: compiledContext.businessContext?.media,
+    hasInternalContext: Boolean(hasInternalBusinessContext(compiledContext.businessContext)),
+  };
+  routeDecisionMetadata.unresolvedAmbiguities = unresolvedAmbiguities;
+  if (routeDecisionMetadata.progressivePolicy) {
+    routeDecisionMetadata.progressivePolicy.unresolvedAmbiguities = unresolvedAmbiguities;
+    routeDecisionMetadata.policyTrace = {
+      reasoningPolicy: routeDecisionMetadata.progressivePolicy.reasoningPolicy,
+      ambiguityClass: routeDecisionMetadata.progressivePolicy.ambiguityClass,
+      riskLevel: routeDecisionMetadata.progressivePolicy.riskLevel,
+      followUpMode: routeDecisionMetadata.progressivePolicy.followUpMode,
+    };
+  }
 
   // ─── Push Events ────────────────────────────────────
   io.pushEvent(createProcessEvent({
@@ -455,7 +537,7 @@ export async function executeUnderstandingStage(
   });
 
   // 基于 discovery 结果生成 service proposal
-  const candidateServiceType = fromLegacyServiceIntent(routeServiceKind);
+  const candidateServiceType = isValidServiceType(routeServiceType || '') ? routeServiceType : null;
   const serviceProposal = candidateServiceType
     ? generateServiceProposal({
         message,
@@ -484,13 +566,14 @@ export async function executeUnderstandingStage(
   if (!caseFrame) {
     caseFrame = await createCaseFrame(userScopeKey, {
       conversationId,
-      serviceType: intentToServiceType(route.intent_type),
+      serviceType: caseFrameServiceType || intentToServiceType(route.intent_type),
       realGoal: semanticFrame?.fieldDefinition?.targetTerm || message,
       priority: 'medium',
       initialMessage: message,
       messageId: traceId,
     });
   } else {
+    caseFrame = await updateServiceIntent(userScopeKey, caseFrame, caseFrameServiceType || intentToServiceType(route.intent_type));
     // 更新已有 CaseFrame：添加消息 ID 和业务上下文
     caseFrame = await addMessageId(userScopeKey, caseFrame, traceId);
 
@@ -548,3 +631,4 @@ export async function executeUnderstandingStage(
     caseFrame,
   };
 }
+

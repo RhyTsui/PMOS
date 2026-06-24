@@ -126,6 +126,99 @@ export interface MatchedRule {
   reason?: string;
 }
 
+export type ReasoningPolicy =
+  | 'direct_execute'
+  | 'minimum_viable_then_followup'
+  | 'confirm_then_execute'
+  | 'read_only_with_context'
+  | 'manual_only';
+
+export type AmbiguityClass = 'none' | 'low' | 'medium' | 'high' | 'critical';
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type FollowUpMode =
+  | 'none'
+  | 'optional'
+  | 'recommended'
+  | 'required_select'
+  | 'required_confirm';
+
+export interface ProgressiveServiceScope {
+  scopeType: 'global' | 'account' | 'campaign' | 'unit' | 'resource';
+  scopeIds?: string[];
+  scopeHints?: string[];
+  timeRangeDefaultDays?: number;
+  granularityDefault?: 'day' | 'week' | 'month' | 'all';
+}
+
+export interface MinimumViableQuery {
+  queryType: string;
+  executableTarget: string;
+  assumptionsUsed: string[];
+  confidence: number;
+  outputHint: string[];
+  executionLimit?: {
+    maxRecords?: number;
+    maxSources?: number;
+  };
+}
+
+export interface ServiceCandidate {
+  serviceIntent: string;
+  name: string;
+  score: number;
+  rationale: string;
+  requiresPermission: boolean;
+  requiresEscalation: boolean;
+  riskAmplifiers?: string[];
+}
+
+export interface UnresolvedAmbiguity {
+  key: string;
+  question: string;
+  impact: string;
+  defaultAssumption: string;
+  options?: string[];
+  priority: 'high' | 'medium' | 'low';
+}
+
+export interface ProgressiveServicePolicy {
+  reasoningPolicy: ReasoningPolicy;
+  ambiguityClass: AmbiguityClass;
+  riskLevel: RiskLevel;
+  followUpMode: FollowUpMode;
+  defaultScope: ProgressiveServiceScope;
+  minimumViableQuery?: MinimumViableQuery;
+  selectedService: string;
+  serviceCandidates: ServiceCandidate[];
+  unresolvedAmbiguities?: UnresolvedAmbiguity[];
+  secondHopReason?: string;
+  executionGuardrails?: {
+    canExecutePartial: boolean;
+    canFallbackToQuestion: boolean;
+    canQueue: boolean;
+  };
+  /** 高风险写操作时的结构化确认项清单（策略 C 闭环） */
+  confirmationItems?: Array<{
+    label: string;
+    description?: string;
+    required: boolean;
+  }>;
+}
+
+export interface RequirementAssumption {
+  key: string;
+  value: unknown;
+  source: 'llm' | 'history' | 'config' | 'default';
+  confidence: number;
+}
+
+export interface RequirementContextAssumptions {
+  assumedContext: Record<string, unknown>;
+  resolvedContext: Record<string, unknown>;
+  assumptions: RequirementAssumption[];
+  unresolvedDisambiguations: UnresolvedAmbiguity[];
+}
+
 export interface CapabilityCandidateContract {
   capabilityId: string;
   capabilityName?: string;
@@ -256,5 +349,9 @@ export interface RouteDecisionContract {
   clarificationQuestion?: string;
   warnings: RouteWarning[];
   promptRuntime?: PromptRuntimeMetadataContract;
+  progressivePolicy?: ProgressiveServicePolicy;
+  assumedContext?: Record<string, unknown>;
+  resolvedContext?: Record<string, unknown>;
+  unresolvedAmbiguities?: UnresolvedAmbiguity[];
   createdAt: string;
 }

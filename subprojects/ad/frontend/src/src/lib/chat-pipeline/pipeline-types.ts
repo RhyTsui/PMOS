@@ -27,6 +27,8 @@ import type {
   RouteDecisionContract,
   ServiceIntent,
   ToolPurpose,
+  ProgressiveServicePolicy,
+  UnresolvedAmbiguity,
 } from '@/contracts/request-understanding/route-decision-contract';
 import type { RequestSemanticFrame } from '@/contracts/request-understanding/semantic-frame-contract';
 import type { UserRequirementContract } from '@/contracts/request-understanding/user-requirement-contract';
@@ -37,8 +39,11 @@ import type { ReportQueryResult } from '@/lib/report-query-orchestrator';
 import type { ProjectContextSummary } from '@/lib/chat-runtime/project-context';
 import type { CaseFrame } from '@/contracts/case-frame';
 import type { ModelServiceConfig } from '@/lib/runtime-config';
+import type { ServiceType } from '@/contracts/service-catalog';
 import type { CapabilityManifest, CapabilitySelectionCandidate } from '@/contracts/capability/capability-manifest';
 import type { RequestRouteDecision } from '@/lib/request-understanding';
+import type { ThinkingChainLayers } from '@/contracts/request-understanding/thinking-chain-contract';
+import type { UrlFactLoopResult } from '@/lib/url-fact-loop';
 
 export interface ChatRequestHistoryItem {
   role: string;
@@ -60,8 +65,30 @@ export type PipelineRouteDecision = RequestRouteDecision & Partial<Omit<RouteDec
 export interface PipelineRouteDecisionMetadata {
   serviceIntent: ServiceIntent | string;
   resolvedIntent?: ServiceIntent | string;
+  serviceType?: ServiceType | string;
+  /** 关键服务类型来源，避免不同分支使用不同字段名导致回放与展示不一致。 */
+  serviceTypeSource?: 'routeServiceType' | 'resolvedIntent' | 'fallbackByIntent';
+  /** 解析服务类型时的候选来源链路，供 trace 与排障回放。 */
+  serviceTypeCandidateSources?: Array<{
+    source: 'routeServiceType' | 'resolvedIntent' | 'rawServiceIntent';
+    value: string;
+  }>;
   warnings: string[];
   executionConfidence?: 'high' | 'medium' | 'low';
+  progressivePolicy?: ProgressiveServicePolicy;
+  policyTrace?: {
+    reasoningPolicy?: string;
+    ambiguityClass?: string;
+    riskLevel?: string;
+    followUpMode?: string;
+  };
+  assumedContext?: Record<string, unknown>;
+  resolvedContext?: Record<string, unknown>;
+  unresolvedAmbiguities?: UnresolvedAmbiguity[];
+  /** 四层思维链结构化视图（纯投影，不影响执行流） */
+  thinkingChain?: ThinkingChainLayers;
+  /** URL 外部事实循环结果（仅当消息包含 URL 时存在） */
+  urlFactLoop?: UrlFactLoopResult;
   [key: string]: unknown;
 }
 

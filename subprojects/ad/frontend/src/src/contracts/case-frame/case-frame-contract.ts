@@ -154,6 +154,23 @@ export interface CaseFrame {
   /** 最后一次用户消息时间 ISO */
   lastUserMessageAt?: string;
 
+  /** 思维链历史快照（最多保留 5 轮，用于跨轮累积推理） */
+  thinkingChainHistory?: Array<{
+    turnIndex: number;
+    messageId: string;
+    judge: {
+      reasoningPolicy?: string;
+      ambiguityClass?: string;
+      riskLevel?: string;
+      executionMode?: string;
+    };
+    advance: {
+      defaultScope?: Record<string, unknown>;
+      secondHopStrategy?: string;
+    };
+    timestamp: string;
+  }>;
+
   // ─── 沉淀标记 ───────────────────────────────────────
 
   /** 是否已沉淀为知识/需求/评测用例 */

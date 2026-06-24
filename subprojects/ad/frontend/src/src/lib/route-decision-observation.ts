@@ -593,3 +593,37 @@ export function summarizeRouteDecisionObservation(observation: RouteDecisionObse
   }
   return `路由观测通过：预期 ${intent}，实际 ${actual}，无阻断差异。`;
 }
+
+// ─── 反思实时反馈：策略降级建议 ──────────────────────────────
+
+export interface CorrectiveAction {
+  /** 是否建议降级 */
+  shouldDowngrade: boolean;
+  /** 降级目标 reasoningPolicy */
+  targetReasoningPolicy?: string;
+  /** 降级原因 */
+  reason?: string;
+  /** 关联的 mismatch 数量 */
+  mismatchCount: number;
+}
+
+/**
+ * 基于路由观测的 mismatch 生成纠正建议。
+ * 当存在 severity=error 的 mismatch 时，建议将 reasoningPolicy 降级为
+ * minimum_viable_then_followup（更保守的策略），降低执行风险。
+ */
+export function buildCorrectiveAction(observation: RouteDecisionObservation): CorrectiveAction {
+  const errorMismatches = observation.mismatches.filter((m) => m.severity === 'error');
+  if (errorMismatches.length === 0) {
+    return {
+      shouldDowngrade: false,
+      mismatchCount: 0,
+    };
+  }
+  return {
+    shouldDowngrade: true,
+    targetReasoningPolicy: 'minimum_viable_then_followup',
+    reason: `路由观测发现 ${errorMismatches.length} 个阻断差异，建议降级为更保守的策略`,
+    mismatchCount: errorMismatches.length,
+  };
+}

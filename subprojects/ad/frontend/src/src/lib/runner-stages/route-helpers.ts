@@ -1,5 +1,14 @@
 import type { AgentProcessEvent, IntentType } from '@/types';
-import type { ServiceIntent, ToolPurpose } from '@/contracts/request-understanding/route-decision-contract';
+import type {
+  ServiceIntent,
+  ToolPurpose,
+  ProgressiveServicePolicy,
+  AmbiguityClass,
+  RiskLevel,
+  FollowUpMode,
+  ReasoningPolicy,
+  UnresolvedAmbiguity,
+} from '@/contracts/request-understanding/route-decision-contract';
 import type { ModelServiceConfig } from '@/lib/runtime-config';
 import { createProcessEvent } from '@/lib/chat-route-primitives';
 import { compactRuntimePayload } from '@/lib/chat-runtime/payload-compact';
@@ -8,17 +17,34 @@ import { evaluateIntentRouteRules } from '@/lib/intent-route-rules';
 import { getPromptContent } from '@/lib/prompt-store';
 import { generateModelText } from '@/lib/model-router';
 import { resolveChatBoundaryMessage } from '@/lib/chat-answer-message-catalog';
+import type { PipelineRouteDecisionMetadata } from '@/lib/chat-pipeline/pipeline-types';
 import {
   buildRouteDecisionObservation,
   summarizeRouteDecisionObservation,
+  buildCorrectiveAction,
 } from '@/lib/route-decision-observation';
 import {
   runPlannerShadow,
   buildPlannerShadowObservationPayload,
   buildPlannerShadowSummary,
 } from '@/lib/planner-shadow';
+import {
+  PROGRESSIVE_POLICY_THRESHOLD,
+  PROGRESSIVE_REASONING_POLICIES,
+  PROGRESSIVE_NON_BLOCKING_REASONING_POLICIES,
+} from '@/lib/runner-stages/progressive-service-metadata';
+import {
+  fromLegacyServiceIntent,
+  fromPlannerServiceIntent,
+  isValidServiceType,
+  resolveServiceProgressivePolicyProfile,
+} from '@/contracts/service-catalog';
 import { recordPlannerShadowObservation } from '@/lib/planner-shadow-metrics';
 import { computePlannerRouteAlignment, serializePlannerRouteAlignment } from '@/lib/planner-route-alignment';
+import type { ThinkingChainLayers, AnswerMode, DisclosureLevel } from '@/contracts/request-understanding/thinking-chain-contract';
+import type { UrlFactLoopResult } from '@/lib/url-fact-loop';
+import { validateRouteSelection } from '@/lib/route-verification';
+import { buildCausalSkeleton } from '@/lib/diagnosis/causal-skeleton';
 
 interface ReportContinuationClassification {
   compatible: boolean;
@@ -143,6 +169,120 @@ function buildReportContinuationHeuristic(message: string): ReportContinuationCl
   };
 }
 
+function toConfidenceLevel(confidence?: string | number): 'low' | 'medium' | 'high' {
+  if (typeof confidence === 'number') {
+    if (confidence >= 0.82) return 'high';
+    if (confidence >= 0.5) return 'medium';
+    return 'low';
+  }
+  if (confidence === 'high') return 'high';
+  if (confidence === 'medium') return 'medium';
+  if (confidence === 'low') return 'low';
+  return 'low';
+}
+
+function buildProgressivePolicy(args: {
+  serviceIntent: string;
+  resolvedIntent: string;
+  executionConfidence?: string | number;
+  serviceType?: string;
+  missingFieldCount?: number;
+  routeWarningCount?: number;
+  message?: string;
+}): ProgressiveServicePolicy {
+  const missCount = Math.max(0, args.missingFieldCount || 0);
+  const warningCount = Math.max(0, args.routeWarningCount || 0);
+  const confidenceLevel = toConfidenceLevel(args.executionConfidence);
+  const policyProfile = resolveServiceProgressivePolicyProfile(args.serviceType);
+  const profileDefaultRisk = policyProfile.defaultRiskLevel || 'low';
+
+  const ambiguityClass: AmbiguityClass =
+    warningCount >= PROGRESSIVE_POLICY_THRESHOLD.CRITICAL_WARNING_COUNT || missCount >= PROGRESSIVE_POLICY_THRESHOLD.HIGH_RISK_MISSING_FIELD_COUNT
+      ? 'high'
+      : warningCount >= PROGRESSIVE_POLICY_THRESHOLD.LOW_RISK_WARNING_COUNT || missCount >= PROGRESSIVE_POLICY_THRESHOLD.LOW_RISK_MISSING_FIELD_COUNT
+        ? 'low'
+        : 'none';
+
+  const riskLevel: RiskLevel =
+    profileDefaultRisk === 'high' || profileDefaultRisk === 'critical'
+      ? profileDefaultRisk
+      : profileDefaultRisk === 'medium' && missCount <= 0 && warningCount <= 0
+        ? 'medium'
+        : warningCount >= PROGRESSIVE_POLICY_THRESHOLD.CRITICAL_WARNING_COUNT || missCount >= PROGRESSIVE_POLICY_THRESHOLD.CRITICAL_MISSING_FIELD_COUNT
+          ? 'high'
+          : warningCount >= PROGRESSIVE_POLICY_THRESHOLD.LOW_RISK_WARNING_COUNT || missCount >= PROGRESSIVE_POLICY_THRESHOLD.LOW_RISK_MISSING_FIELD_COUNT
+            ? 'medium'
+            : profileDefaultRisk;
+
+  const reasoningPolicy: ReasoningPolicy = (() => {
+    const policy = policyProfile.defaultReasoningPolicy || PROGRESSIVE_REASONING_POLICIES.direct_execute;
+    if (riskLevel === 'high') {
+      return policyProfile.allowReadOnlyProgress
+        ? PROGRESSIVE_REASONING_POLICIES.minimum_viable_then_followup
+        : PROGRESSIVE_REASONING_POLICIES.confirm_then_execute;
+    }
+    if (missCount > 0) {
+      return (PROGRESSIVE_NON_BLOCKING_REASONING_POLICIES as readonly string[]).includes(policy)
+        ? policy
+        : PROGRESSIVE_REASONING_POLICIES.minimum_viable_then_followup;
+    }
+    return policy;
+  })();
+
+  const followUpMode: FollowUpMode = riskLevel === 'high'
+    ? 'required_select'
+    : missCount > 0
+      ? policyProfile.defaultFollowUpMode
+      : 'optional';
+
+  const resolvedAmbiguityClass = ambiguityClass === 'none' ? (policyProfile.defaultAmbiguityClass || 'low') : ambiguityClass;
+  const serviceCandidate = {
+    serviceIntent: args.resolvedIntent || args.serviceIntent,
+    name: '默认服务候选',
+    score: confidenceLevel === 'high' ? 0.91 : confidenceLevel === 'medium' ? 0.77 : 0.56,
+    rationale: args.message ? `基于路由决策与语义信号：${args.message}` : '基于路由决策',
+    requiresPermission: false,
+    requiresEscalation: riskLevel === 'high',
+  };
+  const defaults: UnresolvedAmbiguity[] = [];
+  const selectedService = args.resolvedIntent || args.serviceIntent;
+  const executionLimitMaxRecords = riskLevel === 'high' ? 60 : 100;
+  const executionLimitMaxSources = riskLevel === 'high' ? 2 : 3;
+
+  return {
+    reasoningPolicy,
+    ambiguityClass: resolvedAmbiguityClass,
+    riskLevel,
+    followUpMode,
+    defaultScope: {
+      scopeType: 'global',
+      granularityDefault: 'day',
+      timeRangeDefaultDays: 30,
+    },
+    minimumViableQuery: {
+      queryType: 'diagnostic_snapshot',
+      executableTarget: selectedService,
+      assumptionsUsed: missCount > 0 ? ['默认口径假设'] : [],
+      confidence: confidenceLevel === 'high' ? 0.86 : confidenceLevel === 'medium' ? 0.64 : 0.4,
+      outputHint: ['最小可用结果', '风险说明'],
+      executionLimit: {
+        maxRecords: executionLimitMaxRecords,
+        maxSources: executionLimitMaxSources,
+      },
+    },
+    selectedService,
+    serviceCandidates: [serviceCandidate],
+    unresolvedAmbiguities: defaults,
+    secondHopReason: resolvedAmbiguityClass === 'none' ? undefined : '存在未决歧义，采用渐进式执行',
+    executionGuardrails: {
+      canExecutePartial: policyProfile.allowReadOnlyProgress,
+      canFallbackToQuestion: true,
+      canQueue: false,
+    },
+    confirmationItems: buildConfirmationItems(args.serviceType, riskLevel),
+  };
+}
+
 async function classifyReportContinuationByModel(
   message: string,
   modelOptions?: { modelServiceConfig?: ModelServiceConfig; routeIntent?: IntentType },
@@ -258,10 +398,197 @@ function buildToolPurpose(intentType: IntentType, serviceIntent: string, message
     || (intentType === 'get_delivery_packages' ? 'package_fetch' : 'none');
 }
 
+// ─── 思维链四层投影 & 确认项辅助 ──────────────────────────
+
+function deriveAnswerMode(policy: ProgressiveServicePolicy | undefined, isReportQuery: boolean): AnswerMode {
+  if (!policy) return isReportQuery ? 'business_summary' : 'direct_answer';
+  if (policy.riskLevel === 'high' || policy.followUpMode === 'required_confirm' || policy.followUpMode === 'required_select') {
+    return 'blocking_confirmation';
+  }
+  if (policy.reasoningPolicy === 'minimum_viable_then_followup') {
+    return policy.ambiguityClass === 'medium' || policy.ambiguityClass === 'high'
+      ? 'evidence_first_with_hypotheses'
+      : 'business_summary_with_follow_up';
+  }
+  if (policy.reasoningPolicy === 'read_only_with_context') {
+    return 'business_summary_with_follow_up';
+  }
+  return isReportQuery ? 'business_summary' : 'direct_answer';
+}
+
+function deriveDisclosureLevel(policy: ProgressiveServicePolicy | undefined): DisclosureLevel {
+  if (!policy) return 'side_panel_only';
+  if (policy.riskLevel === 'high' || policy.riskLevel === 'critical') return 'admin_trace_only';
+  return 'user_readable';
+}
+
+function deriveExecutionMode(policy: ProgressiveServicePolicy | undefined): string {
+  if (!policy) return 'direct_execute';
+  if (policy.riskLevel === 'high' || policy.riskLevel === 'critical') return 'block_for_confirmation';
+  if (policy.reasoningPolicy === 'minimum_viable_then_followup') return 'aggregate_first';
+  if (policy.reasoningPolicy === 'read_only_with_context') return 'read_only_with_context';
+  if (policy.reasoningPolicy === 'confirm_then_execute') return 'confirm_then_execute';
+  return 'direct_execute';
+}
+
+function buildConfirmationItems(serviceType?: string, riskLevel?: string): Array<{ label: string; description?: string; required: boolean }> {
+  if (riskLevel !== 'high' && riskLevel !== 'critical') return [];
+  // 按服务类型生成默认确认清单
+  if (serviceType === 'automation_task') {
+    return [
+      { label: '任务执行频率和触发条件', required: true },
+      { label: '影响的数据范围和指标', required: true },
+      { label: '通知方式和告警阈值', required: false },
+    ];
+  }
+  if (serviceType === 'integration_workflow') {
+    return [
+      { label: '联调的项目和包', required: true },
+      { label: '联调媒体和联调对象', required: true },
+      { label: '预期联调范围和验收标准', required: false },
+    ];
+  }
+  if (serviceType === 'join_table_report') {
+    return [
+      { label: '报表模板和数据范围', required: true },
+      { label: '输出格式和交付方式', required: true },
+    ];
+  }
+  // 通用高风险确认
+  return [
+    { label: '确认操作对象和范围', required: true },
+    { label: '确认影响和回退方式', required: true },
+  ];
+}
+
+function deriveFollowUpQuestion(policy: ProgressiveServicePolicy | undefined): string | undefined {
+  if (!policy) return undefined;
+  // 优先从 unresolvedAmbiguities 推导
+  if (policy.unresolvedAmbiguities?.length) {
+    return policy.unresolvedAmbiguities[0]?.question;
+  }
+  // 其次从 secondHopReason 推导
+  if (policy.secondHopReason) {
+    return `是否需要${policy.secondHopReason}？`;
+  }
+  return undefined;
+}
+
+function deriveSuggestedActions(policy: ProgressiveServicePolicy | undefined, serviceType?: string): string[] {
+  if (!policy) return [];
+  const actions: string[] = [];
+  // 从 secondHopReason 推导下钻动作
+  if (policy.secondHopReason) {
+    if (policy.secondHopReason.includes('未决歧义')) {
+      actions.push('确认歧义范围', '按默认口径继续');
+    } else {
+      actions.push('继续深入分析');
+    }
+  }
+  // 从服务类型推导推荐动作
+  if (serviceType === 'data_query') {
+    actions.push('按媒体拆分', '按时间趋势查看');
+  } else if (serviceType === 'data_issue_diagnosis' || serviceType === 'roi_diagnosis') {
+    actions.push('查看回传链路', '检查归因配置');
+  } else if (serviceType === 'package_fetch') {
+    actions.push('查看包详情', '检查包状态');
+  }
+  // 从 unresolvedAmbiguities 推导
+  if (policy.unresolvedAmbiguities?.length) {
+    const firstAmbiguity = policy.unresolvedAmbiguities[0];
+    if (firstAmbiguity?.question && !actions.includes(firstAmbiguity.question)) {
+      actions.unshift(firstAmbiguity.question);
+    }
+  }
+  return actions.slice(0, 4); // 最多 4 个推荐动作
+}
+
+function projectThinkingChain(params: {
+  serviceType?: string;
+  progressivePolicy?: ProgressiveServicePolicy;
+  isReportQuery: boolean;
+  routeIntent: string;
+  urlFactLoop?: UrlFactLoopResult;
+  complexity?: 'low' | 'medium' | 'high';
+}): ThinkingChainLayers {
+  const { serviceType, progressivePolicy, isReportQuery, routeIntent, urlFactLoop, complexity = 'medium' } = params;
+  const policy = progressivePolicy;
+  // 所有层始终全量计算（Judge 层的 riskLevel/ambiguityClass 是下游策略基础，不可跳过）
+  const answerMode = deriveAnswerMode(policy, isReportQuery);
+  const disclosureLevel = deriveDisclosureLevel(policy);
+  const executionMode = deriveExecutionMode(policy);
+
+  const serviceCandidates = (policy?.serviceCandidates || []).map((c) => ({
+    type: c.serviceIntent,
+    score: c.score,
+    reason: c.rationale,
+  }));
+
+  // 低复杂度时精简投影：express 层跳过多模式推导，直接走默认
+  const effectiveAnswerMode = complexity === 'low'
+    ? (isReportQuery ? 'business_summary' : 'direct_answer')
+    : answerMode;
+  const effectiveFollowUpQuestion = complexity === 'low'
+    ? undefined
+    : deriveFollowUpQuestion(policy);
+  const effectiveSuggestedActions = complexity === 'low'
+    ? []
+    : deriveSuggestedActions(policy, serviceType);
+
+  return {
+    identify: {
+      serviceType: serviceType || 'general_chat',
+      serviceCandidates,
+      selectedService: policy?.selectedService || routeIntent,
+      urlCues: urlFactLoop?.urlCues?.map((cue) => ({
+        raw: cue.raw,
+        normalized: cue.normalized,
+        domainIntent: cue.domainIntent,
+      })),
+    },
+    judge: {
+      reasoningPolicy: policy?.reasoningPolicy || 'direct_execute',
+      ambiguityClass: policy?.ambiguityClass || 'none',
+      riskLevel: policy?.riskLevel || 'low',
+      executionMode,
+      urlEvidenceGap: urlFactLoop?.evidenceGap,
+    },
+    advance: {
+      defaultScope: (policy?.defaultScope as unknown as Record<string, unknown>) || {},
+      minimumViableQuery: (policy?.minimumViableQuery as unknown as Record<string, unknown>) || {},
+      secondHopStrategy: policy?.secondHopReason,
+      confirmationGate: executionMode === 'block_for_confirmation' ? 'user_confirm_required' : undefined,
+      urlHypotheses: urlFactLoop?.hypotheses?.map((h) => ({ keyword: h.keyword, source: h.source })),
+      // 因果推理骨架（仅诊断类服务）
+      ...((serviceType === 'roi_diagnosis' || serviceType === 'data_issue_diagnosis') ? {
+        causalSkeleton: (() => {
+          const skeleton = buildCausalSkeleton({
+            rootQuestion: `诊断：${serviceType === 'roi_diagnosis' ? 'ROI 异常' : '数据问题'}`,
+            serviceType,
+          });
+          return {
+            rootQuestion: skeleton.rootQuestion,
+            overallConfidence: skeleton.overallConfidence,
+            nodeCount: skeleton.tree.length,
+          };
+        })(),
+      } : {}),
+    },
+    express: {
+      answerMode: effectiveAnswerMode,
+      disclosureLevel,
+      followUpMode: policy?.followUpMode || 'optional',
+      followUpQuestion: effectiveFollowUpQuestion,
+      suggestedActions: effectiveSuggestedActions,
+    },
+  };
+}
+
 function buildRouteDecisionMetadata(params: {
   clientIntent?: string;
   routeIntent: IntentType;
   resolvedIntent: string;
+  executionConfidence?: 'low' | 'medium' | 'high' | number | string;
   routeReason: string;
   matchedRules: ReturnType<typeof evaluateIntentRouteRules>;
   reportRouteMatch: boolean;
@@ -282,15 +609,60 @@ function buildRouteDecisionMetadata(params: {
   isReportQuery: boolean;
   routeWarnings: string[];
   message: string;
-}) {
+  serviceType?: string;
+  missingFieldCount?: number;
+  urlFactLoop?: UrlFactLoopResult;
+}): PipelineRouteDecisionMetadata {
   const routeServiceIntent = buildServiceIntent(params.routeIntent, params.message, params.isReportQuery);
   const rawServiceIntent = params.userRequirementServiceIntent && params.userRequirementServiceIntent !== 'general_chat'
     ? params.userRequirementServiceIntent
     : routeServiceIntent;
   const serviceIntent = normalizeTopLevelServiceIntent(rawServiceIntent);
+  const routeServiceType = params.serviceType;
+  const resolvedIntentServiceType = fromPlannerServiceIntent(String(params.resolvedIntent || ''));
+  const fallbackByIntentServiceType = fromLegacyServiceIntent(String(rawServiceIntent || ''));
+  const resolvedRouteServiceType = isValidServiceType(routeServiceType || '') ? routeServiceType : undefined;
+  const serviceType = resolvedRouteServiceType || resolvedIntentServiceType || fallbackByIntentServiceType || routeServiceType;
+  const serviceTypeSource = serviceType
+    ? resolvedRouteServiceType
+      ? 'routeServiceType'
+      : resolvedIntentServiceType
+        ? 'resolvedIntent'
+        : fallbackByIntentServiceType
+          ? 'fallbackByIntent'
+          : undefined
+    : undefined;
+  const serviceTypeCandidateSources = [
+    ...(routeServiceType ? [{ source: 'routeServiceType' as const, value: routeServiceType }] : []),
+    ...(resolvedIntentServiceType ? [{ source: 'resolvedIntent' as const, value: resolvedIntentServiceType }] : []),
+    ...(fallbackByIntentServiceType ? [{ source: 'rawServiceIntent' as const, value: fallbackByIntentServiceType }] : []),
+  ].filter((item, index, arr) => {
+    const key = `${item.source}:${item.value}`;
+    const existed = arr.slice(0, index).some((prev) => `${prev.source}:${prev.value}` === key);
+    return !existed;
+  });
   const ignoredClientIntentReason = params.clientIntent && params.clientIntent !== params.resolvedIntent
     ? `client_intent_conflict:${params.clientIntent}->${params.resolvedIntent}`
     : undefined;
+  const progressivePolicy = buildProgressivePolicy({
+    serviceIntent,
+    resolvedIntent: params.resolvedIntent,
+    executionConfidence: params.executionConfidence,
+    routeWarningCount: params.routeWarnings.length,
+    missingFieldCount: params.missingFieldCount,
+    serviceType,
+    message: params.message,
+  });
+
+  // ─── 路由自修正验证（仅只读服务允许降级）───
+  const routeVerification = validateRouteSelection({
+    selectedService: serviceType,
+  });
+  const effectiveServiceType = routeVerification.downgraded && routeVerification.downgradedService
+    ? routeVerification.downgradedService
+    : serviceType;
+  const downgradeWarning = routeVerification.warning;
+
   return {
     clientIntent: params.clientIntent || null,
     resolvedIntent: params.resolvedIntent,
@@ -328,7 +700,28 @@ function buildRouteDecisionMetadata(params: {
       ...params.routeWarnings,
       ...(params.capabilityDecision?.warnings || []),
       ...(ignoredClientIntentReason ? [ignoredClientIntentReason] : []),
+      ...(downgradeWarning ? [downgradeWarning] : []),
+      ...(routeVerification.downgradeReason ? [`route_verification:${routeVerification.downgradeReason}`] : []),
     ])],
+    progressivePolicy,
+    serviceTypeSource,
+    serviceTypeCandidateSources,
+    ...(serviceType ? { serviceType } : {}),
+    ...(routeVerification.downgraded ? {
+      routeDowngrade: {
+        originalService: routeVerification.originalService,
+        downgradedService: routeVerification.downgradedService,
+        reason: routeVerification.downgradeReason,
+      },
+    } : {}),
+    thinkingChain: projectThinkingChain({
+      serviceType: effectiveServiceType || serviceType,
+      progressivePolicy,
+      isReportQuery: params.isReportQuery,
+      routeIntent: params.routeIntent,
+      urlFactLoop: params.urlFactLoop,
+    }),
+    ...(params.urlFactLoop ? { urlFactLoop: params.urlFactLoop } : {}),
   };
 }
 
@@ -439,6 +832,7 @@ export {
   type ReportContinuationClassification,
   buildServiceIntent,
   normalizeTopLevelServiceIntent,
+  buildProgressivePolicy,
   authRequiredAnswerForServiceIntent,
   resolveNonReportFallbackMessage,
   parseJsonModelOutput,
@@ -450,3 +844,6 @@ export {
   buildRouteObservationEvent,
   emitPlannerShadowObservationIfEnabled,
 };
+
+
+

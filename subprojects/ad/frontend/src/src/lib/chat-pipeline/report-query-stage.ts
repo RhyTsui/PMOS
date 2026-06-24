@@ -65,12 +65,81 @@ import { getModelServiceConfig } from '@/lib/runtime-config';
 import { type ModelUseCaseRuntimeResult } from '@/lib/model-use-case-runtime';
 import { recordEvidence } from '@/lib/evidence-ledger';
 import { transitionCaseFrameStage, addEvidenceRef } from '@/lib/case-frame-helpers';
+import { parseRelativeDateRange } from '@/lib/date-range-resolver';
+import type { UserRequirementContract } from '@/contracts/request-understanding/user-requirement-contract';
+import { PROGRESSIVE_TRACE_KEYS } from '@/lib/runner-stages/progressive-service-metadata';
+
+/**
+ * 默认时间范围策略：按查询类型自动填充合理的时间范围
+ * - 排名/最多/最少/top N → 近1年
+ * - 趋势/对比/环比 → 近30天
+ * - 诊断/异常 → 近7天
+ * - 其他（日报/普通查询）→ 近7天
+ */
+function buildDefaultDateRange(
+  message: string,
+  requirement: UserRequirementContract,
+): { type: 'relative'; value: string } | null {
+  const text = String(message || '').toLowerCase();
+  // 排名类查询：近1年
+  if (/(最多|最少|top|排名|前\d+|最高|最低|第一|前三)/.test(text)) {
+    return { type: 'relative', value: '近1年' };
+  }
+  // 趋势/对比类查询：近30天
+  if (/(趋势|对比|环比|同比|走势|变化)/.test(text)) {
+    return { type: 'relative', value: '近30天' };
+  }
+  // 诊断/异常类查询：近7天
+  if (/(异常|下降|上升|波动|问题|原因|为什么)/.test(text)) {
+    return { type: 'relative', value: '近7天' };
+  }
+  // 默认：近7天
+  return { type: 'relative', value: '近7天' };
+}
+
+/**
+ * 构建领域知识上下文摘要，注入 LLM prompt
+ * 将实体别名映射转换为 LLM 可理解的格式
+ */
+function buildDomainContextSummary(aliasMaps: {
+  media_aliases: Record<string, string[]>;
+  terminal_aliases: Record<string, string[]>;
+  team_aliases: Record<string, string[]>;
+  app_package_type_aliases: Record<string, string[]>;
+  account_aliases: Record<string, string[]>;
+  package_aliases: Record<string, string[]>;
+  optimizer_aliases: Record<string, string[]>;
+}): string {
+  const sections: string[] = [];
+  const labelMap: Record<string, string> = {
+    media_aliases: '媒体',
+    terminal_aliases: '终端',
+    team_aliases: '团队',
+    app_package_type_aliases: '应用类型',
+    account_aliases: '账户',
+    package_aliases: '包体',
+    optimizer_aliases: '优化师',
+  };
+  for (const [key, aliases] of Object.entries(aliasMaps)) {
+    const entries = Object.entries(aliases);
+    if (!entries.length) continue;
+    const label = labelMap[key] || key;
+    const aliasTexts = entries.slice(0, 8).map(([canonical, aliasList]) =>
+      `${canonical}（${aliasList.slice(0, 4).join('、')}）`
+    );
+    sections.push(`${label}: ${aliasTexts.join('；')}`);
+  }
+  return sections.join('\n') || '暂无领域实体配置';
+}
 
 export async function executeReportQueryStage(
   ctx: ChatPipelineContext,
   io: StreamIO,
   intentRoutingPreAssist?: Awaited<ReturnType<typeof runReportModelNode>>,
 ): Promise<ChatPipelineResult> {
+  // P0.5 Debug: Verify this stage is being called
+  console.log(`[P0.5 Debug] executeReportQueryStage called for message="${ctx.message}"`);
+
   const {
     route,
     message,
@@ -101,6 +170,17 @@ export async function executeReportQueryStage(
     skillSelection,
     caseFrame,
   } = ctx;
+  const missingFieldCount = (userRequirement.missingFields || []).length;
+  const progressiveTraceFallbackReasons: string[] = [];
+  if (!routeDecisionMetadata.progressivePolicy) {
+    progressiveTraceFallbackReasons.push('missing_progressive_policy');
+  }
+  if (!routeDecisionMetadata.policyTrace) {
+    progressiveTraceFallbackReasons.push('missing_route_decision_policy_trace');
+  }
+  if (!routeDecisionMetadata.unresolvedAmbiguities?.length) {
+    progressiveTraceFallbackReasons.push('missing_unresolved_ambiguities');
+  }
 
   const isReportQuery = true;
 
@@ -174,6 +254,25 @@ export async function executeReportQueryStage(
     });
     io.close();
     return { terminal: true, content: authRequiredAnswer };
+  }
+
+  // ─── Default Date Range Policy ───
+  // 当用户未指定时间范围时，按查询类型自动填充默认值
+  const hasDateRange = userRequirement.dateRange.type !== 'unknown' && Boolean(userRequirement.dateRange.value);
+  if (!hasDateRange) {
+    const defaultDateRange = buildDefaultDateRange(message, userRequirement);
+    if (defaultDateRange) {
+      userRequirement.dateRange = defaultDateRange;
+      io.pushEvent(createProcessEvent({
+        type: 'model.step',
+        label: '应用默认时间范围',
+        summary: `用户未指定时间范围，已按查询类型默认${defaultDateRange.value}。`,
+        intent_type: 'report_query',
+        agent: 'report',
+        visibility: 'internal',
+        output: { defaultDateRange, originalType: 'unknown' },
+      }));
+    }
   }
 
   // ─── Capability selection ───
@@ -326,6 +425,37 @@ export async function executeReportQueryStage(
       candidateCount: executionCapabilityDecision.candidates.length,
     },
     warnings: [...new Set([...routeDecisionMetadata.warnings, ...executionCapabilityDecision.warnings])],
+  };
+  const progressivePolicy = reportRouteDecisionMetadata.progressivePolicy;
+  const progressiveTracePayload = {
+    response_contract: {
+      progressivePolicy,
+      unresolvedAmbiguities: reportRouteDecisionMetadata.unresolvedAmbiguities,
+      followUpMode: progressivePolicy?.followUpMode,
+      minimumViableQuery: progressivePolicy?.minimumViableQuery,
+      missingFieldCount,
+      fallbackReasons: progressiveTraceFallbackReasons,
+    },
+    routeDecisionMetadata: {
+      policyTrace: reportRouteDecisionMetadata.policyTrace,
+      unresolvedAmbiguities: reportRouteDecisionMetadata.unresolvedAmbiguities,
+      missingFieldCount,
+      warnings: reportRouteDecisionMetadata.warnings,
+      fallbackReasons: progressiveTraceFallbackReasons,
+      coverage: {
+        hasPolicy: Boolean(progressivePolicy),
+        hasPolicyTrace: Boolean(reportRouteDecisionMetadata.policyTrace),
+        hasUnresolvedAmbiguities: Boolean(reportRouteDecisionMetadata.unresolvedAmbiguities?.length),
+      },
+    },
+    traceEvent: {
+      progressivePolicy,
+      missingFieldCount,
+      unresolvedAmbiguities: reportRouteDecisionMetadata.unresolvedAmbiguities,
+      fallbackReasons: progressiveTraceFallbackReasons,
+      thinkingChain: reportRouteDecisionMetadata.thinkingChain,
+      urlFactLoop: reportRouteDecisionMetadata.urlFactLoop,
+    },
   };
   io.pushEvent(createProcessEvent({
     type: 'skill.started',
@@ -578,15 +708,63 @@ export async function executeReportQueryStage(
     }
 
     // Stage 3: 能力发现 — capability_discovery
-    const toolDigests = capabilityManifest.map((cap: any) => ({
-      capability_id: cap.capabilityId,
-      tool_name: cap.source.toolName,
-      server_name: cap.source.serverId || '',
-      description: cap.description || '',
-      required_fields: cap.requiredInputs || [],
-      optional_fields: cap.optionalInputs || [],
-      supported_identifiers: cap.supports?.identifierTypes || [],
-    }));
+    // ToolCompatibility gate: 检查 account 维度是否被请求
+    const accountRequested = (userRequirement.dimensions || [])
+      .some((d: { key?: string }) => ['account', 'advertiser', 'account_id', 'advertiser_id'].includes(String(d.key || '').toLowerCase()))
+      || (userRequirement.entityHints || [])
+      .some((e: { entityType?: string }) => e.entityType === 'account');
+
+    const toolDigests = capabilityManifest.map((cap: any) => {
+      const isAccountDomain = Array.isArray(cap.report_domains) && cap.report_domains.includes('account');
+      const isDictionary = Array.isArray(cap.report_domains) && cap.report_domains.includes('dictionary');
+
+      // account 域工具：用户未请求 account 维度时标记为 nonExecutable
+      if (isAccountDomain && !accountRequested) {
+        return {
+          capability_id: cap.capabilityId,
+          tool_name: cap.source.toolName,
+          server_name: cap.source.serverId || '',
+          description: cap.description || '',
+          required_fields: cap.requiredInputs || [],
+          optional_fields: cap.optionalInputs || [],
+          supported_identifiers: cap.supports?.identifierTypes || [],
+          executable: false,
+          incompatible_reason: 'account_dimension_not_requested',
+          report_domains: cap.report_domains || [],
+        };
+      }
+
+      // dictionary 工具：不作为 report query tool 展示，只作为 resolver tool
+      if (isDictionary) {
+        return {
+          capability_id: cap.capabilityId,
+          tool_name: cap.source.toolName,
+          server_name: cap.source.serverId || '',
+          description: cap.description || '',
+          required_fields: cap.requiredInputs || [],
+          optional_fields: cap.optionalInputs || [],
+          supported_identifiers: cap.supports?.identifierTypes || [],
+          executable: false,
+          incompatible_reason: 'dictionary_tool_not_report_query',
+          report_domains: cap.report_domains || [],
+          tool_category: 'resolver',
+        };
+      }
+
+      return {
+        capability_id: cap.capabilityId,
+        tool_name: cap.source.toolName,
+        server_name: cap.source.serverId || '',
+        description: cap.description || '',
+        required_fields: cap.requiredInputs || [],
+        optional_fields: cap.optionalInputs || [],
+        supported_identifiers: cap.supports?.identifierTypes || [],
+        executable: true,
+        report_domains: cap.report_domains || [],
+      };
+    });
+    // 注入领域知识上下文：实体别名映射，帮助 LLM 理解业务实体
+    const domainContextSummary = buildDomainContextSummary(getEntityResolutionAliasMaps(loadEntityResolutionConfigSync()));
     capabilityDiscoveryAssist = await runReportModelNode({
       useCase: 'capability_discovery',
       fallbackText: '',
@@ -601,6 +779,7 @@ export async function executeReportQueryStage(
         intentorch_candidate: reportIntentOrchCandidate,
         planner_candidates: reportPlannerProjection.plannerCandidates,
         arbitration_summary: reportPlannerProjection.arbitrationSummary,
+        domainContext: domainContextSummary,
       },
       consume: { enabled: true, consumedBy: 'capability_discovery_and_orchestration', consumedFields: ['relevance', 'dependencies'] },
       traceMeta: { node: 'capability_discovery', phase: 'pre_execution' },
@@ -677,6 +856,9 @@ export async function executeReportQueryStage(
       }
     }
 
+    // P0.5 Debug: Verify we reach executeReportQueryStepWithTrace
+    console.log(`[P0.5 Debug] About to call executeReportQueryStepWithTrace for message="${message}"`);
+
     reportStep = await executeReportQueryStepWithTrace({
       servers,
       message,
@@ -702,7 +884,60 @@ export async function executeReportQueryStage(
       routeReason: route.reason,
       traceId,
       executionContract,
+      selectedProject: compiledContext.project.currentProject as unknown as Record<string, unknown>,
+      sessionContext: {
+        conversationId,
+        userScopeKey,
+      } as Record<string, unknown>,
+      semanticFrame: queryContractAssist.output as Record<string, unknown> | undefined,
+      conversationContext: {
+        recentMessages: compiledContext.conversation.recentMessages,
+        currentMode: compiledContext.conversation.currentMode,
+      } as Record<string, unknown>,
     });
+
+    // ─── P1-RFC-004: Resolver Policy Shadow Runner (旁路观测) ───
+    // 只在 shadow 模式下运行，不影响主链路
+    try {
+      const { getResolverPolicyShadowMode } = await import('@/lib/feature-switch-store');
+      const shadowMode = await getResolverPolicyShadowMode();
+
+      if (shadowMode === 1) { // shadow 模式
+        const { runResolverPolicyShadow } = await import('@/lib/resolver-policy-shadow-runner');
+
+        // 准备 shadow runner 输入 - 只使用实际可用的数据
+        const shadowInput = {
+          message,
+          selectedToolName: reportStep.selection_trace?.selected_tool,
+          requestedDimensions: reportStep.missing_field_categories?.requested_dimensions || [],
+        };
+
+        // 运行 shadow runner
+        const shadowOutput = await runResolverPolicyShadow(shadowInput);
+
+        // 写入 shadow trace 到 process_events
+        io.pushEvent(createProcessEvent({
+          type: 'shadow.trace',
+          label: 'Resolver Policy Shadow 观测',
+          status: shadowOutput.timeout ? 'error' : shadowOutput.error ? 'error' : 'success',
+          summary: `Shadow diff: ${shadowOutput.diffResult.diffType}, 执行时间: ${shadowOutput.executionTimeMs}ms`,
+          intent_type: 'report_query',
+          agent: 'report',
+          output: {
+            executionTimeMs: shadowOutput.executionTimeMs,
+            timeout: shadowOutput.timeout,
+            error: shadowOutput.error,
+            diffType: shadowOutput.diffResult.diffType,
+            diffDetail: shadowOutput.diffResult.diffDetail,
+            legacyTriggeredCount: shadowOutput.diffResult.legacyTriggered.length,
+            governedTriggeredCount: shadowOutput.diffResult.governedTriggered.length,
+          },
+        }));
+      }
+    } catch (shadowError) {
+      // Shadow runner 异常不影响主链路，只记录日志
+      console.error('[P1-RFC-004] Shadow runner error:', shadowError);
+    }
 
     // Evidence ledger — tool result
     const updatedLedger = recordEvidence(io.getEvidenceLedger(), {
@@ -918,6 +1153,8 @@ export async function executeReportQueryStage(
       input: {
         baseAnswer: content,
         missingFields: reportStep.missing_fields,
+        missingFieldCategories: reportStep.missing_field_categories,
+        controlledEntityRuntime: reportStep.controlled_entity_runtime,
         blockingReason: executionCapabilityDecision.blockingReason,
         dataCoverage: executionCapabilityDecision.dataCoverage,
         requirement: userRequirement,
@@ -1041,6 +1278,34 @@ export async function executeReportQueryStage(
   });
   reportModelParticipation.push(answerCompositionAssist.participation);
   content = answerCompositionAssist.text || content;
+
+  // ─── P0.5: Controlled entity runtime trace event ───
+  if (reportStep.controlled_entity_runtime?.enabled) {
+    const cer = reportStep.controlled_entity_runtime;
+    io.pushEvent(createProcessEvent({
+      type: 'model.step',
+      label: '受控实体解析',
+      status: cer.filterCompileOk ? 'success' : cer.enforced ? 'error' : 'success',
+      summary: cer.filterCompileOk
+        ? `识别 ${cer.candidateCount} 个实体候选，全部通过。`
+        : cer.enforced
+          ? `识别 ${cer.candidateCount} 个实体候选，${cer.blockedEntities.length} 个未满足条件已阻断。`
+          : `识别 ${cer.candidateCount} 个实体候选（shadow 模式），${cer.blockedEntities.length} 个未满足条件仅记录。`,
+      intent_type: 'report_query',
+      agent: 'report',
+      visibility: 'internal',
+      output: {
+        enforced: cer.enforced,
+        candidate_count: cer.candidateCount,
+        strong_filter_count: cer.strongFilterCount,
+        resolution_results: cer.resolutionResults,
+        capability_gate_results: cer.capabilityGateResults,
+        filter_compile_ok: cer.filterCompileOk,
+        blocked_entities: cer.blockedEntities,
+        reason_codes: cer.reasonCodes,
+      },
+    }));
+  }
 
   // ─── Quality check event ───
   const resolutionActions = buildEntityResolutionActions({ originalMessage: question, reportStep });
@@ -1275,6 +1540,9 @@ export async function executeReportQueryStage(
       arbitration_summary: reportPlanningMetadata.arbitration_summary,
       info_source_arbitration: reportInformationSourceArbitration,
       failure_case_id: failureCaseId,
+      [PROGRESSIVE_TRACE_KEYS.responseContractMetadata]: progressiveTracePayload.response_contract,
+      [PROGRESSIVE_TRACE_KEYS.routeDecisionObservation]: progressiveTracePayload.routeDecisionMetadata,
+      [PROGRESSIVE_TRACE_KEYS.traceEvent]: progressiveTracePayload.traceEvent,
     },
   });
   const responseContract = buildResponseContract({
@@ -1294,7 +1562,7 @@ export async function executeReportQueryStage(
         selected_tool: reportStep.selection_trace?.selected_tool,
         selected_server: reportStep.selection_trace?.selected_server,
         evidence_refs: reportEvidenceRefs,
-        execution_contract: {
+      execution_contract: {
         ...executionContract,
         requires_execution: executionContract.requires_execution && reportStep.status !== 'not_configured',
       },
@@ -1302,6 +1570,9 @@ export async function executeReportQueryStage(
       arbitration_summary: reportPlanningMetadata.arbitration_summary,
       info_source_arbitration: reportInformationSourceArbitration,
       failure_case_id: failureCaseId,
+      [PROGRESSIVE_TRACE_KEYS.responseContractMetadata]: progressiveTracePayload.response_contract,
+      [PROGRESSIVE_TRACE_KEYS.routeDecisionObservation]: progressiveTracePayload.routeDecisionMetadata,
+      [PROGRESSIVE_TRACE_KEYS.traceEvent]: progressiveTracePayload.traceEvent,
     },
   });
   io.push({
@@ -1330,6 +1601,7 @@ export async function executeReportQueryStage(
         resolved_filters: compactRuntimePayload(reportStep.resolved_filters, { depth: 4, maxString: 1000, maxArray: 20, maxKeys: 40 }),
         tool_chain: compactToolChain(reportStep.tool_chain),
         failure_case_id: failureCaseId,
+        controlled_entity_runtime: reportStep.controlled_entity_runtime,
       },
     },
     metadata: {
@@ -1354,6 +1626,7 @@ export async function executeReportQueryStage(
       tool_chain: compactToolChain(reportStep.tool_chain),
       evidence_refs: reportEvidenceRefs,
       failure_case_id: failureCaseId,
+      controlled_entity_runtime: reportStep.controlled_entity_runtime,
       process_events: io.getProcessEvents(),
       project_context_summary: projectContextSummary,
       compiled_context_summary: {
@@ -1379,6 +1652,9 @@ export async function executeReportQueryStage(
       message_id: traceId,
       turn_id: task.task_id,
       message_runtime_projection: compactRuntimePayload(runtimeProjection, { depth: 5, maxString: 1000, maxArray: 12, maxKeys: 35 }),
+      [PROGRESSIVE_TRACE_KEYS.responseContractMetadata]: progressiveTracePayload.response_contract,
+      [PROGRESSIVE_TRACE_KEYS.routeDecisionObservation]: progressiveTracePayload.routeDecisionMetadata,
+      [PROGRESSIVE_TRACE_KEYS.traceEvent]: progressiveTracePayload.traceEvent,
     },
   });
   io.close();
