@@ -31,6 +31,7 @@ import {
 } from '@/lib/route-decision-observation';
 import {
   buildRouteObservationEvent,
+  emitPlannerShadowObservationIfEnabled,
 } from '@/lib/runner-stages/route-helpers';
 import {
   workflowStepsFromDiagnosisTrace,
@@ -50,17 +51,8 @@ export async function executeDiagnosisStage(
   const caseFrame = ctx.caseFrame;
   const userScopeKey = ctx.userScopeKey;
 
-  // Guard 1: skip if generic skill stage already handled this via executionTarget
-  if (ctx.executionTarget?.type === 'skill') return {};
-
-  // Guard 2: generic readiness check (replaces hardcoded CALLBACK_ATTR_DIAGNOSIS_SKILL_ID)
-  const skillId = selectedSkill?.skill_id;
-  if (!skillId) return {};
-  const readiness = ctx.skillReadinessResults?.find((r: any) => r.skillId === skillId);
-  if (readiness && readiness.state !== 'ready' && readiness.state !== 'executable') return {};
-
-  // Guard 3: intent type + category (category match already guaranteed by route.ts intent_type)
-  if (!((route.intent_type === 'diagnosis' || route.intent_type === 'debugging') && selectedSkill?.skill_id)) {
+  // 前置条件检查
+  if (!((route.intent_type === 'diagnosis' || route.intent_type === 'debugging') && selectedSkill?.skill_id === CALLBACK_ATTR_DIAGNOSIS_SKILL_ID)) {
     return {};
   }
 
@@ -234,6 +226,7 @@ export async function executeDiagnosisStage(
     })
     : undefined;
   if (routeObservation) io.pushEvent(buildRouteObservationEvent(routeObservation));
+  await emitPlannerShadowObservationIfEnabled({ message, history: body.history, pushEvent: io.pushEvent, route: { intent_type: route.intent_type as any, confidence: route.confidence as any, serviceIntent: routeServiceIntent as string }, onShadowResult: (result) => { io.setEvidenceLedger(recordEvidence(io.getEvidenceLedger(), { stage: 'planning', source: 'planner_inference', sourceId: 'planner_shadow', confidence: result.status === 'succeeded' ? 'high_probability' : 'unverified', content: { status: result.status, task_type: result.plan?.task_type, service_intent: result.plan?.service_intent, confidence: result.plan?.confidence, duration_ms: result.durationMs } })); } });
   await io.endPlanningAndStartExecution();
 
   const runtimeState = createRuntimeState(

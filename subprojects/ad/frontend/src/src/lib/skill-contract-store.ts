@@ -3,10 +3,8 @@ import path from 'node:path';
 import type { SkillContract } from '@/types';
 import { CALLBACK_ATTR_DIAGNOSIS_SKILL_CONTRACT } from '@/contracts/skills/callback-attribution-diagnosis';
 import { runtimeDataPath } from './runtime-data-path';
-import { buildDbWriteError } from './db-error';
 
 const SKILL_CONTRACTS_PATH = runtimeDataPath('skill-contracts.json');
-const DOMAIN = 'skill_contract';
 
 interface SkillContractsFile {
   contracts: SkillContract[];
@@ -133,7 +131,7 @@ const RAW_BUILTIN_SKILL_CONTRACTS: SkillContract[] = [
   {
     skill_id: 'preflight_quality_check_skill',
     name: '投放前质量保障',
-    description: '投放前只读检查官方渠道包、智投分包、巨量应用分包、媒体应用、归因、报表和联调状态，给出可投放结论；v1 不自动创建分包。',
+    description: '投放前只读检查官方渠道包、智投分包、巨量应用分包、媒体应用、监测链接、归因、报表和联调状态，给出可投放结论；v1 不自动创建分包。',
     category: 'integration',
     priority: 'P0',
     enabled: true,
@@ -143,7 +141,7 @@ const RAW_BUILTIN_SKILL_CONTRACTS: SkillContract[] = [
     workflow_steps: [
       { key: 'query_zhitou_package', label: '查询智投已有包和分包状态', tool_bindings: ['zhitou_package.channel_package_query', 'zhitou_package.download_url_query'] },
       { key: 'query_oceanengine_package', label: '巨量场景查询巨量应用和应用分包', tool_bindings: ['tools_app_management_android_app_list_v2', 'oceanengine.app_package_query'] },
-
+      { key: 'check_tracking_link', label: '检查监测链接', tool_bindings: ['tracking_link.check'] },
       { key: 'check_attribution', label: '检查归因配置', tool_bindings: ['attribution.config_check'] },
       { key: 'check_report_ready', label: '检查报表可用性', tool_bindings: ['report.health_check'] },
       { key: 'check_debug_result', label: '检查联调结论', tool_bindings: ['debug.latest_result'] },
@@ -188,7 +186,25 @@ const RAW_BUILTIN_SKILL_CONTRACTS: SkillContract[] = [
     evaluation_cases: ['metric-explainer-register-001'],
     risk_guardrails: ['没有结构化资料时明确提示缺资料，不用 mock 或泛化知识伪装。'],
   },
-
+  {
+    skill_id: 'tracking_link_delivery_skill',
+    name: '监测链接交付',
+    description: '查询已有监测链接，并支持有权限用户直接创建新链接。',
+    category: 'integration',
+    priority: 'P1',
+    enabled: true,
+    version: '2026-05-15.v1',
+    intent_triggers: ['监测链接', '创建链接', '给我链接'],
+    input_schema: { type: 'object', properties: { project_scope: { type: 'string' }, media: { type: 'string' }, package_name: { type: 'string' } } },
+    workflow_steps: [
+      { key: 'check_permission', label: '检查创建权限', tool_bindings: ['tracking_link.permission_check'] },
+      { key: 'query_existing_link', label: '查询已有链接', tool_bindings: ['tracking_link.query'] },
+      { key: 'create_link_if_needed', label: '必要时创建新链接', tool_bindings: ['tracking_link.create'], ui_component: 'tracking_link_card' },
+    ],
+    output_schema: { type: 'object', properties: { link: { type: 'string' }, created: { type: 'boolean' } } },
+    evaluation_cases: ['tracking-link-001'],
+    risk_guardrails: ['无权限时明确提示，不做假创建。'],
+  },
   {
     skill_id: 'report_template_builder_skill',
     name: '报表模板提炼',
@@ -248,47 +264,6 @@ const RAW_BUILTIN_SKILL_CONTRACTS: SkillContract[] = [
     evaluation_cases: ['report-quality-empty-001', 'report-quality-missing-metric-001', 'report-quality-date-gap-001'],
     risk_guardrails: ['有数据问题时先告知用户，不继续生成确定性业务结论。'],
   },
-  {
-    skill_id: 'ad-label-aggregation-v2',
-    name: '广告资产标签聚合',
-    description: '基于广告资产标签进行聚合取数分析，支持 SQL 生成、查询执行和结果导出。',
-    domain: 'ad_label',
-    category: 'report',
-    priority: 'P0',
-    enabled: true,
-    version: '2026-07-05.v1',
-    intent_triggers: ['广告资产标签', '资产标签聚合', '标签取数', 'ad-label', '聚合'],
-    input_schema: {
-      type: 'object',
-      properties: {
-        question: { type: 'string', description: '用户的分析问题或取数需求' },
-        execute: { type: 'boolean', description: '是否直接执行查询' },
-        traceId: { type: 'string', description: '上一轮 traceId（continue_trace 模式）' },
-      },
-      required: ['question'],
-    },
-    workflow_steps: [
-      { key: 'run_aggregation_task', label: '执行广告资产标签聚合取数', tool_bindings: ['run_ad_label_aggregation_task'] },
-    ],
-    output_schema: {
-      type: 'object',
-      properties: {
-        answerMarkdown: { type: 'string' },
-        traceId: { type: 'string' },
-        resultSummary: { type: 'object' },
-        queryResult: { type: 'object' },
-        download: { type: 'object' },
-        sql: { type: 'string' },
-      },
-    },
-    evaluation_cases: ['ad-label-sql-only-001', 'ad-label-execute-001', 'ad-label-continue-trace-001', 'ad-label-config-save-001'],
-    risk_guardrails: [
-      '必须通过 Plan Arbitration 选中后才执行，不能被 stage 内正则或硬编码触发。',
-      'execute 模式只读，不修改广告配置数据。',
-      'preview/save config 需要用户显式确认短语和审计记录。',
-      'MCP 不可用时返回 blocked，不允许把 missing_input 伪装成 success。',
-    ],
-  },
 ];
 
 const BUILTIN_SKILL_CONTRACTS: SkillContract[] = RAW_BUILTIN_SKILL_CONTRACTS.map((contract, index) => ({
@@ -330,21 +305,6 @@ function normalizeContract(input: Partial<SkillContract>): SkillContract {
 }
 
 async function readContractsFile(): Promise<SkillContractsFile> {
-  // DB-first: try DB before JSON files
-  try {
-    const { listConfigs } = await import('./db/repositories/config-repository');
-    const rows = await listConfigs({ domain: DOMAIN, status: 'active' });
-    if (rows.length > 0) {
-      const fromDb = rows.map(r => normalizeContract(r.value as Partial<SkillContract>));
-      const merged = BUILTIN_SKILL_CONTRACTS.map((builtin) => {
-        const override = fromDb.find(item => item.skill_id === builtin.skill_id);
-        return override ? normalizeContract({ ...builtin, ...override }) : builtin;
-      });
-      const custom = fromDb.filter(item => !BUILTIN_SKILL_CONTRACTS.some(builtin => builtin.skill_id === item.skill_id));
-      return { contracts: [...merged, ...custom] };
-    }
-  } catch { /* fall through to JSON */ }
-
   try {
     const raw = await readFile(SKILL_CONTRACTS_PATH, 'utf8');
     const parsed = JSON.parse(raw) as Partial<SkillContractsFile>;
@@ -364,27 +324,6 @@ async function readContractsFile(): Promise<SkillContractsFile> {
 }
 
 async function writeContractsFile(file: SkillContractsFile): Promise<void> {
-  // DB write (primary) - each contract as a config_entries row
-  let dbWriteError: unknown;
-  try {
-    const { upsertConfig } = await import('./db/repositories/config-repository');
-    for (const c of file.contracts) {
-      try {
-        await upsertConfig({ domain: DOMAIN, configKey: c.skill_id, value: c, changedBy: 'system', source: 'manual' });
-      } catch (err) {
-        console.error(`[skill-contract] DB upsert failed for "${c.skill_id}"`, (err as Error)?.message);
-        dbWriteError = err;
-      }
-    }
-  } catch (err) {
-    console.error('[skill-contract] DB write failed, falling back to JSON', (err as Error)?.message);
-    dbWriteError = err;
-  }
-  if (dbWriteError) {
-    throw buildDbWriteError('skill_contract', dbWriteError);
-  }
-  return;
-
   await mkdir(path.dirname(SKILL_CONTRACTS_PATH), { recursive: true });
   await writeFile(SKILL_CONTRACTS_PATH, JSON.stringify(file, null, 2), 'utf8');
 }

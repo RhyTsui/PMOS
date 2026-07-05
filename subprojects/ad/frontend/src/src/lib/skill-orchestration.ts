@@ -1,6 +1,5 @@
 import { callMcpTool } from '@/lib/mcp-discovery';
 import { listSkillContracts } from '@/lib/skill-contract-store';
-import { getCachedReadiness } from '@/lib/skill-readiness-probe';
 import { findNormalizationCapabilityCandidates } from '@/lib/report-capability-manifest';
 import type { ActionContract } from '@/contracts/semantic/action-contract';
 import type { CompiledContextPackage, IntentType, McpServerConfig, McpToolConfig, BusinessContextSnapshot, AiNextAction, AgentProcessEvent, SkillContract } from '@/types';
@@ -385,11 +384,6 @@ export async function selectSkillCandidate(message: string, intentType?: IntentT
       metricExplainerSuppressed ? 'suppressed: data query context' : '',
       routeReason ? `route reason: ${routeReason}` : '',
     ].filter(Boolean);
-    // Readiness filter: skip blocked/stale skills (only when cache has data)
-    const readiness = getCachedReadiness(skill.skill_id);
-    if (readiness && readiness.state !== 'ready' && readiness.state !== 'executable') {
-      return { skill, score: 0, matchedTriggers: triggerResult.matched, reasons: [...reasons, `readiness: ${readiness.state}`] };
-    }
     return { skill, score, matchedTriggers: triggerResult.matched, reasons };
   }).filter(candidate => candidate.score > 0);
   const selected = candidates.sort((a, b) => b.score - a.score || a.skill.name.localeCompare(b.skill.name, 'zh-Hans-CN'))[0];
