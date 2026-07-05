@@ -166,11 +166,30 @@ export interface ChatPipelineContext {
       score?: number;
       reasons?: string[];
       matchedTriggers?: string[];
+      /** 新增：skill 就绪状态 */
+      readiness?: import('@/contracts/skills/skill-readiness-types').SkillReadinessState;
     };
+    /** 新增：所有候选 skill */
+    candidates?: import('@/contracts/skills/skill-readiness-types').SkillSelectionCandidate[];
   };
   routeServers: McpServerConfig[];
   routeCapabilityManifest: CapabilityManifest[];
   routeCapabilityCandidates: CapabilitySelectionCandidate[];
+
+  // ─── Skill 系统（新增）───
+  /** 所有已启用 skill 的就绪探测结果 */
+  skillReadinessResults?: import('@/contracts/skills/skill-readiness-types').SkillReadinessProbeResult[];
+  /** Plan Arbitration 输出的唯一执行目标 */
+  executionTarget?: {
+    type: 'mcp_tool' | 'skill' | 'builtin' | 'open_answer';
+    capabilityId?: string;
+    skillId?: string;
+    readiness?: import('@/contracts/skills/skill-readiness-types').SkillReadinessState;
+    reason: string;
+  };
+  /** Skill Capability Projection 结果 */
+  skillCapabilityProjections?: import('@/lib/skill-capability-projection-types').SkillCapabilityProjection[];
+
 
   // ─── 报表续查 ───
   reportContinuation: boolean;
@@ -192,6 +211,12 @@ export interface ChatPipelineContext {
 
   // ─── 路由告警（可变数组，stages 会 push） ───
   routeWarnings: string[];
+
+  // ─── Phase 1: QueryContract ───
+  parsedFilterResult?: import('@/contracts/request-understanding/parsed-filters').ParsedFilterResult;
+  queryContract?: import('@/contracts/semantic/query-contract').CanonicalQueryContract;
+  queryContractSummary?: Record<string, unknown>;
+  attachmentQueryContext?: import('@/lib/attachment-query-context').AttachmentQueryContext;
 
   // ─── 其他上下文 ───
   [key: string]: unknown;

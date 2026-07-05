@@ -1,4 +1,4 @@
-﻿// 小乔智投 Type Definitions
+// 小乔智投 Type Definitions
 // Based on: 数据对象真源, 接口真源, 使用帮助设计, 会话支撑能力设计, 提示词管理设计
 // ==========================================
 // Core Enums
@@ -64,6 +64,13 @@ export type ProcessEventType =
   | 'skill.step'
   | 'skill.finished'
   | 'skill.failed'
+  | 'skill.blocked'
+  | 'skill.policy_evaluated'
+  | 'skill.arbitration'
+  | 'skill.readiness_probed'
+  | 'skill.confirmation_needed'
+  | 'skill.degraded'
+  | 'skill.stale_version'
   | 'mcp.tool_call'
   | 'mcp.tool_result'
   | 'mcp.tool_error'
@@ -76,14 +83,16 @@ export type ProcessEventType =
   | 'knowledge.rejected'
   | 'web.search'
   | 'web.result'
-  | 'intent_orch.enhanced'
-  | 'intent_orch.candidate'
   | 'model.step'
+  | 'model.error'
   | 'source.attached'
+  | 'attachment.read'
+  | 'attachment.candidate'
+  | 'attachment.adopted'
+  | 'attachment.rejected'
   | 'ui.component_rendered'
   | 'answer.delta'
   | 'answer.final'
-  | 'planner_shadow_observation'
   | 'stage.started'
   | 'stage.ended'
   | 'stage.error';
@@ -131,7 +140,7 @@ export interface AgentProcessEvent {
       | 'debug_workbench'
       | 'inspection_result'
       | 'diagnosis_report'
-      | 'tracking_link_card'
+
       | 'report_template'
       | 'data_preview'
       | 'source_detail'
@@ -139,6 +148,21 @@ export interface AgentProcessEvent {
     title?: string;
     payload?: Record<string, unknown>;
   };
+}
+
+export interface WorkflowStep {
+  key: string;
+  label: string;
+  tool_bindings?: string[];
+  ui_component?: string;
+  /** 分支标识 (ANDROID / IOS_HARMONY / common)。仅当 workflow 有平台分支时使用。 */
+  branch?: string;
+  /** 预留：未来 skill 组合，引用其他 skill 的子工作流 (Phase 4+) */
+  sub_skill_ref?: string;
+  /** 步骤是否必需（默认 true）。非必需步骤失败时 workflow 继续。 */
+  required?: boolean;
+  /** 步骤超时（毫秒）。超时后标记为 failed。 */
+  timeout_ms?: number;
 }
 
 export interface SkillContract {
@@ -164,17 +188,21 @@ export interface SkillContract {
   selection_policy?: {
     requires_trigger_match_for_route_bonus?: boolean;
   };
-  workflow_steps: Array<{
-    key: string;
-    label: string;
-    tool_bindings?: string[];
-    ui_component?: string;
-  }>;
+  workflow_steps: WorkflowStep[];
   output_schema: Record<string, unknown>;
   evaluation_cases: string[];
   risk_guardrails?: string[];
   created_at?: number;
   updated_at?: number;
+  // ─── 版本管理 ──────────────────────────────────────
+  /** 向后兼容的版本列表 */
+  compatible_versions?: string[];
+  /** 最低 adapter 版本要求 */
+  min_adapter_version?: string;
+  /** 废弃时间戳 */
+  deprecated_at?: number;
+  /** 被哪个 skill 取代 */
+  superseded_by?: string;
 }
 
 export interface SkillImportPackage {
@@ -261,6 +289,8 @@ export interface AttachmentTableInsight {
   sheet_name: string;
   row_count: number;
   column_count: number;
+  raw_column_count?: number;
+  empty_column_count?: number;
   headers: string[];
   sample_rows: Array<Record<string, string>>;
 }
@@ -366,6 +396,7 @@ export interface Conversation {
 /** 消息对象（数据对象真源 4） */
 export interface Message {
   message_id: string;
+  client_message_id?: string;
   thread_id?: string;
   conversation_id: string;
   role: 'user' | 'assistant' | 'system';
@@ -716,6 +747,7 @@ export interface ProjectBinding {
 /** 附件记录（会话支撑能力设计 6.1） */
 export interface AttachmentRecord {
   id: string;
+  client_attachment_id?: string;
   conversation_id: string;
   message_id?: string;
   task_id?: string;
@@ -723,6 +755,9 @@ export interface AttachmentRecord {
   kind: AttachmentKind;
   mime_type: string;
   size: number;
+  checksum?: string;
+  storage_backend?: 'local' | 'tos' | string;
+  object_key?: string;
   status: AttachmentStatus;
   preview_url?: string;
   asset_url?: string;
@@ -1302,10 +1337,27 @@ export interface UserPreferenceProfile {
 // ==========================================
 
 /** 定时任务类型 */
-export type ScheduledTaskType = 'data_monitor' | 'report_generate' | 'alert_check' | 'health_check' | 'custom';
+export type ScheduledTaskType = 'data_monitor' | 'report_generate' | 'multi_query_spreadsheet' | 'alert_check' | 'health_check' | 'custom';
 
 /** 定时任务状态 */
-export type ScheduledTaskStatus = 'active' | 'paused' | 'running' | 'completed' | 'failed' | 'disabled';
+export type ScheduledTaskStatus = 'draft' | 'pending_approval' | 'active' | 'paused' | 'running' | 'completed' | 'succeeded' | 'partial' | 'failed' | 'skipped' | 'archived' | 'disabled';
+
+/** 自动化任务触发来源 */
+export type AutomationTriggerSource = 'system_schedule' | 'system_event' | 'user_schedule' | 'user_event' | 'manual';
+
+/** 自动化任务可见性 */
+export type AutomationVisibility = 'silent' | 'user_visible' | 'owner_visible' | 'admin_only';
+
+/** 自动化任务归属范围 */
+export type AutomationOwnerScope = 'system' | 'tenant' | 'project' | 'user' | 'shared_group';
+
+/** 自动化结果复用策略 */
+export interface AutomationResultReusePolicy {
+  reusable_in_chat: boolean;
+  freshness_seconds?: number;
+  requires_permission_filter?: boolean;
+  requires_evidence_refs?: boolean;
+}
 
 /** 执行频率 */
 export type ScheduleFrequency = 'every_5min' | 'every_15min' | 'every_30min' | 'hourly' | 'daily' | 'weekly' | 'custom_cron';
@@ -1319,9 +1371,9 @@ export interface AlertCondition {
   metric: string;
   /** 比较运算符 */
   operator: 'gt' | 'lt' | 'eq' | 'ne' | 'gte' | 'lte' | 'change_gt' | 'change_lt';
-  /** 阈值?*/
+  /** 阈值 */
   threshold: number;
-  /** 时间窗口(绉? */
+  /** 时间窗口（秒） */
   window_seconds?: number;
 }
 
@@ -1329,8 +1381,8 @@ export interface AlertCondition {
 export interface ScheduledTaskExecution {
   id: string;
   task_id: string;
-  /** 执行状?*/
-  status: 'queued' | 'running' | 'success' | 'failed' | 'timeout' | 'partial_succeeded' | 'succeeded' | 'cancelled';
+  /** 执行状态 */
+  status: 'queued' | 'pending_approval' | 'active' | 'running' | 'success' | 'failed' | 'timeout' | 'partial_succeeded' | 'succeeded' | 'partial' | 'skipped' | 'archived' | 'cancelled';
   /** 开始时间 */
   started_at: number;
   /** 结束时间 */
@@ -1353,6 +1405,14 @@ export interface ScheduledTaskExecution {
   artifact_url?: string;
   /** 生成文件对应资产 ID */
   artifact_attachment_id?: string;
+  /** 证据引用 */
+  evidence_refs?: string[];
+  /** 来源引用 */
+  source_refs?: string[];
+  /** 结果是否可被 Chat 复用 */
+  result_reusable_in_chat?: boolean;
+  /** 结果完整性 */
+  quality_status?: 'complete' | 'partial' | 'failed' | 'unknown';
   /** 告警是否触发 */
   alert_triggered: boolean;
   /** 告警详情 */
@@ -1377,14 +1437,6 @@ export interface ScheduledTaskExecution {
   trace_id?: string;
   /** Chat-first Task Center: 产物引用 */
   artifact_refs?: Array<{ type: string; uri: string; name?: string }>;
-  /** Chat-first Task Center: 证据引用 */
-  evidence_refs?: Array<{ type: string; id: string; label?: string }>;
-  /** Chat-first Task Center: 来源引用 */
-  source_refs?: Array<{ type: string; uri: string; title?: string }>;
-  /** 结果复用：可在 Chat 中复用 */
-  result_reusable_in_chat?: boolean;
-  /** 质量状态 */
-  quality_status?: string;
 }
 
 /** 定时任务 */
@@ -1396,9 +1448,9 @@ export interface ScheduledTask {
   description: string;
   /** 任务类型 */
   task_type: ScheduledTaskType;
-  /** 状态?*/
+  /** 状态 */
   status: ScheduledTaskStatus;
-  /** 棰戠巼 */
+  /** 频率 */
   frequency: ScheduleFrequency;
   /** 自定义 cron 表达式（frequency=custom_cron 时） */
   cron_expression?: string;
@@ -1406,8 +1458,18 @@ export interface ScheduledTask {
   next_run_at?: number;
   /** 上次执行时间 */
   last_run_at?: number;
-  /** 创建鑰?*/
+  /** 创建者 */
   created_by: string;
+  /** 触发来源 */
+  automation_trigger?: AutomationTriggerSource;
+  /** 可见性 */
+  automation_visibility?: AutomationVisibility;
+  /** 归属范围 */
+  owner_scope?: AutomationOwnerScope;
+  /** 结果复用策略 */
+  result_reuse_policy?: AutomationResultReusePolicy;
+  /** 审批策略引用 */
+  approval_policy_ref?: string;
   /** 项目绑定 */
   project_binding?: ProjectBinding;
   /** 关联的广告账户ID */
@@ -1460,18 +1522,6 @@ export interface ScheduledTask {
   last_result_message_id?: string;
   /** Chat-first Task Center: 最近一次运行状态 */
   last_run_status?: 'completed' | 'failed' | 'partial' | 'skipped' | 'needs_action';
-  /** 自动化触发方式 */
-  automation_trigger?: 'manual' | 'schedule' | 'event' | 'webhook';
-  /** 自动化可见性 */
-  automation_visibility?: 'admin_only' | 'owner_visible' | 'public' | 'silent';
-  /** 所有者范围 */
-  owner_scope?: string;
-  /** 结果复用策略 */
-  result_reuse_policy?: {
-    freshness_seconds?: number;
-    reusable_in_chat?: boolean;
-    requires_evidence_refs?: boolean;
-  };
 }
 
 export interface AutomationNotification {
@@ -1863,6 +1913,82 @@ export interface ModelParticipationRecord {
   warnings?: string[];
 }
 
+export type DiagnosticPhaseKey =
+  | 'request_understanding'
+  | 'query_contract'
+  | 'capability_discovery'
+  | 'tool_selection'
+  | 'parameter_resolution'
+  | 'execution_preflight'
+  | 'tool_execution'
+  | 'result_normalization'
+  | 'semantic_result'
+  | 'response_contract'
+  | 'answer_composition'
+  | 'contract_safety'
+  | 'frontend_render';
+
+export type DiagnosticPhaseStatus = 'waiting' | 'running' | 'succeeded' | 'failed' | 'degraded' | 'skipped';
+
+export type DiagnosticPayloadKind =
+  | 'contract'
+  | 'tool_request'
+  | 'tool_response'
+  | 'semantic_result'
+  | 'response_contract'
+  | 'trace'
+  | 'prompt'
+  | 'render';
+
+export interface DiagnosticPayloadRef {
+  kind: DiagnosticPayloadKind;
+  summary: string;
+  displayValue: string;
+  rawValue?: unknown;
+  redaction?: {
+    level: 'none' | 'partial' | 'full';
+    reason?: string;
+    redactedFields?: string[];
+  };
+  schemaRef?: string;
+  source: string;
+}
+
+export interface DiagnosticCheck {
+  id: string;
+  label: string;
+  status: 'pass' | 'warn' | 'fail' | 'info' | 'pending';
+  summary: string;
+  detail?: string;
+  source?: string;
+}
+
+export interface DiagnosticError {
+  code?: string;
+  message: string;
+  severity?: 'info' | 'warning' | 'error' | 'critical';
+  recoverable?: boolean;
+  retryable?: boolean;
+  detail?: string;
+  source?: string;
+}
+
+export interface DiagnosticPhase {
+  id: string;
+  phase: DiagnosticPhaseKey;
+  title: string;
+  status: DiagnosticPhaseStatus;
+  summary: string;
+  startedAt?: string;
+  endedAt?: string;
+  durationMs?: number;
+  inputs?: DiagnosticPayloadRef[];
+  outputs?: DiagnosticPayloadRef[];
+  checks?: DiagnosticCheck[];
+  errors?: DiagnosticError[];
+  relatedEventIds?: string[];
+  traceNodeRefs?: Array<{ traceId: string; nodeKind: string; seq?: number }>;
+}
 export interface MessageRuntimeProjection {
   message_id: string;
   thread_id?: string;
@@ -1881,6 +2007,7 @@ export interface MessageRuntimeProjection {
     metadata?: Record<string, unknown>;
   };
   model_participation?: ModelParticipationRecord[];
+  diagnostic_phases?: DiagnosticPhase[];
   runtime_steps: MessageRuntimeStepSummary[];
   prompt_hits: Array<{
     key: string;
@@ -2397,6 +2524,23 @@ export interface McpToolConfig {
   bound_agents: string[];
   /** 工具只读/读写 */
   access_mode: 'read' | 'write';
+  /** 可选的结构化能力声明，供 CapabilityManifest 消费 */
+  report_domains?: string[];
+  reportDomains?: string[];
+  supported_breakdowns?: Array<string | { key?: string }>;
+  supportedBreakdowns?: Array<string | { key?: string }>;
+  supported_dimensions?: string[];
+  supportedDimensions?: string[];
+  capability_metadata?: {
+    report_domains?: string[];
+    reportDomains?: string[];
+    supported_breakdowns?: Array<string | { key?: string }>;
+    supportedBreakdowns?: Array<string | { key?: string }>;
+    supported_dimensions?: string[];
+    supportedDimensions?: string[];
+    toolPurpose?: string;
+    supportedServiceIntents?: string[];
+  };
   /** 最近一次调用时间 */
   last_called_at?: number;
   /** 调用次数 */
@@ -2554,4 +2698,6 @@ export interface AutomationIntentResult {
   missing_slots: string[];
   clarifying_question?: string;
 }
+
+
 

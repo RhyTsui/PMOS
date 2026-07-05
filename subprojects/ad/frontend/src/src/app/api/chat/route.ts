@@ -14,8 +14,9 @@ import { EventBridgeHook } from '@/lib/runner-hooks/event-bridge-hook';
 import { InputGuardrailImpl } from '@/lib/guardrails/input-guardrail';
 import { OutputGuardrailImpl } from '@/lib/guardrails/output-guardrail';
 import { createEmptyEvidenceLedger, serializeLedgerForMetadata, type EvidenceLedger } from '@/lib/evidence-ledger';
+import { sseConnectionRegistry } from '@/lib/sse-connection-registry';
 import { getEvidenceLedgerByCase, saveEvidenceLedger } from '@/lib/evidence-ledger-store';
-import { CALLBACK_ATTR_DIAGNOSIS_SKILL_ID } from '@/contracts/skills/callback-attribution-diagnosis';
+import { emitChatPipelineFailedTrace } from '@/lib/trace-snapshot-persistence';
 import {
   executeUnderstandingStage,
   executePublicWebStage,
@@ -23,6 +24,8 @@ import {
   executeDiagnosisStage,
   executePackageStage,
   executeOpenAnswerStage,
+  executeAdLabelAggregationStage,
+  executeSkillStage,
   executeReportQueryStage,
   executeMultiQueryStage,
   shouldEnterPackageStage,
@@ -65,6 +68,9 @@ interface ChatRequestBody {
       media_name?: string;
     } | null;
     projectContextDebug?: Record<string, unknown>;
+    attachmentIds?: string[];
+    attachment_ids?: string[];
+    attachments?: string[];
     [key: string]: unknown;
   };
 }
@@ -170,6 +176,12 @@ export async function POST(request: NextRequest) {
     async start(controller) {
       const encoder = new TextEncoder();
       const processEvents: AgentProcessEvent[] = [];
+      // ── SSE 连接注册 ──
+      const sseConnectionId = sseConnectionRegistry.register({
+        userId: userScopeKey,
+        traceId,
+        conversationId,
+      });
       // Stage 2: Evidence Ledger 初始化（从持久化存储加载，支持跨请求）
       // 初始使用 conversationId 作为 caseId，后续会切换到 CaseFrame 的 caseId
       let evidenceCaseId = `conv-${conversationId}`;
@@ -263,6 +275,7 @@ export async function POST(request: NextRequest) {
         if (closed) return;
         closed = true;
         stopHeartbeat();
+        sseConnectionRegistry.unregister(sseConnectionId);
         try {
           controller.close();
         } catch (error) {
@@ -279,7 +292,7 @@ export async function POST(request: NextRequest) {
       hookRunner.register(eventBridgeHook);
 
       // ─── Stage 0 包装函数 ───
-      // 在 planner shadow 后自动切换 planning → execution
+      // 自动切换 planning → execution
       let planningEnded = false;
       let donePushed = false;  // Track if done event was successfully pushed
       const endPlanningAndStartExecution = async () => {
@@ -291,6 +304,7 @@ export async function POST(request: NextRequest) {
       heartbeatInterval = setInterval(() => {
         if (!closed) push({ type: 'heartbeat', ts: Date.now() });
       }, 8000);
+      heartbeatInterval.unref();
       const pushRuntimeState = (
         currentStage: RuntimeState['current_stage'],
         completedStages: RuntimeStage[] = [],
@@ -311,6 +325,8 @@ export async function POST(request: NextRequest) {
         getEvidenceLedger: () => evidenceLedger,
         setEvidenceLedger: (ledger: EvidenceLedger) => { evidenceLedger = ledger; },
       };
+
+      let reportQueryDetermined = false;
 
       try {
         // ─── Stage 0: setup → understanding ───
@@ -343,7 +359,16 @@ export async function POST(request: NextRequest) {
           reportContinuation, reportContinuationClassification, publicWebNeed,
           routeInformationSourceArbitration, routeDecisionMetadata, isReportQuery,
           routeWarnings, routeServiceIntent, serviceProposal, possibleServices, caseFrame,
+          // Skill system
+          executionTarget, skillReadinessResults,
+          // Phase 1: QueryContract + parsed filters
+          parsedFilterResult,
+          queryContract,
+          queryContractSummary,
+          attachmentQueryContext,
         } = understandingResult;
+
+        reportQueryDetermined = typeof isReportQuery !== 'undefined';
 
         // ─── Evidence Ledger 切换（使用 CaseFrame 的 caseId）───
         // understanding-stage 产出了 CaseFrame，现在切换到正确的 Evidence Ledger
@@ -396,6 +421,8 @@ export async function POST(request: NextRequest) {
           routeDecisionMetadata,
           matchedRouteRules,
           skillSelection,
+          executionTarget,
+          skillReadinessResults,
           routeServers,
           routeCapabilityManifest,
           routeCapabilityCandidates,
@@ -410,6 +437,11 @@ export async function POST(request: NextRequest) {
           reportModelServiceConfig: null,
           userScope,
           routeWarnings,
+          // Phase 1: QueryContract + parsed filters (report-query domain only, undefined for non-report)
+          parsedFilterResult,
+          queryContract,
+          queryContractSummary,
+          attachmentQueryContext,
         };
 
         let publicWebEvidenceForComposer: Record<string, unknown> | undefined;
@@ -438,13 +470,16 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          // ─── Diagnosis Stage ───
+          // ─── Diagnosis Stage / Generic Skill Stage ───
           const selectedSkill = skillSelection.selected?.skill;
-          if ((route.intent_type === 'diagnosis' || route.intent_type === 'debugging') && selectedSkill?.skill_id === CALLBACK_ATTR_DIAGNOSIS_SKILL_ID) {
+          if (pipelineCtx.executionTarget?.type === 'skill') {
+            // Generic skill stage (executionTarget-driven, no hardcoded SKILL_ID)
+            const skillResult = await executeSkillStage(pipelineCtx, streamIO);
+            if (skillResult.terminal) return;
+          } else if ((route.intent_type === 'diagnosis' || route.intent_type === 'debugging') && selectedSkill?.skill_id) {
+            // Legacy diagnosis path (when feature flag OFF)
             const diagnosisResult = await executeDiagnosisStage(pipelineCtx, streamIO);
-            if (diagnosisResult.terminal) {
-              return;
-            }
+            if (diagnosisResult.terminal) return;
           }
 
           // ─── Package Stage ───
@@ -565,6 +600,12 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          // ─── Generic Skill Stage (replaces ad-label-aggregation-stage) ───
+          const skillResult = await executeSkillStage(pipelineCtx, streamIO);
+          if (skillResult.terminal) {
+            return;
+          }
+
           // ─── Report Query Stage ───
           const reportQueryResult = await executeReportQueryStage(pipelineCtx, streamIO);
           if (reportQueryResult.terminal) {
@@ -573,6 +614,16 @@ export async function POST(request: NextRequest) {
         }
       } catch (error) {
         const messageText = error instanceof Error ? error.message : String(error);
+        void emitChatPipelineFailedTrace({
+          message,
+          conversationId,
+          error,
+          partialProgress: {
+            understandingCompleted: reportQueryDetermined,
+            routeDecision: undefined,
+            stagesCompleted: reportQueryDetermined ? ['understanding'] : [],
+          },
+        }).catch(() => {});
         push({ type: 'error', message: messageText });
         const responseContract = buildResponseContract({
           status: 'failed',

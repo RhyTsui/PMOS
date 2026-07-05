@@ -1,6 +1,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runtimeDataPath } from './runtime-data-path';
+import { buildDbWriteError } from './db-error';
+
+const DOMAIN = 'feature_switch';
 
 export interface AdminFeatureSwitch {
   key: string;
@@ -28,9 +31,9 @@ const DEFAULT_SWITCHES: Array<Partial<AdminFeatureSwitch>> = [
   { key: 'input_guardrail_enabled', name: '输入安全校验', type: 'boolean', enabled: true, config: {}, description: '对用户输入进行 PII 检测和 prompt 注入检测' },
   { key: 'tool_guardrail_enabled', name: '工具调用校验', type: 'boolean', enabled: true, config: {}, description: '对工具输入输出进行参数合规和敏感信息过滤' },
   { key: 'output_guardrail_enabled', name: '输出安全校验', type: 'boolean', enabled: true, config: {}, description: '对最终答案进行证据断言、raw params 泄露等安全检查' },
-  { key: 'planner_shadow_enabled', name: 'Planner 旁路观测', type: 'boolean', enabled: true, config: {}, description: '启用 Planner 旁路推理，用于对比路由决策' },
-  { key: 'planner_shadow_timeout_ms', name: 'Planner 超时阈值', type: 'number', enabled: true, config: { value: 2000 }, description: 'Planner 旁路观测超时时间（毫秒）' },
   { key: 'trace_sampling_rate', name: 'Trace 采样率', type: 'number', enabled: true, config: { value: 1.0 }, description: 'Trace 记录采样率（0-1）' },
+  { key: 'enableQueryContractLlmGeneration', name: 'LLM 契约生成', type: 'boolean', enabled: false, config: {}, description: '启用 query_contract_generation LLM 生成 QueryContractCandidate。默认关闭，灰度验证后逐步开启。', scope: 'runtime', riskLevel: 'medium', owner: 'report-query-pipeline' },
+  { key: 'attachment_query_mode', name: '附件问数模式', type: 'number', enabled: true, config: { value: 1 }, description: '控制附件模板/截图解析结果对问数链路的影响程度。0=shadow(仅观测) 1=assist(补空槽，默认) 2=active(可驱动执行，未实现)', scope: 'runtime', riskLevel: 'medium', owner: 'attachment-query-pipeline' },
 ];
 
 const SWITCHES_PATH = runtimeDataPath('feature-switches.json');
@@ -59,6 +62,15 @@ function normalizeSwitch(input: Partial<AdminFeatureSwitch>): AdminFeatureSwitch
 }
 
 async function readSwitchesFile(): Promise<SwitchesFile> {
+  // B1: DB-first read path
+  try {
+    const { listConfigs } = await import('./db/repositories/config-repository');
+    const rows = await listConfigs({ domain: DOMAIN, status: 'active' });
+    if (rows.length > 0) {
+      return { switches: rows.map(r => normalizeSwitch(r.value as Partial<AdminFeatureSwitch>)) };
+    }
+  } catch { /* fall through to JSON */ }
+
   try {
     const raw = await readFile(SWITCHES_PATH, 'utf8');
     const parsed = JSON.parse(raw) as Partial<SwitchesFile>;
@@ -72,6 +84,27 @@ async function readSwitchesFile(): Promise<SwitchesFile> {
 }
 
 async function writeSwitchesFile(file: SwitchesFile): Promise<void> {
+  // B1: DB write (primary) - each switch as a config_entries row
+  let dbWriteError: unknown;
+  try {
+    const { upsertConfig } = await import('./db/repositories/config-repository');
+    for (const s of file.switches) {
+      try {
+        await upsertConfig({ domain: DOMAIN, configKey: s.key, value: s, changedBy: 'system', source: 'manual' });
+      } catch (err) {
+        console.error(`[feature-switch] DB upsert failed for "${s.key}"`, (err as Error)?.message);
+        dbWriteError = err;
+      }
+    }
+  } catch (err) {
+    console.error('[feature-switch] DB write failed, falling back to JSON', (err as Error)?.message);
+    dbWriteError = err;
+  }
+  if (dbWriteError) {
+    throw buildDbWriteError('feature_switch', dbWriteError);
+  }
+  return;
+
   await mkdir(path.dirname(SWITCHES_PATH), { recursive: true });
   await writeFile(SWITCHES_PATH, JSON.stringify(file, null, 2), 'utf8');
 }
@@ -84,8 +117,26 @@ export async function listFeatureSwitches(): Promise<AdminFeatureSwitch[]> {
   }));
   for (const item of file.switches) byKey.set(item.key, normalizeSwitch(item));
   const merged = [...byKey.values()];
-  await writeSwitchesFile({ switches: merged });
+
+  // 仅在新增默认项时才写回（避免每次读取都触发 DB 写入）
+  const storedKeys = new Set(file.switches.map((s) => s.key));
+  const hasNewDefaults = DEFAULT_SWITCHES.some((ds) => !storedKeys.has(normalizeSwitch(ds).key));
+  if (hasNewDefaults) {
+    await writeSwitchesFile({ switches: merged });
+  }
+
   return merged;
+}
+
+/** v4: 读取 query_contract_generation 功能开关(默认 false) */
+export async function isQueryContractLlmGenerationEnabled(): Promise<boolean> {
+  try {
+    const switches = await listFeatureSwitches();
+    const sw = switches.find(s => s.key === 'enableQueryContractLlmGeneration');
+    return sw?.enabled ?? false;
+  } catch {
+    return false;
+  }
 }
 
 export async function updateFeatureSwitch(key: string, patch: Partial<AdminFeatureSwitch>): Promise<AdminFeatureSwitch | undefined> {

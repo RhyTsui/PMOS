@@ -28,6 +28,8 @@ export { executeGiIntelligenceStage, shouldEnterGiIntelligenceStage } from './gi
 export { executeDiagnosisStage } from './diagnosis-stage';
 export { executePackageStage, shouldEnterPackageStage } from './package-stage';
 export { executeOpenAnswerStage } from './open-answer-stage';
+export { executeAdLabelAggregationStage } from './ad-label-aggregation-stage';
+export { executeSkillStage } from './skill-stage';
 export { executeReportQueryStage } from './report-query-stage';
 export { executeMultiQueryStage, shouldEnterMultiQueryStage } from './multi-query-stage';
 export { executeAutomationStage } from './automation-stage';
